@@ -123,6 +123,11 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     if (isAnalyst) {
       navItems = navItems.concat([
         {
+          path: ROUTES.INDICATORS,
+          title: intl.formatMessage(messages.nav.indicators),
+          active: currentPath && currentPath.startsWith(ROUTES.INDICATOR),
+        },
+        {
           path: ROUTES.RESOURCES,
           title: intl.formatMessage(messages.nav.resources),
           active: currentPath && currentPath.startsWith(ROUTES.RESOURCE),

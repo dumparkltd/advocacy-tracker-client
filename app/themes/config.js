@@ -41,10 +41,12 @@ export const ROUTES = {
   REGISTER: '/register',
   UNAUTHORISED: '/unauthorised',
   USERS: '/users',
-  ACTIONS: '/actions',
+  ACTIONS: '/actions', // api: measures
   ACTION: '/action',
   ACTORS: '/actors',
   ACTOR: '/actor',
+  INDICATORS: '/positions', // api: indicators
+  INDICATOR: '/position',
   RESOURCES: '/resources',
   RESOURCE: '/resource',
   TAXONOMIES: '/categories',
@@ -58,10 +60,12 @@ export const ROUTES = {
 export const API = {
   ACTORS: 'actors',
   ACTIONS: 'measures', // actions/ACTIONS
+  INDICATORS: 'indicators', // actions/ACTIONS
   ACTORTYPES: 'actortypes', // action types
   ACTIONTYPES: 'measuretypes', // action types
   ACTOR_ACTIONS: 'actor_measures', // linking actors with their actions
   ACTION_ACTORS: 'measure_actors', // linking actions with their targets
+  ACTION_INDICATORS: 'measure_indicators', // linking actions with indicators
   ACTOR_CATEGORIES: 'actor_categories',
   ACTION_CATEGORIES: 'measure_categories', // measure_categories
   ACTORTYPE_TAXONOMIES: 'actortype_taxonomies', // action taxonomies
@@ -341,6 +345,39 @@ export const RESOURCE_FIELDS = {
   },
 };
 
+export const INDICATOR_FIELDS = {
+  CONNECTIONS: {
+    actions: {
+      table: API.ACTIONS,
+      connection: API.ACTION_INDICATORS,
+      groupby: {
+        table: API.ACTIONTYPES,
+        on: 'measuretype_id',
+      },
+    },
+  },
+  ATTRIBUTES: {
+    draft: {
+      defaultValue: true,
+      required: true,
+      type: 'bool',
+      skipImport: true,
+      // ui: 'dropdown',
+      // options: [
+      //   { value: true, message: 'ui.publishStatuses.draft' },
+      //   { value: false, message: 'ui.publishStatuses.public' },
+      // ],
+    },
+    title: {
+      required: true,
+      type: 'text',
+    },
+    description: {
+      type: 'markdown',
+    },
+  },
+};
+
 // type compatibility: actors for actions
 export const ACTIONTYPE_ACTORTYPES = {
   [ACTIONTYPES.EXPRESS]: [
@@ -380,6 +417,8 @@ export const ACTIONTYPE_RESOURCETYPES = {
   [ACTIONTYPES.INTERACTION]: [],
 };
 export const ACTIONTYPE_TARGETTYPES = {};
+
+export const ACTIONTYPE_INDICATORS = [ACTIONTYPES.EXPRESS];
 
 export const KEEP_FILTERS = ['view', 'ms'];
 

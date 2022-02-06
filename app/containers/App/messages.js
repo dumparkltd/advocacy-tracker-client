@@ -903,6 +903,10 @@ export default defineMessages({
       id: 'app.containers.App.nav.resources',
       defaultMessage: 'Resources',
     },
+    indicators: {
+      id: 'app.containers.App.nav.indicators',
+      defaultMessage: 'Position indicators',
+    },
     targets: {
       id: 'app.containers.App.nav.targets',
       defaultMessage: 'Targets',
@@ -1541,6 +1545,36 @@ export default defineMessages({
       empty: {
         id: 'app.containers.App.entities.resources_5.empty',
         defaultMessage: 'No resources yet',
+      },
+    },
+    indicators: {
+      single: {
+        id: 'app.containers.App.entities.indicators.single',
+        defaultMessage: 'Actor',
+      },
+      plural: {
+        id: 'app.containers.App.entities.indicators.plural',
+        defaultMessage: 'Actors',
+      },
+      singleLong: {
+        id: 'app.containers.App.entities.indicators.singleLong',
+        defaultMessage: 'Actor',
+      },
+      pluralLong: {
+        id: 'app.containers.App.entities.indicators.pluralLong',
+        defaultMessage: 'Actors',
+      },
+      singleShort: {
+        id: 'app.containers.App.entities.indicators.singleShort',
+        defaultMessage: 'Actor',
+      },
+      pluralShort: {
+        id: 'app.containers.App.entities.indicators.pluralShort',
+        defaultMessage: 'Actors',
+      },
+      empty: {
+        id: 'app.containers.App.entities.indicators.empty',
+        defaultMessage: 'No actors yet',
       },
     },
     pages: {

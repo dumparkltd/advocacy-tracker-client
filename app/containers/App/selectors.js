@@ -427,6 +427,14 @@ export const selectResource = createSelector(
   (state, id) => selectEntity(state, { id, path: API.RESOURCES }),
   (entity) => entity
 );
+export const selectIndicators = createSelector(
+  (state) => selectEntities(state, API.INDICATOR),
+  (entities) => sortEntities(entities, 'desc', 'id', null, false)
+);
+export const selectIndicator = createSelector(
+  (state, id) => selectEntity(state, { id, path: API.INDICATOR }),
+  (entity) => entity
+);
 // all action types
 export const selectActortypes = createSelector(
   (state) => selectEntities(state, API.ACTORTYPES),
@@ -755,7 +763,6 @@ const selectResourcesWhereQuery = createSelector(
     ? filterEntitiesByAttributes(entities, query)
     : entities
 );
-
 // TODO: passing of location query likely not needed if selectSearchQuery changed
 export const selectActorsSearchQuery = createSelector(
   selectActorsWhereQuery,
@@ -1198,6 +1205,29 @@ export const selectActionResourcesGroupedByAction = createSelector(
       )
     ),
 );
+export const selectActionIndicatorsGroupedByIndicator = createSelector(
+  (state) => selectEntities(state, API.ACTION_INDICATORS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'indicator_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.getIn(['attributes', 'measure_id'])
+      )
+    ),
+);
+export const selectActionIndicatorsGroupedByAction = createSelector(
+  (state) => selectEntities(state, API.ACTION_INDICATORS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'measure_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.getIn(['attributes', 'indicator_id'])
+      )
+    ),
+);
+
 export const selectActionActorsGroupedByAction = createSelector(
   (state) => selectEntities(state, API.ACTION_ACTORS),
   (entities) => entities

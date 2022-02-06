@@ -102,6 +102,14 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-resource-actions',
       defaultMessage: 'By activity',
     },
+    'connections-action-indicators': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-indicators',
+      defaultMessage: 'By country position',
+    },
+    'connections-indicator-actions': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-indicator-actions',
+      defaultMessage: 'By activity',
+    },
     connectedTaxonomies: {
       id: 'app.components.EntityListHeader.filterGroupLabel.connectedTaxonomies',
       defaultMessage: 'By connected category',
