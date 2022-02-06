@@ -1,0 +1,10 @@
+{
+  "projects": {
+    "default": "marine-defrag-dev",
+    "dev": "marine-defrag-dev",
+    "development": "marine-defrag-dev",
+    "test": "marine-defrag-test",
+    "production": "marine-defrag",
+    "prod": "marine-defrag"
+  }
+}
