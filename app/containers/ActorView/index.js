@@ -23,6 +23,7 @@ import {
   hasTaxonomyCategories,
   getActionConnectionField,
   getActorConnectionField,
+  getEmailField,
 } from 'utils/fields';
 // import { qe } from 'utils/quasi-equals';
 import { getEntityTitleTruncated, checkActorAttribute } from 'utils/entities';
@@ -87,6 +88,11 @@ export class ActorView extends React.PureComponent { // eslint-disable-line reac
             entity.getIn(['attributes', 'code']),
           ),
           checkActorAttribute(typeId, 'title') && getTitleField(entity),
+          checkActorAttribute(typeId, 'prefix', isManager) && getInfoField(
+            'prefix',
+            entity.getIn(['attributes', 'prefix']),
+          ),
+          checkActorAttribute(typeId, 'name') && getTitleField(entity),
         ],
       },
     ]);
@@ -220,6 +226,9 @@ export class ActorView extends React.PureComponent { // eslint-disable-line reac
     fields.push(
       {
         fields: [
+          checkActorAttribute(typeId, 'address') && getTextField(entity, 'address'),
+          checkActorAttribute(typeId, 'phone') && getTextField(entity, 'phone'),
+          checkActorAttribute(typeId, 'email') && getEmailField(entity, 'email'),
           checkActorAttribute(typeId, 'url') && getLinkField(entity),
         ],
       },

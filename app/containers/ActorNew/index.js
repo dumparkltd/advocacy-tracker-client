@@ -26,6 +26,9 @@ import {
   renderActionsAsTargetByActiontypeControl,
   renderAssociationsByActortypeControl,
   renderMembersByActortypeControl,
+  getEmailField,
+  getTextFormField,
+  getTextareaField,
 } from 'utils/forms';
 import { getInfoField } from 'utils/fields';
 
@@ -126,11 +129,23 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
             'code',
             checkActorRequired(typeId, 'code'),
           ),
+          checkActorAttribute(typeId, 'prefix') && getCodeFormField(
+            intl.formatMessage,
+            'prefix',
+            checkActorRequired(typeId, 'prefix'),
+          ),
           checkActorAttribute(typeId, 'title') && getTitleFormField(
             intl.formatMessage,
             'title',
             'title',
             checkActorRequired(typeId, 'title'),
+          ),
+          checkActorAttribute(typeId, 'name') && getTitleFormField(
+            intl.formatMessage,
+            'title',
+            'title',
+            checkActorRequired(typeId, 'name'),
+            'name' // label
           ),
         ],
       },
@@ -250,6 +265,9 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
+          checkActorAttribute(typeId, 'address') && getTextareaField(intl.formatMessage, 'address', checkActorRequired(typeId, 'address')),
+          checkActorAttribute(typeId, 'phone') && getTextFormField(intl.formatMessage, 'phone', checkActorRequired(typeId, 'phone')),
+          checkActorAttribute(typeId, 'email') && getEmailField(intl.formatMessage, checkActorRequired(typeId, 'email')),
           checkActorAttribute(typeId, 'url') && getLinkFormField(
             intl.formatMessage,
             checkActorRequired(typeId, 'url'),

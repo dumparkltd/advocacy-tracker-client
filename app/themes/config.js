@@ -271,15 +271,33 @@ export const ACTOR_FIELDS = {
       // ],
     },
     code: {
-      optional: Object.values(ACTORTYPES), // all types
+      optional: [
+        ACTORTYPES.COUNTRY,
+        ACTORTYPES.ORG,
+        ACTORTYPES.GROUP,
+      ], // all types
       type: 'text',
     },
     title: {
-      required: Object.values(ACTORTYPES), // all types
+      required: [
+        ACTORTYPES.COUNTRY,
+        ACTORTYPES.ORG,
+        ACTORTYPES.GROUP,
+        ACTORTYPES.REGION,
+      ],
+      type: 'text',
+    },
+    name: {
+      required: [ACTORTYPES.CONTACT],
       type: 'text',
     },
     description: {
-      optional: Object.values(ACTORTYPES),
+      required: [
+        ACTORTYPES.COUNTRY,
+        ACTORTYPES.ORG,
+        ACTORTYPES.GROUP,
+        ACTORTYPES.REGION,
+      ],
       type: 'markdown',
     },
     activity_summary: {
@@ -287,7 +305,11 @@ export const ACTOR_FIELDS = {
       type: 'markdown',
     },
     url: {
-      optional: Object.values(ACTORTYPES),
+      optional: [
+        ACTORTYPES.CONTACT,
+        ACTORTYPES.ORG,
+        ACTORTYPES.GROUP,
+      ],
       type: 'url',
     },
     prefix: {
@@ -300,11 +322,11 @@ export const ACTOR_FIELDS = {
     },
     phone: {
       optional: [ACTORTYPES.CONTACT],
-      type: 'text',
+      type: 'input',
     },
     address: {
       optional: [ACTORTYPES.CONTACT],
-      type: 'markdown',
+      type: 'text',
     },
   },
 };

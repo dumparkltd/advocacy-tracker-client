@@ -503,11 +503,18 @@ export const getStatusField = (formatMessage) => ({
   options: PUBLISH_STATUSES,
 });
 
-export const getTitleFormField = (formatMessage, controlType = 'title', attribute = 'title', required) => getFormField({
+export const getTitleFormField = (
+  formatMessage,
+  controlType = 'title',
+  attribute = 'title',
+  required,
+  label,
+) => getFormField({
   formatMessage,
   controlType,
   attribute,
   required,
+  label,
 });
 
 export const getReferenceFormField = (formatMessage, required = false, isAutoReference = false) => getFormField({
@@ -521,6 +528,20 @@ export const getReferenceFormField = (formatMessage, required = false, isAutoRef
 export const getCodeFormField = (formatMessage, att = 'code', required = false) => getFormField({
   formatMessage,
   controlType: 'short',
+  attribute: att,
+  label: att,
+  required,
+});
+export const getShortTextFormField = (formatMessage, att, required = false) => getFormField({
+  formatMessage,
+  controlType: 'short',
+  attribute: att,
+  label: att,
+  required,
+});
+export const getTextFormField = (formatMessage, att, required = false) => getFormField({
+  formatMessage,
+  controlType: 'input',
   attribute: att,
   label: att,
   required,
@@ -586,10 +607,11 @@ export const getMarkdownFormField = (formatMessage, required, attribute = 'descr
 });
 
 // unused
-export const getTextareaField = (formatMessage, attribute = 'description') => getFormField({
+export const getTextareaField = (formatMessage, attribute = 'description', required) => getFormField({
   formatMessage,
   controlType: 'textarea',
   attribute,
+  required,
 });
 
 export const getDateField = (formatMessage, attribute, required = false, label, onChange) => {
@@ -624,13 +646,13 @@ export const getUploadField = (formatMessage) => getFormField({
   placeholder: 'url',
 });
 
-export const getEmailField = (formatMessage, model = '.attributes.email') => {
+export const getEmailField = (formatMessage, required = true, model = '.attributes.email') => {
   const field = getFormField({
     formatMessage,
     controlType: 'email',
     attribute: 'email',
     type: 'email',
-    required: true,
+    required,
     model,
   });
   field.validators.email = validateEmailFormat;
