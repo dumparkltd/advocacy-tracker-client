@@ -13,6 +13,7 @@ export const DEPENDENCIES = [
   API.ACTION_INDICATORS,
   API.ACTION_CATEGORIES,
   API.ACTOR_ACTIONS,
+  API.ACTIONTYPES,
   API.USERS,
   API.USER_ROLES,
 ];
@@ -48,13 +49,13 @@ export const CONFIG = {
       query: 'action',
       type: 'indicator-actions',
       search: true,
-      message: 'entities.indicators.plural',
+      message: 'entities.actions_{typeid}.plural',
       path: API.ACTIONS, // filter by actor connection
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,
       connectPath: API.ACTION_INDICATORS, // filter by actor connection
       key: 'measure_id',
-      ownKey: 'actor_id',
+      ownKey: 'indicator_id',
       groupByType: true,
     },
   },

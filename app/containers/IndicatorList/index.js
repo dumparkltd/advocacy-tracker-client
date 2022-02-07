@@ -15,6 +15,7 @@ import {
   selectReady,
   selectIsUserManager,
   selectIsUserAnalyst,
+  selectActiontypesForIndicators,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -138,6 +139,7 @@ const mapStateToProps = (state, props) => ({
   connections: selectConnections(state),
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
+  actiontypes: selectActiontypesForIndicators(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

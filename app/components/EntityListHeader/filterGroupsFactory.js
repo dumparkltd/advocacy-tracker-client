@@ -79,6 +79,9 @@ export const makeFilterGroups = ({
       } else if (option.type === 'action-resources') {
         types = resourcetypes;
         typeAbout = 'resourcetypes_about';
+      } else if (option.type === 'indicator-actions') {
+        types = actiontypes;
+        typeAbout = 'actiontypes_about';
       }
       filterGroups[connectionKey] = {
         id: connectionKey, // filterGroupId
