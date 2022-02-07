@@ -101,7 +101,6 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
       type,
     } = this.props;
     const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
-
     let pageTitle;
     let icon = path;
     if (path === API.CATEGORIES && taxonomy && taxonomy.get('attributes')) {
@@ -238,6 +237,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
 EntityNew.propTypes = {
   path: PropTypes.string.isRequired,
   attributes: PropTypes.object,
+  // connect: PropTypes.object,
   taxonomy: PropTypes.object,
   parentTaxonomy: PropTypes.object,
   categoryParentOptions: PropTypes.object,
@@ -316,6 +316,15 @@ function mapDispatchToProps(dispatch, props) {
           saveData = saveData.setIn(['attributes', 'parent_id'], formCategoryIds.first());
         } else {
           saveData = saveData.setIn(['attributes', 'parent_id'], null);
+        }
+      }
+
+      if (props.connect) {
+        if (props.connect.get('type') === 'actorActions') {
+          saveData = saveData.set(
+            'actorActions',
+            Map().set('create', props.connect.get('create')),
+          );
         }
       }
 

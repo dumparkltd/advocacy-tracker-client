@@ -13,6 +13,7 @@ import ConnectionLabelWrap from 'components/fields/ConnectionLabelWrap';
 import ToggleAllItems from 'components/fields/ToggleAllItems';
 import EmptyHint from 'components/fields/EmptyHint';
 import PrintOnly from 'components/styled/PrintOnly';
+import ButtonFactory from 'components/buttons/ButtonFactory';
 
 const CONNECTIONMAX = 5;
 
@@ -34,7 +35,6 @@ class ConnectionsField extends React.PureComponent { // eslint-disable-line reac
   render() {
     const { field } = this.props;
     const { intl } = this.context;
-
     const label = field.skipLabel
       ? null
       : `${field.values.size} ${intl.formatMessage(
@@ -49,6 +49,15 @@ class ConnectionsField extends React.PureComponent { // eslint-disable-line reac
             <ConnectionLabel>
               {label}
             </ConnectionLabel>
+            {field.onCreate && (
+              <ButtonFactory
+                button={{
+                  type: 'text',
+                  title: 'Add',
+                  onClick: () => field.onCreate(),
+                }}
+              />
+            )}
           </ConnectionLabelWrap>
         )}
         {(field.values && field.values.size > 0) && (

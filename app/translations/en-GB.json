@@ -449,7 +449,7 @@
   "app.containers.App.entities.actions_5.pluralLong": "Tasks",
   "app.containers.App.entities.actions_5.singleShort": "Task",
   "app.containers.App.entities.actions_5.pluralShort": "Tasks",
-  "app.containers.App.entities.actions_5.empty": "No donor task yet",
+  "app.containers.App.entities.actions_5.empty": "No task yet",
   "app.containers.App.entities.actions_6.single": "Interaction",
   "app.containers.App.entities.actions_6.plural": "Interactions",
   "app.containers.App.entities.actions_6.singleLong": "Contact interaction",

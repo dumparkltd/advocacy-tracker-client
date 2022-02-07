@@ -252,6 +252,7 @@ const getConnectionField = ({
   entityPath,
   onEntityClick,
   skipLabel,
+  onCreate,
 }) => ({
   type: 'connections',
   values: entities.toList(),
@@ -264,6 +265,7 @@ const getConnectionField = ({
   showEmpty: appMessages.entities[entityType].empty,
   connectionOptions,
   skipLabel,
+  onCreate,
 });
 
 export const getActorConnectionField = ({
@@ -307,6 +309,7 @@ export const getActionConnectionField = ({
   typeid, // actortype id
   skipLabel,
   connectionOptions,
+  onCreateOption,
 }) => getConnectionField({
   entities: sortEntities(actions, 'asc', 'id'),
   taxonomies,
@@ -336,6 +339,7 @@ export const getActionConnectionField = ({
   entityPath: ROUTES.ACTION,
   onEntityClick,
   skipLabel,
+  onCreate: onCreateOption || null,
 });
 
 export const getResourceConnectionField = ({

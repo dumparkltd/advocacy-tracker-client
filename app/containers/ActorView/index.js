@@ -28,10 +28,15 @@ import {
 // import { qe } from 'utils/quasi-equals';
 import { getEntityTitleTruncated, checkActorAttribute } from 'utils/entities';
 
-import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
+import {
+  loadEntitiesIfNeeded,
+  updatePath,
+  closeEntity,
+  openNewEntityModal,
+} from 'containers/App/actions';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES } from 'themes/config';
+import { ROUTES, API } from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
@@ -126,6 +131,7 @@ export class ActorView extends React.PureComponent { // eslint-disable-line reac
     taxonomies,
     actionConnections,
     onEntityClick,
+    onCreateOption,
   ) => {
     const fields = [];
     const typeId = entity.getIn(['attributes', 'actortype_id']);
@@ -152,6 +158,18 @@ export class ActorView extends React.PureComponent { // eslint-disable-line reac
             onEntityClick,
             connections: actionConnections,
             typeid: actiontypeid,
+            onCreateOption: () => onCreateOption({
+              path: API.ACTIONS,
+              attributes: {
+                measuretype_id: actiontypeid,
+              },
+              connect: {
+                type: 'actorActions',
+                create: [{
+                  actor_id: entity.get('id'),
+                }],
+              },
+            }),
           }),
         );
       });
@@ -257,6 +275,7 @@ export class ActorView extends React.PureComponent { // eslint-disable-line reac
       associationsByType,
       actionConnections,
       onEntityClick,
+      onCreateOption,
     } = this.props;
     const typeId = viewEntity && viewEntity.getIn(['attributes', 'actortype_id']);
     let buttons = [];
@@ -333,7 +352,7 @@ export class ActorView extends React.PureComponent { // eslint-disable-line reac
                       taxonomies,
                       actionConnections,
                       onEntityClick,
-                      isManager,
+                      onCreateOption,
                     ),
                     aside: this.getBodyAsideFields(viewEntity, isManager),
                   },
@@ -363,6 +382,7 @@ ActorView.propTypes = {
   associationsByType: PropTypes.object,
   params: PropTypes.object,
   isManager: PropTypes.bool,
+  onCreateOption: PropTypes.func,
 };
 
 ActorView.contextTypes = {
@@ -395,6 +415,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onEntityClick: (id, path) => {
       dispatch(updatePath(`${path}/${id}`));
+    },
+    onCreateOption: (args) => {
+      dispatch(openNewEntityModal(args));
     },
   };
 }

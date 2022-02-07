@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
-import { API } from 'themes/config';
+import { API, ACTIONTYPE_ACTORTYPES } from 'themes/config';
 
 import {
   selectReady,
@@ -21,6 +21,7 @@ import {
   selectMembershipsGroupedByAssociation,
   selectActorCategoriesGroupedByActor,
   selectActors,
+  selectActiontypes,
 } from 'containers/App/selectors';
 
 import {
@@ -29,6 +30,8 @@ import {
   setActorConnections,
   setActionConnections,
 } from 'utils/entities';
+
+import qe from 'utils/quasi-equals';
 
 import { DEPENDENCIES } from './constants';
 
@@ -87,6 +90,7 @@ const selectActionsAssociated = createSelector(
 // - group by actortype
 export const selectActionsByType = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectViewEntity,
   selectActionsAssociated,
   selectActionConnections,
   selectActorActionsGroupedByAction,
@@ -94,8 +98,10 @@ export const selectActionsByType = createSelector(
   selectActionResourcesGroupedByAction,
   selectCategories,
   selectActionCategoriesGroupedByAction,
+  selectActiontypes,
   (
     ready,
+    viewActor,
     actions,
     actionConnections,
     actorActions,
@@ -103,20 +109,51 @@ export const selectActionsByType = createSelector(
     actionResources,
     categories,
     actionCategories,
+    actiontypes,
   ) => {
     if (!ready) return Map();
-    return actions && actions
-      .map((action) => setActionConnections({
-        action,
-        actionConnections,
-        actorActions,
-        actionActors,
-        actionResources,
-        categories,
-        actionCategories,
-      }))
-      .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
-      .sortBy((val, key) => key);
+    // console.log(actiontypes && actiontypes.toJS());
+    if (!viewActor || !ready) return null;
+    const actortypeId = viewActor.getIn(['attributes', 'actortype_id']).toString();
+    const validActiontypeIds = Object.keys(ACTIONTYPE_ACTORTYPES).filter((actiontypeId) => {
+      const actortypeIds = ACTIONTYPE_ACTORTYPES[actiontypeId];
+      return actortypeIds && actortypeIds.indexOf(actortypeId) > -1;
+    });
+    if (!validActiontypeIds || validActiontypeIds.length === 0) {
+      return null;
+    }
+    return actiontypes
+      .filter(
+        (type) => validActiontypeIds && validActiontypeIds.indexOf(type.get('id')) > -1
+      )
+      .map(
+        (type) => actions
+          .filter(
+            (action) => qe(type.get('id'), action.getIn(['attributes', 'measuretype_id']))
+          ).map(
+            (action) => setActionConnections({
+              action,
+              actionConnections,
+              actorActions,
+              actionActors,
+              actionResources,
+              categories,
+              actionCategories,
+            })
+          )
+      );
+    // actions && actions
+    //   .map((action) => setActionConnections({
+    //     action,
+    //     actionConnections,
+    //     actorActions,
+    //     actionActors,
+    //     actionResources,
+    //     categories,
+    //     actionCategories,
+    //   }))
+    //   .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
+    //   .sortBy((val, key) => key);
   }
 );
 
