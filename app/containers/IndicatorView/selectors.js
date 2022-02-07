@@ -9,11 +9,12 @@ import {
   selectCategories,
   selectActionConnections,
   selectActions,
-  selectActionResourcesGroupedByResource,
+  selectActionIndicatorsGroupedByIndicator,
   selectActionCategoriesGroupedByAction,
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectActionResourcesGroupedByAction,
 } from 'containers/App/selectors';
 
 import {
@@ -31,9 +32,9 @@ export const selectViewEntity = createSelector(
 
 const selectActionAssociations = createSelector(
   (state, id) => id,
-  selectActionResourcesGroupedByResource,
-  (resourceId, associationsByResource) => associationsByResource.get(
-    parseInt(resourceId, 10)
+  selectActionIndicatorsGroupedByIndicator,
+  (indicatorId, associationsByIndicator) => associationsByIndicator.get(
+    parseInt(indicatorId, 10)
   )
 );
 const selectActionsAssociated = createSelector(
@@ -60,6 +61,7 @@ export const selectActionsByType = createSelector(
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectActionResourcesGroupedByAction,
   selectActionCategoriesGroupedByAction,
   selectCategories,
   (
@@ -69,6 +71,7 @@ export const selectActionsByType = createSelector(
     actorActions,
     actionActors,
     actionIndicators,
+    actionResources,
     actionCategories,
     categories,
   ) => {
@@ -80,6 +83,7 @@ export const selectActionsByType = createSelector(
         actorActions,
         actionActors,
         actionIndicators,
+        actionResources,
         categories,
         actionCategories,
       }))

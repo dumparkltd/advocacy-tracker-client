@@ -355,7 +355,7 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
       if (data.entity.actionIndicators) {
         yield call(saveConnectionsSaga, {
           data: {
-            path: API.ACTION_Indicators,
+            path: API.ACTION_INDICATORS,
             updates: data.entity.actionIndicators,
           },
         });

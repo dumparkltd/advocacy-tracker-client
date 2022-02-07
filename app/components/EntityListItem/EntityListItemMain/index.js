@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { palette } from 'styled-theme';
 // import { isEqual } from 'lodash/lang';
 import { Map } from 'immutable';
-import { USER_ROLES } from 'themes/config';
+import { USER_ROLES, API } from 'themes/config';
 import appMessages from 'containers/App/messages';
 import { Box } from 'grommet';
 
@@ -54,12 +54,44 @@ const EntityListItemMainTitleWrap = styled.a`
 class EntityListItemMain extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   getConnections = (entity, connectionOptions, connections) => {
     const { intl } = this.context;
+    // console.log(connectionOptions)
+    // console.log(connections && connections.toJS())
+    // console.log(entity && entity.toJS())
     return Object.values(connectionOptions)
-      .filter((option) => !option.listItemHide
-        && connections.get(option.path)
-        && entity.get(`${option.entityTypeAs || option.entityType}ByType`)
-        && entity.get(`${option.entityTypeAs || option.entityType}ByType`).size > 0)
+      .filter((option) => {
+        if (option.path === API.INDICATORS) {
+          return !option.listItemHide
+            && connections.get(option.path)
+            && entity.get(option.entityTypeAs || option.entityType)
+            && entity.get(option.entityTypeAs || option.entityType).size > 0;
+        }
+        return !option.listItemHide
+          && connections.get(option.path)
+          && entity.get(`${option.entityTypeAs || option.entityType}ByType`)
+          && entity.get(`${option.entityTypeAs || option.entityType}ByType`).size > 0;
+      })
       .map((option) => {
+        if (option.path === API.INDICATORS) {
+          const entityConnections = entity.get(option.entityTypeAs || option.entityType).toJS();
+          return ({
+            groupLabel: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
+            connections: {
+              option: {
+                label: (size, short) => intl
+                  && intl.formatMessage(
+                    size === 1
+                      ? appMessages.entities[option.entityType][short ? 'singleShort' : 'single']
+                      : appMessages.entities[option.entityType][short ? 'pluralShort' : 'plural']
+                  ),
+                style: option.entityType,
+                clientPath: option.clientPath,
+              },
+              entities: Object.values(entityConnections).map(
+                (connectionId) => connections.getIn([option.path, connectionId.toString()])
+              ),
+            },
+          });
+        }
         const connectionsByType = entity.get(`${option.entityTypeAs || option.entityType}ByType`).toJS();
         return ({
           groupLabel: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),

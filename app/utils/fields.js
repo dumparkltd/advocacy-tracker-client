@@ -315,6 +315,12 @@ export const getActionConnectionField = ({
   taxonomies,
   connections,
   connectionOptions: connectionOptions || {
+    indicators: {
+      message: 'entities.indicators.plural',
+      entityType: 'indicators',
+      path: API.INDICATORS,
+      clientPath: ROUTES.INDICATOR,
+    },
     actors: {
       message: 'entities.actors_{typeid}.plural',
       entityType: 'actors',

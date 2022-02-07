@@ -428,7 +428,7 @@ export const selectResource = createSelector(
   (entity) => entity
 );
 export const selectIndicators = createSelector(
-  (state) => selectEntities(state, API.INDICATOR),
+  (state) => selectEntities(state, API.INDICATORS),
   (entities) => sortEntities(entities, 'desc', 'id', null, false)
 );
 export const selectIndicator = createSelector(
@@ -1114,14 +1114,22 @@ export const selectResourceConnections = createSelector(
     .set(API.ACTIONS, actions)
 );
 
+export const selectIndicatorConnections = createSelector(
+  selectActiontypeActions,
+  (actions) => Map()
+    .set(API.ACTIONS, actions)
+);
+
 export const selectActionConnections = createSelector(
   selectActors,
   selectActions,
   selectResources,
-  (actors, actions, resources) => Map()
+  selectIndicators,
+  (actors, actions, resources, indicators) => Map()
     .set(API.ACTORS, actors)
     .set(API.ACTIONS, actions)
     .set(API.RESOURCES, resources)
+    .set(API.INDICATORS, indicators)
 );
 
 // grouped JOIN tables /////////////////////////////////////////////////////////////////
