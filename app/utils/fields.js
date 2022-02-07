@@ -125,7 +125,7 @@ export const getStatusField = (
 
 // only show the highest rated role (lower role ids means higher)
 const getHighestUserRoleId = (roles) => roles.reduce(
-  (memo, role) => role.get('id') < memo ? role.get('id') : memo,
+  (memo, role) => role && role.get('id') < memo ? role.get('id') : memo,
   USER_ROLES.DEFAULT.value
 );
 
@@ -290,6 +290,7 @@ const getConnectionField = ({
   skipLabel,
   showValueForAction,
   columns,
+  isGrouped,
 }) => ({
   type: 'connections',
   values: entities.toList(),
@@ -302,6 +303,7 @@ const getConnectionField = ({
   showEmpty: appMessages.entities[entityType].empty,
   connectionOptions,
   skipLabel,
+  isGrouped,
   showValueForAction,
   columns: columns || [{
     id: 'main',
@@ -364,6 +366,7 @@ export const getActorConnectionField = ({
   skipLabel,
   showValueForAction,
   columns,
+  isGrouped: true,
 });
 
 export const getActionConnectionField = ({
@@ -380,6 +383,12 @@ export const getActionConnectionField = ({
   taxonomies,
   connections,
   connectionOptions: connectionOptions || {
+    indicators: {
+      message: 'entities.indicators.plural',
+      entityType: 'indicators',
+      path: API.INDICATORS,
+      clientPath: ROUTES.INDICATOR,
+    },
     actors: {
       message: 'entities.actors_{typeid}.plural',
       entityType: 'actors',
@@ -408,6 +417,7 @@ export const getActionConnectionField = ({
   onEntityClick,
   skipLabel,
   columns,
+  isGrouped: true,
 });
 
 export const getResourceConnectionField = ({
@@ -435,8 +445,32 @@ export const getResourceConnectionField = ({
   onEntityClick,
   skipLabel,
   columns,
+  isGrouped: true,
 });
-
+export const getIndicatorConnectionField = ({
+  indicators,
+  connections,
+  onEntityClick,
+  skipLabel,
+  connectionOptions,
+  columns,
+}) => getConnectionField({
+  entities: sortEntities(indicators, 'asc', 'id'),
+  connections,
+  connectionOptions: connectionOptions || {
+    actions: {
+      message: 'entities.actions_{typeid}.plural',
+      entityType: 'actions',
+      path: API.ACTIONS,
+      clientPath: ROUTES.ACTION,
+    },
+  },
+  entityType: 'indicators',
+  entityPath: ROUTES.INDICATOR,
+  onEntityClick,
+  skipLabel,
+  columns,
+});
 // const getConnectionGroupsField = ({
 //   entityGroups,
 //   groupedBy,

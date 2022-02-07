@@ -32,6 +32,17 @@ export const makeActiveEditOptions = ({
     case 'members':
     case 'associations':
     case 'resources':
+      return makeGroupedConnectionEditOptions(
+        entities,
+        config.connections,
+        connections,
+        connectedTaxonomies,
+        activeEditOption.optionId,
+        messages,
+        contextIntl,
+        activeEditOption.group,
+      );
+    case 'indicators':
       return makeConnectionEditOptions(
         entities,
         config.connections,
@@ -123,7 +134,7 @@ const makeTaxonomyEditOptions = (entities, taxonomies, activeEditOption, message
   return editOptions;
 };
 
-const makeConnectionEditOptions = (
+const makeGroupedConnectionEditOptions = (
   entities,
   config,
   connections,
@@ -186,6 +197,60 @@ const makeConnectionEditOptions = (
           reference: getEntityReference(connection),
           label: getEntityTitle(connection),
           description: connection.getIn(['attributes', 'description']),
+          value: connection.get('id'),
+          checked: checkedState(count, entities.size),
+          tags: connection.get('categories'),
+          draft: connection.getIn(['attributes', 'draft']),
+        };
+      });
+  }
+  return editOptions;
+};
+
+const makeConnectionEditOptions = (
+  entities,
+  config,
+  connections,
+  connectedTaxonomies,
+  activeOptionId,
+  messages,
+  contextIntl,
+  group,
+) => {
+  // const option = find(config.connections.options, (o) => o.path === activeEditOption.optionId);
+  // get the active option
+  // const typeId = activeOptionId;
+  const option = config[group];
+  const editOptions = {
+    groupId: group,
+    search: true,
+    options: {},
+    selectedCount: entities.size,
+    multiple: true,
+    required: false,
+    advanced: true,
+    selectAll: true,
+    tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, contextIntl),
+  };
+  if (option) {
+    editOptions.title = messages.title;
+    editOptions.path = option.connectPath;
+    editOptions.search = option.search;
+    const connectionPath = option.path;
+    connections
+      .get(connectionPath)
+      .forEach((connection) => {
+        const count = entities.reduce(
+          (counter, entity) => testEntityEntityAssociation(
+            entity,
+            option.entityTypeAs || option.entityType,
+            connection.get('id')
+          ) ? counter + 1 : counter,
+          0, // initial value
+        );
+        editOptions.options[connection.get('id')] = {
+          reference: getEntityReference(connection),
+          label: getEntityTitle(connection),
           value: connection.get('id'),
           checked: checkedState(count, entities.size),
           tags: connection.get('categories'),

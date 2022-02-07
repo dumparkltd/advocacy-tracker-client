@@ -66,6 +66,7 @@ const STATE_INITIAL = {
     targets: true,
     members: true,
     associations: true,
+    indicators: true,
     users: true,
     resources: true,
     parents: false,

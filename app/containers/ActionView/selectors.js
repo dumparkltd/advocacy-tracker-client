@@ -12,6 +12,7 @@ import {
   selectActions,
   selectActors,
   selectResources,
+  selectIndicators,
   selectActionActorsGroupedByAction,
   selectActorActionsGroupedByActor,
   selectActionActorsGroupedByActor,
@@ -24,6 +25,9 @@ import {
   selectActionResourcesGroupedByResource,
   selectMembershipsGroupedByMember,
   selectMembershipsGroupedByAssociation,
+  selectActionIndicatorsGroupedByAction,
+  selectIndicatorConnections,
+  selectActionIndicatorsGroupedByIndicator,
 } from 'containers/App/selectors';
 
 import {
@@ -31,6 +35,7 @@ import {
   prepareTaxonomiesIsAssociated,
   setActorConnections,
   setResourceConnections,
+  setIndicatorConnections,
 } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
 
@@ -291,6 +296,50 @@ export const selectResourcesByType = createSelector(
         actionResources,
       }))
       .groupBy((r) => r.getIn(['attributes', 'resourcetype_id']))
+      .sortBy((val, key) => key);
+  }
+);
+
+const selectIndicatorAssociations = createSelector(
+  (state, id) => id,
+  selectActionIndicatorsGroupedByAction,
+  (actionId, associationsByAction) => associationsByAction.get(
+    parseInt(actionId, 10)
+  )
+);
+const selectIndicatorsAssociated = createSelector(
+  selectIndicators,
+  selectIndicatorAssociations,
+  (actors, associations) => actors && associations && associations.reduce(
+    (memo, id) => {
+      const entity = actors.get(id.toString());
+      return entity
+        ? memo.set(id, entity)
+        : memo;
+    },
+    Map(),
+  )
+);
+// get associated actors with associoted actions and categories
+// - group by actortype
+export const selectEntityIndicators = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectIndicatorsAssociated,
+  selectIndicatorConnections,
+  selectActionIndicatorsGroupedByIndicator,
+  (
+    ready,
+    indicators,
+    indicatorConnections,
+    actionIndicators,
+  ) => {
+    if (!ready) return Map();
+    return indicators && indicators
+      .map((indicator) => setIndicatorConnections({
+        indicator,
+        indicatorConnections,
+        actionIndicators,
+      }))
       .sortBy((val, key) => key);
   }
 );

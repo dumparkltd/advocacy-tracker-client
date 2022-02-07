@@ -4,7 +4,7 @@ import { startsWith } from 'utils/string';
 import qe from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
 
-import { ACTIONTYPES } from 'themes/config';
+import { ACTIONTYPES, INDICATOR_ACTIONTYPES } from 'themes/config';
 
 import { makeAttributeFilterOptions } from './filterOptionsFactory';
 // figure out filter groups for filter panel
@@ -71,104 +71,130 @@ export const makeFilterGroups = ({
       return true;
     }).forEach((connectionKey) => {
       const option = config.connections[connectionKey];
-      let types;
-      let typeAbout;
-      let label;
-      if (option.type === 'action-actors') {
-        types = actortypes;
-        label = qe(ACTIONTYPES.DONOR, typeId) && 'By donor';
-        typeAbout = 'actortypes_about';
-      } else if (option.type === 'action-targets') {
-        types = actortypes;
-        label = qe(ACTIONTYPES.DONOR, typeId) && 'By recipient';
-        typeAbout = 'actortypes_about';
-      } else if (option.type === 'target-actions') {
-        types = actiontypesForTarget;
-        typeAbout = 'actiontypes_about';
-      } else if (option.type === 'actor-actions') {
-        types = actiontypes;
-        typeAbout = 'actiontypes_about';
-      } else if (option.type === 'resource-actions') {
-        types = actiontypes;
-        typeAbout = 'actiontypes_about';
-      } else if (option.type === 'action-parents') {
-        types = actiontypes;
-      } else if (option.type === 'association-members') {
-        types = membertypes;
-        typeAbout = 'actortypes_about';
-      } else if (option.type === 'member-associations') {
-        types = associationtypes;
-        typeAbout = 'actortypes_about';
-      } else if (option.type === 'action-resources') {
-        types = resourcetypes;
-        typeAbout = 'resourcetypes_about';
-      }
-      filterGroups[connectionKey] = {
-        id: connectionKey, // filterGroupId
-        label: label || messages.connections(option.type),
-        show: true,
-        includeAnyWithout: !!option.groupByType,
-        options: types && types
-          .filter((type) => {
-            if (option.type === 'action-parents') {
-              return type.get('id') === typeId && (!option.typeFilter || type.getIn(['attributes', option.typeFilter]));
-            }
-            if (option.typeFilterPass === 'reverse') {
-              return !type.getIn(['attributes', option.typeFilter]);
-            }
-            if (!option.typeFilter) return true;
-            let attribute = option.typeFilter;
-            const notFilter = startsWith(option.typeFilter, '!');
-            if (notFilter) {
-              attribute = option.typeFilter.substring(1);
-            }
-            const typeCondition = notFilter
-              ? !type.getIn(['attributes', attribute])
-              : type.getIn(['attributes', attribute]);
-            if (includeMembers && option.typeMemberFilter) {
-              return typeCondition || type.getIn(['attributes', option.typeMemberFilter]);
-            }
-            return typeCondition;
-          })
-          .reduce((memo, type) => {
-            let memberType;
-            if (option.typeFilter) {
+      if (!option.groupByType) {
+        let validType = true;
+        if (option.entityType === 'indicators') {
+          validType = INDICATOR_ACTIONTYPES.indexOf(typeId) > -1;
+        }
+        if (validType) {
+          filterGroups[connectionKey] = {
+            id: connectionKey, // filterGroupId
+            label: messages.connections(option.type),
+            show: true,
+            options: [{
+              id: option.type, // filterOptionId
+              label: option.label,
+              message: option.message,
+              color: option.entityType,
+              active: !!activeFilterOption
+                && activeFilterOption.group === connectionKey
+                && activeFilterOption.optionId === option.type,
+            }],
+          };
+        }
+      } else {
+        let types;
+        let typeAbout;
+        let label;
+        if (option.type === 'action-actors') {
+          types = actortypes;
+          label = qe(ACTIONTYPES.DONOR, typeId) && 'By donor';
+          typeAbout = 'actortypes_about';
+        } else if (option.type === 'action-targets') {
+          types = actortypes;
+          label = qe(ACTIONTYPES.DONOR, typeId) && 'By recipient';
+          typeAbout = 'actortypes_about';
+        } else if (option.type === 'target-actions') {
+          types = actiontypesForTarget;
+          typeAbout = 'actiontypes_about';
+        } else if (option.type === 'actor-actions') {
+          types = actiontypes;
+          typeAbout = 'actiontypes_about';
+        } else if (option.type === 'resource-actions') {
+          types = actiontypes;
+          typeAbout = 'actiontypes_about';
+        } else if (option.type === 'action-parents') {
+          types = actiontypes;
+        } else if (option.type === 'association-members') {
+          types = membertypes;
+          typeAbout = 'actortypes_about';
+        } else if (option.type === 'member-associations') {
+          types = associationtypes;
+          typeAbout = 'actortypes_about';
+        } else if (option.type === 'action-resources') {
+          types = resourcetypes;
+          typeAbout = 'resourcetypes_about';
+        } else if (option.type === 'indicator-actions') {
+          types = actiontypes;
+          typeAbout = 'actiontypes_about';
+        }
+        filterGroups[connectionKey] = {
+          id: connectionKey, // filterGroupId
+          label: label || messages.connections(option.type),
+          show: true,
+          includeAnyWithout: !!option.groupByType,
+          options: types && types
+            .filter((type) => {
+              if (option.type === 'action-parents') {
+                return type.get('id') === typeId && (!option.typeFilter || type.getIn(['attributes', option.typeFilter]));
+              }
+              if (option.typeFilterPass === 'reverse') {
+                return !type.getIn(['attributes', option.typeFilter]);
+              }
+              if (!option.typeFilter) return true;
               let attribute = option.typeFilter;
               const notFilter = startsWith(option.typeFilter, '!');
               if (notFilter) {
                 attribute = option.typeFilter.substring(1);
               }
-              const properType = notFilter
+              const typeCondition = notFilter
                 ? !type.getIn(['attributes', attribute])
                 : type.getIn(['attributes', attribute]);
               if (includeMembers && option.typeMemberFilter) {
-                memberType = !properType && type.getIn(['attributes', option.typeMemberFilter]);
+                return typeCondition || type.getIn(['attributes', option.typeMemberFilter]);
               }
-            }
+              return typeCondition;
+            })
+            .reduce((memo, type) => {
+              let memberType;
+              if (option.typeFilter) {
+                let attribute = option.typeFilter;
+                const notFilter = startsWith(option.typeFilter, '!');
+                if (notFilter) {
+                  attribute = option.typeFilter.substring(1);
+                }
+                const properType = notFilter
+                  ? !type.getIn(['attributes', attribute])
+                  : type.getIn(['attributes', attribute]);
+                if (includeMembers && option.typeMemberFilter) {
+                  memberType = !properType && type.getIn(['attributes', option.typeMemberFilter]);
+                }
+              }
 
-            const id = option.attribute || type.get('id');
-            const optionCurrentFilters = currentFilters && currentFilters.filter(
-              (f) => qe(f.optionId, id) && qe(f.groupId, connectionKey)
-            );
-            return memo.concat({
-              id, // filterOptionId
-              label: option.label,
-              info: typeAbout
-                && appMessages[typeAbout]
-                && appMessages[typeAbout][type.get('id')]
-                && intl.formatMessage(appMessages[typeAbout][type.get('id')]),
-              message: (option.messageByType && option.messageByType.indexOf('{typeid}') > -1)
-                ? option.messageByType.replace('{typeid}', type.get('id'))
-                : option.message,
-              color: option.entityType,
-              active: !!activeFilterOption
-                && activeFilterOption.group === connectionKey
-                && activeFilterOption.optionId === id,
-              currentFilters: optionCurrentFilters,
-              memberType,
-            });
-          }, []),
-      };
+              const id = option.attribute || type.get('id');
+              const optionCurrentFilters = currentFilters && currentFilters.filter(
+                (f) => qe(f.optionId, id) && qe(f.groupId, connectionKey)
+              );
+              return memo.concat({
+                id, // filterOptionId
+                label: option.label,
+                info: typeAbout
+                  && appMessages[typeAbout]
+                  && appMessages[typeAbout][type.get('id')]
+                  && intl.formatMessage(appMessages[typeAbout][type.get('id')]),
+                message: (option.messageByType && option.messageByType.indexOf('{typeid}') > -1)
+                  ? option.messageByType.replace('{typeid}', type.get('id'))
+                  : option.message,
+                color: option.entityType,
+                active: !!activeFilterOption
+                  && activeFilterOption.group === connectionKey
+                  && activeFilterOption.optionId === id,
+                currentFilters: optionCurrentFilters,
+                memberType,
+              });
+            }, []),
+        };
+      }
     });
   }
 

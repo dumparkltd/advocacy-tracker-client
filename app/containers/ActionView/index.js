@@ -28,6 +28,7 @@ import {
   getActorConnectionField,
   getActionConnectionField,
   getResourceConnectionField,
+  getIndicatorConnectionField,
 } from 'utils/fields';
 
 import qe from 'utils/quasi-equals';
@@ -63,6 +64,7 @@ import {
   selectIsUserManager,
   selectActorConnections,
   selectResourceConnections,
+  selectIndicatorConnections,
   selectTaxonomiesWithCategories,
   selectSubjectQuery,
   selectActiontypes,
@@ -81,6 +83,7 @@ import {
   selectResourcesByType,
   selectChildActions,
   selectParentActions,
+  selectEntityIndicators,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
@@ -132,9 +135,11 @@ export function ActionView(props) {
     actorsByActortype,
     targetsByActortype,
     resourcesByResourcetype,
+    indicators,
     onEntityClick,
     actorConnections,
     resourceConnections,
+    indicatorConnections,
     children,
     parents,
     onLoadData,
@@ -390,6 +395,21 @@ export function ActionView(props) {
                           }}
                         />
                       )}
+                      {indicators && (
+                        <FieldGroup
+                          group={{
+                            fields: [
+                              getIndicatorConnectionField({
+                                indicators,
+                                onEntityClick,
+                                connections: indicatorConnections,
+                                skipLabel: true,
+                                // TODO columns
+                              }),
+                            ],
+                          }}
+                        />
+                      )}
                       {resourcesByResourcetype && (
                         <FieldGroup
                           group={{
@@ -550,6 +570,8 @@ ActionView.propTypes = {
   onSetSubject: PropTypes.func,
   intl: intlShape.isRequired,
   subject: PropTypes.string,
+  indicatorConnections: PropTypes.object,
+  indicators: PropTypes.object,
 };
 
 ActionView.contextTypes = {
@@ -572,6 +594,8 @@ const mapStateToProps = (state, props) => ({
   parents: selectParentActions(state, props.params.id),
   subject: selectSubjectQuery(state),
   activitytypes: selectActiontypes(state),
+  indicators: selectEntityIndicators(state, props.params.id),
+  indicatorConnections: selectIndicatorConnections(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

@@ -1,5 +1,10 @@
 import { createSelector } from 'reselect';
-import { ACTIONTYPE_ACTORTYPES, ACTIONTYPE_TARGETTYPES, ACTIONTYPE_RESOURCETYPES } from 'themes/config';
+import {
+  ACTIONTYPE_ACTORTYPES,
+  ACTIONTYPE_TARGETTYPES,
+  ACTIONTYPE_RESOURCETYPES,
+  INDICATOR_ACTIONTYPES,
+} from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
 import {
@@ -9,6 +14,7 @@ import {
   selectActiontypes,
   selectActorTaxonomies,
   selectActorsCategorised,
+  selectIndicators,
   selectResources,
   selectResourcetypes,
 } from 'containers/App/selectors';
@@ -36,6 +42,17 @@ export const selectParentOptions = createSelector(
         });
       }
       return null;
+    }
+    return null;
+  }
+);
+
+export const selectIndicatorOptions = createSelector(
+  (state, id) => id,
+  selectIndicators,
+  (actiontypeId, indicators) => {
+    if (INDICATOR_ACTIONTYPES.indexOf(actiontypeId) > -1) {
+      return indicators;
     }
     return null;
   }

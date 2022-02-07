@@ -24,7 +24,9 @@ import {
   selectActionActorsMembersGroupedByAction, // passive, as targets
   selectCategories,
   selectActionResourcesGroupedByAction,
+  selectActionIndicatorsGroupedByAction,
   selectResources,
+  selectIndicators,
   selectIncludeMembersForFiltering,
   selectActorActionsAssociationsGroupedByAction,
   selectActionActorsAssociationsGroupedByAction,
@@ -54,8 +56,18 @@ export const selectConnections = createSelector(
   selectActions,
   selectActionCategoriesGroupedByAction,
   selectResources,
+  selectIndicators,
   selectCategories,
-  (ready, actors, actorCategoriesGrouped, actions, actionAssociationsGrouped, resources, categories) => {
+  (
+    ready,
+    actors,
+    actorCategoriesGrouped,
+    actions,
+    actionAssociationsGrouped,
+    resources,
+    indicators,
+    categories,
+  ) => {
     if (ready) {
       return new Map()
         .set(
@@ -68,6 +80,9 @@ export const selectConnections = createSelector(
         ).set(
           API.RESOURCES,
           resources,
+        ).set(
+          API.INDICATORS,
+          indicators,
         ).set(
           // potential parents
           API.ACTIONS,
@@ -180,6 +195,7 @@ const selectActionsWithConnections = createSelector(
   selectActionActorsMembersGroupedByAction,
   selectActionActorsAssociationsGroupedByAction,
   selectActionResourcesGroupedByAction,
+  selectActionIndicatorsGroupedByAction,
   selectIncludeMembersForFiltering,
   (
     ready,
@@ -192,6 +208,7 @@ const selectActionsWithConnections = createSelector(
     targetMemberConnectionsGrouped,
     targetAssociationConnectionsGrouped,
     resourceAssociationsGrouped,
+    indicatorAssociationsGrouped,
     includeMembers,
   ) => {
     // console.log(actorConnectionsGrouped && actorConnectionsGrouped.toJS())
@@ -312,6 +329,11 @@ const selectActionsWithConnections = createSelector(
             ])
           ).sortBy((val, key) => key);
 
+
+          const entityIndicators = indicatorAssociationsGrouped.get(
+            parseInt(entity.get('id'), 10)
+          );
+
           // the activity
           return entity
             // directly connected actors
@@ -334,6 +356,7 @@ const selectActionsWithConnections = createSelector(
             .set('targetsAssociationsByType', entityTargetsAssociationsByActortype)
             // directly connected resources
             .set('resources', entityResources)
+            .set('indicators', entityIndicators)
             .set('resourcesByType', entityResourcesByResourcetype);
         }
       );

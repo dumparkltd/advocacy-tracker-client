@@ -33,6 +33,7 @@ import {
   renderResourcesByResourcetypeControl,
   renderParentActionControl,
   parentActionOptions,
+  renderIndicatorControl,
 } from 'utils/forms';
 
 import {
@@ -84,6 +85,7 @@ import {
   selectTargetsByActortype,
   selectResourcesByResourcetype,
   selectConnectedTaxonomies,
+  selectIndicatorOptions,
 } from './selectors';
 
 import messages from './messages';
@@ -130,6 +132,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       targetsByActortype,
       resourcesByResourcetype,
       parentOptions,
+      indicatorOptions,
     } = props;
     // console.log(FORM_INITIAL.get('attributes') && FORM_INITIAL.get('attributes').toJS())
     return viewEntity
@@ -148,6 +151,9 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           : Map(),
         associatedResourcesByResourcetype: resourcesByResourcetype
           ? resourcesByResourcetype.map((resources) => entityOptions(resources, true))
+          : Map(),
+        associatedIndicators: indicatorOptions
+          ? entityOptions(indicatorOptions, true)
           : Map(),
         associatedParent: parentActionOptions(
           parentOptions,
@@ -213,6 +219,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     resourcesByResourcetype,
     parentOptions,
     onCreateOption,
+    indicatorOptions,
   ) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'measuretype_id']);
@@ -271,6 +278,21 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         ],
       },
     );
+    if (indicatorOptions) {
+      const indicatorConnections = renderIndicatorControl(
+        indicatorOptions,
+        null,
+        intl,
+      );
+      if (indicatorConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.indicators),
+            fields: [indicatorConnections],
+          },
+        );
+      }
+    }
     if (parentOptions) {
       groups.push({
         label: intl.formatMessage(appMessages.entities.actions.parent),
@@ -394,6 +416,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       resourcesByResourcetype,
       onCreateOption,
       parentOptions,
+      indicatorOptions,
     } = this.props;
     const { intl } = this.context;
     // const reference = this.props.params.id;
@@ -476,6 +499,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                   actorsByActortype,
                   targetsByActortype,
                   resourcesByResourcetype,
+                  indicatorOptions,
                 )}
                 handleSubmitFail={this.props.handleSubmitFail}
                 handleCancel={this.props.handleCancel}
@@ -497,6 +521,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       actorsByActortype,
                       targetsByActortype,
                       resourcesByResourcetype,
+                      indicatorOptions,
                       parentOptions,
                       onCreateOption,
                     ),
@@ -534,6 +559,7 @@ ActionEdit.propTypes = {
   params: PropTypes.object,
   taxonomies: PropTypes.object,
   parentOptions: PropTypes.object,
+  indicatorOptions: PropTypes.object,
   connectedTaxonomies: PropTypes.object,
   actorsByActortype: PropTypes.object,
   targetsByActortype: PropTypes.object,
@@ -559,6 +585,7 @@ const mapStateToProps = (state, props) => ({
   targetsByActortype: selectTargetsByActortype(state, props.params.id),
   resourcesByResourcetype: selectResourcesByResourcetype(state, props.params.id),
   parentOptions: selectParentOptions(state, props.params.id),
+  indicatorOptions: selectIndicatorOptions(state, props.params.id),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -585,7 +612,14 @@ function mapDispatchToProps(dispatch, props) {
     handleSubmitRemote: (model) => {
       dispatch(formActions.submit(model));
     },
-    handleSubmit: (formData, taxonomies, actorsByActortype, targetsByActortype, resourcesByResourcetype) => {
+    handleSubmit: (
+      formData,
+      taxonomies,
+      actorsByActortype,
+      targetsByActortype,
+      resourcesByResourcetype,
+      indicatorOptions,
+    ) => {
       let saveData = formData.set(
         'actionCategories',
         getCategoryUpdatesFromFormData({
@@ -670,6 +704,18 @@ function mapDispatchToProps(dispatch, props) {
                 create: [],
               }),
             )
+        );
+      }
+      if (indicatorOptions) {
+        saveData = saveData.set(
+          'actionIndicators', // targets
+          getConnectionUpdatesFromFormData({
+            formData,
+            connections: indicatorOptions,
+            connectionAttribute: 'associatedIndicators',
+            createConnectionKey: 'indicator_id',
+            createKey: 'measure_id',
+          })
         );
       }
       // TODO: remove once have singleselect instead of multiselect

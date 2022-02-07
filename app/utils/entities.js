@@ -729,6 +729,16 @@ const checkAttribute = (typeId, att, attributes, isManager) => {
     if (attributes[att].required) {
       return attributes[att].required.indexOf(typeId.toString()) > -1;
     }
+  } else if (!typeId && attributes && attributes[att]) {
+    if (attributes[att].hideAnalyst && !isManager) {
+      return false;
+    }
+    if (attributes[att].optional) {
+      return attributes[att].optional.indexOf(typeId.toString()) > -1;
+    }
+    if (attributes[att].required) {
+      return attributes[att].required.indexOf(typeId.toString()) > -1;
+    }
   }
   return false;
 };
@@ -800,11 +810,12 @@ export const setActionConnections = ({
   actorActions,
   actionActors,
   actionResources,
+  actionIndicators,
   categories,
   actionCategories,
 }) => {
   // actors
-  const entityActors = actorActions.get(parseInt(action.get('id'), 10));
+  const entityActors = actorActions && actorActions.get(parseInt(action.get('id'), 10));
   const entityActorsByActortype = entityActors
     && actionConnections.get(API.ACTORS)
     && entityActors
@@ -812,7 +823,7 @@ export const setActionConnections = ({
       .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
       .sortBy((val, key) => key);
   // actors
-  const entityTargets = actionActors.get(parseInt(action.get('id'), 10));
+  const entityTargets = actionActors && actionActors.get(parseInt(action.get('id'), 10));
   const entityTargetsByActortype = entityTargets
     && actionConnections.get(API.ACTORS)
     && entityTargets
@@ -820,12 +831,20 @@ export const setActionConnections = ({
       .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
       .sortBy((val, key) => key);
   // resources
-  const entityResources = actionResources.get(parseInt(action.get('id'), 10));
+  const entityResources = actionResources && actionResources.get(parseInt(action.get('id'), 10));
   const entityResourcesByResourcetype = entityResources
     && actionConnections.get(API.RESOURCES)
     && entityResources
       .filter((resId) => actionConnections.getIn([API.RESOURCES, resId.toString()]))
       .groupBy((resId) => actionConnections.getIn([API.RESOURCES, resId.toString(), 'attributes', 'resourcetype_id']).toString())
+      .sortBy((val, key) => key);
+  // indicators
+  const entityIndicators = actionIndicators
+    && actionIndicators.get(parseInt(action.get('id'), 10))
+    && actionConnections.get(API.INDICATORS)
+    && actionIndicators
+      .get(parseInt(action.get('id'), 10))
+      .filter((id) => actionConnections.getIn([API.INDICATORS, id.toString()]))
       .sortBy((val, key) => key);
 
   // categories
@@ -838,7 +857,8 @@ export const setActionConnections = ({
     .set('categories', entityCategories)
     .set('actorsByType', entityActorsByActortype)
     .set('targetsByType', entityTargetsByActortype)
-    .set('resourcesByType', entityResourcesByResourcetype);
+    .set('resourcesByType', entityResourcesByResourcetype)
+    .set('indicators', entityIndicators);
 };
 
 export const setActorConnections = ({
@@ -919,4 +939,21 @@ export const setResourceConnections = ({
       .sortBy((val, key) => key);
 
   return resource.set('actionsByType', entityActionsByActiontype);
+};
+
+export const setIndicatorConnections = ({
+  indicator,
+  indicatorConnections,
+  actionIndicators,
+}) => {
+  // actors
+  const entityActions = actionIndicators.get(parseInt(indicator.get('id'), 10));
+  const entityActionsByActiontype = entityActions
+    && indicatorConnections.get(API.ACTIONS)
+    && entityActions
+      .filter((actionId) => indicatorConnections.getIn([API.ACTIONS, actionId.toString()]))
+      .groupBy((actionId) => indicatorConnections.getIn([API.ACTIONS, actionId.toString(), 'attributes', 'measuretype_id']).toString())
+      .sortBy((val, key) => key);
+
+  return indicator.set('actionsByType', entityActionsByActiontype);
 };

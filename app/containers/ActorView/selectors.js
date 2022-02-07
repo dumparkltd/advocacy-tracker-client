@@ -21,6 +21,7 @@ import {
   selectActionActorsGroupedByActor,
   selectActionCategoriesGroupedByAction,
   selectActionResourcesGroupedByAction,
+  selectActionIndicatorsGroupedByAction,
   selectMembershipsGroupedByMember,
   selectMembershipsGroupedByAssociation,
   selectActors,
@@ -96,6 +97,7 @@ export const selectActionsWith = createSelector(
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
   selectActionResourcesGroupedByAction,
+  selectActionIndicatorsGroupedByAction,
   selectCategories,
   selectActionCategoriesGroupedByAction,
   (
@@ -105,6 +107,7 @@ export const selectActionsWith = createSelector(
     actorActions,
     actionActors,
     actionResources,
+    actionIndicators,
     categories,
     actionCategories,
   ) => {
@@ -116,6 +119,7 @@ export const selectActionsWith = createSelector(
         actorActions,
         actionActors,
         actionResources,
+        actionIndicators,
         categories,
         actionCategories,
       }));

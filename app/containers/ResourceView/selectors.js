@@ -14,6 +14,7 @@ import {
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
   selectActionResourcesGroupedByAction,
+  selectActionIndicatorsGroupedByAction,
 } from 'containers/App/selectors';
 
 import {
@@ -60,6 +61,7 @@ export const selectActionsByType = createSelector(
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
   selectActionResourcesGroupedByAction,
+  selectActionIndicatorsGroupedByAction,
   selectActionCategoriesGroupedByAction,
   selectCategories,
   (
@@ -69,6 +71,7 @@ export const selectActionsByType = createSelector(
     actorActions,
     actionActors,
     actionResources,
+    actionIndicators,
     actionCategories,
     categories,
   ) => {
@@ -80,6 +83,7 @@ export const selectActionsByType = createSelector(
         actorActions,
         actionActors,
         actionResources,
+        actionIndicators,
         categories,
         actionCategories,
       }))

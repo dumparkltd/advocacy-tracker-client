@@ -30,6 +30,7 @@ import {
   getFormField,
   getCheckboxField,
   renderParentActionControl,
+  renderIndicatorControl,
 } from 'utils/forms';
 import { getInfoField } from 'utils/fields';
 
@@ -74,6 +75,7 @@ import {
   selectActorsByActortype,
   selectTargetsByActortype,
   selectResourcesByResourcetype,
+  selectIndicatorOptions,
 } from './selectors';
 
 import messages from './messages';
@@ -163,6 +165,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     actorsByActortype,
     targetsByActortype,
     resourcesByResourcetype,
+    indicatorOptions,
     parentOptions,
     onCreateOption,
   ) => {
@@ -223,6 +226,16 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
         ],
       },
     );
+    if (indicatorOptions) {
+      groups.push(
+        {
+          label: intl.formatMessage(appMessages.nav.indicators),
+          fields: [
+            renderIndicatorControl(indicatorOptions, null, intl),
+          ],
+        },
+      );
+    }
     if (parentOptions) {
       groups.push({
         label: intl.formatMessage(appMessages.entities.actions.parent),
@@ -346,6 +359,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
       actiontype,
       params,
       parentOptions,
+      indicatorOptions,
     } = this.props;
     const typeId = params.id;
     const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
@@ -410,6 +424,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
                   actorsByActortype,
                   targetsByActortype,
                   resourcesByResourcetype,
+                  indicatorOptions,
                 )}
                 handleSubmitFail={this.props.handleSubmitFail}
                 handleCancel={() => this.props.handleCancel(typeId)}
@@ -429,6 +444,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
                       actorsByActortype,
                       targetsByActortype,
                       resourcesByResourcetype,
+                      indicatorOptions,
                       parentOptions,
                       onCreateOption,
                     ),
@@ -468,6 +484,7 @@ ActionNew.propTypes = {
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   taxonomies: PropTypes.object,
+  indicatorOptions: PropTypes.object,
   parentOptions: PropTypes.object,
   onCreateOption: PropTypes.func,
   connectedTaxonomies: PropTypes.object,
@@ -496,6 +513,7 @@ const mapStateToProps = (state, { params }) => ({
   targetsByActortype: selectTargetsByActortype(state, params.id),
   resourcesByResourcetype: selectResourcesByResourcetype(state, params.id),
   parentOptions: selectParentOptions(state, params.id),
+  indicatorOptions: selectIndicatorOptions(state, params.id),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -522,7 +540,14 @@ function mapDispatchToProps(dispatch) {
     handleSubmitRemote: (model) => {
       dispatch(formActions.submit(model));
     },
-    handleSubmit: (formData, actiontype, actorsByActortype, targetsByActortype, resourcesByResourcetype) => {
+    handleSubmit: (
+      formData,
+      actiontype,
+      actorsByActortype,
+      targetsByActortype,
+      resourcesByResourcetype,
+      indicatorOptions,
+    ) => {
       let saveData = formData.setIn(['attributes', 'measuretype_id'], actiontype.get('id'));
       // actionCategories
       if (formData.get('associatedTaxonomies')) {
@@ -538,7 +563,19 @@ function mapDispatchToProps(dispatch) {
             }), Map({ delete: List(), create: List() }))
         );
       }
-
+      // indicators
+      if (formData.get('associatedIndicators') && indicatorOptions) {
+        saveData = saveData.set(
+          'actionIndicators', // targets
+          Map({
+            delete: List(),
+            create: getCheckedValuesFromOptions(formData.get('associatedIndicators'))
+              .map((id) => Map({
+                indicator_id: id,
+              })),
+          })
+        );
+      }
       // actors
       if (formData.get('associatedActorsByActortype') && actorsByActortype) {
         saveData = saveData.set(
