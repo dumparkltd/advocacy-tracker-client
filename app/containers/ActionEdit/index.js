@@ -22,7 +22,6 @@ import {
   getTextareaField,
   renderTaxonomyControl,
   getCodeFormField,
-  getCheckboxField,
   getLinkFormField,
   getFormField,
   getAmountFormField,
@@ -235,29 +234,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       },
       {
         fields: [
-          checkActionAttribute(typeId, 'reference_ml') && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'reference_ml'),
-            'reference_ml',
-          ),
-          checkActionAttribute(typeId, 'status_lbs_protocol') && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'status_lbs_protocol'),
-            'status_lbs_protocol',
-          ),
-          checkActionAttribute(typeId, 'has_reference_landbased_ml') && getCheckboxField(
-            intl.formatMessage,
-            'has_reference_landbased_ml',
-          ),
-          checkActionAttribute(typeId, 'reference_landbased_ml') && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'reference_landbased_ml'),
-            'reference_landbased_ml',
-          ),
-        ],
-      },
-      {
-        fields: [
           checkActionAttribute(typeId, 'target_comment') && getMarkdownFormField(
             intl.formatMessage,
             checkActionRequired(typeId, 'target_comment'),
@@ -338,6 +314,25 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
+          checkActionAttribute(typeId, 'date_start') && getDateField(
+            intl.formatMessage,
+            'date_start',
+            checkActionRequired(typeId, 'date_start'),
+          ),
+          checkActionAttribute(typeId, 'date_end') && getDateField(
+            intl.formatMessage,
+            'date_end',
+            checkActionRequired(typeId, 'date_end'),
+          ),
+          checkActionAttribute(typeId, 'date_comment') && getTextareaField(
+            intl.formatMessage,
+            'date_comment',
+            checkActionRequired(typeId, 'date_comment'),
+          ),
+        ],
+      },
+      { // fieldGroup
+        fields: [
           checkActionAttribute(typeId, 'url') && getLinkFormField(
             intl.formatMessage,
             checkActionRequired(typeId, 'url'),
@@ -358,25 +353,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
             attribute: 'amount_comment',
             controlType: 'input',
           }),
-        ],
-      },
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'date_start') && getDateField(
-            intl.formatMessage,
-            'date_start',
-            checkActionRequired(typeId, 'date_start'),
-          ),
-          checkActionAttribute(typeId, 'date_end') && getDateField(
-            intl.formatMessage,
-            'date_end',
-            checkActionRequired(typeId, 'date_end'),
-          ),
-          checkActionAttribute(typeId, 'date_comment') && getTextareaField(
-            intl.formatMessage,
-            'date_comment',
-            checkActionRequired(typeId, 'date_comment'),
-          ),
         ],
       },
     ]);

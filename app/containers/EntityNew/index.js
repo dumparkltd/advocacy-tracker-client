@@ -102,14 +102,14 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
     } = this.props;
     const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
     let pageTitle;
-    let icon = path;
+    let currentTypeId;
     if (path === API.CATEGORIES && taxonomy && taxonomy.get('attributes')) {
       pageTitle = intl.formatMessage(messages[path].pageTitleTaxonomy, {
         taxonomy: this.getTaxTitle(taxonomy.get('id')),
       });
     } else if (path === API.ACTORS) {
       // figure out actortype id from form if not set
-      const currentTypeId = (type && type.get('id'))
+      currentTypeId = (type && type.get('id'))
         || viewDomain.getIn(['form', 'data', 'attributes', 'actortype_id'])
         || DEFAULT_ACTORTYPE;
       // check if single actortype set
@@ -126,7 +126,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
       );
     } else if (path === API.ACTIONS) {
       // figure out actortype id from form if not set
-      const currentTypeId = (type && type.get('id'))
+      currentTypeId = (type && type.get('id'))
         || viewDomain.getIn(['form', 'data', 'attributes', 'measuretype_id'])
         || DEFAULT_ACTIONTYPE;
       // check if single actortype set
@@ -139,10 +139,9 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           ),
         }
       );
-      icon = `${path}_${currentTypeId}`;
     } else if (path === API.RESOURCES) {
       // figure out actortype id from form if not set
-      const currentTypeId = (type && type.get('id'))
+      currentTypeId = (type && type.get('id'))
         || viewDomain.getIn(['form', 'data', 'attributes', 'resourcetype_id'])
         || DEFAULT_RESOURCETYPE;
       // check if single actortype set
@@ -155,7 +154,6 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           ),
         }
       );
-      icon = `${path}_${currentTypeId}`;
     } else {
       pageTitle = intl.formatMessage(messages[path].pageTitle);
     }
@@ -169,7 +167,6 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           <ContentHeader
             title={pageTitle}
             type={CONTENT_MODAL}
-            icon={icon}
             buttons={[{
               type: 'cancel',
               onClick: this.props.onCancel,
@@ -216,6 +213,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
             fields={getEntityAttributeFields(
               path,
               {
+                typeId: currentTypeId,
                 categories: {
                   taxonomy,
                   categoryParentOptions,
