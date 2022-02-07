@@ -323,7 +323,7 @@ export default defineMessages({
     },
     2: {
       id: 'app.containers.App.actiontypes_long.2',
-      defaultMessage: 'SDGs',
+      defaultMessage: 'Events',
     },
     3: {
       id: 'app.containers.App.actiontypes_long.3',
@@ -349,7 +349,7 @@ export default defineMessages({
     },
     2: {
       id: 'app.containers.App.actiontypes_about.2',
-      defaultMessage: 'SDGs',
+      defaultMessage: 'Events',
     },
     3: {
       id: 'app.containers.App.actiontypes_about.3',
