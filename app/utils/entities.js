@@ -5,6 +5,7 @@ import {
   ACTION_FIELDS,
   ACTOR_FIELDS,
   RESOURCE_FIELDS,
+  // INDICATOR_FIELDS,
   API,
 } from 'themes/config';
 import { find, reduce, every } from 'lodash/collection';
@@ -676,6 +677,17 @@ const checkAttribute = (typeId, att, attributes, isManager) => {
     if (attributes[att].required) {
       return attributes[att].required.indexOf(typeId.toString()) > -1;
     }
+  } else if (
+    !typeId && attributes && attributes[att]) {
+    if (attributes[att].hideAnalyst && !isManager) {
+      return false;
+    }
+    if (attributes[att].optional) {
+      return attributes[att].optional.indexOf(typeId.toString()) > -1;
+    }
+    if (attributes[att].required) {
+      return attributes[att].required.indexOf(typeId.toString()) > -1;
+    }
   }
   return false;
 };
@@ -726,6 +738,13 @@ export const checkResourceAttribute = (typeId, att) => RESOURCE_FIELDS
     att,
     RESOURCE_FIELDS.ATTRIBUTES,
   );
+// export const checkIndicatorAttribute = (att) => INDICATOR_FIELDS
+//   && INDICATOR_FIELDS.ATTRIBUTES
+//   && checkAttribute(
+//     null,
+//     att,
+//     INDICATOR_FIELDS.ATTRIBUTES,
+//   );
 
 export const checkResourceRequired = (typeId, att) => RESOURCE_FIELDS
   && RESOURCE_FIELDS.ATTRIBUTES

@@ -72,6 +72,7 @@ const STATE_INITIAL = {
     actors: true,
     actions: true,
     targets: true,
+    indicators: true,
     members: false,
     associations: false,
     resources: false,

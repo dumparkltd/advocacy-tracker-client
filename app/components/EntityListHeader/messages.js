@@ -156,6 +156,10 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.editGroupLabel.connections-action-resources',
       defaultMessage: 'Update resources',
     },
+    'connections-indicator-actions': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-indicator-actions',
+      defaultMessage: 'Update activities',
+    },
   },
   filterFormTitlePrefix: {
     id: 'app.components.EntityListHeader.filterFormTitlePrefix',

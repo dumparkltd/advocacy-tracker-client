@@ -141,10 +141,12 @@ theme.palette = {
   parentsHover: ['#ED7000'],
   actions: ['#C75300'],
   actionsHover: ['#ED7000'],
-  actors: ['#033A89', '#6889B8'], // accepted, noted
-  actorsHover: ['#023066', '#426BA6'],
-  resources: ['#033A89', '#6889B8'], // accepted, noted
-  resourcesHover: ['#023066', '#426BA6'],
+  actors: ['#033A89'], // accepted, noted
+  actorsHover: ['#023066'],
+  resources: ['#033A89'],
+  resourcesHover: ['#023066'],
+  indicators: ['#033A89'], // accepted, noted
+  indicatorsHover: ['#023066'],
   attributesHover: [dark[2]],
   attributes: [dark[3]],
   rolesHover: [dark[2]],

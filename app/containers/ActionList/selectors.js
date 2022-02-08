@@ -25,7 +25,9 @@ import {
   selectActionActorsMembersGroupedByAction, // passive, as targets
   selectCategories,
   selectActionResourcesGroupedByAction,
+  selectActionIndicatorsGroupedByAction,
   selectResources,
+  selectIndicators,
 } from 'containers/App/selectors';
 
 import {
@@ -52,8 +54,9 @@ export const selectConnections = createSelector(
   selectActions,
   selectActionCategoriesGroupedByAction,
   selectResources,
+  selectIndicators,
   selectCategories,
-  (ready, actors, actorAssociationsGrouped, actions, actionAssociationsGrouped, resources, categories) => {
+  (ready, actors, actorAssociationsGrouped, actions, actionAssociationsGrouped, resources, indicators, categories) => {
     if (ready) {
       return new Map()
         .set(
@@ -66,6 +69,9 @@ export const selectConnections = createSelector(
         ).set(
           API.RESOURCES,
           resources,
+        ).set(
+          API.INDICATORS,
+          indicators,
         ).set(
           // potential parents
           API.ACTIONS,
@@ -179,6 +185,7 @@ const selectActionsWithConnections = createSelector(
   selectActionActorsGroupedByAction,
   selectActionActorsMembersGroupedByAction,
   selectActionResourcesGroupedByAction,
+  selectActionIndicatorsGroupedByAction,
   (
     ready,
     entities,
@@ -188,6 +195,7 @@ const selectActionsWithConnections = createSelector(
     targetAssociationsGrouped,
     targetMemberAssociationsGrouped,
     resourceAssociationsGrouped,
+    indicatorAssociationsGrouped,
   ) => {
     if (ready && (connections.get(API.ACTORS) || connections.get(API.RESOURCES))) {
       return entities.map(
@@ -276,6 +284,7 @@ const selectActionsWithConnections = createSelector(
           ).sortBy((val, key) => key);
           // console.log(entityActorsByActortype && entityActorsByActortype.toJS());
           // currently requires both for filtering & display
+          const entityIndicators = indicatorAssociationsGrouped.get(parseInt(entity.get('id'), 10));
           return entity
             .set('actors', entityActors)
             .set('actorsByType', entityActorsByActortype)
@@ -285,6 +294,7 @@ const selectActionsWithConnections = createSelector(
             .set('targetsByType', entityTargetsByActortype)
             .set('targetsMembers', entityTargetsMembers)
             .set('targetsMembersByType', entityTargetsMembersByActortype)
+            .set('indicators', entityIndicators)
             .set('resources', entityResources)
             .set('resourcesByType', entityResourcesByResourcetype);
         }

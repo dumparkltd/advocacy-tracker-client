@@ -10,9 +10,11 @@ export const DEPENDENCIES = [
   API.ACTORS,
   API.ACTIONS,
   API.RESOURCES,
+  API.INDICATORS,
   API.ACTOR_ACTIONS,
   API.ACTION_ACTORS,
   API.ACTION_RESOURCES,
+  API.ACTION_INDICATORS,
   API.ACTOR_CATEGORIES,
   API.ACTION_CATEGORIES,
   API.ACTORTYPES,
@@ -113,6 +115,18 @@ export const CONFIG = {
       ownKey: 'measure_id',
       groupByType: true,
       typeFilter: 'is_target',
+    },
+    indicators: {
+      query: 'indicators',
+      type: 'action-indicators',
+      search: true,
+      message: 'entities.indicators.plural',
+      path: API.INDICATORS,
+      entityType: 'indicators',
+      clientPath: ROUTES.INDICATOR,
+      connectPath: API.ACTION_INDICATORS, // filter by actor connection
+      key: 'indicator_id',
+      ownKey: 'measure_id',
     },
     // filter by associated entity
     resources: {
