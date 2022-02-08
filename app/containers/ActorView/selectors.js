@@ -115,7 +115,6 @@ export const selectActionsByType = createSelector(
     actiontypes,
   ) => {
     if (!ready) return Map();
-    // console.log(actiontypes && actiontypes.toJS());
     if (!viewActor || !ready) return null;
     const actortypeId = viewActor.getIn(['attributes', 'actortype_id']).toString();
     const validActiontypeIds = Object.keys(ACTIONTYPE_ACTORTYPES).filter((actiontypeId) => {
@@ -131,33 +130,23 @@ export const selectActionsByType = createSelector(
       )
       .map(
         (type) => actions
-          .filter(
-            (action) => qe(type.get('id'), action.getIn(['attributes', 'measuretype_id']))
-          ).map(
-            (action) => setActionConnections({
-              action,
-              actionConnections,
-              actorActions,
-              actionActors,
-              actionResources,
-              actionIndicators,
-              categories,
-              actionCategories,
-            })
-          )
+          ? actions
+            .filter(
+              (action) => qe(type.get('id'), action.getIn(['attributes', 'measuretype_id']))
+            ).map(
+              (action) => setActionConnections({
+                action,
+                actionConnections,
+                actorActions,
+                actionActors,
+                actionResources,
+                actionIndicators,
+                categories,
+                actionCategories,
+              })
+            )
+          : Map()
       );
-    // actions && actions
-    //   .map((action) => setActionConnections({
-    //     action,
-    //     actionConnections,
-    //     actorActions,
-    //     actionActors,
-    //     actionResources,
-    //     categories,
-    //     actionCategories,
-    //   }))
-    //   .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
-    //   .sortBy((val, key) => key);
   }
 );
 
