@@ -21,7 +21,7 @@ import {
   selectTaxonomiesSorted,
   selectReady,
   selectActions,
-  selectActiontypes,
+  // selectActiontypes,
   selectResources,
   selectActionResourcesGroupedByAction,
   selectResourcetypes,
@@ -52,29 +52,44 @@ export const selectViewEntity = createSelector(
 export const selectParentOptions = createSelector(
   selectViewEntity,
   selectActions,
-  selectActiontypes,
-  (viewAction, actions, actiontypes) => {
-    if (viewAction && actions && actiontypes) {
-      const type = actiontypes.find(
-        (at) => qe(
-          viewAction.getIn(['attributes', 'measuretype_id']),
-          at.get('id'),
-        )
-      );
-      if (type && type.getIn(['attributes', 'has_parent'])) {
-        return actions.filter((action) => {
-          const sameType = qe(type.get('id'), action.getIn(['attributes', 'measuretype_id']));
-          const notSelf = !qe(action.get('id'), viewAction.get('id'));
-          // const hasParent = action.getIn(['attributes', 'parent_id']);
-          // todo: avoid circular dependencies
-          return sameType && notSelf;
-        });
-      }
-      return null;
+  (viewAction, actions) => {
+    if (viewAction && actions) {
+      return actions.filter((action) => {
+        const notSelf = !qe(action.get('id'), viewAction.get('id'));
+        // const hasParent = action.getIn(['attributes', 'parent_id']);
+        // todo: avoid circular dependencies
+        return notSelf;
+      });
     }
     return null;
   }
 );
+// export const selectParentOptions = createSelector(
+//   selectViewEntity,
+//   selectActions,
+//   selectActiontypes,
+//   (viewAction, actions, actiontypes) => {
+//     if (viewAction && actions && actiontypes) {
+//       const type = actiontypes.find(
+//         (at) => qe(
+//           viewAction.getIn(['attributes', 'measuretype_id']),
+//           at.get('id'),
+//         )
+//       );
+//       if (type && type.getIn(['attributes', 'has_parent'])) {
+//         return actions.filter((action) => {
+//           const sameType = qe(type.get('id'), action.getIn(['attributes', 'measuretype_id']));
+//           const notSelf = !qe(action.get('id'), viewAction.get('id'));
+//           // const hasParent = action.getIn(['attributes', 'parent_id']);
+//           // todo: avoid circular dependencies
+//           return sameType && notSelf;
+//         });
+//       }
+//       return null;
+//     }
+//     return null;
+//   }
+// );
 
 export const selectTaxonomyOptions = createSelector(
   selectViewEntity,
