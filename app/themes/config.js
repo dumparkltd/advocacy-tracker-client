@@ -322,7 +322,7 @@ export const ACTOR_FIELDS = {
     },
     phone: {
       optional: [ACTORTYPES.CONTACT],
-      type: 'input',
+      type: 'text',
     },
     address: {
       optional: [ACTORTYPES.CONTACT],
