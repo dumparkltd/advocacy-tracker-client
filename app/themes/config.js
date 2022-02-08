@@ -617,7 +617,7 @@ export const MAP_OPTIONS = {
   },
   CENTER: [20, 0],
   ZOOM: {
-    INTERACTION: 1,
+    INIT: 1,
     MIN: 0,
     MAX: 9,
   },
