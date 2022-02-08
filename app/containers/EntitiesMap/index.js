@@ -59,7 +59,7 @@ export function EntitiesMap({
   config,
   entities,
   actortypes,
-  actiontypes,
+  // actiontypes,
   targettypes,
   typeId,
   mapSubject,
@@ -79,7 +79,7 @@ export function EntitiesMap({
 }) {
   // const { intl } = this.context;
   // let { countries } = this.props;
-  let type;
+  // let type;
   const countriesJSON = topojson.feature(
     countriesTopo,
     Object.values(countriesTopo.objects)[0],
@@ -109,9 +109,9 @@ export function EntitiesMap({
         plural: intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural),
       };
 
-      type = actortypes.find((at) => qe(at.get('id'), typeId));
-      hasByTarget = type.getIn(['attributes', 'is_target']);
-      if (hasByTarget) {
+      // type = actortypes.find((at) => qe(at.get('id'), typeId));
+      hasByTarget = false; // type.getIn(['attributes', 'is_target']);
+      if (!hasByTarget) {
         if (mapSubject === 'targets') {
           indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';
         }
@@ -200,8 +200,8 @@ export function EntitiesMap({
         single: intl.formatMessage(appMessages.entities[`actions_${typeId}`].single),
         plural: intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural),
       };
-      type = actiontypes.find((at) => qe(at.get('id'), typeId));
-      hasByTarget = type.getIn(['attributes', 'has_target']);
+      // type = actiontypes.find((at) => qe(at.get('id'), typeId));
+      hasByTarget = false; // type.getIn(['attributes', 'has_target']);
       if (hasByTarget) {
         if (mapSubject === 'targets') {
           indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';
@@ -403,7 +403,7 @@ EntitiesMap.propTypes = {
   entities: PropTypes.instanceOf(List),
   // connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
-  actiontypes: PropTypes.instanceOf(Map),
+  // actiontypes: PropTypes.instanceOf(Map),
   targettypes: PropTypes.instanceOf(Map),
   countries: PropTypes.instanceOf(Map),
   // taxonomies: PropTypes.instanceOf(Map),
