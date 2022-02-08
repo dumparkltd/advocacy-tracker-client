@@ -869,3 +869,19 @@ export const setResourceConnections = ({
 
   return resource.set('actionsByType', entityActionsByActiontype);
 };
+export const setIndicatorConnections = ({
+  indicator,
+  indicatorConnections,
+  actionIndicators,
+}) => {
+  // actors
+  const entityActions = actionIndicators.get(parseInt(indicator.get('id'), 10));
+  const entityActionsByActiontype = entityActions
+    && indicatorConnections.get(API.ACTIONS)
+    && entityActions
+      .filter((actionId) => indicatorConnections.getIn([API.ACTIONS, actionId.toString()]))
+      .groupBy((actionId) => indicatorConnections.getIn([API.ACTIONS, actionId.toString(), 'attributes', 'measuretype_id']).toString())
+      .sortBy((val, key) => key);
+
+  return indicator.set('actionsByType', entityActionsByActiontype);
+};

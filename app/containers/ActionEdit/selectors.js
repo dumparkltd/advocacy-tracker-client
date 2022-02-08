@@ -1,6 +1,10 @@
 import { createSelector } from 'reselect';
 import {
-  API, ACTIONTYPE_ACTORTYPES, ACTIONTYPE_TARGETTYPES, ACTIONTYPE_RESOURCETYPES,
+  API,
+  ACTIONTYPE_ACTORTYPES,
+  ACTIONTYPE_TARGETTYPES,
+  ACTIONTYPE_RESOURCETYPES,
+  ACTIONTYPE_INDICATORS,
 } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
@@ -21,6 +25,8 @@ import {
   selectResources,
   selectActionResourcesGroupedByAction,
   selectResourcetypes,
+  selectIndicators,
+  selectActionIndicatorsGroupedByAction,
 } from 'containers/App/selectors';
 
 import {
@@ -217,5 +223,23 @@ export const selectResourcesByResourcetype = createSelector(
         action.get('id'),
       );
     });
+  }
+);
+export const selectIndicatorOptions = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectViewEntity,
+  selectIndicators,
+  selectActionIndicatorsGroupedByAction,
+  (ready, action, indicators, associations) => {
+    if (!action || !ready) return null;
+    const actiontypeId = action.getIn(['attributes', 'measuretype_id']).toString();
+    if (ACTIONTYPE_INDICATORS.indexOf(actiontypeId) > -1) {
+      return entitiesSetAssociated(
+        indicators,
+        associations,
+        action.get('id'),
+      );
+    }
+    return null;
   }
 );

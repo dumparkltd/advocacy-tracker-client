@@ -124,6 +124,21 @@ export const renderActionControl = (entities, taxonomies, onCreateOption, contex
       : null,
   }
   : null;
+export const renderIndicatorControl = (entities, onCreateOption, contextIntl) => entities
+  ? {
+    id: 'indicators',
+    model: '.associatedIndicators',
+    dataPath: ['associatedIndicators'],
+    label: contextIntl.formatMessage(appMessages.entities.indicators.plural),
+    controlType: 'multiselect',
+    options: entityOptions(entities, true),
+    advanced: true,
+    selectAll: true,
+    // onCreate: onCreateOption
+    //   ? () => onCreateOption({ path: API.INDICATORS })
+    //   : null,
+  }
+  : null;
 
 export const renderActorControl = (
   actortypeId,

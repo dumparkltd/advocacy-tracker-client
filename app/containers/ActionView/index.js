@@ -25,6 +25,7 @@ import {
   getActorConnectionField,
   getActionConnectionField,
   getResourceConnectionField,
+  getIndicatorConnectionField,
 } from 'utils/fields';
 
 // import { qe } from 'utils/quasi-equals';
@@ -49,6 +50,7 @@ import {
   selectActorConnections,
   selectActionConnections,
   selectResourceConnections,
+  selectIndicatorConnections,
   selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
@@ -63,6 +65,7 @@ import {
   selectResourcesByType,
   selectChildActions,
   selectParentActions,
+  selectEntityIndicators,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
@@ -126,10 +129,12 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
     actorsByActortype,
     targetsByActortype,
     resourcesByResourcetype,
+    indicators,
     taxonomies,
     actorConnections,
     actionConnections,
     resourceConnections,
+    indicatorConnections,
     children,
     parents,
     onEntityClick,
@@ -214,7 +219,22 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
         ],
       });
     }
-
+    // indicators
+    if (indicators) {
+      const indicatorConnectionsLocal = [];
+      indicatorConnectionsLocal.push(
+        getIndicatorConnectionField({
+          indicators,
+          onEntityClick,
+          connections: indicatorConnections,
+          skipLabel: true,
+        }),
+      );
+      fields.push({
+        label: appMessages.nav.indicators,
+        fields: indicatorConnectionsLocal,
+      });
+    }
     // actors
     if (actorsByActortype) {
       const actorConnectionsLocal = [];
@@ -317,6 +337,8 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
       actorConnections,
       actionConnections,
       resourceConnections,
+      indicatorConnections,
+      indicators,
       children,
       parents,
     } = this.props;
@@ -391,10 +413,12 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
                       actorsByActortype,
                       targetsByActortype,
                       resourcesByResourcetype,
+                      indicators,
                       taxonomies,
                       actorConnections,
                       actionConnections,
                       resourceConnections,
+                      indicatorConnections,
                       children,
                       parents,
                       onEntityClick,
@@ -428,9 +452,11 @@ ActionView.propTypes = {
   actorConnections: PropTypes.object,
   actionConnections: PropTypes.object,
   resourceConnections: PropTypes.object,
+  indicatorConnections: PropTypes.object,
   params: PropTypes.object,
   children: PropTypes.object,
   parents: PropTypes.object,
+  indicators: PropTypes.object,
 };
 
 ActionView.contextTypes = {
@@ -447,9 +473,11 @@ const mapStateToProps = (state, props) => ({
   actorsByActortype: selectActorsByType(state, props.params.id),
   resourcesByResourcetype: selectResourcesByType(state, props.params.id),
   targetsByActortype: selectTargetsByType(state, props.params.id),
+  indicators: selectEntityIndicators(state, props.params.id),
   actorConnections: selectActorConnections(state),
   actionConnections: selectActionConnections(state),
   resourceConnections: selectResourceConnections(state),
+  indicatorConnections: selectIndicatorConnections(state),
   children: selectChildActions(state, props.params.id),
   parents: selectParentActions(state, props.params.id),
 });

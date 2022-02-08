@@ -16,6 +16,7 @@ export const DEPENDENCIES = [
   API.ACTORS,
   API.ACTORTYPES,
   API.RESOURCES,
+  API.INDICATORS,
   API.RESOURCETYPES,
   API.ACTIONTYPES,
   API.ACTORTYPE_TAXONOMIES,
@@ -34,5 +35,6 @@ export const FORM_INITIAL = fromJS({
   associatedActorsByActortype: {},
   associatedTargetsByActortype: {},
   associatedResourcesByResource: {},
+  associatedIndicators: [],
   associatedParent: [],
 });

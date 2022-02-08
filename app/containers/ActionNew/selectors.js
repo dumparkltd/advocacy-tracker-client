@@ -1,5 +1,10 @@
 import { createSelector } from 'reselect';
-import { ACTIONTYPE_ACTORTYPES, ACTIONTYPE_TARGETTYPES, ACTIONTYPE_RESOURCETYPES } from 'themes/config';
+import {
+  ACTIONTYPE_ACTORTYPES,
+  ACTIONTYPE_TARGETTYPES,
+  ACTIONTYPE_RESOURCETYPES,
+  ACTIONTYPE_INDICATORS,
+} from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
 import {
@@ -10,6 +15,7 @@ import {
   selectActorTaxonomies,
   selectActorsCategorised,
   selectResources,
+  selectIndicators,
   selectResourcetypes,
 } from 'containers/App/selectors';
 
@@ -113,5 +119,16 @@ export const selectResourcesByResourcetype = createSelector(
         actor.getIn(['attributes', 'resourcetype_id']),
       )
     ));
+  }
+);
+
+export const selectIndicatorOptions = createSelector(
+  (state, id) => id,
+  selectIndicators,
+  (actiontypeId, indicators) => {
+    if (ACTIONTYPE_INDICATORS.indexOf(actiontypeId) > -1) {
+      return indicators;
+    }
+    return null;
   }
 );

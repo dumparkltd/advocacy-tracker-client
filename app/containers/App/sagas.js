@@ -503,7 +503,7 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
             entityId: entityCreated.data.id,
             path: API.ACTION_INDICATORS,
             updates: data.entity.actionIndicators,
-            keyPair: ['indicators_id', 'measure_id'],
+            keyPair: ['indicator_id', 'measure_id'],
           });
         }
 
