@@ -30,6 +30,7 @@ import {
   getFormField,
   renderActionsByActiontypeControl,
   renderIndicatorControl,
+  renderUserMultiControl,
 } from 'utils/forms';
 import { getInfoField } from 'utils/fields';
 
@@ -74,6 +75,7 @@ import {
   selectTargetsByActortype,
   selectResourcesByResourcetype,
   selectIndicatorOptions,
+  selectUserOptions,
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
 } from './selectors';
@@ -168,6 +170,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     topActionsByActiontype,
     subActionsByActiontype,
     indicatorOptions,
+    userOptions,
     onCreateOption,
   ) => {
     const { intl } = this.context;
@@ -210,6 +213,16 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
           label: intl.formatMessage(appMessages.nav.indicators),
           fields: [
             renderIndicatorControl(indicatorOptions, null, intl),
+          ],
+        },
+      );
+    }
+    if (userOptions) {
+      groups.push(
+        {
+          label: intl.formatMessage(appMessages.nav.userActions),
+          fields: [
+            renderUserMultiControl(userOptions, null, intl),
           ],
         },
       );
@@ -364,6 +377,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
       topActionsByActiontype,
       subActionsByActiontype,
       indicatorOptions,
+      userOptions,
     } = this.props;
     const typeId = params.id;
     const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
@@ -431,6 +445,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
                   topActionsByActiontype,
                   subActionsByActiontype,
                   indicatorOptions,
+                  userOptions,
                 )}
                 handleSubmitFail={this.props.handleSubmitFail}
                 handleCancel={() => this.props.handleCancel(typeId)}
@@ -453,6 +468,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
                       topActionsByActiontype,
                       subActionsByActiontype,
                       indicatorOptions,
+                      userOptions,
                       onCreateOption,
                     ),
                     aside: this.getBodyAsideFields(
@@ -494,6 +510,7 @@ ActionNew.propTypes = {
   topActionsByActiontype: PropTypes.object,
   subActionsByActiontype: PropTypes.object,
   indicatorOptions: PropTypes.object,
+  userOptions: PropTypes.object,
   onCreateOption: PropTypes.func,
   connectedTaxonomies: PropTypes.object,
   actiontype: PropTypes.instanceOf(Map),
@@ -523,6 +540,7 @@ const mapStateToProps = (state, { params }) => ({
   topActionsByActiontype: selectTopActionsByActiontype(state, params.id),
   subActionsByActiontype: selectSubActionsByActiontype(state, params.id),
   indicatorOptions: selectIndicatorOptions(state, params.id),
+  userOptions: selectUserOptions(state, params.id),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -558,6 +576,7 @@ function mapDispatchToProps(dispatch) {
       topActionsByActiontype,
       subActionsByActiontype,
       indicatorOptions,
+      userOptions,
     ) => {
       let saveData = formData.setIn(['attributes', 'measuretype_id'], actiontype.get('id'));
       // actionCategories
@@ -584,6 +603,19 @@ function mapDispatchToProps(dispatch) {
             create: getCheckedValuesFromOptions(formData.get('associatedIndicators'))
               .map((id) => Map({
                 indicator_id: id,
+              })),
+          })
+        );
+      }
+      // users
+      if (formData.get('associatedUsers') && userOptions) {
+        saveData = saveData.set(
+          'userActions',
+          Map({
+            delete: List(),
+            create: getCheckedValuesFromOptions(formData.get('associatedUsers'))
+              .map((id) => Map({
+                user_id: id,
               })),
           })
         );

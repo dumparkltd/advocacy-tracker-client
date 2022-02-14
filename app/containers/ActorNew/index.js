@@ -29,6 +29,7 @@ import {
   getEmailField,
   getTextFormField,
   getTextareaField,
+  renderUserMultiControl,
 } from 'utils/forms';
 import { getInfoField } from 'utils/fields';
 
@@ -73,6 +74,7 @@ import {
   selectActionsAsTargetByActiontype,
   selectMembersByActortype,
   selectAssociationsByActortype,
+  selectUserOptions,
 } from './selectors';
 
 import messages from './messages';
@@ -173,6 +175,7 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
     actionsAsTargetByActiontype,
     membersByActortype,
     associationsByActortype,
+    userOptions,
     onCreateOption,
   ) => {
     const { intl } = this.context;
@@ -192,6 +195,16 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
         ),
       ],
     });
+    if (userOptions) {
+      groups.push(
+        {
+          label: intl.formatMessage(appMessages.nav.userActors),
+          fields: [
+            renderUserMultiControl(userOptions, null, intl),
+          ],
+        },
+      );
+    }
     if (actionsByActiontype) {
       const actionConnections = renderActionsByActiontypeControl(
         actionsByActiontype,
@@ -306,6 +319,7 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
       params,
       membersByActortype,
       associationsByActortype,
+      userOptions,
     } = this.props;
     const typeId = params.id;
     const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
@@ -372,6 +386,7 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
                   actionsAsTargetByActiontype,
                   membersByActortype,
                   associationsByActortype,
+                  userOptions,
                   // actortypeTaxonomies,
                 )}
                 handleSubmitFail={this.props.handleSubmitFail}
@@ -393,6 +408,7 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
                       actionsAsTargetByActiontype,
                       membersByActortype,
                       associationsByActortype,
+                      userOptions,
                       onCreateOption,
                     ),
                     aside: this.getBodyAsideFields(
@@ -436,6 +452,7 @@ ActorNew.propTypes = {
   params: PropTypes.object,
   membersByActortype: PropTypes.object,
   associationsByActortype: PropTypes.object,
+  userOptions: PropTypes.object,
 };
 
 ActorNew.contextTypes = {
@@ -459,6 +476,7 @@ const mapStateToProps = (state, { params }) => ({
   actionsAsTargetByActiontype: selectActionsAsTargetByActiontype(state, params.id),
   membersByActortype: selectMembersByActortype(state, params.id),
   associationsByActortype: selectAssociationsByActortype(state, params.id),
+  userOptions: selectUserOptions(state, params.id),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -492,6 +510,7 @@ function mapDispatchToProps(dispatch) {
       actionsAsTargetByActiontype,
       membersByActortype,
       associationsByActortype,
+      userOptions,
     ) => {
       let saveData = formData.setIn(
         ['attributes', 'actortype_id'],
@@ -521,7 +540,19 @@ function mapDispatchToProps(dispatch) {
           }),
         );
       }
-      //
+      // users
+      if (formData.get('associatedUsers') && userOptions) {
+        saveData = saveData.set(
+          'userActors',
+          Map({
+            delete: List(),
+            create: getCheckedValuesFromOptions(formData.get('associatedUsers'))
+              .map((id) => Map({
+                user_id: id,
+              })),
+          })
+        );
+      }
       // actions if allowed by actortype
       if (actionsByActiontype && formData.get('associatedActionsByActiontype')) {
         saveData = saveData.set(

@@ -34,6 +34,7 @@ import {
   // renderParentActionControl,
   // parentActionOptions,
   renderIndicatorControl,
+  renderUserMultiControl,
 } from 'utils/forms';
 
 import {
@@ -86,6 +87,7 @@ import {
   selectResourcesByResourcetype,
   selectConnectedTaxonomies,
   selectIndicatorOptions,
+  selectUserOptions,
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
 } from './selectors';
@@ -136,6 +138,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       topActionsByActiontype,
       subActionsByActiontype,
       indicatorOptions,
+      userOptions,
       // parentOptions,
     } = props;
     // console.log(FORM_INITIAL.get('attributes') && FORM_INITIAL.get('attributes').toJS())
@@ -164,6 +167,9 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           : Map(),
         associatedIndicators: indicatorOptions
           ? entityOptions(indicatorOptions, true)
+          : Map(),
+        associatedUsers: userOptions
+          ? entityOptions(userOptions, true)
           : Map(),
         // associatedParent: parentActionOptions(
         //   parentOptions,
@@ -230,6 +236,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     topActionsByActiontype,
     subActionsByActiontype,
     indicatorOptions,
+    userOptions,
     // parentOptions,
     onCreateOption,
   ) => {
@@ -278,6 +285,21 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           {
             label: intl.formatMessage(appMessages.nav.indicators),
             fields: [indicatorConnections],
+          },
+        );
+      }
+    }
+    if (userOptions) {
+      const userConnections = renderUserMultiControl(
+        userOptions,
+        null,
+        intl,
+      );
+      if (userConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.userActions),
+            fields: [userConnections],
           },
         );
       }
@@ -440,6 +462,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       topActionsByActiontype,
       subActionsByActiontype,
       indicatorOptions,
+      userOptions,
       onCreateOption,
       // parentOptions,
     } = this.props;
@@ -527,6 +550,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                   topActionsByActiontype,
                   subActionsByActiontype,
                   indicatorOptions,
+                  userOptions,
                 )}
                 handleSubmitFail={this.props.handleSubmitFail}
                 handleCancel={this.props.handleCancel}
@@ -551,6 +575,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       topActionsByActiontype,
                       subActionsByActiontype,
                       indicatorOptions,
+                      userOptions,
                       // parentOptions,
                       onCreateOption,
                     ),
@@ -589,6 +614,7 @@ ActionEdit.propTypes = {
   taxonomies: PropTypes.object,
   // parentOptions: PropTypes.object,
   indicatorOptions: PropTypes.object,
+  userOptions: PropTypes.object,
   connectedTaxonomies: PropTypes.object,
   actorsByActortype: PropTypes.object,
   targetsByActortype: PropTypes.object,
@@ -619,6 +645,7 @@ const mapStateToProps = (state, props) => ({
   subActionsByActiontype: selectSubActionsByActiontype(state, props.params.id),
   // parentOptions: selectParentOptions(state, props.params.id),
   indicatorOptions: selectIndicatorOptions(state, props.params.id),
+  userOptions: selectUserOptions(state, props.params.id),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -654,6 +681,7 @@ function mapDispatchToProps(dispatch, props) {
       topActionsByActiontype,
       subActionsByActiontype,
       indicatorOptions,
+      userOptions,
     ) => {
       let saveData = formData.set(
         'actionCategories',
@@ -801,6 +829,18 @@ function mapDispatchToProps(dispatch, props) {
             connections: indicatorOptions,
             connectionAttribute: 'associatedIndicators',
             createConnectionKey: 'indicator_id',
+            createKey: 'measure_id',
+          })
+        );
+      }
+      if (userOptions) {
+        saveData = saveData.set(
+          'userActions',
+          getConnectionUpdatesFromFormData({
+            formData,
+            connections: userOptions,
+            connectionAttribute: 'associatedUsers',
+            createConnectionKey: 'user_id',
             createKey: 'measure_id',
           })
         );

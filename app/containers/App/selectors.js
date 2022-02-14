@@ -24,6 +24,7 @@ import {
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_RESOURCETYPES,
   INDICATOR_ACTIONTYPES,
+  USER_ACTIONTYPES,
 } from 'themes/config';
 
 import {
@@ -436,6 +437,14 @@ export const selectIndicator = createSelector(
   (state, id) => selectEntity(state, { id, path: API.INDICATOR }),
   (entity) => entity
 );
+export const selectUsers = createSelector(
+  (state) => selectEntities(state, API.USERS),
+  (entities) => sortEntities(entities, 'asc', 'name', null, false)
+);
+export const selectUser = createSelector(
+  (state, id) => selectEntity(state, { id, path: API.USERS }),
+  (entity) => entity
+);
 // all action types
 export const selectActortypes = createSelector(
   (state) => selectEntities(state, API.ACTORTYPES),
@@ -494,6 +503,15 @@ export const selectActiontypesForIndicators = createSelector(
     if (!actiontypes) return null;
     return actiontypes.filter(
       (type) => INDICATOR_ACTIONTYPES.indexOf(type.get('id')) > -1
+    );
+  }
+);
+export const selectActiontypesForUsers = createSelector(
+  selectActiontypes,
+  (actiontypes) => {
+    if (!actiontypes) return null;
+    return actiontypes.filter(
+      (type) => USER_ACTIONTYPES.indexOf(type.get('id')) > -1
     );
   }
 );
@@ -1108,7 +1126,12 @@ export const selectUserTaxonomies = createSelector(
 
 export const selectUserConnections = createSelector(
   (state) => selectEntities(state, API.ROLES),
-  (roles) => Map().set('roles', roles)
+  selectActions,
+  selectActors,
+  (roles, actions, actors) => Map()
+    .set('roles', roles)
+    .set(API.ACTIONS, actions)
+    .set(API.ACTORS, actors)
 );
 
 export const selectActorConnections = createSelector(
@@ -1242,6 +1265,50 @@ export const selectActionIndicatorsGroupedByAction = createSelector(
     ).map(
       (group) => group.map(
         (entity) => entity.getIn(['attributes', 'indicator_id'])
+      )
+    ),
+);
+export const selectUserActionsGroupedByAction = createSelector(
+  (state) => selectEntities(state, API.USER_ACTIONS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'measure_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.getIn(['attributes', 'user_id'])
+      )
+    ),
+);
+export const selectUserActionsGroupedByUser = createSelector(
+  (state) => selectEntities(state, API.USER_ACTIONS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'user_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.getIn(['attributes', 'measure_id'])
+      )
+    ),
+);
+export const selectUserActorsGroupedByActor = createSelector(
+  (state) => selectEntities(state, API.USER_ACTORS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'actor_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.getIn(['attributes', 'user_id'])
+      )
+    ),
+);
+export const selectUserActorsGroupedByUser = createSelector(
+  (state) => selectEntities(state, API.USER_ACTORS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'user_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.getIn(['attributes', 'actor_id'])
       )
     ),
 );

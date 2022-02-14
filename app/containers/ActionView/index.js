@@ -26,6 +26,7 @@ import {
   getActionConnectionField,
   getResourceConnectionField,
   getIndicatorConnectionField,
+  getUserConnectionField,
 } from 'utils/fields';
 
 // import { qe } from 'utils/quasi-equals';
@@ -51,6 +52,7 @@ import {
   selectActionConnections,
   selectResourceConnections,
   selectIndicatorConnections,
+  selectUserConnections,
   selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
@@ -66,6 +68,7 @@ import {
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
   selectEntityIndicators,
+  selectEntityUsers,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
@@ -130,11 +133,13 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
     targetsByActortype,
     resourcesByResourcetype,
     indicators,
+    users,
     taxonomies,
     actorConnections,
     actionConnections,
     resourceConnections,
     indicatorConnections,
+    userConnections,
     subActionsByType,
     topActionsByType,
     onEntityClick,
@@ -189,6 +194,38 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
         ],
       },
     );
+    // indicators
+    if (indicators) {
+      const indicatorConnectionsLocal = [];
+      indicatorConnectionsLocal.push(
+        getIndicatorConnectionField({
+          indicators,
+          onEntityClick,
+          connections: indicatorConnections,
+          skipLabel: true,
+        }),
+      );
+      fields.push({
+        label: appMessages.nav.indicators,
+        fields: indicatorConnectionsLocal,
+      });
+    }
+    // users
+    if (users) {
+      const userConnectionsLocal = [];
+      userConnectionsLocal.push(
+        getUserConnectionField({
+          users,
+          onEntityClick,
+          connections: userConnections,
+          skipLabel: true,
+        }),
+      );
+      fields.push({
+        label: appMessages.nav.userActions,
+        fields: userConnectionsLocal,
+      });
+    }
     // connected actions
     if (topActionsByType) {
       const actionConnectionsLocal = [];
@@ -251,22 +288,6 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
       });
     }
 
-    // indicators
-    if (indicators) {
-      const indicatorConnectionsLocal = [];
-      indicatorConnectionsLocal.push(
-        getIndicatorConnectionField({
-          indicators,
-          onEntityClick,
-          connections: indicatorConnections,
-          skipLabel: true,
-        }),
-      );
-      fields.push({
-        label: appMessages.nav.indicators,
-        fields: indicatorConnectionsLocal,
-      });
-    }
     // actors
     if (actorsByActortype) {
       const actorConnectionsLocal = [];
@@ -370,7 +391,9 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
       actionConnections,
       resourceConnections,
       indicatorConnections,
+      userConnections,
       indicators,
+      users,
       subActionsByType,
       topActionsByType,
     } = this.props;
@@ -446,11 +469,13 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
                       targetsByActortype,
                       resourcesByResourcetype,
                       indicators,
+                      users,
                       taxonomies,
                       actorConnections,
                       actionConnections,
                       resourceConnections,
                       indicatorConnections,
+                      userConnections,
                       subActionsByType,
                       topActionsByType,
                       onEntityClick,
@@ -489,6 +514,8 @@ ActionView.propTypes = {
   subActionsByType: PropTypes.object,
   topActionsByType: PropTypes.object,
   indicators: PropTypes.object,
+  userConnections: PropTypes.object,
+  users: PropTypes.object,
 };
 
 ActionView.contextTypes = {
@@ -510,6 +537,8 @@ const mapStateToProps = (state, props) => ({
   actionConnections: selectActionConnections(state),
   resourceConnections: selectResourceConnections(state),
   indicatorConnections: selectIndicatorConnections(state),
+  users: selectEntityUsers(state, props.params.id),
+  userConnections: selectUserConnections(state),
   topActionsByType: selectTopActionsByActiontype(state, props.params.id),
   subActionsByType: selectSubActionsByActiontype(state, props.params.id),
 });

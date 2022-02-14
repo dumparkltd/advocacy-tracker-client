@@ -398,6 +398,34 @@ export const getIndicatorConnectionField = ({
   onEntityClick,
   skipLabel,
 });
+export const getUserConnectionField = ({
+  users,
+  connections,
+  onEntityClick,
+  skipLabel,
+  connectionOptions,
+}) => getConnectionField({
+  entities: sortEntities(users, 'asc', 'name'),
+  connections,
+  connectionOptions: connectionOptions || {
+    actions: {
+      message: 'entities.actions_{typeid}.plural',
+      entityType: 'actions',
+      path: API.ACTIONS,
+      clientPath: ROUTES.ACTION,
+    },
+    actors: {
+      message: 'entities.actors_{typeid}.plural',
+      entityType: 'actors',
+      path: API.ACTORS,
+      clientPath: ROUTES.ACTOR,
+    },
+  },
+  entityType: 'users',
+  entityPath: ROUTES.USER,
+  onEntityClick,
+  skipLabel,
+});
 
 // const getConnectionGroupsField = ({
 //   entityGroups,

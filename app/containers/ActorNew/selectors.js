@@ -1,5 +1,9 @@
 import { createSelector } from 'reselect';
-import { ACTIONTYPE_ACTORTYPES, ACTIONTYPE_TARGETTYPES } from 'themes/config';
+import {
+  ACTIONTYPE_ACTORTYPES,
+  ACTIONTYPE_TARGETTYPES,
+  USER_ACTORTYPES,
+} from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
 import {
@@ -9,6 +13,7 @@ import {
   selectActionsCategorised,
   selectActorsCategorised,
   selectActortypes,
+  selectUsers,
 } from 'containers/App/selectors';
 import { prepareTaxonomies } from 'utils/entities';
 
@@ -119,5 +124,16 @@ export const selectAssociationsByActortype = createSelector(
         actor.getIn(['attributes', 'actortype_id']),
       )
     ));
+  }
+);
+
+export const selectUserOptions = createSelector(
+  (state, id) => id,
+  selectUsers,
+  (actortypeId, users) => {
+    if (USER_ACTORTYPES.indexOf(actortypeId) > -1) {
+      return users;
+    }
+    return null;
   }
 );

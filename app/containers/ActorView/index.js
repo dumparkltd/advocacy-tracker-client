@@ -24,6 +24,7 @@ import {
   getActionConnectionField,
   getActorConnectionField,
   getEmailField,
+  getUserConnectionField,
 } from 'utils/fields';
 // import { qe } from 'utils/quasi-equals';
 import { getEntityTitleTruncated, checkActorAttribute } from 'utils/entities';
@@ -48,7 +49,7 @@ import {
   selectIsUserManager,
   selectTaxonomiesWithCategories,
   selectActionConnections,
-  // selectActiveActortypes,
+  selectUserConnections,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -61,6 +62,7 @@ import {
   selectActionsAsTargetByType,
   selectMembersByType,
   selectAssociationsByType,
+  selectEntityUsers,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
@@ -128,8 +130,10 @@ export class ActorView extends React.PureComponent { // eslint-disable-line reac
     actionsAsTargetByActiontype,
     membersByType,
     associationsByType,
+    users,
     taxonomies,
     actionConnections,
+    userConnections,
     onEntityClick,
     onCreateOption,
   ) => {
@@ -147,6 +151,21 @@ export class ActorView extends React.PureComponent { // eslint-disable-line reac
         ],
       },
     );
+    if (users) {
+      const userConnectionsLocal = [];
+      userConnectionsLocal.push(
+        getUserConnectionField({
+          users,
+          onEntityClick,
+          connections: userConnections,
+          skipLabel: true,
+        }),
+      );
+      fields.push({
+        label: appMessages.nav.userActors,
+        fields: userConnectionsLocal,
+      });
+    }
     // connected actions
     if (actionsByActiontype) {
       const actionConnectionsLocal = [];
@@ -276,6 +295,8 @@ export class ActorView extends React.PureComponent { // eslint-disable-line reac
       actionConnections,
       onEntityClick,
       onCreateOption,
+      users,
+      userConnections,
     } = this.props;
     const typeId = viewEntity && viewEntity.getIn(['attributes', 'actortype_id']);
     let buttons = [];
@@ -349,8 +370,10 @@ export class ActorView extends React.PureComponent { // eslint-disable-line reac
                       actionsAsTargetByActiontype,
                       membersByType,
                       associationsByType,
+                      users,
                       taxonomies,
                       actionConnections,
+                      userConnections,
                       onEntityClick,
                       onCreateOption,
                     ),
@@ -383,6 +406,8 @@ ActorView.propTypes = {
   params: PropTypes.object,
   isManager: PropTypes.bool,
   onCreateOption: PropTypes.func,
+  userConnections: PropTypes.object,
+  users: PropTypes.object,
 };
 
 ActorView.contextTypes = {
@@ -400,6 +425,8 @@ const mapStateToProps = (state, props) => ({
   actionConnections: selectActionConnections(state),
   membersByType: selectMembersByType(state, props.params.id),
   associationsByType: selectAssociationsByType(state, props.params.id),
+  users: selectEntityUsers(state, props.params.id),
+  userConnections: selectUserConnections(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

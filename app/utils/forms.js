@@ -139,6 +139,21 @@ export const renderIndicatorControl = (entities, onCreateOption, contextIntl) =>
     //   : null,
   }
   : null;
+export const renderUserMultiControl = (entities, onCreateOption, contextIntl) => entities
+  ? {
+    id: 'users',
+    model: '.associatedUsers',
+    dataPath: ['associatedUsers'],
+    label: contextIntl.formatMessage(appMessages.entities.users.plural),
+    controlType: 'multiselect',
+    options: entityOptions(entities, true),
+    advanced: true,
+    selectAll: true,
+    // onCreate: onCreateOption
+    //   ? () => onCreateOption({ path: API.INDICATORS })
+    //   : null,
+  }
+  : null;
 
 export const renderActorControl = (
   actortypeId,

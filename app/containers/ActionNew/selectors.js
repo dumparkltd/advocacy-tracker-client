@@ -5,6 +5,7 @@ import {
   ACTIONTYPE_RESOURCETYPES,
   INDICATOR_ACTIONTYPES,
   ACTIONTYPE_ACTIONTYPES,
+  USER_ACTIONTYPES,
 } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
@@ -18,6 +19,7 @@ import {
   selectResources,
   selectIndicators,
   selectResourcetypes,
+  selectUsers,
 } from 'containers/App/selectors';
 
 import { prepareTaxonomies } from 'utils/entities';
@@ -172,6 +174,16 @@ export const selectIndicatorOptions = createSelector(
   (actiontypeId, indicators) => {
     if (INDICATOR_ACTIONTYPES.indexOf(actiontypeId) > -1) {
       return indicators;
+    }
+    return null;
+  }
+);
+export const selectUserOptions = createSelector(
+  (state, id) => id,
+  selectUsers,
+  (actiontypeId, users) => {
+    if (USER_ACTIONTYPES.indexOf(actiontypeId) > -1) {
+      return users;
     }
     return null;
   }

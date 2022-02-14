@@ -1,5 +1,10 @@
 import { createSelector } from 'reselect';
-import { API, ACTIONTYPE_ACTORTYPES, ACTIONTYPE_TARGETTYPES } from 'themes/config';
+import {
+  API,
+  ACTIONTYPE_ACTORTYPES,
+  ACTIONTYPE_TARGETTYPES,
+  USER_ACTORTYPES,
+} from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
 import {
@@ -17,6 +22,8 @@ import {
   selectMembershipsGroupedByMember,
   selectMembershipsGroupedByAssociation,
   selectActortypes,
+  selectUsers,
+  selectUserActorsGroupedByActor,
 } from 'containers/App/selectors';
 
 import {
@@ -226,5 +233,24 @@ export const selectAssociationsByActortype = createSelector(
         viewActor.get('id'),
       );
     });
+  }
+);
+
+export const selectUserOptions = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectViewEntity,
+  selectUsers,
+  selectUserActorsGroupedByActor,
+  (ready, actor, users, associations) => {
+    if (!actor || !ready) return null;
+    const actortypeId = actor.getIn(['attributes', 'actortype_id']).toString();
+    if (USER_ACTORTYPES.indexOf(actortypeId) > -1) {
+      return entitiesSetAssociated(
+        users,
+        associations,
+        actor.get('id'),
+      );
+    }
+    return null;
   }
 );

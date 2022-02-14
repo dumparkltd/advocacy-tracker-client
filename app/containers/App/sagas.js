@@ -377,6 +377,22 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
           },
         });
       }
+      if (data.entity.userActions) {
+        yield call(saveConnectionsSaga, {
+          data: {
+            path: API.USER_ACTIONS,
+            updates: data.entity.userActions,
+          },
+        });
+      }
+      if (data.entity.userActors) {
+        yield call(saveConnectionsSaga, {
+          data: {
+            path: API.USER_ACTORS,
+            updates: data.entity.userActors,
+          },
+        });
+      }
       // update memberships connections
       if (data.entity.memberships) {
         yield call(saveConnectionsSaga, {
@@ -521,6 +537,22 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
             path: API.ACTION_INDICATORS,
             updates: data.entity.actionIndicators,
             keyPair: ['indicator_id', 'measure_id'],
+          });
+        }
+        if (data.entity.userActions) {
+          yield call(createConnectionsSaga, {
+            entityId: entityCreated.data.id,
+            path: API.USER_ACTIONS,
+            updates: data.entity.userActions,
+            keyPair: ['user_id', 'measure_id'],
+          });
+        }
+        if (data.entity.userActors) {
+          yield call(createConnectionsSaga, {
+            entityId: entityCreated.data.id,
+            path: API.USER_ACTORS,
+            updates: data.entity.userActors,
+            keyPair: ['user_id', 'actor_id'],
           });
         }
         // update action-actions connections (relationships)

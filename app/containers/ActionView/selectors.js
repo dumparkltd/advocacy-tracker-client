@@ -27,6 +27,11 @@ import {
   selectActionIndicatorsGroupedByIndicator,
   selectActionActionsGroupedBySubAction,
   selectActionActionsGroupedByTopAction,
+  selectUsers,
+  selectUserActionsGroupedByAction,
+  selectUserConnections,
+  selectUserActionsGroupedByUser,
+  selectUserActorsGroupedByUser,
 } from 'containers/App/selectors';
 
 import {
@@ -36,6 +41,7 @@ import {
   setActionConnections,
   setResourceConnections,
   setIndicatorConnections,
+  setUserConnections,
 } from 'utils/entities';
 
 import { DEPENDENCIES } from './constants';
@@ -236,9 +242,9 @@ const selectIndicatorAssociations = createSelector(
 const selectIndicatorsAssociated = createSelector(
   selectIndicators,
   selectIndicatorAssociations,
-  (actors, associations) => actors && associations && associations.reduce(
+  (indicators, associations) => indicators && associations && associations.reduce(
     (memo, id) => {
-      const entity = actors.get(id.toString());
+      const entity = indicators.get(id.toString());
       return entity
         ? memo.set(id, entity)
         : memo;
@@ -265,6 +271,51 @@ export const selectEntityIndicators = createSelector(
         indicator,
         indicatorConnections,
         actionIndicators,
+      }))
+      .sortBy((val, key) => key);
+  }
+);
+const selectUserAssociations = createSelector(
+  (state, id) => id,
+  selectUserActionsGroupedByAction,
+  (actionId, associationsByAction) => associationsByAction.get(
+    parseInt(actionId, 10)
+  )
+);
+const selectUsersAssociated = createSelector(
+  selectUsers,
+  selectUserAssociations,
+  (users, associations) => users && associations && associations.reduce(
+    (memo, id) => {
+      const entity = users.get(id.toString());
+      return entity
+        ? memo.set(id, entity)
+        : memo;
+    },
+    Map(),
+  )
+);
+
+export const selectEntityUsers = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectUsersAssociated,
+  selectUserConnections,
+  selectUserActionsGroupedByUser,
+  selectUserActorsGroupedByUser,
+  (
+    ready,
+    users,
+    userConnections,
+    userActions,
+    userActors,
+  ) => {
+    if (!ready) return Map();
+    return users && users
+      .map((user) => setUserConnections({
+        user,
+        userConnections,
+        userActions,
+        userActors,
       }))
       .sortBy((val, key) => key);
   }

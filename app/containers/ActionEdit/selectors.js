@@ -4,8 +4,9 @@ import {
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_RESOURCETYPES,
-  ACTIONTYPE_INDICATORS,
   ACTIONTYPE_ACTIONTYPES,
+  INDICATOR_ACTIONTYPES,
+  USER_ACTIONTYPES,
 } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
@@ -32,6 +33,8 @@ import {
   selectActionActionsGroupedBySubAction,
   selectActionActionsGroupedByTopAction,
   selectActiontypes,
+  selectUsers,
+  selectUserActionsGroupedByAction,
 } from 'containers/App/selectors';
 
 import {
@@ -324,9 +327,27 @@ export const selectIndicatorOptions = createSelector(
   (ready, action, indicators, associations) => {
     if (!action || !ready) return null;
     const actiontypeId = action.getIn(['attributes', 'measuretype_id']).toString();
-    if (ACTIONTYPE_INDICATORS.indexOf(actiontypeId) > -1) {
+    if (INDICATOR_ACTIONTYPES.indexOf(actiontypeId) > -1) {
       return entitiesSetAssociated(
         indicators,
+        associations,
+        action.get('id'),
+      );
+    }
+    return null;
+  }
+);
+export const selectUserOptions = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectViewEntity,
+  selectUsers,
+  selectUserActionsGroupedByAction,
+  (ready, action, users, associations) => {
+    if (!action || !ready) return null;
+    const actiontypeId = action.getIn(['attributes', 'measuretype_id']).toString();
+    if (USER_ACTIONTYPES.indexOf(actiontypeId) > -1) {
+      return entitiesSetAssociated(
+        users,
         associations,
         action.get('id'),
       );
