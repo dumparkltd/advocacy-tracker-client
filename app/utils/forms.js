@@ -280,12 +280,13 @@ export const renderActionsByActiontypeControl = (
   taxonomies,
   onCreateOption,
   contextIntl,
+  model = 'associatedActionsByActiontype',
 ) => entitiesByActiontype
   ? entitiesByActiontype.reduce(
     (controls, entities, typeid) => controls.concat({
       id: `actors.${typeid}`,
-      model: `.associatedActionsByActiontype.${typeid}`,
-      dataPath: ['associatedActionsByActiontype', typeid],
+      model: `.${model}.${typeid}`,
+      dataPath: [model, typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actions_${typeid}`].plural),
       controlType: 'multiselect',
       options: entityOptions(entities),

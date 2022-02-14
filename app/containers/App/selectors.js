@@ -1257,6 +1257,46 @@ export const selectActionActorsGroupedByAction = createSelector(
       )
     ),
 );
+export const selectActionActionsGroupedByTopAction = createSelector(
+  (state) => selectEntities(state, API.ACTION_ACTIONS),
+  (connections) => {
+    if (!connections) return null;
+    // measures by measure_id
+    return connections.groupBy(
+      (entity) => entity.getIn(['attributes', 'measure_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.getIn(['attributes', 'other_measure_id'])
+      )
+    );
+    // console.log(leftRight && leftRight.toJS())
+    // // measures by othermeasure_id
+    // const rightLeft = connections.groupBy(
+    //   (entity) => entity.getIn(['attributes', 'other_measure_id'])
+    // ).map(
+    //   (group) => group.map(
+    //     (entity) => entity.getIn(['attributes', 'measure_id'])
+    //   )
+    // );
+    // console.log(rightLeft && rightLeft.toJS())
+    // const combined = leftRight.mergeDeep(rightLeft);
+    // return combined;
+  },
+);
+export const selectActionActionsGroupedBySubAction = createSelector(
+  (state) => selectEntities(state, API.ACTION_ACTIONS),
+  (connections) => {
+    if (!connections) return null;
+    // measures by measure_id
+    return connections.groupBy(
+      (entity) => entity.getIn(['attributes', 'other_measure_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.getIn(['attributes', 'measure_id'])
+      )
+    );
+  },
+);
 export const selectMembershipsGroupedByMember = createSelector(
   (state) => selectEntities(state, API.MEMBERSHIPS),
   (entities) => entities

@@ -5,6 +5,7 @@ import {
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_RESOURCETYPES,
   ACTIONTYPE_INDICATORS,
+  ACTIONTYPE_ACTIONTYPES,
 } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
@@ -27,6 +28,10 @@ import {
   selectResourcetypes,
   selectIndicators,
   selectActionIndicatorsGroupedByAction,
+  selectActionsCategorised,
+  selectActionActionsGroupedBySubAction,
+  selectActionActionsGroupedByTopAction,
+  selectActiontypes,
 } from 'containers/App/selectors';
 
 import {
@@ -172,6 +177,77 @@ export const selectActorsByActortype = createSelector(
         filtered,
         associations,
         action.get('id'),
+      );
+    });
+  }
+);
+export const selectTopActionsByActiontype = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectViewEntity,
+  selectActionsCategorised,
+  selectActionActionsGroupedByTopAction,
+  selectActiontypes,
+  (ready, viewAction, actions, associations, actiontypes) => {
+    if (!viewAction || !ready) return null;
+    const viewActiontypeId = viewAction.getIn(['attributes', 'measuretype_id']).toString();
+    const validActiontypeIds = ACTIONTYPE_ACTIONTYPES[viewActiontypeId];
+    if (!validActiontypeIds || validActiontypeIds.length === 0) {
+      return null;
+    }
+    return actiontypes.filter(
+      (type) => validActiontypeIds
+        && validActiontypeIds.indexOf(type.get('id')) > -1
+    ).map((type) => {
+      const filtered = actions.filter(
+        (action) => qe(
+          type.get('id'),
+          action.getIn(['attributes', 'measuretype_id']),
+        )
+      ).filter(
+        // exclude self
+        (action) => action.get('id') !== viewAction.get('id')
+      );
+      return entitiesSetAssociated(
+        filtered,
+        associations,
+        viewAction.get('id'),
+      );
+    });
+  }
+);
+export const selectSubActionsByActiontype = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectViewEntity,
+  selectActionsCategorised,
+  selectActionActionsGroupedBySubAction,
+  selectActiontypes,
+  (ready, viewAction, actions, associations, actiontypes) => {
+    if (!viewAction || !ready) return null;
+    const viewActiontypeId = viewAction.getIn(['attributes', 'measuretype_id']).toString();
+    const validActiontypeIds = Object.keys(ACTIONTYPE_ACTIONTYPES).filter((actiontypeId) => {
+      const actiontypeIds = ACTIONTYPE_ACTIONTYPES[actiontypeId];
+      return actiontypeIds && actiontypeIds.indexOf(viewActiontypeId) > -1;
+    });
+    if (!validActiontypeIds || validActiontypeIds.length === 0) {
+      return null;
+    }
+    return actiontypes.filter(
+      (type) => validActiontypeIds
+        && validActiontypeIds.indexOf(type.get('id')) > -1
+    ).map((type) => {
+      const filtered = actions.filter(
+        (action) => qe(
+          type.get('id'),
+          action.getIn(['attributes', 'measuretype_id']),
+        )
+      ).filter(
+        // exclude self
+        (action) => action.get('id') !== viewAction.get('id')
+      );
+      return entitiesSetAssociated(
+        filtered,
+        associations,
+        viewAction.get('id'),
       );
     });
   }

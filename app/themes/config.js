@@ -65,6 +65,9 @@ export const API = {
   ACTIONTYPES: 'measuretypes', // action types
   ACTOR_ACTIONS: 'actor_measures', // linking actors with their actions
   ACTION_ACTORS: 'measure_actors', // linking actions with their targets
+  ACTION_ACTIONS: 'measure_measures', // linking actions with related axtions
+  USER_ACTORS: 'user_actors', // linking users with actors
+  USER_ACTIONS: 'user_measures', // linking users with assigned actions
   ACTION_INDICATORS: 'measure_indicators', // linking actions with indicators
   ACTOR_CATEGORIES: 'actor_categories',
   ACTION_CATEGORIES: 'measure_categories', // measure_categories
@@ -201,11 +204,11 @@ export const ACTION_FIELDS = {
       required: Object.values(ACTIONTYPES), // all types
       type: 'text',
     },
-    parent_id: {
-      skipImport: true,
-      optional: Object.values(ACTIONTYPES), // controlled by type setting
-      type: 'number',
-    },
+    // parent_id: {
+    //   skipImport: true,
+    //   optional: Object.values(ACTIONTYPES), // controlled by type setting
+    //   type: 'number',
+    // },
     description: {
       optional: Object.values(ACTIONTYPES),
       type: 'markdown',
@@ -456,7 +459,34 @@ export const ACTIONTYPE_RESOURCETYPES = {
 };
 export const ACTIONTYPE_TARGETTYPES = {};
 
+// related actions
+export const ACTIONTYPE_ACTIONTYPES = {
+  // top-actions - no sub-actions
+  // [ACTIONTYPES.EVENT]: [],
+  // [ACTIONTYPES.OP]: [],
+  // [ACTIONTYPES.AP]: [],
+  // sub-actions with top-actions
+  [ACTIONTYPES.EXPRESS]: [
+    ACTIONTYPES.EVENT,
+  ],
+  [ACTIONTYPES.TASK]: [
+    ACTIONTYPES.OP,
+    ACTIONTYPES.AP,
+    ACTIONTYPES.EVENT,
+  ],
+  [ACTIONTYPES.INTERACTION]: [
+    ACTIONTYPES.OP,
+    ACTIONTYPES.AP,
+    ACTIONTYPES.TASK,
+    ACTIONTYPES.EVENT,
+  ],
+};
+
 export const ACTIONTYPE_INDICATORS = [ACTIONTYPES.EXPRESS];
+
+export const USER_ACTIONTYPES = Object.values(ACTIONTYPES);
+export const USER_ACTORTYPES = Object.values(ACTORTYPES);
+
 
 export const KEEP_FILTERS = ['view', 'ms'];
 

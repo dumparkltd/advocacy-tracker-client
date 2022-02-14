@@ -343,6 +343,23 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
           },
         });
       }
+      // update action-actions connections (relationships)
+      if (data.entity.topActions) {
+        yield call(saveConnectionsSaga, {
+          data: {
+            path: API.ACTION_ACTIONS,
+            updates: data.entity.topActions,
+          },
+        });
+      }
+      if (data.entity.subActions) {
+        yield call(saveConnectionsSaga, {
+          data: {
+            path: API.ACTION_ACTIONS,
+            updates: data.entity.subActions,
+          },
+        });
+      }
       // update action-actors connections (targets)
       if (data.entity.actionResources) {
         yield call(saveConnectionsSaga, {

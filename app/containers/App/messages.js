@@ -919,6 +919,14 @@ export default defineMessages({
       id: 'app.containers.App.nav.targetingActions',
       defaultMessage: 'Targeted by',
     },
+    topActions: {
+      id: 'app.containers.App.nav.topActions',
+      defaultMessage: 'Top/parent activities',
+    },
+    subActions: {
+      id: 'app.containers.App.nav.subActions',
+      defaultMessage: 'Sub/child activities',
+    },
     actors: {
       id: 'app.containers.App.nav.actors',
       defaultMessage: 'Actors',
