@@ -523,7 +523,23 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
             keyPair: ['indicator_id', 'measure_id'],
           });
         }
-
+        // update action-actions connections (relationships)
+        if (data.entity.topActions) {
+          yield call(createConnectionsSaga, {
+            entityId: entityCreated.data.id,
+            path: API.ACTION_ACTIONS,
+            updates: data.entity.topActions,
+            keyPair: ['measure_id', 'other_measure_id'],
+          });
+        }
+        if (data.entity.subActions) {
+          yield call(createConnectionsSaga, {
+            entityId: entityCreated.data.id,
+            path: API.ACTION_ACTIONS,
+            updates: data.entity.subActions,
+            keyPair: ['other_measure_id', 'measure_id'],
+          });
+        }
         // update memberships connections
         if (data.entity.memberships) {
           yield call(createConnectionsSaga, {

@@ -21,7 +21,7 @@ import {
   selectCategories,
   selectTaxonomiesSorted,
   selectReady,
-  selectActions,
+  // selectActions,
   // selectActiontypes,
   selectResources,
   selectActionResourcesGroupedByAction,
@@ -54,21 +54,21 @@ export const selectViewEntity = createSelector(
   (entity, users) => entitySetUser(entity, users)
 );
 
-export const selectParentOptions = createSelector(
-  selectViewEntity,
-  selectActions,
-  (viewAction, actions) => {
-    if (viewAction && actions) {
-      return actions.filter((action) => {
-        const notSelf = !qe(action.get('id'), viewAction.get('id'));
-        // const hasParent = action.getIn(['attributes', 'parent_id']);
-        // todo: avoid circular dependencies
-        return notSelf;
-      });
-    }
-    return null;
-  }
-);
+// export const selectParentOptions = createSelector(
+//   selectViewEntity,
+//   selectActions,
+//   (viewAction, actions) => {
+//     if (viewAction && actions) {
+//       return actions.filter((action) => {
+//         const notSelf = !qe(action.get('id'), viewAction.get('id'));
+//         // const hasParent = action.getIn(['attributes', 'parent_id']);
+//         // todo: avoid circular dependencies
+//         return notSelf;
+//       });
+//     }
+//     return null;
+//   }
+// );
 // export const selectParentOptions = createSelector(
 //   selectViewEntity,
 //   selectActions,

@@ -4,6 +4,7 @@ import {
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_RESOURCETYPES,
   ACTIONTYPE_INDICATORS,
+  ACTIONTYPE_ACTIONTYPES,
 } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
@@ -26,26 +27,26 @@ export const selectDomain = createSelector(
   (substate) => substate
 );
 
-export const selectParentOptions = createSelector(
-  (state, id) => id,
-  selectActions,
-  selectActiontypes,
-  (actiontypeId, actions, actiontypes) => {
-    if (actiontypeId && actions && actiontypes) {
-      const type = actiontypes.find((at) => qe(actiontypeId, at.get('id')));
-      if (type && type.getIn(['attributes', 'has_parent'])) {
-        return actions.filter((action) => {
-          const sameType = qe(actiontypeId, action.getIn(['attributes', 'measuretype_id']));
-          // const hasParent = action.getIn(['attributes', 'parent_id']);
-          // todo: avoid circular dependencies
-          return sameType;
-        });
-      }
-      return null;
-    }
-    return null;
-  }
-);
+// export const selectParentOptions = createSelector(
+//   (state, id) => id,
+//   selectActions,
+//   selectActiontypes,
+//   (actiontypeId, actions, actiontypes) => {
+//     if (actiontypeId && actions && actiontypes) {
+//       const type = actiontypes.find((at) => qe(actiontypeId, at.get('id')));
+//       if (type && type.getIn(['attributes', 'has_parent'])) {
+//         return actions.filter((action) => {
+//           const sameType = qe(actiontypeId, action.getIn(['attributes', 'measuretype_id']));
+//           // const hasParent = action.getIn(['attributes', 'parent_id']);
+//           // todo: avoid circular dependencies
+//           return sameType;
+//         });
+//       }
+//       return null;
+//     }
+//     return null;
+//   }
+// );
 
 export const selectConnectedTaxonomies = createSelector(
   selectActorTaxonomies,
@@ -114,9 +115,52 @@ export const selectResourcesByResourcetype = createSelector(
     return resourcetypes.filter(
       (type) => validResourcetypeIds && validResourcetypeIds.indexOf(type.get('id')) > -1
     ).map((type) => resources.filter(
-      (actor) => qe(
+      (resource) => qe(
         type.get('id'),
-        actor.getIn(['attributes', 'resourcetype_id']),
+        resource.getIn(['attributes', 'resourcetype_id']),
+      )
+    ));
+  }
+);
+export const selectTopActionsByActiontype = createSelector(
+  (state, id) => id,
+  selectActions,
+  selectActiontypes,
+  (viewActiontypeId, actions, actiontypes) => {
+    // compare App/selectors/selectActortypesForActiontype
+    const validActiontypeIds = ACTIONTYPE_ACTIONTYPES[viewActiontypeId];
+    if (!validActiontypeIds || validActiontypeIds.length === 0) {
+      return null;
+    }
+    return actiontypes.filter(
+      (type) => validActiontypeIds && validActiontypeIds.indexOf(type.get('id')) > -1
+    ).map((type) => actions.filter(
+      (action) => qe(
+        type.get('id'),
+        action.getIn(['attributes', 'measuretype_id']),
+      )
+    ));
+  }
+);
+export const selectSubActionsByActiontype = createSelector(
+  (state, id) => id,
+  selectActions,
+  selectActiontypes,
+  (viewActiontypeId, actions, actiontypes) => {
+    // compare App/selectors/selectActortypesForActiontype
+    const validActiontypeIds = Object.keys(ACTIONTYPE_ACTIONTYPES).filter((actiontypeId) => {
+      const actiontypeIds = ACTIONTYPE_ACTIONTYPES[actiontypeId];
+      return actiontypeIds && actiontypeIds.indexOf(viewActiontypeId) > -1;
+    });
+    if (!validActiontypeIds || validActiontypeIds.length === 0) {
+      return null;
+    }
+    return actiontypes.filter(
+      (type) => validActiontypeIds && validActiontypeIds.indexOf(type.get('id')) > -1
+    ).map((type) => actions.filter(
+      (action) => qe(
+        type.get('id'),
+        action.getIn(['attributes', 'measuretype_id']),
       )
     ));
   }
