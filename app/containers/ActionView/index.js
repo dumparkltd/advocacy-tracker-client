@@ -63,8 +63,8 @@ import {
   selectActorsByType,
   selectTargetsByType,
   selectResourcesByType,
-  selectChildActions,
-  selectParentActions,
+  selectTopActionsByActiontype,
+  selectSubActionsByActiontype,
   selectEntityIndicators,
 } from './selectors';
 
@@ -135,8 +135,8 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
     actionConnections,
     resourceConnections,
     indicatorConnections,
-    children,
-    parents,
+    subActionsByType,
+    topActionsByType,
     onEntityClick,
   ) => {
     const { intl } = this.context;
@@ -189,36 +189,68 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
         ],
       },
     );
-    if (parents && parents.size > 0) {
-      fields.push({
-        label: appMessages.entities.actions.parent,
-        fields: [
+    // connected actions
+    if (topActionsByType) {
+      const actionConnectionsLocal = [];
+      topActionsByType.forEach((actions, actiontypeid) => {
+        actionConnectionsLocal.push(
           getActionConnectionField({
-            actions: parents.toList(),
+            actions,
             taxonomies,
             onEntityClick,
             connections: actionConnections,
-            typeid: typeId,
-            skipLabel: true,
+            typeid: actiontypeid,
+            // onCreateOption: () => onCreateOption({
+            //   path: API.ACTIONS,
+            //   attributes: {
+            //     measuretype_id: actiontypeid,
+            //   },
+            //   connect: {
+            //     type: 'actorActions',
+            //     create: [{
+            //       actor_id: entity.get('id'),
+            //     }],
+            //   },
+            // }),
           }),
-        ],
+        );
+      });
+      fields.push({
+        label: appMessages.entities.actions.topActions,
+        fields: actionConnectionsLocal,
       });
     }
-    if (children && children.size > 0) {
-      fields.push({
-        label: appMessages.entities.actions.children,
-        fields: [
+    if (subActionsByType) {
+      const actionConnectionsLocal = [];
+      subActionsByType.forEach((actions, actiontypeid) => {
+        actionConnectionsLocal.push(
           getActionConnectionField({
-            actions: children.toList(),
+            actions,
             taxonomies,
             onEntityClick,
             connections: actionConnections,
-            typeid: typeId,
-            skipLabel: true,
+            typeid: actiontypeid,
+            // onCreateOption: () => onCreateOption({
+            //   path: API.ACTIONS,
+            //   attributes: {
+            //     measuretype_id: actiontypeid,
+            //   },
+            //   connect: {
+            //     type: 'actorActions',
+            //     create: [{
+            //       actor_id: entity.get('id'),
+            //     }],
+            //   },
+            // }),
           }),
-        ],
+        );
+      });
+      fields.push({
+        label: appMessages.entities.actions.subActions,
+        fields: actionConnectionsLocal,
       });
     }
+
     // indicators
     if (indicators) {
       const indicatorConnectionsLocal = [];
@@ -339,8 +371,8 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
       resourceConnections,
       indicatorConnections,
       indicators,
-      children,
-      parents,
+      subActionsByType,
+      topActionsByType,
     } = this.props;
     const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
     let buttons = [];
@@ -419,8 +451,8 @@ export class ActionView extends React.PureComponent { // eslint-disable-line rea
                       actionConnections,
                       resourceConnections,
                       indicatorConnections,
-                      children,
-                      parents,
+                      subActionsByType,
+                      topActionsByType,
                       onEntityClick,
                       isManager,
                     ),
@@ -454,8 +486,8 @@ ActionView.propTypes = {
   resourceConnections: PropTypes.object,
   indicatorConnections: PropTypes.object,
   params: PropTypes.object,
-  children: PropTypes.object,
-  parents: PropTypes.object,
+  subActionsByType: PropTypes.object,
+  topActionsByType: PropTypes.object,
   indicators: PropTypes.object,
 };
 
@@ -478,8 +510,8 @@ const mapStateToProps = (state, props) => ({
   actionConnections: selectActionConnections(state),
   resourceConnections: selectResourceConnections(state),
   indicatorConnections: selectIndicatorConnections(state),
-  children: selectChildActions(state, props.params.id),
-  parents: selectParentActions(state, props.params.id),
+  topActionsByType: selectTopActionsByActiontype(state, props.params.id),
+  subActionsByType: selectSubActionsByActiontype(state, props.params.id),
 });
 
 function mapDispatchToProps(dispatch, props) {

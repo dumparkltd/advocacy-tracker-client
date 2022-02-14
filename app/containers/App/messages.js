@@ -1190,6 +1190,14 @@ export default defineMessages({
         id: 'app.containers.App.entities.actions.children',
         defaultMessage: 'Child/successor activities',
       },
+      topActions: {
+        id: 'app.containers.App.entities.actions.topActions',
+        defaultMessage: 'Top/parent activities',
+      },
+      subActions: {
+        id: 'app.containers.App.entities.actions.subActions',
+        defaultMessage: 'Sub/child activities',
+      },
       single: {
         id: 'app.containers.App.entities.actions.single',
         defaultMessage: 'Action',
