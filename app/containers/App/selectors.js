@@ -23,7 +23,7 @@ import {
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_RESOURCETYPES,
-  ACTIONTYPE_INDICATORS,
+  INDICATOR_ACTIONTYPES,
 } from 'themes/config';
 
 import {
@@ -493,7 +493,7 @@ export const selectActiontypesForIndicators = createSelector(
   (actiontypes) => {
     if (!actiontypes) return null;
     return actiontypes.filter(
-      (type) => ACTIONTYPE_INDICATORS.indexOf(type.get('id')) > -1
+      (type) => INDICATOR_ACTIONTYPES.indexOf(type.get('id')) > -1
     );
   }
 );

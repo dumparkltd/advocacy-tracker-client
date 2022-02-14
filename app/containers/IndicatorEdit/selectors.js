@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect';
-import { API, ACTIONTYPE_INDICATORS } from 'themes/config';
+import { API, INDICATOR_ACTIONTYPES } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
 import {
@@ -51,7 +51,7 @@ export const selectActionsByActiontype = createSelector(
   (ready, viewIndicator, actions, associations, actiontypes) => {
     if (!viewIndicator || !ready) return null;
     return actiontypes.filter(
-      (type) => ACTIONTYPE_INDICATORS && ACTIONTYPE_INDICATORS.indexOf(type.get('id')) > -1
+      (type) => INDICATOR_ACTIONTYPES && INDICATOR_ACTIONTYPES.indexOf(type.get('id')) > -1
     ).map((type) => {
       const filtered = actions.filter(
         (action) => qe(

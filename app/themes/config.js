@@ -108,7 +108,7 @@ export const RESOURCETYPES = {
   DOC: '3',
 };
 
-export const ACTIONTYPE_GROUPS = {
+export const ACTIONTYPE_NAVGROUPS = {
   // Plans & Tasks
   1: {
     types: [
@@ -131,7 +131,7 @@ export const ACTIONTYPE_GROUPS = {
     ],
   },
 };
-export const ACTORTYPE_GROUPS = {
+export const ACTORTYPE_NAVGROUPS = {
   // Contacts & countries
   1: {
     types: [
@@ -148,7 +148,7 @@ export const ACTORTYPE_GROUPS = {
     ],
   },
 };
-export const RESOURCETYPE_GROUPS = {
+export const RESOURCETYPE_NAVGROUPS = {
   // temp: one group only for now
   1: {
     types: [
@@ -482,7 +482,7 @@ export const ACTIONTYPE_ACTIONTYPES = {
   ],
 };
 
-export const ACTIONTYPE_INDICATORS = [ACTIONTYPES.EXPRESS];
+export const INDICATOR_ACTIONTYPES = [ACTIONTYPES.EXPRESS];
 
 export const USER_ACTIONTYPES = Object.values(ACTIONTYPES);
 export const USER_ACTORTYPES = Object.values(ACTORTYPES);

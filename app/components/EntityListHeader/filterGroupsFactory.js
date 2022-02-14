@@ -3,7 +3,7 @@ import { sortEntities } from 'utils/sort';
 import { startsWith } from 'utils/string';
 import appMessages from 'containers/App/messages';
 
-import { ACTIONTYPE_INDICATORS } from 'themes/config';
+import { INDICATOR_ACTIONTYPES } from 'themes/config';
 
 // figure out filter groups for filter panel
 export const makeFilterGroups = ({
@@ -57,7 +57,7 @@ export const makeFilterGroups = ({
       if (!option.groupByType) {
         let validType = true;
         if (option.entityType === 'indicators') {
-          validType = ACTIONTYPE_INDICATORS.indexOf(typeId) > -1;
+          validType = INDICATOR_ACTIONTYPES.indexOf(typeId) > -1;
         }
         if (validType) {
           filterGroups[connectionKey] = {
