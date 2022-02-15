@@ -102,8 +102,8 @@ export const selectActionsByType = createSelector(
   selectActionConnections,
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
-  selectActionIndicatorsGroupedByAction,
   selectActionResourcesGroupedByAction,
+  selectActionIndicatorsGroupedByAction,
   selectCategories,
   selectActionCategoriesGroupedByAction,
   selectActiontypes,
@@ -228,27 +228,6 @@ const selectMembersJoined = createSelector(
     Map(),
   )
 );
-const selectAssociationJoins = createSelector(
-  (state, id) => id,
-  selectMembershipsGroupedByMember,
-  (actorId, joinsByMember) => joinsByMember.get(
-    parseInt(actorId, 10)
-  )
-);
-const selectAssociationsJoined = createSelector(
-  selectActors,
-  selectAssociationJoins,
-  (members, joins) => members && joins && joins.reduce(
-    (memo, id) => {
-      const entity = members.get(id.toString());
-      return entity
-        ? memo.set(id, entity)
-        : memo;
-    },
-    Map(),
-  )
-);
-
 // get associated actors with associoted actions and categories
 // - group by actortype
 export const selectMembersByType = createSelector(
@@ -283,6 +262,28 @@ export const selectMembersByType = createSelector(
   }
 );
 // get associated actors with associoted actions and categories
+
+const selectAssociationJoins = createSelector(
+  (state, id) => id,
+  selectMembershipsGroupedByMember,
+  (actorId, joinsByMember) => joinsByMember.get(
+    parseInt(actorId, 10)
+  )
+);
+const selectAssociationsJoined = createSelector(
+  selectActors,
+  selectAssociationJoins,
+  (members, joins) => members && joins && joins.reduce(
+    (memo, id) => {
+      const entity = members.get(id.toString());
+      return entity
+        ? memo.set(id, entity)
+        : memo;
+    },
+    Map(),
+  )
+);
+
 // - group by actortype
 export const selectAssociationsByType = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
