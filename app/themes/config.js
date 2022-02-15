@@ -295,11 +295,12 @@ export const ACTOR_FIELDS = {
       type: 'text',
     },
     description: {
-      required: [
+      optional: [
         ACTORTYPES.COUNTRY,
         ACTORTYPES.ORG,
         ACTORTYPES.GROUP,
         ACTORTYPES.REGION,
+        ACTORTYPES.CONTACT,
       ],
       type: 'markdown',
     },
@@ -437,7 +438,9 @@ export const ACTIONTYPE_ACTORTYPES = {
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
   ],
-  [ACTIONTYPES.TASK]: [],
+  [ACTIONTYPES.TASK]: [
+    ACTORTYPES.COUNTRY,
+  ],
   [ACTIONTYPES.INTERACTION]: [
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
@@ -463,8 +466,9 @@ export const ACTIONTYPE_TARGETTYPES = {};
 export const ACTIONTYPE_ACTIONTYPES = {
   // top-actions - no sub-actions
   // [ACTIONTYPES.EVENT]: [],
-  // [ACTIONTYPES.OP]: [],
-  // [ACTIONTYPES.AP]: [],
+  [ACTIONTYPES.OP]: [
+    ACTIONTYPES.EVENT,
+  ],
   // sub-actions with top-actions
   [ACTIONTYPES.EXPRESS]: [
     ACTIONTYPES.EVENT,
