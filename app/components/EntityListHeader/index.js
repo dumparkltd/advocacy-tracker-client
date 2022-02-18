@@ -9,7 +9,7 @@ import { FormattedMessage } from 'react-intl';
 import styled, { withTheme } from 'styled-components';
 import { Map, List } from 'immutable';
 import { palette } from 'styled-theme';
-import { Box } from 'grommet';
+import { Box, ResponsiveContext } from 'grommet';
 
 import { isEqual } from 'lodash/lang';
 import { truncateText } from 'utils/string';
@@ -49,9 +49,12 @@ const TheHeader = styled((p) => <Box direction="row" {...p} />)`
 const HeaderSection = styled((p) => <Box direction="row" {...p} />)`
   position: relative;
   border-right: 1px solid ${({ noBorder }) => noBorder ? 'transparent' : palette('light', 4)};
-  padding: 2px 10px;
+  padding: 2px 2px;
   height: 100%;
   flex: ${({ grow }) => grow ? '1' : '0'} ${({ shrink = '1' }) => shrink ? '1' : '0'} auto;
+  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+    padding: 2px 10px;
+  }
 `;
 const HeaderSectionType = styled((p) => <Box direction="column" {...p} />)`
   position: relative;
@@ -297,6 +300,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       typeId,
       isManager,
     } = this.props;
+
     const { intl } = this.context;
     const { activeOption } = this.state;
     const hasSelected = dataReady && canEdit && entityIdsSelected && entityIdsSelected.size > 0;
@@ -394,142 +398,146 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     const currentTypeOption = hasTypeOptions && typeOptions.find((option) => option.active);
 
     return (
-      <Styled>
-        <TheHeader align="center">
-          {config.types && typeOptions && (
-            <HeaderSection noBorder>
-              <ButtonFlatIconOnly onClick={() => onSelectType()}>
-                <Icon name="arrowLeft" size="2em" />
-              </ButtonFlatIconOnly>
-            </HeaderSection>
-          )}
-          {config.types && typeOptions && (
-            <HeaderSectionType justify="start">
-              {config.types && (
-                <Label>
-                  <FormattedMessage
-                    {...messages.selectType}
-                    values={{
-                      types: intl.formatMessage(appMessages[config.types].single),
-                    }}
-                  />
-                </Label>
+      <ResponsiveContext.Consumer>
+        {(size) => (
+          <Styled>
+            <TheHeader align="center">
+              {config.types && typeOptions && (
+                <HeaderSection noBorder>
+                  <ButtonFlatIconOnly onClick={() => onSelectType()}>
+                    <Icon name="arrowLeft" size={size !== 'small' ? '2em' : '1.2em'} />
+                  </ButtonFlatIconOnly>
+                </HeaderSection>
               )}
-              {dataReady && (
-                <SelectType
-                  as="button"
-                  ref={this.typeButtonRef}
-                  onClick={(evt) => this.state.showTypes
-                    ? this.onHideTypes(evt)
-                    : this.onShowTypes(evt)
-                  }
-                >
-                  <LinkTitle active>
-                    {truncateText(
-                      currentTypeOption.label,
-                      TEXT_TRUNCATE.TYPE_SELECT,
-                      false,
-                    )}
-                    {!this.state.showTypes && (
-                      <Icon name="dropdownOpen" text textRight size="1em" />
-                    )}
-                    {this.state.showTypes && (
-                      <Icon name="dropdownClose" text textRight size="1em" />
-                    )}
-                  </LinkTitle>
-                </SelectType>
-              )}
-              {this.state.showTypes && typeOptions && (
-                <TypeOptions ref={this.typeWrapperRef}>
-                  {typeOptions.map((option) => (
-                    <TypeOption
-                      key={option.value}
-                      active={option.active}
-                      onClick={() => {
-                        this.onHideTypes();
-                        onSelectType(option.value);
-                      }}
+              {config.types && typeOptions && size !== 'small' && (
+                <HeaderSectionType justify="start">
+                  {config.types && (
+                    <Label>
+                      <FormattedMessage
+                        {...messages.selectType}
+                        values={{
+                          types: intl.formatMessage(appMessages[config.types].single),
+                        }}
+                      />
+                    </Label>
+                  )}
+                  {dataReady && (
+                    <SelectType
+                      as="button"
+                      ref={this.typeButtonRef}
+                      onClick={(evt) => this.state.showTypes
+                        ? this.onHideTypes(evt)
+                        : this.onShowTypes(evt)
+                      }
                     >
-                      {option.label}
-                    </TypeOption>
-                  ))}
-                </TypeOptions>
+                      <LinkTitle active>
+                        {truncateText(
+                          currentTypeOption.label,
+                          TEXT_TRUNCATE.TYPE_SELECT,
+                          false,
+                        )}
+                        {!this.state.showTypes && (
+                          <Icon name="dropdownOpen" text textRight size="1em" />
+                        )}
+                        {this.state.showTypes && (
+                          <Icon name="dropdownClose" text textRight size="1em" />
+                        )}
+                      </LinkTitle>
+                    </SelectType>
+                  )}
+                  {this.state.showTypes && typeOptions && (
+                    <TypeOptions ref={this.typeWrapperRef}>
+                      {typeOptions.map((option) => (
+                        <TypeOption
+                          key={option.value}
+                          active={option.active}
+                          onClick={() => {
+                            this.onHideTypes();
+                            onSelectType(option.value);
+                          }}
+                        >
+                          {option.label}
+                        </TypeOption>
+                      ))}
+                    </TypeOptions>
+                  )}
+                </HeaderSectionType>
               )}
-            </HeaderSectionType>
-          )}
-          <HeaderSection grow noBorder={!canEdit} align="center" gap="medium">
-            <ButtonOptions
-              onClick={onShowFilters}
-              disabled={showFilters}
-              icon="filter"
-              title={intl.formatMessage(messages.listOptions.showFilter)}
-            />
-            {dataReady && (
-              <EntityListSearch>
-                <TagList
-                  filters={currentFilters}
-                  onClear={onClearFilters}
+              <HeaderSection grow noBorder={!canEdit} align="center" gap="medium">
+                <ButtonOptions
+                  onClick={onShowFilters}
+                  disabled={showFilters}
+                  icon="filter"
+                  title={intl.formatMessage(messages.listOptions.showFilter)}
                 />
-              </EntityListSearch>
-            )}
-          </HeaderSection>
-          {canEdit && (
-            <HeaderSection noBorder>
-              <ButtonOptions
-                onClick={onShowEditOptions}
-                disabled={showEditOptions}
-                icon="edit"
-                title={intl.formatMessage(messages.listOptions.showEditOptions)}
+                {dataReady && (
+                  <EntityListSearch>
+                    <TagList
+                      filters={currentFilters}
+                      onClear={onClearFilters}
+                    />
+                  </EntityListSearch>
+                )}
+              </HeaderSection>
+              {canEdit && size !== 'small' && (
+                <HeaderSection noBorder>
+                  <ButtonOptions
+                    onClick={onShowEditOptions}
+                    disabled={showEditOptions}
+                    icon="edit"
+                    title={intl.formatMessage(messages.listOptions.showEditOptions)}
+                  />
+                </HeaderSection>
+              )}
+            </TheHeader>
+            {showFilters && (
+              <EntityListSidebar
+                hasEntities={entities && entities.size > 0}
+                panelGroups={panelGroups}
+                onHideSidebar={onHideFilters}
+                setActiveOption={this.onSetActiveOption}
               />
-            </HeaderSection>
-          )}
-        </TheHeader>
-        {showFilters && (
-          <EntityListSidebar
-            hasEntities={entities && entities.size > 0}
-            panelGroups={panelGroups}
-            onHideSidebar={onHideFilters}
-            setActiveOption={this.onSetActiveOption}
-          />
+            )}
+            {showEditOptions && (
+              <EntityListSidebar
+                isEditPanel
+                hasEntities={entities && entities.size > 0}
+                hasSelected={hasSelected}
+                panelGroups={panelGroups}
+                onHideSidebar={onHideEditOptions}
+                setActiveOption={this.onSetActiveOption}
+              />
+            )}
+            {activeOption && formOptions && (
+              <EntityListForm
+                model={formModel}
+                activeOptionId={`${activeOption.group}-${activeOption.optionId}`}
+                formOptions={formOptions}
+                buttons={showEditOptions
+                  ? this.getFormButtons(activeOption)
+                  : null
+                }
+                onCancel={this.onHideForm}
+                showCancelButton={showFilters}
+                onSelect={() => {
+                  if (showFilters) {
+                    this.onHideForm();
+                    onHideFilters();
+                  }
+                }}
+                onSubmit={showEditOptions
+                  ? (associations) => {
+                  // close and reset option panel
+                    this.setState({ activeOption: null });
+                    onUpdate(associations, activeOption);
+                  }
+                  : null
+                }
+              />
+            )}
+          </Styled>
         )}
-        {showEditOptions && (
-          <EntityListSidebar
-            isEditPanel
-            hasEntities={entities && entities.size > 0}
-            hasSelected={hasSelected}
-            panelGroups={panelGroups}
-            onHideSidebar={onHideEditOptions}
-            setActiveOption={this.onSetActiveOption}
-          />
-        )}
-        {activeOption && formOptions && (
-          <EntityListForm
-            model={formModel}
-            activeOptionId={`${activeOption.group}-${activeOption.optionId}`}
-            formOptions={formOptions}
-            buttons={showEditOptions
-              ? this.getFormButtons(activeOption)
-              : null
-            }
-            onCancel={this.onHideForm}
-            showCancelButton={showFilters}
-            onSelect={() => {
-              if (showFilters) {
-                this.onHideForm();
-                onHideFilters();
-              }
-            }}
-            onSubmit={showEditOptions
-              ? (associations) => {
-              // close and reset option panel
-                this.setState({ activeOption: null });
-                onUpdate(associations, activeOption);
-              }
-              : null
-            }
-          />
-        )}
-      </Styled>
+      </ResponsiveContext.Consumer>
     );
   }
 }

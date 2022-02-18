@@ -9,6 +9,7 @@ import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
+import { ResponsiveContext } from 'grommet';
 
 import { Map, List, fromJS } from 'immutable';
 
@@ -268,214 +269,221 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       ];
     }
     return (
-      <div>
-        {this.props.includeHeader && !printing && (
-          <EntityListHeader
-            typeId={typeId}
-            dataReady={dataReady}
-            currentFilters={filters}
-            onClearFilters={this.onClearFilters}
-            listUpdating={progress !== null && progress >= 0 && progress < 100}
-            entities={entities}
-            entityIdsSelected={entityIdsSelected}
-            taxonomies={this.props.taxonomies}
-            actortypes={actortypes}
-            resourcetypes={resourcetypes}
-            actiontypes={actiontypes}
-            targettypes={this.props.targettypes}
-            actiontypesForTarget={this.props.actiontypesForTarget}
-            membertypes={this.props.membertypes}
-            connections={connections}
-            associationtypes={this.props.associationtypes}
-            connectedTaxonomies={this.props.connectedTaxonomies}
-            config={config}
-            locationQuery={locationQuery}
-            canEdit={isManager && showList}
-            isManager={isManager}
-            hasUserRole={this.props.hasUserRole}
-            onCreateOption={this.props.onCreateOption}
-            onUpdate={
-              (associations, activeEditOption) => this.props.handleEditSubmit(
-                associations,
-                activeEditOption,
-                this.props.entityIdsSelected,
-                viewDomain.get('errors'),
+      <ResponsiveContext.Consumer>
+        {(size) => {
+          const canReallyEdit = size !== 'small' && isManager && showList;
+          return (
+            <div>
+              {this.props.includeHeader && !printing && (
+                <EntityListHeader
+                  typeId={typeId}
+                  dataReady={dataReady}
+                  currentFilters={filters}
+                  onClearFilters={this.onClearFilters}
+                  listUpdating={progress !== null && progress >= 0 && progress < 100}
+                  entities={entities}
+                  entityIdsSelected={entityIdsSelected}
+                  taxonomies={this.props.taxonomies}
+                  actortypes={actortypes}
+                  resourcetypes={resourcetypes}
+                  actiontypes={actiontypes}
+                  targettypes={this.props.targettypes}
+                  actiontypesForTarget={this.props.actiontypesForTarget}
+                  membertypes={this.props.membertypes}
+                  connections={connections}
+                  associationtypes={this.props.associationtypes}
+                  connectedTaxonomies={this.props.connectedTaxonomies}
+                  config={config}
+                  locationQuery={locationQuery}
+                  canEdit={canReallyEdit}
+                  isManager={isManager}
+                  hasUserRole={this.props.hasUserRole}
+                  onCreateOption={this.props.onCreateOption}
+                  onUpdate={
+                    (associations, activeEditOption) => this.props.handleEditSubmit(
+                      associations,
+                      activeEditOption,
+                      this.props.entityIdsSelected,
+                      viewDomain.get('errors'),
+                    )}
+                  showFilters={this.state.visibleFilters}
+                  showEditOptions={isManager && showList && this.state.visibleEditOptions}
+                  onShowFilters={this.onShowFilters}
+                  onHideFilters={this.onHideFilters}
+                  onHideEditOptions={this.onHideEditOptions}
+                  onShowEditOptions={this.onShowEditOptions}
+                  onSelectType={(type) => {
+                    // reset selection
+                    onEntitySelectAll([]);
+                    onSelectType(type);
+                  }}
+                  typeOptions={typeOptions}
+                  hasFilters={filters && filters.length > 0}
+                />
               )}
-            showFilters={this.state.visibleFilters}
-            showEditOptions={isManager && showList && this.state.visibleEditOptions}
-            onShowFilters={this.onShowFilters}
-            onHideFilters={this.onHideFilters}
-            onHideEditOptions={this.onHideEditOptions}
-            onShowEditOptions={this.onShowEditOptions}
-            onSelectType={(type) => {
-              // reset selection
-              onEntitySelectAll([]);
-              onSelectType(type);
-            }}
-            typeOptions={typeOptions}
-            hasFilters={filters && filters.length > 0}
-          />
-        )}
-        {showList && (
-          <EntityListMain
-            onClearFilters={() => {
-              this.props.onSearch('');
-              if (!this.props.includeHeader) {
-                this.onClearFilters();
-              }
-            }}
-            viewOptions={viewOptions}
-            hasHeader={this.props.includeHeader}
-            listUpdating={progress !== null && progress >= 0 && progress < 100}
-            entities={entities}
-            errors={errors}
-            taxonomies={this.props.taxonomies}
-            actortypes={this.props.actortypes}
-            actiontypes={this.props.actiontypes}
-            resourcetypes={this.props.resourcetypes}
-            connections={this.props.connections}
-            connectedTaxonomies={this.props.connectedTaxonomies}
-            entityIdsSelected={entityIdsSelectedFiltered}
-            locationQuery={locationQuery}
+              {showList && (
+                <EntityListMain
+                  onClearFilters={() => {
+                    this.props.onSearch('');
+                    if (!this.props.includeHeader) {
+                      this.onClearFilters();
+                    }
+                  }}
+                  viewOptions={viewOptions}
+                  hasHeader={this.props.includeHeader}
+                  listUpdating={progress !== null && progress >= 0 && progress < 100}
+                  entities={entities}
+                  errors={errors}
+                  taxonomies={this.props.taxonomies}
+                  actortypes={this.props.actortypes}
+                  actiontypes={this.props.actiontypes}
+                  resourcetypes={this.props.resourcetypes}
+                  connections={this.props.connections}
+                  connectedTaxonomies={this.props.connectedTaxonomies}
+                  entityIdsSelected={entityIdsSelectedFiltered}
+                  locationQuery={locationQuery}
 
-            config={config}
-            header={this.props.header}
-            entityTitle={this.props.entityTitle}
+                  config={config}
+                  header={this.props.header}
+                  entityTitle={this.props.entityTitle}
 
-            dataReady={dataReady}
-            isManager={isManager}
-            isAnalyst={this.props.hasUserRole[USER_ROLES.ANALYST.value]}
+                  dataReady={dataReady}
+                  isManager={canReallyEdit}
+                  isAnalyst={this.props.hasUserRole[USER_ROLES.ANALYST.value]}
 
-            onEntitySelect={(id, checked) => {
-              // show options when selected and not hidden
-              if (checked && this.state.visibleEditOptions !== false) {
-                this.onShowEditOptions();
-              }
-              // reset when unchecking last selected item
-              if (!checked && !this.state.visibleEditOptions && entityIdsSelected.size === 1) {
-                this.onResetEditOptions();
-              }
-              this.props.onEntitySelect(id, checked);
-            }}
-            onEntitySelectAll={(ids) => {
-              // show options when selected and not hidden
-              if (this.state.visibleEditOptions !== false && ids && ids.length > 0) {
-                this.onShowEditOptions();
-              }
-              // reset when unchecking last selected item
-              if (!this.state.visibleEditOptions && (!ids || ids.length === 0)) {
-                this.onResetEditOptions();
-              }
-              onEntitySelectAll(ids);
-            }}
-            onGroupSelect={this.props.onGroupSelect}
-            onSubgroupSelect={this.props.onSubgroupSelect}
-            onSearch={this.props.onSearch}
-            onPageSelect={this.props.onPageSelect}
-            onPageItemsSelect={this.props.onPageItemsSelect}
-            onEntityClick={(id, path) => this.props.onEntityClick(
-              id, path, viewDomain.get('errors')
-            )}
-            onSortBy={this.props.onSortBy}
-            onSortOrder={this.props.onSortOrder}
-            onDismissError={this.props.onDismissError}
-            typeId={typeId}
-            hasFilters={filters && filters.length > 0}
-            showCode={showCode}
-          />
-        )}
-        {showMap && (
-          <EntitiesMap
-            viewOptions={viewOptions}
-            entities={entities}
-            taxonomies={this.props.taxonomies}
-            actortypes={this.props.actortypes}
-            actiontypes={this.props.actiontypes}
-            targettypes={this.props.targettypes}
-            connections={this.props.connections}
-            connectedTaxonomies={this.props.connectedTaxonomies}
-            locationQuery={locationQuery}
-            config={config}
-            dataReady={dataReady}
-            onEntityClick={(id, path) => this.props.onEntityClick(
-              id, path, viewDomain.get('errors')
-            )}
-            typeId={typeId}
-            hasFilters={filters && filters.length > 0}
-          />
-        )}
-        {hasList && dataReady && config.taxonomies && (
-          <PrintOnly>
-            <EntityListPrintKey
-              entities={entities}
-              taxonomies={this.props.taxonomies}
-              config={config}
-              locationQuery={locationQuery}
-            />
-          </PrintOnly>
-        )}
-        {isManager && (progress !== null && progress < 100) && (
-          <Progress>
-            <ProgressText>
-              <FormattedMessage
-                {...messages.processingUpdates}
-                values={{
-                  processNo: Math.min(success.size + errors.size + 1, sending.size),
-                  totalNo: sending.size,
-                  types:
-                  intl.formatMessage(messages[
-                    `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
-                  ]),
-                }}
-              />
-            </ProgressText>
-            <Loading
-              progress={progress}
-            />
-          </Progress>
-        )}
-        {isManager && (viewDomain.get('errors').size > 0 && progress >= 100) && (
-          <Progress error>
-            <Messages
-              type="error"
-              message={
-                intl.formatMessage(
-                  messages.updatesFailed,
-                  {
-                    errorNo: viewDomain.get('errors').size,
-                    types:
-                    intl.formatMessage(messages[
-                      `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
-                    ]),
-                  },
-                )
-              }
-              onDismiss={this.props.resetProgress}
-              preMessage={false}
-            />
-          </Progress>
-        )}
-        {isManager && (viewDomain.get('errors').size === 0 && progress >= 100) && (
-          <Progress error>
-            <Messages
-              type="success"
-              message={
-                intl.formatMessage(
-                  this.getMessageForType(
-                    progressTypes.size === 1 ? progressTypes.first() : 'save',
-                    viewDomain.get('success').size,
-                  ),
-                  {
-                    successNo: viewDomain.get('success').size,
-                  },
-                )
-              }
-              onDismiss={this.props.resetProgress}
-              autoDismiss={2000}
-            />
-          </Progress>
-        )}
-      </div>
+                  onEntitySelect={(id, checked) => {
+                    // show options when selected and not hidden
+                    if (checked && this.state.visibleEditOptions !== false) {
+                      this.onShowEditOptions();
+                    }
+                    // reset when unchecking last selected item
+                    if (!checked && !this.state.visibleEditOptions && entityIdsSelected.size === 1) {
+                      this.onResetEditOptions();
+                    }
+                    this.props.onEntitySelect(id, checked);
+                  }}
+                  onEntitySelectAll={(ids) => {
+                    // show options when selected and not hidden
+                    if (this.state.visibleEditOptions !== false && ids && ids.length > 0) {
+                      this.onShowEditOptions();
+                    }
+                    // reset when unchecking last selected item
+                    if (!this.state.visibleEditOptions && (!ids || ids.length === 0)) {
+                      this.onResetEditOptions();
+                    }
+                    onEntitySelectAll(ids);
+                  }}
+                  onGroupSelect={this.props.onGroupSelect}
+                  onSubgroupSelect={this.props.onSubgroupSelect}
+                  onSearch={this.props.onSearch}
+                  onPageSelect={this.props.onPageSelect}
+                  onPageItemsSelect={this.props.onPageItemsSelect}
+                  onEntityClick={(id, path) => this.props.onEntityClick(
+                    id, path, viewDomain.get('errors')
+                  )}
+                  onSortBy={this.props.onSortBy}
+                  onSortOrder={this.props.onSortOrder}
+                  onDismissError={this.props.onDismissError}
+                  typeId={typeId}
+                  hasFilters={filters && filters.length > 0}
+                  showCode={showCode}
+                />
+              )}
+              {showMap && (
+                <EntitiesMap
+                  viewOptions={viewOptions}
+                  entities={entities}
+                  taxonomies={this.props.taxonomies}
+                  actortypes={this.props.actortypes}
+                  actiontypes={this.props.actiontypes}
+                  targettypes={this.props.targettypes}
+                  connections={this.props.connections}
+                  connectedTaxonomies={this.props.connectedTaxonomies}
+                  locationQuery={locationQuery}
+                  config={config}
+                  dataReady={dataReady}
+                  onEntityClick={(id, path) => this.props.onEntityClick(
+                    id, path, viewDomain.get('errors')
+                  )}
+                  typeId={typeId}
+                  hasFilters={filters && filters.length > 0}
+                />
+              )}
+              {hasList && dataReady && config.taxonomies && (
+                <PrintOnly>
+                  <EntityListPrintKey
+                    entities={entities}
+                    taxonomies={this.props.taxonomies}
+                    config={config}
+                    locationQuery={locationQuery}
+                  />
+                </PrintOnly>
+              )}
+              {isManager && (progress !== null && progress < 100) && (
+                <Progress>
+                  <ProgressText>
+                    <FormattedMessage
+                      {...messages.processingUpdates}
+                      values={{
+                        processNo: Math.min(success.size + errors.size + 1, sending.size),
+                        totalNo: sending.size,
+                        types:
+                        intl.formatMessage(messages[
+                          `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
+                        ]),
+                      }}
+                    />
+                  </ProgressText>
+                  <Loading
+                    progress={progress}
+                  />
+                </Progress>
+              )}
+              {isManager && (viewDomain.get('errors').size > 0 && progress >= 100) && (
+                <Progress error>
+                  <Messages
+                    type="error"
+                    message={
+                      intl.formatMessage(
+                        messages.updatesFailed,
+                        {
+                          errorNo: viewDomain.get('errors').size,
+                          types:
+                          intl.formatMessage(messages[
+                            `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
+                          ]),
+                        },
+                      )
+                    }
+                    onDismiss={this.props.resetProgress}
+                    preMessage={false}
+                  />
+                </Progress>
+              )}
+              {isManager && (viewDomain.get('errors').size === 0 && progress >= 100) && (
+                <Progress error>
+                  <Messages
+                    type="success"
+                    message={
+                      intl.formatMessage(
+                        this.getMessageForType(
+                          progressTypes.size === 1 ? progressTypes.first() : 'save',
+                          viewDomain.get('success').size,
+                        ),
+                        {
+                          successNo: viewDomain.get('success').size,
+                        },
+                      )
+                    }
+                    onDismiss={this.props.resetProgress}
+                    autoDismiss={2000}
+                  />
+                </Progress>
+              )}
+            </div>
+          );
+        }}
+      </ResponsiveContext.Consumer>
     );
   }
 }

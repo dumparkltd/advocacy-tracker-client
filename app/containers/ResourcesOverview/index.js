@@ -5,7 +5,7 @@ import { compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { Map } from 'immutable';
-import { Box } from 'grommet';
+import { Box, ResponsiveContext } from 'grommet';
 
 import styled from 'styled-components';
 
@@ -41,6 +41,7 @@ export function ResourcesOverview({
     // kick off loading of data
     onLoadData();
   }, []);
+  const size = React.useContext(ResponsiveContext);
 
   return (
     <ContainerWrapper hasFooter>
@@ -51,7 +52,7 @@ export function ResourcesOverview({
               <GroupTitle>
                 <FormattedMessage {...appMessages.resourcetypeGroups[key]} />
               </GroupTitle>
-              <Box direction="row" gap="small">
+              <Box direction={size === 'small' ? 'column' : 'row'} gap="small">
                 {RESOURCETYPE_NAVGROUPS[key].types.map((typeId) => {
                   const path = `${ROUTES.RESOURCES}/${typeId}`;
                   const count = types.getIn([typeId, 'count']) ? parseInt(types.getIn([typeId, 'count']), 10) : 0;

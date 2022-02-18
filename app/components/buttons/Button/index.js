@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 const Button = styled.button`
   display: inline-block;
-  padding: 4px 8px;
+  padding: 4px 6px;
   cursor: ${(props) => props.disabled ? 'default' : 'pointer'};
   font-size: ${(props) => props.small ? 0.8 : 0.9}em;
   text-align: center;
