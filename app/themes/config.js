@@ -287,11 +287,12 @@ export const ACTOR_FIELDS = {
         ACTORTYPES.ORG,
         ACTORTYPES.GROUP,
         ACTORTYPES.REGION,
+        ACTORTYPES.CONTACT,
       ],
-      type: 'text',
-    },
-    name: {
-      required: [ACTORTYPES.CONTACT],
+      display: {
+        field: 'name',
+        types: [ACTORTYPES.CONTACT],
+      },
       type: 'text',
     },
     description: {

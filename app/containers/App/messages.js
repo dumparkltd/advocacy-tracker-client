@@ -603,7 +603,7 @@ export default defineMessages({
     },
     title: {
       id: 'app.containers.App.importFields.title',
-      defaultMessage: 'Title',
+      defaultMessage: 'Title/Name',
     },
     description: {
       id: 'app.containers.App.importFields.description',
