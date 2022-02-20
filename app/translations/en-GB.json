@@ -120,7 +120,7 @@
   "app.components.Messages.preBold": "Oh no! ",
   "app.components.Messages.preAdditional": "Something went wrong:",
   "app.components.TagSearch.searchPlaceholderEntities": "Filter items by id, title, code or description",
-  "app.components.TagSearch.searchPlaceholderMultiSelect": "Filter options by title or code",
+  "app.components.TagSearch.searchPlaceholderMultiSelect": "Filter options by title, code or description",
   "app.components.TagSearch.labelPrintFilters": "Filters:",
   "app.components.TagSearch.labelPrintKeywords": "Keyword search:",
   "app.components.EntityListSearch.searchPlaceholderEntities": "Filter items by id, title, code or description",

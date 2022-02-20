@@ -64,11 +64,12 @@ export const filterOptionsByKeywords = (options, query) => { // filter checkboxe
   if (query) {
     try {
       const regex = new RegExp(regExMultipleWords(query), 'i');
+
       return options.filter((option) => regex.test(prepareOptionSearchTarget(
         option,
         (option.get('searchFields') && option.get('searchFields').size > 0)
           ? option.get('searchFields').toArray()
-          : ['id', 'code', 'label', 'search', 'reference'],
+          : ['id', 'code', 'label', 'search', 'reference', 'description'],
         query.length
       )));
     } catch (e) {
