@@ -21,6 +21,7 @@ export const DEPENDENCIES = [
   API.CATEGORIES,
   API.USERS,
   API.USER_ROLES,
+  API.USER_ACTORS,
   API.MEMBERSHIPS,
 ];
 
@@ -131,6 +132,18 @@ export const CONFIG = {
       key: 'memberof_id',
       ownKey: 'member_id',
       groupByType: true,
+    },
+    users: {
+      query: 'users',
+      type: 'actor-users',
+      search: true,
+      message: 'entities.users.plural',
+      path: API.USERS,
+      entityType: 'users',
+      clientPath: ROUTES.USER,
+      connectPath: API.USER_ACTORS, // filter by actor connection
+      key: 'user_id',
+      ownKey: 'actor_id',
     },
   },
   attributes: { // filter by attribute value

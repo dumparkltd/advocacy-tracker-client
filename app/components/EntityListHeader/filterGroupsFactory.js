@@ -3,7 +3,7 @@ import { sortEntities } from 'utils/sort';
 import { startsWith } from 'utils/string';
 import appMessages from 'containers/App/messages';
 
-import { INDICATOR_ACTIONTYPES, USER_ACTIONTYPES } from 'themes/config';
+import { INDICATOR_ACTIONTYPES, USER_ACTIONTYPES, USER_ACTORTYPES } from 'themes/config';
 
 // figure out filter groups for filter panel
 export const makeFilterGroups = ({
@@ -62,6 +62,9 @@ export const makeFilterGroups = ({
         if (option.type === 'action-users') {
           validType = USER_ACTIONTYPES.indexOf(typeId) > -1;
         }
+        if (option.type === 'actor-users') {
+          validType = USER_ACTORTYPES.indexOf(typeId) > -1;
+        }
         if (validType) {
           filterGroups[connectionKey] = {
             id: connectionKey, // filterGroupId
@@ -110,6 +113,12 @@ export const makeFilterGroups = ({
         } else if (option.type === 'indicator-actions') {
           types = actiontypes;
           typeAbout = 'actiontypes_about';
+        } else if (option.type === 'user-actions') {
+          types = actiontypes;
+          typeAbout = 'actiontypes_about';
+        } else if (option.type === 'user-actors') {
+          types = actortypes;
+          typeAbout = 'actortypes_about';
         }
         filterGroups[connectionKey] = {
           id: connectionKey, // filterGroupId

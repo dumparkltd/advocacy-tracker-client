@@ -114,6 +114,18 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-users',
       defaultMessage: 'By user',
     },
+    'connections-actor-users': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-actor-users',
+      defaultMessage: 'By user',
+    },
+    'connections-user-actions': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-user-actions',
+      defaultMessage: 'By activity',
+    },
+    'connections-user-actors': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-user-actors',
+      defaultMessage: 'By actor',
+    },
     connectedTaxonomies: {
       id: 'app.components.EntityListHeader.filterGroupLabel.connectedTaxonomies',
       defaultMessage: 'By connected category',
@@ -166,6 +178,10 @@ export default defineMessages({
     },
     'connections-action-users': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-action-users',
+      defaultMessage: 'Update users',
+    },
+    'connections-actor-users': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-actor-users',
       defaultMessage: 'Update users',
     },
   },

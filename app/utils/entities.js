@@ -169,6 +169,8 @@ export const filterEntitiesByConnection = (
   // consider replacing with .every()
   (entity) => asList(query).every(
     (queryValue) => {
+      console.log(entity && entity.toJS());
+      console.log(queryValue);
       const value = queryValue.indexOf(':') > -1 ? queryValue.split(':')[1] : queryValue;
       return entity.get(path)
         && testEntityEntityAssociation(entity, path, value);

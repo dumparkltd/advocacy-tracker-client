@@ -186,6 +186,7 @@ const makeGroupedConnectionEditOptions = (
           || type === 'action-actors' // active actors
           || type === 'member-associations' // associations
           || type === 'association-members' // members
+          || type === 'actor-users'
         ) {
           return qe(typeId, c.getIn(['attributes', 'actortype_id']));
         }

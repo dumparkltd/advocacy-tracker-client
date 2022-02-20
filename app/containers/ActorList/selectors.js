@@ -22,6 +22,9 @@ import {
   selectActionTaxonomies,
   selectMemberQuery,
   selectAssociationQuery,
+  selectUserQuery,
+  selectUserActorsGroupedByActor,
+  selectUsers,
 } from 'containers/App/selectors';
 
 import {
@@ -45,6 +48,7 @@ export const selectConnections = createSelector(
   selectActors,
   selectActionCategoriesGroupedByAction,
   selectActorCategoriesGroupedByActor,
+  selectUsers,
   selectCategories,
   (
     ready,
@@ -52,6 +56,7 @@ export const selectConnections = createSelector(
     actors,
     actionAssociationsGrouped,
     actorAssociationsGrouped,
+    users,
     categories,
   ) => {
     if (ready) {
@@ -69,6 +74,9 @@ export const selectConnections = createSelector(
           actorAssociationsGrouped,
           categories,
         )
+      ).set(
+        API.USERS,
+        users,
       );
     }
     return new Map();
@@ -194,6 +202,7 @@ const selectActorsWithActions = createSelector(
   selectActionActorsGroupedByActor, // as targets
   selectMembershipsGroupedByAssociation,
   selectMembershipsGroupedByMember,
+  selectUserActorsGroupedByActor,
   (
     ready,
     actors,
@@ -202,6 +211,7 @@ const selectActorsWithActions = createSelector(
     actionsAsTargetGrouped,
     memberAssociationsGrouped,
     associationAssociationsGrouped,
+    userAssociationsGrouped,
   ) => {
     if (ready) {
       return actors.map(
@@ -241,6 +251,7 @@ const selectActorsWithActions = createSelector(
             return memo;
           }, Map());
           const targetActionsAsMemberByType = targetActionsAsMember && actionsByType(targetActionsAsMember, connections.get(API.ACTIONS));
+          const actorUsers = userAssociationsGrouped.get(parseInt(actor.get('id'), 10));
           return actor
             .set('actions', actorActions)
             .set('actionsByType', actorActionsByType)
@@ -253,7 +264,8 @@ const selectActorsWithActions = createSelector(
             .set('members', actorMembers)
             .set('membersByType', actorMembersByType)
             .set('associations', actorAssociations)
-            .set('associationsByType', actorAssociationsByType);
+            .set('associationsByType', actorAssociationsByType)
+            .set('users', actorUsers);
         }
       );
     }
@@ -314,8 +326,15 @@ const selectActorsByAssociations = createSelector(
     ? filterEntitiesByConnection(entities, query, 'associations')
     : entities
 );
-const selectActorsByCategories = createSelector(
+const selectActorsByUsers = createSelector(
   selectActorsByAssociations,
+  selectUserQuery,
+  (entities, query) => query
+    ? filterEntitiesByConnection(entities, query, 'users')
+    : entities
+);
+const selectActorsByCategories = createSelector(
+  selectActorsByUsers,
   selectCategoryQuery,
   (entities, query) => query
     ? filterEntitiesByCategories(entities, query)
