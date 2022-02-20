@@ -110,6 +110,10 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-indicator-actions',
       defaultMessage: 'By activity',
     },
+    'connections-action-users': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-users',
+      defaultMessage: 'By user',
+    },
     connectedTaxonomies: {
       id: 'app.components.EntityListHeader.filterGroupLabel.connectedTaxonomies',
       defaultMessage: 'By connected category',
@@ -159,6 +163,10 @@ export default defineMessages({
     'connections-indicator-actions': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-indicator-actions',
       defaultMessage: 'Update activities',
+    },
+    'connections-action-users': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-action-users',
+      defaultMessage: 'Update users',
     },
   },
   filterFormTitlePrefix: {
