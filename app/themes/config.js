@@ -286,7 +286,7 @@ export const ACTOR_FIELDS = {
         ACTORTYPES.COUNTRY,
         ACTORTYPES.ORG,
         ACTORTYPES.GROUP,
-        ACTORTYPES.REGION,
+        ACTORTYPES.REG,
         ACTORTYPES.CONTACT,
       ],
       display: {
@@ -300,7 +300,7 @@ export const ACTOR_FIELDS = {
         ACTORTYPES.COUNTRY,
         ACTORTYPES.ORG,
         ACTORTYPES.GROUP,
-        ACTORTYPES.REGION,
+        ACTORTYPES.REG,
         ACTORTYPES.CONTACT,
       ],
       type: 'markdown',
