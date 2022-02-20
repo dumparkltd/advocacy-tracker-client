@@ -18,7 +18,7 @@ export const ENDPOINTS = {
   API: (
     NODE_ENV === 'production' && !IS_DEV
       ? 'https://advocacy-tracker-api.herokuapp.com'
-      : 'https://advocacy-tracker-api.herokuapp.com'
+      : 'https://advocacy-tracker-test.herokuapp.com'
   ), // server API endpoint
   SIGN_IN: 'auth/sign_in',
   SIGN_OUT: 'auth/sign_out',
