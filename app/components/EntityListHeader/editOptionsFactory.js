@@ -42,6 +42,7 @@ export const makeActiveEditOptions = ({
         contextIntl,
         activeEditOption.group,
       );
+    case 'users':
     case 'indicators':
       return makeConnectionEditOptions(
         entities,
@@ -173,6 +174,7 @@ const makeGroupedConnectionEditOptions = (
           || type === 'actor-actions'
           || type === 'resource-actions'
           || type === 'indicator-actions'
+          || type === 'action-users'
         ) {
           return qe(typeId, c.getIn(['attributes', 'measuretype_id']));
         }

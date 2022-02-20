@@ -322,6 +322,10 @@ export const selectResourceQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('resources')
 );
+export const selectUserQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('users')
+);
 export const selectSearchQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('search')

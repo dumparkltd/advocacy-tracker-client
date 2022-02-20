@@ -2,7 +2,7 @@ import { reduce } from 'lodash/collection';
 import { startsWith } from 'utils/string';
 
 import { qe } from 'utils/quasi-equals';
-import { API, INDICATOR_ACTIONTYPES } from 'themes/config';
+import { API, INDICATOR_ACTIONTYPES, USER_ACTIONTYPES } from 'themes/config';
 
 export const makeEditGroups = ({
   config,
@@ -75,6 +75,9 @@ export const makeEditGroups = ({
         if (option.entityType === 'indicators') {
           validType = INDICATOR_ACTIONTYPES.indexOf(typeId) > -1;
         }
+        if (option.type === 'action-users') {
+          validType = USER_ACTIONTYPES.indexOf(typeId) > -1;
+        }
         if (validType) {
           editGroups[connectionKey] = {
             id: connectionKey, // filterGroupId
@@ -126,6 +129,9 @@ export const makeEditGroups = ({
           types = resourcetypes;
           typeAttribute_id = 'resourcetype_id';
         } else if (option.type === 'indicator-actions') {
+          types = actiontypes;
+          typeAttribute_id = 'measuretype_id';
+        } else if (option.type === 'action-users') {
           types = actiontypes;
           typeAttribute_id = 'measuretype_id';
         }

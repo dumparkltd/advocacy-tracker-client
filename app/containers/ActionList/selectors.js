@@ -28,6 +28,9 @@ import {
   selectActionIndicatorsGroupedByAction,
   selectResources,
   selectIndicators,
+  selectUsers,
+  selectUserActionsGroupedByAction,
+  selectUserQuery,
 } from 'containers/App/selectors';
 
 import {
@@ -55,8 +58,19 @@ export const selectConnections = createSelector(
   selectActionCategoriesGroupedByAction,
   selectResources,
   selectIndicators,
+  selectUsers,
   selectCategories,
-  (ready, actors, actorAssociationsGrouped, actions, actionAssociationsGrouped, resources, indicators, categories) => {
+  (
+    ready,
+    actors,
+    actorAssociationsGrouped,
+    actions,
+    actionAssociationsGrouped,
+    resources,
+    indicators,
+    users,
+    categories,
+  ) => {
     if (ready) {
       return new Map()
         .set(
@@ -72,6 +86,9 @@ export const selectConnections = createSelector(
         ).set(
           API.INDICATORS,
           indicators,
+        ).set(
+          API.USERS,
+          users,
         ).set(
           // potential parents
           API.ACTIONS,
@@ -186,6 +203,7 @@ const selectActionsWithConnections = createSelector(
   selectActionActorsMembersGroupedByAction,
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectUserActionsGroupedByAction,
   (
     ready,
     entities,
@@ -196,6 +214,7 @@ const selectActionsWithConnections = createSelector(
     targetMemberAssociationsGrouped,
     resourceAssociationsGrouped,
     indicatorAssociationsGrouped,
+    userAssociationsGrouped,
   ) => {
     if (ready && (connections.get(API.ACTORS) || connections.get(API.RESOURCES))) {
       return entities.map(
@@ -285,6 +304,7 @@ const selectActionsWithConnections = createSelector(
           // console.log(entityActorsByActortype && entityActorsByActortype.toJS());
           // currently requires both for filtering & display
           const entityIndicators = indicatorAssociationsGrouped.get(parseInt(entity.get('id'), 10));
+          const entityUsers = userAssociationsGrouped.get(parseInt(entity.get('id'), 10));
           return entity
             .set('actors', entityActors)
             .set('actorsByType', entityActorsByActortype)
@@ -295,6 +315,7 @@ const selectActionsWithConnections = createSelector(
             .set('targetsMembers', entityTargetsMembers)
             .set('targetsMembersByType', entityTargetsMembersByActortype)
             .set('indicators', entityIndicators)
+            .set('users', entityUsers)
             .set('resources', entityResources)
             .set('resourcesByType', entityResourcesByResourcetype);
         }
@@ -326,8 +347,15 @@ const selectActionsByTargets = createSelector(
     ? filterEntitiesByConnection(entities, query, 'targets')
     : entities
 );
-const selectActionsByResources = createSelector(
+const selectActionsByUsers = createSelector(
   selectActionsByTargets,
+  selectUserQuery,
+  (entities, query) => query
+    ? filterEntitiesByConnection(entities, query, 'users')
+    : entities
+);
+const selectActionsByResources = createSelector(
+  selectActionsByUsers,
   selectResourceQuery,
   (entities, query) => query
     ? filterEntitiesByConnection(entities, query, 'resources')
