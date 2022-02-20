@@ -20,6 +20,8 @@ import {
   selectReadyForAuthCheck,
   selectUserConnections,
   selectUserTaxonomies,
+  selectActiontypesForUsers,
+  selectActortypesForUsers,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -48,12 +50,11 @@ export class UserList extends React.PureComponent { // eslint-disable-line react
 
   render() {
     const { intl } = this.context;
-    const { dataReady } = this.props;
+    const { dataReady, actortypes, actiontypes } = this.props;
     const headerOptions = {
       supTitle: intl.formatMessage(messages.pageTitle),
       icon: 'users',
     };
-
     return (
       <div>
         <Helmet
@@ -69,13 +70,14 @@ export class UserList extends React.PureComponent { // eslint-disable-line react
           config={CONFIG}
           header={headerOptions}
           dataReady={dataReady}
-          includeHeader={false}
           canEdit={false}
           entityTitle={{
             single: intl.formatMessage(appMessages.entities.users.single),
             plural: intl.formatMessage(appMessages.entities.users.plural),
           }}
           locationQuery={fromJS(this.props.location.query)}
+          actiontypes={actiontypes}
+          actortypes={actortypes}
         />
       </div>
     );
@@ -91,6 +93,8 @@ UserList.propTypes = {
   taxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   location: PropTypes.object,
+  actiontypes: PropTypes.instanceOf(Map),
+  actortypes: PropTypes.instanceOf(Map),
 };
 
 UserList.contextTypes = {
@@ -103,6 +107,8 @@ const mapStateToProps = (state, props) => ({
   entities: selectUsers(state, fromJS(props.location.query)),
   taxonomies: selectUserTaxonomies(state),
   connections: selectUserConnections(state),
+  actiontypes: selectActiontypesForUsers(state),
+  actortypes: selectActortypesForUsers(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

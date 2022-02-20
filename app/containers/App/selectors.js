@@ -25,6 +25,7 @@ import {
   ACTIONTYPE_RESOURCETYPES,
   INDICATOR_ACTIONTYPES,
   USER_ACTIONTYPES,
+  USER_ACTORTYPES,
   MEMBERSHIPS,
 } from 'themes/config';
 
@@ -517,6 +518,15 @@ export const selectActiontypesForUsers = createSelector(
     if (!actiontypes) return null;
     return actiontypes.filter(
       (type) => USER_ACTIONTYPES.indexOf(type.get('id')) > -1
+    );
+  }
+);
+export const selectActortypesForUsers = createSelector(
+  selectActiontypes,
+  (actiontypes) => {
+    if (!actiontypes) return null;
+    return actiontypes.filter(
+      (type) => USER_ACTORTYPES.indexOf(type.get('id')) > -1
     );
   }
 );

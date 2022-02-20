@@ -118,6 +118,14 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-actor-users',
       defaultMessage: 'By user',
     },
+    'connections-user-actions': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-user-actions',
+      defaultMessage: 'By activity',
+    },
+    'connections-user-actors': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-user-actors',
+      defaultMessage: 'By actor',
+    },
     connectedTaxonomies: {
       id: 'app.components.EntityListHeader.filterGroupLabel.connectedTaxonomies',
       defaultMessage: 'By connected category',

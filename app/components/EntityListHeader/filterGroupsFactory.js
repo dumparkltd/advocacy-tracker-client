@@ -113,6 +113,12 @@ export const makeFilterGroups = ({
         } else if (option.type === 'indicator-actions') {
           types = actiontypes;
           typeAbout = 'actiontypes_about';
+        } else if (option.type === 'user-actions') {
+          types = actiontypes;
+          typeAbout = 'actiontypes_about';
+        } else if (option.type === 'user-actors') {
+          types = actortypes;
+          typeAbout = 'actortypes_about';
         }
         filterGroups[connectionKey] = {
           id: connectionKey, // filterGroupId
