@@ -117,8 +117,6 @@ export const CONFIG = {
       key: 'member_id',
       ownKey: 'memberof_id',
       groupByType: true,
-      typeFilter: 'has_members',
-      typeFilterPass: 'reverse',
     },
     associations: { // filter by associated entity
       query: 'by-association',
@@ -133,7 +131,6 @@ export const CONFIG = {
       key: 'memberof_id',
       ownKey: 'member_id',
       groupByType: true,
-      typeFilter: 'has_members',
     },
   },
   attributes: { // filter by attribute value

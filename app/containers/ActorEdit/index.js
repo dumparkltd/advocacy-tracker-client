@@ -658,7 +658,7 @@ function mapDispatchToProps(dispatch, props) {
       }
       if (associationsByActortype) {
         saveData = saveData.set(
-          'memberships',
+          'associations',
           associationsByActortype
             .map((associations, typeid) => getConnectionUpdatesFromFormData({
               formData,

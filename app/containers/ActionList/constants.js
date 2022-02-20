@@ -143,21 +143,6 @@ export const CONFIG = {
       groupByType: true,
       listItemHide: true,
     },
-    // filter by associated parent
-    parents: {
-      query: 'parent',
-      type: 'action-parents',
-      search: true,
-      message: 'attributes.parent_id',
-      path: API.ACTIONS,
-      entityType: 'actions',
-      entityTypeAs: 'parent',
-      clientPath: ROUTES.ACTION,
-      attribute: 'parent_id',
-      typeFilter: 'has_parent',
-      groupByType: true,
-      listItemHide: true,
-    },
   },
   attributes: { // filter by attribute value
     options: [

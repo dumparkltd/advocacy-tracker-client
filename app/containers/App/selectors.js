@@ -25,6 +25,7 @@ import {
   ACTIONTYPE_RESOURCETYPES,
   INDICATOR_ACTIONTYPES,
   USER_ACTIONTYPES,
+  MEMBERSHIPS,
 } from 'themes/config';
 
 import {
@@ -544,12 +545,13 @@ export const selectMembertypesForActortype = createSelector(
   (state, { type }) => type,
   selectActortypes,
   (typeId, actortypes) => {
-    const actortype = actortypes && actortypes.get(typeId);
-    if (!actortype || !actortype.getIn(['attributes', 'has_members'])) {
-      return null;
-    }
+    if (!actortypes) return null;
+    const validActortypeIds = Object.keys(MEMBERSHIPS).filter((actortypeId) => {
+      const actiontypeIds = MEMBERSHIPS[actortypeId];
+      return actiontypeIds && actiontypeIds.indexOf(typeId) > -1;
+    });
     return actortypes.filter(
-      (type) => !type.getIn(['attributes', 'has_members'])
+      (type) => validActortypeIds && validActortypeIds.indexOf(type.get('id')) > -1
     );
   }
 );
@@ -557,12 +559,10 @@ export const selectAssociationtypesForActortype = createSelector(
   (state, { type }) => type,
   selectActortypes,
   (typeId, actortypes) => {
-    const actortype = actortypes && actortypes.get(typeId);
-    if (!actortype || actortype.getIn(['attributes', 'has_members'])) {
-      return null;
-    }
+    if (!actortypes) return null;
+    const validActortypeIds = MEMBERSHIPS[typeId];
     return actortypes.filter(
-      (type) => type.getIn(['attributes', 'has_members'])
+      (type) => validActortypeIds && validActortypeIds.indexOf(type.get('id')) > -1
     );
   }
 );

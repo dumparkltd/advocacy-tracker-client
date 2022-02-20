@@ -4,6 +4,7 @@ import {
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
   USER_ACTORTYPES,
+  MEMBERSHIPS,
 } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
@@ -180,14 +181,17 @@ export const selectMembersByActortype = createSelector(
   selectActortypes,
   (ready, viewActor, actors, associations, actortypes) => {
     if (!viewActor || !ready) return null;
-    const actortypeId = viewActor.getIn(['attributes', 'actortype_id']).toString();
-    const viewActortype = actortypes.get(actortypeId);
-    if (!viewActortype.getIn(['attributes', 'has_members'])) {
-      // console.log('no members for actortype', actortypeId)
+    const viewActortypeId = viewActor.getIn(['attributes', 'actortype_id']).toString();
+    const validActortypeIds = Object.keys(MEMBERSHIPS).filter((actortypeId) => {
+      const actiontypeIds = MEMBERSHIPS[actortypeId];
+      return actiontypeIds && actiontypeIds.indexOf(viewActortypeId) > -1;
+    });
+    if (!validActortypeIds || validActortypeIds.length === 0) {
       return null;
     }
     return actortypes.filter(
-      (type) => !type.getIn(['attributes', 'has_members'])
+      (type) => validActortypeIds
+        && validActortypeIds.indexOf(type.get('id')) > -1
     ).map((type) => {
       const filtered = actors.filter(
         (actor) => qe(
@@ -213,13 +217,14 @@ export const selectAssociationsByActortype = createSelector(
   (ready, viewActor, actors, joins, actortypes) => {
     if (!viewActor || !ready) return null;
     const actortypeId = viewActor.getIn(['attributes', 'actortype_id']).toString();
-    const viewActortype = actortypes.get(actortypeId);
-    if (viewActortype.getIn(['attributes', 'has_members'])) {
-      // console.log('no memberships for actortype', actortypeId)
+
+    const validActortypeIds = MEMBERSHIPS[actortypeId];
+    if (!validActortypeIds || validActortypeIds.length === 0) {
       return null;
     }
     return actortypes.filter(
-      (type) => type.getIn(['attributes', 'has_members'])
+      (type) => validActortypeIds
+        && validActortypeIds.indexOf(type.get('id')) > -1
     ).map((type) => {
       const filtered = actors.filter(
         (actor) => qe(
