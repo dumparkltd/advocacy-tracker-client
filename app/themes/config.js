@@ -12,7 +12,7 @@
 // General ********************
 export const NODE_ENV = sessionStorage.NODE_ENV || 'production';
 
-const IS_DEV = true;
+const IS_DEV = false;
 
 export const ENDPOINTS = {
   API: (
