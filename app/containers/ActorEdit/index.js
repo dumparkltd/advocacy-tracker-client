@@ -694,7 +694,7 @@ function mapDispatchToProps(dispatch, props) {
           })
         );
       }
-      // console.log(saveData.toJS());
+      console.log(saveData.toJS());
       dispatch(save(saveData.toJS()));
     },
     handleCancel: () => {
