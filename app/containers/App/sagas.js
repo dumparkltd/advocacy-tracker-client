@@ -402,6 +402,16 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
           },
         });
       }
+      // update associations connections
+      // inverse of membership
+      if (data.entity.associations) {
+        yield call(saveConnectionsSaga, {
+          data: {
+            path: API.MEMBERSHIPS,
+            updates: data.entity.associations,
+          },
+        });
+      }
       // update action-category connections
       if (data.entity.actionCategories) {
         yield call(saveConnectionsSaga, {
@@ -579,6 +589,16 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
             path: API.MEMBERSHIPS,
             updates: data.entity.memberships,
             keyPair: ['member_id', 'memberof_id'],
+          });
+        }
+        // update associations connections
+        // inverse of memberships
+        if (data.entity.associations) {
+          yield call(createConnectionsSaga, {
+            entityId: entityCreated.data.id,
+            path: API.MEMBERSHIPS,
+            updates: data.entity.associations,
+            keyPair: ['memberof_id', 'member_id'],
           });
         }
         // update action-category connections
