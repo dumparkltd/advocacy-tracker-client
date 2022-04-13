@@ -1,3 +1,7 @@
+Shortcut to project view of issues: [advocacy-tracker-client/projects/1](https://github.com/dumparkltd/advocacy-tracker-client/projects/1)
+
+---
+
 ![IMPACT OSS](header.png?raw=true "IMPACT OSS")
 
 # WWF Advocacy Tracker client application based on Marine:DeFRAG & IMPACT OSS
