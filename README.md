@@ -1,4 +1,4 @@
-Shortcut to project view of issues: [advocacy-tracker-client/projects/1](https://github.com/dumparkltd/advocacy-tracker-client/projects/1)
+**Shortcut to project view of issues: [advocacy-tracker-client/projects/1](https://github.com/dumparkltd/advocacy-tracker-client/projects/1)**
 
 ---
 
