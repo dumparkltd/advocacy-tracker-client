@@ -40,7 +40,7 @@ const ChangeHint = styled.div`
   padding: 0.5em 1em;
   box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2);
   text-align: right;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     bottom: ${(props) => props.hasFooter ? '50px' : '0px'};
   }
 `;
@@ -58,7 +58,7 @@ const ControlMain = styled.div`
   overflow-y: auto;
   padding:0;
   padding-bottom: ${(props) => props.hasChangeNote ? '50px' : '0px'};
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     top: 60px;
   }
 `;
@@ -69,7 +69,7 @@ const ControlFooter = styled.div`
   right: 0;
   background-color: ${palette('background', 1)};
   box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2);
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     height: 50px;
   }
 `;
@@ -77,7 +77,7 @@ const ControlFooter = styled.div`
 const Search = styled.div`
   padding: 0.75em;
   background-color: ${palette('background', 1)};
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 0.75em 1em;
   }
 `;
@@ -326,6 +326,7 @@ class MultiSelect extends React.Component {
   // TODO intl
   render() {
     let options = this.prepareOptions(this.props, this.state);
+
     const optionsChangedToChecked = options.filter((option) => option.get('changedToChecked'));
     const optionsChangedToUnchecked = options.filter((option) => option.get('changedToUnchecked'));
     const hasChanges = optionsChangedToChecked.size > 0 || optionsChangedToUnchecked.size > 0;

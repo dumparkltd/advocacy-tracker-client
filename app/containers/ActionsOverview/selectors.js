@@ -1,12 +1,11 @@
 import { createSelector } from 'reselect';
-import { API } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
-import { selectActions, selectEntities } from 'containers/App/selectors';
+import { selectActions, selectActiontypes } from 'containers/App/selectors';
 
 
 export const selectActiontypesWithActionCount = createSelector(
   selectActions,
-  (state) => selectEntities(state, API.ACTIONTYPES),
+  selectActiontypes,
   (actions, types) => actions && types && types.map((type) => {
     const typeActions = actions.filter(
       (action) => qe(

@@ -23,10 +23,11 @@ import {
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_RESOURCETYPES,
-  INDICATOR_ACTIONTYPES,
-  USER_ACTIONTYPES,
-  USER_ACTORTYPES,
-  MEMBERSHIPS,
+  DEFAULT_ACTIONTYPE,
+  DEFAULT_ACTORTYPE,
+  FF_ACTIONTYPE,
+  ACTORTYPES_CONFIG,
+  ACTIONTYPES_CONFIG,
 } from 'themes/config';
 
 import {
@@ -242,6 +243,16 @@ export const selectPreviousPathname = createSelector(
   }
 );
 
+export const selectHasBack = createSelector(
+  selectCurrentPathname,
+  selectPreviousPathname,
+  (currentPath, previousPath) => {
+    const isPreviousValid = previousPath.indexOf('/edit') > -1
+      || previousPath.indexOf('/new') > -1;
+    return !isPreviousValid && previousPath && (previousPath !== currentPath);
+  }
+);
+
 export const selectLocation = createSelector(
   getRoute,
   (routeState) => {
@@ -278,6 +289,10 @@ export const selectAttributeQuery = createSelector(
 export const selectWithoutQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('without')
+);
+export const selectAnyQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('any')
 );
 export const selectCategoryQuery = createSelector(
   selectLocationQuery,
@@ -323,10 +338,6 @@ export const selectResourceQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('resources')
 );
-export const selectUserQuery = createSelector(
-  selectLocationQuery,
-  (locationQuery) => locationQuery && locationQuery.get('users')
-);
 export const selectSearchQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('search')
@@ -347,27 +358,39 @@ export const selectSortByQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('sort')
 );
+export const selectPageItemsQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('items')
+);
+export const selectPageNoQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('page')
+);
 
 export const selectActortypeQuery = createSelector(
   selectLocationQuery,
   (query) => (query && query.get('actortype'))
     ? query.get('actortype')
-    : 'all'
+    : DEFAULT_ACTORTYPE
 );
 export const selectActiontypeQuery = createSelector(
   selectLocationQuery,
   (query) => (query && query.get('actiontype'))
     ? query.get('actiontype')
-    : 'all'
+    : DEFAULT_ACTIONTYPE
 );
 
 export const selectViewQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && (locationQuery.get('view') || 'list')
 );
+export const selectSubjectQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && (locationQuery.get('subj'))
+);
 export const selectMapSubjectQuery = createSelector(
   selectLocationQuery,
-  (locationQuery) => locationQuery && (locationQuery.get('ms') || 'actors')
+  (locationQuery) => locationQuery && (locationQuery.get('msubj'))
 );
 export const selectIncludeActorMembers = createSelector(
   selectLocationQuery,
@@ -387,10 +410,19 @@ export const selectIncludeTargetMembers = createSelector(
     return true; // default
   }
 );
+export const selectIncludeMembersForFiltering = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('fm')) {
+      return qe(locationQuery.get('fm'), 1) || locationQuery.get('fm') === 'true';
+    }
+    return true; // default
+  }
+);
 
 // database ////////////////////////////////////////////////////////////////////////
 
-const selectEntitiesAll = (state) => state.getIn(['global', 'entities']);
+export const selectEntitiesAll = (state) => state.getIn(['global', 'entities']);
 
 export const selectEntities = createSelector(
   selectEntitiesAll,
@@ -435,31 +467,37 @@ export const selectResource = createSelector(
   (state, id) => selectEntity(state, { id, path: API.RESOURCES }),
   (entity) => entity
 );
-export const selectIndicators = createSelector(
-  (state) => selectEntities(state, API.INDICATORS),
-  (entities) => sortEntities(entities, 'desc', 'id', null, false)
-);
-export const selectIndicator = createSelector(
-  (state, id) => selectEntity(state, { id, path: API.INDICATOR }),
-  (entity) => entity
-);
-export const selectUsers = createSelector(
-  (state) => selectEntities(state, API.USERS),
-  (entities) => sortEntities(entities, 'asc', 'name', null, false)
-);
-export const selectUser = createSelector(
-  (state, id) => selectEntity(state, { id, path: API.USERS }),
-  (entity) => entity
-);
 // all action types
 export const selectActortypes = createSelector(
   (state) => selectEntities(state, API.ACTORTYPES),
-  (entities) => entities
+  (entities) => entities && entities.sort((a, b) => {
+    const configA = ACTORTYPES_CONFIG[a.get('id')];
+    const configB = ACTORTYPES_CONFIG[b.get('id')];
+    return configA.order < configB.order
+      ? -1
+      : 1;
+  })
 );
 // all action types
 export const selectActiontypes = createSelector(
   (state) => selectEntities(state, API.ACTIONTYPES),
-  (entities) => entities
+  (state, args) => args ? args.includeFacts : false,
+  (entities, includeFacts) => {
+    if (!entities) return null;
+    const sorted = entities.sort((a, b) => {
+      const configA = ACTIONTYPES_CONFIG[a.get('id')];
+      const configB = ACTIONTYPES_CONFIG[b.get('id')];
+      return configA.order < configB.order ? -1 : 1;
+    });
+    return includeFacts
+      ? sorted
+      : sorted.filter((t) => !qe(t.get('id'), FF_ACTIONTYPE));
+  }
+);
+// all action types
+export const selectFactsActiontype = createSelector(
+  (state) => selectEntities(state, API.ACTIONTYPES),
+  (entities) => entities && entities.find((t) => qe(t.get('id'), FF_ACTIONTYPE))
 );
 // all resource types
 export const selectResourcetypes = createSelector(
@@ -503,33 +541,6 @@ export const selectActiontypesForActortype = createSelector(
     );
   }
 );
-export const selectActiontypesForIndicators = createSelector(
-  selectActiontypes,
-  (actiontypes) => {
-    if (!actiontypes) return null;
-    return actiontypes.filter(
-      (type) => INDICATOR_ACTIONTYPES.indexOf(type.get('id')) > -1
-    );
-  }
-);
-export const selectActiontypesForUsers = createSelector(
-  selectActiontypes,
-  (actiontypes) => {
-    if (!actiontypes) return null;
-    return actiontypes.filter(
-      (type) => USER_ACTIONTYPES.indexOf(type.get('id')) > -1
-    );
-  }
-);
-export const selectActortypesForUsers = createSelector(
-  selectActiontypes,
-  (actiontypes) => {
-    if (!actiontypes) return null;
-    return actiontypes.filter(
-      (type) => USER_ACTORTYPES.indexOf(type.get('id')) > -1
-    );
-  }
-);
 export const selectActiontypesForResourcetype = createSelector(
   (state, { type }) => type,
   selectActiontypes,
@@ -559,13 +570,12 @@ export const selectMembertypesForActortype = createSelector(
   (state, { type }) => type,
   selectActortypes,
   (typeId, actortypes) => {
-    if (!actortypes) return null;
-    const validActortypeIds = Object.keys(MEMBERSHIPS).filter((actortypeId) => {
-      const actiontypeIds = MEMBERSHIPS[actortypeId];
-      return actiontypeIds && actiontypeIds.indexOf(typeId) > -1;
-    });
+    const actortype = actortypes && actortypes.get(typeId);
+    if (!actortype || !actortype.getIn(['attributes', 'has_members'])) {
+      return null;
+    }
     return actortypes.filter(
-      (type) => validActortypeIds && validActortypeIds.indexOf(type.get('id')) > -1
+      (type) => !type.getIn(['attributes', 'has_members'])
     );
   }
 );
@@ -573,10 +583,12 @@ export const selectAssociationtypesForActortype = createSelector(
   (state, { type }) => type,
   selectActortypes,
   (typeId, actortypes) => {
-    if (!actortypes) return null;
-    const validActortypeIds = MEMBERSHIPS[typeId];
+    const actortype = actortypes && actortypes.get(typeId);
+    if (!actortype || actortype.getIn(['attributes', 'has_members'])) {
+      return null;
+    }
     return actortypes.filter(
-      (type) => validActortypeIds && validActortypeIds.indexOf(type.get('id')) > -1
+      (type) => type.getIn(['attributes', 'has_members'])
     );
   }
 );
@@ -764,7 +776,7 @@ export const selectEntitiesWhere = createSelector(
 );
 
 // filter entities by attributes, using locationQuery
-const selectEntitiesWhereQuery = createSelector(
+export const selectEntitiesWhereQuery = createSelector(
   selectAttributeQuery,
   (state, { path }) => selectEntities(state, path),
   (query, entities) => query
@@ -790,7 +802,7 @@ export const selectActorsWhere = createSelector(
 );
 
 // filter entities by attributes, using locationQuery
-const selectActorsWhereQuery = createSelector(
+export const selectActorsWhereQuery = createSelector(
   selectAttributeQuery,
   selectActortypeActors, // type should be optional
   (query, entities) => query
@@ -798,13 +810,14 @@ const selectActorsWhereQuery = createSelector(
     : entities
 );
 // filter entities by attributes, using locationQuery
-const selectResourcesWhereQuery = createSelector(
+export const selectResourcesWhereQuery = createSelector(
   selectAttributeQuery,
   selectResourcetypeResources, // type should be optional
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
 );
+
 // TODO: passing of location query likely not needed if selectSearchQuery changed
 export const selectActorsSearchQuery = createSelector(
   selectActorsWhereQuery,
@@ -833,7 +846,7 @@ export const selectActionsWhere = createSelector(
 );
 
 // filter entities by attributes, using locationQuery
-const selectActionsWhereQuery = createSelector(
+export const selectActionsWhereQuery = createSelector(
   selectAttributeQuery,
   selectActiontypeActions, // type should be optional
   (query, entities) => query
@@ -1140,12 +1153,7 @@ export const selectUserTaxonomies = createSelector(
 
 export const selectUserConnections = createSelector(
   (state) => selectEntities(state, API.ROLES),
-  selectActions,
-  selectActors,
-  (roles, actions, actors) => Map()
-    .set('roles', roles)
-    .set(API.ACTIONS, actions)
-    .set(API.ACTORS, actors)
+  (roles) => Map().set('roles', roles)
 );
 
 export const selectActorConnections = createSelector(
@@ -1161,22 +1169,14 @@ export const selectResourceConnections = createSelector(
     .set(API.ACTIONS, actions)
 );
 
-export const selectIndicatorConnections = createSelector(
-  selectActiontypeActions,
-  (actions) => Map()
-    .set(API.ACTIONS, actions)
-);
-
 export const selectActionConnections = createSelector(
   selectActors,
   selectActions,
   selectResources,
-  selectIndicators,
-  (actors, actions, resources, indicators) => Map()
+  (actors, actions, resources) => Map()
     .set(API.ACTORS, actors)
     .set(API.ACTIONS, actions)
     .set(API.RESOURCES, resources)
-    .set(API.INDICATORS, indicators)
 );
 
 // grouped JOIN tables /////////////////////////////////////////////////////////////////
@@ -1204,6 +1204,10 @@ export const selectActorCategoriesGroupedByCategory = createSelector(
     )
 );
 
+export const selectActorActions = createSelector(
+  (state) => selectEntities(state, API.ACTOR_ACTIONS),
+  (entities) => entities,
+);
 export const selectActorActionsGroupedByActor = createSelector(
   (state) => selectEntities(state, API.ACTOR_ACTIONS),
   (entities) => entities
@@ -1224,6 +1228,24 @@ export const selectActorActionsGroupedByAction = createSelector(
       (group) => group.map(
         (entity) => entity.getIn(['attributes', 'actor_id'])
       )
+    ),
+);
+export const selectActorActionsGroupedByActionAttributes = createSelector(
+  (state) => selectEntities(state, API.ACTOR_ACTIONS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'measure_id'])
+    ).map(
+      (group) => group.map((entity) => entity.get('attributes'))
+    ),
+);
+export const selectActorActionsGroupedByActorAttributes = createSelector(
+  (state) => selectEntities(state, API.ACTOR_ACTIONS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'actor_id'])
+    ).map(
+      (group) => group.map((entity) => entity.get('attributes'))
     ),
 );
 
@@ -1260,73 +1282,6 @@ export const selectActionResourcesGroupedByAction = createSelector(
       )
     ),
 );
-export const selectActionIndicatorsGroupedByIndicator = createSelector(
-  (state) => selectEntities(state, API.ACTION_INDICATORS),
-  (entities) => entities
-    && entities.groupBy(
-      (entity) => entity.getIn(['attributes', 'indicator_id'])
-    ).map(
-      (group) => group.map(
-        (entity) => entity.getIn(['attributes', 'measure_id'])
-      )
-    ),
-);
-export const selectActionIndicatorsGroupedByAction = createSelector(
-  (state) => selectEntities(state, API.ACTION_INDICATORS),
-  (entities) => entities
-    && entities.groupBy(
-      (entity) => entity.getIn(['attributes', 'measure_id'])
-    ).map(
-      (group) => group.map(
-        (entity) => entity.getIn(['attributes', 'indicator_id'])
-      )
-    ),
-);
-export const selectUserActionsGroupedByAction = createSelector(
-  (state) => selectEntities(state, API.USER_ACTIONS),
-  (entities) => entities
-    && entities.groupBy(
-      (entity) => entity.getIn(['attributes', 'measure_id'])
-    ).map(
-      (group) => group.map(
-        (entity) => entity.getIn(['attributes', 'user_id'])
-      )
-    ),
-);
-export const selectUserActionsGroupedByUser = createSelector(
-  (state) => selectEntities(state, API.USER_ACTIONS),
-  (entities) => entities
-    && entities.groupBy(
-      (entity) => entity.getIn(['attributes', 'user_id'])
-    ).map(
-      (group) => group.map(
-        (entity) => entity.getIn(['attributes', 'measure_id'])
-      )
-    ),
-);
-export const selectUserActorsGroupedByActor = createSelector(
-  (state) => selectEntities(state, API.USER_ACTORS),
-  (entities) => entities
-    && entities.groupBy(
-      (entity) => entity.getIn(['attributes', 'actor_id'])
-    ).map(
-      (group) => group.map(
-        (entity) => entity.getIn(['attributes', 'user_id'])
-      )
-    ),
-);
-export const selectUserActorsGroupedByUser = createSelector(
-  (state) => selectEntities(state, API.USER_ACTORS),
-  (entities) => entities
-    && entities.groupBy(
-      (entity) => entity.getIn(['attributes', 'user_id'])
-    ).map(
-      (group) => group.map(
-        (entity) => entity.getIn(['attributes', 'actor_id'])
-      )
-    ),
-);
-
 export const selectActionActorsGroupedByAction = createSelector(
   (state) => selectEntities(state, API.ACTION_ACTORS),
   (entities) => entities
@@ -1337,46 +1292,6 @@ export const selectActionActorsGroupedByAction = createSelector(
         (entity) => entity.getIn(['attributes', 'actor_id'])
       )
     ),
-);
-export const selectActionActionsGroupedByTopAction = createSelector(
-  (state) => selectEntities(state, API.ACTION_ACTIONS),
-  (connections) => {
-    if (!connections) return null;
-    // measures by measure_id
-    return connections.groupBy(
-      (entity) => entity.getIn(['attributes', 'measure_id'])
-    ).map(
-      (group) => group.map(
-        (entity) => entity.getIn(['attributes', 'other_measure_id'])
-      )
-    );
-    // console.log(leftRight && leftRight.toJS())
-    // // measures by othermeasure_id
-    // const rightLeft = connections.groupBy(
-    //   (entity) => entity.getIn(['attributes', 'other_measure_id'])
-    // ).map(
-    //   (group) => group.map(
-    //     (entity) => entity.getIn(['attributes', 'measure_id'])
-    //   )
-    // );
-    // console.log(rightLeft && rightLeft.toJS())
-    // const combined = leftRight.mergeDeep(rightLeft);
-    // return combined;
-  },
-);
-export const selectActionActionsGroupedBySubAction = createSelector(
-  (state) => selectEntities(state, API.ACTION_ACTIONS),
-  (connections) => {
-    if (!connections) return null;
-    // measures by measure_id
-    return connections.groupBy(
-      (entity) => entity.getIn(['attributes', 'other_measure_id'])
-    ).map(
-      (group) => group.map(
-        (entity) => entity.getIn(['attributes', 'measure_id'])
-      )
-    );
-  },
 );
 export const selectMembershipsGroupedByMember = createSelector(
   (state) => selectEntities(state, API.MEMBERSHIPS),
@@ -1414,9 +1329,33 @@ export const selectActorActionsMembersGroupedByAction = createSelector(
     }, Map())
   )
 );
+export const selectActorActionsAssociationsGroupedByAction = createSelector(
+  selectActorActionsGroupedByAction,
+  selectMembershipsGroupedByMember,
+  (entities, memberships) => entities && memberships && entities.map(
+    (actors) => actors.reduce((memo, actorId) => {
+      if (memberships.get(actorId)) {
+        return memo.concat(memberships.get(actorId));
+      }
+      return memo;
+    }, Map())
+  )
+);
 export const selectActionActorsMembersGroupedByAction = createSelector(
   selectActionActorsGroupedByAction,
   selectMembershipsGroupedByAssociation,
+  (actionActorsByAction, memberships) => actionActorsByAction && memberships && actionActorsByAction.map(
+    (actionActors) => actionActors.reduce((memo, actorId) => {
+      if (memberships.get(actorId)) {
+        return memo.concat(memberships.get(actorId));
+      }
+      return memo;
+    }, Map())
+  )
+);
+export const selectActionActorsAssociationsGroupedByAction = createSelector(
+  selectActionActorsGroupedByAction,
+  selectMembershipsGroupedByMember,
   (actionActorsByAction, memberships) => actionActorsByAction && memberships && actionActorsByAction.map(
     (actionActors) => actionActors.reduce((memo, actorId) => {
       if (memberships.get(actorId)) {

@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import appMessages from 'containers/App/messages';
 
-import { ROUTES, ACTORTYPE_NAVGROUPS } from 'themes/config';
+import { ROUTES, ACTORTYPE_GROUPS } from 'themes/config';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import { selectReady } from 'containers/App/selectors';
 
@@ -21,7 +21,7 @@ import Container from 'components/styled/Container';
 import Content from 'components/styled/Content';
 import CardTeaser from 'components/CardTeaser';
 import Footer from 'containers/Footer';
-
+import { isMaxSize } from 'utils/responsive';
 import { selectActortypesWithActorCount } from './selectors';
 import { DEPENDENCIES } from './constants';
 
@@ -29,6 +29,8 @@ import { DEPENDENCIES } from './constants';
 const Group = styled((p) => <Box margin={{ bottom: 'large', top: 'medium' }} {...p} />)``;
 const GroupTitle = styled.h5`
   font-size: 14px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.global.colors.text.brand};
 `;
 const ViewContainer = styled(Container)`
   min-height: 70vH;
@@ -45,24 +47,24 @@ export function ActorsOverview({
   }, []);
   const size = React.useContext(ResponsiveContext);
   return (
-    <ContainerWrapper>
+    <ContainerWrapper bg>
       <HeaderExplore />
       <ViewContainer>
         <Content>
-          {Object.keys(ACTORTYPE_NAVGROUPS).map((key) => (
+          {Object.keys(ACTORTYPE_GROUPS).map((key) => (
             <Group key={key}>
               <GroupTitle>
                 <FormattedMessage {...appMessages.actortypeGroups[key]} />
               </GroupTitle>
-              <Box direction={size === 'small' ? 'column' : 'row'} gap="small">
-                {ACTORTYPE_NAVGROUPS[key].types.map((typeId) => {
+              <Box direction={isMaxSize(size, 'medium') ? 'column' : 'row'} gap="small">
+                {ACTORTYPE_GROUPS[key].types.map((typeId) => {
                   const path = `${ROUTES.ACTORS}/${typeId}`;
                   const count = types.getIn([typeId, 'count']) ? parseInt(types.getIn([typeId, 'count']), 10) : 0;
-                  const { primary } = ACTORTYPE_NAVGROUPS[key];
+                  const { primary } = ACTORTYPE_GROUPS[key];
                   return (
                     <CardTeaser
                       key={typeId}
-                      basis={primary ? 'full' : '1/4'}
+                      basis={primary ? '1/2' : '1/4'}
                       primary={primary}
                       path={path}
                       onClick={(evt) => {

@@ -1,18 +1,14 @@
 import React from 'react';
 import styled from 'styled-components';
-import { palette } from 'styled-theme';
 import Link from 'containers/Link';
 
-const ListLink = styled(
-  // eslint-disable-line no-unused-vars
-  ({
-    paletteName, pIndex, paletteHover, pIndexHover, ...props
-  }) => <Link {...props} /> // eslint-disable-line jsx-a11y/anchor-has-content
-)`
-  color: ${({ paletteName, pIndex }) => palette(paletteName || 'mainListItem', pIndex || 0)};
+const ListLink = styled((props) => <Link {...props} />)`
+  color: ${({ theme }) => theme.global.colors.text.light};
   display: block;
+  font-size: ${(props) => props.theme.text.small.size};
+  line-height: ${(props) => props.theme.text.small.height};
   &:hover {
-    color: ${({ paletteHover, pIndexHover }) => palette(paletteHover || 'mainListItemHover', pIndexHover || 0)};
+    color: ${({ theme }) => theme.global.colors.text.highlight};
   }
 `;
 

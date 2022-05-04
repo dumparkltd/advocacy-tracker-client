@@ -17,18 +17,22 @@ import {
   selectIsUserManager,
   selectIsUserAnalyst,
   selectActiontypes,
-  selectActortypesForActiontype,
+  selectActortypes,
+  // selectActortypesForActiontype,
   selectTargettypesForActiontype,
   selectResourcetypesForActiontype,
+  selectActiontypeActions,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
 
 import { checkActionAttribute } from 'utils/entities';
+import qe from 'utils/quasi-equals';
 
-import { ROUTES } from 'themes/config';
+import { ROUTES, FF_ACTIONTYPE, ACTIONTYPE_DISCLAIMERS } from 'themes/config';
 
 import EntityList from 'containers/EntityList';
+import ActionsFactsOverview from 'containers/ActionsFactsOverview';
 import { CONFIG, DEPENDENCIES } from './constants';
 import {
   selectConnections,
@@ -52,7 +56,7 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
 
   prepareTypeOptions = (types, activeId) => {
     const { intl } = this.context;
-    return Object.values(types.toJS()).map((type) => ({
+    return types.toList().toJS().map((type) => ({
       value: type.id,
       label: intl.formatMessage(appMessages.actiontypes[type.id]),
       active: activeId === type.id,
@@ -63,6 +67,7 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
     const {
       dataReady,
       entities,
+      allEntities,
       taxonomies,
       connections,
       connectedTaxonomies,
@@ -82,6 +87,13 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
     const headerOptions = {
       supTitle: intl.formatMessage(messages.pageTitle),
       actions: [],
+      info: appMessages.actiontypes_info[typeId]
+        && ACTIONTYPE_DISCLAIMERS.indexOf(typeId) > -1
+        ? {
+          title: 'Please note',
+          content: intl.formatMessage(appMessages.actiontypes_info[typeId]),
+        }
+        : null,
     };
     if (isAnalyst) {
       headerOptions.actions.push({
@@ -100,20 +112,16 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
     }
     if (isManager) {
       headerOptions.actions.push({
-        type: 'text',
-        title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(),
+        title: 'Create new',
+        onClick: () => this.props.handleNew(typeId),
+        icon: 'add',
+        isManager,
       });
       headerOptions.actions.push({
-        type: 'add',
-        title: [
-          intl.formatMessage(appMessages.buttons.add),
-          {
-            title: intl.formatMessage(appMessages.entities[type].single),
-            hiddenSmall: true,
-          },
-        ],
-        onClick: () => this.props.handleNew(typeId),
+        title: intl.formatMessage(appMessages.buttons.import),
+        onClick: () => this.props.handleImport(),
+        icon: 'import',
+        isManager,
       });
     }
 
@@ -125,28 +133,39 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
-        <EntityList
-          entities={entities}
-          taxonomies={taxonomies}
-          connections={connections}
-          connectedTaxonomies={connectedTaxonomies}
-          config={CONFIG}
-          header={headerOptions}
-          dataReady={dataReady}
-          entityTitle={{
-            single: intl.formatMessage(appMessages.entities[type].single),
-            plural: intl.formatMessage(appMessages.entities[type].plural),
-          }}
-          locationQuery={fromJS(location.query)}
-          actortypes={actortypes}
-          actiontypes={actiontypes}
-          targettypes={targettypes}
-          resourcetypes={resourcetypes}
-          typeOptions={this.prepareTypeOptions(actiontypes, typeId)}
-          onSelectType={onSelectType}
-          typeId={typeId}
-          showCode={checkActionAttribute(typeId, 'code', isManager)}
-        />
+        {!qe(typeId, FF_ACTIONTYPE) && (
+          <EntityList
+            entities={entities}
+            allEntityCount={allEntities && allEntities.size}
+            taxonomies={taxonomies}
+            connections={connections}
+            connectedTaxonomies={connectedTaxonomies}
+            config={CONFIG}
+            headerOptions={headerOptions}
+            dataReady={dataReady}
+            entityTitle={{
+              single: intl.formatMessage(appMessages.entities[type].single),
+              plural: intl.formatMessage(appMessages.entities[type].plural),
+            }}
+            locationQuery={fromJS(location.query)}
+            actortypes={actortypes}
+            actiontypes={actiontypes}
+            targettypes={targettypes}
+            resourcetypes={resourcetypes}
+            typeOptions={this.prepareTypeOptions(actiontypes, typeId)}
+            onSelectType={onSelectType}
+            typeId={typeId}
+            showCode={checkActionAttribute(typeId, 'code', isManager)}
+          />
+        )}
+        {qe(typeId, FF_ACTIONTYPE) && (
+          <ActionsFactsOverview
+            entities={entities}
+            connections={connections}
+            dataReady={dataReady}
+            isManager={isManager}
+          />
+        )}
       </div>
     );
   }
@@ -167,6 +186,7 @@ ActionList.propTypes = {
   actiontypes: PropTypes.instanceOf(Map),
   targettypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
+  allEntities: PropTypes.instanceOf(Map),
   location: PropTypes.object,
   isAnalyst: PropTypes.bool,
   params: PropTypes.object,
@@ -185,9 +205,10 @@ const mapStateToProps = (state, props) => ({
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
   actiontypes: selectActiontypes(state),
-  actortypes: selectActortypesForActiontype(state, { type: props.params.id }),
+  actortypes: selectActortypes(state),
   targettypes: selectTargettypesForActiontype(state, { type: props.params.id }),
   resourcetypes: selectResourcetypesForActiontype(state, { type: props.params.id }),
+  allEntities: selectActiontypeActions(state, { type: props.params.id }),
 });
 function mapDispatchToProps(dispatch) {
   return {

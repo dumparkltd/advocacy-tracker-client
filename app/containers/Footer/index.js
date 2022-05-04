@@ -1,172 +1,108 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { FormattedMessage } from 'react-intl';
-import styled, { withTheme } from 'styled-components';
-import { palette } from 'styled-theme';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+import styled from 'styled-components';
+import { Box, Text, ResponsiveContext } from 'grommet';
 
-import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
-
-// import NormalImg from 'components/Img';
+import { version } from 'themes/config';
 import Container from 'components/styled/Container';
+import { isMinSize } from 'utils/responsive';
 
-import { API } from 'themes/config';
-
+import appMessages from 'containers/App/messages';
 import messages from './messages';
 
 const FooterMain = styled.div`
-  background-color: ${palette('footer', 1)};
-  color: ${palette('footer', 0)};
+  background-color: #183863;
+  color: white;
   padding: 0;
-  min-height: 150px;
   @media print {
-    color: ${palette('text', 0)};
+    color: black;
     background: transparent;
   }
 `;
 
 const FooterLink = styled.a`
-  font-weight:bold;
-  color: ${palette('footerLinks', 0)};
+  font-weight: bold;
+  color: white;
   &:hover {
-    color: ${palette('footerLinksHover', 0)};
+    color: white;
+    text-decoration: underline;
   }
 `;
-// const ImpactLink = styled.a`
-//   font-weight:bold;
-//   color: ${palette('footerLinks', 0)};
-//   &:hover {
-//     color: ${palette('footerLinksHover', 0)};
-//     opacity: 0.8;
-//   }
-//   @media print {
-//     color: ${palette('text', 0)};
-//     text-decoration: underline;
-//   }
-// `;
-//
-// const ImpactLogo = styled(NormalImg)`
-//   height: 90px;
-// `;
 
-const TableWrapper = styled.div`
-  min-height: 150px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    margin-left: -15px;
-    margin-right: -15px;
-  }
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
-    margin-left: -35px;
-    margin-right: -35px;
-  }
-`;
-const Table = styled.div`
-  font-size: 0.8em;
-  min-height: 150px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    display: table;
+const Between = styled((p) => <Box plain {...p} />)`
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: ${({ direction }) => direction === 'row' ? '1px' : '100%'};
+  position: relative;
+  &:after {
+    content: "";
+    position: absolute;
+    height: 100%;
     width: 100%;
-    table-layout: fixed;
-    font-size: 0.9em;
-  }
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
-    font-size: 1em;
-  }
-  @media print {
-    font-size: ${(props) => props.theme.sizes.print.default};
+    left: 0;
+    top: 0;
+    border-left: ${({ direction }) => direction === 'row' ? 1 : 0}px solid rgba(0, 0, 0, 1);
+    border-top: ${({ direction }) => direction === 'column' ? 1 : 0}px solid rgba(0, 0, 0, 1);
   }
 `;
+function Footer({
+  intl,
+}) {
+  const size = React.useContext(ResponsiveContext);
+  const appTitle = `${intl.formatMessage(appMessages.app.claim)} - ${intl.formatMessage(appMessages.app.title)}`;
 
-const TableCell = styled.div`
-  padding-top: 0.8em;
-  padding-bottom: 0.8em;
-  border-bottom: 1px solid ${palette('footer', 3)};
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    display: table-cell;
-    vertical-align: top;
-    width: 50%;
-    padding-left: 15px;
-    padding-right: 15px;
-    border-bottom: none;
-    border-right: 1px solid ${palette('footer', 3)};
-    &:last-child {
-      border-right: none;
-    }
-  }
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
-    padding-left: 35px;
-    padding-right: 35px;
-    padding-top: 1.6em;
-    padding-bottom: 1.6em;
-  }
-`;
-// const TableCellSmall = styled(TableCell)`
-//   @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-//     width: 25%;
-//   }
-// `;
-
-class Footer extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
-  }
-
-  render() {
-    const { intl } = this.context;
-    // const { theme } = this.props;
-    return (
-      <FooterMain>
-        <Container noPaddingBottom>
-          <TableWrapper>
-            <Table>
-              <TableCell>
-                <FormattedMessage {...messages.disclaimer} />
-              </TableCell>
-              <TableCell>
-                <FormattedMessage
-                  {...messages.disclaimer2}
-                  values={{
-                    contact1: (
-                      <FooterLink
-                        target="_blank"
-                        href={`mailto:${intl.formatMessage(messages.contact.email)}`}
-                        title={intl.formatMessage(messages.contact.anchor)}
-                      >
-                        <FormattedMessage {...messages.contact.anchor} />
-                      </FooterLink>
-                    ),
-                  }}
-                />
-              </TableCell>
-            </Table>
-          </TableWrapper>
-        </Container>
-      </FooterMain>
-    );
-  }
+  return (
+    <FooterMain>
+      <Container noPaddingBottom>
+        <Box direction={isMinSize(size, 'medium') ? 'row' : 'column'} fill="vertical">
+          <Box pad="medium" fill basis="1/2">
+            <Text size="small">
+              {appTitle}
+            </Text>
+            <Text size="xsmall">
+              {`Version: ${version}`}
+            </Text>
+          </Box>
+          <Between direction={isMinSize(size, 'medium') ? 'row' : 'column'} />
+          <Box pad="medium" fill basis="1/2" gap="small" style={{ minHeight: '150px' }}>
+            <Text size="small">
+              <FormattedMessage {...messages.disclaimer} />
+            </Text>
+            <Text size="small">
+              <FormattedMessage
+                {...messages.disclaimer2}
+                values={{
+                  contact1: (
+                    <FooterLink
+                      target="_blank"
+                      href={`mailto:${intl.formatMessage(messages.contact.email)}`}
+                      title={intl.formatMessage(messages.contact.anchor)}
+                    >
+                      <FormattedMessage {...messages.contact.anchor} />
+                    </FooterLink>
+                  ),
+                  contact2: (
+                    <FooterLink
+                      target="_blank"
+                      href={`mailto:${intl.formatMessage(messages.contact2.email)}`}
+                      title={intl.formatMessage(messages.contact2.anchor)}
+                    >
+                      <FormattedMessage {...messages.contact2.anchor} />
+                    </FooterLink>
+                  ),
+                }}
+              />
+            </Text>
+          </Box>
+        </Box>
+      </Container>
+    </FooterMain>
+  );
 }
 
 Footer.propTypes = {
-  theme: PropTypes.object.isRequired,
-  onPageLink: PropTypes.func.isRequired,
-  loadEntitiesIfNeeded: PropTypes.func.isRequired,
+  intl: intlShape.isRequired,
 };
-
-Footer.contextTypes = {
-  intl: PropTypes.object.isRequired,
-};
-
-function mapDispatchToProps(dispatch) {
-  return {
-    loadEntitiesIfNeeded: () => {
-      loadEntitiesIfNeeded(API.PAGES);
-      // kick off loading
-    },
-    onPageLink: (path) => {
-      dispatch(updatePath(path));
-    },
-  };
-}
 
 // Wrap the component to inject dispatch and state into it
-export default connect(null, mapDispatchToProps)(withTheme(Footer));
+export default injectIntl(Footer);

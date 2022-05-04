@@ -6,8 +6,12 @@ export const DEPENDENCIES = [
   API.TAXONOMIES,
   API.ACTIONS,
   API.ACTORS,
-  API.ACTORTYPE_TAXONOMIES,
-  API.ACTOR_ACTIONS,
+  API.RESOURCES,
+  API.ACTORTYPES,
+  API.ACTIONTYPES,
+  API.RESOURCETYPES,
+  // API.ACTORTYPE_TAXONOMIES,
+  // API.ACTOR_ACTIONS,
 ];
 
 export const UPDATE_QUERY = 'impactoss/Search/UPDATE_QUERY';
@@ -18,108 +22,42 @@ export const SORTORDER_CHANGE = 'impactoss/Search/SORTORDER_CHANGE';
 export const CONFIG = {
   search: [
     {
-      group: 'entities',
+      group: 'actions',
       targets: [
         {
           path: API.ACTIONS,
-          clientPath: ROUTES.ACTIONS,
-          search: ['title', 'description', 'outcome'],
-          sorting: [
-            {
-              attribute: 'id', // proxy for created at
-              type: 'number',
-              order: 'desc',
-              default: true,
-            },
-            {
-              attribute: 'title',
-              type: 'string',
-              order: 'asc',
-            },
-            {
-              attribute: 'updated_at',
-              type: 'date',
-              order: 'desc',
-            },
-          ],
-        },
-        {
-          path: API.ACTORS,
-          clientPath: ROUTES.ACTORS,
-          search: ['title', 'description', 'code'],
+          optionPath: 'actions',
+          typePath: API.ACTIONTYPES,
+          typeAttribute: 'measuretype_id',
+          clientPath: ROUTES.ACTION,
+          search: ['code', 'title', 'description', 'comment', 'url'],
           groupByType: true,
-          sorting: [
-            {
-              attribute: 'id', // proxy for created at
-              type: 'number',
-              order: 'desc',
-              default: true,
-            },
-            {
-              attribute: 'title',
-              type: 'string',
-              order: 'asc',
-            },
-            {
-              attribute: 'updated_at',
-              type: 'date',
-              order: 'desc',
-            },
-          ],
         },
       ],
     },
     {
-      group: 'taxonomies',
-      search: [{
-        attribute: 'title',
-        as: 'taxonomy',
-      }],
-      categorySearch: ['title', 'short_title', 'description', 'url', 'taxonomy'],
-      sorting: [
-        {
-          attribute: 'title',
-          type: 'string',
-          order: 'asc',
-          default: true,
-        },
-        {
-          attribute: 'updated_at',
-          type: 'date',
-          order: 'desc',
-        },
-      ],
-    },
-    {
-      group: 'content',
+      group: 'actors',
       targets: [
         {
-          path: API.PAGES,
-          clientPath: ROUTES.PAGES,
-          search: ['title', 'content', 'menu_title'],
-          sorting: [
-            {
-              attribute: 'order',
-              type: 'number',
-              order: 'asc',
-              default: true,
-            },
-            {
-              attribute: 'title',
-              type: 'string',
-              order: 'asc',
-            },
-            {
-              attribute: 'id', // proxy for created at
-              type: 'number',
-              order: 'desc',
-            },
-            {
-              attribute: 'updated_at',
-              type: 'date',
-              order: 'desc',
-            },
-          ],
+          path: API.ACTORS,
+          typePath: API.ACTORTYPES,
+          typeAttribute: 'actortype_id',
+          clientPath: ROUTES.ACTOR,
+          search: ['code', 'title', 'description', 'activity_summary', 'url'],
+          groupByType: true,
+        },
+      ],
+    },
+    {
+      group: 'resources',
+      targets: [
+        {
+          path: API.RESOURCES,
+          typePath: API.RESOURCETYPES,
+          typeAttribute: 'resourcetype_id',
+          clientPath: ROUTES.RESOURCE,
+          search: ['title', 'description', 'status', 'url'],
+          groupByType: true,
         },
       ],
     },

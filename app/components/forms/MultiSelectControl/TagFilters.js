@@ -14,7 +14,7 @@ const Styled = styled.div`
   background-color: ${palette('light', 0)};
   padding: 0 0.25em 0.5em;
   position: relative;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 0 0.5em 0.5em;
   }
 `;
@@ -22,7 +22,7 @@ const Styled = styled.div`
 // padding: 0.75em 2em;
 const Group = styled(Button)`
   padding: 0 0.5em;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 0 0.5em;
   }
 `;
@@ -40,7 +40,7 @@ const Dropdown = styled.div`
   box-shadow: 0 8px 8px 0 rgba(0,0,0,0.2);
   overflow-y: auto;
   max-height: 200px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     max-height: 320px;
   }
 `;

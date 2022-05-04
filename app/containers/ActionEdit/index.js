@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { actions as formActions } from 'react-redux-form/immutable';
-import { Map, fromJS } from 'immutable';
+import { Map, List, fromJS } from 'immutable';
 
 import {
   entityOptions,
@@ -22,19 +22,17 @@ import {
   getTextareaField,
   renderTaxonomyControl,
   getCodeFormField,
+  getCheckboxField,
   getLinkFormField,
   getFormField,
   getAmountFormField,
   getCategoryUpdatesFromFormData,
   getConnectionUpdatesFromFormData,
   renderActorsByActortypeControl,
-  renderActionsByActiontypeControl,
   renderTargetsByActortypeControl,
   renderResourcesByResourcetypeControl,
-  // renderParentActionControl,
-  // parentActionOptions,
-  renderIndicatorControl,
-  renderUserMultiControl,
+  renderParentActionControl,
+  parentActionOptions,
 } from 'utils/forms';
 
 import {
@@ -47,7 +45,7 @@ import { checkActionAttribute, checkActionRequired } from 'utils/entities';
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
 
-// import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
+import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
 import { USER_ROLES, API, ROUTES } from 'themes/config';
@@ -80,16 +78,12 @@ import appMessages from 'containers/App/messages';
 import {
   selectDomain,
   selectViewEntity,
-  // selectParentOptions,
+  selectParentOptions,
   selectTaxonomyOptions,
   selectActorsByActortype,
   selectTargetsByActortype,
   selectResourcesByResourcetype,
   selectConnectedTaxonomies,
-  selectIndicatorOptions,
-  selectUserOptions,
-  selectTopActionsByActiontype,
-  selectSubActionsByActiontype,
 } from './selectors';
 
 import messages from './messages';
@@ -135,11 +129,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       actorsByActortype,
       targetsByActortype,
       resourcesByResourcetype,
-      topActionsByActiontype,
-      subActionsByActiontype,
-      indicatorOptions,
-      userOptions,
-      // parentOptions,
+      parentOptions,
     } = props;
     // console.log(FORM_INITIAL.get('attributes') && FORM_INITIAL.get('attributes').toJS())
     return viewEntity
@@ -159,22 +149,10 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         associatedResourcesByResourcetype: resourcesByResourcetype
           ? resourcesByResourcetype.map((resources) => entityOptions(resources, true))
           : Map(),
-        associatedTopActionsByActiontype: topActionsByActiontype
-          ? topActionsByActiontype.map((actions) => entityOptions(actions, true))
-          : Map(),
-        associatedSubActionsByActiontype: subActionsByActiontype
-          ? subActionsByActiontype.map((actions) => entityOptions(actions, true))
-          : Map(),
-        associatedIndicators: indicatorOptions
-          ? entityOptions(indicatorOptions, true)
-          : Map(),
-        associatedUsers: userOptions
-          ? entityOptions(userOptions, true)
-          : Map(),
-        // associatedParent: parentActionOptions(
-        //   parentOptions,
-        //   viewEntity.getIn(['attributes', 'parent_id']),
-        // ),
+        associatedParent: parentActionOptions(
+          parentOptions,
+          viewEntity.getIn(['attributes', 'parent_id']),
+        ),
 
       })
       : Map();
@@ -192,12 +170,12 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
               intl.formatMessage(appMessages.actiontypes[typeId]),
               true // large
             ), // required
-            checkActionAttribute(typeId, 'code') && getCodeFormField(
+            checkActionAttribute(typeId, 'code', true) && getCodeFormField(
               intl.formatMessage,
               'code',
               checkActionRequired(typeId, 'code'),
             ),
-            checkActionAttribute(typeId, 'title') && getTitleFormField(
+            checkActionAttribute(typeId, 'title', true) && getTitleFormField(
               intl.formatMessage,
               'title',
               'title',
@@ -233,11 +211,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     actorsByActortype,
     targetsByActortype,
     resourcesByResourcetype,
-    topActionsByActiontype,
-    subActionsByActiontype,
-    indicatorOptions,
-    userOptions,
-    // parentOptions,
+    parentOptions,
     onCreateOption,
   ) => {
     const { intl } = this.context;
@@ -247,12 +221,12 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     groups.push(
       {
         fields: [
-          checkActionAttribute(typeId, 'description') && getMarkdownFormField(
+          checkActionAttribute(typeId, 'description', true) && getMarkdownFormField(
             intl.formatMessage,
             checkActionRequired(typeId, 'description'),
             'description',
           ),
-          checkActionAttribute(typeId, 'comment') && getMarkdownFormField(
+          checkActionAttribute(typeId, 'comment', true) && getMarkdownFormField(
             intl.formatMessage,
             checkActionRequired(typeId, 'comment'),
             'comment',
@@ -261,12 +235,35 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       },
       {
         fields: [
-          checkActionAttribute(typeId, 'target_comment') && getMarkdownFormField(
+          checkActionAttribute(typeId, 'reference_ml', true) && getMarkdownFormField(
+            intl.formatMessage,
+            checkActionRequired(typeId, 'reference_ml'),
+            'reference_ml',
+          ),
+          checkActionAttribute(typeId, 'status_lbs_protocol', true) && getMarkdownFormField(
+            intl.formatMessage,
+            checkActionRequired(typeId, 'status_lbs_protocol'),
+            'status_lbs_protocol',
+          ),
+          checkActionAttribute(typeId, 'has_reference_landbased_ml', true) && getCheckboxField(
+            intl.formatMessage,
+            'has_reference_landbased_ml',
+          ),
+          checkActionAttribute(typeId, 'reference_landbased_ml', true) && getMarkdownFormField(
+            intl.formatMessage,
+            checkActionRequired(typeId, 'reference_landbased_ml'),
+            'reference_landbased_ml',
+          ),
+        ],
+      },
+      {
+        fields: [
+          checkActionAttribute(typeId, 'target_comment', true) && getMarkdownFormField(
             intl.formatMessage,
             checkActionRequired(typeId, 'target_comment'),
             'target_comment',
           ),
-          checkActionAttribute(typeId, 'status_comment') && getMarkdownFormField(
+          checkActionAttribute(typeId, 'status_comment', true) && getMarkdownFormField(
             intl.formatMessage,
             checkActionRequired(typeId, 'status_comment'),
             'status_comment',
@@ -274,79 +271,15 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         ],
       },
     );
-    if (indicatorOptions) {
-      const indicatorConnections = renderIndicatorControl(
-        indicatorOptions,
-        null,
-        intl,
-      );
-      if (indicatorConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.indicators),
-            fields: [indicatorConnections],
-          },
-        );
-      }
-    }
-    if (userOptions) {
-      const userConnections = renderUserMultiControl(
-        userOptions,
-        null,
-        intl,
-      );
-      if (userConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.userActions),
-            fields: [userConnections],
-          },
-        );
-      }
-    }
-    // if (parentOptions) {
-    //   groups.push({
-    //     label: intl.formatMessage(appMessages.entities.actions.parent),
-    //     fields: [renderParentActionControl(
-    //       parentOptions,
-    //       intl.formatMessage(appMessages.entities.actions.single),
-    //       entity.getIn(['attributes', 'parent_id']),
-    //     )],
-    //   });
-    // }
-    if (topActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        topActionsByActiontype,
-        connectedTaxonomies,
-        onCreateOption,
-        intl,
-        'associatedTopActionsByActiontype',
-      );
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.topActions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    if (subActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        subActionsByActiontype,
-        connectedTaxonomies,
-        onCreateOption,
-        intl,
-        'associatedSubActionsByActiontype',
-      );
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.subActions),
-            fields: actionConnections,
-          },
-        );
-      }
+    if (parentOptions) {
+      groups.push({
+        label: intl.formatMessage(appMessages.entities.actions.parent),
+        fields: [renderParentActionControl(
+          parentOptions,
+          intl.formatMessage(appMessages.entities.actions.single),
+          entity.getIn(['attributes', 'parent_id']),
+        )],
+      });
     }
     if (actorsByActortype) {
       const actorConnections = renderActorsByActortypeControl(
@@ -405,25 +338,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          checkActionAttribute(typeId, 'date_start') && getDateField(
-            intl.formatMessage,
-            'date_start',
-            checkActionRequired(typeId, 'date_start'),
-          ),
-          checkActionAttribute(typeId, 'date_end') && getDateField(
-            intl.formatMessage,
-            'date_end',
-            checkActionRequired(typeId, 'date_end'),
-          ),
-          checkActionAttribute(typeId, 'date_comment') && getTextareaField(
-            intl.formatMessage,
-            'date_comment',
-            checkActionRequired(typeId, 'date_comment'),
-          ),
-        ],
-      },
-      { // fieldGroup
-        fields: [
           checkActionAttribute(typeId, 'url') && getLinkFormField(
             intl.formatMessage,
             checkActionRequired(typeId, 'url'),
@@ -446,6 +360,25 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           }),
         ],
       },
+      { // fieldGroup
+        fields: [
+          checkActionAttribute(typeId, 'date_start') && getDateField(
+            intl.formatMessage,
+            'date_start',
+            checkActionRequired(typeId, 'date_start'),
+          ),
+          checkActionAttribute(typeId, 'date_end') && getDateField(
+            intl.formatMessage,
+            'date_end',
+            checkActionRequired(typeId, 'date_end'),
+          ),
+          checkActionAttribute(typeId, 'date_comment') && getTextareaField(
+            intl.formatMessage,
+            'date_comment',
+            checkActionRequired(typeId, 'date_comment'),
+          ),
+        ],
+      },
     ]);
   };
 
@@ -459,12 +392,8 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       actorsByActortype,
       targetsByActortype,
       resourcesByResourcetype,
-      topActionsByActiontype,
-      subActionsByActiontype,
-      indicatorOptions,
-      userOptions,
       onCreateOption,
-      // parentOptions,
+      parentOptions,
     } = this.props;
     const { intl } = this.context;
     // const reference = this.props.params.id;
@@ -547,10 +476,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                   actorsByActortype,
                   targetsByActortype,
                   resourcesByResourcetype,
-                  topActionsByActiontype,
-                  subActionsByActiontype,
-                  indicatorOptions,
-                  userOptions,
                 )}
                 handleSubmitFail={this.props.handleSubmitFail}
                 handleCancel={this.props.handleCancel}
@@ -572,11 +497,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       actorsByActortype,
                       targetsByActortype,
                       resourcesByResourcetype,
-                      topActionsByActiontype,
-                      subActionsByActiontype,
-                      indicatorOptions,
-                      userOptions,
-                      // parentOptions,
+                      parentOptions,
                       onCreateOption,
                     ),
                     aside: this.getBodyAsideFields(viewEntity),
@@ -612,15 +533,11 @@ ActionEdit.propTypes = {
   isUserAdmin: PropTypes.bool,
   params: PropTypes.object,
   taxonomies: PropTypes.object,
-  // parentOptions: PropTypes.object,
-  indicatorOptions: PropTypes.object,
-  userOptions: PropTypes.object,
+  parentOptions: PropTypes.object,
   connectedTaxonomies: PropTypes.object,
   actorsByActortype: PropTypes.object,
   targetsByActortype: PropTypes.object,
   resourcesByResourcetype: PropTypes.object,
-  topActionsByActiontype: PropTypes.object,
-  subActionsByActiontype: PropTypes.object,
   onCreateOption: PropTypes.func,
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
@@ -641,11 +558,7 @@ const mapStateToProps = (state, props) => ({
   actorsByActortype: selectActorsByActortype(state, props.params.id),
   targetsByActortype: selectTargetsByActortype(state, props.params.id),
   resourcesByResourcetype: selectResourcesByResourcetype(state, props.params.id),
-  topActionsByActiontype: selectTopActionsByActiontype(state, props.params.id),
-  subActionsByActiontype: selectSubActionsByActiontype(state, props.params.id),
-  // parentOptions: selectParentOptions(state, props.params.id),
-  indicatorOptions: selectIndicatorOptions(state, props.params.id),
-  userOptions: selectUserOptions(state, props.params.id),
+  parentOptions: selectParentOptions(state, props.params.id),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -672,17 +585,7 @@ function mapDispatchToProps(dispatch, props) {
     handleSubmitRemote: (model) => {
       dispatch(formActions.submit(model));
     },
-    handleSubmit: (
-      formData,
-      taxonomies,
-      actorsByActortype,
-      targetsByActortype,
-      resourcesByResourcetype,
-      topActionsByActiontype,
-      subActionsByActiontype,
-      indicatorOptions,
-      userOptions,
-    ) => {
+    handleSubmit: (formData, taxonomies, actorsByActortype, targetsByActortype, resourcesByResourcetype) => {
       let saveData = formData.set(
         'actionCategories',
         getCategoryUpdatesFromFormData({
@@ -691,58 +594,6 @@ function mapDispatchToProps(dispatch, props) {
           createKey: 'measure_id',
         })
       );
-      if (topActionsByActiontype) {
-        saveData = saveData.set(
-          'topActions',
-          topActionsByActiontype
-            .map((actions, actiontypeid) => getConnectionUpdatesFromFormData({
-              formData,
-              connections: actions,
-              connectionAttribute: ['associatedTopActionsByActiontype', actiontypeid.toString()],
-              createConnectionKey: 'other_measure_id',
-              createKey: 'measure_id',
-            }))
-            .reduce(
-              (memo, deleteCreateLists) => {
-                const deletes = memo.get('delete').concat(deleteCreateLists.get('delete'));
-                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
-                return memo
-                  .set('delete', deletes)
-                  .set('create', creates);
-              },
-              fromJS({
-                delete: [],
-                create: [],
-              }),
-            )
-        );
-      }
-      if (subActionsByActiontype) {
-        saveData = saveData.set(
-          'subActions',
-          subActionsByActiontype
-            .map((actions, actiontypeid) => getConnectionUpdatesFromFormData({
-              formData,
-              connections: actions,
-              connectionAttribute: ['associatedSubActionsByActiontype', actiontypeid.toString()],
-              createConnectionKey: 'measure_id',
-              createKey: 'other_measure_id',
-            }))
-            .reduce(
-              (memo, deleteCreateLists) => {
-                const deletes = memo.get('delete').concat(deleteCreateLists.get('delete'));
-                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
-                return memo
-                  .set('delete', deletes)
-                  .set('create', creates);
-              },
-              fromJS({
-                delete: [],
-                create: [],
-              }),
-            )
-        );
-      }
       if (actorsByActortype) {
         saveData = saveData.set(
           'actorActions',
@@ -821,29 +672,12 @@ function mapDispatchToProps(dispatch, props) {
             )
         );
       }
-      if (indicatorOptions) {
-        saveData = saveData.set(
-          'actionIndicators', // targets
-          getConnectionUpdatesFromFormData({
-            formData,
-            connections: indicatorOptions,
-            connectionAttribute: 'associatedIndicators',
-            createConnectionKey: 'indicator_id',
-            createKey: 'measure_id',
-          })
-        );
-      }
-      if (userOptions) {
-        saveData = saveData.set(
-          'userActions',
-          getConnectionUpdatesFromFormData({
-            formData,
-            connections: userOptions,
-            connectionAttribute: 'associatedUsers',
-            createConnectionKey: 'user_id',
-            createKey: 'measure_id',
-          })
-        );
+      // TODO: remove once have singleselect instead of multiselect
+      const formParentIds = getCheckedValuesFromOptions(formData.get('associatedParent'));
+      if (List.isList(formParentIds) && formParentIds.size) {
+        saveData = saveData.setIn(['attributes', 'parent_id'], formParentIds.first());
+      } else {
+        saveData = saveData.setIn(['attributes', 'parent_id'], null);
       }
       dispatch(save(saveData.toJS()));
     },

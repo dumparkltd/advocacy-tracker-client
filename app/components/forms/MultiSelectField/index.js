@@ -35,7 +35,7 @@ const MultiSelectWrapper = styled.div`
   border-bottom: 1px solid;
   border-color: ${palette('light', 2)};
   box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     min-width: 350px;
   }
 `;
@@ -55,7 +55,7 @@ const MultiselectActiveOptionListItem = styled.div`
   border-bottom: 1px solid ${palette('light', 1)};
   padding: 6px 0 6px 8px;
   font-size: 0.8em;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 12px 0 12px 16px;
     font-size: 1em;
   }
@@ -74,13 +74,13 @@ const MultiselectActiveOptionRemove = styled(Button)`
     color: ${palette('linkHover', 2)};
   }
   padding: 0 8px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 0 16px;
   }
 `;
 const MultiselectActiveOption = styled.div`
   padding-right: 30px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding-right: 50px;
   }
 `;
@@ -89,7 +89,7 @@ const MultiSelectDropdownIcon = styled.div`
   right: 0;
   top: 0;
   padding: 12px 8px 0 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding-right: 16px;
   }
 `;
@@ -105,7 +105,7 @@ const MultiSelectDropdown = styled(Button)`
     background-color: ${palette('multiSelectFieldButtonHover', 1)}
   }
   padding: 12px 0 12px 8px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     font-size: 0.85em;
     padding: 12px 0 12px 16px;
   }
@@ -117,7 +117,7 @@ const MultiSelectDropdown = styled(Button)`
 const MultiSelectWithout = styled.div`
   color: ${palette('text', 1)};
   padding: 12px 0 12px 8px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding-left: 16px;
   }
 `;

@@ -20,7 +20,7 @@ const Styled = styled.div`
   background-color: ${palette('asideListGroup', 1)};
   padding: 0.25em 8px 0.25em 16px;
   font-size: 0.9em;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 0.25em 8px 0.25em 16px;
     font-size: 0.9em;
   }

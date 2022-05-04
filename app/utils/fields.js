@@ -1,11 +1,36 @@
 import { truncateText } from 'utils/string';
 import { sortEntities, sortCategories } from 'utils/sort';
 // import { filterTaxonomies } from 'utils/entities';
+import isNumber from 'utils/is-number';
+
 import {
   USER_ROLES, TEXT_TRUNCATE, ROUTES, API,
 } from 'themes/config';
 
 import appMessages from 'containers/App/messages';
+
+export const roundNumber = (value, digits = 0) => {
+  const factor = 10 ** Math.min(digits, 3);
+  return isNumber(value) && Math.round(value * factor) / factor;
+};
+export const formatNumber = (value, args = {}) => {
+  const {
+    intl, digits, unit, unitBefore,
+  } = args;
+  let formatted = value;
+  if (isNumber(value)) {
+    const rounded = roundNumber(value, digits);
+    formatted = intl
+      ? intl.formatNumber(rounded, { minimumFractionDigits: digits })
+      : rounded.toFixed(digits);
+  }
+  if (unit && unit.trim() !== '') {
+    return unitBefore
+      ? `${unit} ${formatted}`
+      : `${formatted} ${unit}`;
+  }
+  return formatted;
+};
 
 const checkEmpty = (
   val
@@ -24,9 +49,9 @@ export const getIdField = (entity) => checkEmpty(entity.get('id')) && ({
   large: true,
   label: appMessages.attributes.id,
 });
-export const getReferenceField = (entity, isManager, defaultToId) => {
-  const value = defaultToId
-    ? entity.getIn(['attributes', 'reference']) || entity.get('id')
+export const getReferenceField = (entity, att, isManager) => {
+  const value = att
+    ? entity.getIn(['attributes', 'reference']) || entity.getIn(['attributes', att])
     : entity.getIn(['attributes', 'reference']);
   if (checkEmpty(value)) {
     return ({
@@ -148,29 +173,40 @@ export const getMarkdownField = (
   label: hasLabel && (appMessages.attributes[label || attribute]),
 });
 
-export const getAmountField = (
+export const getNumberField = (
   entity,
   attribute,
-  showEmpty,
-  emptyMessage,
-) => (showEmpty || checkEmpty(entity.getIn(['attributes', attribute]))) && ({
-  type: 'text',
-  value: !!entity.getIn(['attributes', attribute]) && entity.getIn(['attributes', attribute]),
-  label: appMessages.attributes[attribute],
-  showEmpty: showEmpty && (emptyMessage || appMessages.attributes[`${attribute}_empty`]),
-});
+  args = {},
+) => {
+  const { showEmpty, emptyMessage, ...otherArgs } = args;
+  return (showEmpty || checkEmpty(entity.getIn(['attributes', attribute]))) && ({
+    type: 'number',
+    value: !!entity.getIn(['attributes', attribute]) && entity.getIn(['attributes', attribute]),
+    label: appMessages.attributes[attribute],
+    showEmpty: showEmpty && (emptyMessage || appMessages.attributes[`${attribute}_empty`]),
+    ...otherArgs,
+  });
+};
 
 export const getDateField = (
   entity,
   attribute,
-  showEmpty,
-  emptyMessage,
-) => (showEmpty || checkEmpty(entity.getIn(['attributes', attribute]))) && ({
-  type: 'date',
-  value: !!entity.getIn(['attributes', attribute]) && entity.getIn(['attributes', attribute]),
-  label: appMessages.attributes[attribute],
-  showEmpty: showEmpty && (emptyMessage || appMessages.attributes[`${attribute}_empty`]),
-});
+  args = {},
+) => {
+  const {
+    showEmpty,
+    emptyMessage,
+    specificity,
+    attributeLabel,
+  } = args;
+  return (showEmpty || checkEmpty(entity.getIn(['attributes', attribute]))) && ({
+    type: 'date',
+    value: !!entity.getIn(['attributes', attribute]) && entity.getIn(['attributes', attribute]),
+    label: appMessages.attributes[attributeLabel || attribute],
+    showEmpty: showEmpty && (emptyMessage || appMessages.attributes[`${attribute}_empty`]),
+    specificity,
+  });
+};
 
 export const getDateRelatedField = (
   value,
@@ -252,8 +288,8 @@ const getConnectionField = ({
   entityPath,
   onEntityClick,
   skipLabel,
-  onCreate,
-  isGrouped,
+  showValueForAction,
+  columns,
 }) => ({
   type: 'connections',
   values: entities.toList(),
@@ -266,8 +302,13 @@ const getConnectionField = ({
   showEmpty: appMessages.entities[entityType].empty,
   connectionOptions,
   skipLabel,
-  onCreate,
-  isGrouped,
+  showValueForAction,
+  columns: columns || [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: ['code', 'title'],
+  }],
 });
 
 export const getActorConnectionField = ({
@@ -278,6 +319,8 @@ export const getActorConnectionField = ({
   typeid, // actortype id
   skipLabel,
   connectionOptions,
+  showValueForAction,
+  columns,
 }) => getConnectionField({
   entities: sortEntities(actors, 'asc', 'id'),
   taxonomies,
@@ -288,6 +331,7 @@ export const getActorConnectionField = ({
       entityType: 'actions',
       path: API.ACTIONS,
       clientPath: ROUTES.ACTION,
+      groupByType: true,
     },
     targets: {
       message: 'entities.actions_{typeid}.plural',
@@ -295,13 +339,31 @@ export const getActorConnectionField = ({
       entityTypeAs: 'targetingActions',
       path: API.ACTIONS,
       clientPath: ROUTES.ACTION,
+      groupByType: true,
+    },
+    members: {
+      message: 'entities.actors_{typeid}.plural',
+      entityType: 'actors',
+      entityTypeAs: 'members',
+      path: API.ACTORS,
+      clientPath: ROUTES.ACTOR,
+      groupByType: true,
+    },
+    associations: {
+      message: 'entities.actors_{typeid}.plural',
+      entityType: 'actors',
+      entityTypeAs: 'associations',
+      path: API.ACTORS,
+      clientPath: ROUTES.ACTOR,
+      groupByType: true,
     },
   },
   entityType: typeid ? `actors_${typeid}` : 'actors',
   entityPath: ROUTES.ACTOR,
   onEntityClick,
   skipLabel,
-  isGrouped: true,
+  showValueForAction,
+  columns,
 });
 
 export const getActionConnectionField = ({
@@ -312,23 +374,18 @@ export const getActionConnectionField = ({
   typeid, // actortype id
   skipLabel,
   connectionOptions,
-  onCreateOption,
+  columns,
 }) => getConnectionField({
   entities: sortEntities(actions, 'asc', 'id'),
   taxonomies,
   connections,
   connectionOptions: connectionOptions || {
-    indicators: {
-      message: 'entities.indicators.plural',
-      entityType: 'indicators',
-      path: API.INDICATORS,
-      clientPath: ROUTES.INDICATOR,
-    },
     actors: {
       message: 'entities.actors_{typeid}.plural',
       entityType: 'actors',
       path: API.ACTORS,
       clientPath: ROUTES.ACTOR,
+      groupByType: true,
     },
     targets: {
       message: 'entities.actors_{typeid}.plural',
@@ -336,20 +393,21 @@ export const getActionConnectionField = ({
       entityTypeAs: 'targets',
       path: API.ACTORS,
       clientPath: ROUTES.ACTOR,
+      groupByType: true,
     },
     resources: {
       message: 'entities.resources_{typeid}.plural',
       entityType: 'resources',
       path: API.RESOURCES,
       clientPath: ROUTES.RESOURCE,
+      groupByType: true,
     },
   },
   entityType: typeid ? `actions_${typeid}` : 'actions',
   entityPath: ROUTES.ACTION,
   onEntityClick,
   skipLabel,
-  onCreate: onCreateOption || null,
-  isGrouped: true,
+  columns,
 });
 
 export const getResourceConnectionField = ({
@@ -359,6 +417,7 @@ export const getResourceConnectionField = ({
   typeid, // actortype id
   skipLabel,
   connectionOptions,
+  columns,
 }) => getConnectionField({
   entities: sortEntities(resources, 'asc', 'id'),
   connections,
@@ -368,63 +427,14 @@ export const getResourceConnectionField = ({
       entityType: 'actions',
       path: API.ACTIONS,
       clientPath: ROUTES.ACTION,
+      groupByType: true,
     },
   },
   entityType: typeid ? `resources_${typeid}` : 'resources',
   entityPath: ROUTES.RESOURCE,
   onEntityClick,
   skipLabel,
-  isGrouped: true,
-});
-export const getIndicatorConnectionField = ({
-  indicators,
-  connections,
-  onEntityClick,
-  skipLabel,
-  connectionOptions,
-}) => getConnectionField({
-  entities: sortEntities(indicators, 'asc', 'id'),
-  connections,
-  connectionOptions: connectionOptions || {
-    actions: {
-      message: 'entities.actions_{typeid}.plural',
-      entityType: 'actions',
-      path: API.ACTIONS,
-      clientPath: ROUTES.ACTION,
-    },
-  },
-  entityType: 'indicators',
-  entityPath: ROUTES.INDICATOR,
-  onEntityClick,
-  skipLabel,
-});
-export const getUserConnectionField = ({
-  users,
-  connections,
-  onEntityClick,
-  skipLabel,
-  connectionOptions,
-}) => getConnectionField({
-  entities: sortEntities(users, 'asc', 'name'),
-  connections,
-  connectionOptions: connectionOptions || {
-    actions: {
-      message: 'entities.actions_{typeid}.plural',
-      entityType: 'actions',
-      path: API.ACTIONS,
-      clientPath: ROUTES.ACTION,
-    },
-    actors: {
-      message: 'entities.actors_{typeid}.plural',
-      entityType: 'actors',
-      path: API.ACTORS,
-      clientPath: ROUTES.ACTOR,
-    },
-  },
-  entityType: 'users',
-  entityPath: ROUTES.USER,
-  onEntityClick,
-  skipLabel,
+  columns,
 });
 
 // const getConnectionGroupsField = ({

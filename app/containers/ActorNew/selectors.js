@@ -1,10 +1,5 @@
 import { createSelector } from 'reselect';
-import {
-  ACTIONTYPE_ACTORTYPES,
-  ACTIONTYPE_TARGETTYPES,
-  USER_ACTORTYPES,
-  MEMBERSHIPS,
-} from 'themes/config';
+import { ACTIONTYPE_ACTORTYPES, ACTIONTYPE_TARGETTYPES } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
 import {
@@ -14,7 +9,6 @@ import {
   selectActionsCategorised,
   selectActorsCategorised,
   selectActortypes,
-  selectUsers,
 } from 'containers/App/selectors';
 import { prepareTaxonomies } from 'utils/entities';
 
@@ -88,18 +82,15 @@ export const selectMembersByActortype = createSelector(
   (state, id) => id,
   selectActorsCategorised,
   selectActortypes,
-  (viewActortypeId, actors, actortypes) => {
+  (actortypeId, actors, actortypes) => {
     if (!actortypes || !actors) return null;
-    const validActortypeIds = Object.keys(MEMBERSHIPS).filter((actortypeId) => {
-      const actiontypeIds = MEMBERSHIPS[actortypeId];
-      return actiontypeIds && actiontypeIds.indexOf(viewActortypeId) > -1;
-    });
-    if (!validActortypeIds || validActortypeIds.length === 0) {
+    const viewActortype = actortypes && actortypes.get(actortypeId);
+    if (!viewActortype || !viewActortype.getIn(['attributes', 'has_members'])) {
+      // console.log('no members for actortype', actortypeId)
       return null;
     }
     return actortypes.filter(
-      (type) => validActortypeIds
-        && validActortypeIds.indexOf(type.get('id')) > -1
+      (type) => !type.getIn(['attributes', 'has_members'])
     ).map((type) => actors.filter(
       (actor) => qe(
         type.get('id'),
@@ -113,31 +104,20 @@ export const selectAssociationsByActortype = createSelector(
   (state, id) => id,
   selectActorsCategorised,
   selectActortypes,
-  (viewActortypeId, actors, actortypes) => {
+  (actortypeId, actors, actortypes) => {
     if (!actortypes || !actors) return null;
-    const validActortypeIds = MEMBERSHIPS[viewActortypeId];
-    if (!validActortypeIds || validActortypeIds.length === 0) {
+    const viewActortype = actortypes && actortypes.get(actortypeId);
+    if (!viewActortype || viewActortype.getIn(['attributes', 'has_members'])) {
+      // console.log('no memberships for actortype', actortypeId)
       return null;
     }
     return actortypes.filter(
-      (type) => validActortypeIds
-        && validActortypeIds.indexOf(type.get('id')) > -1
+      (type) => type.getIn(['attributes', 'has_members'])
     ).map((type) => actors.filter(
       (actor) => qe(
         type.get('id'),
         actor.getIn(['attributes', 'actortype_id']),
       )
     ));
-  }
-);
-
-export const selectUserOptions = createSelector(
-  (state, id) => id,
-  selectUsers,
-  (actortypeId, users) => {
-    if (USER_ACTORTYPES.indexOf(actortypeId) > -1) {
-      return users;
-    }
-    return null;
   }
 );

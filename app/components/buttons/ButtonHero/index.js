@@ -7,12 +7,12 @@ const ButtonHero = styled(ButtonDefault)`
   min-width: 120px;
   margin-left: ${({ space }) => space ? 10 : 0}px;
   margin-right: ${({ space }) => space ? 10 : 0}px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     font-size: 1.1em;
     padding: 0.8em;
     min-width: 160px;
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
     font-size: 1.25em;
     min-width: 200px;
   }

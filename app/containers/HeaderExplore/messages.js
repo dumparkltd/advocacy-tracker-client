@@ -8,7 +8,7 @@ import { defineMessages } from 'react-intl';
 export default defineMessages({
   title: {
     id: 'app.containers.HeaderExplore.title',
-    defaultMessage: 'Tracking advocacy plans and outcomes',
+    defaultMessage: 'Mapping actors and activities in the field of marine litter, plastics and micro-plastics in a global context',
   },
   explore: {
     id: 'app.containers.HeaderExplore.explore',

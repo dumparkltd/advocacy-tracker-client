@@ -91,7 +91,7 @@ export class UserLogin extends React.PureComponent { // eslint-disable-line reac
                 handleCancel={this.props.handleCancel}
                 labels={{ submit: intl.formatMessage(messages.submit) }}
                 fields={[
-                  getEmailField(intl.formatMessage, true, '.email'),
+                  getEmailField(intl.formatMessage, '.email'),
                   getPasswordField(intl.formatMessage, '.password'),
                 ]}
               />

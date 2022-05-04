@@ -27,9 +27,17 @@ export default defineMessages({
     defaultMessage: 'Search database by keyword',
   },
   groups: {
-    entities: {
-      id: 'app.containers.Search.groups.entities',
-      defaultMessage: 'Subjects',
+    actions: {
+      id: 'app.containers.Search.groups.actions',
+      defaultMessage: 'Activities',
+    },
+    actors: {
+      id: 'app.containers.Search.groups.actors',
+      defaultMessage: 'Actors',
+    },
+    resources: {
+      id: 'app.containers.Search.groups.resources',
+      defaultMessage: 'Resources',
     },
     taxonomies: {
       id: 'app.containers.Search.groups.taxonomies',
@@ -43,6 +51,14 @@ export default defineMessages({
   hints: {
     noEntry: {
       id: 'app.containers.Search.hints.noEntry',
+      defaultMessage: 'Please enter a search text to start your search.',
+    },
+    noTarget: {
+      id: 'app.containers.Search.hints.noTarget',
+      defaultMessage: 'Please enter a search text to start your search.',
+    },
+    noQuery: {
+      id: 'app.containers.Search.hints.noQuery',
       defaultMessage: 'Please enter a search text to start your search.',
     },
     noResults: {

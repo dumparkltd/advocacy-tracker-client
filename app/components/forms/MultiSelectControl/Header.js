@@ -1,19 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { palette } from 'styled-theme';
 import Close from './Close';
 
 const Styled = styled.div`
   display: table;
   width: 100%;
-  color: ${palette('multiSelectHeader', 0)};
-  background-color: ${palette('multiSelectHeader', 1)};
+  color: white;
+  background-color: ${({ theme }) => theme.global.colors.highlightHover};
   box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2);
   z-index: 1;
   height: 40px;
   padding-left: 0.75em;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     height: 60px;
     padding-left: 1em;
   }

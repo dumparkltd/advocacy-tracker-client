@@ -16,6 +16,7 @@ import Aside from './Aside';
 import ViewWrapper from './ViewWrapper';
 import ViewPanel from './ViewPanel';
 import ViewPanelInside from './ViewPanelInside';
+import ViewHeader from './ViewHeader';
 
 const hasFields = (fieldGroup) => fieldGroup.fields && reduce(fieldGroup.fields, (memo, field) => memo || field, false);
 
@@ -52,7 +53,7 @@ class EntityView extends React.PureComponent { // eslint-disable-line react/pref
   );
 
   render() {
-    const { fields, seamless } = this.props;
+    const { fields, seamless, header } = this.props;
     const hasBodyFields = fields.body
       && (
         (
@@ -68,6 +69,9 @@ class EntityView extends React.PureComponent { // eslint-disable-line react/pref
       );
     return (
       <ViewWrapper seamless={seamless}>
+        {header && (
+          <ViewHeader {...header} />
+        )}
         {fields.header && (
           <ViewPanel>
             <ViewPanelInside>
@@ -110,6 +114,7 @@ class EntityView extends React.PureComponent { // eslint-disable-line react/pref
 EntityView.propTypes = {
   fields: PropTypes.object,
   seamless: PropTypes.bool,
+  header: PropTypes.object,
 };
 EntityView.contextTypes = {
   intl: PropTypes.object.isRequired,

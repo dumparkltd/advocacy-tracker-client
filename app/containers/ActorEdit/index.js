@@ -29,10 +29,6 @@ import {
   renderAssociationsByActortypeControl,
   renderMembersByActortypeControl,
   getConnectionUpdatesFromFormData,
-  getEmailField,
-  getTextFormField,
-  getTextareaField,
-  renderUserMultiControl,
 } from 'utils/forms';
 import { getInfoField, getMetaField } from 'utils/fields';
 
@@ -76,7 +72,6 @@ import {
   selectConnectedTaxonomies,
   selectMembersByActortype,
   selectAssociationsByActortype,
-  selectUserOptions,
 } from './selectors';
 
 import messages from './messages';
@@ -122,7 +117,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       actionsAsTargetByActiontype,
       membersByActortype,
       associationsByActortype,
-      userOptions,
     } = props;
     return viewEntity
       ? Map({
@@ -143,9 +137,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
           : Map(),
         associatedAssociationsByActortype: associationsByActortype
           ? associationsByActortype.map((actors) => entityOptions(actors, true))
-          : Map(),
-        associatedUsers: userOptions
-          ? entityOptions(userOptions, true)
           : Map(),
       })
       : Map();
@@ -168,23 +159,11 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
               'code',
               checkActorRequired(typeId, 'code'),
             ),
-            checkActorAttribute(typeId, 'prefix') && getCodeFormField(
-              intl.formatMessage,
-              'prefix',
-              checkActorRequired(typeId, 'prefix'),
-            ),
             checkActorAttribute(typeId, 'title') && getTitleFormField(
               intl.formatMessage,
               'title',
               'title',
               checkActorRequired(typeId, 'title'),
-            ),
-            checkActorAttribute(typeId, 'name') && getTitleFormField(
-              intl.formatMessage,
-              'title',
-              'title',
-              checkActorRequired(typeId, 'name'),
-              'name' // label
             ),
           ],
         },
@@ -216,7 +195,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
     actionsAsTargetByActiontype,
     membersByActortype,
     associationsByActortype,
-    userOptions,
     onCreateOption,
   ) => {
     const { intl } = this.context;
@@ -238,21 +216,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         ],
       },
     );
-    if (userOptions) {
-      const userConnections = renderUserMultiControl(
-        userOptions,
-        null,
-        intl,
-      );
-      if (userConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.userActors),
-            fields: [userConnections],
-          },
-        );
-      }
-    }
+
     if (actionsByActiontype) {
       const actionConnections = renderActionsByActiontypeControl(
         actionsByActiontype,
@@ -327,9 +291,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          checkActorAttribute(typeId, 'address') && getTextareaField(intl.formatMessage, 'address', checkActorRequired(typeId, 'address')),
-          checkActorAttribute(typeId, 'phone') && getTextFormField(intl.formatMessage, 'phone', checkActorRequired(typeId, 'phone')),
-          checkActorAttribute(typeId, 'email') && getEmailField(intl.formatMessage, checkActorRequired(typeId, 'email')),
           checkActorAttribute(typeId, 'url') && getLinkFormField(
             intl.formatMessage,
             checkActorRequired(typeId, 'url'),
@@ -366,7 +327,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       actionsAsTargetByActiontype,
       membersByActortype,
       associationsByActortype,
-      userOptions,
       onCreateOption,
     } = this.props;
     const typeId = viewEntity && viewEntity.getIn(['attributes', 'actortype_id']);
@@ -446,7 +406,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
                   actionsAsTargetByActiontype,
                   membersByActortype,
                   associationsByActortype,
-                  userOptions,
                 )}
                 handleSubmitFail={this.props.handleSubmitFail}
                 handleCancel={this.props.handleCancel}
@@ -469,7 +428,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
                       actionsAsTargetByActiontype,
                       membersByActortype,
                       associationsByActortype,
-                      userOptions,
                       onCreateOption,
                     ),
                     aside: this.getBodyAsideFields(
@@ -515,7 +473,6 @@ ActorEdit.propTypes = {
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   connectedTaxonomies: PropTypes.object,
-  userOptions: PropTypes.object,
 };
 
 ActorEdit.contextTypes = {
@@ -533,7 +490,6 @@ const mapStateToProps = (state, props) => ({
   membersByActortype: selectMembersByActortype(state, props.params.id),
   associationsByActortype: selectAssociationsByActortype(state, props.params.id),
   connectedTaxonomies: selectConnectedTaxonomies(state),
-  userOptions: selectUserOptions(state, props.params.id),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -567,7 +523,6 @@ function mapDispatchToProps(dispatch, props) {
       actionsAsTargetByActiontype,
       membersByActortype,
       associationsByActortype,
-      userOptions,
     ) => {
       let saveData = formData
         .set(
@@ -658,7 +613,7 @@ function mapDispatchToProps(dispatch, props) {
       }
       if (associationsByActortype) {
         saveData = saveData.set(
-          'associations',
+          'memberships',
           associationsByActortype
             .map((associations, typeid) => getConnectionUpdatesFromFormData({
               formData,
@@ -680,18 +635,6 @@ function mapDispatchToProps(dispatch, props) {
                 create: [],
               }),
             )
-        );
-      }
-      if (userOptions) {
-        saveData = saveData.set(
-          'userActors',
-          getConnectionUpdatesFromFormData({
-            formData,
-            connections: userOptions,
-            connectionAttribute: 'associatedUsers',
-            createConnectionKey: 'user_id',
-            createKey: 'actor_id',
-          })
         );
       }
       // console.log(saveData.toJS());

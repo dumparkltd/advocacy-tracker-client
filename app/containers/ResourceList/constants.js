@@ -27,24 +27,6 @@ export const CONFIG = {
   views: {
     list: {
       search: ['title', 'description'],
-      sorting: [
-        {
-          attribute: 'title',
-          type: 'string',
-          order: 'asc',
-          default: true,
-        },
-        {
-          attribute: 'updated_at',
-          type: 'date',
-          order: 'desc',
-        },
-        {
-          attribute: 'id', // proxy for created at
-          type: 'number',
-          order: 'desc',
-        },
-      ],
     },
   },
   connections: { // filter by associated entity
@@ -52,7 +34,8 @@ export const CONFIG = {
       query: 'action',
       type: 'resource-actions',
       search: true,
-      message: 'entities.actions_{typeid}.plural',
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,

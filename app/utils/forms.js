@@ -6,12 +6,6 @@ import {
   getEntityTitle,
   getEntityReference,
   getCategoryShortTitle,
-  checkActionAttribute,
-  checkActionRequired,
-  checkActorAttribute,
-  checkActorRequired,
-  checkResourceAttribute,
-  checkResourceRequired,
 } from 'utils/entities';
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
@@ -26,6 +20,8 @@ import {
   USER_ROLES,
   DATE_FORMAT,
   API,
+  ACTIONTYPES_CONFIG,
+  ACTORTYPES_CONFIG,
 } from 'themes/config';
 
 import appMessages from 'containers/App/messages';
@@ -34,7 +30,6 @@ export const entityOption = (entity, defaultToId, hasTags) => Map({
   value: entity.get('id'),
   label: getEntityTitle(entity),
   reference: getEntityReference(entity, defaultToId),
-  description: entity.getIn(['attributes', 'description']),
   checked: !!entity.get('associated'),
   tags: hasTags && entity.get('categories'),
   draft: entity.getIn(['attributes', 'draft']),
@@ -125,36 +120,6 @@ export const renderActionControl = (entities, taxonomies, onCreateOption, contex
       : null,
   }
   : null;
-export const renderIndicatorControl = (entities, onCreateOption, contextIntl) => entities
-  ? {
-    id: 'indicators',
-    model: '.associatedIndicators',
-    dataPath: ['associatedIndicators'],
-    label: contextIntl.formatMessage(appMessages.entities.indicators.plural),
-    controlType: 'multiselect',
-    options: entityOptions(entities, true),
-    advanced: true,
-    selectAll: true,
-    // onCreate: onCreateOption
-    //   ? () => onCreateOption({ path: API.INDICATORS })
-    //   : null,
-  }
-  : null;
-export const renderUserMultiControl = (entities, onCreateOption, contextIntl) => entities
-  ? {
-    id: 'users',
-    model: '.associatedUsers',
-    dataPath: ['associatedUsers'],
-    label: contextIntl.formatMessage(appMessages.entities.users.plural),
-    controlType: 'multiselect',
-    options: entityOptions(entities, true),
-    advanced: true,
-    selectAll: true,
-    // onCreate: onCreateOption
-    //   ? () => onCreateOption({ path: API.INDICATORS })
-    //   : null,
-  }
-  : null;
 
 export const renderActorControl = (
   actortypeId,
@@ -189,6 +154,7 @@ export const renderActorsByActortypeControl = (
   ? entitiesByActortype.reduce(
     (controls, entities, typeid) => controls.concat({
       id: `actors.${typeid}`,
+      typeId: typeid,
       model: `.associatedActorsByActortype.${typeid}`,
       dataPath: ['associatedActorsByActortype', typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
@@ -205,7 +171,11 @@ export const renderActorsByActortypeControl = (
         : null,
     }),
     [],
-  ).sort((a, b) => a.id > b.id ? 1 : -1)
+  ).sort((a, b) => {
+    const configA = ACTORTYPES_CONFIG[a.typeId];
+    const configB = ACTORTYPES_CONFIG[b.typeId];
+    return configA.order < configB.order ? -1 : 1;
+  })
   : null;
 // actors grouped by actortype
 export const renderTargetsByActortypeControl = (
@@ -217,6 +187,7 @@ export const renderTargetsByActortypeControl = (
   ? entitiesByActortype.reduce(
     (controls, entities, typeid) => controls.concat({
       id: `targets.${typeid}`,
+      typeId: typeid,
       model: `.associatedTargetsByActortype.${typeid}`,
       dataPath: ['associatedTargetsByActortype', typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
@@ -233,7 +204,11 @@ export const renderTargetsByActortypeControl = (
         : null,
     }),
     [],
-  ).sort((a, b) => a.id > b.id ? 1 : -1)
+  ).sort((a, b) => {
+    const configA = ACTORTYPES_CONFIG[a.typeId];
+    const configB = ACTORTYPES_CONFIG[b.typeId];
+    return configA.order < configB.order ? -1 : 1;
+  })
   : null;
 
 export const renderMembersByActortypeControl = (
@@ -244,7 +219,8 @@ export const renderMembersByActortypeControl = (
 ) => entitiesByActortype
   ? entitiesByActortype.reduce(
     (controls, entities, typeid) => controls.concat({
-      id: `actors.${typeid}`,
+      id: `members.${typeid}`,
+      typeId: typeid,
       model: `.associatedMembersByActortype.${typeid}`,
       dataPath: ['associatedMembersByActortype', typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
@@ -261,7 +237,11 @@ export const renderMembersByActortypeControl = (
         : null,
     }),
     [],
-  ).sort((a, b) => a.id > b.id ? 1 : -1)
+  ).sort((a, b) => {
+    const configA = ACTORTYPES_CONFIG[a.typeId];
+    const configB = ACTORTYPES_CONFIG[b.typeId];
+    return configA.order < configB.order ? -1 : 1;
+  })
   : null;
 export const renderAssociationsByActortypeControl = (
   entitiesByActortype,
@@ -271,7 +251,8 @@ export const renderAssociationsByActortypeControl = (
 ) => entitiesByActortype
   ? entitiesByActortype.reduce(
     (controls, entities, typeid) => controls.concat({
-      id: `actors.${typeid}`,
+      id: `associations.${typeid}`,
+      typeId: typeid,
       model: `.associatedAssociationsByActortype.${typeid}`,
       dataPath: ['associatedAssociationsByActortype', typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
@@ -288,7 +269,11 @@ export const renderAssociationsByActortypeControl = (
         : null,
     }),
     [],
-  ).sort((a, b) => a.id > b.id ? 1 : -1)
+  ).sort((a, b) => {
+    const configA = ACTORTYPES_CONFIG[a.typeId];
+    const configB = ACTORTYPES_CONFIG[b.typeId];
+    return configA.order < configB.order ? -1 : 1;
+  })
   : null;
 
 export const renderActionsByActiontypeControl = (
@@ -296,13 +281,13 @@ export const renderActionsByActiontypeControl = (
   taxonomies,
   onCreateOption,
   contextIntl,
-  model = 'associatedActionsByActiontype',
 ) => entitiesByActiontype
   ? entitiesByActiontype.reduce(
     (controls, entities, typeid) => controls.concat({
-      id: `actors.${typeid}`,
-      model: `.${model}.${typeid}`,
-      dataPath: [model, typeid],
+      id: `actions.${typeid}`,
+      typeId: typeid,
+      model: `.associatedActionsByActiontype.${typeid}`,
+      dataPath: ['associatedActionsByActiontype', typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actions_${typeid}`].plural),
       controlType: 'multiselect',
       options: entityOptions(entities),
@@ -317,7 +302,11 @@ export const renderActionsByActiontypeControl = (
         : null,
     }),
     [],
-  ).sort((a, b) => a.id > b.id ? 1 : -1)
+  ).sort((a, b) => {
+    const configA = ACTIONTYPES_CONFIG[a.typeId];
+    const configB = ACTIONTYPES_CONFIG[b.typeId];
+    return configA.order < configB.order ? -1 : 1;
+  })
   : null;
 
 export const renderActionsAsTargetByActiontypeControl = (
@@ -328,7 +317,8 @@ export const renderActionsAsTargetByActiontypeControl = (
 ) => entitiesByActiontype
   ? entitiesByActiontype.reduce(
     (controls, entities, typeid) => controls.concat({
-      id: `actorsAsTarget.${typeid}`,
+      id: `actionsAsTarget.${typeid}`,
+      typeId: typeid,
       model: `.associatedActionsAsTargetByActiontype.${typeid}`,
       dataPath: ['associatedActionsAsTargetByActiontype', typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actions_${typeid}`].plural),
@@ -345,7 +335,11 @@ export const renderActionsAsTargetByActiontypeControl = (
         : null,
     }),
     [],
-  ).sort((a, b) => a.id > b.id ? 1 : -1)
+  ).sort((a, b) => {
+    const configA = ACTIONTYPES_CONFIG[a.typeId];
+    const configB = ACTIONTYPES_CONFIG[b.typeId];
+    return configA.order < configB.order ? -1 : 1;
+  })
   : null;
 
 // actors grouped by actortype
@@ -541,18 +535,11 @@ export const getStatusField = (formatMessage) => ({
   options: PUBLISH_STATUSES,
 });
 
-export const getTitleFormField = (
-  formatMessage,
-  controlType = 'title',
-  attribute = 'title',
-  required,
-  label,
-) => getFormField({
+export const getTitleFormField = (formatMessage, controlType = 'title', attribute = 'title', required) => getFormField({
   formatMessage,
   controlType,
   attribute,
   required,
-  label,
 });
 
 export const getReferenceFormField = (formatMessage, required = false, isAutoReference = false) => getFormField({
@@ -566,20 +553,6 @@ export const getReferenceFormField = (formatMessage, required = false, isAutoRef
 export const getCodeFormField = (formatMessage, att = 'code', required = false) => getFormField({
   formatMessage,
   controlType: 'short',
-  attribute: att,
-  label: att,
-  required,
-});
-export const getShortTextFormField = (formatMessage, att, required = false) => getFormField({
-  formatMessage,
-  controlType: 'short',
-  attribute: att,
-  label: att,
-  required,
-});
-export const getTextFormField = (formatMessage, att, required = false) => getFormField({
-  formatMessage,
-  controlType: 'input',
   attribute: att,
   label: att,
   required,
@@ -645,11 +618,10 @@ export const getMarkdownFormField = (formatMessage, required, attribute = 'descr
 });
 
 // unused
-export const getTextareaField = (formatMessage, attribute = 'description', required) => getFormField({
+export const getTextareaField = (formatMessage, attribute = 'description') => getFormField({
   formatMessage,
   controlType: 'textarea',
   attribute,
-  required,
 });
 
 export const getDateField = (formatMessage, attribute, required = false, label, onChange) => {
@@ -684,13 +656,13 @@ export const getUploadField = (formatMessage) => getFormField({
   placeholder: 'url',
 });
 
-export const getEmailField = (formatMessage, required = true, model = '.attributes.email') => {
+export const getEmailField = (formatMessage, model = '.attributes.email') => {
   const field = getFormField({
     formatMessage,
     controlType: 'email',
     attribute: 'email',
     type: 'email',
-    required,
+    required: true,
     model,
   });
   field.validators.email = validateEmailFormat;
@@ -834,33 +806,11 @@ const getCategoryFields = (args, formatMessage) => ({
   },
 });
 
-const getActorFields = ({ typeId }, formatMessage) => ({
+const getActorFields = (formatMessage) => ({
   header: {
     main: [{ // fieldGroup
       fields: [
-        checkActorAttribute(typeId, 'code') && getCodeFormField(
-          formatMessage,
-          'code',
-          checkActorRequired(typeId, 'code'),
-        ),
-        checkActorAttribute(typeId, 'prefix') && getCodeFormField(
-          formatMessage,
-          'prefix',
-          checkActorRequired(typeId, 'prefix'),
-        ),
-        checkActorAttribute(typeId, 'title') && getTitleFormField(
-          formatMessage,
-          'title',
-          'title',
-          checkActorRequired(typeId, 'title'),
-        ),
-        checkActorAttribute(typeId, 'name') && getTitleFormField(
-          formatMessage,
-          'title',
-          'title',
-          checkActorRequired(typeId, 'name'),
-          'name' // label
-        ),
+        getTitleFormField(formatMessage),
       ],
     }],
     aside: [{ // fieldGroup
@@ -872,62 +822,17 @@ const getActorFields = ({ typeId }, formatMessage) => ({
   body: {
     main: [{
       fields: [
-        checkActorAttribute(typeId, 'description') && getMarkdownFormField(
-          formatMessage,
-          checkActorRequired(typeId, 'description'),
-          'description',
-        ),
-        checkActorAttribute(typeId, 'activity_summary') && getMarkdownFormField(
-          formatMessage,
-          checkActorRequired(typeId, 'activity_summary'),
-          'activity_summary',
-        ),
-      ],
-    }],
-    aside: [{ // fieldGroup
-      fields: [
-        checkActorAttribute(typeId, 'address') && getTextareaField(formatMessage, 'address', checkActorRequired(typeId, 'address')),
-        checkActorAttribute(typeId, 'phone') && getTextFormField(formatMessage, 'phone', checkActorRequired(typeId, 'phone')),
-        checkActorAttribute(typeId, 'email') && getEmailField(formatMessage, checkActorRequired(typeId, 'email')),
-        checkActorAttribute(typeId, 'url') && getLinkFormField(
-          formatMessage,
-          checkActorRequired(typeId, 'url'),
-          'url',
-        ),
-      ],
-    },
-    { // fieldGroup
-      fields: [
-        checkActorAttribute(typeId, 'gdp') && getAmountFormField(
-          formatMessage,
-          checkActorRequired(typeId, 'gdp'),
-          'gdp',
-        ),
-        checkActorAttribute(typeId, 'population') && getNumberFormField(
-          formatMessage,
-          checkActorRequired(typeId, 'population'),
-          'population',
-        ),
+        getMarkdownFormField(formatMessage),
       ],
     }],
   },
 });
 
-const getActionFields = ({ typeId }, formatMessage) => ({
+const getActionFields = (formatMessage) => ({
   header: {
     main: [{ // fieldGroup
       fields: [
-        checkActionAttribute(typeId, 'code') && getCodeFormField(
-          formatMessage,
-          'code',
-          checkActionRequired(typeId, 'code'),
-        ),
-        checkActionAttribute(typeId, 'title') && getTitleFormField(
-          formatMessage,
-          'title',
-          'title',
-          checkActionRequired(typeId, 'title'),
-        ),
+        getTitleFormField(formatMessage),
       ],
     }],
     aside: [{ // fieldGroup
@@ -939,123 +844,42 @@ const getActionFields = ({ typeId }, formatMessage) => ({
   body: {
     main: [{
       fields: [
-        checkActionAttribute(typeId, 'description') && getMarkdownFormField(
-          formatMessage,
-          checkActionRequired(typeId, 'description'),
-          'description',
-        ),
-        checkActionAttribute(typeId, 'comment') && getMarkdownFormField(
-          formatMessage,
-          checkActionRequired(typeId, 'comment'),
-          'comment',
-        ),
-      ],
-    }],
-    aside: [
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'date_start') && getDateField(
-            formatMessage,
-            'date_start',
-            checkActionRequired(typeId, 'date_start'),
-          ),
-          checkActionAttribute(typeId, 'date_end') && getDateField(
-            formatMessage,
-            'date_end',
-            checkActionRequired(typeId, 'date_end'),
-          ),
-          checkActionAttribute(typeId, 'date_comment') && getTextareaField(
-            formatMessage,
-            'date_comment',
-            checkActionRequired(typeId, 'date_comment'),
-          ),
-        ],
-      },
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'url') && getLinkFormField(
-            formatMessage,
-            checkActionRequired(typeId, 'url'),
-            'url',
-          ),
-        ],
-      },
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'amount') && getAmountFormField(
-            formatMessage,
-            checkActionRequired(typeId, 'amount'),
-            'amount',
-          ),
-          checkActionAttribute(typeId, 'amount_comment') && getFormField({
-            formatMessage,
-            required: checkActionRequired(typeId, 'amount_comment'),
-            attribute: 'amount_comment',
-            controlType: 'input',
-          }),
-        ],
-      },
-    ],
-  },
-});
-const getResourceFields = ({ typeId }, formatMessage) => ({
-  header: {
-    main: [{ // fieldGroup
-      fields: [
-        checkResourceAttribute(typeId, 'title') && getTitleFormField(
-          formatMessage,
-          'title',
-          'title',
-          checkResourceRequired(typeId, 'title'),
-        ),
+        getMarkdownFormField(formatMessage),
       ],
     }],
     aside: [{ // fieldGroup
       fields: [
-        checkResourceAttribute(typeId, 'url') && getLinkFormField(
-          formatMessage,
-          checkResourceRequired(typeId, 'url'),
-          'url',
-        ),
+        // getDateField(formatMessage, 'target_date'),
+        // getTextareaField(formatMessage, 'target_date_comment'),
+      ],
+    }],
+  },
+});
+const getResourceFields = (formatMessage) => ({
+  header: {
+    main: [{ // fieldGroup
+      fields: [
+        getTitleFormField(formatMessage),
+      ],
+    }],
+    aside: [{ // fieldGroup
+      fields: [
+        getStatusField(formatMessage),
       ],
     }],
   },
   body: {
     main: [{
       fields: [
-        checkResourceAttribute(typeId, 'url') && getLinkFormField(
-          formatMessage,
-          checkResourceRequired(typeId, 'url'),
-          'url',
-        ),
-      ],
-    },
-    {
-      fields: [
-        checkResourceAttribute(typeId, 'description') && getMarkdownFormField(
-          formatMessage,
-          checkResourceRequired(typeId, 'description'),
-          'description',
-        ),
-        checkResourceAttribute(typeId, 'status') && getMarkdownFormField(
-          formatMessage,
-          checkResourceRequired(typeId, 'status'),
-          'status',
-        ),
+        getLinkFormField(formatMessage),
+        getMarkdownFormField(formatMessage),
       ],
     }],
     aside: [{ // fieldGroup
       fields: [
-        checkResourceAttribute(typeId, 'publication_date') && getDateField(
-          formatMessage,
-          'publication_date',
-          checkResourceRequired(typeId, 'publication_date'),
-        ),
-        checkResourceAttribute(typeId, 'access_date') && getDateField(
-          formatMessage,
-          'access_date',
-          checkResourceRequired(typeId, 'access_date'),
-        ),
+        getDateField(formatMessage, 'access_date'),
+        getDateField(formatMessage, 'publication_date'),
+        // getTextareaField(formatMessage, 'target_date_comment'),
       ],
     }],
   },
@@ -1066,11 +890,11 @@ export const getEntityAttributeFields = (path, args, contextIntl) => {
     case API.CATEGORIES:
       return getCategoryFields(args.categories, contextIntl.formatMessage);
     case API.ACTIONS:
-      return getActionFields(args, contextIntl.formatMessage);
+      return getActionFields(contextIntl.formatMessage);
     case API.ACTORS:
-      return getActorFields(args, contextIntl.formatMessage);
+      return getActorFields(contextIntl.formatMessage);
     case API.RESOURCES:
-      return getResourceFields(args, contextIntl.formatMessage);
+      return getResourceFields(contextIntl.formatMessage);
     default:
       return {};
   }

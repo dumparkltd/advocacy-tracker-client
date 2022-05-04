@@ -16,7 +16,12 @@ class TextField extends React.PureComponent { // eslint-disable-line react/prefe
             <FormattedMessage {...field.label} />
           </Label>
         )}
-        { !!field.value && (<p style={{ whiteSpace: 'pre-line' }}>{field.value}</p>)}
+        {field.title && (
+          <Label>
+            {field.title}
+          </Label>
+        )}
+        { !!field.value && (<p>{field.value}</p>)}
         { !field.value
           && field.showEmpty
           && (

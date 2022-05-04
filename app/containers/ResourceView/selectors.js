@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
-import { API } from 'themes/config';
+import { API, ACTIONTYPES_CONFIG } from 'themes/config';
 
 import {
   selectReady,
@@ -14,7 +14,6 @@ import {
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
   selectActionResourcesGroupedByAction,
-  selectActionIndicatorsGroupedByAction,
 } from 'containers/App/selectors';
 
 import {
@@ -61,7 +60,6 @@ export const selectActionsByType = createSelector(
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
   selectActionResourcesGroupedByAction,
-  selectActionIndicatorsGroupedByAction,
   selectActionCategoriesGroupedByAction,
   selectCategories,
   (
@@ -71,7 +69,6 @@ export const selectActionsByType = createSelector(
     actorActions,
     actionActors,
     actionResources,
-    actionIndicators,
     actionCategories,
     categories,
   ) => {
@@ -83,11 +80,17 @@ export const selectActionsByType = createSelector(
         actorActions,
         actionActors,
         actionResources,
-        actionIndicators,
         categories,
         actionCategories,
       }))
       .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
-      .sortBy((val, key) => key);
+      .sortBy(
+        (val, key) => key,
+        (a, b) => {
+          const configA = ACTIONTYPES_CONFIG[a];
+          const configB = ACTIONTYPES_CONFIG[b];
+          return configA.order < configB.order ? -1 : 1;
+        }
+      );
   }
 );

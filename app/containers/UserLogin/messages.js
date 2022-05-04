@@ -32,7 +32,7 @@ export default defineMessages({
   },
   resetPasswordHint: {
     id: 'app.containers.UserLogin.resetPasswordHint',
-    defaultMessage: 'If you forgot your password, please contact your team leader',
+    defaultMessage: 'If you forgot your password, please contact the administrator',
   },
   submit: {
     id: 'app.containers.UserLogin.submit',

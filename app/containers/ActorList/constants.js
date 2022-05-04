@@ -21,7 +21,6 @@ export const DEPENDENCIES = [
   API.CATEGORIES,
   API.USERS,
   API.USER_ROLES,
-  API.USER_ACTORS,
   API.MEMBERSHIPS,
 ];
 
@@ -32,32 +31,9 @@ export const CONFIG = {
   views: {
     list: {
       search: ['code', 'title', 'description'],
-      sorting: [
-        {
-          attribute: 'title',
-          type: 'string',
-          order: 'asc',
-          default: true,
-        },
-        {
-          attribute: 'code',
-          type: 'string',
-          order: 'asc',
-        },
-        {
-          attribute: 'updated_at',
-          type: 'date',
-          order: 'desc',
-        },
-        {
-          attribute: 'id', // proxy for created at
-          type: 'number',
-          order: 'desc',
-        },
-      ],
     },
     map: {
-      types: [ACTORTYPES.COUNTRY],
+      types: [ACTORTYPES.COUNTRY, ACTORTYPES.ORG, ACTORTYPES.GROUP],
     },
   },
   taxonomies: { // filter by each category
@@ -81,7 +57,8 @@ export const CONFIG = {
       query: 'action',
       type: 'actor-actions',
       search: true,
-      message: 'entities.actions_{typeid}.plural',
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,
@@ -94,7 +71,8 @@ export const CONFIG = {
       query: 'targeting',
       type: 'target-actions',
       search: true,
-      message: 'entities.actions_{typeid}.plural',
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
       entityType: 'actions', // filter by actor connection
       entityTypeAs: 'targetingActions',
@@ -109,7 +87,8 @@ export const CONFIG = {
       query: 'by-member',
       type: 'association-members',
       search: true,
-      message: 'entities.actors_{typeid}.plural',
+      messageByType: 'entities.actors_{typeid}.plural',
+      message: 'entities.actors.plural',
       path: API.ACTORS, // filter by actor connection
       entityTypeAs: 'members', // filter by actor connection
       entityType: 'actors',
@@ -118,12 +97,15 @@ export const CONFIG = {
       key: 'member_id',
       ownKey: 'memberof_id',
       groupByType: true,
+      typeFilter: 'has_members',
+      typeFilterPass: 'reverse',
     },
     associations: { // filter by associated entity
       query: 'by-association',
       type: 'member-associations',
       search: true,
-      message: 'entities.actors_{typeid}.plural',
+      messageByType: 'entities.actors_{typeid}.plural',
+      message: 'entities.actors.plural',
       path: API.ACTORS, // filter by actor connection
       entityType: 'actors',
       entityTypeAs: 'associations', // filter by actor connection
@@ -132,18 +114,7 @@ export const CONFIG = {
       key: 'memberof_id',
       ownKey: 'member_id',
       groupByType: true,
-    },
-    users: {
-      query: 'users',
-      type: 'actor-users',
-      search: true,
-      message: 'entities.users.plural',
-      path: API.USERS,
-      entityType: 'users',
-      clientPath: ROUTES.USER,
-      connectPath: API.USER_ACTORS, // filter by actor connection
-      key: 'user_id',
-      ownKey: 'actor_id',
+      typeFilter: 'has_members',
     },
   },
   attributes: { // filter by attribute value
@@ -154,6 +125,7 @@ export const CONFIG = {
         attribute: 'draft',
         options: PUBLISH_STATUSES,
         role: USER_ROLES.MANAGER.value,
+        filterUI: 'checkboxes',
       },
     ],
   },

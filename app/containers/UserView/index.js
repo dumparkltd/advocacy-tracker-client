@@ -16,8 +16,6 @@ import {
   getMetaField,
   getEmailField,
   getTaxonomyFields,
-  getActionConnectionField,
-  getActorConnectionField,
 } from 'utils/fields';
 
 import { getEntityTitle } from 'utils/entities';
@@ -36,8 +34,6 @@ import {
   selectReady,
   selectSessionUserId,
   selectSessionUserHighestRoleId,
-  selectActionConnections,
-  selectActorConnections,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -46,8 +42,6 @@ import messages from './messages';
 import {
   selectViewEntity,
   selectTaxonomies,
-  selectActionsByType,
-  selectActorsByType,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
@@ -118,61 +112,9 @@ export class UserView extends React.PureComponent { // eslint-disable-line react
     ],
   }]);
 
-  getBodyMainFields = (
-    entity,
-    taxonomies,
-    actionsByActiontype,
-    actorsByActortype,
-    actionConnections,
-    actorConnections,
-    onEntityClick,
-  ) => {
-    const fields = [];
-    fields.push(
-      {
-        fields: [getEmailField(entity)],
-      },
-    );
-    // connected actions
-    if (actionsByActiontype) {
-      const actionConnectionsLocal = [];
-      actionsByActiontype.forEach((actions, actiontypeid) => {
-        actionConnectionsLocal.push(
-          getActionConnectionField({
-            actions,
-            taxonomies,
-            onEntityClick,
-            connections: actionConnections,
-            typeid: actiontypeid,
-          }),
-        );
-      });
-      fields.push({
-        label: appMessages.nav.actionUsers,
-        fields: actionConnectionsLocal,
-      });
-    }
-    // connected actors
-    if (actorsByActortype) {
-      const connectionsLocal = [];
-      actorsByActortype.forEach((actors, actortypeid) => {
-        connectionsLocal.push(
-          getActorConnectionField({
-            actors,
-            taxonomies,
-            onEntityClick,
-            connections: actionConnections,
-            typeid: actortypeid,
-          }),
-        );
-      });
-      fields.push({
-        label: appMessages.nav.actorUsers,
-        fields: connectionsLocal,
-      });
-    }
-    return fields;
-  };
+  getBodyMainFields = (entity) => ([{
+    fields: [getEmailField(entity)],
+  }]);
 
   getBodyAsideFields = (taxonomies) => ([
     { // fieldGroup
@@ -187,15 +129,7 @@ export class UserView extends React.PureComponent { // eslint-disable-line react
   render() {
     const { intl } = this.context;
     const {
-      user,
-      dataReady,
-      sessionUserHighestRoleId,
-      taxonomies,
-      actionsByActiontype,
-      actorsByActortype,
-      actionConnections,
-      actorConnections,
-      onEntityClick,
+      user, dataReady, sessionUserHighestRoleId, taxonomies,
     } = this.props;
     const isManager = sessionUserHighestRoleId <= USER_ROLES.MANAGER.value;
 
@@ -212,7 +146,7 @@ export class UserView extends React.PureComponent { // eslint-disable-line react
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
-        <Content>
+        <Content isSingle>
           <ContentHeader
             title={pageTitle}
             type={CONTENT_SINGLE}
@@ -229,30 +163,20 @@ export class UserView extends React.PureComponent { // eslint-disable-line react
               </div>
             )
           }
-          { user && dataReady
-            && (
-              <EntityView
-                fields={{
-                  header: {
-                    main: this.getHeaderMainFields(user, isManager),
-                    aside: isManager && this.getHeaderAsideFields(user),
-                  },
-                  body: {
-                    main: this.getBodyMainFields(
-                      user,
-                      taxonomies,
-                      actionsByActiontype,
-                      actorsByActortype,
-                      actionConnections,
-                      actorConnections,
-                      onEntityClick,
-                    ),
-                    aside: isManager && this.getBodyAsideFields(taxonomies),
-                  },
-                }}
-              />
-            )
-          }
+          { user && (
+            <EntityView
+              fields={{
+                header: {
+                  main: this.getHeaderMainFields(user, isManager),
+                  aside: isManager && this.getHeaderAsideFields(user),
+                },
+                body: {
+                  main: this.getBodyMainFields(user),
+                  aside: isManager && this.getBodyAsideFields(taxonomies),
+                },
+              }}
+            />
+          )}
         </Content>
       </div>
     );
@@ -269,11 +193,6 @@ UserView.propTypes = {
   dataReady: PropTypes.bool,
   sessionUserHighestRoleId: PropTypes.number,
   params: PropTypes.object,
-  actionsByActiontype: PropTypes.object,
-  actorsByActortype: PropTypes.object,
-  actionConnections: PropTypes.object,
-  actorConnections: PropTypes.object,
-  onEntityClick: PropTypes.func,
   // sessionUserId: PropTypes.string,
 };
 
@@ -288,10 +207,6 @@ const mapStateToProps = (state, props) => ({
   user: selectViewEntity(state, props.params.id),
   // all connected categories for all user-taggable taxonomies
   taxonomies: selectTaxonomies(state, props.params.id),
-  actionsByActiontype: selectActionsByType(state, props.params.id),
-  actorsByActortype: selectActorsByType(state, props.params.id),
-  actionConnections: selectActionConnections(state),
-  actorConnections: selectActorConnections(state),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -307,9 +222,6 @@ function mapDispatchToProps(dispatch) {
     },
     handleClose: () => {
       dispatch(closeEntity(ROUTES.USERS));
-    },
-    onEntityClick: (id, path) => {
-      dispatch(updatePath(`${path}/${id}`));
     },
   };
 }

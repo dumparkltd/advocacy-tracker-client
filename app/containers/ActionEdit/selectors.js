@@ -1,12 +1,6 @@
 import { createSelector } from 'reselect';
 import {
-  API,
-  ACTIONTYPE_ACTORTYPES,
-  ACTIONTYPE_TARGETTYPES,
-  ACTIONTYPE_RESOURCETYPES,
-  ACTIONTYPE_ACTIONTYPES,
-  INDICATOR_ACTIONTYPES,
-  USER_ACTIONTYPES,
+  API, ACTIONTYPE_ACTORTYPES, ACTIONTYPE_TARGETTYPES, ACTIONTYPE_RESOURCETYPES,
 } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
@@ -22,19 +16,11 @@ import {
   selectCategories,
   selectTaxonomiesSorted,
   selectReady,
-  // selectActions,
-  // selectActiontypes,
+  selectActions,
+  selectActiontypes,
   selectResources,
   selectActionResourcesGroupedByAction,
   selectResourcetypes,
-  selectIndicators,
-  selectActionIndicatorsGroupedByAction,
-  selectActionsCategorised,
-  selectActionActionsGroupedBySubAction,
-  selectActionActionsGroupedByTopAction,
-  selectActiontypes,
-  selectUsers,
-  selectUserActionsGroupedByAction,
 } from 'containers/App/selectors';
 
 import {
@@ -57,47 +43,32 @@ export const selectViewEntity = createSelector(
   (entity, users) => entitySetUser(entity, users)
 );
 
-// export const selectParentOptions = createSelector(
-//   selectViewEntity,
-//   selectActions,
-//   (viewAction, actions) => {
-//     if (viewAction && actions) {
-//       return actions.filter((action) => {
-//         const notSelf = !qe(action.get('id'), viewAction.get('id'));
-//         // const hasParent = action.getIn(['attributes', 'parent_id']);
-//         // todo: avoid circular dependencies
-//         return notSelf;
-//       });
-//     }
-//     return null;
-//   }
-// );
-// export const selectParentOptions = createSelector(
-//   selectViewEntity,
-//   selectActions,
-//   selectActiontypes,
-//   (viewAction, actions, actiontypes) => {
-//     if (viewAction && actions && actiontypes) {
-//       const type = actiontypes.find(
-//         (at) => qe(
-//           viewAction.getIn(['attributes', 'measuretype_id']),
-//           at.get('id'),
-//         )
-//       );
-//       if (type && type.getIn(['attributes', 'has_parent'])) {
-//         return actions.filter((action) => {
-//           const sameType = qe(type.get('id'), action.getIn(['attributes', 'measuretype_id']));
-//           const notSelf = !qe(action.get('id'), viewAction.get('id'));
-//           // const hasParent = action.getIn(['attributes', 'parent_id']);
-//           // todo: avoid circular dependencies
-//           return sameType && notSelf;
-//         });
-//       }
-//       return null;
-//     }
-//     return null;
-//   }
-// );
+export const selectParentOptions = createSelector(
+  selectViewEntity,
+  selectActions,
+  selectActiontypes,
+  (viewAction, actions, actiontypes) => {
+    if (viewAction && actions && actiontypes) {
+      const type = actiontypes.find(
+        (at) => qe(
+          viewAction.getIn(['attributes', 'measuretype_id']),
+          at.get('id'),
+        )
+      );
+      if (type && type.getIn(['attributes', 'has_parent'])) {
+        return actions.filter((action) => {
+          const sameType = qe(type.get('id'), action.getIn(['attributes', 'measuretype_id']));
+          const notSelf = !qe(action.get('id'), viewAction.get('id'));
+          // const hasParent = action.getIn(['attributes', 'parent_id']);
+          // todo: avoid circular dependencies
+          return sameType && notSelf;
+        });
+      }
+      return null;
+    }
+    return null;
+  }
+);
 
 export const selectTaxonomyOptions = createSelector(
   selectViewEntity,
@@ -184,77 +155,6 @@ export const selectActorsByActortype = createSelector(
     });
   }
 );
-export const selectTopActionsByActiontype = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectViewEntity,
-  selectActionsCategorised,
-  selectActionActionsGroupedByTopAction,
-  selectActiontypes,
-  (ready, viewAction, actions, associations, actiontypes) => {
-    if (!viewAction || !ready) return null;
-    const viewActiontypeId = viewAction.getIn(['attributes', 'measuretype_id']).toString();
-    const validActiontypeIds = ACTIONTYPE_ACTIONTYPES[viewActiontypeId];
-    if (!validActiontypeIds || validActiontypeIds.length === 0) {
-      return null;
-    }
-    return actiontypes.filter(
-      (type) => validActiontypeIds
-        && validActiontypeIds.indexOf(type.get('id')) > -1
-    ).map((type) => {
-      const filtered = actions.filter(
-        (action) => qe(
-          type.get('id'),
-          action.getIn(['attributes', 'measuretype_id']),
-        )
-      ).filter(
-        // exclude self
-        (action) => action.get('id') !== viewAction.get('id')
-      );
-      return entitiesSetAssociated(
-        filtered,
-        associations,
-        viewAction.get('id'),
-      );
-    });
-  }
-);
-export const selectSubActionsByActiontype = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectViewEntity,
-  selectActionsCategorised,
-  selectActionActionsGroupedBySubAction,
-  selectActiontypes,
-  (ready, viewAction, actions, associations, actiontypes) => {
-    if (!viewAction || !ready) return null;
-    const viewActiontypeId = viewAction.getIn(['attributes', 'measuretype_id']).toString();
-    const validActiontypeIds = Object.keys(ACTIONTYPE_ACTIONTYPES).filter((actiontypeId) => {
-      const actiontypeIds = ACTIONTYPE_ACTIONTYPES[actiontypeId];
-      return actiontypeIds && actiontypeIds.indexOf(viewActiontypeId) > -1;
-    });
-    if (!validActiontypeIds || validActiontypeIds.length === 0) {
-      return null;
-    }
-    return actiontypes.filter(
-      (type) => validActiontypeIds
-        && validActiontypeIds.indexOf(type.get('id')) > -1
-    ).map((type) => {
-      const filtered = actions.filter(
-        (action) => qe(
-          type.get('id'),
-          action.getIn(['attributes', 'measuretype_id']),
-        )
-      ).filter(
-        // exclude self
-        (action) => action.get('id') !== viewAction.get('id')
-      );
-      return entitiesSetAssociated(
-        filtered,
-        associations,
-        viewAction.get('id'),
-      );
-    });
-  }
-);
 
 export const selectTargetsByActortype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
@@ -317,41 +217,5 @@ export const selectResourcesByResourcetype = createSelector(
         action.get('id'),
       );
     });
-  }
-);
-export const selectIndicatorOptions = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectViewEntity,
-  selectIndicators,
-  selectActionIndicatorsGroupedByAction,
-  (ready, action, indicators, associations) => {
-    if (!action || !ready) return null;
-    const actiontypeId = action.getIn(['attributes', 'measuretype_id']).toString();
-    if (INDICATOR_ACTIONTYPES.indexOf(actiontypeId) > -1) {
-      return entitiesSetAssociated(
-        indicators,
-        associations,
-        action.get('id'),
-      );
-    }
-    return null;
-  }
-);
-export const selectUserOptions = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectViewEntity,
-  selectUsers,
-  selectUserActionsGroupedByAction,
-  (ready, action, users, associations) => {
-    if (!action || !ready) return null;
-    const actiontypeId = action.getIn(['attributes', 'measuretype_id']).toString();
-    if (USER_ACTIONTYPES.indexOf(actiontypeId) > -1) {
-      return entitiesSetAssociated(
-        users,
-        associations,
-        action.get('id'),
-      );
-    }
-    return null;
   }
 );

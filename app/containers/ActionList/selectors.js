@@ -3,14 +3,13 @@ import { Map } from 'immutable';
 
 import {
   selectEntities,
-  selectActionsSearchQuery,
+  selectActionsWhereQuery,
   selectWithoutQuery,
+  selectAnyQuery,
   selectActorQuery,
   selectCategoryQuery,
   selectTargetedQuery,
   selectParentQuery,
-  selectSortByQuery,
-  selectSortOrderQuery,
   selectResourceQuery,
   selectActors,
   selectActions,
@@ -25,30 +24,28 @@ import {
   selectActionActorsMembersGroupedByAction, // passive, as targets
   selectCategories,
   selectActionResourcesGroupedByAction,
-  selectActionIndicatorsGroupedByAction,
   selectResources,
-  selectIndicators,
-  selectUsers,
-  selectUserActionsGroupedByAction,
-  selectUserQuery,
+  selectIncludeMembersForFiltering,
+  selectActorActionsAssociationsGroupedByAction,
+  selectActionActorsAssociationsGroupedByAction,
 } from 'containers/App/selectors';
 
 import {
   filterEntitiesByAttributes,
   filterEntitiesByConnection,
+  filterEntitiesByMultipleConnections,
   filterEntitiesByCategories,
   // filterEntitiesByConnectedCategories,
   filterEntitiesWithoutAssociation,
+  filterEntitiesWithAnyAssociation,
   entitiesSetCategoryIds,
   // filterTaxonomies,
   getTaxonomyCategories,
 } from 'utils/entities';
 
-import { sortEntities, getSortOption } from 'utils/sort';
-
 import { API } from 'themes/config';
 
-import { CONFIG, DEPENDENCIES } from './constants';
+import { DEPENDENCIES } from './constants';
 
 export const selectConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
@@ -57,38 +54,20 @@ export const selectConnections = createSelector(
   selectActions,
   selectActionCategoriesGroupedByAction,
   selectResources,
-  selectIndicators,
-  selectUsers,
   selectCategories,
-  (
-    ready,
-    actors,
-    actorAssociationsGrouped,
-    actions,
-    actionAssociationsGrouped,
-    resources,
-    indicators,
-    users,
-    categories,
-  ) => {
+  (ready, actors, actorCategoriesGrouped, actions, actionAssociationsGrouped, resources, categories) => {
     if (ready) {
       return new Map()
         .set(
           API.ACTORS,
           entitiesSetCategoryIds(
             actors,
-            actorAssociationsGrouped,
+            actorCategoriesGrouped,
             categories,
           ),
         ).set(
           API.RESOURCES,
           resources,
-        ).set(
-          API.INDICATORS,
-          indicators,
-        ).set(
-          API.USERS,
-          users,
         ).set(
           // potential parents
           API.ACTIONS,
@@ -173,10 +152,7 @@ export const selectConnectedTaxonomies = createSelector(
 // nest category ids
 const selectActionsWithCategories = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  (state, args) => selectActionsSearchQuery(state, {
-    searchAttributes: CONFIG.views.list.search || ['title'],
-    ...args,
-  }),
+  selectActionsWhereQuery,
   selectActionCategoriesGroupedByAction,
   selectCategories,
   (ready, entities, associationsGrouped, categories) => {
@@ -199,28 +175,32 @@ const selectActionsWithConnections = createSelector(
   selectConnections,
   selectActorActionsGroupedByAction,
   selectActorActionsMembersGroupedByAction,
+  selectActorActionsAssociationsGroupedByAction,
   selectActionActorsGroupedByAction,
   selectActionActorsMembersGroupedByAction,
+  selectActionActorsAssociationsGroupedByAction,
   selectActionResourcesGroupedByAction,
-  selectActionIndicatorsGroupedByAction,
-  selectUserActionsGroupedByAction,
+  selectIncludeMembersForFiltering,
   (
     ready,
     entities,
     connections,
-    actorAssociationsGrouped,
-    actorMemberAssociationsGrouped,
-    targetAssociationsGrouped,
-    targetMemberAssociationsGrouped,
+    actorConnectionsGrouped,
+    actorMemberConnectionsGrouped,
+    actorAssociationConnectionsGrouped,
+    targetConnectionsGrouped,
+    targetMemberConnectionsGrouped,
+    targetAssociationConnectionsGrouped,
     resourceAssociationsGrouped,
-    indicatorAssociationsGrouped,
-    userAssociationsGrouped,
+    includeMembers,
   ) => {
+    // console.log(actorConnectionsGrouped && actorConnectionsGrouped.toJS())
+    // console.log(actorAssociationConnectionsGrouped && actorAssociationConnectionsGrouped.toJS())
     if (ready && (connections.get(API.ACTORS) || connections.get(API.RESOURCES))) {
       return entities.map(
         (entity) => {
           // actors
-          const entityActors = actorAssociationsGrouped.get(parseInt(entity.get('id'), 10));
+          const entityActors = actorConnectionsGrouped.get(parseInt(entity.get('id'), 10));
           const entityActorsByActortype = entityActors && entityActors.filter(
             (actorId) => connections.getIn([
               API.ACTORS,
@@ -235,9 +215,24 @@ const selectActionsWithConnections = createSelector(
             ])
           ).sortBy((val, key) => key);
 
-          // actors as mambers
-          const entityActorsMembers = actorMemberAssociationsGrouped.get(parseInt(entity.get('id'), 10));
+          // actors as members
+          const entityActorsMembers = actorMemberConnectionsGrouped.get(parseInt(entity.get('id'), 10));
           const entityActorsMembersByActortype = entityActorsMembers && entityActorsMembers.filter(
+            (actorId) => connections.getIn([
+              API.ACTORS,
+              actorId.toString(),
+            ])
+          ).groupBy(
+            (actorId) => connections.getIn([
+              API.ACTORS,
+              actorId.toString(),
+              'attributes',
+              'actortype_id',
+            ])
+          ).sortBy((val, key) => key);
+          // actors as associations
+          const entityActorsAssociations = includeMembers && actorAssociationConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          const entityActorsAssociationsByActortype = includeMembers && entityActorsAssociations && entityActorsAssociations.filter(
             (actorId) => connections.getIn([
               API.ACTORS,
               actorId.toString(),
@@ -252,9 +247,9 @@ const selectActionsWithConnections = createSelector(
           ).sortBy((val, key) => key);
 
           // targets
-          const entityTargets = targetAssociationsGrouped.get(parseInt(entity.get('id'), 10));
-          // console.log('actorAssociationsGrouped', actorAssociationsGrouped && actorAssociationsGrouped.toJS())
-          // console.log('targetAssociationsGrouped', targetAssociationsGrouped && targetAssociationsGrouped.toJS())
+          const entityTargets = targetConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          // console.log('actorConnectionsGrouped', actorConnectionsGrouped && actorConnectionsGrouped.toJS())
+          // console.log('targetConnectionsGrouped', targetConnectionsGrouped && targetConnectionsGrouped.toJS())
           const entityTargetsByActortype = entityTargets && entityTargets.filter(
             (actorId) => connections.getIn([
               API.ACTORS,
@@ -270,9 +265,9 @@ const selectActionsWithConnections = createSelector(
           ).sortBy((val, key) => key);
 
           // targets as members
-          const entityTargetsMembers = targetMemberAssociationsGrouped.get(parseInt(entity.get('id'), 10));
-          // console.log('actorAssociationsGrouped', actorAssociationsGrouped && actorAssociationsGrouped.toJS())
-          // console.log('targetAssociationsGrouped', targetAssociationsGrouped && targetAssociationsGrouped.toJS())
+          const entityTargetsMembers = targetMemberConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          // console.log('actorConnectionsGrouped', actorConnectionsGrouped && actorConnectionsGrouped.toJS())
+          // console.log('targetConnectionsGrouped', targetConnectionsGrouped && targetConnectionsGrouped.toJS())
           const entityTargetsMembersByActortype = entityTargetsMembers && entityTargetsMembers.filter(
             (actorId) => connections.getIn([
               'actors',
@@ -301,21 +296,43 @@ const selectActionsWithConnections = createSelector(
               'resourcetype_id',
             ])
           ).sortBy((val, key) => key);
-          // console.log(entityActorsByActortype && entityActorsByActortype.toJS());
-          // currently requires both for filtering & display
-          const entityIndicators = indicatorAssociationsGrouped.get(parseInt(entity.get('id'), 10));
-          const entityUsers = userAssociationsGrouped.get(parseInt(entity.get('id'), 10));
+          // targets as associations
+          const entityTargetsAssociations = includeMembers && targetAssociationConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          const entityTargetsAssociationsByActortype = includeMembers && entityTargetsAssociations && entityTargetsAssociations.filter(
+            (actorId) => connections.getIn([
+              API.ACTORS,
+              actorId.toString(),
+            ])
+          ).groupBy(
+            (actorId) => connections.getIn([
+              API.ACTORS,
+              actorId.toString(),
+              'attributes',
+              'actortype_id',
+            ])
+          ).sortBy((val, key) => key);
+
+          // the activity
           return entity
+            // directly connected actors
             .set('actors', entityActors)
             .set('actorsByType', entityActorsByActortype)
+            // indirectly connected actors (member of a directly connected group)
             .set('actorsMembers', entityActorsMembers)
             .set('actorsMembersByType', entityActorsMembersByActortype)
+            // indirectly connected actors (group, region, class a directly connected actor belongs to)
+            .set('actorsAssociations', entityActorsAssociations)
+            .set('actorsAssociationsByType', entityActorsAssociationsByActortype)
+            // directly connected targets
             .set('targets', entityTargets)
             .set('targetsByType', entityTargetsByActortype)
+            // indirectly connected targets (via group, region, class)
             .set('targetsMembers', entityTargetsMembers)
             .set('targetsMembersByType', entityTargetsMembersByActortype)
-            .set('indicators', entityIndicators)
-            .set('users', entityUsers)
+            // indirectly connected targets (group, region, class a directly connected actor belongs to)
+            .set('targetsAssociations', entityTargetsAssociations)
+            .set('targetsAssociationsByType', entityTargetsAssociationsByActortype)
+            // directly connected resources
             .set('resources', entityResources)
             .set('resourcesByType', entityResourcesByResourcetype);
         }
@@ -329,33 +346,50 @@ const selectActionsWithout = createSelector(
   selectActionsWithConnections,
   selectCategories,
   selectWithoutQuery,
-  (entities, categories, query) => query
-    ? filterEntitiesWithoutAssociation(entities, categories, query)
+  selectIncludeMembersForFiltering,
+  (entities, categories, query, includeMembers) => query
+    ? filterEntitiesWithoutAssociation(entities, categories, query, includeMembers)
+    : entities
+);
+const selectActionsAny = createSelector(
+  selectActionsWithout,
+  selectCategories,
+  selectAnyQuery,
+  selectIncludeMembersForFiltering,
+  (entities, categories, query, includeMembers) => query
+    ? filterEntitiesWithAnyAssociation(entities, categories, query, includeMembers)
     : entities
 );
 const selectActionsByActors = createSelector(
-  selectActionsWithout,
+  selectActionsAny,
   selectActorQuery,
-  (entities, query) => query
-    ? filterEntitiesByConnection(entities, query, 'actors')
-    : entities
+  selectIncludeMembersForFiltering,
+  (entities, query, includeMembers) => {
+    if (query) {
+      if (includeMembers) {
+        return filterEntitiesByMultipleConnections(entities, query, ['actors', 'actorsAssociations']);
+      }
+      return filterEntitiesByConnection(entities, query, 'actors');
+    }
+    return entities;
+  }
 );
 const selectActionsByTargets = createSelector(
   selectActionsByActors,
   selectTargetedQuery,
-  (entities, query) => query
-    ? filterEntitiesByConnection(entities, query, 'targets')
-    : entities
-);
-const selectActionsByUsers = createSelector(
-  selectActionsByTargets,
-  selectUserQuery,
-  (entities, query) => query
-    ? filterEntitiesByConnection(entities, query, 'users')
-    : entities
+  selectIncludeMembersForFiltering,
+  (entities, query, includeMembers) => {
+    if (query) {
+      if (includeMembers) {
+        return filterEntitiesByMultipleConnections(entities, query, ['targets', 'targetsAssociations']);
+      }
+      return filterEntitiesByConnection(entities, query, 'targets');
+    }
+    return entities;
+  }
 );
 const selectActionsByResources = createSelector(
-  selectActionsByUsers,
+  selectActionsByTargets,
   selectResourceQuery,
   (entities, query) => query
     ? filterEntitiesByConnection(entities, query, 'resources')
@@ -397,15 +431,5 @@ const selectActionsByCategories = createSelector(
 // 7. selectActionsByCOnnectedCategories will filter by specific categories connected via connection
 export const selectViewActions = createSelector(
   selectActionsByCategories,
-  selectSortByQuery,
-  selectSortOrderQuery,
-  (entities, sort, order) => {
-    const sortOption = getSortOption(CONFIG.views.list.sorting, sort);
-    return sortEntities(
-      entities,
-      order || (sortOption ? sortOption.order : 'desc'),
-      sort || (sortOption ? sortOption.attribute : 'id'),
-      sortOption ? sortOption.type : 'string'
-    );
-  }
+  (entities) => entities && entities.toList()
 );

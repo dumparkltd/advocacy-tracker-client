@@ -6,6 +6,7 @@ export const DEPENDENCIES = [
 ];
 
 export const CONFIG = {
+  types: 'pages',
   serverPath: API.PAGES,
   clientPath: ROUTES.PAGES,
   views: {

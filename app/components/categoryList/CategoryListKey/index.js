@@ -29,7 +29,7 @@ const ItemTitle = styled.div`
   vertical-align: middle;
   color: ${palette('text', 1)};
   font-size: 0.7em;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
     font-size: 0.8em;
   }
   @media print {
@@ -43,7 +43,7 @@ const Square = styled.div`
   height: 0.7em;
   width: 0.6em;
   vertical-align: middle;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
     height: 0.8em;
   }
   @media print {

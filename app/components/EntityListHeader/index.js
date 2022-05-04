@@ -9,29 +9,38 @@ import { FormattedMessage } from 'react-intl';
 import styled, { withTheme } from 'styled-components';
 import { Map, List } from 'immutable';
 import { palette } from 'styled-theme';
-import { Box, ResponsiveContext } from 'grommet';
+import {
+  Box, Text, Button, ResponsiveContext,
+} from 'grommet';
+import {
+  Add, Edit, Multiple,
+} from 'grommet-icons';
 
 import { isEqual } from 'lodash/lang';
 import { truncateText } from 'utils/string';
+import { isMinSize } from 'utils/responsive';
 
 import { TEXT_TRUNCATE } from 'themes/config';
 import { FILTER_FORM_MODEL, EDIT_FORM_MODEL } from 'containers/EntityListForm/constants';
 
-import Button from 'components/buttons/Button';
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
-import ButtonFlatWithIcon from 'components/buttons/ButtonFlatWithIcon';
+import Bookmarker from 'containers/Bookmarker';
 
 import EntityListForm from 'containers/EntityListForm';
 import appMessages from 'containers/App/messages';
 import PrintHide from 'components/styled/PrintHide';
 import TagList from 'components/TagList';
 import Icon from 'components/Icon';
+import ButtonOld from 'components/buttons/Button';
 
 import EntityListSidebar from './EntityListSidebar';
 
 import { makeFilterGroups } from './filterGroupsFactory';
 import { makeEditGroups } from './editGroupsFactory';
-import { makeActiveFilterOptions } from './filterOptionsFactory';
+import {
+  makeActiveFilterOptions,
+  makeAnyWithoutFilterOptions,
+} from './filterOptionsFactory';
 import { makeActiveEditOptions } from './editOptionsFactory';
 
 import messages from './messages';
@@ -40,19 +49,22 @@ const Styled = styled(PrintHide)``;
 
 const TheHeader = styled((p) => <Box direction="row" {...p} />)`
   height: ${({ theme }) => theme.sizes.headerList.banner.height}px;
-  padding: 0 15px;
+  padding: 0 3px;
   background-color: ${palette('primary', 3)};
   box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
   position: relative;
   z-index: 96;
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+    padding: 0 15px;
+  }
 `;
 const HeaderSection = styled((p) => <Box direction="row" {...p} />)`
   position: relative;
   border-right: 1px solid ${({ noBorder }) => noBorder ? 'transparent' : palette('light', 4)};
-  padding: 2px 2px;
   height: 100%;
+  padding: 2px 5px;
   flex: ${({ grow }) => grow ? '1' : '0'} ${({ shrink = '1' }) => shrink ? '1' : '0'} auto;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 2px 10px;
   }
 `;
@@ -63,26 +75,20 @@ const HeaderSectionType = styled((p) => <Box direction="column" {...p} />)`
   padding: 18px 5px 2px;
   height: 100%;
 `;
-const SelectType = styled(Button)`
+const SelectType = styled(ButtonOld)`
   display: none;
   text-align: left;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     display: block;
     padding-left: 2px;
     padding-right: 2px;
     max-width: 100%;
   }
 `;
-const EntityListSearch = styled((p) => <Box direction="row" gap="medium" {...p} />)``;
+const EntityListSearch = styled((p) => <Box justify="end" direction="row" gap="medium" {...p} />)``;
 
-const ButtonOptions = styled((p) => <ButtonFlatWithIcon iconRight iconSize="20px" small {...p} />)`
-  position: relative;
-  top: 3px;
-  padding: 4px 8px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    padding: ${(props) => props.inForm ? '1em 1.2em' : '0.25em 1.25em'};
-    padding: 5px 10px;
-  }
+const ButtonOptions = styled((p) => <Button plain {...p} />)`
+  color: ${palette('buttonFlat', 1)};
 `;
 
 const Label = styled.div`
@@ -90,7 +96,7 @@ const Label = styled.div`
   color: ${palette('text', 1)};
   padding-left: 2px;
   padding-right: 2px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     font-size: ${(props) => props.theme.sizes.text.smaller};
   }
   @media print {
@@ -101,7 +107,7 @@ const LinkTitle = styled.div`
   font-size: ${(props) => props.theme.sizes.text.small};
   font-weight: bold;
   color: ${(props) => props.active ? palette('headerNavMainItem', 1) : 'inherit'};
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     font-size: ${(props) => props.theme.sizes.text.default};
   }
   @media print {
@@ -111,13 +117,13 @@ const LinkTitle = styled.div`
 
 const TypeOptions = styled(PrintHide)`
   display: none;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     position: absolute;
     top: 100%;
     left: 0;
     display: block;
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
     min-width: 240px;
   }
   background: white;
@@ -125,7 +131,7 @@ const TypeOptions = styled(PrintHide)`
   margin-top: 3px;
   padding: 5px 0;
 `;
-const TypeOption = styled(Button)`
+const TypeOption = styled(ButtonOld)`
   display: block;
   width: 100%;
   text-align: left;
@@ -218,9 +224,9 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     this.setState({ activeOption: option });
   };
 
-  onShowForm = (option) => {
-    this.setState({ activeOption: option.active ? null : option });
-  };
+  // onShowForm = (option) => {
+  //   this.setState({ activeOption: option.active ? null : option });
+  // };
 
   onHideForm = (evt) => {
     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
@@ -286,7 +292,6 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       membertypes,
       associationtypes,
       currentFilters,
-      onClearFilters,
       onShowFilters,
       onHideFilters,
       showFilters,
@@ -299,8 +304,11 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       dataReady,
       typeId,
       isManager,
+      onUpdateQuery,
+      includeMembers,
+      onSetFilterMemberOption,
+      headerActions,
     } = this.props;
-
     const { intl } = this.context;
     const { activeOption } = this.state;
     const hasSelected = dataReady && canEdit && entityIdsSelected && entityIdsSelected.size > 0;
@@ -325,8 +333,10 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
         membertypes,
         associationtypes,
         activeFilterOption: activeOption,
+        currentFilters,
         typeId,
         intl,
+        locationQuery,
         messages: {
           attributes: intl.formatMessage(messages.filterGroupLabel.attributes),
           taxonomyGroup: intl.formatMessage(messages.filterGroupLabel.taxonomies),
@@ -334,7 +344,41 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           // connectedTaxonomies: intl.formatMessage(messages.filterGroupLabel.connectedTaxonomies),
           taxonomies: (taxId) => this.context.intl.formatMessage(appMessages.entities.taxonomies[taxId].plural),
         },
+        includeMembers,
       });
+      panelGroups = Object.keys(panelGroups).reduce(
+        (memo, groupId) => {
+          const group = panelGroups[groupId];
+          if (group.includeAnyWithout && group.options && group.options.length > 0) {
+            const allAnyOptions = makeAnyWithoutFilterOptions({
+              config,
+              locationQuery,
+              activeFilterOption: {
+                group: groupId,
+              },
+              contextIntl: intl,
+              messages: {
+                titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
+                without: intl.formatMessage(messages.filterFormWithoutPrefix),
+                any: intl.formatMessage(messages.filterFormAnyPrefix),
+                connections: (type) => getFilterConnectionsMsg(intl, type),
+              },
+            });
+            return {
+              ...memo,
+              [groupId]: {
+                ...group,
+                optionsGeneral: allAnyOptions,
+              },
+            };
+          }
+          return {
+            ...memo,
+            [groupId]: group,
+          };
+        },
+        {},
+      );
       if (activeOption) {
         formOptions = makeActiveFilterOptions({
           entities,
@@ -352,7 +396,9 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           messages: {
             titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
             without: intl.formatMessage(messages.filterFormWithoutPrefix),
+            any: intl.formatMessage(messages.filterFormAnyPrefix),
           },
+          includeMembers,
         });
       }
     } else if (dataReady && showEditOptions && hasSelected) {
@@ -397,6 +443,12 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     const hasTypeOptions = typeOptions && typeOptions.length > 0;
     const currentTypeOption = hasTypeOptions && typeOptions.find((option) => option.active);
 
+    const managerActions = canEdit && headerActions && headerActions.filter(
+      (action) => action.isManager
+    );
+    const normalActions = headerActions && headerActions.filter(
+      (action) => !action.isManager
+    );
     return (
       <ResponsiveContext.Consumer>
         {(size) => (
@@ -405,11 +457,20 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
               {config.types && typeOptions && (
                 <HeaderSection noBorder>
                   <ButtonFlatIconOnly onClick={() => onSelectType()}>
-                    <Icon name="arrowLeft" size={size !== 'small' ? '2em' : '1.2em'} />
+                    <Icon name="arrowLeft" size="2em" />
                   </ButtonFlatIconOnly>
                 </HeaderSection>
               )}
-              {config.types && typeOptions && size !== 'small' && (
+              {currentTypeOption && !isMinSize(size, 'large') && (
+                <Text>
+                  {truncateText(
+                    currentTypeOption.label,
+                    TEXT_TRUNCATE.TYPE_SELECT,
+                    false,
+                  )}
+                </Text>
+              )}
+              {config.types && typeOptions && isMinSize(size, 'large') && (
                 <HeaderSectionType justify="start">
                   {config.types && (
                     <Label>
@@ -421,7 +482,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                       />
                     </Label>
                   )}
-                  {dataReady && (
+                  {currentTypeOption && (
                     <SelectType
                       as="button"
                       ref={this.typeButtonRef}
@@ -463,30 +524,121 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                   )}
                 </HeaderSectionType>
               )}
-              <HeaderSection grow noBorder={!canEdit} align="center" gap="medium">
-                <ButtonOptions
-                  onClick={onShowFilters}
-                  disabled={showFilters}
-                  icon="filter"
-                  title={intl.formatMessage(messages.listOptions.showFilter)}
-                />
-                {dataReady && (
+              <HeaderSection grow align="center" gap="medium" justify="end">
+                {dataReady && isMinSize(size, 'large') && (
                   <EntityListSearch>
                     <TagList
                       filters={currentFilters}
-                      onClear={onClearFilters}
                     />
                   </EntityListSearch>
                 )}
               </HeaderSection>
-              {canEdit && size !== 'small' && (
-                <HeaderSection noBorder>
+              {dataReady && isMinSize(size, 'large') && (
+                <HeaderSection align="center">
                   <ButtonOptions
-                    onClick={onShowEditOptions}
-                    disabled={showEditOptions}
-                    icon="edit"
-                    title={intl.formatMessage(messages.listOptions.showEditOptions)}
+                    onClick={onShowFilters}
+                    label={(
+                      <Box direction="row" gap="small" align="center">
+                        <Box>{<Icon name="filter" text />}</Box>
+                        <Text>{intl.formatMessage(messages.listOptions.showFilter)}</Text>
+                      </Box>
+                    )}
                   />
+                </HeaderSection>
+              )}
+              {normalActions && (
+                <HeaderSection noBorder={!canEdit}>
+                  <Box fill="vertical" direction="row" align="center" pad={{ vertical: 'xsmall' }}>
+                    {normalActions.map(
+                      (action, i) => {
+                        if (action.type === 'bookmarker') {
+                          return (
+                            <Box key={i}>
+                              <Bookmarker viewTitle={action.title} type={action.entityType} />
+                            </Box>
+                          );
+                        }
+                        if (action.type === 'icon') {
+                          return (
+                            <Box key={i}>
+                              <ButtonFlatIconOnly
+                                onClick={action.onClick && (() => action.onClick())}
+                                title={action.title}
+                                subtle
+                              >
+                                <Icon name={action.icon} />
+                              </ButtonFlatIconOnly>
+                            </Box>
+                          );
+                        }
+                        return null;
+                      }
+                    )}
+                  </Box>
+                </HeaderSection>
+              )}
+              {canEdit && isMinSize(size, 'large') && (
+                <HeaderSection noBorder>
+                  <Box fill="vertical" justify="between" pad={{ top: 'xsmall', bottom: 'xxsmall' }}>
+                    <ButtonOptions
+                      onClick={onShowEditOptions}
+                      label={(
+                        <Box direction="row" gap="small">
+                          <Box>
+                            <Edit color="dark-3" size="xxsmall" />
+                          </Box>
+                          <Text color="dark-3" size="small">{intl.formatMessage(messages.listOptions.showEditOptions)}</Text>
+                        </Box>
+                      )}
+                    />
+                    {managerActions && managerActions.map(
+                      (action, i) => {
+                        if (action.icon === 'add') {
+                          return (
+                            <ButtonOptions
+                              key={i}
+                              onClick={action.onClick}
+                              label={(
+                                <Box direction="row" gap="small">
+                                  <Box>
+                                    <Add color="dark-3" size="xxsmall" />
+                                  </Box>
+                                  <Text color="dark-3" size="small">{action.title}</Text>
+                                </Box>
+                              )}
+                            />
+                          );
+                        }
+                        if (action.icon === 'import') {
+                          return (
+                            <ButtonOptions
+                              key={i}
+                              onClick={action.onClick}
+                              label={(
+                                <Box direction="row" gap="small">
+                                  <Box>
+                                    <Multiple color="dark-3" size="xxsmall" />
+                                  </Box>
+                                  <Text color="dark-3" size="small">{action.title}</Text>
+                                </Box>
+                              )}
+                            />
+                          );
+                        }
+                        return (
+                          <ButtonOptions
+                            key={i}
+                            onClick={action.onClick}
+                            label={(
+                              <Box direction="row" gap="small">
+                                <Text color="dark-3" size="small">{action.title}</Text>
+                              </Box>
+                            )}
+                          />
+                        );
+                      }
+                    )}
+                  </Box>
                 </HeaderSection>
               )}
             </TheHeader>
@@ -495,7 +647,24 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                 hasEntities={entities && entities.size > 0}
                 panelGroups={panelGroups}
                 onHideSidebar={onHideFilters}
+                onHideOptions={this.onHideForm}
                 setActiveOption={this.onSetActiveOption}
+                onUpdateQuery={(args) => {
+                  this.onHideForm();
+                  onUpdateQuery(args);
+                }}
+                memberOption={config.hasMemberOption
+                  ? {
+                    key: 'filter-member-option',
+                    active: !!includeMembers,
+                    label: 'Include members when filtering by region, class or intergovernmental organisation',
+                    onClick: () => {
+                      this.onHideForm();
+                      onSetFilterMemberOption(!includeMembers);
+                    },
+                  }
+                  : null
+                }
               />
             )}
             {showEditOptions && (
@@ -522,7 +691,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                 onSelect={() => {
                   if (showFilters) {
                     this.onHideForm();
-                    onHideFilters();
+                    // onHideFilters();
                   }
                 }}
                 onSubmit={showEditOptions
@@ -562,7 +731,7 @@ EntityListHeader.propTypes = {
   listUpdating: PropTypes.bool,
   theme: PropTypes.object,
   currentFilters: PropTypes.array,
-  onClearFilters: PropTypes.func.isRequired,
+  onUpdateQuery: PropTypes.func.isRequired,
   onShowFilters: PropTypes.func,
   onHideFilters: PropTypes.func,
   showFilters: PropTypes.bool,
@@ -572,9 +741,12 @@ EntityListHeader.propTypes = {
   canEdit: PropTypes.bool,
   dataReady: PropTypes.bool,
   isManager: PropTypes.bool,
+  includeMembers: PropTypes.bool,
   typeOptions: PropTypes.array,
   onSelectType: PropTypes.func,
+  onSetFilterMemberOption: PropTypes.func,
   typeId: PropTypes.string,
+  headerActions: PropTypes.array,
 };
 
 EntityListHeader.contextTypes = {

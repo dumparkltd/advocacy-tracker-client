@@ -218,6 +218,27 @@ export default function createRoutes(store) {
         importModules.catch(errorLoading);
       },
     }, {
+      path: `${ROUTES.ACTOR_ACTIONS}${ROUTES.IMPORT}${ROUTES.ID}`,
+      name: 'actorActionsImport',
+      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      getComponent(nextState, cb) {
+        const importModules = Promise.all([
+          import('containers/ActorActionsImport/reducer'),
+          import('containers/ActorActionsImport/sagas'),
+          import('containers/ActorActionsImport'),
+        ]);
+
+        const renderRoute = loadModule(cb);
+
+        importModules.then(([reducer, sagas, component]) => {
+          injectReducer('actorActionsImport', reducer.default);
+          injectSagas(sagas.default);
+          renderRoute(component);
+        });
+
+        importModules.catch(errorLoading);
+      },
+    }, {
       // ROUTES.ID: actiontype, ROUTES.VIEW: map, list or stats
       path: `${ROUTES.ACTIONS}${ROUTES.ID}`,
       name: 'actionListForType',
@@ -533,104 +554,6 @@ export default function createRoutes(store) {
 
         importModules.then(([reducer, sagas, component]) => {
           injectReducer('resourceEdit', reducer.default);
-          injectSagas(sagas.default);
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
-      },
-    }, {
-      path: `${ROUTES.INDICATORS}${ROUTES.IMPORT}`,
-      name: 'indicatorImport',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
-      getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          import('containers/IndicatorImport/reducer'),
-          import('containers/IndicatorImport/sagas'),
-          import('containers/IndicatorImport'),
-        ]);
-
-        const renderRoute = loadModule(cb);
-
-        importModules.then(([reducer, sagas, component]) => {
-          injectReducer('indicatorImport', reducer.default);
-          injectSagas(sagas.default);
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
-      },
-    }, {
-      // ROUTES.ID: actiontype, ROUTES.VIEW: map, list or stats
-      path: ROUTES.INDICATORS,
-      name: 'indicators',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
-      getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          import('containers/IndicatorList'),
-        ]);
-
-        const renderRoute = loadModule(cb);
-
-        importModules.then(([component]) => {
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
-      },
-    }, {
-      path: `${ROUTES.INDICATORS}${ROUTES.NEW}`, // no type id
-      name: 'indicatorNew',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
-      getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          import('containers/IndicatorNew/reducer'),
-          import('containers/IndicatorNew/sagas'),
-          import('containers/IndicatorNew'),
-        ]);
-
-        const renderRoute = loadModule(cb);
-
-        importModules.then(([reducer, sagas, component]) => {
-          injectReducer('indicatorNew', reducer.default);
-          injectSagas(sagas.default);
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
-      },
-    }, {
-      path: `${ROUTES.INDICATOR}${ROUTES.ID}`,
-      name: 'indicatorView',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
-      getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          import('containers/IndicatorView'),
-        ]);
-
-        const renderRoute = loadModule(cb);
-
-        importModules.then(([component]) => {
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
-      },
-    }, {
-      path: `${ROUTES.INDICATOR}${ROUTES.EDIT}${ROUTES.ID}`,
-      name: 'indicatorEdit',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
-      getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          import('containers/IndicatorEdit/reducer'),
-          import('containers/IndicatorEdit/sagas'),
-          import('containers/IndicatorEdit'),
-        ]);
-
-        const renderRoute = loadModule(cb);
-
-        importModules.then(([reducer, sagas, component]) => {
-          injectReducer('indicatorEdit', reducer.default);
           injectSagas(sagas.default);
           renderRoute(component);
         });

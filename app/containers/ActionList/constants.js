@@ -10,11 +10,9 @@ export const DEPENDENCIES = [
   API.ACTORS,
   API.ACTIONS,
   API.RESOURCES,
-  API.INDICATORS,
   API.ACTOR_ACTIONS,
   API.ACTION_ACTORS,
   API.ACTION_RESOURCES,
-  API.ACTION_INDICATORS,
   API.ACTOR_CATEGORIES,
   API.ACTION_CATEGORIES,
   API.ACTORTYPES,
@@ -26,7 +24,6 @@ export const DEPENDENCIES = [
   API.CATEGORIES,
   API.MEMBERSHIPS,
   API.USERS,
-  API.USER_ACTIONS,
   API.USER_ROLES,
 ];
 
@@ -34,35 +31,19 @@ export const CONFIG = {
   types: 'actiontypes',
   serverPath: API.ACTIONS,
   clientPath: ROUTES.ACTION,
+  hasMemberOption: true,
   views: {
     list: {
       search: ['code', 'title', 'description'],
-      sorting: [
-        {
-          attribute: 'title',
-          type: 'string',
-          order: 'asc',
-        },
-        {
-          attribute: 'code',
-          type: 'string',
-          order: 'asc',
-        },
-        {
-          attribute: 'updated_at',
-          type: 'date',
-          order: 'desc',
-          default: true,
-        },
-        {
-          attribute: 'id', // proxy for created at
-          type: 'number',
-          order: 'desc',
-        },
-      ],
     },
     map: {
-      types: Object.values(ACTIONTYPES),
+      types: [
+        ACTIONTYPES.REGLSEAS,
+        ACTIONTYPES.REGL,
+        ACTIONTYPES.NATL,
+        ACTIONTYPES.INIT,
+        ACTIONTYPES.DONOR,
+      ],
     },
   },
   taxonomies: { // filter by each category
@@ -91,7 +72,8 @@ export const CONFIG = {
       query: 'actor',
       type: 'action-actors',
       search: true,
-      message: 'entities.actors_{typeid}.plural',
+      messageByType: 'entities.actors_{typeid}.plural',
+      message: 'entities.actors.plural',
       path: API.ACTORS,
       entityType: 'actors',
       clientPath: ROUTES.ACTOR,
@@ -100,13 +82,15 @@ export const CONFIG = {
       ownKey: 'measure_id',
       groupByType: true,
       typeFilter: 'is_active',
+      typeMemberFilter: 'has_members',
     },
     // filter by associated target
     targets: {
       query: 'targeted',
       type: 'action-targets',
       search: true,
-      message: 'entities.actors_{typeid}.plural',
+      messageByType: 'entities.actors_{typeid}.plural',
+      message: 'entities.actors.plural',
       path: API.ACTORS,
       entityType: 'actors',
       entityTypeAs: 'targets',
@@ -116,25 +100,15 @@ export const CONFIG = {
       ownKey: 'measure_id',
       groupByType: true,
       typeFilter: 'is_target',
-    },
-    indicators: {
-      query: 'indicators',
-      type: 'action-indicators',
-      search: true,
-      message: 'entities.indicators.plural',
-      path: API.INDICATORS,
-      entityType: 'indicators',
-      clientPath: ROUTES.INDICATOR,
-      connectPath: API.ACTION_INDICATORS, // filter by actor connection
-      key: 'indicator_id',
-      ownKey: 'measure_id',
+      typeMemberFilter: 'has_members',
     },
     // filter by associated entity
     resources: {
       query: 'resources',
       type: 'action-resources',
       search: true,
-      message: 'entities.resources_{typeid}.plural',
+      messageByType: 'entities.resources_{typeid}.plural',
+      message: 'entities.resources.plural',
       path: API.RESOURCES,
       entityType: 'resources',
       clientPath: ROUTES.RESOURCE,
@@ -144,17 +118,19 @@ export const CONFIG = {
       groupByType: true,
       listItemHide: true,
     },
-    users: {
-      query: 'users',
-      type: 'action-users',
+    // filter by associated parent
+    parents: {
+      query: 'parent',
+      type: 'action-parents',
       search: true,
-      message: 'entities.users.plural',
-      path: API.USERS,
-      entityType: 'users',
-      clientPath: ROUTES.USER,
-      connectPath: API.USER_ACTIONS, // filter by actor connection
-      key: 'user_id',
-      ownKey: 'measure_id',
+      message: 'attributes.parent_id',
+      path: API.ACTIONS,
+      entityType: 'actions',
+      entityTypeAs: 'parent',
+      clientPath: ROUTES.ACTION,
+      attribute: 'parent_id',
+      typeFilter: 'has_parent',
+      listItemHide: true,
     },
   },
   attributes: { // filter by attribute value
@@ -165,6 +141,7 @@ export const CONFIG = {
         attribute: 'draft',
         options: PUBLISH_STATUSES,
         role: USER_ROLES.MANAGER.value,
+        filterUI: 'checkboxes',
       },
     ],
   },
