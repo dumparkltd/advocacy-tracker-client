@@ -49,7 +49,8 @@ function Footer({
   intl,
 }) {
   const size = React.useContext(ResponsiveContext);
-  const appTitle = `${intl.formatMessage(appMessages.app.claim)} - ${intl.formatMessage(appMessages.app.title)}`;
+  // const appTitle = `${intl.formatMessage(appMessages.app.claim)} - ${intl.formatMessage(appMessages.app.title)}`;
+  const appTitle = `${intl.formatMessage(appMessages.app.title)}`;
 
   return (
     <FooterMain>
