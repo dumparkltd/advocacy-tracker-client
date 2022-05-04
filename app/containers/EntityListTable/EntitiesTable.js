@@ -27,24 +27,10 @@ const TableRow = styled.tr`
   height: 100%;
 `;
 const getColWidth = ({
-  col, count, isIndicator, colSpan = 1,
+  col, count, colSpan = 1,
 }) => {
   if (count === 1) {
     return 100;
-  }
-  if (isIndicator) {
-    if (count === 2) {
-      return col.type === 'main' ? 50 : 50;
-    }
-    if (count > 2) {
-      if (col.type === 'indicator') {
-        return 25;
-      }
-      if (col.type === 'main') {
-        return 25;
-      }
-      return 50 / (count - 2);
-    }
   }
   if (count === 2) {
     return col.type === 'main' ? 50 : 50;
@@ -135,7 +121,6 @@ export function EntitiesTable({
                       col={col}
                       count={headerColumns.length}
                       colSpan={col.span || 1}
-                      isIndicator={col.isIndicator}
                       first={i === 0}
                       last={i === headerColumns.length - 1}
                       utility
@@ -167,7 +152,6 @@ export function EntitiesTable({
                     scope="col"
                     col={col}
                     count={headerColumns.length}
-                    isIndicator={col.isIndicator}
                     first={i === 0}
                     last={i === headerColumns.length - 1}
                   >
@@ -215,12 +199,6 @@ export function EntitiesTable({
                       />
                     )}
                     {col.type === 'amount' && (
-                      <CellBodyPlain
-                        entity={entity[col.id]}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'indicator' && (
                       <CellBodyPlain
                         entity={entity[col.id]}
                         column={col}

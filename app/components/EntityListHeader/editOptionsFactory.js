@@ -112,6 +112,7 @@ const makeTaxonomyEditOptions = (entities, taxonomies, activeEditOption, message
       editOptions.options[category.get('id')] = {
         reference: getEntityReference(category, false),
         label: getEntityTitle(category),
+        description: category.getIn(['attributes', 'description']),
         group: parent && getEntityParentId(category),
         value: category.get('id'),
         checked: checkedState(count, entities.size),
@@ -184,6 +185,7 @@ const makeConnectionEditOptions = (
         editOptions.options[connection.get('id')] = {
           reference: getEntityReference(connection),
           label: getEntityTitle(connection),
+          description: connection.getIn(['attributes', 'description']),
           value: connection.get('id'),
           checked: checkedState(count, entities.size),
           tags: connection.get('categories'),

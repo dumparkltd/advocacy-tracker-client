@@ -68,7 +68,6 @@ import messages from './messages';
 import Activities from './Activities';
 import Members from './Members';
 import CountryMap from './CountryMap';
-import CountryFacts from './CountryFacts';
 
 import {
   selectViewEntity,
@@ -79,7 +78,6 @@ import {
   selectAssociationsByType,
   selectActionsAsMemberByActortype,
   selectActionsAsTargetAsMemberByActortype,
-  selectActorIndicators,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
@@ -105,7 +103,6 @@ export function ActorView(props) {
     viewTaxonomies,
     associationsByType,
     onEntityClick,
-    onUpdatePath,
     subject,
     onSetSubject,
     membersByType,
@@ -120,7 +117,6 @@ export function ActorView(props) {
     actiontypes,
     actionsAsMemberByActortype,
     actionsAsTargetAsMemberByActortype,
-    indicators,
   } = props;
   useEffect(() => {
     // kick off loading of data
@@ -317,13 +313,7 @@ export function ActorView(props) {
                         actionsAsTargetAsMemberByActortype={actionsAsTargetAsMemberByActortype}
                       />
                     )}
-                    {viewSubject === 'facts' && (
-                      <CountryFacts
-                        onUpdatePath={onUpdatePath}
-                        indicators={indicators}
-                        resources={actionConnections && actionConnections.get('resources')}
-                      />
-                    )}
+
                   </Box>
                 </Main>
                 <Aside bottom>
@@ -402,9 +392,7 @@ ActorView.propTypes = {
   handleClose: PropTypes.func,
   handleTypeClick: PropTypes.func,
   onEntityClick: PropTypes.func,
-  onUpdatePath: PropTypes.func,
   viewTaxonomies: PropTypes.instanceOf(Map),
-  indicators: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
   actionConnections: PropTypes.instanceOf(Map),
   actorConnections: PropTypes.instanceOf(Map),
@@ -429,7 +417,6 @@ const mapStateToProps = (state, props) => ({
   isManager: selectIsUserManager(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
-  indicators: selectActorIndicators(state, props.params.id),
   viewTaxonomies: selectViewTaxonomies(state, props.params.id),
   taxonomies: selectTaxonomiesWithCategories(state),
   actionsByActiontype: selectActionsByType(state, props.params.id),
@@ -462,9 +449,6 @@ function mapDispatchToProps(dispatch, props) {
     },
     onEntityClick: (id, path) => {
       dispatch(updatePath(`${path}/${id}`));
-    },
-    onUpdatePath: (path) => {
-      dispatch(updatePath(path));
     },
     onSetSubject: (type) => {
       dispatch(setSubject(type));

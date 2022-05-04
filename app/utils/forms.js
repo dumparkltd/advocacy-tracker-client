@@ -30,6 +30,7 @@ export const entityOption = (entity, defaultToId, hasTags) => Map({
   value: entity.get('id'),
   label: getEntityTitle(entity),
   reference: getEntityReference(entity, defaultToId),
+  description: entity.getIn(['attributes', 'description']),
   checked: !!entity.get('associated'),
   tags: hasTags && entity.get('categories'),
   draft: entity.getIn(['attributes', 'draft']),

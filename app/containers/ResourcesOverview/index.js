@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import appMessages from 'containers/App/messages';
 
-import { ROUTES, RESOURCETYPE_GROUPS } from 'themes/config';
+import { ROUTES, RESOURCETYPE_NAVGROUPS } from 'themes/config';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import { selectReady } from 'containers/App/selectors';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
@@ -50,16 +50,16 @@ export function ResourcesOverview({
     <ContainerWrapper bg>
       <ViewContainer>
         <Content>
-          {Object.keys(RESOURCETYPE_GROUPS).map((key) => (
+          {Object.keys(RESOURCETYPE_NAVGROUPS).map((key) => (
             <Group key={key}>
               <GroupTitle>
                 <FormattedMessage {...appMessages.resourcetypeGroups[key]} />
               </GroupTitle>
               <Box direction={isMaxSize(size, 'medium') ? 'column' : 'row'} gap="small">
-                {RESOURCETYPE_GROUPS[key].types.map((typeId) => {
+                {RESOURCETYPE_NAVGROUPS[key].types.map((typeId) => {
                   const path = `${ROUTES.RESOURCES}/${typeId}`;
                   const count = types.getIn([typeId, 'count']) ? parseInt(types.getIn([typeId, 'count']), 10) : 0;
-                  const { primary } = RESOURCETYPE_GROUPS[key];
+                  const { primary } = RESOURCETYPE_NAVGROUPS[key];
                   return (
                     <CardTeaser
                       key={typeId}

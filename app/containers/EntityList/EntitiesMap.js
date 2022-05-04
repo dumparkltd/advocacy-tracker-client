@@ -108,7 +108,7 @@ export function EntitiesMap({
     // actors ===================================================
     if (config.types === 'actortypes') {
       type = actortypes.find((at) => qe(at.get('id'), typeId));
-      hasByTarget = type.getIn(['attributes', 'is_target']);
+      hasByTarget = false; // type.getIn(['attributes', 'is_target']);
       hasActions = type.getIn(['attributes', 'is_active']);
       if (hasByTarget && qe(typeId, ACTORTYPES.COUNTRY)) { // ie countries & groups
         if (mapSubjectClean === 'targets') {
@@ -422,7 +422,7 @@ export function EntitiesMap({
         plural: intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural),
       };
       type = actiontypes.find((at) => qe(at.get('id'), typeId));
-      hasByTarget = type.getIn(['attributes', 'has_target']);
+      hasByTarget = false; // type.getIn(['attributes', 'has_target']);
       if (hasByTarget) {
         if (mapSubjectClean === 'targets') {
           indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';

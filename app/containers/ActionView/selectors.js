@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
-import { API, FF_ACTIONTYPE, ACTORTYPES_CONFIG } from 'themes/config';
+import { API, ACTORTYPES_CONFIG } from 'themes/config';
 import {
   selectReady,
   selectEntity,
@@ -157,7 +157,7 @@ export const selectActorsByType = createSelector(
     categories,
   ) => {
     if (!ready) return Map();
-    let actorsWithConnections = actors && actors
+    const actorsWithConnections = actors && actors
       .map((actor) => setActorConnections({
         actor,
         actorConnections,
@@ -168,26 +168,6 @@ export const selectActorsByType = createSelector(
         memberships,
         associations,
       }));
-    if (viewEntity && qe(viewEntity.getIn(['attributes', 'measuretype_id']), FF_ACTIONTYPE)) {
-      const viewEntityActors = actorActionsByActionFull.get(parseInt(viewEntity.get('id'), 10));
-      if (viewEntityActors) {
-        actorsWithConnections = actorsWithConnections.map(
-          (actor) => {
-            // console.log(actor && actor.toJS())
-            const actorConnection = viewEntityActors.find(
-              (connection) => qe(actor.get('id'), connection.get('actor_id'))
-            );
-            return actorConnection
-              ? actor.setIn([
-                'actionValues',
-                viewEntity.get('id'),
-              ],
-              actorConnection.get('value'))
-              : actor;
-          }
-        );
-      }
-    }
     return actorsWithConnections && actorsWithConnections
       .groupBy((r) => r.getIn(['attributes', 'actortype_id']))
       .sortBy(

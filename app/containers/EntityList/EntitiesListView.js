@@ -17,7 +17,6 @@ import {
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
-  FF_ACTIONTYPE,
   ACTIONTYPES,
 } from 'themes/config';
 import { CONTENT_LIST } from 'containers/App/constants';
@@ -43,7 +42,6 @@ const getActivityColumns = (mapSubject, typeId) => {
   if (mapSubject === 'actors') {
     actionTypeIds = Object.keys(ACTIONTYPE_ACTORTYPES).filter(
       (actionTypeId) => {
-        if (qe(actionTypeId, FF_ACTIONTYPE)) return false;
         const actiontypeActortypeId = ACTIONTYPE_ACTORTYPES[actionTypeId];
         return actiontypeActortypeId.indexOf(typeId.toString()) > -1;
       }

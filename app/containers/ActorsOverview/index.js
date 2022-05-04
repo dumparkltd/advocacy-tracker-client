@@ -11,7 +11,7 @@ import styled from 'styled-components';
 
 import appMessages from 'containers/App/messages';
 
-import { ROUTES, ACTORTYPE_GROUPS } from 'themes/config';
+import { ROUTES, ACTORTYPE_NAVGROUPS } from 'themes/config';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import { selectReady } from 'containers/App/selectors';
 
@@ -51,16 +51,16 @@ export function ActorsOverview({
       <HeaderExplore />
       <ViewContainer>
         <Content>
-          {Object.keys(ACTORTYPE_GROUPS).map((key) => (
+          {Object.keys(ACTORTYPE_NAVGROUPS).map((key) => (
             <Group key={key}>
               <GroupTitle>
                 <FormattedMessage {...appMessages.actortypeGroups[key]} />
               </GroupTitle>
               <Box direction={isMaxSize(size, 'medium') ? 'column' : 'row'} gap="small">
-                {ACTORTYPE_GROUPS[key].types.map((typeId) => {
+                {ACTORTYPE_NAVGROUPS[key].types.map((typeId) => {
                   const path = `${ROUTES.ACTORS}/${typeId}`;
                   const count = types.getIn([typeId, 'count']) ? parseInt(types.getIn([typeId, 'count']), 10) : 0;
-                  const { primary } = ACTORTYPE_GROUPS[key];
+                  const { primary } = ACTORTYPE_NAVGROUPS[key];
                   return (
                     <CardTeaser
                       key={typeId}

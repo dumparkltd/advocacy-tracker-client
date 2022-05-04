@@ -191,7 +191,6 @@ export function EntityListTable({
         ) {
           if (
             a[cleanSortBy].type === 'amount'
-            || a[cleanSortBy].type === 'indicator'
             || a[cleanSortBy].type === 'actorActions'
           ) {
             result = aSortValue > bSortValue ? 1 : -1;

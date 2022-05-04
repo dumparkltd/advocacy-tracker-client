@@ -2,12 +2,10 @@ import { createSelector } from 'reselect';
 import { Map } from 'immutable';
 import {
   API,
-  FF_ACTIONTYPE,
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
 } from 'themes/config';
 
-import qe from 'utils/quasi-equals';
 import {
   selectReady,
   selectEntity,
@@ -27,7 +25,6 @@ import {
   selectMembershipsGroupedByAssociation,
   selectActors,
   selectActorCategoriesGroupedByActor,
-  selectActorActionsGroupedByActorAttributes,
 } from 'containers/App/selectors';
 
 import {
@@ -134,9 +131,6 @@ export const selectActionsByType = createSelector(
     if (!ready) return Map();
     return actions && actions
       .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
-      .filter(
-        (typeActions, typeId) => !qe(typeId, FF_ACTIONTYPE),
-      )
       .sortBy((val, key) => key);
   }
 );
@@ -422,23 +416,4 @@ export const selectActionsAsTargetAsMemberByActortype = createSelector(
       }
     );
   },
-);
-
-export const selectActorIndicators = createSelector(
-  (state, id) => id,
-  selectActionsWith,
-  selectActorActionsGroupedByActorAttributes,
-  (id, viewActions, actorActions) => {
-    const viewActorActions = actorActions && actorActions.get(parseInt(id, 10));
-    return viewActions && viewActions.filter(
-      (action) => qe(action.getIn(['attributes', 'measuretype_id']), FF_ACTIONTYPE)
-    ).map(
-      (action) => {
-        const aaa = viewActorActions.find((aa) => qe(aa.get('measure_id'), action.get('id')));
-        return aaa
-          ? action.set('value', aaa.get('value'))
-          : action;
-      }
-    );
-  }
 );
