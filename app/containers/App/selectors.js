@@ -27,6 +27,9 @@ import {
   DEFAULT_ACTORTYPE,
   ACTORTYPES_CONFIG,
   ACTIONTYPES_CONFIG,
+  INDICATOR_ACTIONTYPES,
+  USER_ACTIONTYPES,
+  USER_ACTORTYPES,
 } from 'themes/config';
 
 import {
@@ -466,6 +469,14 @@ export const selectResource = createSelector(
   (state, id) => selectEntity(state, { id, path: API.RESOURCES }),
   (entity) => entity
 );
+export const selectIndicators = createSelector(
+  (state) => selectEntities(state, API.INDICATOR),
+  (entities) => sortEntities(entities, 'desc', 'id', null, false)
+);
+export const selectIndicator = createSelector(
+  (state, id) => selectEntity(state, { id, path: API.INDICATOR }),
+  (entity) => entity
+);
 // all action types
 export const selectActortypes = createSelector(
   (state) => selectEntities(state, API.ACTORTYPES),
@@ -530,6 +541,33 @@ export const selectActiontypesForActortype = createSelector(
     });
     return actiontypes.filter(
       (type) => validActiontypeIds && validActiontypeIds.indexOf(type.get('id')) > -1
+    );
+  }
+);
+export const selectActiontypesForIndicators = createSelector(
+  selectActiontypes,
+  (actiontypes) => {
+    if (!actiontypes) return null;
+    return actiontypes.filter(
+      (type) => INDICATOR_ACTIONTYPES.indexOf(type.get('id')) > -1
+    );
+  }
+);
+export const selectActiontypesForUsers = createSelector(
+  selectActiontypes,
+  (actiontypes) => {
+    if (!actiontypes) return null;
+    return actiontypes.filter(
+      (type) => USER_ACTIONTYPES.indexOf(type.get('id')) > -1
+    );
+  }
+);
+export const selectActortypesForUsers = createSelector(
+  selectActiontypes,
+  (actiontypes) => {
+    if (!actiontypes) return null;
+    return actiontypes.filter(
+      (type) => USER_ACTORTYPES.indexOf(type.get('id')) > -1
     );
   }
 );
@@ -1271,6 +1309,29 @@ export const selectActionResourcesGroupedByAction = createSelector(
     ).map(
       (group) => group.map(
         (entity) => entity.getIn(['attributes', 'resource_id'])
+      )
+    ),
+);
+
+export const selectActionIndicatorsGroupedByIndicator = createSelector(
+  (state) => selectEntities(state, API.ACTION_INDICATORS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'indicator_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.getIn(['attributes', 'measure_id'])
+      )
+    ),
+);
+export const selectActionIndicatorsGroupedByAction = createSelector(
+  (state) => selectEntities(state, API.ACTION_INDICATORS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'measure_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.getIn(['attributes', 'indicator_id'])
       )
     ),
 );

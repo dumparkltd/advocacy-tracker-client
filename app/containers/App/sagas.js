@@ -40,7 +40,7 @@ import {
   SET_ACTORTYPE,
   SET_VIEW,
   SET_SUBJECT,
-  SET_MAP_SUBJECT,
+  SET_MAPSUBJECT,
   OPEN_BOOKMARK,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
@@ -118,6 +118,7 @@ const autoRestart = (generator, handleError, maxTries = MAX_LOAD_ATTEMPTS) => fu
     } catch (err) {
       // console.log('err', n)
       if (n >= maxTries) {
+        // console.log('handleError', n)
         yield handleError(err, ...args);
       }
     }
@@ -130,6 +131,7 @@ const autoRestart = (generator, handleError, maxTries = MAX_LOAD_ATTEMPTS) => fu
    * @param {object} payload {key: data set key}
    */
 function* loadEntitiesErrorHandler(err, { path }) {
+  // console.log('handle loading error', path)
   yield put(entitiesLoadingError(err, path));
 }
 /**
@@ -155,14 +157,17 @@ export function* loadEntitiesSaga({ path }) {
             response: call(apiRequest, 'get', path),
             cancel: take(INVALIDATE_ENTITIES), // will also reset entities requested
           });
+          // console.log('response', response)
           if (response && response.data) {
             // Save response
             yield put(entitiesLoaded(keyBy(response.data, 'id'), path, Date.now()));
           } else {
+            // console.log('no response data', response)
             yield put(entitiesRequested(path, false));
             throw new Error(response.statusText || 'error');
           }
         } catch (err) {
+          // console.log('error', err)
           // Whoops Save error
           // Clear the request time on error, This will cause us to try again next time, which we probably want to do?
           yield put(entitiesRequested(path, false));
@@ -341,6 +346,23 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
           },
         });
       }
+      // update action-actions connections (relationships)
+      if (data.entity.topActions) {
+        yield call(saveConnectionsSaga, {
+          data: {
+            path: API.ACTION_ACTIONS,
+            updates: data.entity.topActions,
+          },
+        });
+      }
+      if (data.entity.subActions) {
+        yield call(saveConnectionsSaga, {
+          data: {
+            path: API.ACTION_ACTIONS,
+            updates: data.entity.subActions,
+          },
+        });
+      }
       // update action-actors connections (targets)
       if (data.entity.actionResources) {
         yield call(saveConnectionsSaga, {
@@ -350,12 +372,46 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
           },
         });
       }
+      if (data.entity.actionIndicators) {
+        yield call(saveConnectionsSaga, {
+          data: {
+            path: API.ACTION_INDICATORS,
+            updates: data.entity.actionIndicators,
+          },
+        });
+      }
+      if (data.entity.userActions) {
+        yield call(saveConnectionsSaga, {
+          data: {
+            path: API.USER_ACTIONS,
+            updates: data.entity.userActions,
+          },
+        });
+      }
+      if (data.entity.userActors) {
+        yield call(saveConnectionsSaga, {
+          data: {
+            path: API.USER_ACTORS,
+            updates: data.entity.userActors,
+          },
+        });
+      }
       // update memberships connections
       if (data.entity.memberships) {
         yield call(saveConnectionsSaga, {
           data: {
             path: API.MEMBERSHIPS,
             updates: data.entity.memberships,
+          },
+        });
+      }
+      // update associations connections
+      // inverse of membership
+      if (data.entity.associations) {
+        yield call(saveConnectionsSaga, {
+          data: {
+            path: API.MEMBERSHIPS,
+            updates: data.entity.associations,
           },
         });
       }
@@ -488,7 +544,47 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
             keyPair: ['resource_id', 'measure_id'],
           });
         }
-
+        if (data.entity.actionIndicators) {
+          yield call(createConnectionsSaga, {
+            entityId: entityCreated.data.id,
+            path: API.ACTION_INDICATORS,
+            updates: data.entity.actionIndicators,
+            keyPair: ['indicator_id', 'measure_id'],
+          });
+        }
+        if (data.entity.userActions) {
+          yield call(createConnectionsSaga, {
+            entityId: entityCreated.data.id,
+            path: API.USER_ACTIONS,
+            updates: data.entity.userActions,
+            keyPair: ['user_id', 'measure_id'],
+          });
+        }
+        if (data.entity.userActors) {
+          yield call(createConnectionsSaga, {
+            entityId: entityCreated.data.id,
+            path: API.USER_ACTORS,
+            updates: data.entity.userActors,
+            keyPair: ['user_id', 'actor_id'],
+          });
+        }
+        // update action-actions connections (relationships)
+        if (data.entity.topActions) {
+          yield call(createConnectionsSaga, {
+            entityId: entityCreated.data.id,
+            path: API.ACTION_ACTIONS,
+            updates: data.entity.topActions,
+            keyPair: ['measure_id', 'other_measure_id'],
+          });
+        }
+        if (data.entity.subActions) {
+          yield call(createConnectionsSaga, {
+            entityId: entityCreated.data.id,
+            path: API.ACTION_ACTIONS,
+            updates: data.entity.subActions,
+            keyPair: ['other_measure_id', 'measure_id'],
+          });
+        }
         // update memberships connections
         if (data.entity.memberships) {
           yield call(createConnectionsSaga, {
@@ -496,6 +592,16 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
             path: API.MEMBERSHIPS,
             updates: data.entity.memberships,
             keyPair: ['member_id', 'memberof_id'],
+          });
+        }
+        // update associations connections
+        // inverse of memberships
+        if (data.entity.associations) {
+          yield call(createConnectionsSaga, {
+            entityId: entityCreated.data.id,
+            path: API.MEMBERSHIPS,
+            updates: data.entity.associations,
+            keyPair: ['memberof_id', 'member_id'],
           });
         }
         // update action-category connections
@@ -699,11 +805,11 @@ export function* setViewSaga({ view }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
-export function* setSubjectSaga({ subject }) {
+export function* setMapSubjectSaga({ subject }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
     {
-      arg: 'subj',
+      arg: 'msubj',
       value: subject,
       replace: true,
     },
@@ -712,11 +818,11 @@ export function* setSubjectSaga({ subject }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
-export function* setMapSubjectSaga({ subject }) {
+export function* setSubjectSaga({ subject }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
     {
-      arg: 'msubj',
+      arg: 'subj',
       value: subject,
       replace: true,
     },
@@ -764,7 +870,6 @@ export function* setIncludeMembersForFilterSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
-
 export function* openBookmarkSaga({ bookmark }) {
   const path = bookmark.getIn(['attributes', 'view', 'path']);
   const queryString = getNextQueryString(
@@ -861,7 +966,7 @@ export default function* rootSaga() {
   yield takeEvery(SET_ACTIONTYPE, setActiontypeSaga);
   yield takeEvery(SET_VIEW, setViewSaga);
   yield takeEvery(SET_SUBJECT, setSubjectSaga);
-  yield takeEvery(SET_MAP_SUBJECT, setMapSubjectSaga);
+  yield takeEvery(SET_MAPSUBJECT, setMapSubjectSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_MEMBERS, setIncludeActorMembersSaga);
   yield takeEvery(SET_INCLUDE_TARGET_MEMBERS, setIncludeTargetMembersSaga);
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);

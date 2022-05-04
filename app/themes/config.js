@@ -47,6 +47,8 @@ export const ROUTES = {
   ACTION: '/action',
   ACTORS: '/actors',
   ACTOR: '/actor',
+  INDICATORS: '/topics', // api: indicators
+  INDICATOR: '/topic',
   RESOURCES: '/resources',
   RESOURCE: '/resource',
   TAXONOMIES: '/categories',

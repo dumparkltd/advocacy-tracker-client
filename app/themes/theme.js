@@ -221,8 +221,8 @@ theme.palette = {
   // multiselect header [#color, #bg]
   // compare asideListItem
   multiSelectHeader: [primary[4], dark[2]],
-  multiSelectFieldButton: [dark[0], light[1]],
-  multiSelectFieldButtonHover: [dark[0], light[2]],
+  multiSelectFieldButton: [dark[0], light[2]],
+  multiSelectFieldButtonHover: [dark[0], light[3]],
   //
   // BUTTONS / LINKS
   //

@@ -65,7 +65,7 @@ import {
   OPEN_BOOKMARK,
   SET_VIEW,
   SET_SUBJECT,
-  SET_MAP_SUBJECT,
+  SET_MAPSUBJECT,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
   SET_INCLUDE_MEMBERS_FORFILTERS,
@@ -474,7 +474,7 @@ export function setSubject(subject) {
 }
 export function setMapSubject(subject) {
   return {
-    type: SET_MAP_SUBJECT,
+    type: SET_MAPSUBJECT,
     subject,
   };
 }

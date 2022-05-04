@@ -314,6 +314,15 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           type: 'resourceActions',
         },
       ];
+    } else if (config.types === 'indicators' && dataReady) {
+      columns = [
+        {
+          id: 'main',
+          type: 'main',
+          sort: 'name',
+          attributes: ['title'],
+        },
+      ];
     } else if (config.types === 'users' && dataReady) {
       columns = [
         {
@@ -347,6 +356,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     if (hasFilters) {
       headerSubTitle = `of ${allEntityCount} total`;
     }
+
     return (
       <ContainerWrapper headerStyle={headerStyle} ref={this.ScrollContainer}>
         {dataReady && viewOptions && viewOptions.length > 1 && (
