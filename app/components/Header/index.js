@@ -64,7 +64,7 @@ const Styled = styled.div`
     return 0;
   }}px;
   }
-  background-color: #183863;
+  background-color: #000;
   box-shadow: ${(props) => props.hasShadow ? '0px 0px 5px 0px rgba(0,0,0,0.5)' : 'none'};
   z-index: 101;
   @media print {
