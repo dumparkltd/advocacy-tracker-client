@@ -463,14 +463,14 @@ theme.global = {
     icon: '#000000',
     actors: '#006076',
     targets: '#a52752',
-    brand: '#183863',
+    brand: '#000000',
     highlight: '#0070cc',
     highlightHover: '#0063b5',
     background: '#f1f0f1',
     backgroundLight: '#fcfcfc',
     inactive: '#f1f0f1', // on light background (empowerment)
     text: {
-      brand: '#183863',
+      brand: '#000000',
       dark: '#FFFFFF', //  on dark background
       light: '#1c2121', // on light background (empowerment)
       secondary: '#777b7e', // on light background (empowerment)

@@ -44,7 +44,8 @@ import {
 } from 'containers/App/actions';
 
 import {
-  ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG, ACTORTYPES, RESOURCE_FIELDS,
+  // ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG, ACTORTYPES, RESOURCE_FIELDS,
+  ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG, RESOURCE_FIELDS,
 } from 'themes/config';
 
 import Loading from 'components/Loading';
@@ -98,17 +99,17 @@ const getActortypeColumns = (typeid) => {
     sort: 'title',
     attributes: ['code', 'title'],
   }];
-  if (qe(typeid, ACTORTYPES.COUNTRY)) {
-    columns = [
-      ...columns,
-      {
-        id: 'classes',
-        type: 'associations',
-        actortype_id: ACTORTYPES.CLASS,
-        title: 'Classes',
-      },
-    ];
-  }
+  // if (qe(typeid, ACTORTYPES.COUNTRY)) {
+  //   columns = [
+  //     ...columns,
+  //     {
+  //       id: 'classes',
+  //       type: 'associations',
+  //       actortype_id: ACTORTYPES.CLASS,
+  //       title: 'Classes',
+  //     },
+  //   ];
+  // }
   if (
     ACTORTYPES_CONFIG[parseInt(typeid, 10)]
     && ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns
