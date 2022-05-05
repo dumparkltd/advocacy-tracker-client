@@ -429,31 +429,63 @@ export const INDICATOR_FIELDS = {
 
 // type compatibility: actors for actions
 export const ACTIONTYPE_ACTORTYPES = {
+  // countries make expressions/statements
   [ACTIONTYPES.EXPRESS]: [
     ACTORTYPES.COUNTRY,
   ],
+  // events are attended by countries, contacts, orgs
   [ACTIONTYPES.EVENT]: [
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
     ACTORTYPES.ORG,
   ],
-  [ACTIONTYPES.OP]: [
-    ACTORTYPES.COUNTRY,
-    ACTORTYPES.CONTACT,
-  ],
-  [ACTIONTYPES.AP]: [
-    ACTORTYPES.COUNTRY,
-    ACTORTYPES.CONTACT,
-  ],
-  [ACTIONTYPES.TASK]: [
-    ACTORTYPES.COUNTRY,
-  ],
+  // interactions with countries, contacts or organisations
   [ACTIONTYPES.INTERACTION]: [
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
     ACTORTYPES.ORG,
   ],
+  // // outreach plans are targeting countries & contacts
+  // [ACTIONTYPES.OP]: [
+  //   ACTORTYPES.COUNTRY,
+  //   ACTORTYPES.CONTACT,
+  // ],
+  // // advocacy plans are targeting countries & contacts
+  // [ACTIONTYPES.AP]: [
+  //   ACTORTYPES.COUNTRY,
+  //   ACTORTYPES.CONTACT,
+  // ],
+  // // tasks target countries
+  // [ACTIONTYPES.TASK]: [
+  //   ACTORTYPES.COUNTRY,
+  // ],
 };
+
+export const ACTIONTYPE_TARGETTYPES = {
+  // outreach plans are targeting countries & contacts
+  [ACTIONTYPES.OP]: [
+    ACTORTYPES.COUNTRY,
+    ACTORTYPES.CONTACT,
+    ACTORTYPES.REG,
+    ACTORTYPES.GROUP,
+  ],
+  // advocacy plans are targeting countries & contacts
+  [ACTIONTYPES.AP]: [
+    ACTORTYPES.COUNTRY,
+    ACTORTYPES.CONTACT,
+    ACTORTYPES.REG,
+    ACTORTYPES.GROUP,
+  ],
+  // tasks target countries
+  [ACTIONTYPES.TASK]: [
+    ACTORTYPES.COUNTRY,
+    ACTORTYPES.CONTACT,
+    ACTORTYPES.REG,
+    ACTORTYPES.GROUP,
+    ACTORTYPES.ORG,
+  ],
+};
+
 
 export const ACTIONTYPE_RESOURCETYPES = {
   [ACTIONTYPES.EXPRESS]: [
@@ -467,7 +499,6 @@ export const ACTIONTYPE_RESOURCETYPES = {
   [ACTIONTYPES.TASK]: [],
   [ACTIONTYPES.INTERACTION]: [],
 };
-export const ACTIONTYPE_TARGETTYPES = {};
 
 // related actions
 export const ACTIONTYPE_ACTIONTYPES = {
