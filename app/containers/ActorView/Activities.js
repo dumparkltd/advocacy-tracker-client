@@ -16,7 +16,12 @@ import {
 } from 'utils/fields';
 import qe from 'utils/quasi-equals';
 
-import { ROUTES, ACTIONTYPES, ACTIONTYPES_CONFIG } from 'themes/config';
+import {
+  ROUTES,
+  ACTIONTYPES,
+  ACTIONTYPES_CONFIG,
+  API,
+} from 'themes/config';
 import FieldGroup from 'components/fields/FieldGroup';
 import ButtonPill from 'components/buttons/ButtonPill';
 
@@ -71,6 +76,7 @@ export function Activities(props) {
     onEntityClick,
     hasMembers,
     intl,
+    onCreateOption,
   } = props;
   // figure out connected action types ##################################################
   const canBeMember = viewActortype && !hasMembers;
@@ -280,6 +286,18 @@ export function Activities(props) {
                   connections: actionConnections,
                   typeid: activeActiontypeId,
                   columns: getActiontypeColumns(activeActiontypeId, viewSubject),
+                  onCreateOption: () => onCreateOption({
+                    path: API.ACTIONS,
+                    attributes: {
+                      measuretype_id: activeActiontypeId,
+                    },
+                    connect: {
+                      type: 'actorActions',
+                      create: [{
+                        actor_id: viewEntity.get('id'),
+                      }],
+                    },
+                  }),
                 }),
               ],
             }}
@@ -332,6 +350,7 @@ Activities.propTypes = {
   actiontypes: PropTypes.instanceOf(Map),
   actionsAsMemberByActortype: PropTypes.instanceOf(Map),
   actionsAsTargetAsMemberByActortype: PropTypes.instanceOf(Map),
+  onCreateOption: PropTypes.func,
   intl: intlShape,
 };
 

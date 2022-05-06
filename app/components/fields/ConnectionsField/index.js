@@ -9,6 +9,7 @@ import FieldWrap from 'components/fields/FieldWrap';
 import EntityListTable from 'containers/EntityListTable';
 // import EntityListItemsWrap from 'components/fields/EntityListItemsWrap';
 import EmptyHint from 'components/fields/EmptyHint';
+import ButtonFactory from 'components/buttons/ButtonFactory';
 
 const StyledFieldWrap = styled(FieldWrap)`
   padding-top: 15px;
@@ -41,6 +42,15 @@ class ConnectionsField extends React.PureComponent { // eslint-disable-line reac
             columns={field.columns}
             moreLess
             inSingleView
+          />
+        )}
+        {field.onCreate && (
+          <ButtonFactory
+            button={{
+              type: 'text',
+              title: 'Add',
+              onClick: () => field.onCreate(),
+            }}
           />
         )}
         { (!field.values || field.values.size === 0)

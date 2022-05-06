@@ -38,6 +38,7 @@ import {
   closeEntity,
   setSubject,
   setActiontype,
+  openNewEntityModal,
 } from 'containers/App/actions';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
@@ -120,6 +121,7 @@ export function ActorView(props) {
     actiontypes,
     actionsAsMemberByActortype,
     actionsAsTargetAsMemberByActortype,
+    onCreateOption,
   } = props;
   useEffect(() => {
     // kick off loading of data
@@ -319,6 +321,7 @@ export function ActorView(props) {
                         actiontypes={actiontypes}
                         actionsAsMemberByActortype={actionsAsMemberByActortype}
                         actionsAsTargetAsMemberByActortype={actionsAsTargetAsMemberByActortype}
+                        onCreateOption={onCreateOption}
                       />
                     )}
 
@@ -418,6 +421,7 @@ ActorView.propTypes = {
   viewActiontypeId: PropTypes.string,
   onSetSubject: PropTypes.func,
   onSetActiontype: PropTypes.func,
+  onCreateOption: PropTypes.func,
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   actionsAsMemberByActortype: PropTypes.instanceOf(Map),
@@ -466,6 +470,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetActiontype: (type) => {
       dispatch(setActiontype(type));
+    },
+    onCreateOption: (args) => {
+      dispatch(openNewEntityModal(args));
     },
   };
 }

@@ -316,7 +316,14 @@ function mapDispatchToProps(dispatch, props) {
           saveData = saveData.setIn(['attributes', 'parent_id'], null);
         }
       }
-
+      if (props.connect) {
+        if (props.connect.get('type') === 'actorActions') {
+          saveData = saveData.set(
+            'actorActions',
+            Map().set('create', props.connect.get('create')),
+          );
+        }
+      }
       dispatch(newEntity({
         entity: saveData.toJS(),
         path: props.path,

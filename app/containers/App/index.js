@@ -205,6 +205,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
               <EntityNew
                 path={newEntityModal.get('path')}
                 attributes={newEntityModal.get('attributes')}
+                connect={newEntityModal.get('connect')}
                 onSaveSuccess={this.props.onCloseModal}
                 onCancel={this.props.onCloseModal}
                 inModal

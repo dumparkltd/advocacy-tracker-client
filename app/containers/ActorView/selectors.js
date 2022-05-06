@@ -4,6 +4,7 @@ import {
   API,
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
+  ACTIONTYPE_ACTORTYPES,
 } from 'themes/config';
 
 import {
@@ -26,6 +27,7 @@ import {
   selectMembershipsGroupedByAssociation,
   selectActors,
   selectActorCategoriesGroupedByActor,
+  // selectActiontypes,
 } from 'containers/App/selectors';
 
 import {
@@ -34,6 +36,8 @@ import {
   setActionConnections,
   setActorConnections,
 } from 'utils/entities';
+
+// import qe from 'utils/quasi-equals';
 
 import { DEPENDENCIES } from './constants';
 
@@ -92,6 +96,7 @@ const selectActionsAssociated = createSelector(
 // - group by actortype
 export const selectActionsWith = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectViewEntity,
   selectActionsAssociated,
   selectActionConnections,
   selectActorActionsGroupedByAction,
@@ -100,8 +105,10 @@ export const selectActionsWith = createSelector(
   selectActionIndicatorsGroupedByAction,
   selectCategories,
   selectActionCategoriesGroupedByAction,
+  // selectActiontypes,
   (
     ready,
+    viewActor,
     actions,
     actionConnections,
     actorActions,
@@ -110,9 +117,23 @@ export const selectActionsWith = createSelector(
     actionIndicators,
     categories,
     actionCategories,
+    // actiontypes,
   ) => {
-    if (!ready) return Map();
+    // if (!ready) return Map();
+    if (!viewActor || !ready) return null;
+    const actortypeId = viewActor.getIn(['attributes', 'actortype_id']).toString();
+    const validActiontypeIds = Object.keys(ACTIONTYPE_ACTORTYPES).filter((actiontypeId) => {
+      const actortypeIds = ACTIONTYPE_ACTORTYPES[actiontypeId];
+      return actortypeIds && actortypeIds.indexOf(actortypeId) > -1;
+    });
+    if (!validActiontypeIds || validActiontypeIds.length === 0) {
+      return null;
+    }
+    // TODO verify
     return actions && actions
+      .filter(
+        (action) => validActiontypeIds.indexOf(action.getIn(['attributes', 'measuretype_id'])) > -1
+      )
       .map((action) => setActionConnections({
         action,
         actionConnections,
