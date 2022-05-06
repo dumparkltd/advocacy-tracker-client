@@ -20,10 +20,13 @@ import {
   getMarkdownField,
   getReferenceField,
   getLinkField,
-  getNumberField,
+  // getNumberField,
   getTaxonomyFields,
   hasTaxonomyCategories,
   getActorConnectionField,
+  getEmailField,
+  getInfoField,
+  getTextField,
 } from 'utils/fields';
 import qe from 'utils/quasi-equals';
 
@@ -220,6 +223,11 @@ export function ActorView(props) {
                           isManager,
                         ),
                         checkActorAttribute(typeId, 'title') && getTitleField(viewEntity),
+                        checkActorAttribute(typeId, 'prefix', isManager) && getInfoField(
+                          'prefix',
+                          viewEntity.getIn(['attributes', 'prefix']),
+                        ),
+                        checkActorAttribute(typeId, 'name') && getTitleField(viewEntity),
                       ],
                     }}
                   />
@@ -324,26 +332,29 @@ export function ActorView(props) {
                     aside
                     group={{
                       fields: [
+                        checkActorAttribute(typeId, 'address') && getTextField(viewEntity, 'address'),
+                        checkActorAttribute(typeId, 'phone') && getTextField(viewEntity, 'phone'),
+                        checkActorAttribute(typeId, 'email') && getEmailField(viewEntity, 'email'),
                         checkActorAttribute(typeId, 'url')
                           && getLinkField(viewEntity),
-                        checkActorAttribute(typeId, 'gdp')
-                          && getNumberField(
-                            viewEntity,
-                            'gdp',
-                            {
-                              unit: 'US$',
-                              unitBefore: true,
-                              info: appMessages.attributeInfo.gdp && intl.formatMessage(appMessages.attributeInfo.gdp),
-                            },
-                          ),
-                        checkActorAttribute(typeId, 'population')
-                          && getNumberField(
-                            viewEntity,
-                            'population',
-                            {
-                              info: appMessages.attributeInfo.population && intl.formatMessage(appMessages.attributeInfo.population),
-                            },
-                          ),
+                        // checkActorAttribute(typeId, 'gdp')
+                        //   && getNumberField(
+                        //     viewEntity,
+                        //     'gdp',
+                        //     {
+                        //       unit: 'US$',
+                        //       unitBefore: true,
+                        //       info: appMessages.attributeInfo.gdp && intl.formatMessage(appMessages.attributeInfo.gdp),
+                        //     },
+                        //   ),
+                        // checkActorAttribute(typeId, 'population')
+                        //   && getNumberField(
+                        //     viewEntity,
+                        //     'population',
+                        //     {
+                        //       info: appMessages.attributeInfo.population && intl.formatMessage(appMessages.attributeInfo.population),
+                        //     },
+                        //   ),
                       ],
                     }}
                   />

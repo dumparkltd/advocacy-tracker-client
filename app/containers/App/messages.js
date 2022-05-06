@@ -735,6 +735,18 @@ export default defineMessages({
       id: 'app.containers.App.placeholders.code',
       defaultMessage: 'ID',
     },
+    prefix: {
+      id: 'app.containers.App.placeholders.prefix',
+      defaultMessage: 'Dr/Ms/Mr',
+    },
+    phone: {
+      id: 'app.containers.App.placeholders.phone',
+      defaultMessage: 'Enter #',
+    },
+    address: {
+      id: 'app.containers.App.placeholders.address',
+      defaultMessage: 'Enter address',
+    },
     description: {
       id: 'app.containers.App.placeholders.description',
       defaultMessage: 'Enter description',
@@ -792,6 +804,18 @@ export default defineMessages({
     code: {
       id: 'app.containers.App.attributes.code',
       defaultMessage: 'Code',
+    },
+    prefix: {
+      id: 'app.containers.App.attributes.prefix',
+      defaultMessage: 'Prefix',
+    },
+    address: {
+      id: 'app.containers.App.attributes.address',
+      defaultMessage: 'Address',
+    },
+    phone: {
+      id: 'app.containers.App.attributes.phone',
+      defaultMessage: 'Phone/WhatsApp',
     },
     title: {
       id: 'app.containers.App.attributes.title',
