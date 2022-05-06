@@ -481,6 +481,7 @@ export const getUserConnectionField = ({
   onEntityClick,
   skipLabel,
   connectionOptions,
+  columns,
 }) => getConnectionField({
   entities: sortEntities(users, 'asc', 'name'),
   connections,
@@ -502,6 +503,12 @@ export const getUserConnectionField = ({
   entityPath: ROUTES.USER,
   onEntityClick,
   skipLabel,
+  columns: columns || [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: ['name'],
+  }],
 });
 
 export const getManagerField = (entity, messageLabel, messageEmpty) => ({

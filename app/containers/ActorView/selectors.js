@@ -135,10 +135,10 @@ export const selectActionsWith = createSelector(
     if (!validActiontypeIds || validActiontypeIds.length === 0) {
       return null;
     }
-    // TODO verify
+
     return actions && actions
       .filter(
-        (action) => validActiontypeIds.indexOf(action.getIn(['attributes', 'measuretype_id'])) > -1
+        (action) => validActiontypeIds.indexOf(action.getIn(['attributes', 'measuretype_id']).toString()) > -1
       )
       .map((action) => setActionConnections({
         action,

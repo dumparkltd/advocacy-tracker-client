@@ -181,9 +181,6 @@ export function ActorView(props) {
   if (hasMembers) {
     validViewSubjects.push('members');
   }
-  if (isCountry) {
-    validViewSubjects.push('facts');
-  }
   if (validViewSubjects.indexOf(viewSubject) === -1) {
     viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
   }
@@ -307,14 +304,6 @@ export function ActorView(props) {
                           active={viewSubject === 'targets'}
                         >
                           <Text size="large">Targeted by</Text>
-                        </SubjectButton>
-                      )}
-                      {isCountry && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('facts')}
-                          active={viewSubject === 'facts'}
-                        >
-                          <Text size="large">Facts & Figures</Text>
                         </SubjectButton>
                       )}
                     </Box>

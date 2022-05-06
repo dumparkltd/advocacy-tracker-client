@@ -111,15 +111,15 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
     }
     if (isManager) {
       headerOptions.actions.push({
-        type: 'text',
-        title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(),
+        title: 'Create new',
+        onClick: () => this.props.handleNew(typeId),
+        icon: 'add',
         isManager,
       });
       headerOptions.actions.push({
-        type: 'text',
-        title: 'Create new',
-        onClick: () => this.props.handleNew(typeId),
+        title: intl.formatMessage(appMessages.buttons.import),
+        onClick: () => this.props.handleImport(),
+        icon: 'import',
         isManager,
       });
     }

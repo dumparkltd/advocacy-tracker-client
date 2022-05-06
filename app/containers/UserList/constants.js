@@ -19,6 +19,7 @@ export const DEPENDENCIES = [
 ];
 
 export const CONFIG = {
+  types: 'users',
   clientPath: ROUTES.USERS,
   serverPath: API.USERS,
   views: {

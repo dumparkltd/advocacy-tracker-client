@@ -432,6 +432,7 @@ export const ACTIONTYPE_ACTORTYPES = {
   // countries make expressions/statements
   [ACTIONTYPES.EXPRESS]: [
     ACTORTYPES.COUNTRY,
+    ACTORTYPES.CONTACT,
   ],
   // events are attended by countries, contacts, orgs
   [ACTIONTYPES.EVENT]: [
@@ -550,6 +551,12 @@ export const ACTORTYPES_CONFIG = {
   1: { // COUNTRY
     id: ACTORTYPES.COUNTRY,
     order: 1,
+    columns: [
+      {
+        id: 'members', // one row per type,
+        type: 'members', // one row per type,
+      },
+    ],
   },
   2: { // ORG
     id: ACTORTYPES.ORG,
@@ -565,12 +572,6 @@ export const ACTORTYPES_CONFIG = {
   3: {
     id: ACTORTYPES.CONTACT,
     order: 5,
-    columns: [
-      {
-        id: 'members', // one row per type,
-        type: 'members', // one row per type,
-      },
-    ],
   },
   4: { // REG
     id: ACTORTYPES.REG,

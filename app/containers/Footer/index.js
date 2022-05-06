@@ -11,7 +11,7 @@ import appMessages from 'containers/App/messages';
 import messages from './messages';
 
 const FooterMain = styled.div`
-  background-color: #183863;
+  background-color: #000000;
   color: white;
   padding: 0;
   @media print {
