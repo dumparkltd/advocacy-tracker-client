@@ -27,6 +27,8 @@ export const DEPENDENCIES = [
   API.ACTION_CATEGORIES,
   API.INDICATORS,
   API.ACTION_INDICATORS,
+  API.ACTION_ACTIONS,
+  API.USER_ACTIONS,
 ];
 
 export const FORM_INITIAL = fromJS({
@@ -39,6 +41,9 @@ export const FORM_INITIAL = fromJS({
   associatedActorsByActortype: {},
   associatedTargetsByActortype: {},
   associatedResourcesByResourcetype: {},
-  associatedParent: [],
+  // associatedParent: [],
   associatedIndicators: [],
+  associatedTopActionsByActiontype: {},
+  associatedSubActionsByActiontype: {},
+  associatedUsers: [],
 });

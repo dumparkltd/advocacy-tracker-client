@@ -30,6 +30,9 @@ import {
   selectIncludeMembersForFiltering,
   selectActorActionsAssociationsGroupedByAction,
   selectActionActorsAssociationsGroupedByAction,
+  selectUsers,
+  selectUserActionsGroupedByAction,
+  selectUserQuery,
 } from 'containers/App/selectors';
 
 import {
@@ -57,6 +60,7 @@ export const selectConnections = createSelector(
   selectActionCategoriesGroupedByAction,
   selectResources,
   selectIndicators,
+  selectUsers,
   selectCategories,
   (
     ready,
@@ -66,6 +70,7 @@ export const selectConnections = createSelector(
     actionAssociationsGrouped,
     resources,
     indicators,
+    users,
     categories,
   ) => {
     if (ready) {
@@ -83,6 +88,9 @@ export const selectConnections = createSelector(
         ).set(
           API.INDICATORS,
           indicators,
+        ).set(
+          API.USERS,
+          users,
         ).set(
           // potential parents
           API.ACTIONS,
@@ -196,6 +204,7 @@ const selectActionsWithConnections = createSelector(
   selectActionActorsAssociationsGroupedByAction,
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectUserActionsGroupedByAction,
   selectIncludeMembersForFiltering,
   (
     ready,
@@ -209,6 +218,7 @@ const selectActionsWithConnections = createSelector(
     targetAssociationConnectionsGrouped,
     resourceAssociationsGrouped,
     indicatorAssociationsGrouped,
+    userAssociationsGrouped,
     includeMembers,
   ) => {
     // console.log(actorConnectionsGrouped && actorConnectionsGrouped.toJS())
@@ -333,7 +343,9 @@ const selectActionsWithConnections = createSelector(
           const entityIndicators = indicatorAssociationsGrouped.get(
             parseInt(entity.get('id'), 10)
           );
-
+          const entityUsers = userAssociationsGrouped.get(
+            parseInt(entity.get('id'), 10)
+          );
           // the activity
           return entity
             // directly connected actors
@@ -357,6 +369,7 @@ const selectActionsWithConnections = createSelector(
             // directly connected resources
             .set('resources', entityResources)
             .set('indicators', entityIndicators)
+            .set('users', entityUsers)
             .set('resourcesByType', entityResourcesByResourcetype);
         }
       );
@@ -411,8 +424,15 @@ const selectActionsByTargets = createSelector(
     return entities;
   }
 );
-const selectActionsByResources = createSelector(
+const selectActionsByUsers = createSelector(
   selectActionsByTargets,
+  selectUserQuery,
+  (entities, query) => query
+    ? filterEntitiesByConnection(entities, query, 'users')
+    : entities
+);
+const selectActionsByResources = createSelector(
+  selectActionsByUsers,
   selectResourceQuery,
   (entities, query) => query
     ? filterEntitiesByConnection(entities, query, 'resources')

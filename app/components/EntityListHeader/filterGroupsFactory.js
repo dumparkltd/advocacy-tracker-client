@@ -4,7 +4,12 @@ import { startsWith } from 'utils/string';
 import qe from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
 
-import { ACTIONTYPES, INDICATOR_ACTIONTYPES } from 'themes/config';
+import {
+  ACTIONTYPES,
+  INDICATOR_ACTIONTYPES,
+  USER_ACTIONTYPES,
+  USER_ACTORTYPES,
+} from 'themes/config';
 
 import { makeAttributeFilterOptions } from './filterOptionsFactory';
 // figure out filter groups for filter panel
@@ -76,6 +81,12 @@ export const makeFilterGroups = ({
         if (option.entityType === 'indicators') {
           validType = INDICATOR_ACTIONTYPES.indexOf(typeId) > -1;
         }
+        if (option.type === 'action-users') {
+          validType = USER_ACTIONTYPES.indexOf(typeId) > -1;
+        }
+        if (option.type === 'actor-users') {
+          validType = USER_ACTORTYPES.indexOf(typeId) > -1;
+        }
         if (validType) {
           filterGroups[connectionKey] = {
             id: connectionKey, // filterGroupId
@@ -127,6 +138,12 @@ export const makeFilterGroups = ({
         } else if (option.type === 'indicator-actions') {
           types = actiontypes;
           typeAbout = 'actiontypes_about';
+        } else if (option.type === 'user-actions') {
+          types = actiontypes;
+          typeAbout = 'actiontypes_about';
+        } else if (option.type === 'user-actors') {
+          types = actortypes;
+          typeAbout = 'actortypes_about';
         }
         filterGroups[connectionKey] = {
           id: connectionKey, // filterGroupId

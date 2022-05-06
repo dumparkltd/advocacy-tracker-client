@@ -475,61 +475,34 @@ export const getIndicatorConnectionField = ({
   skipLabel,
   columns,
 });
-// const getConnectionGroupsField = ({
-//   entityGroups,
-//   groupedBy,
-//   taxonomies,
-//   connections,
-//   connectionOptions,
-//   entityType,
-//   entityIcon,
-//   entityPath,
-//   onEntityClick,
-// }) => ({
-//   type: 'connectionGroups',
-//   groups: entityGroups.toList(),
-//   groupedBy,
-//   taxonomies,
-//   connections,
-//   entityType,
-//   entityIcon,
-//   entityPath: entityPath || entityType,
-//   onEntityClick,
-//   showEmpty: appMessages.entities[entityType].empty,
-//   connectionOptions: connectionOptions.map((option) => ({
-//     label: appMessages.entities[option].plural,
-//     path: option,
-//     // TODO check path
-//     clientPath: option === 'actions' ? 'actions' : option,
-//   })),
-// });
-// export const getActorConnectionGroupsField = (
-//   entityGroups,
-//   groupedBy,
-//   taxonomies,
-//   connections,
-//   onEntityClick,
-//   actortypeid, // actortype id
-// ) => getConnectionGroupsField({
-//   entityGroups,
-//   groupedBy,
-//   taxonomies: filterTaxonomies(taxonomies, 'tags_actors'),
-//   connections,
-//   connectionOptions: ['actions'],
-//   entityType: actortypeid ? `actors_${actortypeid}` : 'actors',
-//   entityPath: ROUTES.ACTOR,
-//   onEntityClick,
-// });
-// export const getActionConnectionGroupsField = (entityGroups, groupedBy, taxonomies, connections, onEntityClick) => getConnectionGroupsField({
-//   entityGroups,
-//   groupedBy,
-//   taxonomies: filterTaxonomies(taxonomies, 'tags_actions'),
-//   connections,
-//   connectionOptions: ['actors'],
-//   entityType: 'actions',
-//   entityPath: ROUTES.ACTION,
-//   onEntityClick,
-// });
+export const getUserConnectionField = ({
+  users,
+  connections,
+  onEntityClick,
+  skipLabel,
+  connectionOptions,
+}) => getConnectionField({
+  entities: sortEntities(users, 'asc', 'name'),
+  connections,
+  connectionOptions: connectionOptions || {
+    actions: {
+      message: 'entities.actions_{typeid}.plural',
+      entityType: 'actions',
+      path: API.ACTIONS,
+      clientPath: ROUTES.ACTION,
+    },
+    actors: {
+      message: 'entities.actors_{typeid}.plural',
+      entityType: 'actors',
+      path: API.ACTORS,
+      clientPath: ROUTES.ACTOR,
+    },
+  },
+  entityType: 'users',
+  entityPath: ROUTES.USER,
+  onEntityClick,
+  skipLabel,
+});
 
 export const getManagerField = (entity, messageLabel, messageEmpty) => ({
   label: messageLabel,

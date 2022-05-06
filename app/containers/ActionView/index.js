@@ -29,6 +29,7 @@ import {
   getActionConnectionField,
   getResourceConnectionField,
   getIndicatorConnectionField,
+  getUserConnectionField,
 } from 'utils/fields';
 
 import qe from 'utils/quasi-equals';
@@ -65,9 +66,11 @@ import {
   selectActorConnections,
   selectResourceConnections,
   selectIndicatorConnections,
+  selectActionConnections,
   selectTaxonomiesWithCategories,
   selectSubjectQuery,
   selectActiontypes,
+  selectUserConnections,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -81,9 +84,10 @@ import {
   selectActorsByType,
   selectTargetsByType,
   selectResourcesByType,
-  selectChildActions,
-  selectParentActions,
+  selectTopActionsByActiontype,
+  selectSubActionsByActiontype,
   selectEntityIndicators,
+  selectEntityUsers,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
@@ -140,8 +144,9 @@ export function ActionView(props) {
     actorConnections,
     resourceConnections,
     indicatorConnections,
-    children,
-    parents,
+    actionConnections,
+    subActionsByType,
+    topActionsByType,
     onLoadData,
     subject,
     onSetSubject,
@@ -151,6 +156,8 @@ export function ActionView(props) {
     params,
     activitytypes,
     handleTypeClick,
+    users,
+    userConnections,
   } = props;
 
   useEffect(() => {
@@ -398,11 +405,28 @@ export function ActionView(props) {
                       {indicators && (
                         <FieldGroup
                           group={{
+                            label: appMessages.nav.indicators,
                             fields: [
                               getIndicatorConnectionField({
                                 indicators,
                                 onEntityClick,
                                 connections: indicatorConnections,
+                                skipLabel: true,
+                                // TODO columns
+                              }),
+                            ],
+                          }}
+                        />
+                      )}
+                      {users && (
+                        <FieldGroup
+                          group={{
+                            label: appMessages.nav.userActions,
+                            fields: [
+                              getUserConnectionField({
+                                users,
+                                onEntityClick,
+                                connections: userConnections,
                                 skipLabel: true,
                                 // TODO columns
                               }),
@@ -507,33 +531,65 @@ export function ActionView(props) {
                       }}
                     />
                   )}
-                  {parents && parents.size > 0 && (
+                  {topActionsByType && (
                     <FieldGroup
                       aside
                       group={{
-                        label: appMessages.entities.actions.parent,
-                        fields: [
-                          getActionConnectionField({
-                            actions: parents.toList(),
-                            onEntityClick,
-                            typeid: typeId,
-                          }),
-                        ],
+                        label: appMessages.entities.actions.topActions,
+                        fields: topActionsByType.reduce(
+                          (memo, actions, typeid) => {
+                            const columns = [
+                              {
+                                id: 'main',
+                                type: 'main',
+                                sort: 'title',
+                                attributes: ['title'],
+                              },
+                            ];
+                            return memo.concat([
+                              getActionConnectionField({
+                                actions,
+                                taxonomies,
+                                onEntityClick,
+                                connections: actionConnections,
+                                typeid,
+                                columns,
+                              }),
+                            ]);
+                          },
+                          [],
+                        ),
                       }}
                     />
                   )}
-                  {children && children.size > 0 && (
+                  {subActionsByType && (
                     <FieldGroup
                       aside
                       group={{
-                        label: appMessages.entities.actions.children,
-                        fields: [
-                          getActionConnectionField({
-                            actions: children.toList(),
-                            onEntityClick,
-                            typeid: typeId,
-                          }),
-                        ],
+                        label: appMessages.entities.actions.subActions,
+                        fields: subActionsByType.reduce(
+                          (memo, actions, typeid) => {
+                            const columns = [
+                              {
+                                id: 'main',
+                                type: 'main',
+                                sort: 'title',
+                                attributes: ['title'],
+                              },
+                            ];
+                            return memo.concat([
+                              getActionConnectionField({
+                                actions,
+                                taxonomies,
+                                onEntityClick,
+                                connections: actionConnections,
+                                typeid,
+                                columns,
+                              }),
+                            ]);
+                          },
+                          [],
+                        ),
                       }}
                     />
                   )}
@@ -562,16 +618,19 @@ ActionView.propTypes = {
   targetsByActortype: PropTypes.object,
   resourcesByResourcetype: PropTypes.object,
   actorConnections: PropTypes.object,
+  actionConnections: PropTypes.object,
   resourceConnections: PropTypes.object,
   activitytypes: PropTypes.object,
   params: PropTypes.object,
-  children: PropTypes.object,
-  parents: PropTypes.object,
+  subActionsByType: PropTypes.object,
+  topActionsByType: PropTypes.object,
   onSetSubject: PropTypes.func,
   intl: intlShape.isRequired,
   subject: PropTypes.string,
   indicatorConnections: PropTypes.object,
   indicators: PropTypes.object,
+  userConnections: PropTypes.object,
+  users: PropTypes.object,
 };
 
 ActionView.contextTypes = {
@@ -589,13 +648,16 @@ const mapStateToProps = (state, props) => ({
   resourcesByResourcetype: selectResourcesByType(state, props.params.id),
   targetsByActortype: selectTargetsByType(state, props.params.id),
   actorConnections: selectActorConnections(state),
+  actionConnections: selectActionConnections(state),
   resourceConnections: selectResourceConnections(state),
-  children: selectChildActions(state, props.params.id),
-  parents: selectParentActions(state, props.params.id),
+  topActionsByType: selectTopActionsByActiontype(state, props.params.id),
+  subActionsByType: selectSubActionsByActiontype(state, props.params.id),
   subject: selectSubjectQuery(state),
   activitytypes: selectActiontypes(state),
   indicators: selectEntityIndicators(state, props.params.id),
   indicatorConnections: selectIndicatorConnections(state),
+  users: selectEntityUsers(state, props.params.id),
+  userConnections: selectUserConnections(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

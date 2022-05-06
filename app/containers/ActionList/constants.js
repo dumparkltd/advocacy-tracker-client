@@ -24,6 +24,7 @@ export const DEPENDENCIES = [
   API.CATEGORIES,
   API.MEMBERSHIPS,
   API.USERS,
+  API.USER_ACTIONS,
   API.USER_ROLES,
   API.INDICATORS,
   API.ACTION_INDICATORS,
@@ -132,19 +133,17 @@ export const CONFIG = {
       groupByType: true,
       listItemHide: true,
     },
-    // filter by associated parent
-    parents: {
-      query: 'parent',
-      type: 'action-parents',
+    users: {
+      query: 'users',
+      type: 'action-users',
       search: true,
-      message: 'attributes.parent_id',
-      path: API.ACTIONS,
-      entityType: 'actions',
-      entityTypeAs: 'parent',
-      clientPath: ROUTES.ACTION,
-      attribute: 'parent_id',
-      typeFilter: 'has_parent',
-      listItemHide: true,
+      message: 'entities.users.plural',
+      path: API.USERS,
+      entityType: 'users',
+      clientPath: ROUTES.USER,
+      connectPath: API.USER_ACTIONS, // filter by actor connection
+      key: 'user_id',
+      ownKey: 'measure_id',
     },
   },
   attributes: { // filter by attribute value

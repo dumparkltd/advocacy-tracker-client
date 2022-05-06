@@ -27,6 +27,7 @@ import {
   getEmailField,
   getInfoField,
   getTextField,
+  getUserConnectionField,
 } from 'utils/fields';
 import qe from 'utils/quasi-equals';
 
@@ -65,6 +66,7 @@ import {
   selectActiontypeQuery,
   selectActortypes,
   selectActiontypes,
+  selectUserConnections,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -82,6 +84,7 @@ import {
   selectAssociationsByType,
   selectActionsAsMemberByActortype,
   selectActionsAsTargetAsMemberByActortype,
+  selectEntityUsers,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
@@ -122,6 +125,8 @@ export function ActorView(props) {
     actionsAsMemberByActortype,
     actionsAsTargetAsMemberByActortype,
     onCreateOption,
+    users,
+    userConnections,
   } = props;
   useEffect(() => {
     // kick off loading of data
@@ -262,6 +267,22 @@ export function ActorView(props) {
                       ],
                     }}
                   />
+                  {users && (
+                    <FieldGroup
+                      group={{
+                        label: appMessages.nav.userActions,
+                        fields: [
+                          getUserConnectionField({
+                            users,
+                            onEntityClick,
+                            connections: userConnections,
+                            skipLabel: true,
+                            // TODO columns
+                          }),
+                        ],
+                      }}
+                    />
+                  )}
                   <Box>
                     <Box direction="row" gap="small" margin={{ vertical: 'small', horizontal: 'medium' }}>
                       {hasMembers && (
@@ -340,24 +361,6 @@ export function ActorView(props) {
                         checkActorAttribute(typeId, 'email') && getEmailField(viewEntity, 'email'),
                         checkActorAttribute(typeId, 'url')
                           && getLinkField(viewEntity),
-                        // checkActorAttribute(typeId, 'gdp')
-                        //   && getNumberField(
-                        //     viewEntity,
-                        //     'gdp',
-                        //     {
-                        //       unit: 'US$',
-                        //       unitBefore: true,
-                        //       info: appMessages.attributeInfo.gdp && intl.formatMessage(appMessages.attributeInfo.gdp),
-                        //     },
-                        //   ),
-                        // checkActorAttribute(typeId, 'population')
-                        //   && getNumberField(
-                        //     viewEntity,
-                        //     'population',
-                        //     {
-                        //       info: appMessages.attributeInfo.population && intl.formatMessage(appMessages.attributeInfo.population),
-                        //     },
-                        //   ),
                       ],
                     }}
                   />
@@ -426,6 +429,8 @@ ActorView.propTypes = {
   actiontypes: PropTypes.instanceOf(Map),
   actionsAsMemberByActortype: PropTypes.instanceOf(Map),
   actionsAsTargetAsMemberByActortype: PropTypes.instanceOf(Map),
+  userConnections: PropTypes.object,
+  users: PropTypes.object,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -446,6 +451,8 @@ const mapStateToProps = (state, props) => ({
   viewActiontypeId: selectActiontypeQuery(state),
   actortypes: selectActortypes(state),
   actiontypes: selectActiontypes(state),
+  users: selectEntityUsers(state, props.params.id),
+  userConnections: selectUserConnections(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

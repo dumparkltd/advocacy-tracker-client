@@ -10,7 +10,7 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { actions as formActions } from 'react-redux-form/immutable';
-import { Map, List, fromJS } from 'immutable';
+import { Map, fromJS } from 'immutable';
 
 import {
   entityOptions,
@@ -30,9 +30,9 @@ import {
   renderActorsByActortypeControl,
   renderTargetsByActortypeControl,
   renderResourcesByResourcetypeControl,
-  renderParentActionControl,
-  parentActionOptions,
   renderIndicatorControl,
+  renderActionsByActiontypeControl,
+  renderUserMultiControl,
 } from 'utils/forms';
 
 import {
@@ -45,7 +45,6 @@ import { checkActionAttribute, checkActionRequired } from 'utils/entities';
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
 
-import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
 import { USER_ROLES, API, ROUTES } from 'themes/config';
@@ -78,13 +77,15 @@ import appMessages from 'containers/App/messages';
 import {
   selectDomain,
   selectViewEntity,
-  selectParentOptions,
+  selectTopActionsByActiontype,
+  selectSubActionsByActiontype,
   selectTaxonomyOptions,
   selectActorsByActortype,
   selectTargetsByActortype,
   selectResourcesByResourcetype,
   selectConnectedTaxonomies,
   selectIndicatorOptions,
+  selectUserOptions,
 } from './selectors';
 
 import messages from './messages';
@@ -130,8 +131,10 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       actorsByActortype,
       targetsByActortype,
       resourcesByResourcetype,
-      parentOptions,
+      topActionsByActiontype,
+      subActionsByActiontype,
       indicatorOptions,
+      userOptions,
     } = props;
     // console.log(FORM_INITIAL.get('attributes') && FORM_INITIAL.get('attributes').toJS())
     return viewEntity
@@ -154,11 +157,15 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         associatedIndicators: indicatorOptions
           ? entityOptions(indicatorOptions, true)
           : Map(),
-        associatedParent: parentActionOptions(
-          parentOptions,
-          viewEntity.getIn(['attributes', 'parent_id']),
-        ),
-
+        associatedTopActionsByActiontype: topActionsByActiontype
+          ? topActionsByActiontype.map((actions) => entityOptions(actions, true))
+          : Map(),
+        associatedSubActionsByActiontype: subActionsByActiontype
+          ? subActionsByActiontype.map((actions) => entityOptions(actions, true))
+          : Map(),
+        associatedUsers: userOptions
+          ? entityOptions(userOptions, true)
+          : Map(),
       })
       : Map();
   }
@@ -216,9 +223,11 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     actorsByActortype,
     targetsByActortype,
     resourcesByResourcetype,
-    parentOptions,
-    onCreateOption,
+    topActionsByActiontype,
+    subActionsByActiontype,
     indicatorOptions,
+    userOptions,
+    onCreateOption,
   ) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'measuretype_id']);
@@ -269,15 +278,54 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         );
       }
     }
-    if (parentOptions) {
-      groups.push({
-        label: intl.formatMessage(appMessages.entities.actions.parent),
-        fields: [renderParentActionControl(
-          parentOptions,
-          intl.formatMessage(appMessages.entities.actions.single),
-          entity.getIn(['attributes', 'parent_id']),
-        )],
-      });
+    if (userOptions) {
+      const userConnections = renderUserMultiControl(
+        userOptions,
+        null,
+        intl,
+      );
+      if (userConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.userActions),
+            fields: [userConnections],
+          },
+        );
+      }
+    }
+    if (topActionsByActiontype) {
+      const actionConnections = renderActionsByActiontypeControl(
+        topActionsByActiontype,
+        connectedTaxonomies,
+        onCreateOption,
+        intl,
+        'associatedTopActionsByActiontype',
+      );
+      if (actionConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.topActions),
+            fields: actionConnections,
+          },
+        );
+      }
+    }
+    if (subActionsByActiontype) {
+      const actionConnections = renderActionsByActiontypeControl(
+        subActionsByActiontype,
+        connectedTaxonomies,
+        onCreateOption,
+        intl,
+        'associatedSubActionsByActiontype',
+      );
+      if (actionConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.subActions),
+            fields: actionConnections,
+          },
+        );
+      }
     }
     if (actorsByActortype) {
       const actorConnections = renderActorsByActortypeControl(
@@ -410,8 +458,10 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       targetsByActortype,
       resourcesByResourcetype,
       onCreateOption,
-      parentOptions,
+      topActionsByActiontype,
+      subActionsByActiontype,
       indicatorOptions,
+      userOptions,
     } = this.props;
     const { intl } = this.context;
     // const reference = this.props.params.id;
@@ -494,7 +544,10 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                   actorsByActortype,
                   targetsByActortype,
                   resourcesByResourcetype,
+                  topActionsByActiontype,
+                  subActionsByActiontype,
                   indicatorOptions,
+                  userOptions,
                 )}
                 handleSubmitFail={this.props.handleSubmitFail}
                 handleCancel={this.props.handleCancel}
@@ -516,8 +569,10 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       actorsByActortype,
                       targetsByActortype,
                       resourcesByResourcetype,
+                      topActionsByActiontype,
+                      subActionsByActiontype,
                       indicatorOptions,
-                      parentOptions,
+                      userOptions,
                       onCreateOption,
                     ),
                     aside: this.getBodyAsideFields(viewEntity),
@@ -553,8 +608,10 @@ ActionEdit.propTypes = {
   isUserAdmin: PropTypes.bool,
   params: PropTypes.object,
   taxonomies: PropTypes.object,
-  parentOptions: PropTypes.object,
+  topActionsByActiontype: PropTypes.object,
+  subActionsByActiontype: PropTypes.object,
   indicatorOptions: PropTypes.object,
+  userOptions: PropTypes.object,
   connectedTaxonomies: PropTypes.object,
   actorsByActortype: PropTypes.object,
   targetsByActortype: PropTypes.object,
@@ -579,8 +636,10 @@ const mapStateToProps = (state, props) => ({
   actorsByActortype: selectActorsByActortype(state, props.params.id),
   targetsByActortype: selectTargetsByActortype(state, props.params.id),
   resourcesByResourcetype: selectResourcesByResourcetype(state, props.params.id),
-  parentOptions: selectParentOptions(state, props.params.id),
+  topActionsByActiontype: selectTopActionsByActiontype(state, props.params.id),
+  subActionsByActiontype: selectSubActionsByActiontype(state, props.params.id),
   indicatorOptions: selectIndicatorOptions(state, props.params.id),
+  userOptions: selectUserOptions(state, props.params.id),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -613,7 +672,10 @@ function mapDispatchToProps(dispatch, props) {
       actorsByActortype,
       targetsByActortype,
       resourcesByResourcetype,
+      topActionsByActiontype,
+      subActionsByActiontype,
       indicatorOptions,
+      userOptions,
     ) => {
       let saveData = formData.set(
         'actionCategories',
@@ -623,6 +685,58 @@ function mapDispatchToProps(dispatch, props) {
           createKey: 'measure_id',
         })
       );
+      if (topActionsByActiontype) {
+        saveData = saveData.set(
+          'topActions',
+          topActionsByActiontype
+            .map((actions, actiontypeid) => getConnectionUpdatesFromFormData({
+              formData,
+              connections: actions,
+              connectionAttribute: ['associatedTopActionsByActiontype', actiontypeid.toString()],
+              createConnectionKey: 'other_measure_id',
+              createKey: 'measure_id',
+            }))
+            .reduce(
+              (memo, deleteCreateLists) => {
+                const deletes = memo.get('delete').concat(deleteCreateLists.get('delete'));
+                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
+                return memo
+                  .set('delete', deletes)
+                  .set('create', creates);
+              },
+              fromJS({
+                delete: [],
+                create: [],
+              }),
+            )
+        );
+      }
+      if (subActionsByActiontype) {
+        saveData = saveData.set(
+          'subActions',
+          subActionsByActiontype
+            .map((actions, actiontypeid) => getConnectionUpdatesFromFormData({
+              formData,
+              connections: actions,
+              connectionAttribute: ['associatedSubActionsByActiontype', actiontypeid.toString()],
+              createConnectionKey: 'measure_id',
+              createKey: 'other_measure_id',
+            }))
+            .reduce(
+              (memo, deleteCreateLists) => {
+                const deletes = memo.get('delete').concat(deleteCreateLists.get('delete'));
+                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
+                return memo
+                  .set('delete', deletes)
+                  .set('create', creates);
+              },
+              fromJS({
+                delete: [],
+                create: [],
+              }),
+            )
+        );
+      }
       if (actorsByActortype) {
         saveData = saveData.set(
           'actorActions',
@@ -713,12 +827,17 @@ function mapDispatchToProps(dispatch, props) {
           })
         );
       }
-      // TODO: remove once have singleselect instead of multiselect
-      const formParentIds = getCheckedValuesFromOptions(formData.get('associatedParent'));
-      if (List.isList(formParentIds) && formParentIds.size) {
-        saveData = saveData.setIn(['attributes', 'parent_id'], formParentIds.first());
-      } else {
-        saveData = saveData.setIn(['attributes', 'parent_id'], null);
+      if (userOptions) {
+        saveData = saveData.set(
+          'userActions',
+          getConnectionUpdatesFromFormData({
+            formData,
+            connections: userOptions,
+            connectionAttribute: 'associatedUsers',
+            createConnectionKey: 'user_id',
+            createKey: 'measure_id',
+          })
+        );
       }
       dispatch(save(saveData.toJS()));
     },

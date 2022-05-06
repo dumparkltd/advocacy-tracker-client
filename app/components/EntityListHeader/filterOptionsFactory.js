@@ -66,6 +66,7 @@ export const makeActiveFilterOptions = ({
         isManager,
         includeMembers,
       );
+    case 'users':
     case 'indicators':
       return makeConnectionFilterOptions(
         entities,

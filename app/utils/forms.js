@@ -142,6 +142,21 @@ export const renderIndicatorControl = (entities, onCreateOption, contextIntl) =>
     //   : null,
   }
   : null;
+export const renderUserMultiControl = (entities, onCreateOption, contextIntl) => entities
+  ? {
+    id: 'users',
+    model: '.associatedUsers',
+    dataPath: ['associatedUsers'],
+    label: contextIntl.formatMessage(appMessages.entities.users.plural),
+    controlType: 'multiselect',
+    options: entityOptions(entities, true),
+    advanced: true,
+    selectAll: true,
+    // onCreate: onCreateOption
+    //   ? () => onCreateOption({ path: API.INDICATORS })
+    //   : null,
+  }
+  : null;
 export const renderActorControl = (
   actortypeId,
   entities,
@@ -302,13 +317,14 @@ export const renderActionsByActiontypeControl = (
   taxonomies,
   onCreateOption,
   contextIntl,
+  model = 'associatedActionsByActiontype',
 ) => entitiesByActiontype
   ? entitiesByActiontype.reduce(
     (controls, entities, typeid) => controls.concat({
       id: `actions.${typeid}`,
       typeId: typeid,
-      model: `.associatedActionsByActiontype.${typeid}`,
-      dataPath: ['associatedActionsByActiontype', typeid],
+      model: `.${model}.${typeid}`,
+      dataPath: [model, typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actions_${typeid}`].plural),
       controlType: 'multiselect',
       options: entityOptions(entities),

@@ -10,14 +10,18 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { actions as formActions } from 'react-redux-form/immutable';
-import { Map, List } from 'immutable';
+import { Map, List, fromJS } from 'immutable';
 
 import {
+  entityOptions,
   taxonomyOptions,
   getTitleFormField,
   getEmailField,
   getHighestUserRoleId,
   getRoleFormField,
+  renderActorsByActortypeControl,
+  renderActionsByActiontypeControl,
+  getConnectionUpdatesFromFormData,
 } from 'utils/forms';
 
 import {
@@ -51,10 +55,15 @@ import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
 import EntityForm from 'containers/EntityForm';
 
+import appMessages from 'containers/App/messages';
+
 import {
   selectDomain,
   selectViewEntity,
   selectRoles,
+  selectActionsByActiontype,
+  selectConnectedTaxonomies,
+  selectActorsByActortype,
 } from './selectors';
 
 import { save } from './actions';
@@ -89,7 +98,13 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
-    const { taxonomies, roles, viewEntity } = props;
+    const {
+      taxonomies,
+      roles,
+      viewEntity,
+      actorsByActortype,
+      actionsByActiontype,
+    } = props;
 
     return Map({
       id: viewEntity.get('id'),
@@ -99,6 +114,12 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       ),
       associatedTaxonomies: taxonomyOptions(taxonomies),
       associatedRole: getHighestUserRoleId(roles),
+      associatedActorsByActortype: actorsByActortype
+        ? actorsByActortype.map((actors) => entityOptions(actors, true))
+        : Map(),
+      associatedActionsByActiontype: actionsByActiontype
+        ? actionsByActiontype.map((actions) => entityOptions(actions, true))
+        : Map(),
     });
   }
 
@@ -125,11 +146,50 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
     ]);
   };
 
-  getBodyMainFields = () => {
+  getBodyMainFields = (
+    actorsByActortype,
+    actionsByActiontype,
+    connectedTaxonomies,
+    onCreateOption,
+  ) => {
     const { intl } = this.context;
-    return ([{
+    const groups = [];
+    if (actorsByActortype) {
+      const actorConnections = renderActorsByActortypeControl(
+        actorsByActortype,
+        connectedTaxonomies,
+        onCreateOption,
+        intl,
+      );
+      if (actorConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.actorUsers),
+            fields: actorConnections,
+          },
+        );
+      }
+    }
+    if (actionsByActiontype) {
+      const actionConnections = renderActionsByActiontypeControl(
+        actionsByActiontype,
+        connectedTaxonomies,
+        onCreateOption,
+        intl,
+      );
+      if (actionConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.actionUsers),
+            fields: actionConnections,
+          },
+        );
+      }
+    }
+    groups.push({
       fields: [getEmailField(intl.formatMessage)],
-    }]);
+    });
+    return groups;
   };
 
   // getBodyAsideFields = (taxonomies, onCreateOption) => {
@@ -158,7 +218,15 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
   render() {
     const { intl } = this.context;
     const {
-      viewEntity, dataReady, viewDomain, roles, sessionUserHighestRoleId,
+      viewEntity,
+      dataReady,
+      viewDomain,
+      roles,
+      sessionUserHighestRoleId,
+      actorsByActortype,
+      actionsByActiontype,
+      onCreateOption,
+      connectedTaxonomies,
     } = this.props;
     const reference = this.props.params.id;
     const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
@@ -208,7 +276,9 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
               />
             )
           }
-          {saveSending && <Loading />}
+          {(saveSending || !dataReady)
+            && <Loading />
+          }
           {!viewEntity && dataReady && !saveError
             && (
               <div>
@@ -216,7 +286,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
               </div>
             )
           }
-          {viewEntity && (
+          {viewEntity && dataReady && (
             <EntityForm
               model="userEdit.form.data"
               formData={viewDomain.getIn(['form', 'data'])}
@@ -224,6 +294,8 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
               handleSubmit={(formData) => this.props.handleSubmit(
                 formData,
                 roles,
+                actorsByActortype,
+                actionsByActiontype,
               )}
               handleSubmitFail={this.props.handleSubmitFail}
               handleCancel={() => this.props.handleCancel(reference)}
@@ -234,7 +306,12 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
                   aside: this.getHeaderAsideFields(viewEntity, editableRoles),
                 },
                 body: {
-                  main: this.getBodyMainFields(),
+                  main: this.getBodyMainFields(
+                    actorsByActortype,
+                    actionsByActiontype,
+                    connectedTaxonomies,
+                    onCreateOption,
+                  ),
                   // aside: (sessionUserHighestRoleId <= USER_ROLES.MANAGER.value) && this.getBodyAsideFields(taxonomies, onCreateOption),
                 },
               }}
@@ -267,6 +344,9 @@ UserEdit.propTypes = {
   onCreateOption: PropTypes.func,
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
+  connectedTaxonomies: PropTypes.object,
+  actorsByActortype: PropTypes.object,
+  actionsByActiontype: PropTypes.object,
 };
 
 UserEdit.contextTypes = {
@@ -279,6 +359,10 @@ const mapStateToProps = (state, props) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   roles: selectRoles(state, props.params.id),
+  actorsByActortype: selectActorsByActortype(state, props.params.id),
+  actionsByActiontype: selectActionsByActiontype(state, props.params.id),
+  connectedTaxonomies: selectConnectedTaxonomies(state),
+
 });
 
 function mapDispatchToProps(dispatch) {
@@ -302,7 +386,7 @@ function mapDispatchToProps(dispatch) {
     handleSubmitRemote: (model) => {
       dispatch(formActions.submit(model));
     },
-    handleSubmit: (formData, roles) => {
+    handleSubmit: (formData, roles, actorsByActortype, actionsByActiontype) => {
       let saveData = formData;
       // roles
       // higher is actually lower
@@ -328,6 +412,59 @@ function mapDispatchToProps(dispatch) {
           : memo,
         List()),
       }));
+
+      if (actionsByActiontype) {
+        saveData = saveData.set(
+          'userActions',
+          actionsByActiontype
+            .map((actions, actiontypeid) => getConnectionUpdatesFromFormData({
+              formData,
+              connections: actions,
+              connectionAttribute: ['associatedActionsByActiontype', actiontypeid.toString()],
+              createConnectionKey: 'measure_id',
+              createKey: 'user_id',
+            }))
+            .reduce(
+              (memo, deleteCreateLists) => {
+                const deletes = memo.get('delete').concat(deleteCreateLists.get('delete'));
+                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
+                return memo
+                  .set('delete', deletes)
+                  .set('create', creates);
+              },
+              fromJS({
+                delete: [],
+                create: [],
+              }),
+            )
+        );
+      }
+      if (actorsByActortype) {
+        saveData = saveData.set(
+          'userActors',
+          actorsByActortype
+            .map((actors, actortypeid) => getConnectionUpdatesFromFormData({
+              formData,
+              connections: actors,
+              connectionAttribute: ['associatedActorsByActortype', actortypeid.toString()],
+              createConnectionKey: 'actor_id',
+              createKey: 'user_id',
+            }))
+            .reduce(
+              (memo, deleteCreateLists) => {
+                const deletes = memo.get('delete').concat(deleteCreateLists.get('delete'));
+                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
+                return memo
+                  .set('delete', deletes)
+                  .set('create', creates);
+              },
+              fromJS({
+                delete: [],
+                create: [],
+              }),
+            )
+        );
+      }
 
       dispatch(save(saveData.toJS()));
     },

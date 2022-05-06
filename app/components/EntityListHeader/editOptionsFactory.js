@@ -42,6 +42,7 @@ export const makeActiveEditOptions = ({
         contextIntl,
         activeEditOption.group,
       );
+    case 'users':
     case 'indicators':
       return makeConnectionEditOptions(
         entities,
@@ -179,6 +180,9 @@ const makeGroupedConnectionEditOptions = (
           || type === 'action-actors' // active actors
           || type === 'member-associations' // associations
           || type === 'association-members' // members
+          || type === 'actor-users'
+          || type === 'action-users'
+          || type === 'indicator-actions'
         ) {
           return qe(typeId, c.getIn(['attributes', 'actortype_id']));
         }

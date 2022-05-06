@@ -127,7 +127,10 @@ const getConnectionLabel = (connection, value, long) => {
       );
     }
     return truncateText(
-      connection.getIn(['attributes', 'code']) || connection.getIn(['attributes', 'title']) || connection.get('id'),
+      connection.getIn(['attributes', 'code'])
+      || connection.getIn(['attributes', 'name'])
+      || connection.getIn(['attributes', 'title'])
+      || connection.get('id'),
       TEXT_TRUNCATE.CONNECTION_TAG,
     );
   }
@@ -266,7 +269,7 @@ const getCurrentConnectionFilters = (
   if (locationQuery.get(query) && connections.get(path)) {
     const locationQueryValue = locationQuery.get(query);
     asList(locationQueryValue).forEach((queryValue) => {
-      const [optionId, value] = queryValue.split(':');
+      const [optionId, value] = queryValue.indexOf(':') > -1 ? queryValue.split(':') : [null, null];
       if (value) {
         const connection = connections.getIn([path, value]);
         if (connection) {

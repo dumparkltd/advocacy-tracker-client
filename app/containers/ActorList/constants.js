@@ -97,8 +97,6 @@ export const CONFIG = {
       key: 'member_id',
       ownKey: 'memberof_id',
       groupByType: true,
-      typeFilter: 'has_members',
-      typeFilterPass: 'reverse',
     },
     associations: { // filter by associated entity
       query: 'by-association',
@@ -114,7 +112,18 @@ export const CONFIG = {
       key: 'memberof_id',
       ownKey: 'member_id',
       groupByType: true,
-      typeFilter: 'has_members',
+    },
+    users: {
+      query: 'users',
+      type: 'actor-users',
+      search: true,
+      message: 'entities.users.plural',
+      path: API.USERS,
+      entityType: 'users',
+      clientPath: ROUTES.USER,
+      connectPath: API.USER_ACTORS, // filter by actor connection
+      key: 'user_id',
+      ownKey: 'actor_id',
     },
   },
   attributes: { // filter by attribute value

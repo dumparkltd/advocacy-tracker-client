@@ -1013,6 +1013,14 @@ export default defineMessages({
       id: 'app.containers.App.nav.targetingActions',
       defaultMessage: 'Targeted by',
     },
+    topActions: {
+      id: 'app.containers.App.nav.topActions',
+      defaultMessage: 'Top/parent activities',
+    },
+    subActions: {
+      id: 'app.containers.App.nav.subActions',
+      defaultMessage: 'Sub/child activities',
+    },
     actors: {
       id: 'app.containers.App.nav.actors',
       defaultMessage: 'Actors',
@@ -1056,6 +1064,22 @@ export default defineMessages({
     users: {
       id: 'app.containers.App.nav.users',
       defaultMessage: 'User admin',
+    },
+    userActions: {
+      id: 'app.containers.App.nav.userActions',
+      defaultMessage: 'Assigned users',
+    },
+    userActors: {
+      id: 'app.containers.App.nav.userActors',
+      defaultMessage: 'Assigned users',
+    },
+    actionUsers: {
+      id: 'app.containers.App.nav.actionUsers',
+      defaultMessage: 'Actions assigned to',
+    },
+    actorUsers: {
+      id: 'app.containers.App.nav.actorUsers',
+      defaultMessage: 'Actors assigned to',
     },
     bookmarks: {
       id: 'app.containers.App.nav.bookmarks',
@@ -1279,6 +1303,14 @@ export default defineMessages({
       children: {
         id: 'app.containers.App.entities.actions.children',
         defaultMessage: 'Child/successor activities',
+      },
+      topActions: {
+        id: 'app.containers.App.entities.actions.topActions',
+        defaultMessage: 'Top/parent activities',
+      },
+      subActions: {
+        id: 'app.containers.App.entities.actions.subActions',
+        defaultMessage: 'Sub/child activities',
       },
       single: {
         id: 'app.containers.App.entities.actions.single',

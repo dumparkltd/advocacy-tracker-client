@@ -28,6 +28,13 @@ import {
   selectActionIndicatorsGroupedByAction,
   selectIndicatorConnections,
   selectActionIndicatorsGroupedByIndicator,
+  selectActionActionsGroupedBySubAction,
+  selectActionActionsGroupedByTopAction,
+  selectUsers,
+  selectUserActionsGroupedByAction,
+  selectUserConnections,
+  selectUserActionsGroupedByUser,
+  selectUserActorsGroupedByUser,
 } from 'containers/App/selectors';
 
 import {
@@ -35,9 +42,10 @@ import {
   prepareTaxonomiesIsAssociated,
   setActorConnections,
   setResourceConnections,
+  setActionConnections,
   setIndicatorConnections,
+  setUserConnections,
 } from 'utils/entities';
-import { qe } from 'utils/quasi-equals';
 
 import { DEPENDENCIES } from './constants';
 
@@ -72,44 +80,114 @@ export const selectViewTaxonomies = createSelector(
 );
 
 
-export const selectChildActions = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
+// connected actions (topactions)
+const selectTopActionJoins = createSelector(
   (state, id) => id,
+  selectActionActionsGroupedByTopAction,
+  (actionId, joinsByAssociation) => joinsByAssociation.get(
+    parseInt(actionId, 10)
+  )
+);
+const selectTopActionsJoined = createSelector(
   selectActions,
+  selectTopActionJoins,
+  (actions, joins) => actions && joins && joins.reduce(
+    (memo, id) => {
+      const entity = actions.get(id.toString());
+      return entity
+        ? memo.set(id, entity)
+        : memo;
+    },
+    Map(),
+  )
+);
+// connected actions (topactions)
+const selectSubActionJoins = createSelector(
+  (state, id) => id,
+  selectActionActionsGroupedBySubAction,
+  (actionId, joinsByAssociation) => joinsByAssociation.get(
+    parseInt(actionId, 10)
+  )
+);
+const selectSubActionsJoined = createSelector(
+  selectActions,
+  selectSubActionJoins,
+  (actions, joins) => actions && joins && joins.reduce(
+    (memo, id) => {
+      const entity = actions.get(id.toString());
+      return entity
+        ? memo.set(id, entity)
+        : memo;
+    },
+    Map(),
+  )
+);
+
+
+// get associated actors with associoted actions and categories
+// - group by actortype
+export const selectTopActionsByActiontype = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectTopActionsJoined,
   selectActionConnections,
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
-  selectActionResourcesGroupedByAction,
   selectActionCategoriesGroupedByAction,
   selectCategories,
   (
     ready,
-    actionId,
     actions,
+    actionConnections,
+    actorActions,
+    actionActors,
+    actionCategories,
+    categories,
   ) => {
-    if (!ready) return null;
-    const children = actions.filter((action) => qe(
-      action.getIn(['attributes', 'parent_id']),
-      actionId,
-    ));
-    return children && children.size > 0 ? children : null;
+    if (!ready) return Map();
+    return actions && actions
+      .map((action) => setActionConnections({
+        action,
+        actionConnections,
+        actorActions,
+        actionActors,
+        categories,
+        actionCategories,
+      }))
+      .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
+      .sortBy((val, key) => key);
   }
 );
-export const selectParentActions = createSelector(
+// get associated actors with associoted actions and categories
+// - group by actortype
+export const selectSubActionsByActiontype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectViewEntity,
-  selectActions,
+  selectSubActionsJoined,
+  selectActionConnections,
+  selectActorActionsGroupedByAction,
+  selectActionActorsGroupedByAction,
+  selectActionCategoriesGroupedByAction,
+  selectCategories,
   (
     ready,
-    viewAction,
     actions,
+    actionConnections,
+    actorActions,
+    actionActors,
+    actionCategories,
+    categories,
   ) => {
-    if (!ready) return null;
-    const parents = actions.filter((action) => qe(
-      viewAction.getIn(['attributes', 'parent_id']),
-      action.get('id'),
-    ));
-    return parents && parents.size > 0 ? parents : null;
+    if (!ready) return Map();
+    return actions && actions
+      .map((action) => setActionConnections({
+        action,
+        actionConnections,
+        actorActions,
+        actionActors,
+        categories,
+        actionCategories,
+      }))
+      .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
+      .sortBy((val, key) => key);
   }
 );
 
@@ -310,9 +388,9 @@ const selectIndicatorAssociations = createSelector(
 const selectIndicatorsAssociated = createSelector(
   selectIndicators,
   selectIndicatorAssociations,
-  (actors, associations) => actors && associations && associations.reduce(
+  (indicators, associations) => indicators && associations && associations.reduce(
     (memo, id) => {
-      const entity = actors.get(id.toString());
+      const entity = indicators.get(id.toString());
       return entity
         ? memo.set(id, entity)
         : memo;
@@ -339,6 +417,52 @@ export const selectEntityIndicators = createSelector(
         indicator,
         indicatorConnections,
         actionIndicators,
+      }))
+      .sortBy((val, key) => key);
+  }
+);
+
+const selectUserAssociations = createSelector(
+  (state, id) => id,
+  selectUserActionsGroupedByAction,
+  (actionId, associationsByAction) => associationsByAction.get(
+    parseInt(actionId, 10)
+  )
+);
+const selectUsersAssociated = createSelector(
+  selectUsers,
+  selectUserAssociations,
+  (users, associations) => users && associations && associations.reduce(
+    (memo, id) => {
+      const entity = users.get(id.toString());
+      return entity
+        ? memo.set(id, entity)
+        : memo;
+    },
+    Map(),
+  )
+);
+
+export const selectEntityUsers = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectUsersAssociated,
+  selectUserConnections,
+  selectUserActionsGroupedByUser,
+  selectUserActorsGroupedByUser,
+  (
+    ready,
+    users,
+    userConnections,
+    userActions,
+    userActors,
+  ) => {
+    if (!ready) return Map();
+    return users && users
+      .map((user) => setUserConnections({
+        user,
+        userConnections,
+        userActions,
+        userActors,
       }))
       .sortBy((val, key) => key);
   }

@@ -28,8 +28,9 @@ import {
   getLinkFormField,
   getAmountFormField,
   getFormField,
-  renderParentActionControl,
+  renderActionsByActiontypeControl,
   renderIndicatorControl,
+  renderUserMultiControl,
 } from 'utils/forms';
 import { getInfoField } from 'utils/fields';
 
@@ -69,12 +70,14 @@ import appMessages from 'containers/App/messages';
 
 import {
   selectDomain,
-  selectParentOptions,
+  selectTopActionsByActiontype,
+  selectSubActionsByActiontype,
   selectConnectedTaxonomies,
   selectActorsByActortype,
   selectTargetsByActortype,
   selectResourcesByResourcetype,
   selectIndicatorOptions,
+  selectUserOptions,
 } from './selectors';
 
 import messages from './messages';
@@ -164,8 +167,10 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     actorsByActortype,
     targetsByActortype,
     resourcesByResourcetype,
+    topActionsByActiontype,
+    subActionsByActiontype,
     indicatorOptions,
-    parentOptions,
+    userOptions,
     onCreateOption,
   ) => {
     const { intl } = this.context;
@@ -212,14 +217,49 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
         },
       );
     }
-    if (parentOptions) {
-      groups.push({
-        label: intl.formatMessage(appMessages.entities.actions.parent),
-        fields: [renderParentActionControl(
-          parentOptions,
-          intl.formatMessage(appMessages.entities.actions.single),
-        )],
-      });
+    if (userOptions) {
+      groups.push(
+        {
+          label: intl.formatMessage(appMessages.nav.userActions),
+          fields: [
+            renderUserMultiControl(userOptions, null, intl),
+          ],
+        },
+      );
+    }
+    if (topActionsByActiontype) {
+      const actionConnections = renderActionsByActiontypeControl(
+        topActionsByActiontype,
+        connectedTaxonomies,
+        onCreateOption,
+        intl,
+        'associatedTopActionsByActiontype',
+      );
+      if (actionConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.topActions),
+            fields: actionConnections,
+          },
+        );
+      }
+    }
+    if (subActionsByActiontype) {
+      const actionConnections = renderActionsByActiontypeControl(
+        subActionsByActiontype,
+        connectedTaxonomies,
+        onCreateOption,
+        intl,
+        'associatedSubActionsByActiontype',
+      );
+      if (actionConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.subActions),
+            fields: actionConnections,
+          },
+        );
+      }
     }
     if (actorsByActortype) {
       const actorConnections = renderActorsByActortypeControl(
@@ -334,8 +374,10 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
       onCreateOption,
       actiontype,
       params,
-      parentOptions,
+      topActionsByActiontype,
+      subActionsByActiontype,
       indicatorOptions,
+      userOptions,
     } = this.props;
     const typeId = params.id;
     const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
@@ -400,7 +442,10 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
                   actorsByActortype,
                   targetsByActortype,
                   resourcesByResourcetype,
+                  topActionsByActiontype,
+                  subActionsByActiontype,
                   indicatorOptions,
+                  userOptions,
                 )}
                 handleSubmitFail={this.props.handleSubmitFail}
                 handleCancel={() => this.props.handleCancel(typeId)}
@@ -420,8 +465,10 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
                       actorsByActortype,
                       targetsByActortype,
                       resourcesByResourcetype,
+                      topActionsByActiontype,
+                      subActionsByActiontype,
                       indicatorOptions,
-                      parentOptions,
+                      userOptions,
                       onCreateOption,
                     ),
                     aside: this.getBodyAsideFields(
@@ -461,7 +508,9 @@ ActionNew.propTypes = {
   onServerErrorDismiss: PropTypes.func.isRequired,
   taxonomies: PropTypes.object,
   indicatorOptions: PropTypes.object,
-  parentOptions: PropTypes.object,
+  userOptions: PropTypes.object,
+  topActionsByActiontype: PropTypes.object,
+  subActionsByActiontype: PropTypes.object,
   onCreateOption: PropTypes.func,
   connectedTaxonomies: PropTypes.object,
   actiontype: PropTypes.instanceOf(Map),
@@ -488,8 +537,10 @@ const mapStateToProps = (state, { params }) => ({
   actorsByActortype: selectActorsByActortype(state, params.id),
   targetsByActortype: selectTargetsByActortype(state, params.id),
   resourcesByResourcetype: selectResourcesByResourcetype(state, params.id),
-  parentOptions: selectParentOptions(state, params.id),
+  topActionsByActiontype: selectTopActionsByActiontype(state, params.id),
+  subActionsByActiontype: selectSubActionsByActiontype(state, params.id),
   indicatorOptions: selectIndicatorOptions(state, params.id),
+  userOptions: selectUserOptions(state, params.id),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -522,7 +573,10 @@ function mapDispatchToProps(dispatch) {
       actorsByActortype,
       targetsByActortype,
       resourcesByResourcetype,
+      topActionsByActiontype,
+      subActionsByActiontype,
       indicatorOptions,
+      userOptions,
     ) => {
       let saveData = formData.setIn(['attributes', 'measuretype_id'], actiontype.get('id'));
       // actionCategories
@@ -537,6 +591,50 @@ function mapDispatchToProps(dispatch) {
                 category_id: id,
               }))),
             }), Map({ delete: List(), create: List() }))
+        );
+      }
+      if (formData.get('associatedTopActionsByActiontype') && topActionsByActiontype) {
+        saveData = saveData.set(
+          'topActions',
+          topActionsByActiontype
+            .map((actions, actiontypeid) => getConnectionUpdatesFromFormData({
+              formData,
+              connections: actions,
+              connectionAttribute: ['associatedTopActionsByActiontype', actiontypeid.toString()],
+              createConnectionKey: 'other_measure_id',
+              createKey: 'measure_id',
+            }))
+            .reduce(
+              (memo, deleteCreateLists) => {
+                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
+                return memo.set('create', creates);
+              },
+              fromJS({
+                create: [],
+              }),
+            )
+        );
+      }
+      if (formData.get('associatedSubActionsByActiontype') && subActionsByActiontype) {
+        saveData = saveData.set(
+          'subActions',
+          subActionsByActiontype
+            .map((actions, actiontypeid) => getConnectionUpdatesFromFormData({
+              formData,
+              connections: actions,
+              connectionAttribute: ['associatedSubActionsByActiontype', actiontypeid.toString()],
+              createConnectionKey: 'measure_id',
+              createKey: 'other_measure_id',
+            }))
+            .reduce(
+              (memo, deleteCreateLists) => {
+                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
+                return memo.set('create', creates);
+              },
+              fromJS({
+                create: [],
+              }),
+            )
         );
       }
       // indicators
@@ -620,12 +718,17 @@ function mapDispatchToProps(dispatch) {
             )
         );
       }
-      // TODO: remove once have singleselect instead of multiselect
-      const formParentIds = getCheckedValuesFromOptions(formData.get('associatedParent'));
-      if (List.isList(formParentIds) && formParentIds.size) {
-        saveData = saveData.setIn(['attributes', 'parent_id'], formParentIds.first());
-      } else {
-        saveData = saveData.setIn(['attributes', 'parent_id'], null);
+      if (formData.get('associatedUsers') && userOptions) {
+        saveData = saveData.set(
+          'userActions',
+          Map({
+            delete: List(),
+            create: getCheckedValuesFromOptions(formData.get('associatedUsers'))
+              .map((id) => Map({
+                user_id: id,
+              })),
+          })
+        );
       }
       dispatch(save(saveData.toJS(), actiontype.get('id')));
     },

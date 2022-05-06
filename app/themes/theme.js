@@ -139,6 +139,8 @@ theme.palette = {
   resourcesHover: ['#023066'],
   indicators: ['#033A89'], // accepted, noted
   indicatorsHover: ['#023066'],
+  users: ['#033A89'], // accepted, noted
+  usersHover: ['#023066'],
   attributesHover: [dark[2]],
   attributes: [dark[3]],
   rolesHover: [dark[2]],
