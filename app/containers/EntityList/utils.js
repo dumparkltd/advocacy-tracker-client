@@ -59,7 +59,7 @@ export const getActorsForEntities = (
           ? actionActorsAsMember.reduce(
             (memo2, actorId) => {
               const sActorId = actorId.toString();
-              // makes sure not already included in direct action
+              // makes sure not already included in direct or indirect action
               if (
                 !memo2.getIn([sActorId, actorAtt])
                 || !memo2.getIn([sActorId, actorAtt]).includes(actionId)
@@ -67,10 +67,13 @@ export const getActorsForEntities = (
                 // if already present, add action id
                 if (memo2.get(sActorId)) {
                   if (memo2.getIn([sActorId, actorAttMembers])) {
-                    return memo2.setIn(
-                      [sActorId, actorAttMembers],
-                      memo2.getIn([sActorId, actorAttMembers]).push(actionId),
-                    );
+                    if (!memo2.getIn([sActorId, actorAttMembers]).includes(actionId)) {
+                      return memo2.setIn(
+                        [sActorId, actorAttMembers],
+                        memo2.getIn([sActorId, actorAttMembers]).push(actionId),
+                      );
+                    }
+                    return memo2;
                   }
                   return memo2.setIn([sActorId, actorAttMembers], List().push(actionId));
                 }

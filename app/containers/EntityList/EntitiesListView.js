@@ -385,6 +385,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                   <Box>
                     <Box direction="row" gap="xsmall" margin={{ vertical: 'small' }} wrap>
                       {mapSubject === 'actors'
+                        && ACTIONTYPE_ACTORTYPES[typeId]
                         && ACTIONTYPE_ACTORTYPES[typeId].length > 1
                         && ACTIONTYPE_ACTORTYPES[typeId].map(
                           (actortypeId) => (
@@ -400,6 +401,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                           )
                         )}
                       {mapSubject === 'targets'
+                        && ACTIONTYPE_TARGETTYPES[typeId]
                         && ACTIONTYPE_TARGETTYPES[typeId].length > 1
                         && ACTIONTYPE_TARGETTYPES[typeId].map(
                           (actortypeId) => (
