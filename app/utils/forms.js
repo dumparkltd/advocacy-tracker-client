@@ -6,6 +6,12 @@ import {
   getEntityTitle,
   getEntityReference,
   getCategoryShortTitle,
+  checkActionAttribute,
+  checkActionRequired,
+  checkActorAttribute,
+  checkActorRequired,
+  checkResourceAttribute,
+  checkResourceRequired,
 } from 'utils/entities';
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
@@ -841,11 +847,33 @@ const getCategoryFields = (args, formatMessage) => ({
   },
 });
 
-const getActorFields = (formatMessage) => ({
+const getActorFields = ({ typeId }, formatMessage) => ({
   header: {
     main: [{ // fieldGroup
       fields: [
-        getTitleFormField(formatMessage),
+        checkActorAttribute(typeId, 'code') && getCodeFormField(
+          formatMessage,
+          'code',
+          checkActorRequired(typeId, 'code'),
+        ),
+        checkActorAttribute(typeId, 'prefix') && getCodeFormField(
+          formatMessage,
+          'prefix',
+          checkActorRequired(typeId, 'prefix'),
+        ),
+        checkActorAttribute(typeId, 'title') && getTitleFormField(
+          formatMessage,
+          'title',
+          'title',
+          checkActorRequired(typeId, 'title'),
+        ),
+        checkActorAttribute(typeId, 'name') && getTitleFormField(
+          formatMessage,
+          'title',
+          'title',
+          checkActorRequired(typeId, 'name'),
+          'name' // label
+        ),
       ],
     }],
     aside: [{ // fieldGroup
@@ -857,17 +885,62 @@ const getActorFields = (formatMessage) => ({
   body: {
     main: [{
       fields: [
-        getMarkdownFormField(formatMessage),
+        checkActorAttribute(typeId, 'description') && getMarkdownFormField(
+          formatMessage,
+          checkActorRequired(typeId, 'description'),
+          'description',
+        ),
+        checkActorAttribute(typeId, 'activity_summary') && getMarkdownFormField(
+          formatMessage,
+          checkActorRequired(typeId, 'activity_summary'),
+          'activity_summary',
+        ),
+      ],
+    }],
+    aside: [{ // fieldGroup
+      fields: [
+        checkActorAttribute(typeId, 'address') && getTextareaField(formatMessage, 'address', checkActorRequired(typeId, 'address')),
+        checkActorAttribute(typeId, 'phone') && getTextFormField(formatMessage, 'phone', checkActorRequired(typeId, 'phone')),
+        checkActorAttribute(typeId, 'email') && getEmailField(formatMessage, checkActorRequired(typeId, 'email')),
+        checkActorAttribute(typeId, 'url') && getLinkFormField(
+          formatMessage,
+          checkActorRequired(typeId, 'url'),
+          'url',
+        ),
+      ],
+    },
+    { // fieldGroup
+      fields: [
+        checkActorAttribute(typeId, 'gdp') && getAmountFormField(
+          formatMessage,
+          checkActorRequired(typeId, 'gdp'),
+          'gdp',
+        ),
+        checkActorAttribute(typeId, 'population') && getNumberFormField(
+          formatMessage,
+          checkActorRequired(typeId, 'population'),
+          'population',
+        ),
       ],
     }],
   },
 });
 
-const getActionFields = (formatMessage) => ({
+const getActionFields = ({ typeId }, formatMessage) => ({
   header: {
     main: [{ // fieldGroup
       fields: [
-        getTitleFormField(formatMessage),
+        checkActionAttribute(typeId, 'code') && getCodeFormField(
+          formatMessage,
+          'code',
+          checkActionRequired(typeId, 'code'),
+        ),
+        checkActionAttribute(typeId, 'title') && getTitleFormField(
+          formatMessage,
+          'title',
+          'title',
+          checkActionRequired(typeId, 'title'),
+        ),
       ],
     }],
     aside: [{ // fieldGroup
@@ -879,42 +952,125 @@ const getActionFields = (formatMessage) => ({
   body: {
     main: [{
       fields: [
-        getMarkdownFormField(formatMessage),
+        checkActionAttribute(typeId, 'description') && getMarkdownFormField(
+          formatMessage,
+          checkActionRequired(typeId, 'description'),
+          'description',
+        ),
+        checkActionAttribute(typeId, 'comment') && getMarkdownFormField(
+          formatMessage,
+          checkActionRequired(typeId, 'comment'),
+          'comment',
+        ),
       ],
     }],
-    aside: [{ // fieldGroup
-      fields: [
-        // getDateField(formatMessage, 'target_date'),
-        // getTextareaField(formatMessage, 'target_date_comment'),
-      ],
-    }],
+    aside: [
+      { // fieldGroup
+        fields: [
+          checkActionAttribute(typeId, 'date_start') && getDateField(
+            formatMessage,
+            'date_start',
+            checkActionRequired(typeId, 'date_start'),
+          ),
+          checkActionAttribute(typeId, 'date_end') && getDateField(
+            formatMessage,
+            'date_end',
+            checkActionRequired(typeId, 'date_end'),
+          ),
+          checkActionAttribute(typeId, 'date_comment') && getTextareaField(
+            formatMessage,
+            'date_comment',
+            checkActionRequired(typeId, 'date_comment'),
+          ),
+        ],
+      },
+      { // fieldGroup
+        fields: [
+          checkActionAttribute(typeId, 'url') && getLinkFormField(
+            formatMessage,
+            checkActionRequired(typeId, 'url'),
+            'url',
+          ),
+        ],
+      },
+      { // fieldGroup
+        fields: [
+          checkActionAttribute(typeId, 'amount') && getAmountFormField(
+            formatMessage,
+            checkActionRequired(typeId, 'amount'),
+            'amount',
+          ),
+          checkActionAttribute(typeId, 'amount_comment') && getFormField({
+            formatMessage,
+            required: checkActionRequired(typeId, 'amount_comment'),
+            attribute: 'amount_comment',
+            controlType: 'input',
+          }),
+        ],
+      },
+    ],
   },
 });
-const getResourceFields = (formatMessage) => ({
+const getResourceFields = ({ typeId }, formatMessage) => ({
   header: {
     main: [{ // fieldGroup
       fields: [
-        getTitleFormField(formatMessage),
+        checkResourceAttribute(typeId, 'title') && getTitleFormField(
+          formatMessage,
+          'title',
+          'title',
+          checkResourceRequired(typeId, 'title'),
+        ),
       ],
     }],
     aside: [{ // fieldGroup
       fields: [
-        getStatusField(formatMessage),
+        checkResourceAttribute(typeId, 'url') && getLinkFormField(
+          formatMessage,
+          checkResourceRequired(typeId, 'url'),
+          'url',
+        ),
       ],
     }],
   },
   body: {
-    main: [{
-      fields: [
-        getLinkFormField(formatMessage),
-        getMarkdownFormField(formatMessage),
-      ],
-    }],
+    main: [
+      {
+        fields: [
+          checkResourceAttribute(typeId, 'url') && getLinkFormField(
+            formatMessage,
+            checkResourceRequired(typeId, 'url'),
+            'url',
+          ),
+        ],
+      },
+      {
+        fields: [
+          checkResourceAttribute(typeId, 'description') && getMarkdownFormField(
+            formatMessage,
+            checkResourceRequired(typeId, 'description'),
+            'description',
+          ),
+          checkResourceAttribute(typeId, 'status') && getMarkdownFormField(
+            formatMessage,
+            checkResourceRequired(typeId, 'status'),
+            'status',
+          ),
+        ],
+      },
+    ],
     aside: [{ // fieldGroup
       fields: [
-        getDateField(formatMessage, 'access_date'),
-        getDateField(formatMessage, 'publication_date'),
-        // getTextareaField(formatMessage, 'target_date_comment'),
+        checkResourceAttribute(typeId, 'publication_date') && getDateField(
+          formatMessage,
+          'publication_date',
+          checkResourceRequired(typeId, 'publication_date'),
+        ),
+        checkResourceAttribute(typeId, 'access_date') && getDateField(
+          formatMessage,
+          'access_date',
+          checkResourceRequired(typeId, 'access_date'),
+        ),
       ],
     }],
   },
@@ -925,11 +1081,11 @@ export const getEntityAttributeFields = (path, args, contextIntl) => {
     case API.CATEGORIES:
       return getCategoryFields(args.categories, contextIntl.formatMessage);
     case API.ACTIONS:
-      return getActionFields(contextIntl.formatMessage);
+      return getActionFields(args, contextIntl.formatMessage);
     case API.ACTORS:
-      return getActorFields(contextIntl.formatMessage);
+      return getActorFields(args, contextIntl.formatMessage);
     case API.RESOURCES:
-      return getResourceFields(contextIntl.formatMessage);
+      return getResourceFields(args, contextIntl.formatMessage);
     default:
       return {};
   }
