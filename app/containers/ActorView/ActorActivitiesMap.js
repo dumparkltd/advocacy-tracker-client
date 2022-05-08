@@ -301,14 +301,14 @@ export function ActorActivitiesMap({
         memberOption = {
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: `Include activities of intergovernmental organisations '${actorName}' belongs to`,
+          label: `Include activities of groups '${actorName}' belongs to`,
           key: 'am',
         };
       }
       memberTargetOption = {
         active: includeTargetMembers,
         onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-        label: `Include regions, intergovernmental organisations, classes targeted by activities of '${actorName}'`,
+        label: `Include regions, groups, classes targeted by activities of '${actorName}'`,
         key: 'tm',
       };
     }
@@ -323,7 +323,7 @@ export function ActorActivitiesMap({
       memberOption = {
         active: includeActorMembers,
         onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-        label: `Include activities of intergovernmental organisations '${actorName}' belongs to`,
+        label: `Include activities of groups '${actorName}' belongs to`,
       };
     }
   }
@@ -336,14 +336,14 @@ export function ActorActivitiesMap({
       memberOption = {
         active: includeActorMembers,
         onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-        label: `Include member countries of intergovernmental organisations targeting '${actorName}'`,
+        label: `Include member countries of groups targeting '${actorName}'`,
         key: 'am',
       };
       if (actorCanBeMember) {
         memberTargetOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: `Include countries with activities targeting '${actorName}' indirectly via a region, intergovernmental organisation or class`,
+          label: `Include countries with activities targeting '${actorName}' indirectly via a region, group or class`,
           key: 'tm',
         };
       }

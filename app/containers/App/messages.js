@@ -2224,7 +2224,7 @@ export default defineMessages({
       },
       analyst: {
         id: 'app.containers.App.ui.userRoles.analyst',
-        defaultMessage: 'Analyst',
+        defaultMessage: 'Staff',
       },
       default: {
         id: 'app.containers.App.ui.userRoles.default',

@@ -133,13 +133,13 @@ export function EntitiesMap({
           memberOption = {
             active: includeTargetMembers,
             onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-            label: 'Include activities targeting regions, intergovernmental organisations and classes (countries belong to)',
+            label: 'Include activities targeting regions, groups and classes (countries belong to)',
           };
         } else if (hasGroupActors(actortypes)) {
           memberOption = {
             active: includeActorMembers,
             onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-            label: 'Include activities of intergovernmental organisations (countries belong to)',
+            label: 'Include activities of groups (countries belong to)',
           };
         }
       } else if (hasActions && !hasByTarget) { // i.e. institutions
@@ -148,21 +148,21 @@ export function EntitiesMap({
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions, intergovernmental organisations and classes (countries belong to)',
+          label: 'Include activities targeting regions, groups and classes (countries belong to)',
         };
       // } else if (!hasActions && hasByTarget) { // i.e. regions, classes
       //   mapSubjectClean = 'targets';
       //   memberOption = {
       //     active: includeActorMembers,
       //     onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-      //     label: 'Include activities of intergovernmental organisations (countries belong to)',
+      //     label: 'Include activities of groups (countries belong to)',
       //   };
       } else { // i.e. groups
         mapSubjectClean = 'targets';
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions, intergovernmental organisations and classes (countries belong to)',
+          label: 'Include activities targeting regions, groups and classes (countries belong to)',
         };
       }
 
@@ -451,14 +451,14 @@ export function EntitiesMap({
           memberOption = {
             active: includeTargetMembers,
             onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-            label: 'Include activities targeting regions, intergovernmental organisations and classes (countries belong to)',
+            label: 'Include activities targeting regions, groups and classes (countries belong to)',
           };
         }
       } else if (hasGroupActors(actortypes)) {
         memberOption = {
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of intergovernmental organisations (countries belong to)',
+          label: 'Include activities of groups (countries belong to)',
         };
       }
       // entities are filtered actions

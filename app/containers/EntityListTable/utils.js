@@ -75,9 +75,26 @@ export const prepareHeader = ({
           onSort,
         });
       case 'actors':
+      case 'userActors':
         return ({
           ...col,
           title: 'Actors',
+          sortActive: sortBy === col.id,
+          sortOrder: sortOrder || 'asc',
+          onSort,
+        });
+      case 'users':
+        return ({
+          ...col,
+          title: 'Users (staff)',
+          sortActive: sortBy === col.id,
+          sortOrder: sortOrder || 'asc',
+          onSort,
+        });
+      case 'indicators':
+        return ({
+          ...col,
+          title: 'Topics',
           sortActive: sortBy === col.id,
           sortOrder: sortOrder || 'asc',
           onSort,
@@ -129,6 +146,8 @@ export const prepareHeader = ({
           onSort,
         });
       case 'resourceActions':
+      case 'indicatorActions':
+      case 'userActions':
         return ({
           ...col,
           title: 'Activities',
@@ -176,7 +195,7 @@ const getRelatedValue = (relatedEntities, typeLabel) => {
         ? `${relatedEntities.size} ${lowerCase(typeLabel)}`
         : relatedEntities.size;
     }
-    return relatedEntities.first().getIn(['attributes', 'title']);
+    return relatedEntities.first().getIn(['attributes', 'name']) || relatedEntities.first().getIn(['attributes', 'title']);
   }
   return null;
 };
@@ -285,7 +304,36 @@ export const prepareEntities = ({
                 sortValue: getRelatedSortValue(relatedEntities),
               },
             };
+          case 'users':
+            temp = entity.get('users');
+            relatedEntities = getRelatedEntities(temp, connections.get('users'), col);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getRelatedValue(relatedEntities, col.label || 'users'),
+                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
+                tooltip: relatedEntities,
+                multiple: relatedEntities && relatedEntities.size > 1,
+                sortValue: getRelatedSortValue(relatedEntities),
+              },
+            };
+          case 'indicators':
+            temp = entity.get('indicators');
+            relatedEntities = getRelatedEntities(temp, connections.get('indicators'), col);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getRelatedValue(relatedEntities, col.label || 'topics'),
+                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
+                tooltip: relatedEntities,
+                multiple: relatedEntities && relatedEntities.size > 1,
+                sortValue: getRelatedSortValue(relatedEntities),
+              },
+            };
           case 'actors':
+          case 'userActors':
             temp = entity.get('actors') || (entity.get('actorsByType') && entity.get('actorsByType').flatten());
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
@@ -316,19 +364,14 @@ export const prepareEntities = ({
               },
             };
           case 'associations':
-            relatedEntities = getRelatedEntities(
-              entity.getIn(['associationsByType', col.actortype_id]),
-              connections.get('actors'),
-              col,
-            );
+            temp = entity.get('associations') || (entity.get('associationsByType') && entity.get('associationsByType').flatten());
+
+            relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: getRelatedValue(
-                  relatedEntities,
-                  intl.formatMessage(appMessages.entities[`actors_${col.actortype_id}`].pluralShort),
-                ),
+                value: getRelatedValue(relatedEntities, 'memberships'),
                 single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
                 tooltip: relatedEntities && relatedEntities.size > 1
                   && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
@@ -401,6 +444,8 @@ export const prepareEntities = ({
               },
             };
           case 'resourceActions':
+          case 'indicatorActions':
+          case 'userActions':
             temp = entity.get('actions')
               || (entity.get('actionsByType') && entity.get('actionsByType').flatten());
             relatedEntities = temp && getRelatedEntities(

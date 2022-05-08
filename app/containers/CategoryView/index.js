@@ -289,6 +289,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
       actorConnections,
       handleEdit,
       handleTypeClick,
+      handleClose,
     } = this.props;
     let buttons = [];
     if (dataReady) {
@@ -306,7 +307,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
           ...buttons,
           {
             type: 'edit',
-            onClick: handleEdit,
+            onClick: () => handleEdit(viewEntity.get('id')),
           },
         ];
       }
@@ -354,10 +355,10 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
               <EntityView
                 header={{
                   title: pageTitle,
-                  onClose: this.props.handleClose,
+                  onClose: handleClose,
                   buttons,
-                  onTypeClick: this.props.viewEntity && isManager
-                    ? () => handleTypeClick(this.props.viewEntity.getIn(['taxonomy', 'id']))
+                  onTypeClick: viewEntity && isManager
+                    ? () => handleTypeClick(viewEntity.getIn(['taxonomy', 'id']))
                     : null,
                 }}
                 fields={{

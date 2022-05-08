@@ -345,6 +345,10 @@ export const selectUserQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('users')
 );
+export const selectIndicatorQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('indicators')
+);
 export const selectSearchQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('search')

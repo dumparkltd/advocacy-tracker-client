@@ -50,7 +50,8 @@ export const CONFIG = {
       query: 'action',
       type: 'user-actions',
       search: true,
-      message: 'entities.actions_{typeid}.plural',
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,
@@ -63,7 +64,8 @@ export const CONFIG = {
       query: 'actor',
       type: 'user-actors',
       search: true,
-      message: 'entities.actors_{typeid}.plural',
+      messageByType: 'entities.actors_{typeid}.plural',
+      message: 'entities.actors.plural',
       path: API.ACTORS, // filter by actor connection
       entityType: 'actors', // filter by actor connection
       clientPath: ROUTES.ACTOR,

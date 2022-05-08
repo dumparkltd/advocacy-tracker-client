@@ -5,7 +5,7 @@ import qe from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
 
 import {
-  ACTIONTYPES,
+  // ACTIONTYPES,
   INDICATOR_ACTIONTYPES,
   USER_ACTIONTYPES,
   USER_ACTORTYPES,
@@ -18,6 +18,7 @@ export const makeFilterGroups = ({
   taxonomies,
   hasUserRole,
   actortypes,
+  targettypes,
   actiontypes,
   resourcetypes,
   actiontypesForTarget,
@@ -88,6 +89,10 @@ export const makeFilterGroups = ({
           validType = USER_ACTORTYPES.indexOf(typeId) > -1;
         }
         if (validType) {
+          // console.log(currentFilters)
+          const optionCurrentFilters = currentFilters && currentFilters.filter(
+            (f) => qe(f.groupId, connectionKey)
+          );
           filterGroups[connectionKey] = {
             id: connectionKey, // filterGroupId
             label: messages.connections(option.type),
@@ -100,6 +105,7 @@ export const makeFilterGroups = ({
               active: !!activeFilterOption
                 && activeFilterOption.group === connectionKey
                 && activeFilterOption.optionId === option.type,
+              currentFilters: optionCurrentFilters,
             }],
           };
         }
@@ -109,11 +115,9 @@ export const makeFilterGroups = ({
         let label;
         if (option.type === 'action-actors') {
           types = actortypes;
-          label = qe(ACTIONTYPES.DONOR, typeId) && 'By donor';
           typeAbout = 'actortypes_about';
         } else if (option.type === 'action-targets') {
-          types = actortypes;
-          label = qe(ACTIONTYPES.DONOR, typeId) && 'By recipient';
+          types = targettypes;
           typeAbout = 'actortypes_about';
         } else if (option.type === 'target-actions') {
           types = actiontypesForTarget;

@@ -50,7 +50,8 @@ export const CONFIG = {
       query: 'action',
       type: 'indicator-actions',
       search: true,
-      message: 'entities.actions_{typeid}.plural',
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,

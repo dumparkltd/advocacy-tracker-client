@@ -41,11 +41,7 @@ export const CONFIG = {
     },
     map: {
       types: [
-        ACTIONTYPES.REGLSEAS,
-        ACTIONTYPES.REGL,
-        ACTIONTYPES.NATL,
-        ACTIONTYPES.INIT,
-        ACTIONTYPES.DONOR,
+        ACTIONTYPES.EXPRESS,
       ],
     },
   },
@@ -85,7 +81,6 @@ export const CONFIG = {
       ownKey: 'measure_id',
       groupByType: true,
       typeFilter: 'is_active',
-      typeMemberFilter: 'has_members',
     },
     // filter by associated target
     targets: {

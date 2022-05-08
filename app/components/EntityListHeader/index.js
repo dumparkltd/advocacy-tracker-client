@@ -657,7 +657,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                   ? {
                     key: 'filter-member-option',
                     active: !!includeMembers,
-                    label: 'Include members when filtering by region, class or intergovernmental organisation',
+                    label: 'Include members when filtering by region, class or group',
                     onClick: () => {
                       this.onHideForm();
                       onSetFilterMemberOption(!includeMembers);

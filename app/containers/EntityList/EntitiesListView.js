@@ -17,7 +17,7 @@ import {
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
-  ACTIONTYPES,
+  // ACTIONTYPES,
 } from 'themes/config';
 import { CONTENT_LIST } from 'containers/App/constants';
 import { jumpToComponent } from 'utils/scroll-to-component';
@@ -144,9 +144,10 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     const { viewType } = this.state;
     let type;
     let hasByTarget;
+    let hasByActor;
     let isTarget;
     let isActive;
-    let subjectOptions;
+    let subjectOptions = [];
     let memberOption;
     let entityActors;
     let columns;
@@ -158,25 +159,31 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     if (config.types === 'actiontypes' && dataReady) {
       columns = ACTIONTYPES_CONFIG[typeId] && ACTIONTYPES_CONFIG[typeId].columns;
       type = actiontypes.find((at) => qe(at.get('id'), typeId));
-      hasByTarget = type.getIn(['attributes', 'has_target']);
+      // hasByTarget = type.getIn(['attributes', 'has_target']);
+      hasByActor = ACTIONTYPE_ACTORTYPES[typeId] && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
+      hasByTarget = ACTIONTYPE_TARGETTYPES[typeId] && ACTIONTYPE_TARGETTYPES[typeId].length > 0;
+      // console.log(typeId, type.get('id'), ACTIONTYPE_ACTORTYPES, ACTIONTYPE_ACTORTYPES[typeId], hasByActor, hasByTarget)
       if (!hasByTarget && mapSubject === 'targets') {
         mapSubjectClean = null;
       }
-      if (qe(ACTIONTYPES.INTL, typeId)) {
+      if (!hasByActor && mapSubject === 'actors') {
         mapSubjectClean = null;
       }
-      if (!qe(ACTIONTYPES.INTL, typeId)) {
+      subjectOptions = [
+        {
+          type: 'secondary',
+          title: 'Activities',
+          onClick: () => onSetMapSubject(),
+          active: !mapSubjectClean,
+          disabled: !mapSubjectClean,
+        },
+      ];
+      if (hasByActor) {
         subjectOptions = [
+          ...subjectOptions,
           {
             type: 'secondary',
-            title: 'Activities',
-            onClick: () => onSetMapSubject(),
-            active: !mapSubjectClean,
-            disabled: !mapSubjectClean,
-          },
-          {
-            type: 'secondary',
-            title: qe(ACTIONTYPES.DONOR, typeId) ? 'By donor' : 'By actor',
+            title: 'By actor',
             onClick: () => onSetMapSubject('actors'),
             active: mapSubjectClean === 'actors',
             disabled: mapSubjectClean === 'actors',
@@ -188,7 +195,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           ...subjectOptions,
           {
             type: 'secondary',
-            title: qe(ACTIONTYPES.DONOR, typeId) ? 'By recipient' : 'By target',
+            title: 'By target',
             onClick: () => onSetMapSubject('targets'),
             active: mapSubjectClean === 'targets',
             disabled: mapSubjectClean === 'targets',
@@ -199,13 +206,13 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions, intergovernmental organisations and classes (countries belong to)',
+          label: 'Include activities targeting regions, groups and classes (countries belong to)',
         };
       } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.COUNTRY)) {
         memberOption = {
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of intergovernmental organisations (countries belong to)',
+          label: 'Include activities of groups (countries belong to)',
         };
       }
       entityActors = mapSubjectClean && getActorsForEntities(
@@ -289,13 +296,13 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions, intergovernmental organisations and classes (countries belong to)',
+          label: 'Include activities targeting regions, groups and classes (countries belong to)',
         };
       } else if (mapSubjectClean === 'actors' && qe(typeId, ACTORTYPES.COUNTRY)) {
         memberOption = {
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of intergovernmental organisations (countries belong to)',
+          label: 'Include activities of groups (countries belong to)',
         };
       }
       // RESOURCES ================================================================
@@ -322,6 +329,10 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           sort: 'name',
           attributes: ['title'],
         },
+        {
+          id: 'actions', // one row per type,
+          type: 'indicatorActions', // one row per type,
+        },
       ];
     } else if (config.types === 'users' && dataReady) {
       columns = [
@@ -334,6 +345,14 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {
           id: 'userrole',
           type: 'userrole',
+        },
+        {
+          id: 'userActions',
+          type: 'userActions',
+        },
+        {
+          id: 'userActors',
+          type: 'userActors',
         },
       ];
     } else if (config.types === 'pages' && dataReady) {
@@ -356,7 +375,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     if (hasFilters) {
       headerSubTitle = `of ${allEntityCount} total`;
     }
-
     return (
       <ContainerWrapper headerStyle={headerStyle} ref={this.ScrollContainer}>
         {dataReady && viewOptions && viewOptions.length > 1 && (
@@ -500,6 +518,12 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                               clientPath: ROUTES.ACTION,
                               actionTypeId: typeId,
                             },
+                            // USERS: { // filter by associated entity
+                            //   entityType: 'users', // filter by actor connection
+                            //   path: API.USERS, // filter by actor connection
+                            //   clientPath: ROUTES.USER,
+                            //   actionTypeId: typeId,
+                            // },
                           },
                         }}
                         connections={connections}

@@ -6,8 +6,10 @@ import { isMinSize } from 'utils/responsive';
 
 import CellBodyMain from './CellBodyMain';
 import CellBodyPlain from './CellBodyPlain';
+import CellBodyUsers from './CellBodyUsers';
 import CellBodyActors from './CellBodyActors';
 import CellBodyActions from './CellBodyActions';
+import CellBodyIndicators from './CellBodyIndicators';
 import CellBodyCategories from './CellBodyCategories';
 import CellBodyHasResource from './CellBodyHasResource';
 import CellBodyBarChart from './CellBodyBarChart';
@@ -231,6 +233,20 @@ export function EntitiesTable({
                         column={col}
                       />
                     )}
+                    {col.type === 'users' && (
+                      <CellBodyUsers
+                        entity={entity[col.id]}
+                        onEntityClick={onEntityClick}
+                        column={col}
+                      />
+                    )}
+                    {col.type === 'indicators' && (
+                      <CellBodyIndicators
+                        entity={entity[col.id]}
+                        onEntityClick={onEntityClick}
+                        column={col}
+                      />
+                    )}
                     {col.type === 'members' && (
                       <CellBodyActors
                         entity={entity[col.id]}
@@ -239,6 +255,13 @@ export function EntitiesTable({
                       />
                     )}
                     {col.type === 'associations' && (
+                      <CellBodyActors
+                        entity={entity[col.id]}
+                        onEntityClick={onEntityClick}
+                        column={col}
+                      />
+                    )}
+                    {col.type === 'userActors' && (
                       <CellBodyActors
                         entity={entity[col.id]}
                         onEntityClick={onEntityClick}
@@ -259,6 +282,20 @@ export function EntitiesTable({
                       />
                     )}
                     {col.type === 'resourceActions' && (
+                      <CellBodyActions
+                        entity={entity[col.id]}
+                        column={col}
+                        onEntityClick={onEntityClick}
+                      />
+                    )}
+                    {col.type === 'indicatorActions' && (
+                      <CellBodyActions
+                        entity={entity[col.id]}
+                        column={col}
+                        onEntityClick={onEntityClick}
+                      />
+                    )}
+                    {col.type === 'userActions' && (
                       <CellBodyActions
                         entity={entity[col.id]}
                         column={col}

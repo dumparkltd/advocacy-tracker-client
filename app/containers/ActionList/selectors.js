@@ -33,6 +33,7 @@ import {
   selectUsers,
   selectUserActionsGroupedByAction,
   selectUserQuery,
+  selectIndicatorQuery,
 } from 'containers/App/selectors';
 
 import {
@@ -431,8 +432,15 @@ const selectActionsByUsers = createSelector(
     ? filterEntitiesByConnection(entities, query, 'users')
     : entities
 );
-const selectActionsByResources = createSelector(
+const selectActionsByIndicators = createSelector(
   selectActionsByUsers,
+  selectIndicatorQuery,
+  (entities, query) => query
+    ? filterEntitiesByConnection(entities, query, 'indicators')
+    : entities
+);
+const selectActionsByResources = createSelector(
+  selectActionsByIndicators,
   selectResourceQuery,
   (entities, query) => query
     ? filterEntitiesByConnection(entities, query, 'resources')

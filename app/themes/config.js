@@ -436,12 +436,14 @@ export const ACTIONTYPE_ACTORTYPES = {
   ],
   // events are attended by countries, contacts, orgs
   [ACTIONTYPES.EVENT]: [
+    ACTORTYPES.GROUP,
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
     ACTORTYPES.ORG,
   ],
   // interactions with countries, contacts or organisations
   [ACTIONTYPES.INTERACTION]: [
+    ACTORTYPES.GROUP,
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
     ACTORTYPES.ORG,
@@ -522,6 +524,7 @@ export const ACTIONTYPE_ACTIONTYPES = {
     ACTIONTYPES.AP,
     ACTIONTYPES.TASK,
     ACTIONTYPES.EVENT,
+    ACTIONTYPES.EXPRESS,
   ],
 };
 // member of
@@ -544,7 +547,13 @@ export const MEMBERSHIPS = {
 
 export const INDICATOR_ACTIONTYPES = [ACTIONTYPES.EXPRESS];
 
-export const USER_ACTIONTYPES = Object.values(ACTIONTYPES);
+export const USER_ACTIONTYPES = [
+  ACTIONTYPES.OP,
+  ACTIONTYPES.AP,
+  ACTIONTYPES.TASK,
+  ACTIONTYPES.EVENT,
+  ACTIONTYPES.INTERACTION,
+];
 export const USER_ACTORTYPES = Object.values(ACTORTYPES);
 
 export const ACTORTYPES_CONFIG = {
@@ -556,6 +565,10 @@ export const ACTORTYPES_CONFIG = {
         id: 'members', // one row per type,
         type: 'members', // one row per type,
       },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
     ],
   },
   2: { // ORG
@@ -565,36 +578,72 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'taxonomy',
         type: 'taxonomy',
-        taxonomy_id: 7, // sector
+        taxonomy_id: 2, // sector
+      },
+      {
+        id: 'members', // one row per type,
+        type: 'members', // one row per type,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
       },
     ],
   },
   3: {
     id: ACTORTYPES.CONTACT,
     order: 5,
+    columns: [
+      // {
+      //   id: 'taxonomy',
+      //   type: 'taxonomy',
+      //   taxonomy_id: 3, // role
+      // },
+      {
+        id: 'associations', // one row per type,
+        type: 'associations', // one row per type,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
+    ],
   },
   4: { // REG
     id: ACTORTYPES.REG,
     order: 4,
     columns: [
       {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 4, // region type
+      },
+      {
         id: 'members', // one row per type,
         type: 'members', // one row per type,
       },
       {
-        id: 'taxonomy',
-        type: 'taxonomy',
-        taxonomy_id: 13, // region type
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
       },
     ],
   },
   5: { // GROUP
-    id: ACTORTYPES.GROUPS,
+    id: ACTORTYPES.GROUP,
     order: 2,
     columns: [
       {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 5, // group type
+      },
+      {
         id: 'members', // one row per type,
         type: 'members', // one row per type,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
       },
     ],
   },
@@ -613,9 +662,28 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 6, // level of support
+      },
+      {
+        id: 'taxonomy-13',
+        type: 'taxonomy',
+        taxonomy_id: 13, // level of authority
+      },
+      {
+        id: 'indicators',
+        type: 'indicators',
+        sort: 'title',
+      },
+      {
         id: 'actors',
         type: 'actors',
         sort: 'title',
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
       },
       // {
       //   id: 'taxonomy-12',
@@ -650,9 +718,18 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 9, // event type
+      },
+      {
         id: 'actors', // one row per type,
         type: 'actors', // one row per type,
         showOnSingle: false,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
       },
       // {
       //   id: 'taxonomy-3',
@@ -673,8 +750,18 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
-        id: 'actors', // one row per type,
-        type: 'actors', // one row per type,
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 10, // event type
+      },
+      {
+        id: 'targets', // one row per type,
+        type: 'targets', // one row per type,
+        sort: 'title',
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
       },
     ],
   },
@@ -689,9 +776,18 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
-        id: 'actors',
-        type: 'actors',
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 10, // event type
+      },
+      {
+        id: 'targets',
+        type: 'targets',
         sort: 'title',
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
       },
       // {
       //   id: 'taxonomy',
@@ -711,8 +807,17 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
-        id: 'actors', // one row per type,
-        type: 'actors', // one row per type,
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 11, // status
+      },
+      {
+        id: 'targets', // one row per type,
+        type: 'targets', // one row per type,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
       },
     ],
   },
@@ -727,8 +832,17 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 12, // interaction type
+      },
+      {
         id: 'actors', // one row per type,
         type: 'actors', // one row per type,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
       },
     ],
   },

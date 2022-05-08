@@ -21,6 +21,7 @@ export const DEPENDENCIES = [
   API.CATEGORIES,
   API.USERS,
   API.USER_ROLES,
+  API.USER_ACTORS,
   API.MEMBERSHIPS,
 ];
 
@@ -33,7 +34,7 @@ export const CONFIG = {
       search: ['code', 'title', 'description'],
     },
     map: {
-      types: [ACTORTYPES.COUNTRY, ACTORTYPES.ORG, ACTORTYPES.GROUP],
+      types: [ACTORTYPES.COUNTRY],
     },
   },
   taxonomies: { // filter by each category
