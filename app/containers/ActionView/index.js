@@ -418,22 +418,6 @@ export function ActionView(props) {
                           }}
                         />
                       )}
-                      {users && (
-                        <FieldGroup
-                          group={{
-                            label: appMessages.nav.userActions,
-                            fields: [
-                              getUserConnectionField({
-                                users,
-                                onEntityClick,
-                                connections: userConnections,
-                                skipLabel: true,
-                                // TODO columns
-                              }),
-                            ],
-                          }}
-                        />
-                      )}
                       {resourcesByResourcetype && (
                         <FieldGroup
                           group={{
@@ -528,6 +512,22 @@ export function ActionView(props) {
                         label: appMessages.entities.taxonomies.plural,
                         icon: 'categories',
                         fields: getTaxonomyFields(viewTaxonomies),
+                      }}
+                    />
+                  )}
+                  {users && (
+                    <FieldGroup
+                      group={{
+                        label: appMessages.nav.userActions,
+                        fields: [
+                          getUserConnectionField({
+                            users,
+                            onEntityClick,
+                            connections: userConnections,
+                            skipLabel: true,
+                            // TODO columns
+                          }),
+                        ],
                       }}
                     />
                   )}

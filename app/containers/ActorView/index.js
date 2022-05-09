@@ -235,6 +235,18 @@ export function ActorView(props) {
                       ],
                     }}
                   />
+                  <FieldGroup
+                    aside
+                    group={{
+                      fields: [
+                        checkActorAttribute(typeId, 'address') && getTextField(viewEntity, 'address'),
+                        checkActorAttribute(typeId, 'phone') && getTextField(viewEntity, 'phone'),
+                        checkActorAttribute(typeId, 'email') && getEmailField(viewEntity, 'email'),
+                        checkActorAttribute(typeId, 'url')
+                          && getLinkField(viewEntity),
+                      ],
+                    }}
+                  />
                 </Main>
                 {isManager && (
                   <Aside>
@@ -264,22 +276,6 @@ export function ActorView(props) {
                       ],
                     }}
                   />
-                  {users && (
-                    <FieldGroup
-                      group={{
-                        label: appMessages.nav.userActions,
-                        fields: [
-                          getUserConnectionField({
-                            users,
-                            onEntityClick,
-                            connections: userConnections,
-                            skipLabel: true,
-                            // TODO columns
-                          }),
-                        ],
-                      }}
-                    />
-                  )}
                   <Box>
                     <Box direction="row" gap="small" margin={{ vertical: 'small', horizontal: 'medium' }}>
                       {hasMembers && (
@@ -341,24 +337,28 @@ export function ActorView(props) {
                   {isCountry && (
                     <CountryMap actor={viewEntity} />
                   )}
-                  <FieldGroup
-                    aside
-                    group={{
-                      fields: [
-                        checkActorAttribute(typeId, 'address') && getTextField(viewEntity, 'address'),
-                        checkActorAttribute(typeId, 'phone') && getTextField(viewEntity, 'phone'),
-                        checkActorAttribute(typeId, 'email') && getEmailField(viewEntity, 'email'),
-                        checkActorAttribute(typeId, 'url')
-                          && getLinkField(viewEntity),
-                      ],
-                    }}
-                  />
                   {hasTaxonomyCategories(viewTaxonomies) && (
                     <FieldGroup
                       aside
                       group={{ // fieldGroup
                         label: appMessages.entities.taxonomies.plural,
                         fields: getTaxonomyFields(viewTaxonomies),
+                      }}
+                    />
+                  )}
+                  {users && (
+                    <FieldGroup
+                      group={{
+                        label: appMessages.nav.userActions,
+                        fields: [
+                          getUserConnectionField({
+                            users,
+                            onEntityClick,
+                            connections: userConnections,
+                            skipLabel: true,
+                            // TODO columns
+                          }),
+                        ],
                       }}
                     />
                   )}

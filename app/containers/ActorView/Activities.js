@@ -197,7 +197,7 @@ export function Activities(props) {
   // let hasActivityMap = typeId && qe(typeId, ACTORTYPES.COUNTRY);
   let mapSubject = false;
   const hasMemberOption = activeActiontypeId && !qe(activeActiontypeId, ACTIONTYPES.NATL);
-  const hasActivityMap = true; // typeId && qe(typeId, ACTORTYPES.COUNTRY);
+  const hasActivityMap = false; // typeId && qe(typeId, ACTORTYPES.COUNTRY);
   let hasTarget;
   const activeActionType = actiontypes && activeActiontypeId && actiontypes.get(activeActiontypeId.toString());
   if (hasActivityMap) {
