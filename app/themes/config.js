@@ -328,7 +328,7 @@ export const ACTOR_FIELDS = {
       type: 'text',
     },
     email: {
-      optional: [ACTORTYPES.CONTACT],
+      optional: [ACTORTYPES.CONTACT, ACTORTYPES.ORG],
       type: 'text',
     },
     phone: {
