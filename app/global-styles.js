@@ -1,8 +1,22 @@
 import { createGlobalStyle } from 'styled-components';
+import WWFFontWoff from './fonts/wwf-webfont.woff';
+import WWFFontTTF from './fonts/wwf-webfont.ttf';
+import WWFFontEOT from './fonts/wwf-webfont.eot';
 
 /* eslint no-unused-expressions: 0 */
 const GlobalStyle = createGlobalStyle`
   @import url('https://unpkg.com/leaflet@1.7.1/dist/leaflet.css');
+
+  @font-face {
+    font-family: 'wwfregular';
+    src: url(${WWFFontEOT});
+    src: url(${WWFFontEOT}) format('embedded-opentype'),
+    url(${WWFFontWoff}) format('woff'),
+    url(${WWFFontTTF}) format('truetype');
+    font-weight: 300;
+    font-style: normal;
+    line-height: 1;
+  }
 
   html,
   body {
@@ -10,14 +24,14 @@ const GlobalStyle = createGlobalStyle`
     width: 100%;
   }
   body {
-    font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     font-size: 16px;
     line-height: 1.428571429;
     color: #1c2121;
     margin: 0;
   }
   button, input, select, textarea {
-    font-family: 'Roboto', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background-color: transparent;
     border-style: none;
     color: inherit;
@@ -42,11 +56,11 @@ const GlobalStyle = createGlobalStyle`
     background: transparent;
     border: none;
     text-align: left;
-    color: #0077d8;
+    color: #00728f;
     text-decoration: none;
 
     &:hover {
-      color: #0063b5;
+      color: #08586c;
     }
   }
   h1, h2, h3, h4, h5, h6 {
@@ -58,6 +72,7 @@ const GlobalStyle = createGlobalStyle`
   h1 {
     font-weight: 700;
     font-size: 2em;
+    font-family: 'wwfregular';
   }
   h2 {
     font-size: 1.6em;

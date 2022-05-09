@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styled, { withTheme } from 'styled-components';
 import {
-  Box, Button, ResponsiveContext, Text, Heading,
+  Box, Button, ResponsiveContext, Heading,
 } from 'grommet';
 import { ROUTES } from 'themes/config';
 import { isMinSize } from 'utils/responsive';
@@ -12,28 +12,29 @@ import Icon from 'components/Icon';
 import ScreenReaderOnly from 'components/styled/ScreenReaderOnly';
 
 import Brand from './Brand';
-import Logo from './Logo';
+import LogoWrap from './LogoWrap';
 import messages from './messages';
 
-const Claim = styled((p) => <Text {...p} />)`
-  font-family: ${(props) => props.theme.fonts.title};
-  font-size: ${(props) => props.theme.text.xxsmall.size};
-  line-height: ${(props) => props.theme.text.xxsmall.size};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${(props) => props.theme.text.xsmall.size};
-    line-height: ${(props) => props.theme.text.xsmall.size};
-  }
-`;
+// const Claim = styled((p) => <Text {...p} />)`
+//   font-family: ${(props) => props.theme.fonts.title};
+//   font-size: ${(props) => props.theme.text.xxsmall.size};
+//   line-height: ${(props) => props.theme.text.xxsmall.size};
+//   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+//     font-size: ${(props) => props.theme.text.xsmall.size};
+//     line-height: ${(props) => props.theme.text.xsmall.size};
+//   }
+// `;
 const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
   margin: 0;
   font-family: ${(props) => props.theme.fonts.title};
-  font-size: ${(props) => props.theme.text.small.size};
-  line-height: ${(props) => props.theme.text.small.size};
+  font-size: ${(props) => props.theme.text.large.size};
+  line-height: ${(props) => props.theme.text.large.size};
   font-weight: 500;
   padding: 0;
+  max-width: 120px;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${(props) => props.theme.text.large.size};
-    line-height: ${(props) => props.theme.text.large.size};
+    font-size: ${(props) => props.theme.text.xlarge.size};
+    line-height: ${(props) => props.theme.text.xlarge.size};
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.header.print.title};
@@ -50,19 +51,9 @@ const Styled = styled.div`
   top: 0;
   left: 0;
   right: 0;
-  height:${(props) => {
-    if (props.hasBrand) {
-      return props.theme.sizes.header.banner.heightMobile;
-    }
-    return 0;
-  }}px;
+  height:${(props) => props.theme.sizes.header.banner.heightMobile}px;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    height:${(props) => {
-    if (props.hasBrand) {
-      return props.theme.sizes.header.banner.height;
-    }
-    return 0;
-  }}px;
+    height:${(props) => props.theme.sizes.header.banner.height}px;
   }
   background-color: #000;
   box-shadow: ${(props) => props.hasShadow ? '0px 0px 5px 0px rgba(0,0,0,0.5)' : 'none'};
@@ -77,20 +68,24 @@ const Styled = styled.div`
 `;
 
 const LinkPage = styled((p) => <Button plain as="a" justify="center" fill="vertical" {...p} />)`
-  color: ${({ wide, theme }) => theme.global.colors.text[!wide ? 'light' : 'dark']};
-  background-color: ${({ theme, active, wide }) => (active && wide) ? theme.global.colors.highlight : 'transparent'};
+  color: ${({ active }) => active ? 'black' : 'white'};
+  background-color: ${({ active }) => active ? '#f0f0f0' : 'transparent'};
   padding-right: 12px;
   padding-left: 12px;
-  padding-top: 16px;
+  padding-top: 24px;
   padding-bottom: ${({ wide }) => !wide ? 16 : 0}px;
   width: ${({ wide }) => !wide ? '100%' : 'auto'};
   text-align: center;
   font-size: ${({ theme }) => theme.text.small.size};
   line-height: ${({ theme }) => theme.text.small.height};
   font-weight: ${({ wide, active }) => (!wide && active) ? 500 : 300};
+  height:${(props) => props.theme.sizes.header.banner.heightMobile}px;
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+    height:${(props) => props.theme.sizes.header.banner.height}px;
+  }
   &:hover {
-    color: ${({ wide, theme }) => theme.global.colors.text[!wide ? 'light' : 'dark']};
-    background-color:${({ theme, wide }) => wide ? theme.global.colors.highlightHover : 'transparent'};
+    color: ${({ active }) => active ? 'black' : 'white'};
+    background-color: ${({ active }) => active ? '#f0f0f0' : '#282a2c'};
   }
 `;
 const LinkAccount = LinkPage;
@@ -108,8 +103,7 @@ const ToggleMenu = styled((p) => <Button plain as="a" {...p} />)`
 `;
 
 const Section = styled((p) => <Box {...p} />)`
-  border-right: 1px solid ${({ wide }) => wide ? 'black' : 'transparent'};
-  border-bottom: 1px solid ${({ wide, theme }) => wide ? 'transparent' : theme.global.colors.background};
+  border-right: 1px solid ${({ wide }) => wide ? '#282a2c' : 'transparent'};
   &:last-child {
     border-color: transparent;
   }
@@ -203,16 +197,13 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                     onClick={(evt) => this.onClick(evt, '/')}
                     title={appTitle}
                   >
-                    <Box direction="row" align="center">
-                      <Logo src={this.props.theme.media.headerLogo} alt={appTitle} />
-                      <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
-                        <Claim>
-                          <FormattedMessage {...appMessages.app.claim} />
-                        </Claim>
-                        <BrandTitle>
-                          <FormattedMessage {...appMessages.app.title} />
-                        </BrandTitle>
-                      </Box>
+                    <LogoWrap>
+                      <Icon name="logo" />
+                    </LogoWrap>
+                    <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
+                      <BrandTitle>
+                        <FormattedMessage {...appMessages.app.title} />
+                      </BrandTitle>
                     </Box>
                   </Brand>
                 </Box>

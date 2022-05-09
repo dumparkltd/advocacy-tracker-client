@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { FormattedMessage } from 'react-intl';
+// import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 
@@ -16,13 +16,13 @@ import Container from 'components/styled/Container';
 import Content from 'components/styled/Content';
 
 import LinkMain from './LinkMain';
-import messages from './messages';
+// import messages from './messages';
 
 const Styled = styled.div`
   background-color: ${palette('primary', 3)};
   box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
   position: relative;
-  padding: 40px 0 0;
+  padding: 20px 0 0;
   @media print {
     display: block;
     height: ${({ theme }) => theme.sizes.headerExplore.banner.height}px;
@@ -49,28 +49,6 @@ const NavMain = styled(PrintHide)`
   white-space: nowrap;
 `;
 
-const Title = styled.h1`
-  font-size: ${({ theme }) => theme.text.large.size};
-  line-height: ${({ theme }) => theme.text.large.height};
-  max-width: 100%;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${({ theme }) => theme.text.xlarge.size};
-    line-height: ${({ theme }) => theme.text.xlarge.height};
-    max-width: ${({ theme }) => theme.text.xlarge.maxWidth};
-  }
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
-    font-size: ${({ theme }) => theme.text.xxlarge.size};
-    line-height: ${({ theme }) => theme.text.xxlarge.height};
-    max-width: ${({ theme }) => theme.text.xxlarge.maxWidth};
-  }
-  margin: 0;
-  color: ${({ theme }) => theme.global.colors.brand};
-`;
-const Label = styled.div`
-  margin-top: 30px;
-  font-size: 0.7em;
-`;
-
 const StyledContainer = styled(Container)`
   padding-bottom: 0;
 `;
@@ -90,17 +68,16 @@ class HeaderExplore extends React.PureComponent { // eslint-disable-line react/p
         title: intl.formatMessage(appMessages.nav.actors),
         active: currentPath && currentPath === ROUTES.ACTORS,
       },
+      // {
+      //   path: ROUTES.INDICATORS,
+      //   title: intl.formatMessage(appMessages.nav.indicators),
+      //   active: currentPath && currentPath === ROUTES.INDICATORS,
+      // },
     ];
     return (
       <Styled>
         <StyledContainer>
           <Content>
-            <Title>
-              <FormattedMessage {...messages.title} />
-            </Title>
-            <Label>
-              <FormattedMessage {...messages.explore} />
-            </Label>
             <NavMain>
               {navItems && navItems.map((item, i) => (
                 <LinkMain

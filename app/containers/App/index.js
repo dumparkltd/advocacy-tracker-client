@@ -114,6 +114,12 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     if (isManager) {
       navItems = navItems.concat([
         {
+          path: ROUTES.USERS,
+          title: intl.formatMessage(messages.nav.users),
+          isAdmin: true,
+          active: currentPath === ROUTES.USERS,
+        },
+        {
           path: ROUTES.PAGES,
           title: intl.formatMessage(messages.nav.pages),
           isAdmin: true,
@@ -125,12 +131,6 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           isAdmin: true,
           active: currentPath.startsWith(ROUTES.CATEGORY)
           || currentPath.startsWith(ROUTES.TAXONOMIES),
-        },
-        {
-          path: ROUTES.USERS,
-          title: intl.formatMessage(messages.nav.users),
-          isAdmin: true,
-          active: currentPath === ROUTES.USERS,
         },
       ]);
     }

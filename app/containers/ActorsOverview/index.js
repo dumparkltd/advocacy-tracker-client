@@ -33,7 +33,7 @@ const GroupTitle = styled.h5`
   color: ${({ theme }) => theme.global.colors.text.brand};
 `;
 const ViewContainer = styled(Container)`
-  min-height: 70vH;
+  min-height: 80vH;
   @media print {
     min-height: 50vH;
   }

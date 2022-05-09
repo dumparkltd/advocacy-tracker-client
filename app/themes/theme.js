@@ -1,7 +1,7 @@
 import coolorsToHex from 'coolors-to-hex';
 
-import headerLogo from 'themes/media/headerLogo.png';
-import headerLogo2x from 'themes/media/headerLogo@2x.png';
+// import headerLogo from 'themes/media/headerLogo.png';
+// import headerLogo2x from 'themes/media/headerLogo@2x.png';
 
 import graphicHome from 'themes/media/homeGraphic.png';
 import graphicHome2x from 'themes/media/homeGraphic@2x.png';
@@ -15,7 +15,7 @@ const theme = {};
 // pass array for retina images: [normalSrc, retinaSrc],
 // or single image: src
 theme.media = {
-  headerLogo: [headerLogo, headerLogo2x],
+  // headerLogo: [headerLogo, headerLogo2x],
   graphicHome: [graphicHome, graphicHome2x],
   // impactossLogo: [impactossLogo, impactossLogo2x],
 };
@@ -30,7 +30,7 @@ theme.gutter = 20;
 // 2: main colour, light
 // 3: main colour, background
 // 4: white
-const primary = coolorsToHex('https://coolors.co/0063b5-0070cc-0077d8-f1f0f1-ffffff');
+const primary = coolorsToHex('https://coolors.co/08586c-00728f-00728f-f1f0f1-ffffff');
 // secondary color palette: dark to light
 // 0: dark header colour, darker
 // 1: dark header colour
@@ -258,7 +258,7 @@ theme.fonts = {
   // also see global-styles.js for primary font
   pre: 'Consolas, Liberation Mono, Menlo, Courier, monospace',
   quote: 'Georgia, serif',
-  title: 'Roboto, Helvetica Neue, Helvetica, Arial, sans-serif', // only used for fallback
+  title: 'wwfregular, Helvetica Neue, Helvetica, Arial, sans-serif', // only used for fallback
   claim: 'Roboto, Helvetica Neue, Helvetica, Arial, sans-serif', // only used for fallback
 };
 
@@ -325,7 +325,7 @@ theme.sizes = {
   },
   header: {
     banner: {
-      height: 50,
+      height: 60,
       heightMobile: 50,
     },
     nav: {
@@ -468,8 +468,8 @@ theme.global = {
     actors: '#006076',
     targets: '#a52752',
     brand: '#000000',
-    highlight: '#0070cc',
-    highlightHover: '#0063b5',
+    highlight: '#00728f',
+    highlightHover: '#08586c',
     background: '#f1f0f1',
     backgroundLight: '#fcfcfc',
     inactive: '#f1f0f1', // on light background (empowerment)
@@ -507,7 +507,7 @@ theme.layer = {
 theme.text = {
   xxxlarge: { size: '48px', height: '60px', maxWidth: '800px' },
   xxlarge: { size: '30px', height: '36px', maxWidth: '800px' },
-  xlarge: { size: '21px', height: '28px', maxWidth: '800px' },
+  xlarge: { size: '20px', height: '28px', maxWidth: '800px' },
   large: { size: '18px', height: '24px', maxWidth: '800px' },
   largeTall: { size: '18px', height: '26px', maxWidth: '800px' },
   medium: { size: '16px', height: '21px', maxWidth: '800px' },
