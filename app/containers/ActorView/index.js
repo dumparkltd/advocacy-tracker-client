@@ -330,7 +330,6 @@ export function ActorView(props) {
                         onCreateOption={onCreateOption}
                       />
                     )}
-
                   </Box>
                 </Main>
                 <Aside bottom>

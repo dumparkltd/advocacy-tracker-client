@@ -47,7 +47,7 @@ import {
 
 import {
   // ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG, ACTORTYPES, RESOURCE_FIELDS,
-  ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG, RESOURCE_FIELDS,
+  ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG,
 } from 'themes/config';
 
 import Loading from 'components/Loading';
@@ -425,7 +425,7 @@ export function ActionView(props) {
                             label: appMessages.nav.resources,
                             fields: resourcesByResourcetype.reduce(
                               (memo, resources, resourcetypeid) => {
-                                let columns = [
+                                const columns = [
                                   {
                                     id: 'main',
                                     type: 'main',
@@ -433,16 +433,6 @@ export function ActionView(props) {
                                     attributes: ['title'],
                                   },
                                 ];
-                                if (RESOURCE_FIELDS.ATTRIBUTES.status.optional.indexOf(resourcetypeid.toString()) > -1) {
-                                  columns = [
-                                    ...columns,
-                                    {
-                                      id: 'attribute',
-                                      type: 'attribute',
-                                      attribute: 'status',
-                                    },
-                                  ];
-                                }
                                 return memo.concat([
                                   getResourceConnectionField({
                                     resources,
