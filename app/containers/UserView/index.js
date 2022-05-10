@@ -221,14 +221,6 @@ export function UserView({
                       ],
                     }}
                   />
-                  <FieldGroup
-                    group={{
-                      fields: [
-                        getEmailField(user),
-                      ],
-                    }}
-                    aside
-                  />
                 </Main>
                 {isManager && (
                   <Aside>
@@ -301,6 +293,14 @@ export function UserView({
                   )}
                 </Main>
                 <Aside bottom>
+                  <FieldGroup
+                    group={{
+                      fields: [
+                        getEmailField(user),
+                      ],
+                    }}
+                    aside
+                  />
                   {isManager && (
                     <FieldGroup
                       group={{

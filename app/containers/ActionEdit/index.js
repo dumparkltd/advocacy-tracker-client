@@ -23,8 +23,6 @@ import {
   renderTaxonomyControl,
   getCodeFormField,
   getLinkFormField,
-  getFormField,
-  getAmountFormField,
   getCategoryUpdatesFromFormData,
   getConnectionUpdatesFromFormData,
   renderActorsByActortypeControl,
@@ -37,7 +35,6 @@ import {
 
 import {
   getMetaField,
-  getInfoField,
 } from 'utils/fields';
 
 import { checkActionAttribute, checkActionRequired } from 'utils/entities';
@@ -177,11 +174,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       [ // fieldGroups
         { // fieldGroup
           fields: [
-            getInfoField(
-              'measuretype_id',
-              intl.formatMessage(appMessages.actiontypes[typeId]),
-              true // large
-            ), // required
             checkActionAttribute(typeId, 'code', true) && getCodeFormField(
               intl.formatMessage,
               'code',
@@ -199,7 +191,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     );
   };
 
-  getHeaderAsideFields = (entity, taxonomies, onCreateOption) => {
+  getHeaderAsideFields = (entity) => {
     const { intl } = this.context;
     const groups = []; // fieldGroups
 
@@ -208,11 +200,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         getStatusField(intl.formatMessage),
         getMetaField(entity),
       ],
-    });
-    groups.push({ // fieldGroup
-      label: intl.formatMessage(appMessages.entities.taxonomies.plural),
-      icon: 'categories',
-      fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
     });
     return groups;
   };
@@ -223,10 +210,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     actorsByActortype,
     targetsByActortype,
     resourcesByResourcetype,
-    topActionsByActiontype,
-    subActionsByActiontype,
     indicatorOptions,
-    userOptions,
     onCreateOption,
   ) => {
     const { intl } = this.context;
@@ -234,6 +218,15 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
 
     const groups = [];
     groups.push(
+      { // fieldGroup
+        fields: [
+          checkActionAttribute(typeId, 'url') && getLinkFormField(
+            intl.formatMessage,
+            checkActionRequired(typeId, 'url'),
+            'url',
+          ),
+        ],
+      },
       {
         fields: [
           checkActionAttribute(typeId, 'description', true) && getMarkdownFormField(
@@ -274,55 +267,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           {
             label: intl.formatMessage(appMessages.nav.indicators),
             fields: [indicatorConnections],
-          },
-        );
-      }
-    }
-    if (userOptions) {
-      const userConnections = renderUserMultiControl(
-        userOptions,
-        null,
-        intl,
-      );
-      if (userConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.userActions),
-            fields: [userConnections],
-          },
-        );
-      }
-    }
-    if (topActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        topActionsByActiontype,
-        connectedTaxonomies,
-        onCreateOption,
-        intl,
-        'associatedTopActionsByActiontype',
-      );
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.topActions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    if (subActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        subActionsByActiontype,
-        connectedTaxonomies,
-        onCreateOption,
-        intl,
-        'associatedSubActionsByActiontype',
-      );
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.subActions),
-            fields: actionConnections,
           },
         );
       }
@@ -377,11 +321,19 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     return groups;
   };
 
-  getBodyAsideFields = (entity) => {
+  getBodyAsideFields = (
+    entity,
+    taxonomies,
+    connectedTaxonomies,
+    topActionsByActiontype,
+    subActionsByActiontype,
+    userOptions,
+    onCreateOption,
+  ) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'measuretype_id']);
 
-    return ([ // fieldGroups
+    const groups = [ // fieldGroups
       { // fieldGroup
         fields: [
           checkActionAttribute(typeId, 'date_start') && getDateField(
@@ -402,49 +354,61 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         ],
       },
       { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'url') && getLinkFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'url'),
-            'url',
-          ),
-        ],
+        label: intl.formatMessage(appMessages.entities.taxonomies.plural),
+        icon: 'categories',
+        fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
       },
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'amount') && getAmountFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'amount'),
-            'amount',
-          ),
-          checkActionAttribute(typeId, 'amount_comment') && getFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActionRequired(typeId, 'amount_comment'),
-            attribute: 'amount_comment',
-            controlType: 'input',
-          }),
-        ],
-      },
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'date_start') && getDateField(
-            intl.formatMessage,
-            'date_start',
-            checkActionRequired(typeId, 'date_start'),
-          ),
-          checkActionAttribute(typeId, 'date_end') && getDateField(
-            intl.formatMessage,
-            'date_end',
-            checkActionRequired(typeId, 'date_end'),
-          ),
-          checkActionAttribute(typeId, 'date_comment') && getTextareaField(
-            intl.formatMessage,
-            'date_comment',
-            checkActionRequired(typeId, 'date_comment'),
-          ),
-        ],
-      },
-    ]);
+    ];
+    if (userOptions) {
+      const userConnections = renderUserMultiControl(
+        userOptions,
+        null,
+        intl,
+      );
+      if (userConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.userActions),
+            fields: [userConnections],
+          },
+        );
+      }
+    }
+    if (topActionsByActiontype) {
+      const actionConnections = renderActionsByActiontypeControl(
+        topActionsByActiontype,
+        connectedTaxonomies,
+        onCreateOption,
+        intl,
+        'associatedTopActionsByActiontype',
+      );
+      if (actionConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.topActions),
+            fields: actionConnections,
+          },
+        );
+      }
+    }
+    if (subActionsByActiontype) {
+      const actionConnections = renderActionsByActiontypeControl(
+        subActionsByActiontype,
+        connectedTaxonomies,
+        onCreateOption,
+        intl,
+        'associatedSubActionsByActiontype',
+      );
+      if (actionConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.subActions),
+            fields: actionConnections,
+          },
+        );
+      }
+    }
+    return groups;
   };
 
   render() {
@@ -556,11 +520,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                 fields={{
                   header: {
                     main: this.getHeaderMainFields(viewEntity),
-                    aside: this.getHeaderAsideFields(
-                      viewEntity,
-                      taxonomies,
-                      onCreateOption,
-                    ),
+                    aside: this.getHeaderAsideFields(viewEntity),
                   },
                   body: {
                     main: this.getBodyMainFields(
@@ -569,13 +529,18 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       actorsByActortype,
                       targetsByActortype,
                       resourcesByResourcetype,
+                      indicatorOptions,
+                      onCreateOption,
+                    ),
+                    aside: this.getBodyAsideFields(
+                      viewEntity,
+                      taxonomies,
+                      connectedTaxonomies,
                       topActionsByActiontype,
                       subActionsByActiontype,
-                      indicatorOptions,
                       userOptions,
                       onCreateOption,
                     ),
-                    aside: this.getBodyAsideFields(viewEntity),
                   },
                 }}
                 scrollContainer={this.scrollContainer.current}

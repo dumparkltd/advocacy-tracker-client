@@ -235,18 +235,6 @@ export function ActorView(props) {
                       ],
                     }}
                   />
-                  <FieldGroup
-                    aside
-                    group={{
-                      fields: [
-                        checkActorAttribute(typeId, 'address') && getTextField(viewEntity, 'address'),
-                        checkActorAttribute(typeId, 'phone') && getTextField(viewEntity, 'phone'),
-                        checkActorAttribute(typeId, 'email') && getEmailField(viewEntity, 'email'),
-                        checkActorAttribute(typeId, 'url')
-                          && getLinkField(viewEntity),
-                      ],
-                    }}
-                  />
                 </Main>
                 {isManager && (
                   <Aside>
@@ -336,6 +324,18 @@ export function ActorView(props) {
                   {isCountry && (
                     <CountryMap actor={viewEntity} />
                   )}
+                  <FieldGroup
+                    aside
+                    group={{
+                      fields: [
+                        checkActorAttribute(typeId, 'email') && getEmailField(viewEntity, 'email'),
+                        checkActorAttribute(typeId, 'phone') && getTextField(viewEntity, 'phone'),
+                        checkActorAttribute(typeId, 'address') && getTextField(viewEntity, 'address'),
+                        checkActorAttribute(typeId, 'url')
+                          && getLinkField(viewEntity),
+                      ],
+                    }}
+                  />
                   {hasTaxonomyCategories(viewTaxonomies) && (
                     <FieldGroup
                       aside

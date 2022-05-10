@@ -26,13 +26,10 @@ import {
   getTextareaField,
   renderTaxonomyControl,
   getLinkFormField,
-  getAmountFormField,
-  getFormField,
   renderActionsByActiontypeControl,
   renderIndicatorControl,
   renderUserMultiControl,
 } from 'utils/forms';
-import { getInfoField } from 'utils/fields';
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
@@ -123,11 +120,6 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          getInfoField(
-            'measuretype_id',
-            intl.formatMessage(appMessages.actiontypes[typeId]),
-            true // large
-          ), // required
           checkActionAttribute(typeId, 'code') && getCodeFormField(
             intl.formatMessage,
             'code',
@@ -144,7 +136,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     ]);
   };
 
-  getHeaderAsideFields = (taxonomies, onCreateOption) => {
+  getHeaderAsideFields = () => {
     const { intl } = this.context;
     const groups = [];
     groups.push({
@@ -152,12 +144,6 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
         getStatusField(intl.formatMessage),
       ],
     });
-    groups.push({ // fieldGroup
-      label: intl.formatMessage(appMessages.entities.taxonomies.plural),
-      icon: 'categories',
-      fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
-    });
-
     return groups;
   }
 
@@ -167,16 +153,22 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     actorsByActortype,
     targetsByActortype,
     resourcesByResourcetype,
-    topActionsByActiontype,
-    subActionsByActiontype,
     indicatorOptions,
-    userOptions,
     onCreateOption,
   ) => {
     const { intl } = this.context;
     const typeId = type.get('id');
     const groups = [];
     groups.push(
+      { // fieldGroup
+        fields: [
+          checkActionAttribute(typeId, 'url') && getLinkFormField(
+            intl.formatMessage,
+            checkActionRequired(typeId, 'url'),
+            'url',
+          ),
+        ],
+      },
       {
         fields: [
           // description
@@ -217,50 +209,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
         },
       );
     }
-    if (userOptions) {
-      groups.push(
-        {
-          label: intl.formatMessage(appMessages.nav.userActions),
-          fields: [
-            renderUserMultiControl(userOptions, null, intl),
-          ],
-        },
-      );
-    }
-    if (topActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        topActionsByActiontype,
-        connectedTaxonomies,
-        onCreateOption,
-        intl,
-        'associatedTopActionsByActiontype',
-      );
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.topActions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    if (subActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        subActionsByActiontype,
-        connectedTaxonomies,
-        onCreateOption,
-        intl,
-        'associatedSubActionsByActiontype',
-      );
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.subActions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
+
     if (actorsByActortype) {
       const actorConnections = renderActorsByActortypeControl(
         actorsByActortype,
@@ -311,10 +260,18 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     return groups;
   };
 
-  getBodyAsideFields = (type) => {
+  getBodyAsideFields = (
+    type,
+    taxonomies,
+    connectedTaxonomies,
+    topActionsByActiontype,
+    subActionsByActiontype,
+    userOptions,
+    onCreateOption,
+  ) => {
     const { intl } = this.context;
     const typeId = type.get('id');
-    return ([ // fieldGroups
+    const groups = [ // fieldGroups
       { // fieldGroup
         fields: [
           checkActionAttribute(typeId, 'date_start') && getDateField(
@@ -335,30 +292,56 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
         ],
       },
       { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'url') && getLinkFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'url'),
-            'url',
-          ),
-        ],
+        label: intl.formatMessage(appMessages.entities.taxonomies.plural),
+        icon: 'categories',
+        fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
       },
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'amount') && getAmountFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'amount'),
-            'amount',
-          ),
-          checkActionAttribute(typeId, 'amount_comment') && getFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActionRequired(typeId, 'amount_comment'),
-            attribute: 'amount_comment',
-            controlType: 'input',
-          }),
-        ],
-      },
-    ]);
+    ];
+    if (userOptions) {
+      groups.push(
+        {
+          label: intl.formatMessage(appMessages.nav.userActions),
+          fields: [
+            renderUserMultiControl(userOptions, null, intl),
+          ],
+        },
+      );
+    }
+    if (topActionsByActiontype) {
+      const actionConnections = renderActionsByActiontypeControl(
+        topActionsByActiontype,
+        connectedTaxonomies,
+        onCreateOption,
+        intl,
+        'associatedTopActionsByActiontype',
+      );
+      if (actionConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.topActions),
+            fields: actionConnections,
+          },
+        );
+      }
+    }
+    if (subActionsByActiontype) {
+      const actionConnections = renderActionsByActiontypeControl(
+        subActionsByActiontype,
+        connectedTaxonomies,
+        onCreateOption,
+        intl,
+        'associatedSubActionsByActiontype',
+      );
+      if (actionConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.subActions),
+            fields: actionConnections,
+          },
+        );
+      }
+    }
+    return groups;
   }
 
   render() {
@@ -453,10 +436,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
                 fields={{
                   header: {
                     main: this.getHeaderMainFields(actiontype),
-                    aside: this.getHeaderAsideFields(
-                      taxonomies,
-                      onCreateOption,
-                    ),
+                    aside: this.getHeaderAsideFields(),
                   },
                   body: {
                     main: this.getBodyMainFields(
@@ -465,14 +445,17 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
                       actorsByActortype,
                       targetsByActortype,
                       resourcesByResourcetype,
-                      topActionsByActiontype,
-                      subActionsByActiontype,
                       indicatorOptions,
-                      userOptions,
                       onCreateOption,
                     ),
                     aside: this.getBodyAsideFields(
-                      actiontype
+                      actiontype,
+                      taxonomies,
+                      connectedTaxonomies,
+                      topActionsByActiontype,
+                      subActionsByActiontype,
+                      userOptions,
+                      onCreateOption,
                     ),
                   },
                 }}

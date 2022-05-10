@@ -21,8 +21,6 @@ import {
   getCodeFormField,
   renderTaxonomyControl,
   getLinkFormField,
-  getAmountFormField,
-  getNumberFormField,
   getCategoryUpdatesFromFormData,
   renderActionsByActiontypeControl,
   renderActionsAsTargetByActiontypeControl,
@@ -34,7 +32,7 @@ import {
   getTextareaField,
   renderUserMultiControl,
 } from 'utils/forms';
-import { getInfoField, getMetaField } from 'utils/fields';
+import { getMetaField } from 'utils/fields';
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
@@ -158,11 +156,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       [ // fieldGroups
         { // fieldGroup
           fields: [
-            getInfoField(
-              'actortype_id',
-              intl.formatMessage(appMessages.actortypes[typeId]),
-              true // large
-            ), // required
             checkActorAttribute(typeId, 'code') && getCodeFormField(
               intl.formatMessage,
               'code',
@@ -192,7 +185,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
     );
   };
 
-  getHeaderAsideFields = (entity, taxonomies, onCreateOption) => {
+  getHeaderAsideFields = (entity) => {
     const { intl } = this.context;
     return ([
       {
@@ -200,11 +193,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
           getStatusField(intl.formatMessage),
           getMetaField(entity),
         ],
-      },
-      { // fieldGroup
-        label: intl.formatMessage(appMessages.entities.taxonomies.plural),
-        icon: 'categories',
-        fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
       },
     ]);
   };
@@ -215,9 +203,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
     actionsByActiontype,
     actionsAsTargetByActiontype,
     membersByActortype,
-    associationsByActortype,
-    userOptions,
-    onCreateOption,
+    onCreateOption
   ) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'actortype_id']);
@@ -238,21 +224,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         ],
       },
     );
-    if (userOptions) {
-      const userConnections = renderUserMultiControl(
-        userOptions,
-        null,
-        intl,
-      );
-      if (userConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.userActors),
-            fields: [userConnections],
-          },
-        );
-      }
-    }
     if (actionsByActiontype) {
       const actionConnections = renderActionsByActiontypeControl(
         actionsByActiontype,
@@ -301,6 +272,49 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         );
       }
     }
+    return groups;
+  }
+
+  getBodyAsideFields = (
+    entity,
+    taxonomies,
+    connectedTaxonomies,
+    associationsByActortype,
+    userOptions,
+    onCreateOption,
+  ) => {
+    const { intl } = this.context;
+    const typeId = entity.getIn(['attributes', 'actortype_id']);
+
+    const groups = [ // fieldGroups
+      { // fieldGroup
+        fields: [
+          checkActorAttribute(typeId, 'email') && getEmailField(intl.formatMessage, checkActorRequired(typeId, 'email')),
+          checkActorAttribute(typeId, 'phone') && getTextFormField(intl.formatMessage, 'phone', checkActorRequired(typeId, 'phone')),
+          checkActorAttribute(typeId, 'address') && getTextareaField(intl.formatMessage, 'address', checkActorRequired(typeId, 'address')),
+          checkActorAttribute(typeId, 'url') && getLinkFormField(
+            intl.formatMessage,
+            checkActorRequired(typeId, 'url'),
+            'url',
+          ),
+        ],
+      },
+      { // fieldGroup
+        label: intl.formatMessage(appMessages.entities.taxonomies.plural),
+        icon: 'categories',
+        fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
+      },
+    ];
+    if (userOptions) {
+      groups.push(
+        {
+          label: intl.formatMessage(appMessages.nav.userActors),
+          fields: [
+            renderUserMultiControl(userOptions, null, intl),
+          ],
+        },
+      );
+    }
     if (associationsByActortype) {
       const associationConnections = renderAssociationsByActortypeControl(
         associationsByActortype,
@@ -318,40 +332,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       }
     }
     return groups;
-  }
-
-  getBodyAsideFields = (entity) => {
-    const { intl } = this.context;
-    const typeId = entity.getIn(['attributes', 'actortype_id']);
-
-    return ([ // fieldGroups
-      { // fieldGroup
-        fields: [
-          checkActorAttribute(typeId, 'address') && getTextareaField(intl.formatMessage, 'address', checkActorRequired(typeId, 'address')),
-          checkActorAttribute(typeId, 'phone') && getTextFormField(intl.formatMessage, 'phone', checkActorRequired(typeId, 'phone')),
-          checkActorAttribute(typeId, 'email') && getEmailField(intl.formatMessage, checkActorRequired(typeId, 'email')),
-          checkActorAttribute(typeId, 'url') && getLinkFormField(
-            intl.formatMessage,
-            checkActorRequired(typeId, 'url'),
-            'url',
-          ),
-        ],
-      },
-      { // fieldGroup
-        fields: [
-          checkActorAttribute(typeId, 'gdp') && getAmountFormField(
-            intl.formatMessage,
-            checkActorRequired(typeId, 'gdp'),
-            'gdp',
-          ),
-          checkActorAttribute(typeId, 'population') && getNumberFormField(
-            intl.formatMessage,
-            checkActorRequired(typeId, 'population'),
-            'population',
-          ),
-        ],
-      },
-    ]);
   };
 
   render() {
@@ -455,11 +435,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
                 fields={{
                   header: {
                     main: this.getHeaderMainFields(viewEntity),
-                    aside: this.getHeaderAsideFields(
-                      viewEntity,
-                      taxonomies,
-                      onCreateOption,
-                    ),
+                    aside: this.getHeaderAsideFields(viewEntity),
                   },
                   body: {
                     main: this.getBodyMainFields(
@@ -468,12 +444,15 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
                       actionsByActiontype,
                       actionsAsTargetByActiontype,
                       membersByActortype,
-                      associationsByActortype,
-                      userOptions,
                       onCreateOption,
                     ),
                     aside: this.getBodyAsideFields(
-                      viewEntity
+                      viewEntity,
+                      taxonomies,
+                      connectedTaxonomies,
+                      associationsByActortype,
+                      userOptions,
+                      onCreateOption,
                     ),
                   },
                 }}

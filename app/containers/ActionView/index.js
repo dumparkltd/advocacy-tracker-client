@@ -19,10 +19,8 @@ import {
   getMarkdownField,
   getDateField,
   getTextField,
-  // getInfoField,
   getReferenceField,
   getLinkField,
-  getNumberField,
   getTaxonomyFields,
   hasTaxonomyCategories,
   getActorConnectionField,
@@ -304,6 +302,14 @@ export function ActionView(props) {
               <ViewPanelInside>
                 <Main hasAside bottom>
                   <FieldGroup
+                    aside
+                    group={{
+                      fields: [
+                        checkActionAttribute(typeId, 'url') && getLinkField(viewEntity),
+                      ],
+                    }}
+                  />
+                  <FieldGroup
                     group={{
                       fields: [
                         checkActionAttribute(typeId, 'description')
@@ -438,25 +444,6 @@ export function ActionView(props) {
                   </Box>
                 </Main>
                 <Aside bottom>
-                  <FieldGroup
-                    aside
-                    group={{
-                      fields: [
-                        checkActionAttribute(typeId, 'url') && getLinkField(viewEntity),
-                      ],
-                    }}
-                  />
-                  <FieldGroup
-                    aside
-                    group={{
-                      type: 'dark',
-                      fields: [
-                        checkActionAttribute(typeId, 'amount')
-                          && getNumberField(viewEntity, 'amount', { unit: 'US$', unitBefore: true }),
-                        checkActionAttribute(typeId, 'amount_comment') && getTextField(viewEntity, 'amount_comment'),
-                      ],
-                    }}
-                  />
                   <FieldGroup
                     aside
                     group={{
