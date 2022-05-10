@@ -55,7 +55,7 @@ const TheHeader = styled((p) => <Box direction="row" {...p} />)`
   position: relative;
   z-index: 96;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: 0 15px;
+    padding: 0 15px 0 75px;
   }
 `;
 const HeaderSection = styled((p) => <Box direction="row" {...p} />)`
