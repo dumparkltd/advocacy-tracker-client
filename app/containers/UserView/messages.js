@@ -10,6 +10,10 @@ export default defineMessages({
     id: 'app.containers.UserView.pageTitle',
     defaultMessage: 'User profile',
   },
+  pageTitleBack: {
+    id: 'app.containers.UserView.pageTitleBack',
+    defaultMessage: 'Users',
+  },
   metaDescription: {
     id: 'app.containers.UserView.metaDescription',
     defaultMessage: 'User profile page description',

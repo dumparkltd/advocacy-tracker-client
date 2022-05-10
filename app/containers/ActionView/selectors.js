@@ -216,7 +216,6 @@ const selectActorsAssociated = createSelector(
 // - group by actortype
 export const selectActorsByType = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectViewEntity,
   selectActorsAssociated,
   selectActorConnections,
   selectActorActionsGroupedByActionAttributes,
@@ -228,7 +227,6 @@ export const selectActorsByType = createSelector(
   selectCategories,
   (
     ready,
-    viewEntity,
     actors,
     actorConnections,
     actorActionsByActionFull,

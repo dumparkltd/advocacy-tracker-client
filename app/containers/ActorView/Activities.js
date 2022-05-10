@@ -20,6 +20,8 @@ import {
   ROUTES,
   ACTIONTYPES,
   ACTIONTYPES_CONFIG,
+  ACTIONTYPE_ACTORTYPES,
+  ACTIONTYPE_TARGETTYPES,
   API,
 } from 'themes/config';
 import FieldGroup from 'components/fields/FieldGroup';
@@ -42,7 +44,7 @@ const getActiontypeColumns = (typeid, viewSubject) => {
     return ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
       (col) => {
         if (typeof col.showOnSingle !== 'undefined') {
-          if (Array.isArray(col.showOnSingle)) {
+          if (viewSubject && Array.isArray(col.showOnSingle)) {
             return col.showOnSingle.indexOf(viewSubject) > -1;
           }
           return col.showOnSingle;
@@ -61,28 +63,40 @@ const getActiontypeColumns = (typeid, viewSubject) => {
 
 export function Activities(props) {
   const {
-    viewEntity,
+    viewEntity, // current entity
     viewSubject,
     taxonomies,
     actionConnections,
     onSetActiontype,
-    viewActiontypeId,
+    viewActiontypeId, // as set in URL
     actionsByActiontype,
     actionsAsTargetByActiontype,
     actiontypes,
     actionsAsMemberByActortype,
     actionsAsTargetAsMemberByActortype,
-    viewActortype,
+    viewActortype, // the type of current entity
     onEntityClick,
     hasMembers,
     intl,
     onCreateOption,
   } = props;
+
+  // console.log('viewSubject', viewSubject)
+  // console.log('viewActiontypeId', viewActiontypeId)
+  // console.log('actionsByActiontype', actionsByActiontype && actionsByActiontype.toJS())
+  // console.log('actionsAsTargetByActiontype', actionsAsTargetByActiontype && actionsAsTargetByActiontype.toJS())
+  // console.log('actiontypes', actiontypes && actiontypes.toJS())
+  // console.log('actionsAsMemberByActortype', actionsAsMemberByActortype && actionsAsMemberByActortype.toJS())
+  // console.log('actionsAsTargetAsMemberByActortype', actionsAsTargetAsMemberByActortype && actionsAsTargetAsMemberByActortype.toJS())
+  // console.log('viewActortype', viewActortype && viewActortype.toJS())
+  // console.log('hasMembers', hasMembers)
   // figure out connected action types ##################################################
   const canBeMember = viewActortype && !hasMembers;
+
   let actiontypesForSubject;
   let actiontypesAsMemberByActortypeForSubject;
   let actiontypeIdsAsMemberForSubject;
+  let actiontypesForSubjectOptions;
   let actiontypeIdsForSubjectOptions;
   let actiontypesAsMemberForSubject;
   let activeActiontypeId;
@@ -92,12 +106,24 @@ export function Activities(props) {
     // direct actions by type for selected subject
     if (viewSubject === 'actors') {
       actiontypesForSubject = actionsByActiontype;
+      actiontypesForSubjectOptions = actiontypes.filter(
+        (at) => {
+          const atId = at.get('id');
+          return ACTIONTYPE_ACTORTYPES[atId] && ACTIONTYPE_ACTORTYPES[atId].includes(viewActortype.get('id'));
+        }
+      );
     } else if (viewSubject === 'targets') {
       actiontypesForSubject = actionsAsTargetByActiontype;
+      actiontypesForSubjectOptions = actiontypes.filter(
+        (at) => {
+          const atId = at.get('id');
+          return ACTIONTYPE_TARGETTYPES[atId] && ACTIONTYPE_TARGETTYPES[atId].includes(viewActortype.get('id'));
+        }
+      );
     }
     // direct && indirect actiontypeids for selected subject
-    actiontypeIdsForSubjectOptions = actiontypesForSubject
-      && actiontypesForSubject.entrySeq().map(([id]) => id.toString());
+    actiontypeIdsForSubjectOptions = actiontypesForSubjectOptions
+      && actiontypesForSubjectOptions.entrySeq().map(([id]) => id.toString());
     // any indirect actions present for selected subject and type?
     // indirect actions by type for selected subject
     if (canBeMember) {
@@ -234,23 +260,28 @@ export function Activities(props) {
           wrap
         >
           {actiontypeIdsForSubjectOptions.map(
-            (id) => (
-              <TypeButton
-                key={id}
-                onClick={() => onSetActiontype(id)}
-                active={qe(activeActiontypeId, id) || actiontypeIdsForSubjectOptions.size === 1}
-                listItems={actiontypeIdsForSubjectOptions.size}
-              >
-                <Text size="small">
-                  {actiontypeIdsForSubjectOptions.size > 4 && (
-                    <FormattedMessage {...appMessages.entities[`actions_${id}`].pluralShort} />
-                  )}
-                  {actiontypeIdsForSubjectOptions.size <= 4 && (
-                    <FormattedMessage {...appMessages.entities[`actions_${id}`].plural} />
-                  )}
-                </Text>
-              </TypeButton>
-            )
+            (id) => {
+              const actiontypeActions = actiontypesForSubject && actiontypesForSubject.get(parseInt(id, 10));
+              const noActions = actiontypeActions ? actiontypeActions.size : 0;
+              return (
+                <TypeButton
+                  key={id}
+                  onClick={() => onSetActiontype(id)}
+                  active={qe(activeActiontypeId, id) || actiontypeIdsForSubjectOptions.size === 1}
+                  listItems={actiontypeIdsForSubjectOptions.size}
+                >
+                  <Text size="small">
+                    {`${noActions} `}
+                    {actiontypeIdsForSubjectOptions.size > 4 && (
+                      <FormattedMessage {...appMessages.entities[`actions_${id}`][noActions === 1 ? 'singleShort' : 'pluralShort']} />
+                    )}
+                    {actiontypeIdsForSubjectOptions.size <= 4 && (
+                      <FormattedMessage {...appMessages.entities[`actions_${id}`][noActions === 1 ? 'single' : 'plural']} />
+                    )}
+                  </Text>
+                </TypeButton>
+              );
+            }
           )}
         </TypeSelectBox>
       )}
@@ -273,37 +304,35 @@ export function Activities(props) {
           )}
         </Box>
       )}
-      {actiontypesForSubject && activeActiontypeActions && actiontypesForSubject.size > 0 && (
-        <Box>
-          <FieldGroup
-            group={{
-              title: viewSubject === 'actors' ? 'Individually' : 'Explicitly targeted',
-              fields: [
-                getActionConnectionField({
-                  actions: activeActiontypeActions,
-                  taxonomies,
-                  onEntityClick,
-                  connections: actionConnections,
-                  typeid: activeActiontypeId,
-                  columns: getActiontypeColumns(activeActiontypeId, viewSubject),
-                  onCreateOption: () => onCreateOption({
-                    path: API.ACTIONS,
-                    attributes: {
-                      measuretype_id: activeActiontypeId,
-                    },
-                    connect: {
-                      type: 'actorActions',
-                      create: [{
-                        actor_id: viewEntity.get('id'),
-                      }],
-                    },
-                  }),
+      <Box>
+        <FieldGroup
+          group={{
+            title: viewSubject === 'actors' ? 'Individually' : 'Explicitly targeted',
+            fields: [
+              getActionConnectionField({
+                actions: activeActiontypeActions,
+                taxonomies,
+                onEntityClick,
+                connections: actionConnections,
+                typeid: activeActiontypeId,
+                columns: getActiontypeColumns(activeActiontypeId, viewSubject),
+                onCreateOption: () => onCreateOption({
+                  path: API.ACTIONS,
+                  attributes: {
+                    measuretype_id: activeActiontypeId,
+                  },
+                  connect: {
+                    type: 'actorActions',
+                    create: [{
+                      actor_id: viewEntity.get('id'),
+                    }],
+                  },
                 }),
-              ],
-            }}
-          />
-        </Box>
-      )}
+              }),
+            ],
+          }}
+        />
+      </Box>
       {canBeMember && actiontypesAsMemberForSubject.entrySeq().map(([actortypeId, typeActors]) => (
         <Box key={actortypeId}>
           {typeActors.entrySeq().map(([actorId, actor]) => {

@@ -19,8 +19,9 @@ class ConnectionsField extends React.PureComponent { // eslint-disable-line reac
   render() {
     const { field } = this.props;
     const { intl } = this.context;
-    const label = `${field.values.size} ${intl.formatMessage(
-      field.values.size === 1
+    const noOfValues = field.values ? field.values.size : 0;
+    const label = `${noOfValues} ${intl.formatMessage(
+      noOfValues === 1
         ? appMessages.entities[field.entityType].single
         : appMessages.entities[field.entityType].plural
     )}`;
@@ -44,22 +45,22 @@ class ConnectionsField extends React.PureComponent { // eslint-disable-line reac
             inSingleView
           />
         )}
-        {field.onCreate && (
-          <ButtonFactory
-            button={{
-              type: 'text',
-              title: 'Add',
-              onClick: () => field.onCreate(),
-            }}
-          />
+        {noOfValues === 0 && (
+          <EmptyHint>
+            <FormattedMessage {...field.showEmpty} />
+          </EmptyHint>
         )}
-        { (!field.values || field.values.size === 0)
-          && (
-            <EmptyHint>
-              <FormattedMessage {...field.showEmpty} />
-            </EmptyHint>
-          )
-        }
+        {field.onCreate && (
+          <div>
+            <ButtonFactory
+              button={{
+                type: 'text',
+                title: `Add new ${intl.formatMessage(appMessages.entities[field.entityType].single)}`,
+                onClick: () => field.onCreate(),
+              }}
+            />
+          </div>
+        )}
       </StyledFieldWrap>
     );
   }

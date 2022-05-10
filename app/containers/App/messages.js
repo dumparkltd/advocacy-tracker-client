@@ -1780,6 +1780,10 @@ export default defineMessages({
         id: 'app.containers.App.entities.users.plural',
         defaultMessage: 'Users',
       },
+      empty: {
+        id: 'app.containers.App.entities.users.empty',
+        defaultMessage: 'No users assigned yet',
+      },
     },
     bookmarks: {
       single: {

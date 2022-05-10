@@ -4,11 +4,13 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
+import { Box, Text, Button } from 'grommet';
+import styled from 'styled-components';
 
 import {
   getTitleField,
@@ -16,21 +18,32 @@ import {
   getMetaField,
   getEmailField,
   getTaxonomyFields,
-  getActionConnectionField,
   getActorConnectionField,
 } from 'utils/fields';
 
 import { getEntityTitle } from 'utils/entities';
 
-import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
+import {
+  loadEntitiesIfNeeded,
+  updatePath,
+  closeEntity,
+  setSubject,
+  setActiontype,
+  openNewEntityModal,
+} from 'containers/App/actions';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { USER_ROLES, ROUTES } from 'themes/config';
+import { USER_ROLES, ROUTES, ACTORTYPES_CONFIG } from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
-import EntityView from 'components/EntityView';
+import ViewHeader from 'components/EntityView/ViewHeader';
+import Main from 'components/EntityView/Main';
+import Aside from 'components/EntityView/Aside';
+import ViewWrapper from 'components/EntityView/ViewWrapper';
+import ViewPanel from 'components/EntityView/ViewPanel';
+import ViewPanelInside from 'components/EntityView/ViewPanelInside';
+import FieldGroup from 'components/fields/FieldGroup';
 
 import {
   selectReady,
@@ -38,230 +51,281 @@ import {
   selectSessionUserHighestRoleId,
   selectActionConnections,
   selectActorConnections,
+  selectIsUserManager,
+  selectSubjectQuery,
+  selectActiontypeQuery,
+  selectActortypes,
+  selectActiontypes,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
+
+import Activities from './Activities';
 import messages from './messages';
 
 import {
   selectViewEntity,
-  selectTaxonomies,
+  selectViewTaxonomies,
   selectActionsByType,
   selectActorsByType,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
 
-export class UserView extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
-  }
+// only show the highest rated role (lower role ids means higher)
+const getHighestUserRoleId = (user) => user
+  ? user.get('roles').reduce(
+    (memo, role) => (role && role.get('id') < memo) ? role.get('id') : memo,
+    USER_ROLES.DEFAULT.value
+  )
+  : USER_ROLES.DEFAULT.value;
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    // reload entities if not ready or no longer ready (eg invalidated)
-    if (!nextProps.dataReady) {
-      this.props.loadEntitiesIfNeeded();
-    }
+const getActortypeColumns = (typeid) => {
+  let columns = [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: ['code', 'title'],
+  }];
+  if (
+    ACTORTYPES_CONFIG[parseInt(typeid, 10)]
+    && ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns
+  ) {
+    columns = [
+      ...columns,
+      ...ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
+        (col) => {
+          if (typeof col.showOnSingle !== 'undefined') {
+            return col.showOnSingle;
+          }
+          return true;
+        }
+      ),
+    ];
   }
+  return columns;
+};
 
-  getButtons = ({
-    user,
-    sessionUserId,
-    sessionUserHighestRoleId,
-    handleEdit,
-    handleClose,
-    handleEditPassword,
-    dataReady,
-  }) => {
-    const { intl } = this.context;
-    const userId = user.get('id') || user.getIn(['attributes', 'id']);
-    const buttons = [];
-    if (dataReady) {
-      buttons.push({
-        type: 'icon',
-        onClick: () => window.print(),
-        title: 'Print',
-        icon: 'print',
-      });
-    }
-    if (userId === sessionUserId) {
-      buttons.push({
-        type: 'edit',
-        title: intl.formatMessage(messages.editPassword),
-        onClick: () => handleEditPassword(userId),
-      });
-    }
-    if (sessionUserHighestRoleId === USER_ROLES.ADMIN.value // is admin
-      || userId === sessionUserId // own profile
-      || sessionUserHighestRoleId < this.getHighestUserRoleId(user.get('roles'))
-    ) {
-      buttons.push({
-        type: 'edit',
-        onClick: () => handleEdit(userId),
-      });
-    }
+const SubjectButton = styled((p) => <Button plain {...p} />)`
+  padding: 2px 4px;
+  border-bottom: 2px solid;
+  border-bottom-color: ${({ active }) => active ? 'brand' : 'transparent'};
+  background: none;
+`;
+
+const VALID_SUBJECTS = ['uactivities', 'uactors'];
+
+export function UserView({
+  user,
+  dataReady,
+  sessionUserHighestRoleId,
+  handleTypeClick,
+  handleClose,
+  taxonomies,
+  actionsByActiontype,
+  actionConnections,
+  actorsByActortype,
+  actorConnections,
+  onEntityClick,
+  isManager,
+  handleEditPassword,
+  sessionUserId,
+  handleEdit,
+  intl,
+  params,
+  onLoadData,
+  onSetSubject,
+  subject,
+  onSetActiontype,
+  viewActiontypeId,
+  actiontypes,
+  onCreateOption,
+}) {
+  useEffect(() => {
+    // kick off loading of data
+    onLoadData();
+  }, []);
+
+  const pageTitle = intl.formatMessage(
+    isManager ? messages.pageTitleBack : messages.pageTitle
+  );
+  const metaTitle = user
+    ? `${pageTitle}: ${getEntityTitle(user)}`
+    : `${pageTitle} ${params.id}`;
+  const userId = user
+    ? user.get('id') || user.getIn(['attributes', 'id'])
+    : params.id;
+
+  const viewSubject = VALID_SUBJECTS.indexOf(subject) > -1
+    ? subject
+    : VALID_SUBJECTS[0];
+
+  const buttons = [];
+  if (dataReady) {
     buttons.push({
-      type: 'close',
-      onClick: handleClose,
+      type: 'icon',
+      onClick: () => window.print(),
+      title: 'Print',
+      icon: 'print',
     });
-    return buttons;
-  };
-
-  getHeaderMainFields = (entity, isManager) => ([{ // fieldGroup
-    fields: [getTitleField(entity, isManager, 'name', appMessages.attributes.name)],
-  }]);
-
-  getHeaderAsideFields = (entity) => ([{
-    fields: [
-      getRoleField(entity),
-      getMetaField(entity),
-    ],
-  }]);
-
-  getBodyMainFields = (
-    entity,
-    taxonomies,
-    actionsByActiontype,
-    actorsByActortype,
-    actionConnections,
-    actorConnections,
-    onEntityClick,
-  ) => {
-    const fields = [];
-    fields.push(
-      {
-        fields: [getEmailField(entity)],
-      },
-    );
-    // connected actions
-    if (actionsByActiontype) {
-      const actionConnectionsLocal = [];
-      actionsByActiontype.forEach((actions, actiontypeid) => {
-        actionConnectionsLocal.push(
-          getActionConnectionField({
-            actions,
-            taxonomies,
-            onEntityClick,
-            connections: actionConnections,
-            typeid: actiontypeid,
-          }),
-        );
-      });
-      fields.push({
-        label: appMessages.nav.actionUsers,
-        fields: actionConnectionsLocal,
-      });
-    }
-    // connected actors
-    if (actorsByActortype) {
-      const connectionsLocal = [];
-      actorsByActortype.forEach((actors, actortypeid) => {
-        connectionsLocal.push(
-          getActorConnectionField({
-            actors,
-            taxonomies,
-            onEntityClick,
-            connections: actionConnections,
-            typeid: actortypeid,
-          }),
-        );
-      });
-      fields.push({
-        label: appMessages.nav.actorUsers,
-        fields: connectionsLocal,
-      });
-    }
-    return fields;
-  };
-
-  getBodyAsideFields = (taxonomies) => ([
-    { // fieldGroup
-      fields: getTaxonomyFields(taxonomies),
-    },
-  ]);
-
-  // only show the highest rated role (lower role ids means higher)
-  getHighestUserRoleId = (roles) => roles.reduce((memo, role) => (role.get('id') < memo) ? role.get('id') : memo,
-    USER_ROLES.DEFAULT.value);
-
-  render() {
-    const { intl } = this.context;
-    const {
-      user,
-      dataReady,
-      sessionUserHighestRoleId,
-      taxonomies,
-      actionsByActiontype,
-      actorsByActortype,
-      actionConnections,
-      actorConnections,
-      onEntityClick,
-    } = this.props;
-    const isManager = sessionUserHighestRoleId <= USER_ROLES.MANAGER.value;
-
-    const pageTitle = intl.formatMessage(messages.pageTitle);
-    const metaTitle = user
-      ? `${pageTitle}: ${getEntityTitle(user)}`
-      : `${pageTitle} ${this.props.params.id}`;
-
-    return (
-      <div>
-        <Helmet
-          title={metaTitle}
-          meta={[
-            { name: 'description', content: intl.formatMessage(messages.metaDescription) },
-          ]}
-        />
-        <Content>
-          <ContentHeader
-            title={pageTitle}
-            type={CONTENT_SINGLE}
-            icon="users"
-            buttons={user && this.getButtons(this.props)}
-          />
-          { !user && !dataReady
-            && <Loading />
-          }
-          { !user && dataReady
-            && (
-              <div>
-                <FormattedMessage {...messages.notFound} />
-              </div>
-            )
-          }
-          { user && dataReady && (
-            <EntityView
-              fields={{
-                header: {
-                  main: this.getHeaderMainFields(user, isManager),
-                  aside: isManager && this.getHeaderAsideFields(user),
-                },
-                body: {
-                  main: this.getBodyMainFields(
-                    user,
-                    taxonomies,
-                    actionsByActiontype,
-                    actorsByActortype,
-                    actionConnections,
-                    actorConnections,
-                    onEntityClick,
-                  ),
-                  aside: isManager && this.getBodyAsideFields(taxonomies),
-                },
-              }}
-            />
-          )}
-        </Content>
-      </div>
-    );
   }
+  if (userId === sessionUserId) {
+    buttons.push({
+      type: 'edit',
+      title: intl.formatMessage(messages.editPassword),
+      onClick: () => handleEditPassword(userId),
+    });
+  }
+  if (sessionUserHighestRoleId === USER_ROLES.ADMIN.value // is admin
+    || userId === sessionUserId // own profile
+    || sessionUserHighestRoleId < getHighestUserRoleId(user) // TODO verify
+  ) {
+    buttons.push({
+      type: 'edit',
+      onClick: () => handleEdit(userId),
+    });
+  }
+
+  return (
+    <div>
+      <Helmet
+        title={metaTitle}
+        meta={[
+          { name: 'description', content: intl.formatMessage(messages.metaDescription) },
+        ]}
+      />
+      <Content isSingle>
+        {!user && !dataReady && <Loading />}
+        {!user && dataReady && (
+          <div>
+            <FormattedMessage {...messages.notFound} />
+          </div>
+        )}
+        {user && dataReady && (
+          <ViewWrapper>
+            <ViewHeader
+              title={pageTitle}
+              type={CONTENT_SINGLE}
+              buttons={buttons}
+              onClose={() => handleClose()}
+              onTypeClick={isManager ? () => handleTypeClick() : null}
+            />
+            <ViewPanel>
+              <ViewPanelInside>
+                <Main hasAside={isManager}>
+                  <FieldGroup
+                    group={{ // fieldGroup
+                      fields: [
+                        getTitleField(user, isManager, 'name', appMessages.attributes.name),
+                      ],
+                    }}
+                  />
+                  <FieldGroup
+                    group={{
+                      fields: [
+                        getEmailField(user),
+                      ],
+                    }}
+                    aside
+                  />
+                </Main>
+                {isManager && (
+                  <Aside>
+                    <FieldGroup
+                      group={{
+                        fields: [
+                          getRoleField(user),
+                          getMetaField(user),
+                        ],
+                      }}
+                      aside
+                    />
+                  </Aside>
+                )}
+              </ViewPanelInside>
+            </ViewPanel>
+            <ViewPanel>
+              <ViewPanelInside>
+                <Main hasAside bottom>
+                  {isManager && (
+                    <Box>
+                      <Box direction="row" gap="small" margin={{ vertical: 'small', horizontal: 'medium' }}>
+                        <SubjectButton
+                          onClick={() => onSetSubject('uactivities')}
+                          active={viewSubject === 'uactivities'}
+                        >
+                          <Text size="large">Activities</Text>
+                        </SubjectButton>
+                        <SubjectButton
+                          onClick={() => onSetSubject('uactors')}
+                          active={viewSubject === 'uactors'}
+                        >
+                          <Text size="large">Actors</Text>
+                        </SubjectButton>
+                      </Box>
+                      {(viewSubject === 'uactivities') && (
+                        <Activities
+                          viewEntity={user}
+                          viewSubject={viewSubject}
+                          taxonomies={taxonomies}
+                          actionConnections={actionConnections}
+                          onSetActiontype={onSetActiontype}
+                          onEntityClick={onEntityClick}
+                          onCreateOption={onCreateOption}
+                          viewActiontypeId={viewActiontypeId}
+                          actionsByActiontype={actionsByActiontype}
+                          actiontypes={actiontypes}
+                        />
+                      )}
+                      {viewSubject === 'uactors' && actorsByActortype && (
+                        <FieldGroup
+                          group={{
+                            fields: actorsByActortype.reduce(
+                              (memo, actors, typeid) => memo.concat([
+                                getActorConnectionField({
+                                  actors,
+                                  taxonomies,
+                                  onEntityClick,
+                                  connections: actorConnections,
+                                  typeid,
+                                  columns: getActortypeColumns(typeid),
+                                }),
+                              ]),
+                              [],
+                            ),
+                          }}
+                        />
+                      )}
+                    </Box>
+                  )}
+                </Main>
+                <Aside bottom>
+                  {isManager && (
+                    <FieldGroup
+                      group={{
+                        fields: [
+                          getTaxonomyFields(taxonomies),
+                        ],
+                      }}
+                      aside
+                    />
+                  )}
+                </Aside>
+              </ViewPanelInside>
+            </ViewPanel>
+          </ViewWrapper>
+        )}
+      </Content>
+    </div>
+  );
 }
 
 UserView.propTypes = {
-  loadEntitiesIfNeeded: PropTypes.func,
-  // handleEdit: PropTypes.func,
-  // handleEditPassword: PropTypes.func,
-  // handleClose: PropTypes.func,
+  onLoadData: PropTypes.func,
+  handleEdit: PropTypes.func,
+  handleEditPassword: PropTypes.func,
+  handleClose: PropTypes.func,
   user: PropTypes.object,
   taxonomies: PropTypes.object,
   dataReady: PropTypes.bool,
@@ -269,32 +333,44 @@ UserView.propTypes = {
   params: PropTypes.object,
   actionsByActiontype: PropTypes.object,
   actorsByActortype: PropTypes.object,
+  actortypes: PropTypes.object,
+  actiontypes: PropTypes.object,
   actionConnections: PropTypes.object,
   actorConnections: PropTypes.object,
+  handleTypeClick: PropTypes.func,
   onEntityClick: PropTypes.func,
-  // sessionUserId: PropTypes.string,
-};
-
-UserView.contextTypes = {
-  intl: PropTypes.object.isRequired,
+  onCreateOption: PropTypes.func,
+  onSetActiontype: PropTypes.func,
+  isManager: PropTypes.bool,
+  sessionUserId: PropTypes.string,
+  viewActiontypeId: PropTypes.string,
+  intl: intlShape,
+  subject: PropTypes.string,
+  onSetSubject: PropTypes.func,
 };
 
 const mapStateToProps = (state, props) => ({
+  isManager: selectIsUserManager(state),
   sessionUserHighestRoleId: selectSessionUserHighestRoleId(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   sessionUserId: selectSessionUserId(state),
   user: selectViewEntity(state, props.params.id),
   // all connected categories for all user-taggable taxonomies
-  taxonomies: selectTaxonomies(state, props.params.id),
+  viewTaxonomies: selectViewTaxonomies(state, props.params.id),
+  taxonomies: selectTaxonomiesWithCategories(state),
   actionsByActiontype: selectActionsByType(state, props.params.id),
   actorsByActortype: selectActorsByType(state, props.params.id),
   actionConnections: selectActionConnections(state),
   actorConnections: selectActorConnections(state),
+  subject: selectSubjectQuery(state),
+  viewActiontypeId: selectActiontypeQuery(state),
+  actortypes: selectActortypes(state),
+  actiontypes: selectActiontypes(state),
 });
 
 function mapDispatchToProps(dispatch) {
   return {
-    loadEntitiesIfNeeded: () => {
+    onLoadData: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     handleEdit: (userId) => {
@@ -306,10 +382,22 @@ function mapDispatchToProps(dispatch) {
     handleClose: () => {
       dispatch(closeEntity(ROUTES.USERS));
     },
+    handleTypeClick: () => {
+      dispatch(updatePath(ROUTES.USERS));
+    },
     onEntityClick: (id, path) => {
       dispatch(updatePath(`${path}/${id}`));
+    },
+    onSetSubject: (type) => {
+      dispatch(setSubject(type));
+    },
+    onSetActiontype: (type) => {
+      dispatch(setActiontype(type));
+    },
+    onCreateOption: (args) => {
+      dispatch(openNewEntityModal(args));
     },
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(UserView);
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(UserView));

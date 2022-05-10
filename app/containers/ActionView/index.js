@@ -19,7 +19,7 @@ import {
   getMarkdownField,
   getDateField,
   getTextField,
-  getInfoField,
+  // getInfoField,
   getReferenceField,
   getLinkField,
   getNumberField,
@@ -47,7 +47,11 @@ import {
 
 import {
   // ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG, ACTORTYPES, RESOURCE_FIELDS,
-  ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG,
+  ROUTES,
+  ACTIONTYPES,
+  ACTORTYPES_CONFIG,
+  ACTIONTYPE_TARGETTYPES,
+  ACTIONTYPE_ACTORTYPES,
 } from 'themes/config';
 
 import Loading from 'components/Loading';
@@ -69,7 +73,7 @@ import {
   selectActionConnections,
   selectTaxonomiesWithCategories,
   selectSubjectQuery,
-  selectActiontypes,
+  // selectActiontypes,
   selectUserConnections,
 } from 'containers/App/selectors';
 
@@ -154,7 +158,7 @@ export function ActionView(props) {
     handleEdit,
     handleClose,
     params,
-    activitytypes,
+    // activitytypes,
     handleTypeClick,
     users,
     userConnections,
@@ -166,7 +170,7 @@ export function ActionView(props) {
   }, []);
 
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
-  const viewActivitytype = activitytypes && activitytypes.find((type) => qe(type.get('id'), typeId));
+  // const viewActivitytype = activitytypes && activitytypes.find((type) => qe(type.get('id'), typeId));
 
   let buttons = [];
   if (dataReady) {
@@ -197,38 +201,34 @@ export function ActionView(props) {
     ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
     : `${pageTitle}: ${params.id}`;
 
-  const hasTarget = viewActivitytype && viewActivitytype.getIn(['attributes', 'has_target']);
-  const hasMemberOption = !!typeId && !qe(typeId, ACTIONTYPES.NATL);
-  const hasMap = !!typeId; // && !qe(typeId, ACTIONTYPES.NATL);
-  const viewSubject = hasTarget && subject ? subject : 'actors';
+  const hasTarget = ACTIONTYPE_TARGETTYPES[typeId] && ACTIONTYPE_TARGETTYPES[typeId].length > 0;
+  const hasActor = ACTIONTYPE_ACTORTYPES[typeId] && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
 
-  const actortypesForSubject = !hasTarget || viewSubject === 'actors'
+  const hasMemberOption = !!typeId && !qe(typeId, ACTIONTYPES.NATL);
+  const hasMap = qe(typeId, ACTIONTYPES.EXPRESS);
+  let viewSubject;
+  if (hasTarget && !hasActor) {
+    viewSubject = 'targets';
+  } else if (hasActor && !hasTarget) {
+    viewSubject = 'actors';
+  } else { // } if (hasTarget && hasActor) {
+    viewSubject = subject || 'actors';
+  }
+
+  const actortypesForSubject = viewSubject === 'actors'
     ? actorsByActortype
     : targetsByActortype;
 
-  let hasLandbasedValue;
-  if (viewEntity && checkActionAttribute(typeId, 'has_reference_landbased_ml')) {
-    if (
-      typeof viewEntity.getIn(['attributes', 'has_reference_landbased_ml']) !== 'undefined'
-      && viewEntity.getIn(['attributes', 'has_reference_landbased_ml']) !== null
-    ) {
-      hasLandbasedValue = intl.formatMessage(
-        appMessages.ui.checkAttributeStatuses[
-          viewEntity.getIn(['attributes', 'has_reference_landbased_ml']).toString()
-        ],
-      );
-    }
-  }
   // check date comment for date spceficity
-  const DATE_SPECIFICITIES = ['y', 'm', 'd'];
-  let dateSpecificity;
-  if (
-    viewEntity
-    && viewEntity.getIn(['attributes', 'date_comment'])
-    && DATE_SPECIFICITIES.indexOf(viewEntity.getIn(['attributes', 'date_comment']).trim()) > -1
-  ) {
-    dateSpecificity = viewEntity.getIn(['attributes', 'date_comment']).trim();
-  }
+  // const DATE_SPECIFICITIES = ['y', 'm', 'd'];
+  const dateSpecificity = 'd';
+  // if (
+  //   viewEntity
+  //   && viewEntity.getIn(['attributes', 'date_comment'])
+  //   && DATE_SPECIFICITIES.indexOf(viewEntity.getIn(['attributes', 'date_comment']).trim()) > -1
+  // ) {
+  //   dateSpecificity = viewEntity.getIn(['attributes', 'date_comment']).trim();
+  // }
   let datesEqual;
   if (
     viewEntity
@@ -315,37 +315,38 @@ export function ActionView(props) {
                       ],
                     }}
                   />
-                  <FieldGroup
-                    group={{
-                      fields: [
-                        checkActionAttribute(typeId, 'reference_ml')
-                          && getMarkdownField(viewEntity, 'reference_ml', true),
-                        checkActionAttribute(typeId, 'status_lbs_protocol')
-                          && getMarkdownField(viewEntity, 'status_lbs_protocol', true),
-                        checkActionAttribute(typeId, 'has_reference_landbased_ml')
-                          && getInfoField(
-                            'has_reference_landbased_ml',
-                            hasLandbasedValue,
-                          ),
-                        checkActionAttribute(typeId, 'reference_landbased_ml')
-                          && getMarkdownField(viewEntity, 'reference_landbased_ml', true),
-                      ],
-                    }}
-                  />
+                  {indicators && (
+                    <FieldGroup
+                      group={{
+                        label: appMessages.nav.indicators,
+                        fields: [
+                          getIndicatorConnectionField({
+                            indicators,
+                            onEntityClick,
+                            connections: indicatorConnections,
+                            skipLabel: true,
+                            // TODO columns
+                          }),
+                        ],
+                      }}
+                    />
+                  )}
                   <Box>
                     <Box direction="row" gap="small" margin={{ vertical: 'small', horizontal: 'medium' }}>
-                      <SubjectButton
-                        onClick={() => onSetSubject('actors')}
-                        active={viewSubject === 'actors'}
-                      >
-                        <Text size="large">{qe(ACTIONTYPES.DONOR, typeId) ? 'Donors' : 'Actors'}</Text>
-                      </SubjectButton>
+                      {hasActor && (
+                        <SubjectButton
+                          onClick={() => onSetSubject('actors')}
+                          active={viewSubject === 'actors'}
+                        >
+                          <Text size="large">Actors</Text>
+                        </SubjectButton>
+                      )}
                       {hasTarget && (
                         <SubjectButton
                           onClick={() => onSetSubject('targets')}
                           active={viewSubject === 'targets'}
                         >
-                          <Text size="large">{qe(ACTIONTYPES.DONOR, typeId) ? 'Recipients' : 'Targets'}</Text>
+                          <Text size="large">Targets</Text>
                         </SubjectButton>
                       )}
                     </Box>
@@ -399,22 +400,6 @@ export function ActionView(props) {
                               ]),
                               [],
                             ),
-                          }}
-                        />
-                      )}
-                      {indicators && (
-                        <FieldGroup
-                          group={{
-                            label: appMessages.nav.indicators,
-                            fields: [
-                              getIndicatorConnectionField({
-                                indicators,
-                                onEntityClick,
-                                connections: indicatorConnections,
-                                skipLabel: true,
-                                // TODO columns
-                              }),
-                            ],
                           }}
                         />
                       )}
@@ -610,7 +595,7 @@ ActionView.propTypes = {
   actorConnections: PropTypes.object,
   actionConnections: PropTypes.object,
   resourceConnections: PropTypes.object,
-  activitytypes: PropTypes.object,
+  // activitytypes: PropTypes.object,
   params: PropTypes.object,
   subActionsByType: PropTypes.object,
   topActionsByType: PropTypes.object,
@@ -643,7 +628,7 @@ const mapStateToProps = (state, props) => ({
   topActionsByType: selectTopActionsByActiontype(state, props.params.id),
   subActionsByType: selectSubActionsByActiontype(state, props.params.id),
   subject: selectSubjectQuery(state),
-  activitytypes: selectActiontypes(state),
+  // activitytypes: selectActiontypes(state),
   indicators: selectEntityIndicators(state, props.params.id),
   indicatorConnections: selectIndicatorConnections(state),
   users: selectEntityUsers(state, props.params.id),

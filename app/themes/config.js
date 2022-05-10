@@ -568,6 +568,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        showOnSingle: false,
       },
     ],
   },
@@ -587,6 +588,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        showOnSingle: false,
       },
     ],
   },
@@ -606,6 +608,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        showOnSingle: false,
       },
     ],
   },
@@ -625,6 +628,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        showOnSingle: false,
       },
     ],
   },
@@ -644,6 +648,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        showOnSingle: false,
       },
     ],
   },
@@ -684,6 +689,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        showOnSingle: false,
       },
       // {
       //   id: 'taxonomy-12',
@@ -730,6 +736,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        showOnSingle: false,
       },
       // {
       //   id: 'taxonomy-3',
@@ -762,6 +769,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        showOnSingle: false,
       },
     ],
   },
@@ -788,6 +796,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        showOnSingle: false,
       },
       // {
       //   id: 'taxonomy',
@@ -818,6 +827,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        showOnSingle: false,
       },
     ],
   },
@@ -843,6 +853,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        showOnSingle: false,
       },
     ],
   },

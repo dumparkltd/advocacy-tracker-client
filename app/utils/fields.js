@@ -294,7 +294,7 @@ const getConnectionField = ({
   onCreate,
 }) => ({
   type: 'connections',
-  values: entities.toList(),
+  values: entities && entities.toList(),
   taxonomies,
   connections,
   entityType,
@@ -326,7 +326,7 @@ export const getActorConnectionField = ({
   showValueForAction,
   columns,
 }) => getConnectionField({
-  entities: sortEntities(actors, 'asc', 'id'),
+  entities: actors && sortEntities(actors, 'asc', 'id'),
   taxonomies,
   connections,
   connectionOptions: connectionOptions || {
@@ -414,6 +414,13 @@ export const getActionConnectionField = ({
       clientPath: ROUTES.RESOURCE,
       groupByType: true,
     },
+    // users: {
+    //   message: 'entities.users.plural',
+    //   entityType: 'users',
+    //   path: API.USERS,
+    //   clientPath: ROUTES.USER,
+    //   groupByType: true,
+    // },
   },
   entityType: typeid ? `actions_${typeid}` : 'actions',
   entityPath: ROUTES.ACTION,

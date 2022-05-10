@@ -15,7 +15,7 @@ import * as topojson from 'topojson-client';
 
 import countriesTopo from 'data/ne_countries_10m_v5.topo.json';
 
-import { ACTORTYPES, ACTIONTYPES } from 'themes/config';
+import { ACTORTYPES } from 'themes/config';
 
 import {
   selectActortypeActors,
@@ -58,7 +58,7 @@ export function ActionMap({
   onEntityClick,
   countries,
   hasMemberOption,
-  typeId,
+  // typeId,
   // intl,
 }) {
   // const { intl } = this.context;
@@ -135,9 +135,7 @@ export function ActionMap({
   let memberOption;
   let mapTitle;
   if (mapSubject === 'targets') {
-    mapTitle = qe(ACTIONTYPES.DONOR, typeId)
-      ? 'Recipient countries'
-      : 'Countries targeted by activity';
+    mapTitle = 'Countries targeted by activity';
     // note this should always be true!
     if (hasMemberOption && hasAssociations) {
       memberOption = {
@@ -148,9 +146,7 @@ export function ActionMap({
     }
   }
   if (mapSubject === 'actors') {
-    mapTitle = qe(ACTIONTYPES.DONOR, typeId)
-      ? 'Donor countries'
-      : 'Countries responsible by activity';
+    mapTitle = 'Countries responsible by activity';
     if (hasMemberOption && hasAssociations) {
       memberOption = {
         active: includeActorMembers,
@@ -202,10 +198,10 @@ ActionMap.propTypes = {
   hasMemberOption: PropTypes.bool,
   onEntityClick: PropTypes.func,
   mapSubject: PropTypes.string,
-  typeId: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.number,
-  ]),
+  // typeId: PropTypes.oneOfType([
+  //   PropTypes.string,
+  //   PropTypes.number,
+  // ]),
 };
 
 const mapStateToProps = (state) => ({

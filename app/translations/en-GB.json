@@ -739,6 +739,7 @@
   "app.containers.UserLogin.loginLinkBefore": "Already have an account? ",
   "app.containers.UserLogin.loginLink": "Sign in here",
   "app.containers.UserRegister.submit": "Register",
+  "app.containers.UserView.pageTitleBack": "Users",
   "app.containers.UserView.pageTitle": "User profile",
   "app.containers.UserView.metaDescription": "User profile page description",
   "app.containers.UserView.notFound": "Sorry no user found",

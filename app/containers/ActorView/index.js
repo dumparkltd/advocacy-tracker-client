@@ -278,14 +278,6 @@ export function ActorView(props) {
                   />
                   <Box>
                     <Box direction="row" gap="small" margin={{ vertical: 'small', horizontal: 'medium' }}>
-                      {hasMembers && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('members')}
-                          active={viewSubject === 'members'}
-                        >
-                          <Text size="large">Members</Text>
-                        </SubjectButton>
-                      )}
                       {isActive && (
                         <SubjectButton
                           onClick={() => onSetSubject('actors')}
@@ -300,6 +292,14 @@ export function ActorView(props) {
                           active={viewSubject === 'targets'}
                         >
                           <Text size="large">Targeted by</Text>
+                        </SubjectButton>
+                      )}
+                      {hasMembers && (
+                        <SubjectButton
+                          onClick={() => onSetSubject('members')}
+                          active={viewSubject === 'members'}
+                        >
+                          <Text size="large">Members</Text>
                         </SubjectButton>
                       )}
                     </Box>
@@ -345,22 +345,20 @@ export function ActorView(props) {
                       }}
                     />
                   )}
-                  {users && (
-                    <FieldGroup
-                      group={{
-                        label: appMessages.nav.userActions,
-                        fields: [
-                          getUserConnectionField({
-                            users,
-                            onEntityClick,
-                            connections: userConnections,
-                            skipLabel: true,
-                            // TODO columns
-                          }),
-                        ],
-                      }}
-                    />
-                  )}
+                  <FieldGroup
+                    group={{
+                      label: appMessages.nav.userActions,
+                      fields: [
+                        getUserConnectionField({
+                          users,
+                          onEntityClick,
+                          connections: userConnections,
+                          skipLabel: true,
+                          // TODO columns
+                        }),
+                      ],
+                    }}
+                  />
                   {associationsByType && (
                     <FieldGroup
                       aside
