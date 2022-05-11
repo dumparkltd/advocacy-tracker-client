@@ -2160,6 +2160,32 @@ export default defineMessages({
           defaultMessage: 'About tax 13',
         },
       },
+      14: {
+        single: {
+          id: 'app.containers.App.entities.taxonomies.14.single',
+          defaultMessage: 'Taxonomy 14',
+        },
+        plural: {
+          id: 'app.containers.App.entities.taxonomies.14.plural',
+          defaultMessage: 'Taxonomy 14',
+        },
+        empty: {
+          id: 'app.containers.App.entities.taxonomies.14.empty',
+          defaultMessage: 'No Taxonomy 14 assigned yet',
+        },
+        shortSingle: {
+          id: 'app.containers.App.entities.taxonomies.14.shortSingle',
+          defaultMessage: 'Taxonomy 14',
+        },
+        shortPlural: {
+          id: 'app.containers.App.entities.taxonomies.14.shortPlural',
+          defaultMessage: 'Taxonomy 14',
+        },
+        description: {
+          id: 'app.containers.App.entities.taxonomies.13.description',
+          defaultMessage: 'About tax 14',
+        },
+      },
     },
     categories: {
       single: {

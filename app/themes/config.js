@@ -509,6 +509,7 @@ export const ACTIONTYPE_ACTIONTYPES = {
   // [ACTIONTYPES.EVENT]: [],
   [ACTIONTYPES.OP]: [
     ACTIONTYPES.EVENT,
+    ACTIONTYPES.AP,
   ],
   // sub-actions with top-actions
   [ACTIONTYPES.EXPRESS]: [
@@ -819,6 +820,11 @@ export const ACTIONTYPES_CONFIG = {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 11, // status
+      },
+      {
+        id: 'taxonomy-10',
+        type: 'taxonomy',
+        taxonomy_id: 10, // priority
       },
       {
         id: 'targets', // one row per type,
