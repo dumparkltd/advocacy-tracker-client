@@ -9,7 +9,8 @@ import {
   selectActorQuery,
   selectCategoryQuery,
   selectTargetedQuery,
-  selectParentQuery,
+  selectChildrenQuery,
+  selectParentsQuery,
   selectResourceQuery,
   selectActors,
   selectActions,
@@ -30,6 +31,8 @@ import {
   selectIncludeMembersForFiltering,
   selectActorActionsAssociationsGroupedByAction,
   selectActionActorsAssociationsGroupedByAction,
+  selectActionActionsGroupedByTopAction,
+  selectActionActionsGroupedBySubAction,
   selectUsers,
   selectUserActionsGroupedByAction,
   selectUserQuery,
@@ -37,7 +40,7 @@ import {
 } from 'containers/App/selectors';
 
 import {
-  filterEntitiesByAttributes,
+  // filterEntitiesByAttributes,
   filterEntitiesByConnection,
   filterEntitiesByMultipleConnections,
   filterEntitiesByCategories,
@@ -93,7 +96,7 @@ export const selectConnections = createSelector(
           API.USERS,
           users,
         ).set(
-          // potential parents
+          // potential parents/children
           API.ACTIONS,
           entitiesSetCategoryIds(
             actions,
@@ -206,6 +209,8 @@ const selectActionsWithConnections = createSelector(
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
   selectUserActionsGroupedByAction,
+  selectActionActionsGroupedByTopAction,
+  selectActionActionsGroupedBySubAction,
   selectIncludeMembersForFiltering,
   (
     ready,
@@ -220,10 +225,11 @@ const selectActionsWithConnections = createSelector(
     resourceAssociationsGrouped,
     indicatorAssociationsGrouped,
     userAssociationsGrouped,
+    parentConnectionsGrouped,
+    childConnectionsGrouped,
     includeMembers,
   ) => {
     // console.log(actorConnectionsGrouped && actorConnectionsGrouped.toJS())
-    // console.log(actorAssociationConnectionsGrouped && actorAssociationConnectionsGrouped.toJS())
     if (ready && (connections.get(API.ACTORS) || connections.get(API.RESOURCES))) {
       return entities.map(
         (entity) => {
@@ -347,6 +353,39 @@ const selectActionsWithConnections = createSelector(
           const entityUsers = userAssociationsGrouped.get(
             parseInt(entity.get('id'), 10)
           );
+
+          // parent activities
+          const entityParents = parentConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          const entityParentsByType = entityParents && entityParents.filter(
+            (actorId) => connections.getIn([
+              API.ACTIONS,
+              actorId.toString(),
+            ])
+          ).groupBy(
+            (actorId) => connections.getIn([
+              API.ACTIONS,
+              actorId.toString(),
+              'attributes',
+              'measuretype_id',
+            ])
+          ).sortBy((val, key) => key);
+
+          // child activities
+          const entityChildren = childConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          const entityChildrenByType = entityChildren && entityChildren.filter(
+            (actorId) => connections.getIn([
+              API.ACTIONS,
+              actorId.toString(),
+            ])
+          ).groupBy(
+            (actorId) => connections.getIn([
+              API.ACTIONS,
+              actorId.toString(),
+              'attributes',
+              'measuretype_id',
+            ])
+          ).sortBy((val, key) => key);
+
           // the activity
           return entity
             // directly connected actors
@@ -370,6 +409,10 @@ const selectActionsWithConnections = createSelector(
             // directly connected resources
             .set('resources', entityResources)
             .set('indicators', entityIndicators)
+            .set('parents', entityParents)
+            .set('parentsByType', entityParentsByType)
+            .set('children', entityChildren)
+            .set('childrenByType', entityChildrenByType)
             .set('users', entityUsers)
             .set('resourcesByType', entityResourcesByResourcetype);
         }
@@ -446,19 +489,22 @@ const selectActionsByResources = createSelector(
     ? filterEntitiesByConnection(entities, query, 'resources')
     : entities
 );
-const selectActionsByParent = createSelector(
+const selectActionsByChildren = createSelector(
   selectActionsByResources,
-  selectParentQuery,
-  (entities, query) => {
-    if (!query) return entities;
-    const [, value] = query.split(':');
-    return (value)
-      ? filterEntitiesByAttributes(entities, { parent_id: parseInt(value, 10) })
-      : entities;
-  }
+  selectChildrenQuery,
+  (entities, query) => query
+    ? filterEntitiesByConnection(entities, query, 'children')
+    : entities
+);
+const selectActionsByParents = createSelector(
+  selectActionsByChildren,
+  selectParentsQuery,
+  (entities, query) => query
+    ? filterEntitiesByConnection(entities, query, 'parents')
+    : entities
 );
 const selectActionsByCategories = createSelector(
-  selectActionsByParent,
+  selectActionsByParents,
   selectCategoryQuery,
   (entities, query) => query
     ? filterEntitiesByCategories(entities, query)

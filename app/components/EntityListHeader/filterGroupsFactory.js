@@ -9,6 +9,7 @@ import {
   INDICATOR_ACTIONTYPES,
   USER_ACTIONTYPES,
   USER_ACTORTYPES,
+  ACTIONTYPE_ACTIONTYPES,
 } from 'themes/config';
 
 import { makeAttributeFilterOptions } from './filterOptionsFactory';
@@ -112,52 +113,90 @@ export const makeFilterGroups = ({
       } else {
         let types;
         let typeAbout;
-        let label;
-        if (option.type === 'action-actors') {
-          types = actortypes;
-          typeAbout = 'actortypes_about';
-        } else if (option.type === 'action-targets') {
-          types = targettypes;
-          typeAbout = 'actortypes_about';
-        } else if (option.type === 'target-actions') {
-          types = actiontypesForTarget;
-          typeAbout = 'actiontypes_about';
-        } else if (option.type === 'actor-actions') {
-          types = actiontypes;
-          typeAbout = 'actiontypes_about';
-        } else if (option.type === 'resource-actions') {
-          types = actiontypes;
-          typeAbout = 'actiontypes_about';
-        } else if (option.type === 'action-parents') {
-          types = actiontypes;
-        } else if (option.type === 'association-members') {
-          types = membertypes;
-          typeAbout = 'actortypes_about';
-        } else if (option.type === 'member-associations') {
-          types = associationtypes;
-          typeAbout = 'actortypes_about';
-        } else if (option.type === 'action-resources') {
-          types = resourcetypes;
-          typeAbout = 'resourcetypes_about';
-        } else if (option.type === 'indicator-actions') {
-          types = actiontypes;
-          typeAbout = 'actiontypes_about';
-        } else if (option.type === 'user-actions') {
-          types = actiontypes;
-          typeAbout = 'actiontypes_about';
-        } else if (option.type === 'user-actors') {
-          types = actortypes;
-          typeAbout = 'actortypes_about';
+        switch (option.type) {
+          case 'actor-actions':
+          case 'resource-actions':
+          case 'action-parents':
+          case 'action-children':
+          case 'indicator-actions':
+          case 'user-actions':
+            types = actiontypes;
+            break;
+          case 'target-actions':
+            types = actiontypesForTarget;
+            break;
+          case 'action-actors':
+          case 'user-actors':
+            types = actortypes;
+            break;
+          case 'action-targets':
+            types = targettypes;
+            break;
+          case 'association-members':
+            types = membertypes;
+            break;
+          case 'member-associations':
+            types = associationtypes;
+            break;
+          case 'action-resources':
+            types = resourcetypes;
+            break;
+          default:
+            break;
+        }
+        switch (option.type) {
+          case 'action-actors':
+            typeAbout = 'actortypes_about';
+            break;
+          case 'action-targets':
+            typeAbout = 'actortypes_about';
+            break;
+          case 'target-actions':
+            typeAbout = 'actiontypes_about';
+            break;
+          case 'actor-actions':
+            typeAbout = 'actiontypes_about';
+            break;
+          case 'resource-actions':
+            typeAbout = 'actiontypes_about';
+            break;
+          case 'association-members':
+            typeAbout = 'actortypes_about';
+            break;
+          case 'member-associations':
+            typeAbout = 'actortypes_about';
+            break;
+          case 'action-resources':
+            typeAbout = 'resourcetypes_about';
+            break;
+          case 'indicator-actions':
+            typeAbout = 'actiontypes_about';
+            break;
+          case 'user-actions':
+            typeAbout = 'actiontypes_about';
+            break;
+          case 'user-actors':
+            typeAbout = 'actortypes_about';
+            break;
+          default:
+            break;
         }
         filterGroups[connectionKey] = {
           id: connectionKey, // filterGroupId
-          label: label || messages.connections(option.type),
+          label: messages.connections(option.type),
           show: true,
           includeAnyWithout: !!option.groupByType,
           options: types && types
             .filter((type) => {
               if (option.type === 'action-parents') {
-                return type.get('id') === typeId && (!option.typeFilter || type.getIn(['attributes', option.typeFilter]));
+                return ACTIONTYPE_ACTIONTYPES[typeId] && ACTIONTYPE_ACTIONTYPES[typeId].indexOf(type.get('id')) > -1;
+              }
+              if (option.type === 'action-children') {
+                const validActiontypeIds = Object.keys(ACTIONTYPE_ACTIONTYPES).filter((actiontypeId) => {
+                  const actiontypeIds = ACTIONTYPE_ACTIONTYPES[actiontypeId];
+                  return actiontypeIds && actiontypeIds.indexOf(typeId) > -1;
+                });
+                return validActiontypeIds.indexOf(type.get('id')) > -1;
               }
               if (option.typeFilterPass === 'reverse') {
                 return !type.getIn(['attributes', option.typeFilter]);

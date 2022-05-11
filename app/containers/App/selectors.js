@@ -313,9 +313,13 @@ export const selectActorQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('actor')
 );
-export const selectParentQuery = createSelector(
+export const selectParentsQuery = createSelector(
   selectLocationQuery,
-  (locationQuery) => locationQuery && locationQuery.get('parent')
+  (locationQuery) => locationQuery && locationQuery.get('by-parent')
+);
+export const selectChildrenQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('by-child')
 );
 export const selectTargetedQuery = createSelector(
   selectLocationQuery,

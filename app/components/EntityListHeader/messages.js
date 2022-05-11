@@ -94,6 +94,10 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-parents',
       defaultMessage: 'By parent activity',
     },
+    'connections-action-children': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-children',
+      defaultMessage: 'By child activity',
+    },
     'connections-action-resources': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-resources',
       defaultMessage: 'By resource',

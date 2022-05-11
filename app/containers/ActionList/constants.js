@@ -10,6 +10,7 @@ export const DEPENDENCIES = [
   API.ACTORS,
   API.ACTIONS,
   API.RESOURCES,
+  API.ACTION_ACTIONS,
   API.ACTOR_ACTIONS,
   API.ACTION_ACTORS,
   API.ACTION_RESOURCES,
@@ -99,6 +100,36 @@ export const CONFIG = {
       groupByType: true,
       typeFilter: 'is_target',
       typeMemberFilter: 'has_members',
+    },
+    parents: {
+      query: 'by-parent',
+      type: 'action-parents',
+      search: true,
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
+      path: API.ACTIONS, // filter by actor connection
+      entityType: 'actions', // filter by actor connection
+      entityTypeAs: 'parents', // filter by actor connection
+      clientPath: ROUTES.ACTION,
+      connectPath: API.ACTION_ACTIONS, // filter by actor connection
+      key: 'measure_id',
+      ownKey: 'other_measure_id',
+      groupByType: true,
+    },
+    children: {
+      query: 'by-child',
+      type: 'action-children',
+      search: true,
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
+      path: API.ACTIONS, // filter by actor connection
+      entityType: 'actions', // filter by actor connection
+      entityTypeAs: 'children', // filter by actor connection
+      clientPath: ROUTES.ACTION,
+      connectPath: API.ACTION_ACTIONS, // filter by actor connection
+      key: 'other_measure_id', //  parent
+      ownKey: 'measure_id', // child
+      groupByType: true,
     },
     indicators: {
       query: 'indicators',

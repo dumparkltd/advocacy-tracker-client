@@ -1049,13 +1049,21 @@ export default defineMessages({
       id: 'app.containers.App.nav.parent',
       defaultMessage: 'Parent',
     },
+    parents: {
+      id: 'app.containers.App.nav.parents',
+      defaultMessage: 'Parent activities',
+    },
+    children: {
+      id: 'app.containers.App.nav.children',
+      defaultMessage: 'Child activities',
+    },
     attributes: {
       id: 'app.containers.App.nav.attributes',
       defaultMessage: 'Attributes',
     },
     associations: {
       id: 'app.containers.App.nav.associations',
-      defaultMessage: 'Member of',
+      defaultMessage: 'Associations',
     },
     pages: {
       id: 'app.containers.App.nav.pages',

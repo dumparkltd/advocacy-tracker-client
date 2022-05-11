@@ -53,6 +53,7 @@ export const makeActiveFilterOptions = ({
     case 'associations':
     case 'resources':
     case 'parents':
+    case 'children':
       return makeGroupedConnectionFilterOptions(
         entities,
         config.connections,
@@ -105,6 +106,9 @@ export const makeAnyWithoutFilterOptions = ({
     case 'members':
     case 'associations':
     case 'resources':
+    case 'indicators':
+    case 'parents':
+    case 'children':
       return makeAnyWithoutConnectionFilterOptions(
         config.connections,
         locationQuery,
