@@ -204,6 +204,14 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.editGroupLabel.connections-user-actors',
       defaultMessage: 'Update user roles',
     },
+    'connections-action-parents': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-action-parents',
+      defaultMessage: 'Update parent activities',
+    },
+    'connections-action-children': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-action-children',
+      defaultMessage: 'Update child activities',
+    },
   },
   filterFormTitlePrefix: {
     id: 'app.components.EntityListHeader.filterFormTitlePrefix',

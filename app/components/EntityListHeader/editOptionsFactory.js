@@ -32,6 +32,8 @@ export const makeActiveEditOptions = ({
     case 'members':
     case 'associations':
     case 'resources':
+    case 'parents':
+    case 'children':
       return makeGroupedConnectionEditOptions(
         entities,
         config.connections,
@@ -169,7 +171,13 @@ const makeGroupedConnectionEditOptions = (
     connections
       .get(connectionPath)
       .filter((c) => {
-        if (type === 'target-actions' || type === 'actor-actions' || type === 'resource-actions') {
+        if (
+          type === 'target-actions'
+          || type === 'actor-actions'
+          || type === 'resource-actions'
+          || type === 'action-parents'
+          || type === 'action-children'
+        ) {
           return qe(typeId, c.getIn(['attributes', 'measuretype_id']));
         }
         if (type === 'action-resources') {

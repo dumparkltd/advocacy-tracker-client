@@ -112,8 +112,8 @@ export const CONFIG = {
       entityTypeAs: 'parents', // filter by actor connection
       clientPath: ROUTES.ACTION,
       connectPath: API.ACTION_ACTIONS, // filter by actor connection
-      key: 'measure_id',
-      ownKey: 'other_measure_id',
+      ownKey: 'measure_id',
+      key: 'other_measure_id',
       groupByType: true,
     },
     children: {
@@ -127,8 +127,8 @@ export const CONFIG = {
       entityTypeAs: 'children', // filter by actor connection
       clientPath: ROUTES.ACTION,
       connectPath: API.ACTION_ACTIONS, // filter by actor connection
-      key: 'other_measure_id', //  parent
-      ownKey: 'measure_id', // child
+      ownKey: 'other_measure_id', //  parent
+      key: 'measure_id', // child
       groupByType: true,
     },
     indicators: {

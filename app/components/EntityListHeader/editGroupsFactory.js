@@ -3,7 +3,11 @@ import { startsWith } from 'utils/string';
 
 import { qe } from 'utils/quasi-equals';
 import {
-  API, INDICATOR_ACTIONTYPES, USER_ACTIONTYPES, USER_ACTORTYPES,
+  API,
+  INDICATOR_ACTIONTYPES,
+  USER_ACTIONTYPES,
+  USER_ACTORTYPES,
+  ACTIONTYPE_ACTIONTYPES,
 } from 'themes/config';
 
 export const makeEditGroups = ({
@@ -121,6 +125,8 @@ export const makeEditGroups = ({
           case 'actor-actions':
           case 'user-actions':
           case 'resource-actions':
+          case 'action-parents':
+          case 'action-children':
             types = actiontypes;
             break;
           case 'target-actions':
@@ -152,6 +158,8 @@ export const makeEditGroups = ({
           case 'actor-actions':
           case 'user-actions':
           case 'resource-actions':
+          case 'action-parents':
+          case 'action-children':
             typeAttribute_id = 'measuretype_id';
             break;
           // resources
@@ -168,7 +176,14 @@ export const makeEditGroups = ({
           options: types && types
             .filter((type) => {
               if (option.type === 'action-parents') {
-                return type.get('id') === typeId && (!option.typeFilter || type.getIn(['attributes', option.typeFilter]));
+                return ACTIONTYPE_ACTIONTYPES[typeId] && ACTIONTYPE_ACTIONTYPES[typeId].indexOf(type.get('id')) > -1;
+              }
+              if (option.type === 'action-children') {
+                const validActiontypeIds = Object.keys(ACTIONTYPE_ACTIONTYPES).filter((actiontypeId) => {
+                  const actiontypeIds = ACTIONTYPE_ACTIONTYPES[actiontypeId];
+                  return actiontypeIds && actiontypeIds.indexOf(typeId) > -1;
+                });
+                return validActiontypeIds.indexOf(type.get('id')) > -1;
               }
               if (option.typeFilterPass === 'reverse') {
                 return !type.getIn(['attributes', option.typeFilter]);
