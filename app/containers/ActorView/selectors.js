@@ -32,6 +32,7 @@ import {
   selectUserActorsGroupedByUser,
   selectUserActorsGroupedByActor,
   selectUserActionsGroupedByUser,
+  selectUserActionsGroupedByAction,
   selectUsers,
 } from 'containers/App/selectors';
 
@@ -111,6 +112,7 @@ export const selectActionsWith = createSelector(
   selectActionIndicatorsGroupedByAction,
   selectCategories,
   selectActionCategoriesGroupedByAction,
+  selectUserActionsGroupedByAction,
   // selectActiontypes,
   (
     ready,
@@ -123,6 +125,7 @@ export const selectActionsWith = createSelector(
     actionIndicators,
     categories,
     actionCategories,
+    userActions,
     // actiontypes,
   ) => {
     // if (!ready) return Map();
@@ -149,6 +152,7 @@ export const selectActionsWith = createSelector(
         actionIndicators,
         categories,
         actionCategories,
+        users: userActions,
       }));
   }
 );
@@ -191,6 +195,7 @@ export const selectActionsAsTargetByType = createSelector(
   selectActionResourcesGroupedByAction,
   selectActionCategoriesGroupedByAction,
   selectCategories,
+  selectUserActionsGroupedByAction,
   (
     ready,
     actions,
@@ -200,6 +205,7 @@ export const selectActionsAsTargetByType = createSelector(
     actionResources,
     actionCategories,
     categories,
+    userActions,
   ) => {
     if (!ready) return Map();
     return actions && actions
@@ -211,6 +217,7 @@ export const selectActionsAsTargetByType = createSelector(
         actionResources,
         categories,
         actionCategories,
+        users: userActions,
       }))
       .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
       .sortBy(

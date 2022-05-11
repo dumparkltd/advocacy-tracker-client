@@ -813,9 +813,11 @@ export const setActionConnections = ({
   actionIndicators,
   categories,
   actionCategories,
+  users,
 }) => {
+  const actionId = parseInt(action.get('id'), 10);
   // actors
-  const entityActors = actorActions && actorActions.get(parseInt(action.get('id'), 10));
+  const entityActors = actorActions && actorActions.get(actionId);
   const entityActorsByActortype = entityActors
     && actionConnections.get(API.ACTORS)
     && entityActors
@@ -823,7 +825,7 @@ export const setActionConnections = ({
       .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
       .sortBy((val, key) => key);
   // actors
-  const entityTargets = actionActors && actionActors.get(parseInt(action.get('id'), 10));
+  const entityTargets = actionActors && actionActors.get(actionId);
   const entityTargetsByActortype = entityTargets
     && actionConnections.get(API.ACTORS)
     && entityTargets
@@ -831,7 +833,7 @@ export const setActionConnections = ({
       .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
       .sortBy((val, key) => key);
   // resources
-  const entityResources = actionResources && actionResources.get(parseInt(action.get('id'), 10));
+  const entityResources = actionResources && actionResources.get(actionId);
   const entityResourcesByResourcetype = entityResources
     && actionConnections.get(API.RESOURCES)
     && entityResources
@@ -840,11 +842,19 @@ export const setActionConnections = ({
       .sortBy((val, key) => key);
   // indicators
   const entityIndicators = actionIndicators
-    && actionIndicators.get(parseInt(action.get('id'), 10))
+    && actionIndicators.get(actionId)
     && actionConnections.get(API.INDICATORS)
     && actionIndicators
-      .get(parseInt(action.get('id'), 10))
+      .get(actionId)
       .filter((id) => actionConnections.getIn([API.INDICATORS, id.toString()]))
+      .sortBy((val, key) => key);
+  // users
+  const entityUsers = users
+    && users.get(actionId)
+    && actionConnections.get(API.USERS)
+    && users
+      .get(actionId)
+      .filter((id) => actionConnections.getIn([API.USERS, id.toString()]))
       .sortBy((val, key) => key);
 
   // categories
@@ -858,7 +868,8 @@ export const setActionConnections = ({
     .set('actorsByType', entityActorsByActortype)
     .set('targetsByType', entityTargetsByActortype)
     .set('resourcesByType', entityResourcesByResourcetype)
-    .set('indicators', entityIndicators);
+    .set('indicators', entityIndicators)
+    .set('users', entityUsers);
 };
 
 export const setActorConnections = ({
@@ -870,6 +881,7 @@ export const setActorConnections = ({
   actorCategories,
   memberships,
   associations,
+  users,
 }) => {
   const actorId = parseInt(actor.get('id'), 10);
   if (!actorConnections) return actor;
@@ -909,6 +921,15 @@ export const setActorConnections = ({
       .groupBy((localActorId) => actorConnections.getIn([API.ACTORS, localActorId.toString(), 'attributes', 'actortype_id']).toString())
       .sortBy((val, key) => key);
 
+  // users
+  const entityUsers = users
+    && users.get(actorId)
+    && actorConnections.get(API.USERS)
+    && users
+      .get(actorId)
+      .filter((id) => actorConnections.getIn([API.USERS, id.toString()]))
+      .sortBy((val, key) => key);
+
   // categories
   const entityCategories = getEntityCategories(
     actor.get('id'),
@@ -921,7 +942,8 @@ export const setActorConnections = ({
     .set('actionsByType', entityActionsByActiontype)
     .set('targetingActionsByType', entityTargetingActionsByType)
     .set('membersByType', entityMembersByActortype)
-    .set('associationsByType', entityAssociationsByActortype);
+    .set('associationsByType', entityAssociationsByActortype)
+    .set('users', entityUsers);
 };
 
 export const setResourceConnections = ({

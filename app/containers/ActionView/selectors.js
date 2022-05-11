@@ -35,6 +35,7 @@ import {
   selectUserConnections,
   selectUserActionsGroupedByUser,
   selectUserActorsGroupedByUser,
+  selectUserActorsGroupedByActor,
 } from 'containers/App/selectors';
 
 import {
@@ -224,6 +225,7 @@ export const selectActorsByType = createSelector(
   selectMembershipsGroupedByMember,
   selectMembershipsGroupedByAssociation,
   selectActorCategoriesGroupedByActor,
+  selectUserActorsGroupedByActor,
   selectCategories,
   (
     ready,
@@ -235,6 +237,7 @@ export const selectActorsByType = createSelector(
     memberships,
     associations,
     actorCategories,
+    userActorsByActor,
     categories,
   ) => {
     if (!ready) return Map();
@@ -248,6 +251,7 @@ export const selectActorsByType = createSelector(
         actorCategories,
         memberships,
         associations,
+        users: userActorsByActor,
       }));
     return actorsWithConnections && actorsWithConnections
       .groupBy((r) => r.getIn(['attributes', 'actortype_id']))
@@ -295,6 +299,7 @@ export const selectTargetsByType = createSelector(
   selectMembershipsGroupedByMember,
   selectMembershipsGroupedByAssociation,
   selectActorCategoriesGroupedByActor,
+  selectUserActorsGroupedByActor,
   selectCategories,
   (
     ready,
@@ -305,6 +310,7 @@ export const selectTargetsByType = createSelector(
     memberships,
     associations,
     actorCategories,
+    userActorsByActor,
     categories,
   ) => {
     if (!ready) return Map();
@@ -318,6 +324,7 @@ export const selectTargetsByType = createSelector(
         actorCategories,
         memberships,
         associations,
+        users: userActorsByActor,
       }))
       .groupBy((r) => r.getIn(['attributes', 'actortype_id']))
       .sortBy(
