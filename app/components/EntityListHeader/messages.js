@@ -188,6 +188,18 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.editGroupLabel.connections-actor-users',
       defaultMessage: 'Update users assignments',
     },
+    'connections-user-actions': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-user-actions',
+      defaultMessage: 'Update activity assignments',
+    },
+    'connections-user-actors': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-user-actors',
+      defaultMessage: 'Update actor assignments',
+    },
+    'connections-user-roles': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-user-actors',
+      defaultMessage: 'Update user roles',
+    },
   },
   filterFormTitlePrefix: {
     id: 'app.components.EntityListHeader.filterFormTitlePrefix',

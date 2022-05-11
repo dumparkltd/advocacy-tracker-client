@@ -109,30 +109,57 @@ export const makeEditGroups = ({
       } else {
         let types;
         let typeAttribute_id;
-        if (option.type === 'action-actors') {
-          types = actortypes;
-          typeAttribute_id = 'actortypeattribute_id';
-        } else if (option.type === 'action-targets') {
-          types = targettypes;
-          typeAttribute_id = 'actortype_id';
-        } else if (option.type === 'target-actions') {
-          types = actiontypesForTarget;
-          typeAttribute_id = 'measuretype_id';
-        } else if (option.type === 'actor-actions') {
-          types = actiontypes;
-          typeAttribute_id = 'measuretype_id';
-        } else if (option.type === 'resource-actions') {
-          types = actiontypes;
-          typeAttribute_id = 'measuretype_id';
-        } else if (option.type === 'association-members') {
-          types = membertypes;
-          typeAttribute_id = 'actortype_id';
-        } else if (option.type === 'member-associations') {
-          types = associationtypes;
-          typeAttribute_id = 'actortype_id';
-        } else if (option.type === 'action-resources') {
-          types = resourcetypes;
-          typeAttribute_id = 'resourcetype_id';
+
+        switch (option.type) {
+          case 'user-actors':
+          case 'action-actors':
+            types = actortypes;
+            break;
+          case 'action-targets':
+            types = targettypes;
+            break;
+          case 'actor-actions':
+          case 'user-actions':
+          case 'resource-actions':
+            types = actiontypes;
+            break;
+          case 'target-actions':
+            types = actiontypesForTarget;
+            break;
+          case 'association-members':
+            types = membertypes;
+            break;
+          case 'member-associations':
+            types = associationtypes;
+            break;
+          case 'action-resources':
+            types = resourcetypes;
+            break;
+          default:
+            break;
+        }
+        switch (option.type) {
+          // actors
+          case 'user-actors':
+          case 'action-actors':
+          case 'action-targets':
+          case 'association-members':
+          case 'member-associations':
+            typeAttribute_id = 'actortype_id';
+            break;
+          // actions
+          case 'target-actions':
+          case 'actor-actions':
+          case 'user-actions':
+          case 'resource-actions':
+            typeAttribute_id = 'measuretype_id';
+            break;
+          // resources
+          case 'action-resources':
+            typeAttribute_id = 'resourcetype_id';
+            break;
+          default:
+            break;
         }
         editGroups[connectionKey] = {
           id: connectionKey, // filterGroupId

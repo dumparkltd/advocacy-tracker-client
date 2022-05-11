@@ -22,6 +22,8 @@ import {
   selectUserTaxonomies,
   selectActiontypesForUsers,
   selectActortypesForUsers,
+  // selectIsUserManager,
+  selectIsUserAnalyst,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -50,11 +52,33 @@ export class UserList extends React.PureComponent { // eslint-disable-line react
 
   render() {
     const { intl } = this.context;
-    const { dataReady, actortypes, actiontypes } = this.props;
+    const {
+      dataReady,
+      actortypes,
+      actiontypes,
+      // isManager,
+      isAnalyst,
+    } = this.props;
+    const type = 'users';
     const headerOptions = {
       supTitle: intl.formatMessage(messages.pageTitle),
-      icon: 'users',
+      actions: [],
     };
+    if (isAnalyst) {
+      headerOptions.actions.push({
+        type: 'bookmarker',
+        title: intl.formatMessage(appMessages.entities[type].plural),
+        entityType: type,
+      });
+    }
+    if (window.print) {
+      headerOptions.actions.push({
+        type: 'icon',
+        onClick: () => window.print(),
+        title: 'Print',
+        icon: 'print',
+      });
+    }
 
     return (
       <div>
@@ -73,7 +97,6 @@ export class UserList extends React.PureComponent { // eslint-disable-line react
             headerOptions={headerOptions}
             dataReady={dataReady}
             includeHeader={false}
-            canEdit={false}
             entityTitle={{
               single: intl.formatMessage(appMessages.entities.users.single),
               plural: intl.formatMessage(appMessages.entities.users.plural),
@@ -99,6 +122,8 @@ UserList.propTypes = {
   location: PropTypes.object,
   actiontypes: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
+  // isManager: PropTypes.bool,
+  isAnalyst: PropTypes.bool,
 };
 
 UserList.contextTypes = {
@@ -113,6 +138,8 @@ const mapStateToProps = (state, props) => ({
   connections: selectUserConnections(state),
   actiontypes: selectActiontypesForUsers(state),
   actortypes: selectActortypesForUsers(state),
+  // isManager: selectIsUserManager(state),
+  isAnalyst: selectIsUserAnalyst(state),
 });
 function mapDispatchToProps(dispatch) {
   return {
