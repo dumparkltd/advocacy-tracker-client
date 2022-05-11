@@ -667,6 +667,11 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
+        id: 'indicators',
+        type: 'indicators',
+        sort: 'title',
+      },
+      {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 6, // level of support
@@ -675,11 +680,6 @@ export const ACTIONTYPES_CONFIG = {
         id: 'taxonomy-13',
         type: 'taxonomy',
         taxonomy_id: 13, // level of authority
-      },
-      {
-        id: 'indicators',
-        type: 'indicators',
-        sort: 'title',
       },
       {
         id: 'actors',
