@@ -109,7 +109,7 @@ export function Activities(props) {
       actiontypesForSubjectOptions = actiontypes.filter(
         (at) => {
           const atId = at.get('id');
-          return ACTIONTYPE_ACTORTYPES[atId] && ACTIONTYPE_ACTORTYPES[atId].includes(viewActortype.get('id'));
+          return ACTIONTYPE_ACTORTYPES[atId] && ACTIONTYPE_ACTORTYPES[atId].indexOf(viewActortype.get('id')) > -1;
         }
       );
     } else if (viewSubject === 'targets') {
@@ -117,7 +117,7 @@ export function Activities(props) {
       actiontypesForSubjectOptions = actiontypes.filter(
         (at) => {
           const atId = at.get('id');
-          return ACTIONTYPE_TARGETTYPES[atId] && ACTIONTYPE_TARGETTYPES[atId].includes(viewActortype.get('id'));
+          return ACTIONTYPE_TARGETTYPES[atId] && ACTIONTYPE_TARGETTYPES[atId].indexOf(viewActortype.get('id') > -1);
         }
       );
     }
@@ -130,27 +130,37 @@ export function Activities(props) {
       if (viewSubject === 'actors') {
         actiontypesAsMemberByActortypeForSubject = actionsAsMemberByActortype;
         // indirect actiontypeids for selected subject
-        actiontypeIdsAsMemberForSubject = actiontypesAsMemberByActortypeForSubject.reduce(
-          (memo, typeActors) => memo.concat(
-            typeActors.reduce(
-              (memo2, actor) => memo2.concat(actor.get('actionsByType').keySeq()),
-              List(),
-            )
-          ),
-          List(),
-        ).toSet();
+        actiontypeIdsAsMemberForSubject = actiontypesAsMemberByActortypeForSubject
+          .reduce(
+            (memo, typeActors) => memo.concat(
+              typeActors.reduce(
+                (memo2, actor) => memo2.concat(actor.get('actionsByType').keySeq()),
+                List(),
+              )
+            ),
+            List(),
+          )
+          .toSet()
+          .filter(
+            (atId) => ACTIONTYPE_ACTORTYPES[atId] && ACTIONTYPE_ACTORTYPES[atId].indexOf(viewActortype.get('id')) > -1
+          );
       } else if (viewSubject === 'targets') {
         actiontypesAsMemberByActortypeForSubject = actionsAsTargetAsMemberByActortype;
         // indirect actiontypeids for selected subject
-        actiontypeIdsAsMemberForSubject = actiontypesAsMemberByActortypeForSubject.reduce(
-          (memo, typeActors) => memo.concat(
-            typeActors.reduce(
-              (memo2, actor) => memo2.concat(actor.get('targetingActionsByType').keySeq()),
-              List(),
-            )
-          ),
-          List(),
-        ).toSet();
+        actiontypeIdsAsMemberForSubject = actiontypesAsMemberByActortypeForSubject
+          .reduce(
+            (memo, typeActors) => memo.concat(
+              typeActors.reduce(
+                (memo2, actor) => memo2.concat(actor.get('targetingActionsByType').keySeq()),
+                List(),
+              )
+            ),
+            List(),
+          )
+          .toSet()
+          .filter(
+            (atId) => ACTIONTYPE_TARGETTYPES[atId] && ACTIONTYPE_TARGETTYPES[atId].indexOf(viewActortype.get('id')) > -1
+          );
       }
     }
 
@@ -322,7 +332,7 @@ export function Activities(props) {
                     measuretype_id: activeActiontypeId,
                   },
                   connect: {
-                    type: 'actorActions',
+                    type: viewSubject === 'actors' ? 'actorActions' : 'actionActors',
                     create: [{
                       actor_id: viewEntity.get('id'),
                     }],
