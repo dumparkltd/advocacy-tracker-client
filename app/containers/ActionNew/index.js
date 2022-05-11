@@ -160,15 +160,6 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     const typeId = type.get('id');
     const groups = [];
     groups.push(
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'url') && getLinkFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'url'),
-            'url',
-          ),
-        ],
-      },
       {
         fields: [
           // description
@@ -272,6 +263,15 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     const { intl } = this.context;
     const typeId = type.get('id');
     const groups = [ // fieldGroups
+      { // fieldGroup
+        fields: [
+          checkActionAttribute(typeId, 'url') && getLinkFormField(
+            intl.formatMessage,
+            checkActionRequired(typeId, 'url'),
+            'url',
+          ),
+        ],
+      },
       { // fieldGroup
         fields: [
           checkActionAttribute(typeId, 'date_start') && getDateField(

@@ -302,14 +302,6 @@ export function ActionView(props) {
               <ViewPanelInside>
                 <Main hasAside bottom>
                   <FieldGroup
-                    aside
-                    group={{
-                      fields: [
-                        checkActionAttribute(typeId, 'url') && getLinkField(viewEntity),
-                      ],
-                    }}
-                  />
-                  <FieldGroup
                     group={{
                       fields: [
                         checkActionAttribute(typeId, 'description')
@@ -444,6 +436,14 @@ export function ActionView(props) {
                   </Box>
                 </Main>
                 <Aside bottom>
+                  <FieldGroup
+                    aside
+                    group={{
+                      fields: [
+                        checkActionAttribute(typeId, 'url') && getLinkField(viewEntity),
+                      ],
+                    }}
+                  />
                   <FieldGroup
                     aside
                     group={{

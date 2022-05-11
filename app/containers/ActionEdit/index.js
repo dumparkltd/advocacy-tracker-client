@@ -218,15 +218,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
 
     const groups = [];
     groups.push(
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'url') && getLinkFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'url'),
-            'url',
-          ),
-        ],
-      },
       {
         fields: [
           checkActionAttribute(typeId, 'description', true) && getMarkdownFormField(
@@ -334,6 +325,15 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     const typeId = entity.getIn(['attributes', 'measuretype_id']);
 
     const groups = [ // fieldGroups
+      { // fieldGroup
+        fields: [
+          checkActionAttribute(typeId, 'url') && getLinkFormField(
+            intl.formatMessage,
+            checkActionRequired(typeId, 'url'),
+            'url',
+          ),
+        ],
+      },
       { // fieldGroup
         fields: [
           checkActionAttribute(typeId, 'date_start') && getDateField(
