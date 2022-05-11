@@ -320,6 +320,7 @@ function mapDispatchToProps(dispatch, props) {
         props.connect && (
           props.connect.get('type') === 'actorActions'
           || props.connect.get('type') === 'actionActors'
+          || props.connect.get('type') === 'userActions'
         )
       ) {
         saveData = saveData.set(

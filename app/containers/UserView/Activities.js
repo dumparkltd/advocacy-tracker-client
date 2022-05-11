@@ -136,9 +136,9 @@ export function Activities(props) {
                     measuretype_id: viewActiontypeId,
                   },
                   connect: {
-                    type: 'actorActions',
+                    type: 'userActions',
                     create: [{
-                      actor_id: viewEntity.get('id'),
+                      user_id: viewEntity.get('id'),
                     }],
                   },
                 }),
