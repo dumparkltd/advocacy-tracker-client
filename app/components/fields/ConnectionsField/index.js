@@ -54,7 +54,7 @@ class ConnectionsField extends React.PureComponent { // eslint-disable-line reac
           <div>
             <ButtonFactory
               button={{
-                type: 'text',
+                type: 'addFlatPrimary',
                 title: `Add new ${intl.formatMessage(appMessages.entities[field.entityType].single)}`,
                 onClick: () => field.onCreate(),
               }}

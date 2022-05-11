@@ -249,7 +249,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     return [
       activeOption.create
         ? {
-          type: 'addFromMultiselect',
+          type: 'addFlat',
           position: 'left',
           onClick: () => onCreateOption(activeOption.create),
         }

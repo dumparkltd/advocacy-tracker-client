@@ -294,7 +294,7 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
                 buttons={[
                   field.onCreate
                     ? {
-                      type: 'addFromMultiselect',
+                      type: 'addFlat',
                       position: 'left',
                       onClick: field.onCreate,
                     }
