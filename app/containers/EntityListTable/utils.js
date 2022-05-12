@@ -150,7 +150,7 @@ export const prepareHeader = ({
       case 'userActions':
         return ({
           ...col,
-          title: 'Activities',
+          title: col.title || 'Activities',
           sortActive: sortBy === col.id,
           sortOrder: sortOrder || 'asc',
           onSort,

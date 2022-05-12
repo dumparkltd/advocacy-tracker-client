@@ -11,7 +11,6 @@ import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 
 import {
   ROUTES,
-  API,
   ACTORTYPES,
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
@@ -35,7 +34,7 @@ import ContentHeader from 'components/ContentHeader';
 import qe from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
 
-import { getActorsForEntities } from './utils';
+import { getActorsForEntities, getUsersForEntities } from './utils';
 
 const getActivityColumns = (mapSubject, typeId) => {
   let actionTypeIds;
@@ -150,9 +149,11 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     let subjectOptions = [];
     let memberOption;
     let entityActors;
+    let entityUsers;
     let columns;
     let headerColumnsUtility;
     let mapSubjectClean = mapSubject;
+    let userEntityColumnTitle;
 
     // ACTIONS =================================================================
 
@@ -202,6 +203,16 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           },
         ];
       }
+      subjectOptions = [
+        ...subjectOptions,
+        {
+          type: 'secondary',
+          title: 'By user',
+          onClick: () => onSetMapSubject('users'),
+          active: mapSubjectClean === 'users',
+          disabled: mapSubjectClean === 'users',
+        },
+      ];
       if (mapSubjectClean === 'targets' && qe(viewType, ACTORTYPES.COUNTRY)) {
         memberOption = {
           active: includeTargetMembers,
@@ -215,16 +226,24 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           label: 'Include activities of groups (countries belong to)',
         };
       }
-      entityActors = mapSubjectClean && getActorsForEntities(
-        entities,
-        connections && connections.get('actors'),
-        mapSubjectClean,
-        mapSubjectClean === 'actors' ? includeActorMembers : includeTargetMembers,
-      );
-      entityActors = entityActors && entityActors.groupBy(
-        (actor) => actor.getIn(['attributes', 'actortype_id'])
-      );
-
+      if (mapSubjectClean === 'actors' || mapSubjectClean === 'targets') {
+        entityActors = getActorsForEntities(
+          entities,
+          connections && connections.get('actors'),
+          mapSubjectClean,
+          mapSubjectClean === 'actors' ? includeActorMembers : includeTargetMembers,
+        );
+        entityActors = entityActors && entityActors.groupBy(
+          (actor) => actor.getIn(['attributes', 'actortype_id'])
+        );
+      } else if (mapSubjectClean === 'users') {
+        entityUsers = getUsersForEntities(
+          entities,
+          connections && connections.get('users'),
+          'actions',
+        );
+        userEntityColumnTitle = intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural);
+      }
 
       // ACTORS ================================================================
       //
@@ -375,6 +394,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     if (hasFilters) {
       headerSubTitle = `of ${allEntityCount} total`;
     }
+
     return (
       <ContainerWrapper headerStyle={headerStyle} ref={this.ScrollContainer}>
         {dataReady && viewOptions && viewOptions.length > 1 && (
@@ -490,48 +510,52 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                               search: ['code', 'title', 'description'],
                             },
                           },
-                          connections: {
-                            actions: { // filter by associated entity
-                              entityType: 'actions', // filter by actor connection
-                              path: API.ACTIONS, // filter by actor connection
-                              clientPath: ROUTES.ACTION,
-                              actionTypeId: typeId,
-                            },
-                            actionsMembers: { // filter by associated entity
-                              entityType: 'actions', // filter by actor connection
-                              entityTypeAs: 'actionsMembers',
-                              path: API.ACTIONS, // filter by actor connection
-                              clientPath: ROUTES.ACTION,
-                              actionTypeId: typeId,
-                            },
-                            targets: { // filter by associated entity
-                              entityType: 'actions', // filter by actor connection
-                              entityTypeAs: 'targetingActions',
-                              path: API.ACTIONS, // filter by actor connection
-                              clientPath: ROUTES.ACTION,
-                              actionTypeId: typeId,
-                            },
-                            targetsMembers: { // filter by associated entity
-                              entityType: 'actions', // filter by actor connection
-                              entityTypeAs: 'targetingActionsAsMember',
-                              path: API.ACTIONS, // filter by actor connection
-                              clientPath: ROUTES.ACTION,
-                              actionTypeId: typeId,
-                            },
-                            // USERS: { // filter by associated entity
-                            //   entityType: 'users', // filter by actor connection
-                            //   path: API.USERS, // filter by actor connection
-                            //   clientPath: ROUTES.USER,
-                            //   actionTypeId: typeId,
-                            // },
-                          },
                         }}
                         connections={connections}
                       />
                     )}
                   </Box>
                 )}
-                {!entityActors && (
+                {entityUsers && (
+                  <Box>
+                    <EntityListTable
+                      paginate
+                      hasSearch
+                      columns={[
+                        {
+                          id: 'main',
+                          type: 'main',
+                          sort: 'title',
+                          attributes: ['name'],
+                        },
+                        {
+                          id: 'userActions',
+                          type: 'userActions',
+                          actiontype_id: viewType,
+                          title: userEntityColumnTitle,
+                        },
+                      ]}
+                      entities={entityUsers}
+                      entityPath={ROUTES.USER}
+                      onEntityClick={onEntityClick}
+                      entityTitle={{
+                        single: intl.formatMessage(appMessages.entities.users.single),
+                        plural: intl.formatMessage(appMessages.entities.users.plural),
+                      }}
+                      onResetScroll={this.scrollToTop}
+                      config={{
+                        clientPath: ROUTES.USER,
+                        views: {
+                          list: {
+                            search: ['name', 'description'],
+                          },
+                        },
+                      }}
+                      connections={connections}
+                    />
+                  </Box>
+                )}
+                {!entityActors && !entityUsers && (
                   <EntityListTable
                     paginate
                     hasSearch

@@ -93,3 +93,41 @@ export const getActorsForEntities = (
     Map(),
   ).toList();
 };
+
+// work out actors for entities and store activites both direct as well as indirect
+export const getUsersForEntities = (
+  entities,
+  users,
+  type = 'entities',
+) => {
+  const userAtt = 'users';
+  return entities && entities.reduce(
+    (memo, entity) => {
+      const entityId = parseInt(entity.get('id'), 10);
+      const entityUsers = entity.get(userAtt);
+      return entityUsers
+        ? entityUsers.reduce(
+          (memo2, userId) => {
+            const sUserId = userId.toString();
+            if (memo2.get(sUserId)) {
+              if (memo2.getIn([sUserId, type])) {
+                return memo2.setIn(
+                  [sUserId, type],
+                  memo2.getIn([sUserId, type]).push(entityId),
+                );
+              }
+              // remove from indirect list if already added there
+              return memo2.setIn([sUserId, type], List().push(entityId));
+            }
+            const user = users.get(sUserId);
+            return user
+              ? memo2.set(sUserId, user.set(type, List().push(entityId)))
+              : memo2;
+          },
+          memo,
+        )
+        : memo;
+    },
+    Map(),
+  ).toList();
+};
