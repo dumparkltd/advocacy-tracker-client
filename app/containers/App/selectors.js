@@ -313,6 +313,10 @@ export const selectActorQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('actor')
 );
+export const selectRoleQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('role')
+);
 export const selectParentsQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('by-parent')

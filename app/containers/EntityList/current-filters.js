@@ -8,6 +8,7 @@ import {
 
 import { getCategoryShortTitle } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
+import appMessage from 'utils/app-message';
 
 import { truncateText } from 'utils/string';
 import isNumber from 'utils/is-number';
@@ -118,8 +119,17 @@ const getErrorTag = (label) => ({
   type: 'error',
   label,
 });
-const getConnectionLabel = (connection, value, long) => {
+const getConnectionLabel = (connection, value, long, labels, intl) => {
   if (connection) {
+    if (labels) {
+      const label = labels.find((l) => qe(l.value, value));
+      if (label && label.message) {
+        return truncateText(
+          appMessage(intl, label.message),
+          TEXT_TRUNCATE.CONNECTION_TAG,
+        );
+      }
+    }
     if (long) {
       return truncateText(
         connection.getIn(['attributes', 'title']) || connection.getIn(['attributes', 'name']) || connection.get('id'),
@@ -265,7 +275,9 @@ const getCurrentConnectionFilters = (
   isManager,
 ) => {
   const tags = [];
-  const { query, path, groupByType } = option;
+  const {
+    query, path, groupByType, labels,
+  } = option;
   if (locationQuery.get(query) && connections.get(path)) {
     const locationQueryValue = locationQuery.get(query);
     asList(locationQueryValue).forEach((queryValue) => {
@@ -283,8 +295,8 @@ const getCurrentConnectionFilters = (
         if (connection) {
           const isCodePublic = checkCodeVisibility(connection, option.entityType, isManager);
           tags.push({
-            label: getConnectionLabel(connection, value, !isCodePublic),
-            labelLong: getConnectionLabel(connection, value, true),
+            label: getConnectionLabel(connection, value, !isCodePublic, labels, intl),
+            labelLong: getConnectionLabel(connection, value, true, labels, intl),
             type: option.entityType,
             group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
             onClick: () => onClick({

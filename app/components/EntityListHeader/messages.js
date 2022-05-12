@@ -130,6 +130,10 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-user-actors',
       defaultMessage: 'By actor',
     },
+    'connections-user-roles': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-user-roles',
+      defaultMessage: 'By role',
+    },
     connectedTaxonomies: {
       id: 'app.components.EntityListHeader.filterGroupLabel.connectedTaxonomies',
       defaultMessage: 'By connected category',
@@ -202,7 +206,7 @@ export default defineMessages({
     },
     'connections-user-roles': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-user-actors',
-      defaultMessage: 'Update user roles',
+      defaultMessage: 'Update user role',
     },
     'connections-action-parents': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-action-parents',

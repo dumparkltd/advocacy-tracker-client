@@ -46,6 +46,7 @@ export const makeActiveEditOptions = ({
       );
     case 'users':
     case 'indicators':
+    case 'roles':
       return makeConnectionEditOptions(
         entities,
         config.connections,
@@ -167,6 +168,7 @@ const makeGroupedConnectionEditOptions = (
     editOptions.title = messages.title;
     editOptions.path = option.connectPath;
     editOptions.search = option.search;
+    editOptions.multiple = !option.single;
     const connectionPath = option.path;
     connections
       .get(connectionPath)
@@ -248,6 +250,8 @@ const makeConnectionEditOptions = (
     editOptions.title = messages.title;
     editOptions.path = option.connectPath;
     editOptions.search = option.search;
+    editOptions.multiple = !option.single;
+
     const connectionPath = option.path;
     connections
       .get(connectionPath)
@@ -262,7 +266,7 @@ const makeConnectionEditOptions = (
         );
         editOptions.options[connection.get('id')] = {
           reference: getEntityReference(connection),
-          label: getEntityTitle(connection),
+          label: getEntityTitle(connection, option.labels, contextIntl),
           value: connection.get('id'),
           checked: checkedState(count, entities.size),
           tags: connection.get('categories'),

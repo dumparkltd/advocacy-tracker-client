@@ -334,6 +334,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 activeEditOption,
                 entityIdsSelected,
                 viewDomain.get('errors'),
+                connections,
               )}
             showFilters={this.state.visibleFilters}
             showEditOptions={isManager && showList && this.state.visibleEditOptions}
@@ -665,7 +666,7 @@ function mapDispatchToProps(dispatch, props) {
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));
     },
-    handleEditSubmit: (formData, activeEditOption, entityIdsSelected, errors) => {
+    handleEditSubmit: (formData, activeEditOption, entityIdsSelected, errors, connections) => {
       dispatch(resetProgress());
 
       const entities = props.entities.filter(
@@ -740,49 +741,107 @@ function mapDispatchToProps(dispatch, props) {
               case ('associations'):
               case ('resources'):
               case ('indicators'):
-              case ('users'):
+              case ('roles'):
                 existingAssignments = entity.get(activeEditOption.connection);
                 break;
               default:
                 existingAssignments = List();
                 break;
             }
-            // create connections
-            if (creates.size > 0) {
-              // exclude existing relations from the changeSet
-              entityCreates = !!existingAssignments && existingAssignments.size > 0
-                ? creates.filter(
-                  (id) => !existingAssignments.includes(parseInt(id, 10))
-                )
-                : creates;
-              entityCreates = entityCreates.map(
-                (id) => fromJS({
+
+            if (activeEditOption.group === 'roles') {
+              const roles = connections.get('roles');
+              // "creates" includes single new "highest" role
+              // existingAssignments includes previous highest role
+              // if new highest role higher (that is actually lower)
+              //    --> create all roles higher than old role up to the new highest role
+              const prevHighestRoleId = existingAssignments
+                ? existingAssignments.toList().first()
+                : USER_ROLES.DEFAULT.value;
+              const newHighestRoleId = creates.size > 0 ? creates.first() : USER_ROLES.DEFAULT.value;
+              const prevRoleIds = roles.filter(
+                (role) => prevHighestRoleId <= parseInt(role.get('id'), 10)
+              ).map((role) => parseInt(role.get('id'), 10)).toList();
+              const createRoleIds = newHighestRoleId === USER_ROLES.DEFAULT.value
+                ? List()
+                : roles.filter(
+                  (role) => {
+                    const roleId = parseInt(role.get('id'), 10);
+                    return newHighestRoleId <= roleId && !prevRoleIds.includes(roleId);
+                  }
+                ).map((role) => parseInt(role.get('id'), 10)).toList();
+              const deleteRoleIds = roles.filter(
+                (role) => {
+                  const roleId = parseInt(role.get('id'), 10);
+                  return newHighestRoleId > roleId && prevRoleIds.includes(roleId);
+                }
+              ).map((role) => parseInt(role.get('id'), 10)).toList();
+              // console.log('newHighestRoleId', newHighestRoleId)
+              // console.log('newRoleIds', createRoleIds.toJS())
+              // console.log('deleteRoleIds', deleteRoleIds.toJS())
+              // console.log('entity.allRoles', entity.get('allRoles').toJS())
+              if (createRoleIds.size > 0) {
+                entityCreates = createRoleIds.map((id) => fromJS({
                   path: activeEditOption.path,
                   entity: {
                     attributes: {
                       [activeEditOption.ownKey]: entity.get('id'),
-                      [activeEditOption.key]: id,
+                      [activeEditOption.key]: id.toString(),
                     },
                   },
                   saveRef: entity.get('id'),
-                })
-              );
-            }
-            // delete connections
-            if (
-              deletes.size > 0
-              && !!existingAssignments
-              && existingAssignments.size > 0
-            ) {
-              entityDeletes = existingAssignments.filter(
-                (assigned) => deletes.includes(assigned.toString())
-              ).map(
-                (assigned, id) => fromJS({
-                  path: activeEditOption.path,
-                  id,
-                  saveRef: entity.get('id'),
-                })
-              ).toList();
+                }));
+              }
+              if (deleteRoleIds.size > 0) {
+                // console.log(deleteConnections.toJS())
+                entityDeletes = entity.get('allRoles').filter(
+                  (roleId) => deleteRoleIds.includes(roleId)
+                ).map(
+                  (assigned, id) => fromJS({
+                    path: activeEditOption.path,
+                    id,
+                    saveRef: entity.get('id'),
+                  })
+                ).toList();
+              }
+            } else {
+              // create connections
+              if (creates.size > 0) {
+                // exclude existing relations from the changeSet
+                entityCreates = !!existingAssignments && existingAssignments.size > 0
+                  ? creates.filter(
+                    (id) => !existingAssignments.includes(parseInt(id, 10))
+                  )
+                  : creates;
+                entityCreates = entityCreates.map(
+                  (id) => fromJS({
+                    path: activeEditOption.path,
+                    entity: {
+                      attributes: {
+                        [activeEditOption.ownKey]: entity.get('id'),
+                        [activeEditOption.key]: id,
+                      },
+                    },
+                    saveRef: entity.get('id'),
+                  })
+                );
+              }
+              // delete connections
+              if (
+                deletes.size > 0
+                && !!existingAssignments
+                && existingAssignments.size > 0
+              ) {
+                entityDeletes = existingAssignments.filter(
+                  (assigned) => deletes.includes(assigned.toString())
+                ).map(
+                  (assigned, id) => fromJS({
+                    path: activeEditOption.path,
+                    id,
+                    saveRef: entity.get('id'),
+                  })
+                ).toList();
+              }
             }
             return memo
               .set('creates', memo.get('creates').concat(entityCreates))
@@ -804,22 +863,6 @@ function mapDispatchToProps(dispatch, props) {
             updates.get('deletes').toJS(),
           ));
         }
-        // entityCreates.forEach((id) => dispatch(newConnection({
-        //   path: activeEditOption.path,
-        //   entity: {
-        //     attributes: {
-        //       [activeEditOption.ownKey]: entity.get('id'),
-        //       [activeEditOption.key]: id,
-        //     },
-        //   },
-        //   saveRef: entity.get('id'),
-        // })));
-        // existingAssignments
-        //   .forEach((assigned, id) => dispatch(deleteConnection({
-        //     path: activeEditOption.path,
-        //     id,
-        //     saveRef: entity.get('id'),
-        //   })));
       }
     },
   };

@@ -18,6 +18,7 @@ import {
   selectReady,
   selectUserActionsGroupedByUser,
   selectUserActorsGroupedByUser,
+  selectRoleQuery,
 } from 'containers/App/selectors';
 import { USER_ROLES, API } from 'themes/config';
 
@@ -107,22 +108,26 @@ const selectUsersNested = createSelector(
           );
           const userActions = actionAssociationsGrouped.get(parseInt(entity.get('id'), 10));
           const userActors = actorAssociationsGrouped.get(parseInt(entity.get('id'), 10));
+          const userCategories = entityCategories && entityCategories.filter(
+            (association) => qe(
+              association.getIn(['attributes', 'user_id']),
+              entity.get('id')
+            )
+          ).map(
+            (association) => association.getIn(['attributes', 'category_id'])
+          );
 
           return entity.set(
             'categories',
-            entityCategories && entityCategories.filter(
-              (association) => qe(
-                association.getIn(['attributes', 'user_id']),
-                entity.get('id')
-              )
-            ).map(
-              (association) => association.getIn(['attributes', 'category_id'])
-            )
+            userCategories,
           ).set(
             'roles',
             entityHighestRoleId !== USER_ROLES.DEFAULT.value
               ? Map({ 0: entityHighestRoleId })
               : Map()
+          ).set(
+            'allRoles',
+            entityRoleIds,
           ).set(
             'actions',
             userActions
@@ -188,8 +193,15 @@ const selectUsersByActors = createSelector(
     ? filterEntitiesByConnection(entities, query, 'actors')
     : entities
 );
-const selectUsersByCategories = createSelector(
+const selectUsersByRole = createSelector(
   selectUsersByActors,
+  selectRoleQuery,
+  (entities, query) => query
+    ? filterEntitiesByConnection(entities, query, 'roles')
+    : entities
+);
+const selectUsersByCategories = createSelector(
+  selectUsersByRole,
   selectCategoryQuery,
   (entities, query) => query
     ? filterEntitiesByCategories(entities, query)

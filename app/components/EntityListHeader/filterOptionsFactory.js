@@ -69,6 +69,7 @@ export const makeActiveFilterOptions = ({
       );
     case 'users':
     case 'indicators':
+    case 'roles':
       return makeConnectionFilterOptions(
         entities,
         config.connections,

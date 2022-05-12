@@ -1089,6 +1089,10 @@ export default defineMessages({
       id: 'app.containers.App.nav.actorUsers',
       defaultMessage: 'Actors assigned to',
     },
+    roles: {
+      id: 'app.containers.App.nav.roles',
+      defaultMessage: 'Roles',
+    },
     bookmarks: {
       id: 'app.containers.App.nav.bookmarks',
       defaultMessage: 'Bookmarks',

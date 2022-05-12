@@ -1,5 +1,5 @@
 // import { API, USER_ROLES, ROUTES } from 'themes/config';
-import { API, ROUTES } from 'themes/config';
+import { API, ROUTES, USER_ROLES } from 'themes/config';
 
 export const DEPENDENCIES = [
   API.USERS,
@@ -73,6 +73,19 @@ export const CONFIG = {
       key: 'actor_id',
       ownKey: 'user_id',
       groupByType: true,
+    },
+    roles: {
+      query: 'role',
+      type: 'user-roles',
+      search: false,
+      message: 'entities.roles.single',
+      entityType: 'roles',
+      path: 'roles',
+      key: 'role_id',
+      ownKey: 'user_id',
+      connectPath: API.USER_ROLES, // filter by actor connection
+      single: true,
+      labels: Object.values(USER_ROLES),
     },
   },
 };
