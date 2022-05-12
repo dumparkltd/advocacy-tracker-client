@@ -54,7 +54,7 @@ const Reset = styled(ButtonSimple)`
   }
   margin-right: 20px;
   font-weight: 500;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 0 0.5em 0 0;
   }
   @media print {

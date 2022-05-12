@@ -35,7 +35,7 @@ const GroupTitle = styled.div`
   font-size: 0.6em;
   font-weight: 500;
   padding: 0.8em 8px 0.4em 16px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     font-size: 0.7em;
   }
   @media print {

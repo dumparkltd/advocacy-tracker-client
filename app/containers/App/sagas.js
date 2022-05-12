@@ -37,11 +37,14 @@ import {
   CLOSE_ENTITY,
   DISMISS_QUERY_MESSAGES,
   SET_ACTIONTYPE,
+  SET_ACTORTYPE,
   SET_VIEW,
+  SET_SUBJECT,
   SET_MAPSUBJECT,
   OPEN_BOOKMARK,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
+  SET_INCLUDE_MEMBERS_FORFILTERS,
 } from 'containers/App/constants';
 
 import {
@@ -169,7 +172,7 @@ export function* loadEntitiesSaga({ path }) {
           // Clear the request time on error, This will cause us to try again next time, which we probably want to do?
           yield put(entitiesRequested(path, false));
           // throw error
-          throw new Error(err);
+          throw new Error((err.response && err.response.status) || err);
         }
       } else {
         // console.log('error: not signedin', )
@@ -729,7 +732,7 @@ const getNextQuery = (query, extend, location) => {
     // if set and removing
     } else if (queryUpdated[param.arg] && param.value && param.replace) {
       queryUpdated[param.arg] = param.value;
-    } else if (queryUpdated[param.arg] && param.remove) {
+    } else if (queryUpdated[param.arg] && (param.remove || typeof param.value === 'undefined')) {
       delete queryUpdated[param.arg];
     // if not set or replacing with new value
     } else if (typeof param.value !== 'undefined' && !param.remove) {
@@ -768,11 +771,25 @@ export function* setActortypeSaga({ actortype }) {
     {
       arg: 'actortype',
       value: actortype,
+      replace: true,
     },
     true, // extend
     location,
   );
 
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
+export function* setActiontypeSaga({ actiontype }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'actiontype',
+      value: actiontype,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
 export function* setViewSaga({ view }) {
@@ -792,7 +809,20 @@ export function* setMapSubjectSaga({ subject }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
     {
-      arg: 'ms',
+      arg: 'msubj',
+      value: subject,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
+export function* setSubjectSaga({ subject }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'subj',
       value: subject,
       replace: true,
     },
@@ -827,7 +857,19 @@ export function* setIncludeTargetMembersSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
-
+export function* setIncludeMembersForFilterSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'fm',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
 export function* openBookmarkSaga({ bookmark }) {
   const path = bookmark.getIn(['attributes', 'view', 'path']);
   const queryString = getNextQueryString(
@@ -920,11 +962,14 @@ export default function* rootSaga() {
   yield takeLatest(REDIRECT_IF_NOT_PERMITTED, checkRoleSaga);
   yield takeEvery(UPDATE_ROUTE_QUERY, updateRouteQuerySaga);
   yield takeEvery(UPDATE_PATH, updatePathSaga);
-  yield takeEvery(SET_ACTIONTYPE, setActortypeSaga);
+  yield takeEvery(SET_ACTORTYPE, setActortypeSaga);
+  yield takeEvery(SET_ACTIONTYPE, setActiontypeSaga);
   yield takeEvery(SET_VIEW, setViewSaga);
+  yield takeEvery(SET_SUBJECT, setSubjectSaga);
   yield takeEvery(SET_MAPSUBJECT, setMapSubjectSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_MEMBERS, setIncludeActorMembersSaga);
   yield takeEvery(SET_INCLUDE_TARGET_MEMBERS, setIncludeTargetMembersSaga);
+  yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
   yield takeEvery(OPEN_BOOKMARK, openBookmarkSaga);
   yield takeEvery(DISMISS_QUERY_MESSAGES, dismissQueryMessagesSaga);
 

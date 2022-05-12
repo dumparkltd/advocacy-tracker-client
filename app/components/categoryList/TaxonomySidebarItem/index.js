@@ -23,10 +23,10 @@ const Styled = styled(Button)`
     background-color: ${(props) => props.active ? palette('asideListItemHover', 3) : palette('asideListItemHover', 2)};
     border-bottom-color: ${palette('asideListItemHover', 4)}
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding:  ${({ small }) => small ? '0.15em 8px 0.15em 24px' : '0.3em 8px 0.3em 12px'};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
     padding:  ${({ small }) => small ? '0.25em 8px 0.25em 32px' : '0.5em 8px 0.5em 16px'};
   }
 `;

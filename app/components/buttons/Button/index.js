@@ -6,7 +6,7 @@ import styled from 'styled-components';
 
 const Button = styled.button`
   display: inline-block;
-  padding: 4px 6px;
+  padding: 4px 8px;
   cursor: ${(props) => props.disabled ? 'default' : 'pointer'};
   font-size: ${(props) => props.small ? 0.8 : 0.9}em;
   text-align: center;
@@ -17,7 +17,7 @@ const Button = styled.button`
   background-image: none;
   border: none;
   border-radius: 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     font-size: ${(props) => props.small ? 0.9 : 1}em;
     padding: 6px 12px;
   }

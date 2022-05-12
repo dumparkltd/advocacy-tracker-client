@@ -94,6 +94,10 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-parents',
       defaultMessage: 'By parent activity',
     },
+    'connections-action-children': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-children',
+      defaultMessage: 'By child activity',
+    },
     'connections-action-resources': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-resources',
       defaultMessage: 'By resource',
@@ -112,11 +116,11 @@ export default defineMessages({
     },
     'connections-action-users': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-users',
-      defaultMessage: 'By user',
+      defaultMessage: 'By assigned user',
     },
     'connections-actor-users': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-actor-users',
-      defaultMessage: 'By user',
+      defaultMessage: 'By assigned user',
     },
     'connections-user-actions': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-user-actions',
@@ -176,13 +180,37 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.editGroupLabel.connections-indicator-actions',
       defaultMessage: 'Update activities',
     },
+    'connections-action-indicators': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-indicators',
+      defaultMessage: 'Update country positions',
+    },
     'connections-action-users': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-action-users',
-      defaultMessage: 'Update users',
+      defaultMessage: 'Update user assignments',
     },
     'connections-actor-users': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-actor-users',
-      defaultMessage: 'Update users',
+      defaultMessage: 'Update users assignments',
+    },
+    'connections-user-actions': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-user-actions',
+      defaultMessage: 'Update activity assignments',
+    },
+    'connections-user-actors': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-user-actors',
+      defaultMessage: 'Update actor assignments',
+    },
+    'connections-user-roles': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-user-actors',
+      defaultMessage: 'Update user roles',
+    },
+    'connections-action-parents': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-action-parents',
+      defaultMessage: 'Update parent activities',
+    },
+    'connections-action-children': {
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-action-children',
+      defaultMessage: 'Update child activities',
     },
   },
   filterFormTitlePrefix: {
@@ -191,7 +219,11 @@ export default defineMessages({
   },
   filterFormWithoutPrefix: {
     id: 'app.components.EntityListHeader.filterFormWithoutPrefix',
-    defaultMessage: 'Without',
+    defaultMessage: 'Without any',
+  },
+  filterFormAnyPrefix: {
+    id: 'app.components.EntityListHeader.filterFormAnyPrefix',
+    defaultMessage: 'With some',
   },
   editFormTitlePrefix: {
     id: 'app.components.EntityListHeader.editFormTitlePrefix',

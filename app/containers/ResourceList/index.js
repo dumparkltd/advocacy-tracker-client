@@ -17,6 +17,7 @@ import {
   selectIsUserAnalyst,
   selectResourcetypes,
   selectActiontypesForResourcetype,
+  selectResourcetypeResources,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -47,7 +48,7 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
 
   prepareTypeOptions = (types, activeId) => {
     const { intl } = this.context;
-    return Object.values(types.toJS()).map((type) => ({
+    return types.toList().toJS().map((type) => ({
       value: type.id,
       label: intl.formatMessage(appMessages.resourcetypes[type.id]),
       active: activeId === type.id,
@@ -68,6 +69,7 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
       actiontypes,
       resourcetypes,
       onSelectType,
+      allEntities,
     } = this.props;
     const typeId = params.id;
     const type = `resources_${typeId}`;
@@ -93,19 +95,17 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
     if (isManager) {
       headerOptions.actions.push({
         type: 'text',
-        title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(),
+        title: 'Create new',
+        onClick: () => this.props.handleNew(typeId),
+        icon: 'add',
+        isManager,
       });
       headerOptions.actions.push({
-        type: 'add',
-        title: [
-          intl.formatMessage(appMessages.buttons.add),
-          {
-            title: intl.formatMessage(appMessages.entities[type].single),
-            hiddenSmall: true,
-          },
-        ],
-        onClick: () => this.props.handleNew(typeId),
+        type: 'text',
+        title: intl.formatMessage(appMessages.buttons.import),
+        onClick: () => this.props.handleImport(),
+        icon: 'import',
+        isManager,
       });
     }
 
@@ -120,9 +120,10 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
         />
         <EntityList
           entities={entities}
+          allEntityCount={allEntities && allEntities.size}
           connections={connections}
           config={CONFIG}
-          header={headerOptions}
+          headerOptions={headerOptions}
           dataReady={dataReady}
           entityTitle={{
             single: intl.formatMessage(appMessages.entities[type].single),
@@ -156,6 +157,7 @@ ResourceList.propTypes = {
   location: PropTypes.object,
   isAnalyst: PropTypes.bool,
   params: PropTypes.object,
+  allEntities: PropTypes.instanceOf(Map),
 };
 
 ResourceList.contextTypes = {
@@ -171,6 +173,7 @@ const mapStateToProps = (state, props) => ({
   isAnalyst: selectIsUserAnalyst(state),
   actiontypes: selectActiontypesForResourcetype(state, { type: props.params.id }),
   resourcetypes: selectResourcetypes(state),
+  allEntities: selectResourcetypeResources(state, { type: props.params.id }),
 });
 
 function mapDispatchToProps(dispatch) {

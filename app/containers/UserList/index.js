@@ -22,6 +22,8 @@ import {
   selectUserTaxonomies,
   selectActiontypesForUsers,
   selectActortypesForUsers,
+  // selectIsUserManager,
+  selectIsUserAnalyst,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -50,11 +52,34 @@ export class UserList extends React.PureComponent { // eslint-disable-line react
 
   render() {
     const { intl } = this.context;
-    const { dataReady, actortypes, actiontypes } = this.props;
+    const {
+      dataReady,
+      actortypes,
+      actiontypes,
+      // isManager,
+      isAnalyst,
+    } = this.props;
+    const type = 'users';
     const headerOptions = {
       supTitle: intl.formatMessage(messages.pageTitle),
-      icon: 'users',
+      actions: [],
     };
+    if (isAnalyst) {
+      headerOptions.actions.push({
+        type: 'bookmarker',
+        title: intl.formatMessage(appMessages.entities[type].plural),
+        entityType: type,
+      });
+    }
+    if (window.print) {
+      headerOptions.actions.push({
+        type: 'icon',
+        onClick: () => window.print(),
+        title: 'Print',
+        icon: 'print',
+      });
+    }
+
     return (
       <div>
         <Helmet
@@ -63,22 +88,24 @@ export class UserList extends React.PureComponent { // eslint-disable-line react
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
-        <EntityList
-          entities={this.props.entities}
-          taxonomies={this.props.taxonomies}
-          connections={this.props.connections}
-          config={CONFIG}
-          header={headerOptions}
-          dataReady={dataReady}
-          canEdit={false}
-          entityTitle={{
-            single: intl.formatMessage(appMessages.entities.users.single),
-            plural: intl.formatMessage(appMessages.entities.users.plural),
-          }}
-          locationQuery={fromJS(this.props.location.query)}
-          actiontypes={actiontypes}
-          actortypes={actortypes}
-        />
+        {dataReady && (
+          <EntityList
+            entities={this.props.entities}
+            taxonomies={this.props.taxonomies}
+            connections={this.props.connections}
+            config={CONFIG}
+            headerOptions={headerOptions}
+            dataReady={dataReady}
+            includeHeader={false}
+            entityTitle={{
+              single: intl.formatMessage(appMessages.entities.users.single),
+              plural: intl.formatMessage(appMessages.entities.users.plural),
+            }}
+            locationQuery={fromJS(this.props.location.query)}
+            actiontypes={actiontypes}
+            actortypes={actortypes}
+          />
+        )}
       </div>
     );
   }
@@ -95,6 +122,8 @@ UserList.propTypes = {
   location: PropTypes.object,
   actiontypes: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
+  // isManager: PropTypes.bool,
+  isAnalyst: PropTypes.bool,
 };
 
 UserList.contextTypes = {
@@ -109,6 +138,8 @@ const mapStateToProps = (state, props) => ({
   connections: selectUserConnections(state),
   actiontypes: selectActiontypesForUsers(state),
   actortypes: selectActortypesForUsers(state),
+  // isManager: selectIsUserManager(state),
+  isAnalyst: selectIsUserAnalyst(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

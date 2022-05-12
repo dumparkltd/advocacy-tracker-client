@@ -116,6 +116,11 @@ export class UserRegister extends React.PureComponent { // eslint-disable-line r
                 <Icon name="arrowRight" text size="1.5em" sizes={{ mobile: '1em' }} />
               </A>
             </p>
+            <p>
+              <i>
+                <FormattedMessage {...messages.registerHint} />
+              </i>
+            </p>
           </BottomLinks>
         </ContentNarrow>
       </div>

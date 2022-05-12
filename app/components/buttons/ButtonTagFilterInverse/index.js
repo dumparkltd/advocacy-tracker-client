@@ -13,7 +13,7 @@ const ButtonTagFilterInverse = styled(ButtonTagFilter)`
     color: ${(props) => palette(props.paletteHover, props.pIndex || 0)};
     background-color: ${palette('buttonInverseHover', 1)};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 1px 6px;
     font-size: 0.85em;
   }

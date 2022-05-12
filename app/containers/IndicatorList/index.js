@@ -74,20 +74,16 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
     }
     if (isManager) {
       headerOptions.actions.push({
-        type: 'text',
-        title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(),
+        title: 'Create new',
+        onClick: () => this.props.handleNew(),
+        icon: 'add',
+        isManager,
       });
       headerOptions.actions.push({
-        type: 'add',
-        title: [
-          intl.formatMessage(appMessages.buttons.add),
-          {
-            title: intl.formatMessage(appMessages.entities[type].single),
-            hiddenSmall: true,
-          },
-        ],
-        onClick: () => this.props.handleNew(),
+        title: intl.formatMessage(appMessages.buttons.import),
+        onClick: () => this.props.handleImport(),
+        icon: 'import',
+        isManager,
       });
     }
     return (
@@ -102,7 +98,7 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
           entities={entities}
           connections={connections}
           config={CONFIG}
-          header={headerOptions}
+          headerOptions={headerOptions}
           dataReady={dataReady}
           entityTitle={{
             single: intl.formatMessage(appMessages.entities.indicators.single),

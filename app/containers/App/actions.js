@@ -61,11 +61,14 @@ import {
   SUBMIT_INVALID,
   DISMISS_QUERY_MESSAGES,
   SET_ACTIONTYPE,
+  SET_ACTORTYPE,
   OPEN_BOOKMARK,
   SET_VIEW,
+  SET_SUBJECT,
   SET_MAPSUBJECT,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
+  SET_INCLUDE_MEMBERS_FORFILTERS,
 } from './constants';
 
 export function submitInvalid(valid) {
@@ -447,14 +450,26 @@ export function dismissQueryMessages() {
 
 export function setActortype(actortype) {
   return {
-    type: SET_ACTIONTYPE,
+    type: SET_ACTORTYPE,
     actortype,
+  };
+}
+export function setActiontype(actiontype) {
+  return {
+    type: SET_ACTIONTYPE,
+    actiontype,
   };
 }
 export function setView(view) {
   return {
     type: SET_VIEW,
     view,
+  };
+}
+export function setSubject(subject) {
+  return {
+    type: SET_SUBJECT,
+    subject,
   };
 }
 export function setMapSubject(subject) {
@@ -472,6 +487,12 @@ export function setIncludeActorMembers(value) {
 export function setIncludeTargetMembers(value) {
   return {
     type: SET_INCLUDE_TARGET_MEMBERS,
+    value,
+  };
+}
+export function setIncludeMembersForFiltering(value) {
+  return {
+    type: SET_INCLUDE_MEMBERS_FORFILTERS,
     value,
   };
 }

@@ -120,6 +120,36 @@ export default defineMessages({
       defaultMessage: 'Actortype 5',
     },
   },
+  actortypes_info: {
+    1: {
+      id: 'app.containers.App.actortypes_info.1',
+      defaultMessage: 'In some cases country memberships/actors are not displayed in international frameworks and policies due to difficulty in retrieving information and potential inconsistencies through updates (e.g. regarding ratifications, etc.).',
+    },
+    2: {
+      id: 'app.containers.App.actortypes_info.2',
+      defaultMessage: 'The linking of institutions with activities, initiatives, etc. is partially shown in this mapping tool. For a comprehensive overview, institutions are also listed, but not linked to actors, etc., as they only contribute to plastic pollution prevention in general. It is continuously updated, especially with regard to regional contexts. ',
+    },
+    3: {
+      id: 'app.containers.App.actortypes_info.3',
+      defaultMessage: 'Actortype 3',
+    },
+    4: {
+      id: 'app.containers.App.actortypes_info.4',
+      defaultMessage: 'The naming and classifications of regions in this mapping tool is for informational purposes only and do not constitute recognition of international boundaries or regions.',
+    },
+    5: {
+      id: 'app.containers.App.actortypes_info.5',
+      defaultMessage: 'Actortype 5',
+    },
+    6: {
+      id: 'app.containers.App.actortypes_info.6',
+      defaultMessage: 'Actortype 6',
+    },
+    7: {
+      id: 'app.containers.App.actortypes_info.7',
+      defaultMessage: 'Actortype 7',
+    },
+  },
   actortypeGroups: {
     1: {
       id: 'app.containers.App.actortypeGroups.1',
@@ -285,6 +315,10 @@ export default defineMessages({
       id: 'app.containers.App.actiontypes.6',
       defaultMessage: 'Actortype 6',
     },
+    7: {
+      id: 'app.containers.App.actiontypes.7',
+      defaultMessage: 'Actortype 7',
+    },
   },
   actiontypes_short: {
     common: {
@@ -315,6 +349,10 @@ export default defineMessages({
       id: 'app.containers.App.actiontypes_short.6',
       defaultMessage: 'Actortype 6',
     },
+    7: {
+      id: 'app.containers.App.actiontypes_short.7',
+      defaultMessage: 'Actortype 7',
+    },
   },
   actiontypes_long: {
     1: {
@@ -323,7 +361,7 @@ export default defineMessages({
     },
     2: {
       id: 'app.containers.App.actiontypes_long.2',
-      defaultMessage: 'Events',
+      defaultMessage: 'SDGs',
     },
     3: {
       id: 'app.containers.App.actiontypes_long.3',
@@ -341,6 +379,10 @@ export default defineMessages({
       id: 'app.containers.App.actiontypes_long.6',
       defaultMessage: 'Actortype 6',
     },
+    7: {
+      id: 'app.containers.App.actiontypes_long.7',
+      defaultMessage: 'Actortype 7',
+    },
   },
   actiontypes_about: {
     1: {
@@ -349,7 +391,7 @@ export default defineMessages({
     },
     2: {
       id: 'app.containers.App.actiontypes_about.2',
-      defaultMessage: 'Events',
+      defaultMessage: 'SDGs',
     },
     3: {
       id: 'app.containers.App.actiontypes_about.3',
@@ -366,6 +408,40 @@ export default defineMessages({
     6: {
       id: 'app.containers.App.actiontypes_about.6',
       defaultMessage: 'Actortype 6',
+    },
+    7: {
+      id: 'app.containers.App.actiontypes_about.7',
+      defaultMessage: 'Actortype 7',
+    },
+  },
+  actiontypes_info: {
+    1: {
+      id: 'app.containers.App.actiontypes_info.1',
+      defaultMessage: 'In some cases country memberships/actors are not displayed in international frameworks and policies due to difficulty in retrieving information and potential inconsistencies through updates (e.g. regarding ratifications, etc.).',
+    },
+    2: {
+      id: 'app.containers.App.actiontypes_info.2',
+      defaultMessage: 'SDGs',
+    },
+    3: {
+      id: 'app.containers.App.actiontypes_info.3',
+      defaultMessage: 'Actortype 3',
+    },
+    4: {
+      id: 'app.containers.App.actiontypes_info.4',
+      defaultMessage: 'Actortype 4',
+    },
+    5: {
+      id: 'app.containers.App.actiontypes_info.5',
+      defaultMessage: 'The term **donor** may also refer to other actors responsible for conducting the donor activity, such as **implementing partners**. A more detailed differentiation of different "donor" types is currently under development.',
+    },
+    6: {
+      id: 'app.containers.App.actiontypes_info.6',
+      defaultMessage: 'Actortype 6',
+    },
+    7: {
+      id: 'app.containers.App.actiontypes_info.7',
+      defaultMessage: 'Actortype 7',
     },
   },
   actiontypeGroups: {
@@ -603,7 +679,7 @@ export default defineMessages({
     },
     title: {
       id: 'app.containers.App.importFields.title',
-      defaultMessage: 'Title/Name',
+      defaultMessage: 'Title',
     },
     description: {
       id: 'app.containers.App.importFields.description',
@@ -761,6 +837,10 @@ export default defineMessages({
       id: 'app.containers.App.attributes.url',
       defaultMessage: 'Website',
     },
+    date: {
+      id: 'app.containers.App.attributes.date',
+      defaultMessage: 'Date',
+    },
     date_start: {
       id: 'app.containers.App.attributes.date_start',
       defaultMessage: 'Date',
@@ -855,7 +935,7 @@ export default defineMessages({
     },
     parent_id: {
       id: 'app.containers.App.attributes.parent_id',
-      defaultMessage: 'Parent',
+      defaultMessage: 'Predecessor',
     },
     manager_id: {
       categories: {
@@ -898,6 +978,16 @@ export default defineMessages({
       defaultMessage: 'Status',
     },
   },
+  attributeInfo: {
+    gdp: {
+      id: 'app.containers.App.attributeInfo.gdp',
+      defaultMessage: 'gdp',
+    },
+    population: {
+      id: 'app.containers.App.attributeInfo.population',
+      defaultMessage: 'population',
+    },
+  },
   nav: {
     overview: {
       id: 'app.containers.App.nav.overview',
@@ -914,6 +1004,10 @@ export default defineMessages({
     actions: {
       id: 'app.containers.App.nav.actions',
       defaultMessage: 'Actions',
+    },
+    actionsMembers: {
+      id: 'app.containers.App.nav.actionsMembers',
+      defaultMessage: 'Activities as member',
     },
     targetingActions: {
       id: 'app.containers.App.nav.targetingActions',
@@ -943,6 +1037,10 @@ export default defineMessages({
       id: 'app.containers.App.nav.targets',
       defaultMessage: 'Targets',
     },
+    targetingActionsAsMember: {
+      id: 'app.containers.App.nav.targetingActionsAsMember',
+      defaultMessage: 'Targeted by (as member)',
+    },
     members: {
       id: 'app.containers.App.nav.members',
       defaultMessage: 'Members',
@@ -951,13 +1049,21 @@ export default defineMessages({
       id: 'app.containers.App.nav.parent',
       defaultMessage: 'Parent',
     },
+    parents: {
+      id: 'app.containers.App.nav.parents',
+      defaultMessage: 'Parent activities',
+    },
+    children: {
+      id: 'app.containers.App.nav.children',
+      defaultMessage: 'Child activities',
+    },
     attributes: {
       id: 'app.containers.App.nav.attributes',
       defaultMessage: 'Attributes',
     },
     associations: {
       id: 'app.containers.App.nav.associations',
-      defaultMessage: 'Member of',
+      defaultMessage: 'Associations',
     },
     pages: {
       id: 'app.containers.App.nav.pages',
@@ -1200,7 +1306,7 @@ export default defineMessages({
     actions: {
       parent: {
         id: 'app.containers.App.entities.actions.parent',
-        defaultMessage: 'Parent activity',
+        defaultMessage: 'Predecessor activity',
       },
       children: {
         id: 'app.containers.App.entities.actions.children',
@@ -1420,6 +1526,36 @@ export default defineMessages({
       },
       empty: {
         id: 'app.containers.App.entities.actions_6.empty',
+        defaultMessage: 'No actors yet',
+      },
+    },
+    actions_7: {
+      single: {
+        id: 'app.containers.App.entities.actions_7.single',
+        defaultMessage: 'Actor',
+      },
+      plural: {
+        id: 'app.containers.App.entities.actions_7.plural',
+        defaultMessage: 'Actors',
+      },
+      singleLong: {
+        id: 'app.containers.App.entities.actions_7.singleLong',
+        defaultMessage: 'Actor',
+      },
+      pluralLong: {
+        id: 'app.containers.App.entities.actions_7.pluralLong',
+        defaultMessage: 'Actors',
+      },
+      singleShort: {
+        id: 'app.containers.App.entities.actions_7.singleShort',
+        defaultMessage: 'Actor',
+      },
+      pluralShort: {
+        id: 'app.containers.App.entities.actions_7.pluralShort',
+        defaultMessage: 'Actors',
+      },
+      empty: {
+        id: 'app.containers.App.entities.actions_7.empty',
         defaultMessage: 'No actors yet',
       },
     },
@@ -1651,6 +1787,10 @@ export default defineMessages({
       plural: {
         id: 'app.containers.App.entities.users.plural',
         defaultMessage: 'Users',
+      },
+      empty: {
+        id: 'app.containers.App.entities.users.empty',
+        defaultMessage: 'No users assigned yet',
       },
     },
     bookmarks: {
@@ -2028,6 +2168,32 @@ export default defineMessages({
           defaultMessage: 'About tax 13',
         },
       },
+      14: {
+        single: {
+          id: 'app.containers.App.entities.taxonomies.14.single',
+          defaultMessage: 'Taxonomy 14',
+        },
+        plural: {
+          id: 'app.containers.App.entities.taxonomies.14.plural',
+          defaultMessage: 'Taxonomy 14',
+        },
+        empty: {
+          id: 'app.containers.App.entities.taxonomies.14.empty',
+          defaultMessage: 'No Taxonomy 14 assigned yet',
+        },
+        shortSingle: {
+          id: 'app.containers.App.entities.taxonomies.14.shortSingle',
+          defaultMessage: 'Taxonomy 14',
+        },
+        shortPlural: {
+          id: 'app.containers.App.entities.taxonomies.14.shortPlural',
+          defaultMessage: 'Taxonomy 14',
+        },
+        description: {
+          id: 'app.containers.App.entities.taxonomies.13.description',
+          defaultMessage: 'About tax 14',
+        },
+      },
     },
     categories: {
       single: {
@@ -2096,7 +2262,7 @@ export default defineMessages({
       },
       analyst: {
         id: 'app.containers.App.ui.userRoles.analyst',
-        defaultMessage: 'Analyst',
+        defaultMessage: 'Staff',
       },
       default: {
         id: 'app.containers.App.ui.userRoles.default',

@@ -16,8 +16,8 @@ import {
   selectActiontypes,
   selectActorTaxonomies,
   selectActorsCategorised,
-  selectResources,
   selectIndicators,
+  selectResources,
   selectResourcetypes,
   selectUsers,
 } from 'containers/App/selectors';
@@ -29,26 +29,16 @@ export const selectDomain = createSelector(
   (substate) => substate
 );
 
-// export const selectParentOptions = createSelector(
-//   (state, id) => id,
-//   selectActions,
-//   selectActiontypes,
-//   (actiontypeId, actions, actiontypes) => {
-//     if (actiontypeId && actions && actiontypes) {
-//       const type = actiontypes.find((at) => qe(actiontypeId, at.get('id')));
-//       if (type && type.getIn(['attributes', 'has_parent'])) {
-//         return actions.filter((action) => {
-//           const sameType = qe(actiontypeId, action.getIn(['attributes', 'measuretype_id']));
-//           // const hasParent = action.getIn(['attributes', 'parent_id']);
-//           // todo: avoid circular dependencies
-//           return sameType;
-//         });
-//       }
-//       return null;
-//     }
-//     return null;
-//   }
-// );
+export const selectIndicatorOptions = createSelector(
+  (state, id) => id,
+  selectIndicators,
+  (actiontypeId, indicators) => {
+    if (INDICATOR_ACTIONTYPES.indexOf(actiontypeId) > -1) {
+      return indicators;
+    }
+    return null;
+  }
+);
 
 export const selectConnectedTaxonomies = createSelector(
   selectActorTaxonomies,
@@ -124,6 +114,7 @@ export const selectResourcesByResourcetype = createSelector(
     ));
   }
 );
+
 export const selectTopActionsByActiontype = createSelector(
   (state, id) => id,
   selectActions,
@@ -165,17 +156,6 @@ export const selectSubActionsByActiontype = createSelector(
         action.getIn(['attributes', 'measuretype_id']),
       )
     ));
-  }
-);
-
-export const selectIndicatorOptions = createSelector(
-  (state, id) => id,
-  selectIndicators,
-  (actiontypeId, indicators) => {
-    if (INDICATOR_ACTIONTYPES.indexOf(actiontypeId) > -1) {
-      return indicators;
-    }
-    return null;
   }
 );
 export const selectUserOptions = createSelector(

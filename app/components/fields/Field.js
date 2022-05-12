@@ -11,7 +11,7 @@ const Field = styled.div`
     }
     return 15;
   }}px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding-bottom: ${(props) => {
     if (props.nested || props.noPadding) {
       return 0;

@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
-import { API } from 'themes/config';
+import { API, ACTORTYPES_CONFIG } from 'themes/config';
 
 import {
   selectReady,
@@ -22,6 +22,9 @@ import {
   selectActorActionsGroupedByActor,
   selectActionActorsGroupedByActor,
   selectActorCategoriesGroupedByActor,
+  selectActorActionsGroupedByActionAttributes,
+  selectMembershipsGroupedByMember,
+  selectMembershipsGroupedByAssociation,
 } from 'containers/App/selectors';
 
 import {
@@ -47,7 +50,7 @@ export const selectViewEntity = createSelector(
   )
 );
 
-export const selectTaxonomies = createSelector(
+export const selectViewTaxonomies = createSelector(
   (state, id) => id,
   (state) => selectTaxonomiesSorted(state),
   selectCategories,
@@ -82,29 +85,45 @@ export const selectActorsByType = createSelector(
   selectActorConnections,
   selectActorActionsGroupedByActor,
   selectActionActorsGroupedByActor,
+  selectActorActionsGroupedByActionAttributes,
+  selectMembershipsGroupedByMember,
+  selectMembershipsGroupedByAssociation,
   selectActorCategoriesGroupedByActor,
   selectCategories,
   (
     ready,
     actors,
     actorConnections,
-    actorActions,
-    actionActors,
+    actorActionsByActionFull,
+    actorActionsByActor,
+    actionActorsByActor,
+    memberships,
+    associations,
     actorCategories,
     categories,
   ) => {
     if (!ready) return Map();
-    return actors && actors
+    const actorsWithConnections = actors && actors
       .map((actor) => setActorConnections({
         actor,
         actorConnections,
-        actorActions,
-        actionActors,
+        actorActions: actorActionsByActor,
+        actionActors: actionActorsByActor,
         categories,
         actorCategories,
-      }))
+        memberships,
+        associations,
+      }));
+    return actorsWithConnections && actorsWithConnections
       .groupBy((r) => r.getIn(['attributes', 'actortype_id']))
-      .sortBy((val, key) => key);
+      .sortBy(
+        (val, key) => key,
+        (a, b) => {
+          const configA = ACTORTYPES_CONFIG[a];
+          const configB = ACTORTYPES_CONFIG[b];
+          return configA.order < configB.order ? -1 : 1;
+        }
+      );
   }
 );
 

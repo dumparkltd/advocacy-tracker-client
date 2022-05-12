@@ -1,11 +1,10 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
 import {
-  selectResourcesSearchQuery,
+  selectResourcesWhereQuery,
   selectWithoutQuery,
+  selectAnyQuery,
   selectActionQuery,
-  selectSortByQuery,
-  selectSortOrderQuery,
   selectActions,
   // selectResources,
   selectReady,
@@ -17,13 +16,13 @@ import {
 import {
   filterEntitiesByConnection,
   filterEntitiesWithoutAssociation,
+  filterEntitiesWithAnyAssociation,
   entitiesSetCategoryIds,
 } from 'utils/entities';
 // import { qe } from 'utils/quasi-equals';
 
-import { sortEntities, getSortOption } from 'utils/sort';
 import { API } from 'themes/config';
-import { CONFIG, DEPENDENCIES } from './constants';
+import { DEPENDENCIES } from './constants';
 
 export const selectConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
@@ -96,10 +95,7 @@ export const selectConnections = createSelector(
 
 const selectResourcesWithActions = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  (state, args) => selectResourcesSearchQuery(state, {
-    searchAttributes: CONFIG.views.list.search || ['code', 'title'],
-    ...args,
-  }),
+  selectResourcesWhereQuery,
   selectConnections,
   selectActionResourcesGroupedByResource, // as targets
   (
@@ -148,8 +144,16 @@ const selectResourcesWithout = createSelector(
     ? filterEntitiesWithoutAssociation(entities, categories, query)
     : entities
 );
-const selectResourcesByConnections = createSelector(
+const selectResourcesAny = createSelector(
   selectResourcesWithout,
+  selectCategories,
+  selectAnyQuery,
+  (entities, categories, query) => query
+    ? filterEntitiesWithAnyAssociation(entities, categories, query)
+    : entities
+);
+const selectResourcesByConnections = createSelector(
+  selectResourcesAny,
   selectActionQuery,
   (entities, query) => query
     ? filterEntitiesByConnection(entities, query, 'actions')
@@ -164,15 +168,5 @@ const selectResourcesByConnections = createSelector(
 // 6. selectActorsByCategories will filter by specific categories
 export const selectListResources = createSelector(
   selectResourcesByConnections,
-  selectSortByQuery,
-  selectSortOrderQuery,
-  (entities, sort, order) => {
-    const sortOption = getSortOption(CONFIG.views.list.sorting, sort);
-    return sortEntities(
-      entities,
-      order || (sortOption ? sortOption.order : 'desc'),
-      sort || (sortOption ? sortOption.attribute : 'id'),
-      sortOption ? sortOption.type : 'string'
-    );
-  }
+  (entities) => entities && entities.toList()
 );

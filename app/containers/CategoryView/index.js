@@ -38,12 +38,10 @@ import {
 
 import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
 import { ROUTES } from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
 import EntityView from 'components/EntityView';
 
 import {
@@ -98,14 +96,16 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
 
   getHeaderAsideFields = (entity, isManager, parentTaxonomy) => {
     const { intl } = this.context;
-    const groups = [
-      {
-        fields: [
-          isManager && getStatusField(entity),
-          getMetaField(entity),
-        ],
-      },
-    ]; // fieldGroups
+    const groups = isManager
+      ? [
+        {
+          fields: [
+            isManager && getStatusField(entity),
+            getMetaField(entity),
+          ],
+        },
+      ]
+      : []; // fieldGroups
 
     if (
       entity.getIn(['taxonomy', 'attributes', 'tags_users'])
@@ -247,7 +247,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
       fields.push({
         type: 'dark',
         fields: [
-          showDate && getDateField(entity, 'date', true),
+          showDate && getDateField(entity, 'date', { showEmpty: true }),
           showLink && getLinkField(entity),
         ],
       });
@@ -287,34 +287,30 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
       actorsByActortype,
       childActorsByActortype,
       actorConnections,
+      handleEdit,
+      handleTypeClick,
+      handleClose,
     } = this.props;
     let buttons = [];
     if (dataReady) {
-      buttons.push({
-        type: 'icon',
-        onClick: () => window.print(),
-        title: 'Print',
-        icon: 'print',
-      });
-      buttons = isManager
-        ? buttons.concat([
+      buttons = [
+        ...buttons,
+        {
+          type: 'icon',
+          onClick: () => window.print(),
+          title: 'Print',
+          icon: 'print',
+        },
+      ];
+      if (isManager) {
+        buttons = [
+          ...buttons,
           {
             type: 'edit',
-            onClick: () => this.props.handleEdit(this.props.params.id),
+            onClick: () => handleEdit(viewEntity.get('id')),
           },
-          {
-            type: 'close',
-            onClick: () => this.props.handleClose(
-              this.props.viewEntity && this.props.viewEntity.getIn(['taxonomy', 'id'])
-            ),
-          },
-        ])
-        : buttons.concat([{
-          type: 'close',
-          onClick: () => this.props.handleClose(
-            this.props.viewEntity && this.props.viewEntity.getIn(['taxonomy', 'id'])
-          ),
-        }]);
+        ];
+      }
     }
 
     let pageTitle = intl.formatMessage(messages.pageTitle);
@@ -343,13 +339,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
-        <Content>
-          <ContentHeader
-            title={pageTitle}
-            type={CONTENT_SINGLE}
-            icon="categories"
-            buttons={buttons}
-          />
+        <Content isSingle>
           { !dataReady
             && <Loading />
           }
@@ -363,6 +353,14 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
           { viewEntity && dataReady
             && (
               <EntityView
+                header={{
+                  title: pageTitle,
+                  onClose: handleClose,
+                  buttons,
+                  onTypeClick: viewEntity && isManager
+                    ? () => handleTypeClick(viewEntity.getIn(['taxonomy', 'id']))
+                    : null,
+                }}
                 fields={{
                   header: {
                     main: this.getHeaderMainFields(viewEntity, isManager),
@@ -401,6 +399,7 @@ CategoryView.propTypes = {
   handleEdit: PropTypes.func,
   handleClose: PropTypes.func,
   onEntityClick: PropTypes.func,
+  handleTypeClick: PropTypes.func,
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
   params: PropTypes.object,
@@ -448,6 +447,9 @@ function mapDispatchToProps(dispatch) {
     },
     handleClose: (taxId) => {
       dispatch(closeEntity(`${ROUTES.TAXONOMIES}/${taxId}`));
+    },
+    handleTypeClick: (taxId) => {
+      dispatch(updatePath(`${ROUTES.TAXONOMIES}/${taxId}`));
     },
   };
 }

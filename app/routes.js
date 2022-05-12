@@ -218,6 +218,27 @@ export default function createRoutes(store) {
         importModules.catch(errorLoading);
       },
     }, {
+      path: `${ROUTES.ACTOR_ACTIONS}${ROUTES.IMPORT}${ROUTES.ID}`,
+      name: 'actorActionsImport',
+      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      getComponent(nextState, cb) {
+        const importModules = Promise.all([
+          import('containers/ActorActionsImport/reducer'),
+          import('containers/ActorActionsImport/sagas'),
+          import('containers/ActorActionsImport'),
+        ]);
+
+        const renderRoute = loadModule(cb);
+
+        importModules.then(([reducer, sagas, component]) => {
+          injectReducer('actorActionsImport', reducer.default);
+          injectSagas(sagas.default);
+          renderRoute(component);
+        });
+
+        importModules.catch(errorLoading);
+      },
+    }, {
       // ROUTES.ID: actiontype, ROUTES.VIEW: map, list or stats
       path: `${ROUTES.ACTIONS}${ROUTES.ID}`,
       name: 'actionListForType',

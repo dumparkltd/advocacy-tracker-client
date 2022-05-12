@@ -17,10 +17,10 @@ const Styled = styled((p) => (
 ))`
   width: 100%;
   line-height: 1.3;
-  font-size: 0.8em;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  font-size: ${({ theme }) => theme.text.xsmall.size};
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     border-bottom: 1px solid ${palette('light', 1)};
-    font-size: 1em;
+    font-size: ${({ theme }) => theme.text.small.size};
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.default};

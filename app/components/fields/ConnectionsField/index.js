@@ -4,117 +4,63 @@ import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 
 import appMessages from 'containers/App/messages';
-import EntityListItems from 'components/EntityListMain/EntityListGroups/EntityListItems';
 
 import FieldWrap from 'components/fields/FieldWrap';
-import ConnectionLabel from 'components/fields/ConnectionLabel';
-import ConnectionLabelWrap from 'components/fields/ConnectionLabelWrap';
+import EntityListTable from 'containers/EntityListTable';
 // import EntityListItemsWrap from 'components/fields/EntityListItemsWrap';
-import ToggleAllItems from 'components/fields/ToggleAllItems';
 import EmptyHint from 'components/fields/EmptyHint';
-import PrintOnly from 'components/styled/PrintOnly';
 import ButtonFactory from 'components/buttons/ButtonFactory';
-
-const CONNECTIONMAX = 5;
 
 const StyledFieldWrap = styled(FieldWrap)`
   padding-top: 15px;
 `;
 
-const PrintHint = styled(PrintOnly)`
-  font-size: ${({ theme }) => theme.sizes.print.smaller};
-  font-style: italic;
-`;
-
 class ConnectionsField extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  constructor() {
-    super();
-    this.state = { showAllConnections: false };
-  }
-
   render() {
     const { field } = this.props;
     const { intl } = this.context;
-    const label = field.skipLabel
-      ? null
-      : `${field.values.size} ${intl.formatMessage(
-        field.values.size === 1
-          ? appMessages.entities[field.entityType].single
-          : appMessages.entities[field.entityType].plural
-      )}`;
+    const noOfValues = field.values ? field.values.size : 0;
+    const label = `${noOfValues} ${intl.formatMessage(
+      noOfValues === 1
+        ? appMessages.entities[field.entityType].single
+        : appMessages.entities[field.entityType].plural
+    )}`;
+
     return (
       <StyledFieldWrap>
-        {label && (
-          <ConnectionLabelWrap>
-            <ConnectionLabel>
-              {label}
-            </ConnectionLabel>
-            {field.onCreate && (
-              <ButtonFactory
-                button={{
-                  type: 'text',
-                  title: 'Add',
-                  onClick: () => field.onCreate(),
-                }}
-              />
-            )}
-          </ConnectionLabelWrap>
-        )}
         {(field.values && field.values.size > 0) && (
+          <EntityListTable
+            config={{
+              connections: field.connectionOptions,
+              clientPath: field.entityPath,
+            }}
+            label={label}
+            entities={field.values}
+            taxonomies={field.taxonomies}
+            connections={field.connections}
+            onEntityClick={field.onEntityClick}
+            showValueForAction={field.showValueForAction}
+            columns={field.columns}
+            moreLess
+            inSingleView
+          />
+        )}
+        {noOfValues === 0 && (
+          <EmptyHint>
+            <FormattedMessage {...field.showEmpty} />
+          </EmptyHint>
+        )}
+        {field.onCreate && (
           <div>
-            {field.values.size > CONNECTIONMAX
-              && !this.state.showAllConnections
-              && (
-                <PrintHint>
-                  <FormattedMessage
-                    {...appMessages.hints.printListMore}
-                    values={{
-                      no: CONNECTIONMAX,
-                    }}
-                  />
-                </PrintHint>
-              )
-            }
-            <EntityListItems
-              taxonomies={field.taxonomies}
-              connections={field.connections}
-              config={{
-                connections: field.connectionOptions,
-                clientPath: field.entityPath,
+            <ButtonFactory
+              button={{
+                type: 'addFlatPrimary',
+                title: `Add new ${intl.formatMessage(appMessages.entities[field.entityType].single)}`,
+                onClick: () => field.onCreate(),
               }}
-              entities={
-                this.state.showAllConnections
-                  ? field.values
-                  : (field.values.slice(0, CONNECTIONMAX))
-              }
-              onEntityClick={field.onEntityClick}
-              inSingleView
             />
-            {field.values.size > CONNECTIONMAX && (
-              <ToggleAllItems
-                onClick={() => this.setState(
-                  (prevState) => (
-                    { showAllConnections: !prevState.showAllConnections }
-                  )
-                )}
-              >
-                { this.state.showAllConnections
-                && <FormattedMessage {...appMessages.entities.showLess} />
-                }
-                { !this.state.showAllConnections
-                && <FormattedMessage {...appMessages.entities.showAll} />
-                }
-              </ToggleAllItems>
-            )}
           </div>
         )}
-        { (!field.values || field.values.size === 0)
-          && (
-            <EmptyHint>
-              <FormattedMessage {...field.showEmpty} />
-            </EmptyHint>
-          )
-        }
       </StyledFieldWrap>
     );
   }

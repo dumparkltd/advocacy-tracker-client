@@ -1,27 +1,21 @@
+import React from 'react';
 import styled from 'styled-components';
-import { palette } from 'styled-theme';
+import { Button } from 'grommet';
 
-import Link from 'components/Header/Link';
-
-export default styled(Link)`
-  display: inline-block;
+export default styled((p) => <Button plain {...p} />)`
   vertical-align: top;
   text-align: center;
-  color: ${(props) => props.active ? palette('headerNavMainItem', 1) : palette('headerNavMainItem', 0)};
+  color:${({ theme, active }) => active ? theme.global.colors.brand : theme.global.colors['dark-3']};
+  background-color: ${({ active }) => active ? 'transparent' : 'transparent'};
+  border-bottom: 4px solid ${({ theme, active }) => active ? theme.global.colors.brand : 'transparent'};
   &:hover {
-    color:${palette('headerNavMainItemHover', 0)};
+    color:${({ theme, active }) => active ? theme.global.colors.brand : theme.global.colors.highlight};
+    border-bottom: 4px solid ${({ theme, active }) => active ? theme.global.colors.brand : 'transparent'};
   }
-  font-size: 0.8em;
   height: ${(props) => props.theme.sizes.headerExplore.nav.heightMobile - 1}px;
-  border-bottom: 4px solid ${(props) => props.active ? palette('headerNavMainItem', 1) : 'transparent'};
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    font-size: 0.9em;
-    height: ${(props) => props.theme.sizes.headerExplore.nav.height - 1}px;
-  }
+  padding: 8px 0.5em;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-  }
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
-    font-size: 1em;
+    height: ${(props) => props.theme.sizes.headerExplore.nav.height - 1}px;
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.default};

@@ -9,7 +9,7 @@ const ButtonSimple = styled(Button)`
   padding: 0;
   text-align: left;
   white-space: nowrap;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 0;
   }
 `;

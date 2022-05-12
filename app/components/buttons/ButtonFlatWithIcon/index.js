@@ -15,11 +15,11 @@ const Button = styled(ButtonFlat)`
   border-color: ${(props) => props.border ? palette(props.border.palette, props.border.pIndex) : 'transparent'};
   min-height: 2.2em;
   padding: ${(props) => props.inForm ? '0.7em 0.5em' : '0.25em 1.25em'};
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: ${(props) => props.inForm ? '1em 1.2em' : '0.25em 1.25em'};
     letter-spacing: 0;
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
     min-height: 3em;
     letter-spacing: 0;
   }

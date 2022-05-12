@@ -8,17 +8,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
-import { List, fromJS } from 'immutable';
+import { Map, fromJS } from 'immutable';
 
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
-import { selectReady } from 'containers/App/selectors';
+import { selectReady, selectEntities } from 'containers/App/selectors';
 import appMessages from 'containers/App/messages';
-import { ROUTES } from 'themes/config';
+import { ROUTES, API } from 'themes/config';
 
 import EntityList from 'containers/EntityList';
 
 import { CONFIG, DEPENDENCIES } from './constants';
-import { selectPages } from './selectors';
 import messages from './messages';
 
 export class PageList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
@@ -62,11 +61,12 @@ export class PageList extends React.PureComponent { // eslint-disable-line react
           ]}
         />
         <EntityList
-          entities={this.props.entities}
+          entities={this.props.entities && this.props.entities.toList()}
           config={CONFIG}
-          header={headerOptions}
+          headerOptions={headerOptions}
           dataReady={dataReady}
           includeHeader={false}
+          headerStyle="explore"
           canEdit={false}
           entityTitle={{
             single: intl.formatMessage(appMessages.entities.pages.single),
@@ -83,7 +83,7 @@ PageList.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func,
   handleNew: PropTypes.func,
   dataReady: PropTypes.bool,
-  entities: PropTypes.instanceOf(List).isRequired,
+  entities: PropTypes.instanceOf(Map).isRequired,
   location: PropTypes.object,
 };
 
@@ -91,9 +91,9 @@ PageList.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = (state, props) => ({
+const mapStateToProps = (state) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
-  entities: selectPages(state, fromJS(props.location.query)),
+  entities: selectEntities(state, API.PAGES),
 });
 function mapDispatchToProps(dispatch) {
   return {

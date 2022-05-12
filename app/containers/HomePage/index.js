@@ -10,7 +10,6 @@ import Helmet from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import ReactMarkdown from 'react-markdown';
 import styled, { withTheme } from 'styled-components';
-import { palette } from 'styled-theme';
 import Grid from 'grid-styled';
 import Row from 'components/styled/Row';
 import Container from 'components/styled/Container';
@@ -30,97 +29,88 @@ import Footer from 'containers/Footer';
 
 import appMessages from 'containers/App/messages';
 
-import {
-  ROUTES,
-  SHOW_HOME_TITLE,
-  SHOW_BRAND_ON_HOME,
-} from 'themes/config';
+import { ROUTES } from 'themes/config';
 
 import { DEPENDENCIES } from './constants';
 
 import messages from './messages';
 
 const GraphicHome = styled(NormalImg)`
-  width: 100%;
-  max-width: 1200px;
+  width: 100px;
 `;
 
+const Styled = styled.div`
+  background: ${({ theme }) => theme.global.colors.background};
+`;
 const SectionTop = styled.div`
   min-height: 90vH;
   display: ${(props) => props.hasBrand ? 'block' : 'table'};
   width: ${(props) => props.hasBrand ? 'auto' : '100%'};
-  background-color: ${palette('home', 0)};
-  color: ${palette('homeIntro', 0)};
+  color: ${({ theme }) => theme.global.colors.brand};
   text-align: center;
-  @media print {
-    background-color: transparent;
-    color: ${palette('text', 0)};
-    display: block;
-    min-height: auto;
-  }
 `;
 
 const SectionWrapper = styled.div`
   display: ${(props) => props.hasBrand ? 'block' : 'table-cell'};
   vertical-align: ${(props) => props.hasBrand ? 'baseline' : 'middle'};
   padding-bottom: 3em;
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
     padding-bottom: 6em;
   }
 `;
 
 const HomeActions = styled.div`
-  padding-top: 1em;
+  margin-top: 30px;
+  margin-bottom: 50px;
   @media (min-width: ${(props) => props.theme.breakpoints.large}) {
-    padding-top: 2em;
+    margin-top: 50px;
   }
 `;
 const Title = styled.h1`
-  color:${palette('headerBrand', 0)};
+  margin: 5px 0 20px;
+  color: ${({ theme }) => theme.global.colors.brand};
   font-family: ${(props) => props.theme.fonts.title};
-  font-size: ${(props) => props.theme.sizes.home.text.titleMobile};
-  /* text-transform: uppercase; */
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    font-size: ${(props) => props.theme.sizes.home.text.title};
-  }
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
-    margin-bottom: 1em;
+  font-size: ${({ theme }) => theme.text.xxlarge.size};
+  line-height: ${({ theme }) => theme.text.xxlarge.size.height};
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+    font-size: ${({ theme }) => theme.text.xxxlarge.size};
+    line-height: ${({ theme }) => theme.text.xxxlarge.size.height};
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.home.print.title};
-    color: ${palette('primary', 0)}
   }
 `;
 
 const Claim = styled.p`
-  color: ${palette('headerBrand', 1)};
+  color: ${({ theme }) => theme.global.colors.text.brand};
   font-family: ${(props) => props.theme.fonts.claim};
   font-size: ${(props) => props.theme.sizes.home.text.claimMobile};
   font-weight: 100;
   margin-left: auto;
   margin-right: auto;
-  margin-top: 0.5em;
+  margin-top: 20px;
+  margin-bottom: 0px;
   line-height: 1.3;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    font-size: ${(props) => props.theme.sizes.home.text.claim};
-    margin-top: 2.5em;
+  font-size: ${({ theme }) => theme.text.large.size};
+  line-height: ${({ theme }) => theme.text.large.size.height};
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+    font-size: ${({ theme }) => theme.text.xlarge.size};
+    line-height: ${({ theme }) => theme.text.xlarge.size.height};
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.home.print.claim};
-    color: ${palette('primary', 0)}
   }
 `;
 
 const Intro = styled(ReactMarkdown)`
-  font-size: 1em;
+  font-size: ${({ hint, theme }) => theme.text[hint ? 'small' : 'medium'].size};
+  line-height: ${({ hint, theme }) => theme.text[hint ? 'small' : 'medium'].height};
+  color: ${({ hint, theme }) => theme.global.colors.text[hint ? 'secondary' : 'brand']};
   margin-left: auto;
   margin-right: auto;
-  line-height: 1.3;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    font-size: 1.1em;
-  }
   @media (min-width: ${(props) => props.theme.breakpoints.large}) {
-    font-size: 1.25em;
+    font-size: ${({ hint, theme }) => theme.text[hint ? 'medium' : 'large'].size};
+    line-height: ${({ hint, theme }) => theme.text[hint ? 'medium' : 'large'].height};
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.large};
@@ -128,7 +118,7 @@ const Intro = styled(ReactMarkdown)`
 `;
 const GridSpace = styled(Grid)`
   display: none !important;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     display: inline-block;
   }
 `;
@@ -137,23 +127,16 @@ const MainButton = styled(ButtonHero)`
   max-width: ${({ single }) => single ? 'auto' : '250px'};
   width: 100%;
   display: block;
-  margin-bottom: 10px;
+  margin: 10px auto;
   min-width: auto;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     display: inline-block;
-    margin-bottom: 0;
+    margin: 10px 5px 0;
     min-width: auto;
     width: ${({ single }) => single ? 'auto' : '250px'};
   }
   @media print {
-    font-size: ${(props) => props.theme.sizes.print.small};
-    color: ${palette('primary', 0)};
-    background: transparent;
-    border: 1px solid ${palette('light', 3)};
-    border-radius: 10px;
-    max-width: ${({ count }) => count ? ((100 / count) - 2) : 100}%;
-    min-width: auto;
-    margin: 0 1%;
+    display: none;
   }
 `;
 
@@ -177,34 +160,28 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
     } = this.props;
     const appTitle = `${intl.formatMessage(appMessages.app.title)} - ${intl.formatMessage(appMessages.app.claim)}`;
     return (
-      <div>
+      <Styled>
         <Helmet
           title={intl.formatMessage(messages.pageTitle)}
           meta={[
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
-        <SectionTop hasBrand={SHOW_BRAND_ON_HOME}>
-          <SectionWrapper hasBrand={SHOW_BRAND_ON_HOME}>
-            { !SHOW_HOME_TITLE
-              && <GraphicHome src={theme.media.titleHome} alt={appTitle} />
-            }
+        <SectionTop>
+          <SectionWrapper>
             <Container noPaddingBottom>
-              { SHOW_HOME_TITLE
-                && (
-                  <Row>
-                    <GridSpace lg={1 / 8} />
-                    <Grid lg={3 / 4} sm={1}>
-                      <Claim>
-                        <FormattedMessage {...appMessages.app.claim} />
-                      </Claim>
-                      <Title>
-                        <FormattedMessage {...appMessages.app.title} />
-                      </Title>
-                    </Grid>
-                  </Row>
-                )
-              }
+              <GraphicHome src={theme.media.graphicHome} alt={appTitle} />
+              <Row>
+                <GridSpace lg={1 / 8} />
+                <Grid lg={3 / 4} sm={1}>
+                  <Claim>
+                    <FormattedMessage {...appMessages.app.claim} />
+                  </Claim>
+                  <Title>
+                    <FormattedMessage {...appMessages.app.title} />
+                  </Title>
+                </Grid>
+              </Row>
               <Row>
                 <GridSpace lg={1 / 6} sm={1 / 8} />
                 <Grid lg={2 / 3} sm={3 / 4} xs={1}>
@@ -249,14 +226,14 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
                 {!isUserSigningIn && isUserSignedIn && !isUserAnalyst && (
                   <Row>
                     <GridSpace lg={1 / 6} sm={1 / 8} />
-                    <Intro source={intl.formatMessage(messages.noRoleAssigned)} />
+                    <Intro hint source={intl.formatMessage(messages.noRoleAssigned)} />
                   </Row>
                 )}
                 {!isUserSigningIn && !isUserSignedIn && (
                   <Row>
                     <GridSpace lg={1 / 6} sm={1 / 8} />
                     <Grid lg={2 / 3} sm={3 / 4} xs={1}>
-                      <Intro source={intl.formatMessage(messages.notSignedIn)} />
+                      <Intro hint source={intl.formatMessage(messages.notSignedIn)} />
                     </Grid>
                     <Grid lg={1} sm={1} xs={1}>
                       <MainButton
@@ -281,7 +258,7 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
           </SectionWrapper>
         </SectionTop>
         <Footer />
-      </div>
+      </Styled>
     );
   }
 }

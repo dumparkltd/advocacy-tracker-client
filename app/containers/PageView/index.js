@@ -32,6 +32,7 @@ import {
   selectReady,
   selectIsUserAdmin,
   selectIsUserAnalyst,
+  selectIsUserManager,
 } from 'containers/App/selectors';
 
 import {
@@ -78,10 +79,10 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
     fields: [getMarkdownField(entity, 'content', false)],
   }]);
 
-  getFields = (entity, isAnalyst) => ({
+  getFields = (entity, isAdmin) => ({
     body: {
       main: this.getBodyMainFields(entity),
-      aside: isAnalyst
+      aside: isAdmin
         ? this.getBodyAsideFields(entity)
         : null,
     },
@@ -91,7 +92,7 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
   render() {
     const { intl } = this.context;
     const {
-      page, dataReady, isAdmin, isAnalyst,
+      page, dataReady, isAdmin, isAnalyst, isManager,
     } = this.props;
     const buttons = [];
     if (dataReady) {
@@ -137,7 +138,7 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
             { page && dataReady
               && (
                 <EntityView
-                  fields={this.getFields(page, isAnalyst)}
+                  fields={this.getFields(page, isManager)}
                   seamless
                 />
               )
@@ -158,6 +159,7 @@ PageView.propTypes = {
   dataReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
   isAnalyst: PropTypes.bool,
+  isManager: PropTypes.bool,
   params: PropTypes.object,
 };
 
@@ -168,6 +170,7 @@ PageView.contextTypes = {
 
 const mapStateToProps = (state, props) => ({
   isAdmin: selectIsUserAdmin(state),
+  isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   page: selectViewEntity(state, props.params.id),

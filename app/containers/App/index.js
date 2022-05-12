@@ -12,7 +12,6 @@ import ReactModal from 'react-modal';
 import GlobalStyle from 'global-styles';
 
 import styled from 'styled-components';
-import { palette } from 'styled-theme';
 import Header from 'components/Header';
 import EntityNew from 'containers/EntityNew';
 
@@ -49,10 +48,10 @@ const Main = styled.div`
   left: 0;
   right: 0;
   bottom:0;
-  background-color: ${(props) => props.isHome ? 'transparent' : palette('light', 0)};
+  background-color: transparent;
   overflow: hidden;
 
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     top: ${(props) => props.isHome
     ? 0
     : props.theme.sizes.header.banner.height
@@ -78,7 +77,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     }
   }
 
-  preparePageMenuPages = (pages) => sortEntities(
+  preparePageMenuPages = (pages, currentPath) => sortEntities(
     pages,
     'asc',
     'order',
@@ -87,6 +86,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     .map((page) => ({
       path: `${ROUTES.PAGES}/${page.get('id')}`,
       title: page.getIn(['attributes', 'menu_title']) || page.getIn(['attributes', 'title']),
+      active: currentPath === `${ROUTES.PAGES}/${page.get('id')}`,
     }))
     .toArray();
 
@@ -97,29 +97,6 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
   ) => {
     const { intl } = this.context;
     let navItems = [];
-    if (isManager) {
-      navItems = navItems.concat([
-        {
-          path: ROUTES.PAGES,
-          title: intl.formatMessage(messages.nav.pages),
-          isAdmin: true,
-          active: currentPath === ROUTES.PAGES,
-        },
-        {
-          path: ROUTES.TAXONOMIES,
-          title: intl.formatMessage(messages.nav.taxonomies),
-          isAdmin: true,
-          active: currentPath.startsWith(ROUTES.CATEGORY)
-          || currentPath.startsWith(ROUTES.TAXONOMIES),
-        },
-        {
-          path: ROUTES.USERS,
-          title: intl.formatMessage(messages.nav.users),
-          isAdmin: true,
-          active: currentPath === ROUTES.USERS,
-        },
-      ]);
-    }
     if (isAnalyst) {
       navItems = navItems.concat([
         {
@@ -132,11 +109,28 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           title: intl.formatMessage(messages.nav.resources),
           active: currentPath && currentPath.startsWith(ROUTES.RESOURCE),
         },
+      ]);
+    }
+    if (isManager) {
+      navItems = navItems.concat([
         {
-          path: ROUTES.BOOKMARKS,
-          title: intl.formatMessage(messages.nav.bookmarks),
+          path: ROUTES.USERS,
+          title: intl.formatMessage(messages.nav.users),
           isAdmin: true,
-          active: currentPath === ROUTES.BOOKMARKS,
+          active: currentPath === ROUTES.USERS,
+        },
+        {
+          path: ROUTES.PAGES,
+          title: intl.formatMessage(messages.nav.pages),
+          isAdmin: true,
+          active: currentPath === ROUTES.PAGES,
+        },
+        {
+          path: ROUTES.TAXONOMIES,
+          title: intl.formatMessage(messages.nav.taxonomies),
+          isAdmin: true,
+          active: currentPath.startsWith(ROUTES.CATEGORY)
+          || currentPath.startsWith(ROUTES.TAXONOMIES),
         },
       ]);
     }
@@ -166,25 +160,30 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     const isHomeOrAuth = isHome || isAuth;
     return (
       <div id="app">
-        <Helmet titleTemplate={`${title} - %s`} defaultTitle={title} />
+        <Helmet titleTemplate={`%s - ${title}`} defaultTitle={title} />
         {!isHome && (
           <Header
             isSignedIn={isUserSignedIn}
+            isAnalyst={isAnalyst}
             user={user}
-            pages={pages && this.preparePageMenuPages(pages)}
+            pages={pages && this.preparePageMenuPages(pages, location.pathname)}
             navItems={this.prepareMainMenuItems(
               isUserSignedIn && isManager,
               isUserSignedIn && isAnalyst,
               location.pathname,
             )}
-            search={{
-              path: ROUTES.SEARCH,
-              title: intl.formatMessage(messages.nav.search),
-              active: location.pathname.startsWith(ROUTES.SEARCH),
-              icon: 'search',
-            }}
+            search={!isUserSignedIn
+              ? null
+              : {
+                path: ROUTES.SEARCH,
+                title: intl.formatMessage(messages.nav.search),
+                active: location.pathname.startsWith(ROUTES.SEARCH),
+                icon: 'search',
+              }
+            }
             onPageLink={onPageLink}
             isAuth={isAuth}
+            currentPath={location.pathname}
           />
         )}
         <Main isHome={isHomeOrAuth}>

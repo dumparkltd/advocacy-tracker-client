@@ -44,6 +44,7 @@ import {
 import {
   selectReady,
   selectSessionUserHighestRoleId,
+  selectIsUserManager,
 } from 'containers/App/selectors';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
@@ -127,6 +128,8 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
     const { intl } = this.context;
     return ([{ // fieldGroup
       fields: [getTitleFormField(intl.formatMessage, 'title', 'name')],
+    }, {
+      fields: [getEmailField(intl.formatMessage)],
     }]);
   };
 
@@ -186,20 +189,8 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
         );
       }
     }
-    groups.push({
-      fields: [getEmailField(intl.formatMessage)],
-    });
     return groups;
   };
-
-  // getBodyAsideFields = (taxonomies, onCreateOption) => {
-  //   const { intl } = this.context;
-  //   return ([ // fieldGroups
-  //     { // fieldGroup
-  //       fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
-  //     },
-  //   ]);
-  // };
 
   getEditableUserRoles = (roles, sessionUserHighestRoleId) => {
     if (roles) {
@@ -227,6 +218,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       actionsByActiontype,
       onCreateOption,
       connectedTaxonomies,
+      isManager,
     } = this.props;
     const reference = this.props.params.id;
     const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
@@ -286,40 +278,38 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
               </div>
             )
           }
-          {viewEntity && dataReady
-            && (
-              <EntityForm
-                model="userEdit.form.data"
-                formData={viewDomain.getIn(['form', 'data'])}
-                saving={saveSending}
-                handleSubmit={(formData) => this.props.handleSubmit(
-                  formData,
-                  roles,
-                  actorsByActortype,
-                  actionsByActiontype,
-                )}
-                handleSubmitFail={this.props.handleSubmitFail}
-                handleCancel={() => this.props.handleCancel(reference)}
-                handleUpdate={this.props.handleUpdate}
-                fields={{
-                  header: {
-                    main: this.getHeaderMainFields(),
-                    aside: this.getHeaderAsideFields(viewEntity, editableRoles),
-                  },
-                  body: {
-                    main: this.getBodyMainFields(
-                      actorsByActortype,
-                      actionsByActiontype,
-                      connectedTaxonomies,
-                      onCreateOption,
-                    ),
-                    // aside: (sessionUserHighestRoleId <= USER_ROLES.MANAGER.value) && this.getBodyAsideFields(taxonomies, onCreateOption),
-                  },
-                }}
-                scrollContainer={this.scrollContainer.current}
-              />
-            )
-          }
+          {viewEntity && dataReady && (
+            <EntityForm
+              model="userEdit.form.data"
+              formData={viewDomain.getIn(['form', 'data'])}
+              saving={saveSending}
+              handleSubmit={(formData) => this.props.handleSubmit(
+                formData,
+                roles,
+                actorsByActortype,
+                actionsByActiontype,
+              )}
+              handleSubmitFail={this.props.handleSubmitFail}
+              handleCancel={() => this.props.handleCancel(reference)}
+              handleUpdate={this.props.handleUpdate}
+              fields={{
+                header: {
+                  main: this.getHeaderMainFields(),
+                  aside: this.getHeaderAsideFields(viewEntity, editableRoles),
+                },
+                body: {
+                  main: isManager && this.getBodyMainFields(
+                    actorsByActortype,
+                    actionsByActiontype,
+                    connectedTaxonomies,
+                    onCreateOption,
+                  ),
+                  // aside: this.getBodyAsideFields(),
+                },
+              }}
+              scrollContainer={this.scrollContainer.current}
+            />
+          )}
           { saveSending
             && <Loading />
           }
@@ -340,6 +330,7 @@ UserEdit.propTypes = {
   viewDomain: PropTypes.object,
   viewEntity: PropTypes.object,
   roles: PropTypes.object,
+  isManager: PropTypes.bool,
   dataReady: PropTypes.bool,
   sessionUserHighestRoleId: PropTypes.number,
   params: PropTypes.object,
@@ -364,7 +355,7 @@ const mapStateToProps = (state, props) => ({
   actorsByActortype: selectActorsByActortype(state, props.params.id),
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
   connectedTaxonomies: selectConnectedTaxonomies(state),
-
+  isManager: selectIsUserManager(state),
 });
 
 function mapDispatchToProps(dispatch) {

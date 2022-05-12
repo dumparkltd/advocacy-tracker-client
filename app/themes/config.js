@@ -13,6 +13,7 @@
 export const NODE_ENV = sessionStorage.NODE_ENV || 'production';
 
 const IS_DEV = true;
+export const version = '1.0';
 
 export const ENDPOINTS = {
   API: (
@@ -41,12 +42,13 @@ export const ROUTES = {
   REGISTER: '/register',
   UNAUTHORISED: '/unauthorised',
   USERS: '/users',
-  ACTIONS: '/actions', // api: measures
+  ACTIONS: '/actions',
+  ACTOR_ACTIONS: '/actoractions',
   ACTION: '/action',
   ACTORS: '/actors',
   ACTOR: '/actor',
-  INDICATORS: '/positions', // api: indicators
-  INDICATOR: '/position',
+  INDICATORS: '/topics', // api: indicators
+  INDICATOR: '/topic',
   RESOURCES: '/resources',
   RESOURCE: '/resource',
   TAXONOMIES: '/categories',
@@ -95,6 +97,7 @@ export const ACTIONTYPES = {
   TASK: '5',
   INTERACTION: '6',
 };
+
 export const ACTORTYPES = {
   COUNTRY: '1',
   ORG: '2',
@@ -102,6 +105,9 @@ export const ACTORTYPES = {
   REG: '4',
   GROUP: '5',
 };
+
+export const ACTIONTYPE_DISCLAIMERS = [];
+
 export const RESOURCETYPES = {
   REF: '1',
   WEB: '2',
@@ -322,7 +328,7 @@ export const ACTOR_FIELDS = {
       type: 'text',
     },
     email: {
-      optional: [ACTORTYPES.CONTACT],
+      optional: [ACTORTYPES.CONTACT, ACTORTYPES.ORG],
       type: 'text',
     },
     phone: {
@@ -423,31 +429,66 @@ export const INDICATOR_FIELDS = {
 
 // type compatibility: actors for actions
 export const ACTIONTYPE_ACTORTYPES = {
+  // countries make expressions/statements
   [ACTIONTYPES.EXPRESS]: [
     ACTORTYPES.COUNTRY,
+    ACTORTYPES.CONTACT,
   ],
+  // events are attended by countries, contacts, orgs
   [ACTIONTYPES.EVENT]: [
+    ACTORTYPES.GROUP,
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
     ACTORTYPES.ORG,
   ],
+  // interactions with countries, contacts or organisations
+  [ACTIONTYPES.INTERACTION]: [
+    ACTORTYPES.GROUP,
+    ACTORTYPES.COUNTRY,
+    ACTORTYPES.CONTACT,
+    ACTORTYPES.ORG,
+  ],
+  // // outreach plans are targeting countries & contacts
+  // [ACTIONTYPES.OP]: [
+  //   ACTORTYPES.COUNTRY,
+  //   ACTORTYPES.CONTACT,
+  // ],
+  // // advocacy plans are targeting countries & contacts
+  // [ACTIONTYPES.AP]: [
+  //   ACTORTYPES.COUNTRY,
+  //   ACTORTYPES.CONTACT,
+  // ],
+  // // tasks target countries
+  // [ACTIONTYPES.TASK]: [
+  //   ACTORTYPES.COUNTRY,
+  // ],
+};
+
+export const ACTIONTYPE_TARGETTYPES = {
+  // outreach plans are targeting countries & contacts
   [ACTIONTYPES.OP]: [
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
+    ACTORTYPES.REG,
+    ACTORTYPES.GROUP,
   ],
+  // advocacy plans are targeting countries & contacts
   [ACTIONTYPES.AP]: [
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
+    ACTORTYPES.REG,
+    ACTORTYPES.GROUP,
   ],
+  // tasks target countries
   [ACTIONTYPES.TASK]: [
     ACTORTYPES.COUNTRY,
-  ],
-  [ACTIONTYPES.INTERACTION]: [
-    ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
+    ACTORTYPES.REG,
+    ACTORTYPES.GROUP,
     ACTORTYPES.ORG,
   ],
 };
+
 
 export const ACTIONTYPE_RESOURCETYPES = {
   [ACTIONTYPES.EXPRESS]: [
@@ -461,7 +502,6 @@ export const ACTIONTYPE_RESOURCETYPES = {
   [ACTIONTYPES.TASK]: [],
   [ACTIONTYPES.INTERACTION]: [],
 };
-export const ACTIONTYPE_TARGETTYPES = {};
 
 // related actions
 export const ACTIONTYPE_ACTIONTYPES = {
@@ -469,10 +509,12 @@ export const ACTIONTYPE_ACTIONTYPES = {
   // [ACTIONTYPES.EVENT]: [],
   [ACTIONTYPES.OP]: [
     ACTIONTYPES.EVENT,
+    ACTIONTYPES.AP,
   ],
   // sub-actions with top-actions
   [ACTIONTYPES.EXPRESS]: [
     ACTIONTYPES.EVENT,
+    ACTIONTYPES.INTERACTION,
   ],
   [ACTIONTYPES.TASK]: [
     ACTIONTYPES.OP,
@@ -506,11 +548,314 @@ export const MEMBERSHIPS = {
 
 export const INDICATOR_ACTIONTYPES = [ACTIONTYPES.EXPRESS];
 
-export const USER_ACTIONTYPES = Object.values(ACTIONTYPES);
+export const USER_ACTIONTYPES = [
+  ACTIONTYPES.OP,
+  ACTIONTYPES.AP,
+  ACTIONTYPES.TASK,
+  ACTIONTYPES.EVENT,
+  ACTIONTYPES.INTERACTION,
+];
 export const USER_ACTORTYPES = Object.values(ACTORTYPES);
 
+export const ACTORTYPES_CONFIG = {
+  1: { // COUNTRY
+    id: ACTORTYPES.COUNTRY,
+    order: 1,
+    columns: [
+      {
+        id: 'members', // one row per type,
+        type: 'members', // one row per type,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
+    ],
+  },
+  2: { // ORG
+    id: ACTORTYPES.ORG,
+    order: 3,
+    columns: [
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 2, // sector
+      },
+      {
+        id: 'members', // one row per type,
+        type: 'members', // one row per type,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
+    ],
+  },
+  3: {
+    id: ACTORTYPES.CONTACT,
+    order: 5,
+    columns: [
+      // {
+      //   id: 'taxonomy',
+      //   type: 'taxonomy',
+      //   taxonomy_id: 3, // role
+      // },
+      {
+        id: 'associations', // one row per type,
+        type: 'associations', // one row per type,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
+    ],
+  },
+  4: { // REG
+    id: ACTORTYPES.REG,
+    order: 4,
+    columns: [
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 4, // region type
+      },
+      {
+        id: 'members', // one row per type,
+        type: 'members', // one row per type,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
+    ],
+  },
+  5: { // GROUP
+    id: ACTORTYPES.GROUP,
+    order: 2,
+    columns: [
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 5, // group type
+      },
+      {
+        id: 'members', // one row per type,
+        type: 'members', // one row per type,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
+    ],
+  },
+};
 
-export const KEEP_FILTERS = ['view', 'ms'];
+export const ACTIONTYPES_CONFIG = {
+  1: {
+    id: ACTIONTYPES.EXPRESS,
+    order: 5,
+    is_code_public: true,
+    columns: [
+      {
+        id: 'main',
+        type: 'main',
+        sort: 'title',
+        attributes: ['title'],
+      },
+      {
+        id: 'indicators',
+        type: 'indicators',
+        sort: 'title',
+      },
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 6, // level of support
+      },
+      {
+        id: 'taxonomy-13',
+        type: 'taxonomy',
+        taxonomy_id: 13, // level of authority
+      },
+      {
+        id: 'actors',
+        type: 'actors',
+        sort: 'title',
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
+      // {
+      //   id: 'taxonomy-12',
+      //   type: 'taxonomy',
+      //   taxonomy_id: 12, // commitment type
+      // },
+      // {
+      //   id: 'taxonomy-11',
+      //   type: 'taxonomy',
+      //   taxonomy_id: 11, // level of commitment: as link
+      // },
+      // {
+      //   id: 'date',
+      //   type: 'date',
+      //   sort: 'date_start',
+      //   sortOrder: 'asc',
+      //   attribute: 'date_start',
+      //   align: 'end',
+      //   primary: true,
+      // },
+    ],
+  },
+  2: {
+    id: ACTIONTYPES.EVENT,
+    order: 4,
+    is_code_public: true,
+    columns: [
+      {
+        id: 'main',
+        type: 'main',
+        sort: 'title',
+        attributes: ['title'],
+      },
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 9, // event type
+      },
+      {
+        id: 'actors', // one row per type,
+        type: 'actors', // one row per type,
+        showOnSingle: false,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
+      // {
+      //   id: 'taxonomy-3',
+      //   type: 'taxonomy',
+      //   taxonomy_id: 3, // LBS-protocol statuses: as link
+      // },
+    ],
+  },
+  3: {
+    id: ACTIONTYPES.OP,
+    order: 3,
+    is_code_public: true,
+    columns: [
+      {
+        id: 'main',
+        type: 'main',
+        sort: 'title',
+        attributes: ['title'],
+      },
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 10, // event type
+      },
+      {
+        id: 'targets', // one row per type,
+        type: 'targets', // one row per type,
+        sort: 'title',
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
+    ],
+  },
+  4: {
+    id: ACTIONTYPES.AP,
+    order: 2,
+    columns: [
+      {
+        id: 'main',
+        type: 'main',
+        sort: 'title',
+        attributes: ['title'],
+      },
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 10, // event type
+      },
+      {
+        id: 'targets',
+        type: 'targets',
+        sort: 'title',
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
+      // {
+      //   id: 'taxonomy',
+      //   type: 'taxonomy',
+      //   taxonomy_id: 4, // strategy types: as link
+      // },
+    ],
+  },
+  5: {
+    id: ACTIONTYPES.TASK,
+    order: 1,
+    columns: [
+      {
+        id: 'main',
+        type: 'main',
+        sort: 'title',
+        attributes: ['title'],
+      },
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 11, // status
+      },
+      {
+        id: 'taxonomy-10',
+        type: 'taxonomy',
+        taxonomy_id: 10, // priority
+      },
+      {
+        id: 'targets', // one row per type,
+        type: 'targets', // one row per type,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
+    ],
+  },
+  6: {
+    id: ACTIONTYPES.INTERACTION,
+    order: 6,
+    columns: [
+      {
+        id: 'main',
+        type: 'main',
+        sort: 'title',
+        attributes: ['title'],
+      },
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 12, // interaction type
+      },
+      {
+        id: 'actors', // one row per type,
+        type: 'actors', // one row per type,
+      },
+      {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+      },
+    ],
+  },
+};
+
+
+export const KEEP_FILTERS = ['view', 'ms', 'subj', 'msubj', 'tm', 'am'];
 
 // Language and date settings ********************
 // Note: you may also set the locales in i18n.js
@@ -526,7 +871,6 @@ export const DATE_FORMAT = 'dd/MM/yyyy';
 // set in translations/[LOCALE].js
 // - app.containers.App.app.title
 // - app.containers.App.app.claim
-export const SHOW_HEADER_TITLE = true;
 
 // show header pattern
 // specified in themes/[theme].js: theme.backgroundImages.header
@@ -567,7 +911,7 @@ export const PAGE_ITEM_OPTIONS = [
 ];
 
 export const TEXT_TRUNCATE = {
-  CONNECTION_TAG: 20,
+  CONNECTION_TAG: 10,
   ATTRIBUTE_TAG: 10,
   ENTITY_TAG: 7,
   CONNECTION_POPUP: 80,
@@ -631,9 +975,9 @@ export const PUBLISH_STATUSES = [
   { value: false, message: 'ui.publishStatuses.public' },
 ];
 
-export const DEFAULT_ACTORTYPE = '1';
-export const DEFAULT_ACTIONTYPE = '1';
-export const DEFAULT_RESOURCETYPE = '1';
+export const DEFAULT_RESOURCETYPE = RESOURCETYPES.REF;
+export const DEFAULT_ACTIONTYPE = ACTIONTYPES.TASK;
+export const DEFAULT_ACTORTYPE = ACTORTYPES.COUNTRY;
 export const DEFAULT_TAXONOMY = '6';
 export const NO_PARENT_KEY = 'parentUndefined';
 
@@ -648,6 +992,21 @@ export const MAP_OPTIONS = {
     weight: 1,
     color: '#CFD3D7',
     fillOpacity: 1,
+    fillColor: '#EDEFF0',
+  },
+  STYLE: {
+    active: {
+      weight: 2,
+      color: '#000000',
+    },
+    members: {
+      fillColor: '#aaa',
+    },
+    country: {
+      fillColor: '#0063b5',
+      weight: 1.5,
+      color: '#333333',
+    },
   },
   TOOLTIP_STYLE: {
     weight: 1,
@@ -680,13 +1039,16 @@ export const MAP_OPTIONS = {
     E: 3600,
   },
   PROJ: {
-    name: 'Robinson',
-    crs: 'ESRI:54030',
-    proj4def: '+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
-    resolutions: [
-      65536, 32768, 16384, 8192, 4096, 2048, 1024, 512, 256, 128,
-    ],
-    origin: [0, 0],
-    bounds: [[90, -180], [-90, 180]], // [[N, W], [S, E]]
+    robinson: {
+      name: 'Robinson',
+      crs: 'ESRI:54030',
+      proj4def: '+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
+      resolutions: [
+        65536, 32768, 16384, 8192, 4096, 2048, 1024, 512, 256, 128,
+      ],
+      origin: [0, 0],
+      bounds: [[90, -180], [-90, 180]], // [[N, W], [S, E]]
+      addBBox: true,
+    },
   },
 };

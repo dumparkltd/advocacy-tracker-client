@@ -368,6 +368,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       scrollContainer,
     } = this.props;
     const hasEntityNewModal = !!newEntityModal;
+
     return (
       <FormWrapper withoutShadow={inModal} hasMarginBottom={!inModal}>
         <StyledForm

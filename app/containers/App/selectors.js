@@ -23,6 +23,10 @@ import {
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_RESOURCETYPES,
+  DEFAULT_ACTIONTYPE,
+  DEFAULT_ACTORTYPE,
+  ACTORTYPES_CONFIG,
+  ACTIONTYPES_CONFIG,
   INDICATOR_ACTIONTYPES,
   USER_ACTIONTYPES,
   USER_ACTORTYPES,
@@ -242,6 +246,16 @@ export const selectPreviousPathname = createSelector(
   }
 );
 
+export const selectHasBack = createSelector(
+  selectCurrentPathname,
+  selectPreviousPathname,
+  (currentPath, previousPath) => {
+    const isPreviousValid = previousPath.indexOf('/edit') > -1
+      || previousPath.indexOf('/new') > -1;
+    return !isPreviousValid && previousPath && (previousPath !== currentPath);
+  }
+);
+
 export const selectLocation = createSelector(
   getRoute,
   (routeState) => {
@@ -279,6 +293,10 @@ export const selectWithoutQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('without')
 );
+export const selectAnyQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('any')
+);
 export const selectCategoryQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('cat')
@@ -295,9 +313,13 @@ export const selectActorQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('actor')
 );
-export const selectParentQuery = createSelector(
+export const selectParentsQuery = createSelector(
   selectLocationQuery,
-  (locationQuery) => locationQuery && locationQuery.get('parent')
+  (locationQuery) => locationQuery && locationQuery.get('by-parent')
+);
+export const selectChildrenQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('by-child')
 );
 export const selectTargetedQuery = createSelector(
   selectLocationQuery,
@@ -327,6 +349,10 @@ export const selectUserQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('users')
 );
+export const selectIndicatorQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('indicators')
+);
 export const selectSearchQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('search')
@@ -347,27 +373,39 @@ export const selectSortByQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('sort')
 );
+export const selectPageItemsQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('items')
+);
+export const selectPageNoQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('page')
+);
 
 export const selectActortypeQuery = createSelector(
   selectLocationQuery,
   (query) => (query && query.get('actortype'))
     ? query.get('actortype')
-    : 'all'
+    : DEFAULT_ACTORTYPE
 );
 export const selectActiontypeQuery = createSelector(
   selectLocationQuery,
   (query) => (query && query.get('actiontype'))
     ? query.get('actiontype')
-    : 'all'
+    : DEFAULT_ACTIONTYPE
 );
 
 export const selectViewQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && (locationQuery.get('view') || 'list')
 );
+export const selectSubjectQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && (locationQuery.get('subj'))
+);
 export const selectMapSubjectQuery = createSelector(
   selectLocationQuery,
-  (locationQuery) => locationQuery && (locationQuery.get('ms') || 'actors')
+  (locationQuery) => locationQuery && (locationQuery.get('msubj'))
 );
 export const selectIncludeActorMembers = createSelector(
   selectLocationQuery,
@@ -387,10 +425,19 @@ export const selectIncludeTargetMembers = createSelector(
     return true; // default
   }
 );
+export const selectIncludeMembersForFiltering = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('fm')) {
+      return qe(locationQuery.get('fm'), 1) || locationQuery.get('fm') === 'true';
+    }
+    return true; // default
+  }
+);
 
 // database ////////////////////////////////////////////////////////////////////////
 
-const selectEntitiesAll = (state) => state.getIn(['global', 'entities']);
+export const selectEntitiesAll = (state) => state.getIn(['global', 'entities']);
 
 export const selectEntities = createSelector(
   selectEntitiesAll,
@@ -451,16 +498,30 @@ export const selectUser = createSelector(
   (state, id) => selectEntity(state, { id, path: API.USERS }),
   (entity) => entity
 );
-// all action types
 export const selectActortypes = createSelector(
   (state) => selectEntities(state, API.ACTORTYPES),
-  (entities) => entities
+  (entities) => entities && entities.sort((a, b) => {
+    const configA = ACTORTYPES_CONFIG[a.get('id')];
+    const configB = ACTORTYPES_CONFIG[b.get('id')];
+    return configA.order < configB.order
+      ? -1
+      : 1;
+  })
 );
 // all action types
 export const selectActiontypes = createSelector(
   (state) => selectEntities(state, API.ACTIONTYPES),
-  (entities) => entities
+  (entities) => {
+    if (!entities) return null;
+    const sorted = entities.sort((a, b) => {
+      const configA = ACTIONTYPES_CONFIG[a.get('id')];
+      const configB = ACTIONTYPES_CONFIG[b.get('id')];
+      return configA.order < configB.order ? -1 : 1;
+    });
+    return sorted;
+  }
 );
+
 // all resource types
 export const selectResourcetypes = createSelector(
   (state) => selectEntities(state, API.RESOURCETYPES),
@@ -530,6 +591,7 @@ export const selectActortypesForUsers = createSelector(
     );
   }
 );
+
 export const selectActiontypesForResourcetype = createSelector(
   (state, { type }) => type,
   selectActiontypes,
@@ -764,7 +826,7 @@ export const selectEntitiesWhere = createSelector(
 );
 
 // filter entities by attributes, using locationQuery
-const selectEntitiesWhereQuery = createSelector(
+export const selectEntitiesWhereQuery = createSelector(
   selectAttributeQuery,
   (state, { path }) => selectEntities(state, path),
   (query, entities) => query
@@ -790,7 +852,7 @@ export const selectActorsWhere = createSelector(
 );
 
 // filter entities by attributes, using locationQuery
-const selectActorsWhereQuery = createSelector(
+export const selectActorsWhereQuery = createSelector(
   selectAttributeQuery,
   selectActortypeActors, // type should be optional
   (query, entities) => query
@@ -798,13 +860,14 @@ const selectActorsWhereQuery = createSelector(
     : entities
 );
 // filter entities by attributes, using locationQuery
-const selectResourcesWhereQuery = createSelector(
+export const selectResourcesWhereQuery = createSelector(
   selectAttributeQuery,
   selectResourcetypeResources, // type should be optional
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
 );
+
 // TODO: passing of location query likely not needed if selectSearchQuery changed
 export const selectActorsSearchQuery = createSelector(
   selectActorsWhereQuery,
@@ -833,7 +896,7 @@ export const selectActionsWhere = createSelector(
 );
 
 // filter entities by attributes, using locationQuery
-const selectActionsWhereQuery = createSelector(
+export const selectActionsWhereQuery = createSelector(
   selectAttributeQuery,
   selectActiontypeActions, // type should be optional
   (query, entities) => query
@@ -1151,9 +1214,11 @@ export const selectUserConnections = createSelector(
 export const selectActorConnections = createSelector(
   selectActions,
   selectActors,
-  (actions, actors) => Map()
+  selectUsers,
+  (actions, actors, users) => Map()
     .set(API.ACTIONS, actions)
     .set(API.ACTORS, actors)
+    .set(API.USERS, users)
 );
 export const selectResourceConnections = createSelector(
   selectActiontypeActions,
@@ -1172,11 +1237,13 @@ export const selectActionConnections = createSelector(
   selectActions,
   selectResources,
   selectIndicators,
-  (actors, actions, resources, indicators) => Map()
+  selectUsers,
+  (actors, actions, resources, indicators, users) => Map()
     .set(API.ACTORS, actors)
     .set(API.ACTIONS, actions)
     .set(API.RESOURCES, resources)
     .set(API.INDICATORS, indicators)
+    .set(API.USERS, users)
 );
 
 // grouped JOIN tables /////////////////////////////////////////////////////////////////
@@ -1204,6 +1271,10 @@ export const selectActorCategoriesGroupedByCategory = createSelector(
     )
 );
 
+export const selectActorActions = createSelector(
+  (state) => selectEntities(state, API.ACTOR_ACTIONS),
+  (entities) => entities,
+);
 export const selectActorActionsGroupedByActor = createSelector(
   (state) => selectEntities(state, API.ACTOR_ACTIONS),
   (entities) => entities
@@ -1224,6 +1295,24 @@ export const selectActorActionsGroupedByAction = createSelector(
       (group) => group.map(
         (entity) => entity.getIn(['attributes', 'actor_id'])
       )
+    ),
+);
+export const selectActorActionsGroupedByActionAttributes = createSelector(
+  (state) => selectEntities(state, API.ACTOR_ACTIONS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'measure_id'])
+    ).map(
+      (group) => group.map((entity) => entity.get('attributes'))
+    ),
+);
+export const selectActorActionsGroupedByActorAttributes = createSelector(
+  (state) => selectEntities(state, API.ACTOR_ACTIONS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'actor_id'])
+    ).map(
+      (group) => group.map((entity) => entity.get('attributes'))
     ),
 );
 
@@ -1260,6 +1349,7 @@ export const selectActionResourcesGroupedByAction = createSelector(
       )
     ),
 );
+
 export const selectActionIndicatorsGroupedByIndicator = createSelector(
   (state) => selectEntities(state, API.ACTION_INDICATORS),
   (entities) => entities
@@ -1326,7 +1416,6 @@ export const selectUserActorsGroupedByUser = createSelector(
       )
     ),
 );
-
 export const selectActionActorsGroupedByAction = createSelector(
   (state) => selectEntities(state, API.ACTION_ACTORS),
   (entities) => entities
@@ -1350,18 +1439,6 @@ export const selectActionActionsGroupedByTopAction = createSelector(
         (entity) => entity.getIn(['attributes', 'other_measure_id'])
       )
     );
-    // console.log(leftRight && leftRight.toJS())
-    // // measures by othermeasure_id
-    // const rightLeft = connections.groupBy(
-    //   (entity) => entity.getIn(['attributes', 'other_measure_id'])
-    // ).map(
-    //   (group) => group.map(
-    //     (entity) => entity.getIn(['attributes', 'measure_id'])
-    //   )
-    // );
-    // console.log(rightLeft && rightLeft.toJS())
-    // const combined = leftRight.mergeDeep(rightLeft);
-    // return combined;
   },
 );
 export const selectActionActionsGroupedBySubAction = createSelector(
@@ -1414,9 +1491,33 @@ export const selectActorActionsMembersGroupedByAction = createSelector(
     }, Map())
   )
 );
+export const selectActorActionsAssociationsGroupedByAction = createSelector(
+  selectActorActionsGroupedByAction,
+  selectMembershipsGroupedByMember,
+  (entities, memberships) => entities && memberships && entities.map(
+    (actors) => actors.reduce((memo, actorId) => {
+      if (memberships.get(actorId)) {
+        return memo.concat(memberships.get(actorId));
+      }
+      return memo;
+    }, Map())
+  )
+);
 export const selectActionActorsMembersGroupedByAction = createSelector(
   selectActionActorsGroupedByAction,
   selectMembershipsGroupedByAssociation,
+  (actionActorsByAction, memberships) => actionActorsByAction && memberships && actionActorsByAction.map(
+    (actionActors) => actionActors.reduce((memo, actorId) => {
+      if (memberships.get(actorId)) {
+        return memo.concat(memberships.get(actorId));
+      }
+      return memo;
+    }, Map())
+  )
+);
+export const selectActionActorsAssociationsGroupedByAction = createSelector(
+  selectActionActorsGroupedByAction,
+  selectMembershipsGroupedByMember,
   (actionActorsByAction, memberships) => actionActorsByAction && memberships && actionActorsByAction.map(
     (actionActors) => actionActors.reduce((memo, actorId) => {
       if (memberships.get(actorId)) {

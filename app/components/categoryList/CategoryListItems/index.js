@@ -34,7 +34,7 @@ const GroupHeader = styled.h6`
   font-style: ${({ empty }) => (empty ? 'italic' : 'normal')};
   margin-top: 6px;
   margin-bottom: 3px;
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.small : '769px'}) {
+  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
     margin-top: 20px;
     margin-bottom: 10px;
   }

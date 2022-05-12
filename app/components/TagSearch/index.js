@@ -28,7 +28,7 @@ const Search = styled.div`
   width: 100%;
   background-color: ${palette('background', 0)};
   color: ${palette('dark', 2)};
-  padding: ${(props) => props.small ? '2px 7px' : '7px'};
+  padding: 2px 7px;
   border: 1px solid ${(props) => props.active ? palette('light', 4) : palette('light', 2)};
   box-shadow: 0 0 3px 0 ${(props) => props.active ? palette('dark', 2) : 'transparent'};
   min-height: ${(props) => props.small ? 30 : 36}px;
@@ -65,7 +65,7 @@ const Clear = styled(Button)`
   top: 0;
   right: 0;
   background-color: ${palette('background', 4)};
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: ${(props) => props.small ? '4px 6px' : '8px 6px'};
   }
   @media print {
@@ -189,7 +189,7 @@ export class TagSearch extends React.Component { // eslint-disable-line react/pr
               : messages.searchPlaceholderEntities
           ))}
         />
-        { hasFilters && (
+        { hasFilters && this.props.onClear && (
           <Clear
             onClick={this.props.onClear}
             small={this.props.multiselect}

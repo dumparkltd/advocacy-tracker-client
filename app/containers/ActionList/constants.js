@@ -10,11 +10,10 @@ export const DEPENDENCIES = [
   API.ACTORS,
   API.ACTIONS,
   API.RESOURCES,
-  API.INDICATORS,
+  API.ACTION_ACTIONS,
   API.ACTOR_ACTIONS,
   API.ACTION_ACTORS,
   API.ACTION_RESOURCES,
-  API.ACTION_INDICATORS,
   API.ACTOR_CATEGORIES,
   API.ACTION_CATEGORIES,
   API.ACTORTYPES,
@@ -28,41 +27,23 @@ export const DEPENDENCIES = [
   API.USERS,
   API.USER_ACTIONS,
   API.USER_ROLES,
+  API.INDICATORS,
+  API.ACTION_INDICATORS,
 ];
 
 export const CONFIG = {
   types: 'actiontypes',
   serverPath: API.ACTIONS,
   clientPath: ROUTES.ACTION,
+  hasMemberOption: true,
   views: {
     list: {
       search: ['code', 'title', 'description'],
-      sorting: [
-        {
-          attribute: 'title',
-          type: 'string',
-          order: 'asc',
-        },
-        {
-          attribute: 'code',
-          type: 'string',
-          order: 'asc',
-        },
-        {
-          attribute: 'updated_at',
-          type: 'date',
-          order: 'desc',
-          default: true,
-        },
-        {
-          attribute: 'id', // proxy for created at
-          type: 'number',
-          order: 'desc',
-        },
-      ],
     },
     map: {
-      types: Object.values(ACTIONTYPES),
+      types: [
+        ACTIONTYPES.EXPRESS,
+      ],
     },
   },
   taxonomies: { // filter by each category
@@ -91,7 +72,8 @@ export const CONFIG = {
       query: 'actor',
       type: 'action-actors',
       search: true,
-      message: 'entities.actors_{typeid}.plural',
+      messageByType: 'entities.actors_{typeid}.plural',
+      message: 'entities.actors.plural',
       path: API.ACTORS,
       entityType: 'actors',
       clientPath: ROUTES.ACTOR,
@@ -106,7 +88,8 @@ export const CONFIG = {
       query: 'targeted',
       type: 'action-targets',
       search: true,
-      message: 'entities.actors_{typeid}.plural',
+      messageByType: 'entities.actors_{typeid}.plural',
+      message: 'entities.actors.plural',
       path: API.ACTORS,
       entityType: 'actors',
       entityTypeAs: 'targets',
@@ -116,6 +99,37 @@ export const CONFIG = {
       ownKey: 'measure_id',
       groupByType: true,
       typeFilter: 'is_target',
+      typeMemberFilter: 'has_members',
+    },
+    parents: {
+      query: 'by-parent',
+      type: 'action-parents',
+      search: true,
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
+      path: API.ACTIONS, // filter by actor connection
+      entityType: 'actions', // filter by actor connection
+      entityTypeAs: 'parents', // filter by actor connection
+      clientPath: ROUTES.ACTION,
+      connectPath: API.ACTION_ACTIONS, // filter by actor connection
+      ownKey: 'measure_id',
+      key: 'other_measure_id',
+      groupByType: true,
+    },
+    children: {
+      query: 'by-child',
+      type: 'action-children',
+      search: true,
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
+      path: API.ACTIONS, // filter by actor connection
+      entityType: 'actions', // filter by actor connection
+      entityTypeAs: 'children', // filter by actor connection
+      clientPath: ROUTES.ACTION,
+      connectPath: API.ACTION_ACTIONS, // filter by actor connection
+      ownKey: 'other_measure_id', //  parent
+      key: 'measure_id', // child
+      groupByType: true,
     },
     indicators: {
       query: 'indicators',
@@ -134,7 +148,8 @@ export const CONFIG = {
       query: 'resources',
       type: 'action-resources',
       search: true,
-      message: 'entities.resources_{typeid}.plural',
+      messageByType: 'entities.resources_{typeid}.plural',
+      message: 'entities.resources.plural',
       path: API.RESOURCES,
       entityType: 'resources',
       clientPath: ROUTES.RESOURCE,
@@ -165,6 +180,7 @@ export const CONFIG = {
         attribute: 'draft',
         options: PUBLISH_STATUSES,
         role: USER_ROLES.MANAGER.value,
+        filterUI: 'checkboxes',
       },
     ],
   },

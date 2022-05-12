@@ -61,7 +61,7 @@ class ButtonFactory extends React.PureComponent { // eslint-disable-line react/p
             disabled={button.disabled}
           />
         );
-      case 'addFromMultiselect':
+      case 'addFlat':
         return (
           <ButtonFlatWithIcon
             onClick={() => button.onClick()}
@@ -71,6 +71,18 @@ class ButtonFactory extends React.PureComponent { // eslint-disable-line react/p
             title={button.title || intl.formatMessage(appMessages.buttons.add)}
             disabled={button.disabled}
             inForm
+          />
+        );
+      case 'addFlatPrimary':
+        return (
+          <ButtonFlatWithIcon
+            onClick={() => button.onClick()}
+            icon="add"
+            strong
+            type={button.submit ? 'submit' : 'button'}
+            title={button.title || intl.formatMessage(appMessages.buttons.add)}
+            disabled={button.disabled}
+            primary
           />
         );
       case 'save':
