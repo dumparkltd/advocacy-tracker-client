@@ -118,9 +118,9 @@ export const ACTIONTYPE_NAVGROUPS = {
   // Plans & Tasks
   1: {
     types: [
-      ACTIONTYPES.AP,
-      ACTIONTYPES.OP,
       ACTIONTYPES.TASK,
+      ACTIONTYPES.OP,
+      ACTIONTYPES.AP,
     ],
   },
   // country expressions
@@ -132,8 +132,8 @@ export const ACTIONTYPE_NAVGROUPS = {
   // events and interactions
   3: {
     types: [
-      ACTIONTYPES.EVENT,
       ACTIONTYPES.INTERACTION,
+      ACTIONTYPES.EVENT,
     ],
   },
 };
@@ -653,7 +653,7 @@ export const ACTORTYPES_CONFIG = {
 export const ACTIONTYPES_CONFIG = {
   1: {
     id: ACTIONTYPES.EXPRESS,
-    order: 5,
+    order: 3,
     is_code_public: true,
     columns: [
       {
@@ -741,7 +741,7 @@ export const ACTIONTYPES_CONFIG = {
   },
   3: {
     id: ACTIONTYPES.OP,
-    order: 3,
+    order: 5,
     is_code_public: true,
     columns: [
       {
@@ -768,7 +768,7 @@ export const ACTIONTYPES_CONFIG = {
   },
   4: {
     id: ACTIONTYPES.AP,
-    order: 2,
+    order: 6,
     columns: [
       {
         id: 'main',
@@ -829,7 +829,7 @@ export const ACTIONTYPES_CONFIG = {
   },
   6: {
     id: ACTIONTYPES.INTERACTION,
-    order: 6,
+    order: 2,
     columns: [
       {
         id: 'main',
