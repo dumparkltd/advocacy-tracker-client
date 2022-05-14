@@ -133,7 +133,7 @@ export function EntitiesMap({
           memberOption = {
             active: includeTargetMembers,
             onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-            label: 'Include activities targeting regions, groups and classes (countries belong to)',
+            label: 'Include activities targeting regions and groups (countries belong to)',
           };
         } else if (hasGroupActors(actortypes)) {
           memberOption = {
@@ -148,7 +148,7 @@ export function EntitiesMap({
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions, groups and classes (countries belong to)',
+          label: 'Include activities targeting regions and groups (countries belong to)',
         };
       // } else if (!hasActions && hasByTarget) { // i.e. regions, classes
       //   mapSubjectClean = 'targets';
@@ -162,7 +162,7 @@ export function EntitiesMap({
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions, groups and classes (countries belong to)',
+          label: 'Include activities targeting regions and groups (countries belong to)',
         };
       }
 
@@ -451,7 +451,7 @@ export function EntitiesMap({
           memberOption = {
             active: includeTargetMembers,
             onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-            label: 'Include activities targeting regions, groups and classes (countries belong to)',
+            label: 'Include activities targeting regions and groups (countries belong to)',
           };
         }
       } else if (hasGroupActors(actortypes)) {

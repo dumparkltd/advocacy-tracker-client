@@ -217,7 +217,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions, groups and classes (countries belong to)',
+          label: 'Include activities targeting regions and groups (countries belong to)',
         };
       } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.COUNTRY)) {
         memberOption = {
@@ -315,7 +315,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions, groups and classes (countries belong to)',
+          label: 'Include activities targeting regions and groups (countries belong to)',
         };
       } else if (mapSubjectClean === 'actors' && qe(typeId, ACTORTYPES.COUNTRY)) {
         memberOption = {
