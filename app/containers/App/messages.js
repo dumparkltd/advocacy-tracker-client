@@ -1015,11 +1015,11 @@ export default defineMessages({
     },
     topActions: {
       id: 'app.containers.App.nav.topActions',
-      defaultMessage: 'Top/parent activities',
+      defaultMessage: 'Parent activities',
     },
     subActions: {
       id: 'app.containers.App.nav.subActions',
-      defaultMessage: 'Sub/child activities',
+      defaultMessage: 'Child activities',
     },
     actors: {
       id: 'app.containers.App.nav.actors',
@@ -1310,19 +1310,19 @@ export default defineMessages({
     actions: {
       parent: {
         id: 'app.containers.App.entities.actions.parent',
-        defaultMessage: 'Predecessor activity',
+        defaultMessage: 'Parent activity',
       },
       children: {
         id: 'app.containers.App.entities.actions.children',
-        defaultMessage: 'Child/successor activities',
+        defaultMessage: 'Child activities',
       },
       topActions: {
         id: 'app.containers.App.entities.actions.topActions',
-        defaultMessage: 'Top/parent activities',
+        defaultMessage: 'Parent activities',
       },
       subActions: {
         id: 'app.containers.App.entities.actions.subActions',
-        defaultMessage: 'Sub/child activities',
+        defaultMessage: 'Child activities',
       },
       single: {
         id: 'app.containers.App.entities.actions.single',

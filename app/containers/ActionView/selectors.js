@@ -135,6 +135,7 @@ export const selectTopActionsByActiontype = createSelector(
   selectActionActorsGroupedByAction,
   selectActionCategoriesGroupedByAction,
   selectCategories,
+  selectUserActionsGroupedByAction,
   (
     ready,
     actions,
@@ -143,6 +144,7 @@ export const selectTopActionsByActiontype = createSelector(
     actionActors,
     actionCategories,
     categories,
+    userActions,
   ) => {
     if (!ready) return Map();
     return actions && actions
@@ -153,6 +155,7 @@ export const selectTopActionsByActiontype = createSelector(
         actionActors,
         categories,
         actionCategories,
+        users: userActions,
       }))
       .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
       .sortBy((val, key) => key);
@@ -168,6 +171,7 @@ export const selectSubActionsByActiontype = createSelector(
   selectActionActorsGroupedByAction,
   selectActionCategoriesGroupedByAction,
   selectCategories,
+  selectUserActionsGroupedByAction,
   (
     ready,
     actions,
@@ -176,6 +180,7 @@ export const selectSubActionsByActiontype = createSelector(
     actionActors,
     actionCategories,
     categories,
+    userActions,
   ) => {
     if (!ready) return Map();
     return actions && actions
@@ -186,6 +191,7 @@ export const selectSubActionsByActiontype = createSelector(
         actionActors,
         categories,
         actionCategories,
+        users: userActions,
       }))
       .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
       .sortBy((val, key) => key);

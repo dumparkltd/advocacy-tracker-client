@@ -321,6 +321,7 @@ function mapDispatchToProps(dispatch, props) {
           props.connect.get('type') === 'actorActions'
           || props.connect.get('type') === 'actionActors'
           || props.connect.get('type') === 'userActions'
+          || props.connect.get('type') === 'subActions'
         )
       ) {
         saveData = saveData.set(

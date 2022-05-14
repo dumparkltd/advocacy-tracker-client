@@ -153,6 +153,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     actorsByActortype,
     targetsByActortype,
     resourcesByResourcetype,
+    subActionsByActiontype,
     indicatorOptions,
     onCreateOption,
   ) => {
@@ -233,6 +234,23 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
         );
       }
     }
+    if (subActionsByActiontype) {
+      const actionConnections = renderActionsByActiontypeControl(
+        subActionsByActiontype,
+        connectedTaxonomies,
+        onCreateOption,
+        intl,
+        'associatedSubActionsByActiontype',
+      );
+      if (actionConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.subActions),
+            fields: actionConnections,
+          },
+        );
+      }
+    }
     if (resourcesByResourcetype) {
       const resourceConnections = renderResourcesByResourcetypeControl(
         resourcesByResourcetype,
@@ -256,7 +274,6 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     taxonomies,
     connectedTaxonomies,
     topActionsByActiontype,
-    subActionsByActiontype,
     userOptions,
     onCreateOption,
   ) => {
@@ -319,23 +336,6 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
         groups.push(
           {
             label: intl.formatMessage(appMessages.nav.topActions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    if (subActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        subActionsByActiontype,
-        connectedTaxonomies,
-        onCreateOption,
-        intl,
-        'associatedSubActionsByActiontype',
-      );
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.subActions),
             fields: actionConnections,
           },
         );
@@ -445,6 +445,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
                       actorsByActortype,
                       targetsByActortype,
                       resourcesByResourcetype,
+                      subActionsByActiontype,
                       indicatorOptions,
                       onCreateOption,
                     ),
@@ -453,7 +454,6 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
                       taxonomies,
                       connectedTaxonomies,
                       topActionsByActiontype,
-                      subActionsByActiontype,
                       userOptions,
                       onCreateOption,
                     ),

@@ -210,6 +210,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     actorsByActortype,
     targetsByActortype,
     resourcesByResourcetype,
+    subActionsByActiontype,
     indicatorOptions,
     onCreateOption,
   ) => {
@@ -294,6 +295,23 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         );
       }
     }
+    if (subActionsByActiontype) {
+      const actionConnections = renderActionsByActiontypeControl(
+        subActionsByActiontype,
+        connectedTaxonomies,
+        onCreateOption,
+        intl,
+        'associatedSubActionsByActiontype',
+      );
+      if (actionConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.subActions),
+            fields: actionConnections,
+          },
+        );
+      }
+    }
     if (resourcesByResourcetype) {
       const resourceConnections = renderResourcesByResourcetypeControl(
         resourcesByResourcetype,
@@ -317,7 +335,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     taxonomies,
     connectedTaxonomies,
     topActionsByActiontype,
-    subActionsByActiontype,
     userOptions,
     onCreateOption,
   ) => {
@@ -386,23 +403,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         groups.push(
           {
             label: intl.formatMessage(appMessages.nav.topActions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    if (subActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        subActionsByActiontype,
-        connectedTaxonomies,
-        onCreateOption,
-        intl,
-        'associatedSubActionsByActiontype',
-      );
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.subActions),
             fields: actionConnections,
           },
         );
@@ -529,6 +529,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       actorsByActortype,
                       targetsByActortype,
                       resourcesByResourcetype,
+                      subActionsByActiontype,
                       indicatorOptions,
                       onCreateOption,
                     ),
@@ -537,7 +538,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       taxonomies,
                       connectedTaxonomies,
                       topActionsByActiontype,
-                      subActionsByActiontype,
                       userOptions,
                       onCreateOption,
                     ),
