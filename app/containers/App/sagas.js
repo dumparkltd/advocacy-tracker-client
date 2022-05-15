@@ -34,6 +34,7 @@ import {
   UPDATE_ROUTE_QUERY,
   AUTHENTICATE_FORWARD,
   UPDATE_PATH,
+  RECOVER_PASSWORD,
   CLOSE_ENTITY,
   DISMISS_QUERY_MESSAGES,
   SET_ACTIONTYPE,
@@ -45,6 +46,7 @@ import {
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
   SET_INCLUDE_MEMBERS_FORFILTERS,
+  PARAMS,
 } from 'containers/App/constants';
 
 import {
@@ -74,6 +76,9 @@ import {
   deleteSending,
   deleteSuccess,
   deleteError,
+  recoverSending,
+  recoverSuccess,
+  recoverError,
   forwardOnAuthenticationChange,
   updatePath,
 } from 'containers/App/actions';
@@ -212,6 +217,29 @@ export function* authenticateSaga(payload) {
   } catch (err) {
     err.response.json = yield err.response.json();
     yield put(authenticateError(err));
+  }
+}
+
+export function* recoverSaga(payload) {
+  const { email } = payload.data;
+  try {
+    yield put(recoverSending());
+    yield call(apiRequest, 'post', ENDPOINTS.PASSWORD, {
+      email,
+      redirect_url: `${window.location.origin}${ROUTES.RESET_PASSWORD}`,
+    });
+    yield put(recoverSuccess());
+    // forward to login
+    yield put(updatePath(
+      ROUTES.LOGIN,
+      {
+        replace: true,
+        query: { info: PARAMS.RECOVER_SUCCESS },
+      }
+    ));
+  } catch (err) {
+    err.response.json = yield err.response.json();
+    yield put(recoverError(err));
   }
 }
 
@@ -948,6 +976,7 @@ export default function* rootSaga() {
   yield takeLatest(VALIDATE_TOKEN, validateTokenSaga);
 
   yield takeLatest(AUTHENTICATE, authenticateSaga);
+  yield takeLatest(RECOVER_PASSWORD, recoverSaga);
   yield takeLatest(LOGOUT, logoutSaga);
   yield takeLatest(AUTHENTICATE_FORWARD, authChangeSaga);
 

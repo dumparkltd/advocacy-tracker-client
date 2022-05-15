@@ -40,6 +40,8 @@ export const ROUTES = {
   LOGIN: '/login',
   LOGOUT: '/logout',
   REGISTER: '/register',
+  RESET_PASSWORD: '/resetpassword',
+  RECOVER_PASSWORD: '/recoverpassword',
   UNAUTHORISED: '/unauthorised',
   USERS: '/users',
   ACTIONS: '/actions',

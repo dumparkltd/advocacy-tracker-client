@@ -81,6 +81,48 @@ export default function createRoutes(store) {
         importModules.catch(errorLoading);
       },
     }, {
+      path: ROUTES.RECOVER_PASSWORD,
+      name: 'userPasswordRecover',
+      onEnter: redirectIfSignedIn(),
+      getComponent(nextState, cb) {
+        const importModules = Promise.all([
+          import('containers/UserPasswordRecover/reducer'),
+          import('containers/UserPasswordRecover/sagas'),
+          import('containers/UserPasswordRecover'),
+        ]);
+
+        const renderRoute = loadModule(cb);
+
+        importModules.then(([reducer, sagas, component]) => {
+          injectReducer('userPasswordRecover', reducer.default);
+          injectSagas(sagas.default);
+          renderRoute(component);
+        });
+
+        importModules.catch(errorLoading);
+      },
+    }, {
+      path: ROUTES.RESET_PASSWORD,
+      name: 'userPasswordReset',
+      onEnter: redirectIfSignedIn(),
+      getComponent(nextState, cb) {
+        const importModules = Promise.all([
+          import('containers/UserPasswordReset/reducer'),
+          import('containers/UserPasswordReset/sagas'),
+          import('containers/UserPasswordReset'),
+        ]);
+
+        const renderRoute = loadModule(cb);
+
+        importModules.then(([reducer, sagas, component]) => {
+          injectReducer('userPasswordReset', reducer.default);
+          injectSagas(sagas.default);
+          renderRoute(component);
+        });
+
+        importModules.catch(errorLoading);
+      },
+    }, {
       path: ROUTES.REGISTER,
       name: 'userRegister',
       onEnter: redirectIfSignedIn(),
