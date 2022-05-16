@@ -976,6 +976,15 @@ export const PUBLISH_STATUSES = [
   { value: true, message: 'ui.publishStatuses.draft' },
   { value: false, message: 'ui.publishStatuses.public' },
 ];
+// Entity publish statuses
+export const PRIVACY_STATUSES = [
+  { value: true, message: 'ui.privacyStatuses.private' },
+  { value: false, message: 'ui.privacyStatuses.public' },
+];
+export const ARCHIVE_STATUSES = [
+  { value: true, message: 'ui.archiveStatuses.archived' },
+  { value: false, message: 'ui.archiveStatuses.current' },
+];
 
 export const DEFAULT_RESOURCETYPE = RESOURCETYPES.REF;
 export const DEFAULT_ACTIONTYPE = ACTIONTYPES.TASK;

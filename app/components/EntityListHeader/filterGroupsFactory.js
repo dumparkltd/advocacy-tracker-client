@@ -34,6 +34,42 @@ export const makeFilterGroups = ({
   includeMembers,
 }) => {
   const filterGroups = {};
+
+  // attributes
+  if (config.attributes) {
+    // first prepare taxonomy options
+    filterGroups.attributes = {
+      id: 'attributes', // filterGroupId
+      label: messages.attributes,
+      show: true,
+      options: reduce(
+        config.attributes.options,
+        (memo, option) => {
+          if (
+            typeof option.role === 'undefined'
+            || (hasUserRole && hasUserRole[option.role])
+          ) {
+            const attributeFilterOptions = option.filterUI
+              && option.filterUI === 'checkboxes'
+              && makeAttributeFilterOptions({
+                config: config.attributes,
+                activeOptionId: option.attribute,
+                locationQueryValue: locationQuery.get('where'),
+              });
+            return memo.concat([{
+              id: option.attribute, // filterOptionId
+              label: option.label,
+              filterUI: option.filterUI,
+              message: option.message,
+              options: attributeFilterOptions && attributeFilterOptions.options,
+            }]);
+          }
+          return memo;
+        },
+        [],
+      ),
+    };
+  }
   // taxonomy option group
   if (config.taxonomies && taxonomies) {
     // first prepare taxonomy options
@@ -256,42 +292,6 @@ export const makeFilterGroups = ({
         };
       }
     });
-  }
-
-  // attributes
-  if (config.attributes) {
-    // first prepare taxonomy options
-    filterGroups.attributes = {
-      id: 'attributes', // filterGroupId
-      label: messages.attributes,
-      show: true,
-      options: reduce(
-        config.attributes.options,
-        (memo, option) => {
-          if (
-            typeof option.role === 'undefined'
-            || (hasUserRole && hasUserRole[option.role])
-          ) {
-            const attributeFilterOptions = option.filterUI
-              && option.filterUI === 'checkboxes'
-              && makeAttributeFilterOptions({
-                config: config.attributes,
-                activeOptionId: option.attribute,
-                locationQueryValue: locationQuery.get('where'),
-              });
-            return memo.concat([{
-              id: option.attribute, // filterOptionId
-              label: option.label,
-              filterUI: option.filterUI,
-              message: option.message,
-              options: attributeFilterOptions && attributeFilterOptions.options,
-            }]);
-          }
-          return memo;
-        },
-        [],
-      ),
-    };
   }
   return filterGroups;
 };

@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import { Box, Text, Button } from 'grommet';
 import PrintHide from 'components/styled/PrintHide';
 import styled from 'styled-components';
+import { FormattedMessage } from 'react-intl';
+
+import appMessages from 'containers/App/messages';
 
 const Select = styled(PrintHide)`
   width: 20px;
@@ -17,6 +20,7 @@ const Link = styled((p) => <Button as="a" plain {...p} />)`
 const Label = styled((p) => <Text size="small" {...p} />)`
   line-height: 16px;
 `;
+
 
 export function CellBodyMain({
   entity,
@@ -34,7 +38,26 @@ export function CellBodyMain({
           />
         </Select>
       )}
-      <Box>
+      <Box gap="xxsmall">
+        {(entity.draft || entity.is_archive || entity.private) && (
+          <Box direction="row" gap="xsmall">
+            {entity.private && (
+              <Text color="private" size="xxxsmall">
+                <FormattedMessage {...appMessages.ui.privacyStatuses.private} />
+              </Text>
+            )}
+            {entity.archived && (
+              <Text color="archived" size="xxxsmall">
+                <FormattedMessage {...appMessages.ui.archiveStatuses.archived} />
+              </Text>
+            )}
+            {entity.draft && (
+              <Text color="draft" size="xxxsmall">
+                <FormattedMessage {...appMessages.ui.publishStatuses.draft} />
+              </Text>
+            )}
+          </Box>
+        )}
         {Object.keys(entity.values).map((key) => (
           <Box key={key}>
             {(key === 'title' || key === 'name') && (
@@ -58,13 +81,6 @@ export function CellBodyMain({
             )}
           </Box>
         ))}
-        {entity.draft && (
-          <Box>
-            <Text color="dark-5" size="xxsmall">
-              [DRAFT]
-            </Text>
-          </Box>
-        )}
       </Box>
     </Box>
   );

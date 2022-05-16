@@ -483,6 +483,9 @@ theme.global = {
       light: '#CECED2',
       dark: '#FFFFFF',
     },
+    private: '#DA1D52',
+    archived: '#F37043',
+    draft: '#BCB9B8',
   },
   edgeSize: {
     hair: '1px',
@@ -516,6 +519,7 @@ theme.text = {
   small: { size: '14px', height: '18px', maxWidth: '700px' },
   xsmall: { size: '13px', height: '16px', maxWidth: '600px' },
   xxsmall: { size: '12px', height: '14px', maxWidth: '500px' },
+  xxxsmall: { size: '11px', height: '13px', maxWidth: '500px' },
 };
 
 theme.icon = {

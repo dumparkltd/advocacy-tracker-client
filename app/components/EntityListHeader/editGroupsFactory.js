@@ -29,6 +29,36 @@ export const makeEditGroups = ({
   // const selectedActortypes = actortypes && actortypes.filter(
   //   (actortype) => selectedActortypeIds.find((id) => qe(id, actortype.get('id'))),
   // );
+
+  // attributes
+  if (config.attributes) {
+    // first prepare taxonomy options
+    editGroups.attributes = {
+      id: 'attributes', // filterGroupId
+      label: messages.attributes,
+      show: true,
+      options: reduce(
+        config.attributes.options,
+        (optionsMemo, option) => {
+          if (
+            (typeof option.edit === 'undefined' || option.edit)
+            && (typeof option.role === 'undefined' || hasUserRole[option.roleEdit || option.role])
+          ) {
+            return optionsMemo.concat({
+              id: option.attribute, // filterOptionId
+              label: option.label,
+              message: option.message,
+              active: !!activeEditOption
+                && activeEditOption.group === 'attributes'
+                && activeEditOption.optionId === option.attribute,
+            });
+          }
+          return optionsMemo;
+        },
+        [],
+      ),
+    };
+  }
   // taxonomy option group
   if (config.taxonomies && taxonomies) {
     // first prepare taxonomy options
@@ -227,34 +257,5 @@ export const makeEditGroups = ({
     });
   }
 
-  // attributes
-  if (config.attributes) {
-    // first prepare taxonomy options
-    editGroups.attributes = {
-      id: 'attributes', // filterGroupId
-      label: messages.attributes,
-      show: true,
-      options: reduce(
-        config.attributes.options,
-        (optionsMemo, option) => {
-          if (
-            (typeof option.edit === 'undefined' || option.edit)
-            && (typeof option.role === 'undefined' || hasUserRole[option.role])
-          ) {
-            return optionsMemo.concat({
-              id: option.attribute, // filterOptionId
-              label: option.label,
-              message: option.message,
-              active: !!activeEditOption
-                && activeEditOption.group === 'attributes'
-                && activeEditOption.optionId === option.attribute,
-            });
-          }
-          return optionsMemo;
-        },
-        [],
-      ),
-    };
-  }
   return editGroups;
 };

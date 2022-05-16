@@ -134,6 +134,7 @@ export const makeAttributeFilterOptions = ({
   };
   // the attribute option
   const option = find(config.options, (o) => o.attribute === activeOptionId);
+
   if (option) {
     filterOptions.message = option.message;
     if (option.filterUI && option.filterUI === 'checkboxes') {

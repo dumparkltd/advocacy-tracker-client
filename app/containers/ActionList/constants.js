@@ -3,6 +3,8 @@ import {
   ROUTES,
   USER_ROLES,
   PUBLISH_STATUSES,
+  PRIVACY_STATUSES,
+  ARCHIVE_STATUSES,
   ACTIONTYPES,
 } from 'themes/config';
 
@@ -181,6 +183,24 @@ export const CONFIG = {
         options: PUBLISH_STATUSES,
         role: USER_ROLES.MANAGER.value,
         filterUI: 'checkboxes',
+      },
+      {
+        search: false,
+        message: 'attributes.private',
+        attribute: 'private',
+        options: PRIVACY_STATUSES,
+        role: USER_ROLES.MANAGER.value,
+        roleEdit: USER_ROLES.ADMIN.value,
+        filterUI: 'checkboxes',
+      },
+      {
+        search: false,
+        message: 'attributes.is_archive',
+        attribute: 'is_archive',
+        options: ARCHIVE_STATUSES,
+        role: USER_ROLES.ADMIN.value,
+        filterUI: 'checkboxes',
+        default: false,
       },
     ],
   },

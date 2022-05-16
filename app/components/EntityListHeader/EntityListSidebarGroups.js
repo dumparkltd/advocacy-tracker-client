@@ -83,7 +83,7 @@ class EntityListSidebarGroups extends React.PureComponent { // eslint-disable-li
                       <Box>
                         {groupOptions && groupOptions.map(
                           (option, i) => (
-                            <Box key={i}>
+                            <Box key={i} margin={{ top: 'small' }}>
                               {option.get('filterUI') && qe(option.get('filterUI'), 'checkboxes') && (
                                 <FilterOptionCheckboxes
                                   option={option}

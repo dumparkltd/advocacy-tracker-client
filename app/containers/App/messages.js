@@ -797,9 +797,17 @@ export default defineMessages({
       id: 'app.containers.App.attributes.resourcetype_id',
       defaultMessage: 'Resource type',
     },
+    is_archive: {
+      id: 'app.containers.App.attributes.is_archive',
+      defaultMessage: 'Archived?',
+    },
+    private: {
+      id: 'app.containers.App.attributes.private',
+      defaultMessage: 'Confidentiality',
+    },
     draft: {
       id: 'app.containers.App.attributes.draft',
-      defaultMessage: 'Status',
+      defaultMessage: 'Authoring status',
     },
     code: {
       id: 'app.containers.App.attributes.code',
@@ -2273,6 +2281,26 @@ export default defineMessages({
         defaultMessage: 'Guest (no role assigned)',
       },
     },
+    archiveStatuses: {
+      archived: {
+        id: 'app.containers.App.ui.privacyStatuses.archived',
+        defaultMessage: 'Archived',
+      },
+      current: {
+        id: 'app.containers.App.ui.privacyStatuses.current',
+        defaultMessage: 'Current',
+      },
+    },
+    privacyStatuses: {
+      private: {
+        id: 'app.containers.App.ui.privacyStatuses.private',
+        defaultMessage: 'Confidential',
+      },
+      public: {
+        id: 'app.containers.App.ui.privacyStatuses.public',
+        defaultMessage: 'Not confidential',
+      },
+    },
     publishStatuses: {
       draft: {
         id: 'app.containers.App.ui.publishStatuses.draft',
@@ -2280,7 +2308,7 @@ export default defineMessages({
       },
       public: {
         id: 'app.containers.App.ui.publishStatuses.public',
-        defaultMessage: 'Public',
+        defaultMessage: 'Completed',
       },
     },
     docPublishStatuses: {

@@ -46,7 +46,8 @@ export function FilterOptionCheckboxes({
                       value: attributeOption.get('value'),
                       add: !attributeOption.get('checked'),
                       remove: attributeOption.get('checked'),
-                      replace: !attributeOption.get('checked'),
+                      replace: false,
+                      multipleAttributeValues: false,
                     },
                     {
                       arg: 'page',

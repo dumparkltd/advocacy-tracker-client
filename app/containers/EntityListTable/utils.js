@@ -246,6 +246,8 @@ export const prepareEntities = ({
                   {}
                 ),
                 draft: entity.getIn(['attributes', 'draft']),
+                archived: entity.getIn(['attributes', 'is_archive']),
+                private: entity.getIn(['attributes', 'private']),
                 sortValue: entity.getIn(['attributes', col.sort]),
                 selected: entityIdsSelected && entityIdsSelected.includes(id),
                 href: url || `${path}/${id}`,

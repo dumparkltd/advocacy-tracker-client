@@ -100,6 +100,7 @@ import {
   updateEntityRequest,
   updateAssociationsRequest,
 } from 'utils/entities-update';
+import { qe } from 'utils/quasi-equals';
 import apiRequest, { getAuthValues, clearAuthValues } from 'utils/api-request';
 
 const MAX_LOAD_ATTEMPTS = 3;
@@ -734,8 +735,34 @@ const getNextQuery = (query, extend, location) => {
     const queryUpdated = memo;
     // if arg already set and not replacing
     if (queryUpdated[param.arg] && !param.replace) {
+      // if multipleAttributeValues are not allowed
+      if (
+        param.value
+        && param.value.indexOf(':') > -1
+        && typeof param.multipleAttributeValues !== 'undefined'
+        && param.multipleAttributeValues === false
+      ) {
+        if (param.add) {
+          const [attribute] = param.value.split(':');
+          const keepAttributeValues = queryPrevious[param.arg]
+            ? asArray(queryPrevious[param.arg]).filter(
+              (attVal) => {
+                const [att] = attVal.split(':');
+                return !qe(att, attribute);
+              }
+            )
+            : [];
+          queryUpdated[param.arg] = [
+            ...keepAttributeValues,
+            param.value,
+          ];
+        } else if (param.remove && queryUpdated[param.arg]) {
+          queryUpdated[param.arg] = asArray(queryPrevious[param.arg]).filter(
+            (attVal) => !qe(attVal, param.value)
+          );
+        }
       // if multiple values set
-      if (Array.isArray(queryUpdated[param.arg])) {
+      } else if (Array.isArray(queryUpdated[param.arg])) {
         // add if not already present
         if (param.add && queryUpdated[param.arg].indexOf(param.value.toString()) === -1) {
           queryUpdated[param.arg].push(param.value);
@@ -788,7 +815,7 @@ export function* updateRouteQuerySaga({ query, extend = true }) {
     {
       query,
       extend,
-      replace: true,
+      // replace: true, ineffective
     },
   ));
 }
