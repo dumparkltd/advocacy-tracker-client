@@ -942,7 +942,7 @@ export const KEYS = {
   CLIENT: 'client',
   EXPIRY: 'expiry',
   UID: 'uid',
-  // RESET_PASSWORD: 'reset_password',
+  RESET_PASSWORD: 'reset_password',
 };
 
 // database date format
