@@ -39,7 +39,7 @@ export function CellBodyMain({
         </Select>
       )}
       <Box gap="xxsmall">
-        {(entity.draft || entity.is_archive || entity.private) && (
+        {(entity.draft || entity.archived || entity.private) && (
           <Box direction="row" gap="xsmall">
             {entity.private && (
               <Text color="private" size="xxxsmall">
