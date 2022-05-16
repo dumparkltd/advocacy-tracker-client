@@ -21,6 +21,8 @@ export const RESET_PROGRESS = 'impactoss/App/RESET_PROGRESS';
 
 export const AUTHENTICATE_SENDING = 'impactoss/App/AUTHENTICATE_SENDING';
 export const AUTHENTICATE = 'impactoss/App/AUTHENTICATE';
+export const RESET_PASSWORD = 'impactoss/App/RESET_PASSWORD';
+export const RECOVER_PASSWORD = 'impactoss/App/RECOVER_PASSWORD';
 export const AUTHENTICATE_SUCCESS = 'impactoss/App/AUTHENTICATE_SUCCESS';
 export const AUTHENTICATE_ERROR = 'impactoss/App/AUTHENTICATE_ERROR';
 export const SET_AUTHENTICATION_STATE = 'impactoss/App/SET_AUTHENTICATION_STATE';
@@ -55,6 +57,10 @@ export const SAVE_ERROR_DISMISS = 'impactoss/App/SAVE_ERROR_DISMISS';
 export const DELETE_SENDING = 'impactoss/App/DELETE_SENDING';
 export const DELETE_SUCCESS = 'impactoss/App/DELETE_SUCCESS';
 export const DELETE_ERROR = 'impactoss/App/DELETE_ERROR';
+
+export const RECOVER_SENDING = 'impactoss/App/RECOVER_SENDING';
+export const RECOVER_SUCCESS = 'impactoss/App/RECOVER_SUCCESS';
+export const RECOVER_ERROR = 'impactoss/App/RECOVER_ERROR';
 
 export const UPDATE_ROUTE_QUERY = 'impactoss/App/UPDATE_ROUTE_QUERY';
 export const UPDATE_PATH = 'impactoss/App/UPDATE_PATH';

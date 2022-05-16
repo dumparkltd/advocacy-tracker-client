@@ -40,6 +40,8 @@ export const ROUTES = {
   LOGIN: '/login',
   LOGOUT: '/logout',
   REGISTER: '/register',
+  RESET_PASSWORD: '/resetpassword',
+  RECOVER_PASSWORD: '/recoverpassword',
   UNAUTHORISED: '/unauthorised',
   USERS: '/users',
   ACTIONS: '/actions',
@@ -940,7 +942,7 @@ export const KEYS = {
   CLIENT: 'client',
   EXPIRY: 'expiry',
   UID: 'uid',
-  // RESET_PASSWORD: 'reset_password',
+  RESET_PASSWORD: 'reset_password',
 };
 
 // database date format
