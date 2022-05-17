@@ -55,7 +55,7 @@ const BarWrap = styled.div`
 `;
 const Bar = styled.div`
   width: ${({ length }) => length}%;
-  background-color: ${(props) => palette(props.palette, props.pIndex || 0)};
+  background-color: ${(props) => props.theme.global.colors.highlight};
   vertical-align: middle;
   display: inline-block;
   position: relative;
@@ -75,7 +75,7 @@ const Bar = styled.div`
       right: 0;
       left: 0;
       z-index: -1;
-      border-bottom: ${({ multiple }) => (multiple ? 8 : 16)}px solid ${(props) => palette(props.palette, props.pIndex || 0)};
+      border-bottom: ${({ multiple }) => (multiple ? 8 : 16)}px solid ${(props) => props.theme.global.colors.highlight};
     }
   }
 `;
@@ -86,7 +86,7 @@ const Count = styled.div`
   left: 0;
   bottom: 100%;
   padding: 2px 0;
-  color: ${(props) => palette(props.palette, 0)};
+  color: ${(props) => props.theme.global.colors.highlight};
   white-space: nowrap;
   @media print, (min-width: ${(props) => props.theme.breakpoints.medium}) {
     display: block;
@@ -109,7 +109,7 @@ const Count = styled.div`
 const CountSecondary = styled(Count)`
   right: 0;
   top: 100%;
-  color: ${(props) => palette(props.palette, 1)};
+  color: ${(props) => props.theme.global.colors.highlight};
   @media print, (min-width: ${(props) => props.theme.breakpoints.medium}) {
     text-align: left;
     padding: 0 0 0 5px;
