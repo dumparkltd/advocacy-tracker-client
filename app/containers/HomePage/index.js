@@ -23,7 +23,7 @@ import {
 
 import ButtonHero from 'components/buttons/ButtonHero';
 // import ButtonFlat from 'components/buttons/ButtonFlat';
-import NormalImg from 'components/Img';
+// import NormalImg from 'components/Img';
 import Loading from 'components/Loading';
 import Footer from 'containers/Footer';
 
@@ -34,10 +34,6 @@ import { ROUTES } from 'themes/config';
 import { DEPENDENCIES } from './constants';
 
 import messages from './messages';
-
-const GraphicHome = styled(NormalImg)`
-  width: 100px;
-`;
 
 const Styled = styled.div`
   background: ${({ theme }) => theme.global.colors.background};
@@ -156,9 +152,8 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
   render() {
     const { intl } = this.context;
     const {
-      theme, onPageLink, isUserSigningIn, isUserSignedIn, isUserAnalyst,
+      onPageLink, isUserSigningIn, isUserSignedIn, isUserAnalyst,
     } = this.props;
-    const appTitle = `${intl.formatMessage(appMessages.app.title)} - ${intl.formatMessage(appMessages.app.claim)}`;
     return (
       <Styled>
         <Helmet
@@ -170,7 +165,6 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
         <SectionTop>
           <SectionWrapper>
             <Container noPaddingBottom>
-              <GraphicHome src={theme.media.graphicHome} alt={appTitle} />
               <Row>
                 <GridSpace lg={1 / 8} />
                 <Grid lg={3 / 4} sm={1}>

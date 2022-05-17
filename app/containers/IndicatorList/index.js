@@ -141,7 +141,6 @@ const mapStateToProps = (state, props) => ({
   isAnalyst: selectIsUserAnalyst(state),
   actiontypes: selectActiontypesForIndicators(state),
   allEntities: selectIndicators(state),
-
 });
 function mapDispatchToProps(dispatch) {
   return {
