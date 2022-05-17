@@ -16,6 +16,7 @@ import {
   selectIsUserManager,
   selectIsUserAnalyst,
   selectActiontypesForIndicators,
+  selectIndicators,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -45,6 +46,7 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
     const {
       dataReady,
       entities,
+      allEntities,
       connections,
       // connectedTaxonomies,
       location,
@@ -96,6 +98,7 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
         />
         <EntityList
           entities={entities}
+          allEntityCount={allEntities && allEntities.size}
           connections={connections}
           config={CONFIG}
           headerOptions={headerOptions}
@@ -123,6 +126,7 @@ IndicatorList.propTypes = {
   actiontypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
   isAnalyst: PropTypes.bool,
+  allEntities: PropTypes.instanceOf(Map),
 };
 
 IndicatorList.contextTypes = {
@@ -136,6 +140,8 @@ const mapStateToProps = (state, props) => ({
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
   actiontypes: selectActiontypesForIndicators(state),
+  allEntities: selectIndicators(state),
+
 });
 function mapDispatchToProps(dispatch) {
   return {

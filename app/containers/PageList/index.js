@@ -8,16 +8,21 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
-import { Map, fromJS } from 'immutable';
+import { Map, List, fromJS } from 'immutable';
 
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
-import { selectReady, selectEntities } from 'containers/App/selectors';
+import {
+  selectReady,
+  selectIsUserManager,
+  selectPages,
+} from 'containers/App/selectors';
 import appMessages from 'containers/App/messages';
-import { ROUTES, API } from 'themes/config';
+import { ROUTES } from 'themes/config';
 
 import EntityList from 'containers/EntityList';
 
 import { CONFIG, DEPENDENCIES } from './constants';
+import { selectListPages } from './selectors';
 import messages from './messages';
 
 export class PageList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
@@ -34,24 +39,32 @@ export class PageList extends React.PureComponent { // eslint-disable-line react
 
   render() {
     const { intl } = this.context;
-    const { dataReady } = this.props;
-
+    const {
+      dataReady,
+      isManager,
+      location,
+      allEntities,
+    } = this.props;
     const headerOptions = {
       supTitle: intl.formatMessage(messages.pageTitle),
-      icon: 'pages',
-      actions: [{
-        type: 'add',
-        title: [
-          intl.formatMessage(appMessages.buttons.add),
-          {
-            title: intl.formatMessage(appMessages.entities.pages.single),
-            hiddenSmall: true,
-          },
-        ],
-        onClick: () => this.props.handleNew(),
-      }],
+      actions: [],
     };
-
+    if (window.print) {
+      headerOptions.actions.push({
+        type: 'icon',
+        onClick: () => window.print(),
+        title: 'Print',
+        icon: 'print',
+      });
+    }
+    if (isManager) {
+      headerOptions.actions.push({
+        title: 'Create new',
+        onClick: () => this.props.handleNew(),
+        icon: 'add',
+        isManager,
+      });
+    }
     return (
       <div>
         <Helmet
@@ -61,18 +74,16 @@ export class PageList extends React.PureComponent { // eslint-disable-line react
           ]}
         />
         <EntityList
-          entities={this.props.entities && this.props.entities.toList()}
+          entities={this.props.entities && this.props.entities}
+          allEntityCount={allEntities && allEntities.size}
           config={CONFIG}
           headerOptions={headerOptions}
           dataReady={dataReady}
-          includeHeader={false}
-          headerStyle="explore"
-          canEdit={false}
           entityTitle={{
             single: intl.formatMessage(appMessages.entities.pages.single),
             plural: intl.formatMessage(appMessages.entities.pages.plural),
           }}
-          locationQuery={fromJS(this.props.location.query)}
+          locationQuery={fromJS(location.query)}
         />
       </div>
     );
@@ -83,17 +94,21 @@ PageList.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func,
   handleNew: PropTypes.func,
   dataReady: PropTypes.bool,
-  entities: PropTypes.instanceOf(Map).isRequired,
+  entities: PropTypes.instanceOf(List).isRequired,
+  allEntities: PropTypes.instanceOf(Map),
   location: PropTypes.object,
+  isManager: PropTypes.bool,
 };
 
 PageList.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state, props) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
-  entities: selectEntities(state, API.PAGES),
+  entities: selectListPages(state, fromJS(props.location.query)),
+  isManager: selectIsUserManager(state),
+  allEntities: selectPages(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

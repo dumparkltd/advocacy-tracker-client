@@ -473,6 +473,10 @@ export const selectActors = createSelector(
   (state) => selectEntities(state, API.ACTORS),
   (entities) => sortEntities(entities, 'asc', 'title', null, false)
 );
+export const selectPages = createSelector(
+  (state) => selectEntities(state, API.PAGES),
+  (entities) => sortEntities(entities, 'asc', 'title', null, false)
+);
 export const selectActor = createSelector(
   (state, id) => selectEntity(state, { id, path: API.ACTORS }),
   (entity) => entity
@@ -859,6 +863,14 @@ export const selectActorsWhere = createSelector(
 export const selectActorsWhereQuery = createSelector(
   selectAttributeQuery,
   selectActortypeActors, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
+);
+// filter entities by attributes, using locationQuery
+export const selectPagesWhereQuery = createSelector(
+  selectAttributeQuery,
+  selectPages, // type should be optional
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities

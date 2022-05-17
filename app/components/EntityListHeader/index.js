@@ -579,11 +579,17 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
               )}
               {canEdit && isMinSize(size, 'large') && (
                 <HeaderSection noBorder>
-                  <Box fill="vertical" justify="between" pad={{ top: 'xsmall', bottom: 'xxsmall' }}>
+                  <Box
+                    fill="vertical"
+                    pad={{ top: 'xsmall', bottom: 'xxsmall' }}
+                    align="start"
+                    justify="center"
+                    gap="xsmall"
+                  >
                     <ButtonOptions
                       onClick={onShowEditOptions}
                       label={(
-                        <Box direction="row" gap="small">
+                        <Box direction="row" gap="small" align="center">
                           <Box>
                             <Edit color="dark-3" size="xxsmall" />
                           </Box>
@@ -599,7 +605,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                               key={i}
                               onClick={action.onClick}
                               label={(
-                                <Box direction="row" gap="small">
+                                <Box direction="row" gap="small" align="center">
                                   <Box>
                                     <Add color="dark-3" size="xxsmall" />
                                   </Box>
@@ -615,7 +621,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                               key={i}
                               onClick={action.onClick}
                               label={(
-                                <Box direction="row" gap="small">
+                                <Box direction="row" gap="small" align="center">
                                   <Box>
                                     <Multiple color="dark-3" size="xxsmall" />
                                   </Box>
