@@ -104,6 +104,7 @@ const ToggleMenu = styled((p) => <Button plain as="a" {...p} />)`
 
 const Section = styled((p) => <Box {...p} />)`
   border-right: 1px solid ${({ wide }) => wide ? '#282a2c' : 'transparent'};
+  border-bottom: 1px solid ${({ wide }) => !wide ? '#282a2c' : 'transparent'};
   &:last-child {
     border-color: transparent;
   }
@@ -114,7 +115,7 @@ const MainMenu = styled((p) => <Box {...p} />)`
   right: ${({ wide }) => !wide ? 0 : 'auto'};
   width: ${({ wide }) => !wide ? '100%' : 'auto'};
   top: ${({ wide, theme }) => !wide ? theme.sizes.header.banner.heightMobile : 0}px;
-  background: ${({ wide, theme }) => !wide ? theme.global.colors.white : 'transparent'};
+  background: ${({ wide, theme }) => wide ? theme.global.colors.white : theme.global.colors.black};
 `;
 
 const STATE_INITIAL = {
