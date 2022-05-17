@@ -39,7 +39,7 @@ import {
 } from 'containers/App/selectors';
 
 import {
-  entitySetSingles,
+  entitySetUser,
   prepareTaxonomiesIsAssociated,
   setActorConnections,
   setResourceConnections,
@@ -53,15 +53,7 @@ import { DEPENDENCIES } from './constants';
 export const selectViewEntity = createSelector(
   (state, id) => selectEntity(state, { path: API.ACTIONS, id }),
   (state) => selectEntities(state, API.USERS),
-  (entity, users) => entity && entitySetSingles(
-    entity, [
-      {
-        related: users,
-        key: 'user',
-        relatedKey: 'updated_by_id',
-      },
-    ],
-  )
+  (entity, users) => entitySetUser(entity, users)
 );
 
 // TODO optimise use selectActionCategoriesGroupedByAction

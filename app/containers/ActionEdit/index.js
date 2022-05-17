@@ -41,6 +41,7 @@ import { checkActionAttribute, checkActionRequired } from 'utils/entities';
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
+import qe from 'utils/quasi-equals';
 
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
@@ -61,6 +62,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectSessionUserId,
 } from 'containers/App/selectors';
 
 import Messages from 'components/Messages';
@@ -133,7 +135,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       indicatorOptions,
       userOptions,
     } = props;
-    // console.log(FORM_INITIAL.get('attributes') && FORM_INITIAL.get('attributes').toJS())
     return viewEntity
       ? Map({
         id: viewEntity.get('id'),
@@ -191,13 +192,15 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     );
   };
 
-  getHeaderAsideFields = (entity) => {
+  getHeaderAsideFields = (entity, isAdmin, isMine) => {
     const { intl } = this.context;
     const groups = []; // fieldGroups
 
     groups.push({
       fields: [
         getStatusField(intl.formatMessage),
+        (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
+        isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
         getMetaField(entity),
       ],
     });
@@ -426,6 +429,8 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       subActionsByActiontype,
       indicatorOptions,
       userOptions,
+      isAdmin,
+      myId,
     } = this.props;
     const { intl } = this.context;
     // const reference = this.props.params.id;
@@ -438,6 +443,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     const type = typeId
       ? intl.formatMessage(appMessages.entities[`actions_${typeId}`].single)
       : intl.formatMessage(appMessages.entities.actions.single);
+    const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
 
     return (
       <div>
@@ -516,11 +522,11 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                 handleSubmitFail={this.props.handleSubmitFail}
                 handleCancel={this.props.handleCancel}
                 handleUpdate={this.props.handleUpdate}
-                handleDelete={this.props.isUserAdmin ? this.props.handleDelete : null}
+                handleDelete={isAdmin ? this.props.handleDelete : null}
                 fields={{
                   header: {
                     main: this.getHeaderMainFields(viewEntity),
-                    aside: this.getHeaderAsideFields(viewEntity),
+                    aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
                   },
                   body: {
                     main: this.getBodyMainFields(
@@ -570,7 +576,7 @@ ActionEdit.propTypes = {
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
-  isUserAdmin: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   params: PropTypes.object,
   taxonomies: PropTypes.object,
   topActionsByActiontype: PropTypes.object,
@@ -584,6 +590,7 @@ ActionEdit.propTypes = {
   onCreateOption: PropTypes.func,
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
+  myId: PropTypes.string,
 };
 
 ActionEdit.contextTypes = {
@@ -592,7 +599,7 @@ ActionEdit.contextTypes = {
 
 const mapStateToProps = (state, props) => ({
   viewDomain: selectDomain(state),
-  isUserAdmin: selectIsUserAdmin(state),
+  isAdmin: selectIsUserAdmin(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),
@@ -605,6 +612,7 @@ const mapStateToProps = (state, props) => ({
   subActionsByActiontype: selectSubActionsByActiontype(state, props.params.id),
   indicatorOptions: selectIndicatorOptions(state, props.params.id),
   userOptions: selectUserOptions(state, props.params.id),
+  myId: selectSessionUserId(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

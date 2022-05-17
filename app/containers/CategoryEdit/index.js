@@ -36,6 +36,7 @@ import {
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
+import qe from 'utils/quasi-equals';
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
@@ -58,6 +59,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectSessionUserId,
 } from 'containers/App/selectors';
 
 import Messages from 'components/Messages';
@@ -149,12 +151,14 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
   };
 
 
-  getHeaderAsideFields = (entity, parentOptions, parentTaxonomy) => {
+  getHeaderAsideFields = (entity, isAdmin, isMine) => {
     const { intl } = this.context;
     const groups = []; // fieldGroups
     groups.push({
       fields: [
         getStatusField(intl.formatMessage),
+        (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
+        isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
         getMetaField(entity),
       ],
     });
@@ -168,6 +172,24 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
         ],
       });
     }
+    return groups;
+  }
+
+  getBodyMainFields = (
+    entity,
+    parentOptions,
+    parentTaxonomy,
+    // connectedTaxonomies,
+    // actorsByActortype,
+    // actions,
+    // onCreateOption,
+    // userOnly,
+  ) => {
+    const { intl } = this.context;
+    const groups = [];
+    groups.push({
+      fields: [getMarkdownFormField(intl.formatMessage)],
+    });
     if (parentOptions && parentTaxonomy) {
       groups.push({
         label: intl.formatMessage(appMessages.entities.taxonomies.parent),
@@ -179,22 +201,6 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
         )],
       });
     }
-    return groups;
-  }
-
-  getBodyMainFields = (
-    // entity,
-    // connectedTaxonomies,
-    // actorsByActortype,
-    // actions,
-    // onCreateOption,
-    // userOnly,
-  ) => {
-    const { intl } = this.context;
-    const fields = [];
-    fields.push({
-      fields: [getMarkdownFormField(intl.formatMessage)],
-    });
     // if (!userOnly) {
     //   if (entity.getIn(['taxonomy', 'attributes', 'tags_actions']) && actions) {
     //     fields.push(
@@ -228,7 +234,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
     //     }
     //   }
     // }
-    return fields;
+    return groups;
   };
 
   // getBodyAsideFields = (entity, users, isAdmin) => {
@@ -274,6 +280,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
       viewDomain,
       parentOptions,
       parentTaxonomy,
+      myId,
       // actorsByActortype,
       // actions,
       // users,
@@ -295,6 +302,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
         taxonomy: this.getTaxTitle(viewEntity.getIn(['taxonomy', 'id'])),
       });
     }
+    const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
 
     return (
       <div>
@@ -376,12 +384,15 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
                     main: this.getHeaderMainFields(),
                     aside: this.getHeaderAsideFields(
                       viewEntity,
-                      parentOptions,
-                      parentTaxonomy,
+                      isAdmin,
+                      isMine,
                     ),
                   },
                   body: {
                     main: this.getBodyMainFields(
+                      viewEntity,
+                      parentOptions,
+                      parentTaxonomy,
                       // viewEntity,
                       // connectedTaxonomies,
                       // actorsByActortype,
@@ -432,6 +443,7 @@ CategoryEdit.propTypes = {
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   onCreateOption: PropTypes.func,
+  myId: PropTypes.string,
 };
 
 CategoryEdit.contextTypes = {
@@ -446,6 +458,7 @@ const mapStateToProps = (state, props) => ({
   viewEntity: selectViewEntity(state, props.params.id),
   parentOptions: selectParentOptions(state, props.params.id),
   parentTaxonomy: selectParentTaxonomy(state, props.params.id),
+  myId: selectSessionUserId(state),
   // users: selectUsers(state),
   // actions: selectActions(state, props.params.id),
   // actorsByActortype: selectActorsByActortype(state, props.params.id),

@@ -14,6 +14,7 @@ import {
   getTitleField,
   getCategoryShortTitleField,
   getStatusField,
+  getStatusFieldIf,
   getMetaField,
   getMarkdownField,
   getLinkField,
@@ -34,7 +35,7 @@ import {
   getEntityReference,
 } from 'utils/entities';
 
-// import qe from 'utils/quasi-equals';
+import qe from 'utils/quasi-equals';
 
 import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
 
@@ -50,6 +51,8 @@ import {
   selectActorConnections,
   selectActionConnections,
   selectTaxonomiesWithCategories,
+  selectIsUserAdmin,
+  selectSessionUserId,
 } from 'containers/App/selectors';
 
 
@@ -94,13 +97,21 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
     return groups;
   };
 
-  getHeaderAsideFields = (entity, isManager, parentTaxonomy) => {
+  getHeaderAsideFields = (entity, isManager, isAdmin, isMine) => {
     const { intl } = this.context;
     const groups = isManager
       ? [
         {
           fields: [
             isManager && getStatusField(entity),
+            (isAdmin || isMine) && getStatusFieldIf({
+              entity,
+              attribute: 'private',
+            }),
+            isAdmin && getStatusFieldIf({
+              entity,
+              attribute: 'is_archive',
+            }),
             getMetaField(entity),
           ],
         },
@@ -118,21 +129,6 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
           value: intl.formatMessage(appMessages.textValues.user_only),
           label: appMessages.attributes.user_only,
         }],
-      });
-    }
-    // include parent link
-    if (entity.get('category') && parentTaxonomy) {
-      groups.push({
-        label: appMessages.entities.taxonomies.parent,
-        icon: 'categories',
-        fields: [
-          getEntityLinkField(
-            entity.get('category'),
-            ROUTES.CATEGORY,
-            '',
-            getEntityTitle(parentTaxonomy)
-          ),
-        ],
       });
     }
     return groups.length > 0 ? groups : null;
@@ -230,11 +226,26 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
     return fields;
   };
 
-  getBodyAsideFields = (entity, isManager, childTaxonomies) => {
-    const fields = [];
+  getBodyAsideFields = (entity, isManager, childTaxonomies, parentTaxonomy) => {
+    const groups = [];
+    // include parent link
+    if (entity.get('category') && parentTaxonomy) {
+      groups.push({
+        label: appMessages.entities.taxonomies.parent,
+        icon: 'categories',
+        fields: [
+          getEntityLinkField(
+            entity.get('category'),
+            ROUTES.CATEGORY,
+            '',
+            getEntityTitle(parentTaxonomy)
+          ),
+        ],
+      });
+    }
     // include children links
     if (childTaxonomies && hasTaxonomyCategories(childTaxonomies)) {
-      fields.push({ // fieldGroup
+      groups.push({ // fieldGroup
         label: appMessages.entities.taxonomies.children,
         icon: 'categories',
         fields: getTaxonomyFields(childTaxonomies, true),
@@ -244,7 +255,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
       && entity.getIn(['attributes', 'url']).trim().length > 0;
     const showDate = entity.getIn(['taxonomy', 'attributes', 'has_date']);
     if (showLink || showDate) {
-      fields.push({
+      groups.push({
         type: 'dark',
         fields: [
           showDate && getDateField(entity, 'date', { showEmpty: true }),
@@ -253,7 +264,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
       });
     }
     if (isManager && !!entity.getIn(['taxonomy', 'attributes', 'has_manager'])) {
-      fields.push({
+      groups.push({
         type: 'dark',
         fields: [getManagerField(
           entity,
@@ -262,7 +273,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
         )],
       });
     }
-    return fields.length > 0 ? fields : null;
+    return groups.length > 0 ? groups : null;
   };
 
   /* eslint-disable react/destructuring-assignment */
@@ -290,6 +301,8 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
       handleEdit,
       handleTypeClick,
       handleClose,
+      isAdmin,
+      myId,
     } = this.props;
     let buttons = [];
     if (dataReady) {
@@ -331,6 +344,8 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
     // console.log('actorsByActortype', actorsByActortype && actorsByActortype.toJS())
     // console.log('childActorsByActortype', childActorsByActortype && childActorsByActortype.toJS())
     // console.log('actortypes', actortypes && actortypes.toJS())
+    const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+
     return (
       <div>
         <Helmet
@@ -364,7 +379,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
                 fields={{
                   header: {
                     main: this.getHeaderMainFields(viewEntity, isManager),
-                    aside: this.getHeaderAsideFields(viewEntity, isManager, parentTaxonomy),
+                    aside: this.getHeaderAsideFields(viewEntity, isManager, isAdmin, isMine),
                   },
                   body: {
                     main: this.getBodyMainFields(
@@ -382,6 +397,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
                       viewEntity,
                       isManager,
                       childTaxonomies,
+                      parentTaxonomy,
                     ),
                   },
                 }}
@@ -413,6 +429,8 @@ CategoryView.propTypes = {
   childTaxonomies: PropTypes.object,
   actorConnections: PropTypes.object,
   actionConnections: PropTypes.object,
+  isAdmin: PropTypes.bool,
+  myId: PropTypes.string,
 };
 
 CategoryView.contextTypes = {
@@ -432,6 +450,8 @@ const mapStateToProps = (state, props) => ({
   actionsByActiontype: selectActionsByType(state, props.params.id),
   childActorsByActortype: selectChildActorsByType(state, props.params.id),
   childActionsByActiontype: selectChildActionsByType(state, props.params.id),
+  isAdmin: selectIsUserAdmin(state),
+  myId: selectSessionUserId(state),
 });
 
 function mapDispatchToProps(dispatch) {

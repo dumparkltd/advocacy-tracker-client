@@ -142,6 +142,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     groups.push({
       fields: [
         getStatusField(intl.formatMessage),
+        getStatusField(intl.formatMessage, 'private'),
       ],
     });
     return groups;

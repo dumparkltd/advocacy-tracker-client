@@ -23,6 +23,8 @@ import validateLength from 'components/forms/validators/validate-length';
 
 import {
   PUBLISH_STATUSES,
+  PRIVACY_STATUSES,
+  ARCHIVE_STATUSES,
   USER_ROLES,
   DATE_FORMAT,
   API,
@@ -564,13 +566,25 @@ export const getRoleFormField = (formatMessage, roleOptions) => ({
     || userRole.value === USER_ROLES.DEFAULT.value)),
 });
 
-export const getStatusField = (formatMessage) => ({
-  id: 'status',
-  controlType: 'select',
-  model: '.attributes.draft',
-  label: formatMessage(appMessages.attributes.draft),
-  options: PUBLISH_STATUSES,
-});
+export const getStatusField = (formatMessage, attribute = 'draft', options) => {
+  let myOptions = options;
+  if (attribute === 'draft') {
+    myOptions = PUBLISH_STATUSES;
+  }
+  if (attribute === 'private') {
+    myOptions = PRIVACY_STATUSES;
+  }
+  if (attribute === 'is_archive') {
+    myOptions = ARCHIVE_STATUSES;
+  }
+  return {
+    id: 'status',
+    controlType: 'select',
+    model: `.attributes.${attribute}`,
+    label: formatMessage(appMessages.attributes[attribute]),
+    options: myOptions,
+  };
+};
 
 export const getTitleFormField = (
   formatMessage,
@@ -840,10 +854,14 @@ const getCategoryFields = (args, formatMessage) => ({
         fields: [
           getCheckboxField(formatMessage, 'user_only'),
           getStatusField(formatMessage),
+          getStatusField(formatMessage, 'private'),
         ],
       }]
       : [{
-        fields: [getStatusField(formatMessage)],
+        fields: [
+          getStatusField(formatMessage),
+          getStatusField(formatMessage, 'private'),
+        ],
       }],
   },
   body: {
@@ -895,6 +913,7 @@ const getActorFields = ({ typeId }, formatMessage) => ({
     aside: [{ // fieldGroup
       fields: [
         getStatusField(formatMessage),
+        getStatusField(formatMessage, 'private'),
       ],
     }],
   },
@@ -962,6 +981,7 @@ const getActionFields = ({ typeId }, formatMessage) => ({
     aside: [{ // fieldGroup
       fields: [
         getStatusField(formatMessage),
+        getStatusField(formatMessage, 'private'),
       ],
     }],
   },
@@ -1041,11 +1061,8 @@ const getResourceFields = ({ typeId }, formatMessage) => ({
     }],
     aside: [{ // fieldGroup
       fields: [
-        checkResourceAttribute(typeId, 'url') && getLinkFormField(
-          formatMessage,
-          checkResourceRequired(typeId, 'url'),
-          'url',
-        ),
+        getStatusField(formatMessage),
+        getStatusField(formatMessage, 'private'),
       ],
     }],
   },

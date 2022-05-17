@@ -16,6 +16,7 @@ import styled from 'styled-components';
 import {
   getTitleField,
   getStatusField,
+  getStatusFieldIf,
   getMetaField,
   getMarkdownField,
   getReferenceField,
@@ -59,6 +60,8 @@ import FieldGroup from 'components/fields/FieldGroup';
 import {
   selectReady,
   selectIsUserManager,
+  selectIsUserAdmin,
+  selectSessionUserId,
   selectTaxonomiesWithCategories,
   selectActionConnections,
   selectActorConnections,
@@ -127,6 +130,8 @@ export function ActorView(props) {
     onCreateOption,
     users,
     userConnections,
+    isAdmin,
+    myId,
   } = props;
   useEffect(() => {
     // kick off loading of data
@@ -184,6 +189,8 @@ export function ActorView(props) {
   if (validViewSubjects.indexOf(viewSubject) === -1) {
     viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
   }
+  const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+
   return (
     <div>
       <Helmet
@@ -242,6 +249,14 @@ export function ActorView(props) {
                       group={{
                         fields: [
                           getStatusField(viewEntity),
+                          (isAdmin || isMine) && getStatusFieldIf({
+                            entity: viewEntity,
+                            attribute: 'private',
+                          }),
+                          isAdmin && getStatusFieldIf({
+                            entity: viewEntity,
+                            attribute: 'is_archive',
+                          }),
                           getMetaField(viewEntity),
                         ],
                       }}
@@ -417,6 +432,8 @@ ActorView.propTypes = {
   actionsAsTargetAsMemberByActortype: PropTypes.instanceOf(Map),
   userConnections: PropTypes.object,
   users: PropTypes.object,
+  isAdmin: PropTypes.bool,
+  myId: PropTypes.string,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -439,6 +456,8 @@ const mapStateToProps = (state, props) => ({
   actiontypes: selectActiontypes(state),
   users: selectEntityUsers(state, props.params.id),
   userConnections: selectUserConnections(state),
+  isAdmin: selectIsUserAdmin(state),
+  myId: selectSessionUserId(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

@@ -349,7 +349,12 @@ export const entitySetSingle = (
   );
 
 export const entitySetUser = (entity, users) => entity
-  && entitySetSingle(entity, users, 'user', 'updated_by_id');
+  && entitySetSingle(
+    entitySetSingle(entity, users, 'creator', 'created_by_id'),
+    users,
+    'user',
+    'updated_by_id',
+  );
 
 export const entitySetSingles = (entity, singles) => entity
   && singles.reduce(
@@ -745,7 +750,9 @@ const checkAttribute = (typeId, att, attributes, isManager) => {
 
 const checkRequired = (typeId, att, attributes) => {
   if (typeId && attributes && attributes[att] && attributes[att].required) {
-    return attributes[att].required.indexOf(typeId.toString()) > -1;
+    return typeof attributes[att].required === 'boolean'
+      ? attributes[att].required
+      : attributes[att].required.indexOf(typeId.toString()) > -1;
   }
   return false;
 };

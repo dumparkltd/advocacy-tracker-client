@@ -124,7 +124,10 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
     const { intl } = this.context;
     return ([
       {
-        fields: [getStatusField(intl.formatMessage)],
+        fields: [
+          getStatusField(intl.formatMessage),
+          getStatusField(intl.formatMessage, 'private'),
+        ],
       },
     ]);
   }

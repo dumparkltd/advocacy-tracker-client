@@ -112,6 +112,7 @@ export const getStatusField = (
 ) => (defaultValue || checkEmpty(entity.getIn(['attributes', attribute]))) && ({
   controlType: 'info',
   type: 'status',
+  attribute,
   value: (
     entity
     && entity.getIn(['attributes', attribute]) !== null
@@ -122,6 +123,25 @@ export const getStatusField = (
   options,
   label,
 });
+export const getStatusFieldIf = ({
+  entity,
+  attribute = 'draft',
+  options,
+  label,
+  defaultValue = true,
+  ifValue = true,
+}) => {
+  if (entity.getIn(['attributes', attribute]) === ifValue) {
+    return getStatusField(
+      entity,
+      attribute,
+      options,
+      label,
+      defaultValue,
+    );
+  }
+  return null;
+};
 
 // only show the highest rated role (lower role ids means higher)
 const getHighestUserRoleId = (roles) => roles.reduce(
@@ -143,6 +163,12 @@ export const getMetaField = (entity) => {
     value: entity.getIn(['attributes', 'created_at']),
     date: true,
   });
+  if (entity.get('creator') && entity.getIn(['creator', 'attributes', 'name'])) {
+    fields.push({
+      label: appMessages.attributes.meta.created_by_id,
+      value: entity.getIn(['creator', 'attributes', 'name']),
+    });
+  }
   fields.push({
     label: appMessages.attributes.meta.updated_at,
     value: entity.getIn(['attributes', 'updated_at']),
@@ -152,7 +178,7 @@ export const getMetaField = (entity) => {
   if (entity.get('user') && entity.getIn(['user', 'attributes', 'name'])) {
     fields.push({
       label: appMessages.attributes.meta.updated_by_id,
-      value: entity.get('user') && entity.getIn(['user', 'attributes', 'name']),
+      value: entity.getIn(['user', 'attributes', 'name']),
     });
   }
   return {

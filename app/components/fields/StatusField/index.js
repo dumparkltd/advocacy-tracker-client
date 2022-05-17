@@ -6,7 +6,7 @@ import { FormattedMessage } from 'react-intl';
 import appMessage from 'utils/app-message';
 import appMessages from 'containers/App/messages';
 
-import { PUBLISH_STATUSES } from 'themes/config';
+import { PUBLISH_STATUSES, PRIVACY_STATUSES, ARCHIVE_STATUSES } from 'themes/config';
 
 import Label from 'components/fields/Label';
 import FieldWrapInline from 'components/fields/FieldWrapInline';
@@ -16,12 +16,20 @@ class StatusField extends React.PureComponent { // eslint-disable-line react/pre
   render() {
     const { intl } = this.context;
     const { field } = this.props;
-    const status = find(field.options || PUBLISH_STATUSES, { value: field.value });
+    const { attribute } = field;
+    let status;
+    if (attribute === 'draft') {
+      status = find(field.options || PUBLISH_STATUSES, { value: field.value });
+    } else if (attribute === 'is_archive') {
+      status = find(field.options || ARCHIVE_STATUSES, { value: field.value });
+    } else if (attribute === 'private') {
+      status = find(field.options || PRIVACY_STATUSES, { value: field.value });
+    }
 
     return (
       <FieldWrapInline>
         <Label>
-          <FormattedMessage {...(field.label || appMessages.attributes.draft)} />
+          <FormattedMessage {...(field.label || appMessages.attributes[attribute])} />
         </Label>
         <Status>
           { status && status.message

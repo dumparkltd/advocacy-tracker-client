@@ -333,7 +333,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           id: 'main',
           type: 'main',
           sort: 'title',
-          attributes: ['code', 'title'],
+          attributes: ['title'],
         },
         {
           id: 'resourceActions',
@@ -380,7 +380,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           id: 'main',
           type: 'main',
           sort: 'name',
-          attributes: ['menu_title', 'title'],
+          attributes: ['title', 'menu_title'],
         },
       ];
     }

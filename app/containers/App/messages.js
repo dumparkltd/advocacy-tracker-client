@@ -964,6 +964,10 @@ export default defineMessages({
         id: 'app.containers.App.attributes.meta.updated_by_id',
         defaultMessage: 'Updated by',
       },
+      created_by_id: {
+        id: 'app.containers.App.attributes.meta.created_by_id',
+        defaultMessage: 'Created by',
+      },
       updated_at: {
         id: 'app.containers.App.attributes.meta.updated_at',
         defaultMessage: 'Last updated',

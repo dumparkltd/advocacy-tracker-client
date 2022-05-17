@@ -58,29 +58,49 @@ export function CellBodyMain({
             )}
           </Box>
         )}
-        {Object.keys(entity.values).map((key) => (
-          <Box key={key}>
-            {(key === 'title' || key === 'name') && (
-              <Link
-                href={entity.href}
-                onClick={entity.onClick}
-                title={entity.values.title}
-              >
-                <Label size="small">
-                  {entity.values[key]}
-                </Label>
-              </Link>
-            )}
-            {key !== 'title' && key !== 'name' && (
-              <Label
-                color="dark-5"
-                size="xsmall"
-              >
-                {entity.values[key]}
-              </Label>
-            )}
+        <Link
+          href={entity.href}
+          onClick={entity.onClick}
+          title={entity.values.title}
+        >
+          <Box direction="row" gap="xsmall">
+            {Object.keys(entity.values).map((key) => {
+              if (!entity.values[key]) {
+                return null;
+              }
+              if (key === 'title' || key === 'name') {
+                return (
+                  <Label size="small" key={key}>
+                    {entity.values[key]}
+                  </Label>
+                );
+              }
+              if (key === 'menu_title') {
+                return (
+                  <Label
+                    key={key}
+                    color="dark-5"
+                    size="small"
+                  >
+                    {`[${entity.values[key]}]`}
+                  </Label>
+                );
+              }
+              if (key === 'code') {
+                return (
+                  <Label
+                    key={key}
+                    color="dark-5"
+                    size="small"
+                  >
+                    {`${entity.values[key]}`}
+                  </Label>
+                );
+              }
+              return null;
+            })}
           </Box>
-        ))}
+        </Link>
       </Box>
     </Box>
   );

@@ -204,6 +204,16 @@ export const ACTION_FIELDS = {
       //   { value: false, message: 'ui.publishStatuses.public' },
       // ],
     },
+    private: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
     code: {
       optional: Object.values(ACTIONTYPES), // all types
       type: 'text',
@@ -266,13 +276,13 @@ export const ACTOR_FIELDS = {
   ATTRIBUTES: {
     actortype_id: {
       defaultValue: '1',
-      required: Object.values(ACTORTYPES), // all types
+      required: true,
       type: 'number',
       table: API.ACTORTYPES,
     },
     draft: {
       defaultValue: true,
-      required: Object.values(ACTORTYPES), // all types
+      required: true,
       type: 'bool',
       skipImport: true,
       // ui: 'dropdown',
@@ -280,6 +290,16 @@ export const ACTOR_FIELDS = {
       //   { value: true, message: 'ui.publishStatuses.draft' },
       //   { value: false, message: 'ui.publishStatuses.public' },
       // ],
+    },
+    private: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
     },
     code: {
       optional: [
@@ -373,6 +393,16 @@ export const RESOURCE_FIELDS = {
       //   { value: false, message: 'ui.publishStatuses.public' },
       // ],
     },
+    private: {
+      defaultValue: false,
+      required: Object.values(ACTIONTYPES), // all types
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      required: Object.values(ACTIONTYPES), // all types
+      type: 'bool',
+    },
     title: {
       required: Object.values(RESOURCETYPES), // all types
       type: 'text',
@@ -418,6 +448,16 @@ export const INDICATOR_FIELDS = {
       //   { value: true, message: 'ui.publishStatuses.draft' },
       //   { value: false, message: 'ui.publishStatuses.public' },
       // ],
+    },
+    private: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
     },
     title: {
       required: true,
@@ -684,10 +724,10 @@ export const ACTIONTYPES_CONFIG = {
         type: 'actors',
         sort: 'title',
       },
-      {
-        id: 'users', // one row per type,
-        type: 'users', // one row per type,
-      },
+      // {
+      //   id: 'users', // one row per type,
+      //   type: 'users', // one row per type,
+      // },
       // {
       //   id: 'taxonomy-12',
       //   type: 'taxonomy',
@@ -978,12 +1018,12 @@ export const PUBLISH_STATUSES = [
 ];
 // Entity publish statuses
 export const PRIVACY_STATUSES = [
-  { value: true, message: 'ui.privacyStatuses.private' },
   { value: false, message: 'ui.privacyStatuses.public' },
+  { value: true, message: 'ui.privacyStatuses.private' },
 ];
 export const ARCHIVE_STATUSES = [
-  { value: true, message: 'ui.archiveStatuses.archived' },
   { value: false, message: 'ui.archiveStatuses.current' },
+  { value: true, message: 'ui.archiveStatuses.archived' },
 ];
 
 export const DEFAULT_RESOURCETYPE = RESOURCETYPES.REF;

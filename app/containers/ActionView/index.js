@@ -15,6 +15,7 @@ import styled from 'styled-components';
 import {
   getTitleField,
   getStatusField,
+  getStatusFieldIf,
   getMetaField,
   getMarkdownField,
   getDateField,
@@ -68,6 +69,7 @@ import FieldGroup from 'components/fields/FieldGroup';
 import {
   selectReady,
   selectIsUserManager,
+  selectIsUserAdmin,
   selectActorConnections,
   selectResourceConnections,
   selectIndicatorConnections,
@@ -77,6 +79,7 @@ import {
   selectActiontypes,
   selectUserConnections,
   selectActiontypeQuery,
+  selectSessionUserId,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -169,6 +172,8 @@ export function ActionView(props) {
     onSetActiontype,
     onCreateOption,
     actiontypes,
+    isAdmin,
+    myId,
   } = props;
 
   useEffect(() => {
@@ -259,6 +264,9 @@ export function ActionView(props) {
     const [de] = viewEntity.getIn(['attributes', 'date_end']).split('T');
     datesEqual = ds === de;
   }
+
+  const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+
   return (
     <div>
       <Helmet
@@ -268,16 +276,12 @@ export function ActionView(props) {
         ]}
       />
       <Content isSingle>
-        { !dataReady
-          && <Loading />
-        }
-        { !viewEntity && dataReady
-          && (
-            <div>
-              <FormattedMessage {...messages.notFound} />
-            </div>
-          )
-        }
+        { !dataReady && <Loading /> }
+        { !viewEntity && dataReady && (
+          <div>
+            <FormattedMessage {...messages.notFound} />
+          </div>
+        )}
         { viewEntity && dataReady && (
           <ViewWrapper>
             <ViewHeader
@@ -311,6 +315,14 @@ export function ActionView(props) {
                       group={{
                         fields: [
                           getStatusField(viewEntity),
+                          (isAdmin || isMine) && getStatusFieldIf({
+                            entity: viewEntity,
+                            attribute: 'private',
+                          }),
+                          isAdmin && getStatusFieldIf({
+                            entity: viewEntity,
+                            attribute: 'is_archive',
+                          }),
                           getMetaField(viewEntity),
                         ],
                       }}
@@ -586,6 +598,8 @@ ActionView.propTypes = {
   handleClose: PropTypes.func,
   onEntityClick: PropTypes.func,
   isManager: PropTypes.bool,
+  isAdmin: PropTypes.bool,
+  myId: PropTypes.string,
   viewTaxonomies: PropTypes.object,
   taxonomies: PropTypes.object,
   actorsByActortype: PropTypes.object,
@@ -637,6 +651,8 @@ const mapStateToProps = (state, props) => ({
   userConnections: selectUserConnections(state),
   viewActiontypeId: selectActiontypeQuery(state),
   actiontypes: selectActiontypes(state),
+  isAdmin: selectIsUserAdmin(state),
+  myId: selectSessionUserId(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

@@ -33,13 +33,16 @@ import {
   selectIsUserAdmin,
   selectIsUserAnalyst,
   selectIsUserManager,
+  selectSessionUserId,
 } from 'containers/App/selectors';
 
 import {
   getStatusField,
+  getStatusFieldIf,
   getMetaField,
   getMarkdownField,
 } from 'utils/fields';
+import qe from 'utils/quasi-equals';
 
 import messages from './messages';
 import { selectViewEntity } from './selectors';
@@ -68,9 +71,13 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
     }
   }
 
-  getBodyAsideFields = (entity) => ([{
+  getBodyAsideFields = (entity, isAdmin, isMine) => ([{
     fields: [
       getStatusField(entity),
+      (isAdmin || isMine) && getStatusFieldIf({
+        entity,
+        attribute: 'private',
+      }),
       getMetaField(entity),
     ],
   }]);
@@ -79,11 +86,11 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
     fields: [getMarkdownField(entity, 'content', false)],
   }]);
 
-  getFields = (entity, isAdmin) => ({
+  getFields = (entity, isManager, isAdmin, isMine) => ({
     body: {
       main: this.getBodyMainFields(entity),
-      aside: isAdmin
-        ? this.getBodyAsideFields(entity)
+      aside: isManager
+        ? this.getBodyAsideFields(entity, isAdmin, isMine)
         : null,
     },
   })
@@ -92,7 +99,12 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
   render() {
     const { intl } = this.context;
     const {
-      page, dataReady, isAdmin, isAnalyst, isManager,
+      page,
+      dataReady,
+      isAdmin,
+      isAnalyst,
+      isManager,
+      myId,
     } = this.props;
     const buttons = [];
     if (dataReady) {
@@ -109,6 +121,7 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
         });
       }
     }
+    const isMine = page && qe(page.getIn(['attributes', 'created_by_id']), myId);
 
     return (
       <div>
@@ -138,7 +151,7 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
             { page && dataReady
               && (
                 <EntityView
-                  fields={this.getFields(page, isManager)}
+                  fields={this.getFields(page, isManager, isAdmin, isMine)}
                   seamless
                 />
               )
@@ -161,6 +174,7 @@ PageView.propTypes = {
   isAnalyst: PropTypes.bool,
   isManager: PropTypes.bool,
   params: PropTypes.object,
+  myId: PropTypes.string,
 };
 
 PageView.contextTypes = {
@@ -172,6 +186,7 @@ const mapStateToProps = (state, props) => ({
   isAdmin: selectIsUserAdmin(state),
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
+  myId: selectSessionUserId(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   page: selectViewEntity(state, props.params.id),
 });

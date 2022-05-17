@@ -56,6 +56,11 @@ export const selectViewEntity = createSelector(
           relatedKey: 'manager_id',
         },
         {
+          related: users,
+          key: 'creator',
+          relatedKey: 'created_by_id',
+        },
+        {
           related: taxonomies,
           key: 'taxonomy',
           relatedKey: 'taxonomy_id',
