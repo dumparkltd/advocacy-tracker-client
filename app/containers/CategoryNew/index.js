@@ -29,7 +29,7 @@ import {
 } from 'utils/forms';
 
 import { scrollToTop } from 'utils/scroll-to-component';
-import { hasNewError } from 'utils/entity-form';
+import { hasNewErrorNEW } from 'utils/entity-form';
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
@@ -55,16 +55,15 @@ import {
   selectTaxonomy,
 } from 'containers/App/selectors';
 
-import Messages from 'components/Messages';
-import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
 
 import { getEntityTitle } from 'utils/entities';
 
+import FormWrapper from './FormWrapper';
+
 import {
-  selectDomain,
+  selectDomainPage,
   selectParentOptions,
   selectParentTaxonomy,
   // selectActorsByActortype,
@@ -97,7 +96,7 @@ export class CategoryNew extends React.PureComponent { // eslint-disable-line re
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
     }
-    if (hasNewError(nextProps, this.props) && this.scrollContainer) {
+    if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
     }
   }
@@ -227,17 +226,18 @@ export class CategoryNew extends React.PureComponent { // eslint-disable-line re
     const {
       taxonomy,
       dataReady,
-      viewDomain,
+      viewDomainPage,
       parentOptions,
       parentTaxonomy,
-      // actorsByActortype,
-      // actions,
-      // isAdmin,
-      // users,
-      // connectedTaxonomies,
-      // onCreateOption,
+      onErrorDismiss,
+      onServerErrorDismiss,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
     } = this.props;
-    const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
+    const { saveSending } = viewDomainPage.toJS();
     const taxonomyReference = this.props.params.id;
 
     let pageTitle = intl.formatMessage(messages.pageTitle);
@@ -262,78 +262,45 @@ export class CategoryNew extends React.PureComponent { // eslint-disable-line re
           <ContentHeader
             title={pageTitle}
             type={CONTENT_SINGLE}
-            icon="categories"
             buttons={
               dataReady ? [{
                 type: 'cancel',
-                onClick: () => this.props.handleCancel(taxonomyReference),
+                onClick: () => handleCancel(taxonomyReference),
               },
               {
                 type: 'save',
                 disabled: saveSending,
-                onClick: () => this.props.handleSubmitRemote('categoryNew.form.data'),
+                onClick: () => handleSubmitRemote('categoryNew.form.data'),
               }] : null
             }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {(saveSending || !dataReady)
-            && <Loading />
-          }
-          {dataReady
-            && (
-              <EntityForm
-                model="categoryNew.form.data"
-                formData={viewDomain.getIn(['form', 'data'])}
-                saving={saveSending}
-                handleSubmit={(formData) => this.props.handleSubmit(
-                  formData,
-                  // actions,
-                  // actorsByActortype,
-                  taxonomy
-                )}
-                handleSubmitFail={this.props.handleSubmitFail}
-                handleCancel={() => this.props.handleCancel(taxonomyReference)}
-                handleUpdate={this.props.handleUpdate}
-                fields={{ // isManager, taxonomies,
-                  header: {
-                    main: this.getHeaderMainFields(),
-                    aside: this.getHeaderAsideFields(taxonomy, parentOptions, parentTaxonomy),
-                  },
-                  body: {
-                    main: this.getBodyMainFields(
-                      // taxonomy,
-                      // connectedTaxonomies,
-                      // actorsByActortype,
-                      // actions,
-                      // onCreateOption,
-                      // viewDomain.getIn(['form', 'data', 'attributes', 'user_only'])
-                    ),
-                    aside: this.getBodyAsideFields(
-                      // users, isAdmin, taxonomy
-                    ),
-                  },
-                }}
-                scrollContainer={this.scrollContainer.current}
-              />
-            )
-          }
+          <FormWrapper
+            model="categoryNew.form.data"
+            handleSubmit={(formData) => handleSubmit(
+              formData,
+              taxonomy
+            )}
+            handleSubmitFail={handleSubmitFail}
+            handleCancel={() => handleCancel(taxonomyReference)}
+            handleUpdate={handleUpdate}
+            onErrorDismiss={onErrorDismiss}
+            onServerErrorDismiss={onServerErrorDismiss}
+            fields={dataReady && { // isManager, taxonomies,
+              header: {
+                main: this.getHeaderMainFields(),
+                aside: this.getHeaderAsideFields(
+                  taxonomy,
+                  parentOptions,
+                  parentTaxonomy,
+                ),
+              },
+              body: {
+                main: this.getBodyMainFields(),
+                aside: this.getBodyAsideFields(),
+              },
+            }}
+            scrollContainer={this.scrollContainer.current}
+          />
         </Content>
       </div>
     );
@@ -350,7 +317,7 @@ CategoryNew.propTypes = {
   handleUpdate: PropTypes.func.isRequired,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
-  viewDomain: PropTypes.object,
+  viewDomainPage: PropTypes.object,
   taxonomy: PropTypes.object,
   params: PropTypes.object,
   parentOptions: PropTypes.object,
@@ -372,7 +339,7 @@ CategoryNew.contextTypes = {
 
 const mapStateToProps = (state, props) => ({
   isAdmin: selectIsUserAdmin(state),
-  viewDomain: selectDomain(state),
+  viewDomainPage: selectDomainPage(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   taxonomy: selectTaxonomy(state, props.params.id),

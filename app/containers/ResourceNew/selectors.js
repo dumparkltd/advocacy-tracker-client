@@ -14,6 +14,10 @@ export const selectDomain = createSelector(
   (state) => state.get('resourceNew'),
   (substate) => substate
 );
+export const selectDomainPage = createSelector(
+  (state) => state.getIn(['resourceNew', 'page']),
+  (substate) => substate
+);
 
 export const selectConnectedTaxonomies = createSelector(
   selectActionTaxonomies,

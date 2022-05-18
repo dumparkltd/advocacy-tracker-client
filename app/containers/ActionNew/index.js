@@ -34,7 +34,7 @@ import {
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
 import { scrollToTop } from 'utils/scroll-to-component';
-import { hasNewError } from 'utils/entity-form';
+import { hasNewErrorNEW } from 'utils/entity-form';
 import { checkActionAttribute, checkActionRequired } from 'utils/entities';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
@@ -57,16 +57,14 @@ import {
   selectActiontype,
 } from 'containers/App/selectors';
 
-import Messages from 'components/Messages';
-import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
 
 import appMessages from 'containers/App/messages';
+import FormWrapper from './FormWrapper';
 
 import {
-  selectDomain,
+  selectDomainPage,
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
   selectConnectedTaxonomies,
@@ -100,7 +98,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
     }
-    if (hasNewError(nextProps, this.props) && this.scrollContainer) {
+    if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
     }
   }
@@ -349,7 +347,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     const { intl } = this.context;
     const {
       dataReady,
-      viewDomain,
+      viewDomainPage,
       actorsByActortype,
       targetsByActortype,
       resourcesByResourcetype,
@@ -362,9 +360,17 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
       subActionsByActiontype,
       indicatorOptions,
       userOptions,
+      onErrorDismiss,
+      onServerErrorDismiss,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
     } = this.props;
+
     const typeId = params.id;
-    const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
+    const { saveSending } = viewDomainPage.toJS();
     const type = intl.formatMessage(appMessages.entities[`actions_${typeId}`].single);
     return (
       <div>
@@ -384,89 +390,61 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
             buttons={
               dataReady ? [{
                 type: 'cancel',
-                onClick: () => this.props.handleCancel(typeId),
+                onClick: () => handleCancel(typeId),
               },
               {
                 type: 'save',
                 disabled: saveSending,
-                onClick: () => this.props.handleSubmitRemote('actionNew.form.data'),
+                onClick: () => handleSubmitRemote('actionNew.form.data'),
               }] : null
             }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {(saveSending || !dataReady)
-            && <Loading />
-          }
-          {dataReady
-            && (
-              <EntityForm
-                model="actionNew.form.data"
-                formData={viewDomain.getIn(['form', 'data'])}
-                saving={saveSending}
-                handleSubmit={(formData) => this.props.handleSubmit(
-                  formData,
+          <FormWrapper
+            model="actionNew.form.data"
+            handleSubmit={(formData) => handleSubmit(
+              formData,
+              actiontype,
+              actorsByActortype,
+              targetsByActortype,
+              resourcesByResourcetype,
+              topActionsByActiontype,
+              subActionsByActiontype,
+              indicatorOptions,
+              userOptions,
+            )}
+            handleSubmitFail={handleSubmitFail}
+            handleCancel={() => handleCancel(typeId)}
+            handleUpdate={handleUpdate}
+            onErrorDismiss={onErrorDismiss}
+            onServerErrorDismiss={onServerErrorDismiss}
+            scrollContainer={this.scrollContainer.current}
+            fields={dataReady && {
+              header: {
+                main: this.getHeaderMainFields(actiontype),
+                aside: this.getHeaderAsideFields(),
+              },
+              body: {
+                main: this.getBodyMainFields(
                   actiontype,
+                  connectedTaxonomies,
                   actorsByActortype,
                   targetsByActortype,
                   resourcesByResourcetype,
-                  topActionsByActiontype,
                   subActionsByActiontype,
                   indicatorOptions,
+                  onCreateOption,
+                ),
+                aside: this.getBodyAsideFields(
+                  actiontype,
+                  taxonomies,
+                  connectedTaxonomies,
+                  topActionsByActiontype,
                   userOptions,
-                )}
-                handleSubmitFail={this.props.handleSubmitFail}
-                handleCancel={() => this.props.handleCancel(typeId)}
-                handleUpdate={this.props.handleUpdate}
-                fields={{
-                  header: {
-                    main: this.getHeaderMainFields(actiontype),
-                    aside: this.getHeaderAsideFields(),
-                  },
-                  body: {
-                    main: this.getBodyMainFields(
-                      actiontype,
-                      connectedTaxonomies,
-                      actorsByActortype,
-                      targetsByActortype,
-                      resourcesByResourcetype,
-                      subActionsByActiontype,
-                      indicatorOptions,
-                      onCreateOption,
-                    ),
-                    aside: this.getBodyAsideFields(
-                      actiontype,
-                      taxonomies,
-                      connectedTaxonomies,
-                      topActionsByActiontype,
-                      userOptions,
-                      onCreateOption,
-                    ),
-                  },
-                }}
-                scrollContainer={this.scrollContainer.current}
-              />
-            )
-          }
-          {saveSending
-            && <Loading />
-          }
+                  onCreateOption,
+                ),
+              },
+            }}
+          />
         </Content>
       </div>
     );
@@ -481,7 +459,6 @@ ActionNew.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
-  viewDomain: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   actorsByActortype: PropTypes.object,
@@ -490,6 +467,7 @@ ActionNew.propTypes = {
   initialiseForm: PropTypes.func,
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
+  viewDomainPage: PropTypes.object,
   taxonomies: PropTypes.object,
   indicatorOptions: PropTypes.object,
   userOptions: PropTypes.object,
@@ -506,7 +484,6 @@ ActionNew.contextTypes = {
 };
 
 const mapStateToProps = (state, { params }) => ({
-  viewDomain: selectDomain(state),
   authReady: selectReadyForAuthCheck(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   taxonomies: selectActiontypeTaxonomiesWithCats(
@@ -525,6 +502,7 @@ const mapStateToProps = (state, { params }) => ({
   subActionsByActiontype: selectSubActionsByActiontype(state, params.id),
   indicatorOptions: selectIndicatorOptions(state, params.id),
   userOptions: selectUserOptions(state, params.id),
+  viewDomainPage: selectDomainPage(state),
 });
 
 function mapDispatchToProps(dispatch) {
