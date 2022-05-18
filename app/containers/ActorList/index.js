@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { Map, List, fromJS } from 'immutable';
 
+import validateEmailFormat from 'components/forms/validators/validate-email-format';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectReady,
@@ -122,6 +123,25 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
         icon: 'import',
         isManager,
       });
+    }
+    if (qe(typeId, ACTORTYPES.CONTACT)) {
+      let count = 0;
+      const groupEmails = entities && entities.reduce(
+        (memo, entity) => {
+          if (
+            memo.length < 1900
+            && entity.getIn(['attributes', 'email'])
+            && entity.getIn(['attributes', 'email']) !== ''
+            && validateEmailFormat(entity.getIn(['attributes', 'email']))
+          ) {
+            count += 1;
+            return `${memo},${entity.getIn(['attributes', 'email'])}`;
+          }
+          return memo;
+        },
+        '',
+      );
+      console.log(count, groupEmails.length);
     }
 
     return (
