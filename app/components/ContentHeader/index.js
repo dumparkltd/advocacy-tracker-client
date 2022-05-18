@@ -58,10 +58,9 @@ const TableCell = styled.span`
     if (props.hiddenMobile) {
       return 'none';
     }
-    return 'block';
+    return 'table-cell';
   }};
   clear: both;
-  display: table-cell;
   vertical-align: middle;
 `;
 

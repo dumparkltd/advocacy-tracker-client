@@ -43,6 +43,10 @@ const SidebarWrapper = styled.div`
   bottom: 0;
   right: 0;
   z-index: 100;
+  width: 100%;
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+    width: auto;
+  }
 `;
 
 const STATE_INITIAL = {
