@@ -473,8 +473,10 @@ export const INDICATOR_FIELDS = {
 export const ACTIONTYPE_ACTORTYPES = {
   // countries make expressions/statements
   [ACTIONTYPES.EXPRESS]: [
+    ACTORTYPES.GROUP,
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
+    ACTORTYPES.ORG,
   ],
   // events are attended by countries, contacts, orgs
   [ACTIONTYPES.EVENT]: [
