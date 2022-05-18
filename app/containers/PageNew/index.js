@@ -99,7 +99,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
   getBodyMainFields = () => {
     const { intl } = this.context;
     return ([{
-      fields: [getMarkdownFormField(intl.formatMessage, 'content')],
+      fields: [getMarkdownFormField(intl.formatMessage, true, 'content')],
     }]);
   };
 
