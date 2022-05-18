@@ -484,7 +484,7 @@ theme.global = {
       dark: '#FFFFFF',
     },
     private: '#DA1D52',
-    archived: '#F37043',
+    archived: '#00728F',
     draft: '#BCB9B8',
   },
   edgeSize: {
