@@ -129,8 +129,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
       const groupEmails = entities && entities.reduce(
         (memo, entity) => {
           if (
-            memo.length < 1900
-            && entity.getIn(['attributes', 'email'])
+            entity.getIn(['attributes', 'email'])
             && entity.getIn(['attributes', 'email']) !== ''
             && validateEmailFormat(entity.getIn(['attributes', 'email']))
           ) {
