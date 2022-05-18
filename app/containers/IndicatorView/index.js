@@ -13,28 +13,36 @@ import { FormattedMessage } from 'react-intl';
 import {
   getTitleField,
   getStatusField,
+  getStatusFieldIf,
   getMetaField,
   getMarkdownField,
   getActionConnectionField,
 } from 'utils/fields';
 // import { qe } from 'utils/quasi-equals';
 import { getEntityTitleTruncated } from 'utils/entities';
+import qe from 'utils/quasi-equals';
 
 import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES } from 'themes/config';
+import { ROUTES, ACTIONTYPES_CONFIG } from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
-import EntityView from 'components/EntityView';
+import ViewHeader from 'components/EntityView/ViewHeader';
+import Main from 'components/EntityView/Main';
+import Aside from 'components/EntityView/Aside';
+import ViewWrapper from 'components/EntityView/ViewWrapper';
+import ViewPanel from 'components/EntityView/ViewPanel';
+import ViewPanelInside from 'components/EntityView/ViewPanelInside';
+import FieldGroup from 'components/fields/FieldGroup';
 
 import {
   selectReady,
   selectIsUserManager,
+  selectIsUserAdmin,
   selectTaxonomiesWithCategories,
   selectActionConnections,
+  selectSessionUserId,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -47,6 +55,28 @@ import {
 
 import { DEPENDENCIES } from './constants';
 
+const getActiontypeColumns = (typeid) => {
+  if (
+    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
+    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
+  ) {
+    return ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
+      (col) => {
+        if (typeof col.showOnSingle !== 'undefined') {
+          return col.showOnSingle;
+        }
+        return true;
+      }
+    );
+  }
+  return [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: ['title'],
+  }];
+};
+
 export class IndicatorView extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
     this.props.loadEntitiesIfNeeded();
@@ -58,26 +88,6 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
       this.props.loadEntitiesIfNeeded();
     }
   }
-
-  getHeaderMainFields = (entity) => ([ // fieldGroups
-    { // fieldGroup
-      fields: [
-        getTitleField(entity),
-      ],
-    },
-  ]);
-
-  getHeaderAsideFields = (entity) => {
-    const fields = ([
-      {
-        fields: [
-          getStatusField(entity),
-          getMetaField(entity),
-        ],
-      },
-    ]);
-    return fields;
-  };
 
   getBodyMainFields = (
     entity,
@@ -138,40 +148,42 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
       viewEntity,
       dataReady,
       isManager,
+      isAdmin,
+      myId,
       taxonomies,
       actionsByActiontype,
       actionConnections,
       onEntityClick,
+      handleEdit,
+      handleClose,
     } = this.props;
     let buttons = [];
     if (dataReady) {
-      buttons.push({
-        type: 'icon',
-        onClick: () => window.print(),
-        title: 'Print',
-        icon: 'print',
-      });
-      buttons = isManager
-        ? buttons.concat([
+      buttons = [
+        ...buttons,
+        {
+          type: 'icon',
+          onClick: () => window.print(),
+          title: 'Print',
+          icon: 'print',
+        },
+      ];
+      if (isManager) {
+        buttons = [
+          ...buttons,
           {
             type: 'edit',
-            onClick: () => this.props.handleEdit(this.props.params.id),
+            onClick: handleEdit,
           },
-          {
-            type: 'close',
-            onClick: () => this.props.handleClose(),
-          },
-        ])
-        : buttons.concat([{
-          type: 'close',
-          onClick: () => this.props.handleClose(),
-        }]);
+        ];
+      }
     }
     const pageTitle = intl.formatMessage(appMessages.entities.indicators.single);
 
     const metaTitle = viewEntity
       ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
       : `${pageTitle}: ${this.props.params.id}`;
+    const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
 
     return (
       <div>
@@ -181,44 +193,91 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
-        <Content>
-          <ContentHeader
-            title={pageTitle}
-            type={CONTENT_SINGLE}
-            buttons={buttons}
-          />
-          { !dataReady
-            && <Loading />
-          }
-          { !viewEntity && dataReady
-            && (
-              <div>
-                <FormattedMessage {...messages.notFound} />
-              </div>
-            )
-          }
-          { viewEntity && dataReady
-            && (
-              <EntityView
-                fields={{
-                  header: {
-                    main: this.getHeaderMainFields(viewEntity),
-                    aside: this.getHeaderAsideFields(viewEntity),
-                  },
-                  body: {
-                    main: this.getBodyMainFields(
-                      viewEntity,
-                      actionsByActiontype,
-                      taxonomies,
-                      actionConnections,
-                      onEntityClick,
-                    ),
-                    // aside: this.getBodyAsideFields(viewEntity),
-                  },
-                }}
+        <Content isSingle>
+          { !dataReady && <Loading /> }
+          { !viewEntity && dataReady && (
+            <div>
+              <FormattedMessage {...messages.notFound} />
+            </div>
+          )}
+          { viewEntity && dataReady && (
+            <ViewWrapper>
+              <ViewHeader
+                title={pageTitle}
+                buttons={buttons}
+                onClose={() => handleClose()}
+                onTypeClick={() => handleClose()}
               />
-            )
-          }
+              <ViewPanel>
+                <ViewPanelInside>
+                  <Main hasAside={isManager}>
+                    <FieldGroup
+                      group={{ // fieldGroup
+                        fields: [
+                          getTitleField(viewEntity),
+                        ],
+                      }}
+                    />
+                  </Main>
+                  {isManager && (
+                    <Aside>
+                      <FieldGroup
+                        group={{
+                          fields: [
+                            getStatusField(viewEntity),
+                            (isAdmin || isMine) && getStatusFieldIf({
+                              entity: viewEntity,
+                              attribute: 'private',
+                            }),
+                            isAdmin && getStatusFieldIf({
+                              entity: viewEntity,
+                              attribute: 'is_archive',
+                            }),
+                            getMetaField(viewEntity),
+                          ],
+                        }}
+                        aside
+                      />
+                    </Aside>
+                  )}
+                </ViewPanelInside>
+              </ViewPanel>
+              <ViewPanel>
+                <ViewPanelInside>
+                  <Main bottom>
+                    <FieldGroup
+                      group={{
+                        fields: [
+                          getMarkdownField(viewEntity, 'description', true),
+                        ],
+                      }}
+                    />
+                    {actionsByActiontype && (
+                      <FieldGroup
+                        group={{
+                          label: appMessages.nav.actions,
+                          fields: actionsByActiontype.reduce(
+                            (memo, actions, actiontypeid) => ([
+                              ...memo,
+                              getActionConnectionField({
+                                actions,
+                                taxonomies,
+                                onEntityClick,
+                                connections: actionConnections,
+                                typeid: actiontypeid,
+                                columns: getActiontypeColumns(actiontypeid),
+                              }),
+                            ]),
+                            [],
+                          ),
+                        }}
+                      />
+                    )}
+                  </Main>
+                </ViewPanelInside>
+              </ViewPanel>
+            </ViewWrapper>
+          )}
         </Content>
       </div>
     );
@@ -236,7 +295,9 @@ IndicatorView.propTypes = {
   actionConnections: PropTypes.object,
   actionsByActiontype: PropTypes.object,
   params: PropTypes.object,
+  myId: PropTypes.string,
   isManager: PropTypes.bool,
+  isAdmin: PropTypes.bool,
 };
 
 IndicatorView.contextTypes = {
@@ -245,6 +306,8 @@ IndicatorView.contextTypes = {
 
 const mapStateToProps = (state, props) => ({
   isManager: selectIsUserManager(state),
+  isAdmin: selectIsUserAdmin(state),
+  myId: selectSessionUserId(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   taxonomies: selectTaxonomiesWithCategories(state),

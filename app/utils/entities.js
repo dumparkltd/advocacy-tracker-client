@@ -5,7 +5,6 @@ import {
   ACTION_FIELDS,
   ACTOR_FIELDS,
   RESOURCE_FIELDS,
-  // INDICATOR_FIELDS,
   API,
 } from 'themes/config';
 import { find, reduce, every } from 'lodash/collection';
@@ -60,14 +59,28 @@ export const testEntityTaxonomyAssociation = (
   );
 
 // check if entity has any nested connection by type
-export const testEntityAssociation = (entity, associatedPath) => {
+export const testEntityAssociation = (entity, associatedPath, includeMembers) => {
   // check for actortype
   if (associatedPath.indexOf('_') > -1) {
     const [path, typeId] = associatedPath.split('_');
     const associations = entity.getIn([`${path}ByType`, parseInt(typeId, 10)]);
-    return associations && associations.size > 0;
+    if (associations && associations.size > 0) {
+      return true;
+    }
+    if (includeMembers) {
+      const memberAssociations = entity.getIn([`${path}AssociationsByType`, parseInt(typeId, 10)]);
+      return memberAssociations && memberAssociations.size > 0;
+    }
+    return false;
   }
-  return entity.get(associatedPath) && entity.get(associatedPath).size > 0;
+  const pass = entity.get(associatedPath) && entity.get(associatedPath).size > 0;
+  if (pass) {
+    return true;
+  }
+  if (includeMembers) {
+    return entity.get(`${associatedPath}Associations`) && entity.get(`${associatedPath}Associations`).size > 0;
+  }
+  return false;
 };
 
 // prep searchtarget, incl id
@@ -100,6 +113,7 @@ export const filterEntitiesWithoutAssociation = (
   entities,
   categories,
   query,
+  includeMembers,
 ) => entities && entities.filter(
   (entity) => asList(query).every(
     (queryValue) => {
@@ -112,7 +126,30 @@ export const filterEntitiesWithoutAssociation = (
         const [, attribute] = queryValue.split(':');
         return !entity.getIn(['attributes', attribute]);
       }
-      return !testEntityAssociation(entity, queryValue);
+      return !testEntityAssociation(entity, queryValue, includeMembers);
+    }
+  )
+);
+// filter entities by presence of any association either by taxonomy id or connection type
+// assumes prior nesting of relationships
+export const filterEntitiesWithAnyAssociation = (
+  entities,
+  categories,
+  query,
+  includeMembers,
+) => entities && entities.filter(
+  (entity) => asList(query).every(
+    (queryValue) => {
+      const isTax = isNumber(queryValue);
+      if (isTax) {
+        return testEntityTaxonomyAssociation(entity, categories, parseInt(queryValue, 10));
+      }
+      const isAttribute = startsWith(queryValue, 'att:');
+      if (isAttribute) {
+        const [, attribute] = queryValue.split(':');
+        return entity.getIn(['attributes', attribute]);
+      }
+      return testEntityAssociation(entity, queryValue, includeMembers);
     }
   )
 );
@@ -169,11 +206,24 @@ export const filterEntitiesByConnection = (
   // consider replacing with .every()
   (entity) => asList(query).every(
     (queryValue) => {
-      console.log(entity && entity.toJS());
-      console.log(queryValue);
       const value = queryValue.indexOf(':') > -1 ? queryValue.split(':')[1] : queryValue;
       return entity.get(path)
         && testEntityEntityAssociation(entity, path, value);
+    },
+  )
+);
+export const filterEntitiesByMultipleConnections = (
+  entities,
+  query,
+  paths,
+) => entities && entities.filter(
+  // consider replacing with .every()
+  (entity) => asList(query).every(
+    (queryArg) => {
+      const [, value] = queryArg.split(':');
+      return paths.some(
+        (path) => entity.get(path) && testEntityEntityAssociation(entity, path, value)
+      );
     },
   )
 );
@@ -299,7 +349,12 @@ export const entitySetSingle = (
   );
 
 export const entitySetUser = (entity, users) => entity
-  && entitySetSingle(entity, users, 'user', 'updated_by_id');
+  && entitySetSingle(
+    entitySetSingle(entity, users, 'creator', 'created_by_id'),
+    users,
+    'user',
+    'updated_by_id',
+  );
 
 export const entitySetSingles = (entity, singles) => entity
   && singles.reduce(
@@ -679,8 +734,7 @@ const checkAttribute = (typeId, att, attributes, isManager) => {
     if (attributes[att].required) {
       return attributes[att].required.indexOf(typeId.toString()) > -1;
     }
-  } else if (
-    !typeId && attributes && attributes[att]) {
+  } else if (!typeId && attributes && attributes[att]) {
     if (attributes[att].hideAnalyst && !isManager) {
       return false;
     }
@@ -696,7 +750,9 @@ const checkAttribute = (typeId, att, attributes, isManager) => {
 
 const checkRequired = (typeId, att, attributes) => {
   if (typeId && attributes && attributes[att] && attributes[att].required) {
-    return attributes[att].required.indexOf(typeId.toString()) > -1;
+    return typeof attributes[att].required === 'boolean'
+      ? attributes[att].required
+      : attributes[att].required.indexOf(typeId.toString()) > -1;
   }
   return false;
 };
@@ -740,13 +796,6 @@ export const checkResourceAttribute = (typeId, att) => RESOURCE_FIELDS
     att,
     RESOURCE_FIELDS.ATTRIBUTES,
   );
-// export const checkIndicatorAttribute = (att) => INDICATOR_FIELDS
-//   && INDICATOR_FIELDS.ATTRIBUTES
-//   && checkAttribute(
-//     null,
-//     att,
-//     INDICATOR_FIELDS.ATTRIBUTES,
-//   );
 
 export const checkResourceRequired = (typeId, att) => RESOURCE_FIELDS
   && RESOURCE_FIELDS.ATTRIBUTES
@@ -756,9 +805,10 @@ export const checkResourceRequired = (typeId, att) => RESOURCE_FIELDS
     RESOURCE_FIELDS.ATTRIBUTES,
   );
 
-export const hasGroupActors = (actortypesForActiontype) => actortypesForActiontype && actortypesForActiontype.some(
-  (type) => type.getIn(['attributes', 'has_members'])
-);
+export const hasGroupActors = (actortypesForActiontype) => actortypesForActiontype
+  && actortypesForActiontype.some(
+    (type) => type.getIn(['attributes', 'has_members'])
+  );
 
 
 export const setActionConnections = ({
@@ -770,9 +820,11 @@ export const setActionConnections = ({
   actionIndicators,
   categories,
   actionCategories,
+  users,
 }) => {
+  const actionId = parseInt(action.get('id'), 10);
   // actors
-  const entityActors = actorActions && actorActions.get(parseInt(action.get('id'), 10));
+  const entityActors = actorActions && actorActions.get(actionId);
   const entityActorsByActortype = entityActors
     && actionConnections.get(API.ACTORS)
     && entityActors
@@ -780,7 +832,7 @@ export const setActionConnections = ({
       .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
       .sortBy((val, key) => key);
   // actors
-  const entityTargets = actionActors && actionActors.get(parseInt(action.get('id'), 10));
+  const entityTargets = actionActors && actionActors.get(actionId);
   const entityTargetsByActortype = entityTargets
     && actionConnections.get(API.ACTORS)
     && entityTargets
@@ -788,7 +840,7 @@ export const setActionConnections = ({
       .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
       .sortBy((val, key) => key);
   // resources
-  const entityResources = actionResources && actionResources.get(parseInt(action.get('id'), 10));
+  const entityResources = actionResources && actionResources.get(actionId);
   const entityResourcesByResourcetype = entityResources
     && actionConnections.get(API.RESOURCES)
     && entityResources
@@ -797,11 +849,19 @@ export const setActionConnections = ({
       .sortBy((val, key) => key);
   // indicators
   const entityIndicators = actionIndicators
-    && actionIndicators.get(parseInt(action.get('id'), 10))
+    && actionIndicators.get(actionId)
     && actionConnections.get(API.INDICATORS)
     && actionIndicators
-      .get(parseInt(action.get('id'), 10))
+      .get(actionId)
       .filter((id) => actionConnections.getIn([API.INDICATORS, id.toString()]))
+      .sortBy((val, key) => key);
+  // users
+  const entityUsers = users
+    && users.get(actionId)
+    && actionConnections.get(API.USERS)
+    && users
+      .get(actionId)
+      .filter((id) => actionConnections.getIn([API.USERS, id.toString()]))
       .sortBy((val, key) => key);
 
   // categories
@@ -815,7 +875,8 @@ export const setActionConnections = ({
     .set('actorsByType', entityActorsByActortype)
     .set('targetsByType', entityTargetsByActortype)
     .set('resourcesByType', entityResourcesByResourcetype)
-    .set('indicators', entityIndicators);
+    .set('indicators', entityIndicators)
+    .set('users', entityUsers);
 };
 
 export const setActorConnections = ({
@@ -825,9 +886,14 @@ export const setActorConnections = ({
   actionActors,
   categories,
   actorCategories,
+  memberships,
+  associations,
+  users,
 }) => {
+  const actorId = parseInt(actor.get('id'), 10);
+  if (!actorConnections) return actor;
   // actors
-  const entityActions = actorActions.get(parseInt(actor.get('id'), 10));
+  const entityActions = actorActions && actorActions.get(actorId);
   const entityActionsByActiontype = entityActions
     && actorConnections.get(API.ACTIONS)
     && entityActions
@@ -835,12 +901,40 @@ export const setActorConnections = ({
       .groupBy((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString(), 'attributes', 'measuretype_id']).toString())
       .sortBy((val, key) => key);
 
-  const entityTargetingActions = actionActors.get(parseInt(actor.get('id'), 10));
+  // targets
+  const entityTargetingActions = actionActors && actionActors.get(actorId);
   const entityTargetingActionsByType = entityTargetingActions
     && actorConnections.get(API.ACTIONS)
     && entityTargetingActions
       .filter((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString()]))
       .groupBy((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString(), 'attributes', 'measuretype_id']).toString())
+      .sortBy((val, key) => key);
+
+  // memberships
+  const entityMembers = associations && associations.get(actorId);
+  const entityMembersByActortype = entityMembers
+    && actorConnections.get(API.ACTORS)
+    && entityMembers
+      .filter((localActorId) => actorConnections.getIn([API.ACTORS, localActorId.toString()]))
+      .groupBy((localActorId) => actorConnections.getIn([API.ACTORS, localActorId.toString(), 'attributes', 'actortype_id']).toString())
+      .sortBy((val, key) => key);
+
+  // assocciations
+  const entityAssociations = memberships && memberships.get(actorId);
+  const entityAssociationsByActortype = entityAssociations
+    && actorConnections.get(API.ACTORS)
+    && entityAssociations
+      .filter((localActorId) => actorConnections.getIn([API.ACTORS, localActorId.toString()]))
+      .groupBy((localActorId) => actorConnections.getIn([API.ACTORS, localActorId.toString(), 'attributes', 'actortype_id']).toString())
+      .sortBy((val, key) => key);
+
+  // users
+  const entityUsers = users
+    && users.get(actorId)
+    && actorConnections.get(API.USERS)
+    && users
+      .get(actorId)
+      .filter((id) => actorConnections.getIn([API.USERS, id.toString()]))
       .sortBy((val, key) => key);
 
   // categories
@@ -849,10 +943,14 @@ export const setActorConnections = ({
     actorCategories,
     categories,
   );
+
   return actor
     .set('categories', entityCategories)
     .set('actionsByType', entityActionsByActiontype)
-    .set('targetingActionsByType', entityTargetingActionsByType);
+    .set('targetingActionsByType', entityTargetingActionsByType)
+    .set('membersByType', entityMembersByActortype)
+    .set('associationsByType', entityAssociationsByActortype)
+    .set('users', entityUsers);
 };
 
 export const setResourceConnections = ({
@@ -871,6 +969,7 @@ export const setResourceConnections = ({
 
   return resource.set('actionsByType', entityActionsByActiontype);
 };
+
 export const setIndicatorConnections = ({
   indicator,
   indicatorConnections,

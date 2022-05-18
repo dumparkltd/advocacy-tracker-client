@@ -8,55 +8,108 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
+import { Box } from 'grommet';
+
+import qe from 'utils/quasi-equals';
 
 import EntityListSidebarGroupLabel from './EntityListSidebarGroupLabel';
-import EntityListSidebarOption from './EntityListSidebarOption';
+import FilterOptionList from './FilterOptionList';
+import FilterOptionCheckboxes from './FilterOptionCheckboxes';
+import FilterOptionCheckbox from './FilterOptionCheckbox';
 
-const Group = styled.div`
-  border-bottom: 1px solid;
-  border-color: ${(props) => props.expanded ? palette('aside', 0) : palette('light', 2)};
+const Group = styled((p) => (
+  <Box
+    pad={{ vertical: 'small' }}
+    {...p}
+  />
+))`
+  border-top: 1px solid ${palette('light', 2)};
   &:last-child {
-    border-bottom: 0;
+    border-bottom: 1px solid ${palette('light', 2)};
   }
 `;
 
 class EntityListSidebarGroups extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const { groups } = this.props;
+    const {
+      groups, onHideOptions, onUpdateQuery, onShowForm,
+    } = this.props;
     return (
       <div>
-        { groups && groups.entrySeq().map(([groupId, group]) => group.get('options') && group.get('options').size > 0
-          ? (
-            <Group key={groupId} expanded={this.props.expanded[groupId]}>
-              <EntityListSidebarGroupLabel
-                label={group.get('label')}
-                icon={group.get('icon') || group.get('id')}
-                expanded={this.props.expanded[groupId]}
-                onToggle={(evt) => {
-                  if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-                  this.props.onToggleGroup(groupId, !this.props.expanded[groupId]);
-                }}
-              />
-              { this.props.expanded[groupId]
-                  && (
-                    <div>
-                      {
-                        group.get('options').map((option, i) => option.get('id') ? (
-                          <EntityListSidebarOption
-                            key={i}
-                            option={option}
-                            groupId={group.get('id')}
-                            groupType={group.get('type')}
-                            onShowForm={this.props.onShowForm}
-                          />
-                        ) : null)
-                      }
-                    </div>
-                  )
-              }
-            </Group>
-          )
-          : null)}
+        {groups && groups.entrySeq().map(([groupId, group]) => {
+          const groupOptions = group.get('options') && group.get('options').filter(
+            (option) => option.get('id')
+          ).sort(
+            (a, b) => {
+              if (a.get('memberType')) return 1;
+              if (b.get('memberType')) return -1;
+              return 0;
+            }
+          );
+          const groupOptionsGeneral = group.get('optionsGeneral');
+          if (
+            (groupOptions && groupOptions.size > 0)
+            || (groupOptionsGeneral && groupOptionsGeneral.size > 0)
+          ) {
+            return (
+              <Group key={groupId} expanded={this.props.expanded[groupId]}>
+                <EntityListSidebarGroupLabel
+                  label={group.get('label')}
+                  expanded={this.props.expanded[groupId]}
+                  onToggle={(evt) => {
+                    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+                    this.props.onToggleGroup(groupId, !this.props.expanded[groupId]);
+                  }}
+                />
+                {this.props.expanded[groupId] && (
+                  <Box margin={{ top: 'small', bottom: 'medium' }} gap="small">
+                    {groupOptionsGeneral && (
+                      <Box gap="xsmall">
+                        {groupOptionsGeneral && groupOptionsGeneral.map(
+                          (option, i) => (
+                            <Box key={i}>
+                              {option.get('filterUI') && qe(option.get('filterUI'), 'checkbox') && (
+                                <FilterOptionCheckbox
+                                  option={option}
+                                  onUpdateQuery={onUpdateQuery}
+                                />
+                              )}
+                            </Box>
+                          )
+                        )}
+                      </Box>
+                    )}
+                    {groupOptions && (
+                      <Box>
+                        {groupOptions && groupOptions.map(
+                          (option, i) => (
+                            <Box key={i} margin={{ top: 'small' }}>
+                              {option.get('filterUI') && qe(option.get('filterUI'), 'checkboxes') && (
+                                <FilterOptionCheckboxes
+                                  option={option}
+                                  onUpdateQuery={onUpdateQuery}
+                                />
+                              )}
+                              {(!option.get('filterUI') || qe(option.get('filterUI'), 'list')) && (
+                                <FilterOptionList
+                                  option={option}
+                                  group={group}
+                                  onShowForm={onShowForm}
+                                  onHideOptions={onHideOptions}
+                                />
+                              )}
+                            </Box>
+                          )
+                        )}
+                      </Box>
+                    )}
+                  </Box>
+                )}
+              </Group>
+            );
+          }
+          return null;
+        })}
       </div>
     );
   }
@@ -66,6 +119,8 @@ EntityListSidebarGroups.propTypes = {
   expanded: PropTypes.object,
   onShowForm: PropTypes.func.isRequired,
   onToggleGroup: PropTypes.func.isRequired,
+  onHideOptions: PropTypes.func,
+  onUpdateQuery: PropTypes.func,
 };
 
 EntityListSidebarGroups.contextTypes = {

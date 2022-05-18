@@ -6,8 +6,11 @@
  * @return {boolean} if values are quasi equal
  */
 export default function quasiEquals(testValue, value) {
-  if (typeof value === 'undefined' || typeof testValue === 'undefined') {
+  if (typeof value === 'undefined' && typeof testValue === 'undefined') {
     return undefined;
+  }
+  if (typeof value === 'undefined' || typeof testValue === 'undefined') {
+    return false;
   }
   if (testValue === null) {
     return value === null || value === 'null';

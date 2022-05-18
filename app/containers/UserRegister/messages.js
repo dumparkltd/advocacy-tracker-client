@@ -30,4 +30,8 @@ export default defineMessages({
     id: 'app.containers.UserRegister.submit',
     defaultMessage: 'Register',
   },
+  registerHint: {
+    id: 'app.containers.UserRegister.registerHint',
+    defaultMessage: 'Once registered, please contact the administrator for full access',
+  },
 });

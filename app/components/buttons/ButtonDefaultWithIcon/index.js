@@ -18,11 +18,11 @@ const Button = styled(ButtonDefault)`
   font-size: 0.85em;
   min-width: 80px;
   min-height: 2.2em;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     font-size: 0.85em;
     padding: 0.3em 1em 0.2em;
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
     min-width: 90px;
     min-height: 3em;
     padding: 0.3em 1.5em 0.2em;
@@ -34,14 +34,14 @@ const Button = styled(ButtonDefault)`
 
 const Word = styled.span`
   display: ${(props) => props.hiddenSmall ? 'none' : 'inline'};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
     display: ${(props) => {
     if (props.hiddenMedium) return 'none';
     if (props.visibleSmall) return 'none';
     return 'inline';
   }};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
     display: ${(props) => {
     if (props.hiddenLarge) return 'none';
     if (props.visibleSmall) return 'none';

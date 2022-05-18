@@ -16,6 +16,7 @@ import {
   selectIsUserManager,
   selectIsUserAnalyst,
   selectActiontypesForIndicators,
+  selectIndicators,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -45,6 +46,7 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
     const {
       dataReady,
       entities,
+      allEntities,
       connections,
       // connectedTaxonomies,
       location,
@@ -74,20 +76,16 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
     }
     if (isManager) {
       headerOptions.actions.push({
-        type: 'text',
-        title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(),
+        title: 'Create new',
+        onClick: () => this.props.handleNew(),
+        icon: 'add',
+        isManager,
       });
       headerOptions.actions.push({
-        type: 'add',
-        title: [
-          intl.formatMessage(appMessages.buttons.add),
-          {
-            title: intl.formatMessage(appMessages.entities[type].single),
-            hiddenSmall: true,
-          },
-        ],
-        onClick: () => this.props.handleNew(),
+        title: intl.formatMessage(appMessages.buttons.import),
+        onClick: () => this.props.handleImport(),
+        icon: 'import',
+        isManager,
       });
     }
     return (
@@ -100,9 +98,10 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
         />
         <EntityList
           entities={entities}
+          allEntityCount={allEntities && allEntities.size}
           connections={connections}
           config={CONFIG}
-          header={headerOptions}
+          headerOptions={headerOptions}
           dataReady={dataReady}
           entityTitle={{
             single: intl.formatMessage(appMessages.entities.indicators.single),
@@ -127,6 +126,7 @@ IndicatorList.propTypes = {
   actiontypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
   isAnalyst: PropTypes.bool,
+  allEntities: PropTypes.instanceOf(Map),
 };
 
 IndicatorList.contextTypes = {
@@ -140,6 +140,7 @@ const mapStateToProps = (state, props) => ({
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
   actiontypes: selectActiontypesForIndicators(state),
+  allEntities: selectIndicators(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

@@ -32,6 +32,8 @@ export const makeActiveEditOptions = ({
     case 'members':
     case 'associations':
     case 'resources':
+    case 'parents':
+    case 'children':
       return makeGroupedConnectionEditOptions(
         entities,
         config.connections,
@@ -44,6 +46,7 @@ export const makeActiveEditOptions = ({
       );
     case 'users':
     case 'indicators':
+    case 'roles':
       return makeConnectionEditOptions(
         entities,
         config.connections,
@@ -165,6 +168,7 @@ const makeGroupedConnectionEditOptions = (
     editOptions.title = messages.title;
     editOptions.path = option.connectPath;
     editOptions.search = option.search;
+    editOptions.multiple = !option.single;
     const connectionPath = option.path;
     connections
       .get(connectionPath)
@@ -173,8 +177,8 @@ const makeGroupedConnectionEditOptions = (
           type === 'target-actions'
           || type === 'actor-actions'
           || type === 'resource-actions'
-          || type === 'indicator-actions'
-          || type === 'action-users'
+          || type === 'action-parents'
+          || type === 'action-children'
         ) {
           return qe(typeId, c.getIn(['attributes', 'measuretype_id']));
         }
@@ -187,6 +191,8 @@ const makeGroupedConnectionEditOptions = (
           || type === 'member-associations' // associations
           || type === 'association-members' // members
           || type === 'actor-users'
+          || type === 'action-users'
+          || type === 'indicator-actions'
         ) {
           return qe(typeId, c.getIn(['attributes', 'actortype_id']));
         }
@@ -214,6 +220,7 @@ const makeGroupedConnectionEditOptions = (
   }
   return editOptions;
 };
+
 const makeConnectionEditOptions = (
   entities,
   config,
@@ -243,6 +250,8 @@ const makeConnectionEditOptions = (
     editOptions.title = messages.title;
     editOptions.path = option.connectPath;
     editOptions.search = option.search;
+    editOptions.multiple = !option.single;
+
     const connectionPath = option.path;
     connections
       .get(connectionPath)
@@ -257,8 +266,7 @@ const makeConnectionEditOptions = (
         );
         editOptions.options[connection.get('id')] = {
           reference: getEntityReference(connection),
-          label: getEntityTitle(connection),
-          description: connection.getIn(['attributes', 'description']),
+          label: getEntityTitle(connection, option.labels, contextIntl),
           value: connection.get('id'),
           checked: checkedState(count, entities.size),
           tags: connection.get('categories'),

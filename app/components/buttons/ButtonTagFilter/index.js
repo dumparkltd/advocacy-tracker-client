@@ -15,7 +15,7 @@ const ButtonTagFilter = styled(Button)`
     color: ${palette('text', 2)};
     background-color: ${(props) => palette(props.disabled ? props.paletteHover : props.palette, props.pIndex || 0)};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 1px 6px;
     font-size: 0.85em;
   }

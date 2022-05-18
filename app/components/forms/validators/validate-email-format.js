@@ -1,5 +1,6 @@
 // very basic email validation
 export default function validateEmailFormat(val) {
-  const re = /\S+@\S+\.\S+/;
+  /* eslint-disable no-useless-escape */
+  const re = /^(([^<>()[\]\.,;:\s@\"]+(\.[^<>()[\]\.,;:\s@\"]+)*)|(\".+\"))@(([^<>()[\]\.,;:\s@\"]+\.)+[^<>()[\]\.,;:\s@\"]{2,})$/i;
   return !val || val === '' || re.test(val);
 }

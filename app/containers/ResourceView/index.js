@@ -13,24 +13,22 @@ import { FormattedMessage } from 'react-intl';
 import {
   getTitleField,
   getStatusField,
+  getStatusFieldIf,
   getMetaField,
   getMarkdownField,
-  getInfoField,
   getLinkField,
   getActionConnectionField,
   getDateField,
 } from 'utils/fields';
-// import { qe } from 'utils/quasi-equals';
+import { qe } from 'utils/quasi-equals';
 import { getEntityTitleTruncated, checkResourceAttribute } from 'utils/entities';
 
 import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES } from 'themes/config';
+import { ROUTES, ACTIONTYPES_CONFIG } from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
 import EntityView from 'components/EntityView';
 
 import {
@@ -38,6 +36,8 @@ import {
   selectIsUserManager,
   selectTaxonomiesWithCategories,
   selectActionConnections,
+  selectIsUserAdmin,
+  selectSessionUserId,
   // selectActiveResourcetypes,
 } from 'containers/App/selectors';
 
@@ -50,7 +50,27 @@ import {
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
-
+const getActiontypeColumns = (typeid) => {
+  if (
+    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
+    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
+  ) {
+    return ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
+      (col) => {
+        if (typeof col.showOnSingle !== 'undefined') {
+          return col.showOnSingle;
+        }
+        return true;
+      }
+    );
+  }
+  return [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: ['title'],
+  }];
+};
 export class ResourceView extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
     this.props.loadEntitiesIfNeeded();
@@ -64,27 +84,29 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
   }
 
   getHeaderMainFields = (entity) => {
-    const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'resourcetype_id']);
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          getInfoField(
-            'resourcetype_id',
-            intl.formatMessage(appMessages.resourcetypes[typeId]),
-            true // large
-          ), // required
           checkResourceAttribute(typeId, 'title') && getTitleField(entity),
         ],
       },
     ]);
   };
 
-  getHeaderAsideFields = (entity) => {
+  getHeaderAsideFields = (entity, isAdmin, isMine) => {
     const fields = ([
       {
         fields: [
           getStatusField(entity),
+          (isAdmin || isMine) && getStatusFieldIf({
+            entity,
+            attribute: 'private',
+          }),
+          isAdmin && getStatusFieldIf({
+            entity,
+            attribute: 'is_archive',
+          }),
           getMetaField(entity),
         ],
       },
@@ -125,6 +147,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
             onEntityClick,
             connections: actionConnections,
             typeid: actiontypeid,
+            columns: getActiontypeColumns(actiontypeid),
           }),
         );
       });
@@ -160,31 +183,33 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
       actionsByActiontype,
       actionConnections,
       onEntityClick,
+      handleTypeClick,
+      handleEdit,
+      handleClose,
+      isAdmin,
+      myId,
     } = this.props;
     const typeId = viewEntity && viewEntity.getIn(['attributes', 'resourcetype_id']);
     let buttons = [];
     if (dataReady) {
-      buttons.push({
-        type: 'icon',
-        onClick: () => window.print(),
-        title: 'Print',
-        icon: 'print',
-      });
-      buttons = isManager
-        ? buttons.concat([
+      buttons = [
+        ...buttons,
+        {
+          type: 'icon',
+          onClick: () => window.print(),
+          title: 'Print',
+          icon: 'print',
+        },
+      ];
+      if (isManager) {
+        buttons = [
+          ...buttons,
           {
             type: 'edit',
-            onClick: () => this.props.handleEdit(this.props.params.id),
+            onClick: handleEdit,
           },
-          {
-            type: 'close',
-            onClick: () => this.props.handleClose(typeId),
-          },
-        ])
-        : buttons.concat([{
-          type: 'close',
-          onClick: () => this.props.handleClose(typeId),
-        }]);
+        ];
+      }
     }
     const pageTitle = typeId
       ? intl.formatMessage(appMessages.entities[`resources_${typeId}`].single)
@@ -194,6 +219,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
       ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
       : `${pageTitle}: ${this.props.params.id}`;
 
+    const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
     return (
       <div>
         <Helmet
@@ -202,12 +228,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
-        <Content>
-          <ContentHeader
-            title={pageTitle}
-            type={CONTENT_SINGLE}
-            buttons={buttons}
-          />
+        <Content isSingle>
           { !dataReady
             && <Loading />
           }
@@ -221,10 +242,18 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
           { viewEntity && dataReady
             && (
               <EntityView
+                header={{
+                  title: typeId
+                    ? intl.formatMessage(appMessages.resourcetypes[typeId])
+                    : intl.formatMessage(appMessages.entities.resources.plural),
+                  onClose: () => handleClose(typeId),
+                  buttons,
+                  onTypeClick: () => handleTypeClick(typeId),
+                }}
                 fields={{
                   header: {
                     main: this.getHeaderMainFields(viewEntity),
-                    aside: this.getHeaderAsideFields(viewEntity),
+                    aside: isManager && this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
                   },
                   body: {
                     main: this.getBodyMainFields(
@@ -252,12 +281,15 @@ ResourceView.propTypes = {
   dataReady: PropTypes.bool,
   handleEdit: PropTypes.func,
   handleClose: PropTypes.func,
+  handleTypeClick: PropTypes.func,
   onEntityClick: PropTypes.func,
   taxonomies: PropTypes.object,
   actionConnections: PropTypes.object,
   actionsByActiontype: PropTypes.object,
   params: PropTypes.object,
   isManager: PropTypes.bool,
+  isAdmin: PropTypes.bool,
+  myId: PropTypes.string,
 };
 
 ResourceView.contextTypes = {
@@ -271,6 +303,8 @@ const mapStateToProps = (state, props) => ({
   taxonomies: selectTaxonomiesWithCategories(state),
   actionsByActiontype: selectActionsByType(state, props.params.id),
   actionConnections: selectActionConnections(state),
+  isAdmin: selectIsUserAdmin(state),
+  myId: selectSessionUserId(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -283,6 +317,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     handleClose: (typeId) => {
       dispatch(closeEntity(`${ROUTES.RESOURCES}/${typeId}`));
+    },
+    handleTypeClick: (typeId) => {
+      dispatch(updatePath(`${ROUTES.RESOURCES}/${typeId}`));
     },
     onEntityClick: (id, path) => {
       dispatch(updatePath(`${path}/${id}`));

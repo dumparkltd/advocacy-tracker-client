@@ -5,7 +5,6 @@ import Button from '../Button';
 
 const ButtonFlat = styled(Button)`
   background: transparent;
-  letter-spacing: 0.5px;
   font-weight: bold;
   text-transform: uppercase;
   padding: ${(props) => props.inForm ? '1em 0.6em' : '10px 5px'};
@@ -23,8 +22,7 @@ const ButtonFlat = styled(Button)`
     return props.primary ? palette('buttonFlatHover', 0) : palette('buttonFlatHover', 1);
   }};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    letter-spacing: 1px;
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: ${(props) => props.inForm ? '1em 1.2em' : '10px 12px'};
   }
 `;

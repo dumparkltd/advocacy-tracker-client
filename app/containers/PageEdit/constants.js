@@ -19,7 +19,8 @@ export const FORM_INITIAL = fromJS({
     title: '',
     content: '',
     menu_title: '',
-    draft: '',
+    draft: true,
+    private: false,
     order: '',
   },
 });

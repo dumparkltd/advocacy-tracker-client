@@ -34,14 +34,19 @@ import {
   UPDATE_ROUTE_QUERY,
   AUTHENTICATE_FORWARD,
   UPDATE_PATH,
+  RECOVER_PASSWORD,
   CLOSE_ENTITY,
   DISMISS_QUERY_MESSAGES,
   SET_ACTIONTYPE,
+  SET_ACTORTYPE,
   SET_VIEW,
+  SET_SUBJECT,
   SET_MAPSUBJECT,
   OPEN_BOOKMARK,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
+  SET_INCLUDE_MEMBERS_FORFILTERS,
+  PARAMS,
 } from 'containers/App/constants';
 
 import {
@@ -71,6 +76,9 @@ import {
   deleteSending,
   deleteSuccess,
   deleteError,
+  recoverSending,
+  recoverSuccess,
+  recoverError,
   forwardOnAuthenticationChange,
   updatePath,
 } from 'containers/App/actions';
@@ -92,6 +100,7 @@ import {
   updateEntityRequest,
   updateAssociationsRequest,
 } from 'utils/entities-update';
+import { qe } from 'utils/quasi-equals';
 import apiRequest, { getAuthValues, clearAuthValues } from 'utils/api-request';
 
 const MAX_LOAD_ATTEMPTS = 3;
@@ -169,7 +178,7 @@ export function* loadEntitiesSaga({ path }) {
           // Clear the request time on error, This will cause us to try again next time, which we probably want to do?
           yield put(entitiesRequested(path, false));
           // throw error
-          throw new Error(err);
+          throw new Error((err.response && err.response.status) || err);
         }
       } else {
         // console.log('error: not signedin', )
@@ -209,6 +218,29 @@ export function* authenticateSaga(payload) {
   } catch (err) {
     err.response.json = yield err.response.json();
     yield put(authenticateError(err));
+  }
+}
+
+export function* recoverSaga(payload) {
+  const { email } = payload.data;
+  try {
+    yield put(recoverSending());
+    yield call(apiRequest, 'post', ENDPOINTS.PASSWORD, {
+      email,
+      redirect_url: `${window.location.origin}${ROUTES.RESET_PASSWORD}`,
+    });
+    yield put(recoverSuccess());
+    // forward to login
+    yield put(updatePath(
+      ROUTES.LOGIN,
+      {
+        replace: true,
+        query: { info: PARAMS.RECOVER_SUCCESS },
+      }
+    ));
+  } catch (err) {
+    err.response.json = yield err.response.json();
+    yield put(recoverError(err));
   }
 }
 
@@ -703,8 +735,34 @@ const getNextQuery = (query, extend, location) => {
     const queryUpdated = memo;
     // if arg already set and not replacing
     if (queryUpdated[param.arg] && !param.replace) {
+      // if multipleAttributeValues are not allowed
+      if (
+        param.value
+        && param.value.indexOf(':') > -1
+        && typeof param.multipleAttributeValues !== 'undefined'
+        && param.multipleAttributeValues === false
+      ) {
+        if (param.add) {
+          const [attribute] = param.value.split(':');
+          const keepAttributeValues = queryPrevious[param.arg]
+            ? asArray(queryPrevious[param.arg]).filter(
+              (attVal) => {
+                const [att] = attVal.split(':');
+                return !qe(att, attribute);
+              }
+            )
+            : [];
+          queryUpdated[param.arg] = [
+            ...keepAttributeValues,
+            param.value,
+          ];
+        } else if (param.remove && queryUpdated[param.arg]) {
+          queryUpdated[param.arg] = asArray(queryPrevious[param.arg]).filter(
+            (attVal) => !qe(attVal, param.value)
+          );
+        }
       // if multiple values set
-      if (Array.isArray(queryUpdated[param.arg])) {
+      } else if (Array.isArray(queryUpdated[param.arg])) {
         // add if not already present
         if (param.add && queryUpdated[param.arg].indexOf(param.value.toString()) === -1) {
           queryUpdated[param.arg].push(param.value);
@@ -729,7 +787,7 @@ const getNextQuery = (query, extend, location) => {
     // if set and removing
     } else if (queryUpdated[param.arg] && param.value && param.replace) {
       queryUpdated[param.arg] = param.value;
-    } else if (queryUpdated[param.arg] && param.remove) {
+    } else if (queryUpdated[param.arg] && (param.remove || typeof param.value === 'undefined')) {
       delete queryUpdated[param.arg];
     // if not set or replacing with new value
     } else if (typeof param.value !== 'undefined' && !param.remove) {
@@ -757,7 +815,7 @@ export function* updateRouteQuerySaga({ query, extend = true }) {
     {
       query,
       extend,
-      replace: true,
+      // replace: true, ineffective
     },
   ));
 }
@@ -768,11 +826,25 @@ export function* setActortypeSaga({ actortype }) {
     {
       arg: 'actortype',
       value: actortype,
+      replace: true,
     },
     true, // extend
     location,
   );
 
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
+export function* setActiontypeSaga({ actiontype }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'actiontype',
+      value: actiontype,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
 export function* setViewSaga({ view }) {
@@ -792,7 +864,20 @@ export function* setMapSubjectSaga({ subject }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
     {
-      arg: 'ms',
+      arg: 'msubj',
+      value: subject,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
+export function* setSubjectSaga({ subject }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'subj',
       value: subject,
       replace: true,
     },
@@ -827,7 +912,19 @@ export function* setIncludeTargetMembersSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
-
+export function* setIncludeMembersForFilterSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'fm',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
 export function* openBookmarkSaga({ bookmark }) {
   const path = bookmark.getIn(['attributes', 'view', 'path']);
   const queryString = getNextQueryString(
@@ -906,6 +1003,7 @@ export default function* rootSaga() {
   yield takeLatest(VALIDATE_TOKEN, validateTokenSaga);
 
   yield takeLatest(AUTHENTICATE, authenticateSaga);
+  yield takeLatest(RECOVER_PASSWORD, recoverSaga);
   yield takeLatest(LOGOUT, logoutSaga);
   yield takeLatest(AUTHENTICATE_FORWARD, authChangeSaga);
 
@@ -920,11 +1018,14 @@ export default function* rootSaga() {
   yield takeLatest(REDIRECT_IF_NOT_PERMITTED, checkRoleSaga);
   yield takeEvery(UPDATE_ROUTE_QUERY, updateRouteQuerySaga);
   yield takeEvery(UPDATE_PATH, updatePathSaga);
-  yield takeEvery(SET_ACTIONTYPE, setActortypeSaga);
+  yield takeEvery(SET_ACTORTYPE, setActortypeSaga);
+  yield takeEvery(SET_ACTIONTYPE, setActiontypeSaga);
   yield takeEvery(SET_VIEW, setViewSaga);
+  yield takeEvery(SET_SUBJECT, setSubjectSaga);
   yield takeEvery(SET_MAPSUBJECT, setMapSubjectSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_MEMBERS, setIncludeActorMembersSaga);
   yield takeEvery(SET_INCLUDE_TARGET_MEMBERS, setIncludeTargetMembersSaga);
+  yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
   yield takeEvery(OPEN_BOOKMARK, openBookmarkSaga);
   yield takeEvery(DISMISS_QUERY_MESSAGES, dismissQueryMessagesSaga);
 

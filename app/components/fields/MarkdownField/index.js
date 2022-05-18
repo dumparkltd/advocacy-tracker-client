@@ -9,9 +9,11 @@ import Label from 'components/fields/Label';
 // import appMessages from 'containers/App/messages';
 
 const Markdown = styled(ReactMarkdown)`
-  font-size: ${(props) => props.theme.sizes.text.markdownMobile};
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    font-size: ${(props) => props.theme.sizes.text.markdown};
+  font-size: ${(props) => props.theme.text.mediumTall.size};
+  line-height: ${(props) => props.theme.text.mediumTall.height};
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+    font-size: ${(props) => props.theme.text.largeTall.size};
+    line-height: ${(props) => props.theme.text.largeTall.height};
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.markdown};

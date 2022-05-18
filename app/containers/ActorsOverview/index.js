@@ -21,7 +21,7 @@ import Container from 'components/styled/Container';
 import Content from 'components/styled/Content';
 import CardTeaser from 'components/CardTeaser';
 import Footer from 'containers/Footer';
-
+import { isMaxSize } from 'utils/responsive';
 import { selectActortypesWithActorCount } from './selectors';
 import { DEPENDENCIES } from './constants';
 
@@ -29,9 +29,11 @@ import { DEPENDENCIES } from './constants';
 const Group = styled((p) => <Box margin={{ bottom: 'large', top: 'medium' }} {...p} />)``;
 const GroupTitle = styled.h5`
   font-size: 14px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.global.colors.text.brand};
 `;
 const ViewContainer = styled(Container)`
-  min-height: 70vH;
+  min-height: 80vH;
   @media print {
     min-height: 50vH;
   }
@@ -45,7 +47,7 @@ export function ActorsOverview({
   }, []);
   const size = React.useContext(ResponsiveContext);
   return (
-    <ContainerWrapper>
+    <ContainerWrapper bg>
       <HeaderExplore />
       <ViewContainer>
         <Content>
@@ -54,7 +56,7 @@ export function ActorsOverview({
               <GroupTitle>
                 <FormattedMessage {...appMessages.actortypeGroups[key]} />
               </GroupTitle>
-              <Box direction={size === 'small' ? 'column' : 'row'} gap="small">
+              <Box direction={isMaxSize(size, 'medium') ? 'column' : 'row'} gap="small">
                 {ACTORTYPE_NAVGROUPS[key].types.map((typeId) => {
                   const path = `${ROUTES.ACTORS}/${typeId}`;
                   const count = types.getIn([typeId, 'count']) ? parseInt(types.getIn([typeId, 'count']), 10) : 0;
@@ -62,7 +64,7 @@ export function ActorsOverview({
                   return (
                     <CardTeaser
                       key={typeId}
-                      basis={primary ? 'full' : '1/4'}
+                      basis={primary ? '1/2' : '1/4'}
                       primary={primary}
                       path={path}
                       onClick={(evt) => {

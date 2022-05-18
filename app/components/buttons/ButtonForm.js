@@ -7,7 +7,7 @@ const ButtonForm = styled(Button)`
   text-transform: uppercase;
   font-size: 0.9em;
   padding: 0.7em 0.5em;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     letter-spacing: 1px;
     font-size: 1em;
     padding: 1em 1.2em;

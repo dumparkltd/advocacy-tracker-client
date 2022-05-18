@@ -14,6 +14,7 @@ import { fromJS } from 'immutable';
 
 import { checkResponseError } from 'utils/request';
 import { isSignedIn } from 'utils/api-request';
+import qe from 'utils/quasi-equals';
 import { API } from 'themes/config';
 
 import {
@@ -115,12 +116,11 @@ function appReducer(state = initialState, payload) {
         .setIn(['ready', payload.path], payload.time);
     case LOAD_ENTITIES_ERROR:
       // check unauthorised (401)
-      // console.log('LOAD_ENTITIES_ERROR', payload)
       if (
         payload
         && payload.error
-        && payload.error.response
-        && payload.error.response.status === 401
+        && payload.error.message
+        && (qe(payload.error.message, 401) || qe(payload.error.message, 403))
       ) {
         return state
           .setIn(['server', 'error'], payload.error)

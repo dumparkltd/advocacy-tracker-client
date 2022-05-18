@@ -9,14 +9,15 @@ import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import { fromJS } from 'immutable';
+import { Box, Button } from 'grommet';
 
 import Scrollable from 'components/styled/Scrollable';
 import Icon from 'components/Icon';
-import Button from 'components/buttons/Button';
 import SupTitle from 'components/SupTitle';
 
 import Sidebar from 'components/styled/Sidebar';
 import SidebarHeader from 'components/styled/SidebarHeader';
+import MapMemberOption from 'containers/MapContainer/MapInfoOptions/MapMemberOption';
 
 import EntityListSidebarGroups from './EntityListSidebarGroups';
 
@@ -36,51 +37,38 @@ const ListEntitiesEmpty = styled.div`
   }
 `;
 
-const ToggleHide = styled(Button)`
-  position: absolute;
-  right:0;
-  top:0;
-`;
-// color: ${palette('link', 3)};
-// &:hover {
-//   color: ${palette('linkHover', 3)};
-// }
 const SidebarWrapper = styled.div`
   position: absolute;
   top: 0;
   bottom: 0;
   right: 0;
   z-index: 100;
-  left: 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    left: auto;
-  }
 `;
 
 const STATE_INITIAL = {
   expandedGroups: {
-    taxonomies: true,
-    taxonomies_1: true,
-    taxonomies_2: true,
-    taxonomies_3: true,
-    taxonomies_4: true,
-    taxonomies_5: true,
-    taxonomies_6: true,
-    taxonomies_7: true,
-    taxonomies_8: true,
-    taxonomies_9: true,
-    taxonomies_10: true,
-    taxonomies_11: true,
-    taxonomies_12: true,
-    // connectedTaxonomies: true,
-    actors: true,
-    actions: true,
-    targets: true,
-    indicators: true,
-    members: true,
-    associations: true,
-    users: true,
-    resources: true,
+    taxonomies: false,
+    taxonomies_1: false,
+    taxonomies_2: false,
+    taxonomies_3: false,
+    taxonomies_4: false,
+    taxonomies_5: false,
+    taxonomies_6: false,
+    taxonomies_7: false,
+    taxonomies_8: false,
+    taxonomies_9: false,
+    taxonomies_10: false,
+    taxonomies_11: false,
+    taxonomies_12: false,
+    taxonomies_13: false,
+    actors: false,
+    actions: false,
+    targets: false,
+    members: false,
+    associations: false,
+    indicators: false,
+    users: false,
+    resources: false,
     parents: false,
     attributes: false,
   },
@@ -123,6 +111,9 @@ export class EntityListSidebar extends React.Component { // eslint-disable-line 
       hasSelected,
       panelGroups,
       onHideSidebar,
+      onHideOptions,
+      onUpdateQuery,
+      memberOption,
     } = this.props;
     const { intl } = this.context;
     return (
@@ -130,19 +121,28 @@ export class EntityListSidebar extends React.Component { // eslint-disable-line 
         <Sidebar onClick={(evt) => evt.stopPropagation()}>
           <ScrollableWrapper>
             <SidebarHeader>
-              {isEditPanel && <SupTitle title={intl.formatMessage(messages.header.edit)} />}
-              {!isEditPanel && <SupTitle title={intl.formatMessage(messages.header.filter)} />}
-              <ToggleHide onClick={onHideSidebar}>
-                <Icon name="close" />
-              </ToggleHide>
+              <Box direction="row" justify="between" align="center">
+                {isEditPanel && <SupTitle title={intl.formatMessage(messages.header.edit)} />}
+                {!isEditPanel && <SupTitle title={intl.formatMessage(messages.header.filter)} />}
+                <Button plain onClick={onHideSidebar}>
+                  <Icon name="close" />
+                </Button>
+              </Box>
+              {memberOption && (
+                <Box margin={{ top: 'small' }}>
+                  <MapMemberOption option={memberOption} />
+                </Box>
+              )}
             </SidebarHeader>
             <div>
               { (!isEditPanel || (isEditPanel && hasSelected && hasEntities)) && (
                 <EntityListSidebarGroups
                   groups={fromJS(panelGroups)}
                   onShowForm={this.onShowForm}
+                  onHideOptions={onHideOptions}
                   onToggleGroup={this.onToggleGroup}
                   expanded={this.state.expandedGroups}
+                  onUpdateQuery={onUpdateQuery}
                 />
               )}
               { isEditPanel && hasEntities && !hasSelected && (
@@ -164,7 +164,10 @@ EntityListSidebar.propTypes = {
   hasSelected: PropTypes.bool,
   panelGroups: PropTypes.object,
   onHideSidebar: PropTypes.func,
+  onHideOptions: PropTypes.func,
   setActiveOption: PropTypes.func,
+  onUpdateQuery: PropTypes.func,
+  memberOption: PropTypes.object,
 };
 
 EntityListSidebar.contextTypes = {

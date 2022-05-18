@@ -112,9 +112,16 @@ export class UserLogin extends React.PureComponent { // eslint-disable-line reac
               </A>
             </p>
             <p>
-              <i>
-                <FormattedMessage {...messages.resetPasswordHint} />
-              </i>
+              <A
+                href={ROUTES.RECOVER_PASSWORD}
+                onClick={(evt) => {
+                  if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+                  this.props.handleLink(ROUTES.RECOVER_PASSWORD, { keepQuery: true });
+                }}
+              >
+                <FormattedMessage {...messages.recoverPasswordLink} />
+                <Icon name="arrowRight" text size="1.5em" sizes={{ mobile: '1em' }} />
+              </A>
             </p>
           </BottomLinks>
         </ContentNarrow>

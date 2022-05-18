@@ -19,10 +19,7 @@ import {
 
 import { makeTagFilterGroups } from 'utils/forms';
 
-import {
-  optionChecked,
-  attributeOptionChecked,
-} from './utils';
+import { optionChecked } from './utils';
 
 export const makeActiveFilterOptions = ({
   entities,
@@ -35,6 +32,7 @@ export const makeActiveFilterOptions = ({
   contextIntl,
   messages,
   isManager,
+  includeMembers,
 }) => {
   // create filterOptions
   switch (activeFilterOption.group) {
@@ -55,6 +53,7 @@ export const makeActiveFilterOptions = ({
     case 'associations':
     case 'resources':
     case 'parents':
+    case 'children':
       return makeGroupedConnectionFilterOptions(
         entities,
         config.connections,
@@ -66,9 +65,11 @@ export const makeActiveFilterOptions = ({
         contextIntl,
         activeFilterOption.group,
         isManager,
+        includeMembers,
       );
     case 'users':
     case 'indicators':
+    case 'roles':
       return makeConnectionFilterOptions(
         entities,
         config.connections,
@@ -82,109 +83,74 @@ export const makeActiveFilterOptions = ({
         isManager,
       );
     case 'attributes':
-      return makeAttributeFilterOptions(
-        entities,
-        config.attributes,
-        activeFilterOption.optionId,
-        locationQuery.get('where'),
+      return makeAttributeFilterOptions({
+        config: config.attributes,
+        activeOptionId: activeFilterOption.optionId,
+        locationQueryValue: locationQuery.get('where'),
+      });
+    default:
+      return null;
+  }
+};
+export const makeAnyWithoutFilterOptions = ({
+  config,
+  locationQuery,
+  activeFilterOption,
+  contextIntl,
+  messages,
+}) => {
+  // create filterOptions
+  switch (activeFilterOption.group) {
+    case 'actors':
+    case 'actions':
+    case 'targets':
+    case 'members':
+    case 'associations':
+    case 'resources':
+    case 'indicators':
+    case 'parents':
+    case 'children':
+      return makeAnyWithoutConnectionFilterOptions(
+        config.connections,
+        locationQuery,
         messages,
+        contextIntl,
+        activeFilterOption.group,
       );
     default:
       return null;
   }
 };
 
-export const makeAttributeFilterOptions = (entities, config, activeOptionId, locationQueryValue, messages) => {
+// not as list but other filter UI, eg checkboxes
+export const makeAttributeFilterOptions = ({
+  config,
+  activeOptionId,
+  locationQueryValue,
+}) => {
   const filterOptions = {
     groupId: 'attributes',
     options: {},
-    multiple: true,
-    required: false,
-    search: true,
-    selectAll: false,
   };
   // the attribute option
   const option = find(config.options, (o) => o.attribute === activeOptionId);
+
   if (option) {
-    filterOptions.messagePrefix = messages.titlePrefix;
     filterOptions.message = option.message;
-    filterOptions.search = option.search;
-    if (entities.size === 0) {
-      if (locationQueryValue && option.options) {
-        asList(locationQueryValue).forEach((queryValue) => {
-          if (attributeOptionChecked(queryValue, option.attribute)) {
-            const locationQueryValueAttribute = queryValue.split(':');
-            if (locationQueryValueAttribute.length > 1) {
-              const locationAttribute = locationQueryValueAttribute[1];
-              forEach(option.options, (attributeOption) => {
-                if (attributeOption.value.toString() === locationAttribute) {
-                  filterOptions.options[attributeOption.value] = {
-                    label: attributeOption.label ? attributeOption.label : upperFirst(attributeOption.value),
-                    message: attributeOption.message,
-                    showCount: true,
-                    value: `${option.attribute}:${attributeOption.value}`,
-                    count: 0,
-                    query: 'where',
-                    checked: true,
-                  };
-                }
-              });
-            }
-          }
-        });
-      }
-    } else {
-      entities.forEach((entity) => {
-        if (typeof entity.getIn(['attributes', option.attribute]) !== 'undefined'
-        && entity.getIn(['attributes', option.attribute]) !== null) {
-          const value = entity.getIn(['attributes', option.attribute]).toString();
-          const queryValue = `${option.attribute}:${value}`;
-          // add connected entities if not present otherwise increase count
-          if (filterOptions.options[value]) {
-            filterOptions.options[value].count += 1;
-          } else if (option.reference && !!entity.get(option.reference.key)) {
-            filterOptions.options[value] = {
-              label: entity.getIn([option.reference.key, 'attributes', option.reference.label]),
-              showCount: true,
-              value: queryValue,
-              count: 1,
-              query: 'where',
-              checked: optionChecked(locationQueryValue, queryValue),
-            };
-          } else if (option.options) {
-            const attributeOption = find(option.options, (o) => o.value.toString() === value);
-            const label = attributeOption ? attributeOption.label : upperFirst(value);
-            filterOptions.options[value] = {
-              label,
-              message: attributeOption.message,
-              showCount: true,
-              value: queryValue,
-              count: 1,
-              query: 'where',
-              checked: optionChecked(locationQueryValue, queryValue),
-            };
-          }
-        } else if (option.reference && option.reference.without) {
-          if (filterOptions.options.without) {
-            // no connection present
-            // add without option
-            filterOptions.options.without.count += 1;
-          } else {
-            const queryValue = `${option.attribute}:null`;
-            filterOptions.options.without = {
-              messagePrefix: messages.without,
-              message: option.message,
-              showCount: true,
-              labelEmphasis: true,
-              value: queryValue,
-              count: 1,
-              query: 'where',
-              checked: optionChecked(locationQueryValue, queryValue),
-            };
-          }
+    if (option.filterUI && option.filterUI === 'checkboxes') {
+      filterOptions.options = option.options.map(
+        (attributeOption) => {
+          const queryValue = `${option.attribute}:${attributeOption.value}`;
+          const checked = asList(locationQueryValue).indexOf(queryValue) > -1;
+          return ({
+            message: attributeOption.message,
+            value: queryValue,
+            query: 'where',
+            checked,
+          });
         }
-      }); // for each entities
-    } // if (entities.length === 0) {
+      );
+    }
   } // if option
   return filterOptions;
 };
@@ -338,6 +304,7 @@ export const makeGroupedConnectionFilterOptions = (
   contextIntl,
   group,
   isManager,
+  includeMembers,
 ) => {
   const filterOptions = {
     groupId: group,
@@ -348,6 +315,7 @@ export const makeGroupedConnectionFilterOptions = (
     advanced: true,
     selectAll: false,
   };
+
   // get the active option
   const typeId = activeOptionId;
   const option = config[group];
@@ -408,6 +376,25 @@ export const makeGroupedConnectionFilterOptions = (
           }
         });
       }
+      // also check for active any options
+      if (locationQuery.get('any')) {
+        locationQueryValue = locationQuery.get('any');
+        asList(locationQueryValue).forEach((queryValue) => {
+          if (`${query}:${typeId}` === queryValue) {
+            filterOptions.options[queryValue] = {
+              messagePrefix: messages.any,
+              label: option.label,
+              message: option.message,
+              showCount: true,
+              labelEmphasis: true,
+              value: queryValue,
+              count: 0,
+              query: 'any',
+              checked: true,
+            };
+          }
+        });
+      }
     } else {
       entities.forEach((entity) => {
         // FK connection (1 : n)
@@ -450,10 +437,10 @@ export const makeGroupedConnectionFilterOptions = (
               let { message } = option;
               if (
                 option.groupByType
-                && option.message
-                && option.message.indexOf('{typeid}') > -1
+                && option.messageByType
+                && option.messageByType.indexOf('{typeid}') > -1
               ) {
-                message = option.message.replace('{typeid}', typeId);
+                message = option.messageByTypemessageByType.replace('{typeid}', typeId);
               }
               filterOptions.options.without = {
                 messagePrefix: messages.without,
@@ -465,6 +452,33 @@ export const makeGroupedConnectionFilterOptions = (
                 count: 1,
                 query: 'without',
                 checked: optionChecked(locationQuery.get('without'), `att:${option.attribute}`),
+              };
+            }
+          }
+          if (connection) {
+            if (filterOptions.options.any) {
+              // no connection present
+              // add without option
+              filterOptions.options.any.count += 1;
+            } else {
+              let { message } = option;
+              if (
+                option.groupByType
+                && option.messageByType
+                && option.messageByType.indexOf('{typeid}') > -1
+              ) {
+                message = option.messageByTypemessageByType.replace('{typeid}', typeId);
+              }
+              filterOptions.options.any = {
+                messagePrefix: messages.any,
+                label: option.label,
+                message,
+                showCount: true,
+                labelEmphasis: true,
+                value: `att:${option.attribute}`,
+                count: 1,
+                query: 'any',
+                checked: optionChecked(locationQuery.get('any'), `att:${option.attribute}`),
               };
             }
           }
@@ -503,6 +517,40 @@ export const makeGroupedConnectionFilterOptions = (
               }
             });
           }
+          if (includeMembers) {
+            const entityMemberConnections = entity.getIn([`${entityType}AssociationsByType`, parseInt(typeId, 10)]);
+            // if entity has connected entities
+            if (entityMemberConnections) {
+              // add connected entities if not present otherwise increase count
+              entityMemberConnections.forEach((connectedId) => {
+                const connection = connections.getIn([path, connectedId.toString()]);
+                // if not taxonomy already considered
+                if (connection) {
+                  optionConnections = optionConnections.push(connection);
+                  // if category already added
+                  if (filterOptions.options[connectedId]) {
+                    filterOptions.options[connectedId].count += 1;
+                  } else {
+                    const value = `${typeId}:${connectedId}`;
+                    const reference = showEntityReference && getEntityReference(connection);
+                    const label = getEntityTitle(connection, option.labels, contextIntl);
+                    filterOptions.options[connectedId] = {
+                      reference,
+                      label,
+                      info: connection.getIn(['attributes', 'description']),
+                      showCount: true,
+                      value: `${typeId}:${connectedId}`,
+                      count: 1,
+                      query,
+                      checked: optionChecked(locationQueryValue, value),
+                      tags: connection.get('categories'),
+                      draft: connection.getIn(['attributes', 'draft']),
+                    };
+                  }
+                }
+              });
+            }
+          }
           if (optionConnections.size === 0) {
             if (filterOptions.options.without) {
               // no connection present
@@ -512,10 +560,10 @@ export const makeGroupedConnectionFilterOptions = (
               let { message } = option;
               if (
                 option.groupByType
-                && option.message
-                && option.message.indexOf('{typeid}') > -1
+                && option.messageByType
+                && option.messageByType.indexOf('{typeid}') > -1
               ) {
-                message = option.message.replace('{typeid}', typeId);
+                message = option.messageByType.replace('{typeid}', typeId);
               }
               filterOptions.options.without = {
                 messagePrefix: messages.without,
@@ -527,6 +575,33 @@ export const makeGroupedConnectionFilterOptions = (
                 count: 1,
                 query: 'without',
                 checked: optionChecked(locationQuery.get('without'), `${entityType}_${typeId}`),
+              };
+            }
+          }
+          if (optionConnections.size > 0) {
+            if (filterOptions.options.any) {
+              // no connection present
+              // add without option
+              filterOptions.options.any.count += 1;
+            } else {
+              let { message } = option;
+              if (
+                option.groupByType
+                && option.messageByType
+                && option.messageByType.indexOf('{typeid}') > -1
+              ) {
+                message = option.messageByType.replace('{typeid}', typeId);
+              }
+              filterOptions.options.any = {
+                messagePrefix: messages.any,
+                label: option.label,
+                message,
+                showCount: true,
+                labelEmphasis: true,
+                value: `${entityType}_${typeId}`,
+                count: 1,
+                query: 'any',
+                checked: optionChecked(locationQuery.get('any'), `${entityType}_${typeId}`),
               };
             }
           }
@@ -722,4 +797,44 @@ export const makeConnectionFilterOptions = (
   }
   filterOptions.tagFilterGroups = option && makeTagFilterGroups(connectedTaxonomies, contextIntl);
   return filterOptions;
+};
+export const makeAnyWithoutConnectionFilterOptions = (
+  config,
+  locationQuery,
+  messages,
+  contextIntl,
+  group,
+) => {
+  // get the active option
+  const option = config[group];
+  // if option active
+  if (option) {
+    // the option path
+    // const { query, path } = option;
+    const entityType = option.entityTypeAs || option.entityType;
+    const withoutChecked = asList(locationQuery.get('without')).includes(entityType);
+    const anyChecked = asList(locationQuery.get('any')).includes(entityType);
+    const label = appMessages.nav[group]
+      ? contextIntl.formatMessage(appMessages.nav[group])
+      : 'LABEL NOT FOUND';
+    return [
+      {
+        messagePrefix: messages.any,
+        label,
+        value: entityType,
+        query: 'any',
+        filterUI: 'checkbox',
+        checked: anyChecked,
+      },
+      {
+        messagePrefix: messages.without,
+        label,
+        value: entityType,
+        query: 'without',
+        filterUI: 'checkbox',
+        checked: withoutChecked,
+      },
+    ];
+  }
+  return null;
 };

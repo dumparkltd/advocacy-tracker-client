@@ -28,7 +28,9 @@ export const FORM_INITIAL = fromJS({
   id: '',
   attributes: Object.keys(ACTOR_FIELDS.ATTRIBUTES).reduce((memo, att) => ({
     ...memo,
-    [att]: ACTOR_FIELDS.ATTRIBUTES[att].defaultValue || '',
+    [att]: typeof ACTOR_FIELDS.ATTRIBUTES[att].defaultValue !== 'undefined'
+      ? ACTOR_FIELDS.ATTRIBUTES[att].defaultValue
+      : '',
   }), {}),
   associatedTaxonomies: {},
   associatedActionsByActiontype: {},

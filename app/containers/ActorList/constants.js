@@ -2,6 +2,8 @@ import {
   API,
   USER_ROLES,
   PUBLISH_STATUSES,
+  PRIVACY_STATUSES,
+  ARCHIVE_STATUSES,
   ROUTES,
   ACTORTYPES,
 } from 'themes/config';
@@ -32,29 +34,6 @@ export const CONFIG = {
   views: {
     list: {
       search: ['code', 'title', 'description'],
-      sorting: [
-        {
-          attribute: 'title',
-          type: 'string',
-          order: 'asc',
-          default: true,
-        },
-        {
-          attribute: 'code',
-          type: 'string',
-          order: 'asc',
-        },
-        {
-          attribute: 'updated_at',
-          type: 'date',
-          order: 'desc',
-        },
-        {
-          attribute: 'id', // proxy for created at
-          type: 'number',
-          order: 'desc',
-        },
-      ],
     },
     map: {
       types: [ACTORTYPES.COUNTRY],
@@ -81,7 +60,8 @@ export const CONFIG = {
       query: 'action',
       type: 'actor-actions',
       search: true,
-      message: 'entities.actions_{typeid}.plural',
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,
@@ -94,7 +74,8 @@ export const CONFIG = {
       query: 'targeting',
       type: 'target-actions',
       search: true,
-      message: 'entities.actions_{typeid}.plural',
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
       entityType: 'actions', // filter by actor connection
       entityTypeAs: 'targetingActions',
@@ -109,7 +90,8 @@ export const CONFIG = {
       query: 'by-member',
       type: 'association-members',
       search: true,
-      message: 'entities.actors_{typeid}.plural',
+      messageByType: 'entities.actors_{typeid}.plural',
+      message: 'entities.actors.plural',
       path: API.ACTORS, // filter by actor connection
       entityTypeAs: 'members', // filter by actor connection
       entityType: 'actors',
@@ -123,7 +105,8 @@ export const CONFIG = {
       query: 'by-association',
       type: 'member-associations',
       search: true,
-      message: 'entities.actors_{typeid}.plural',
+      messageByType: 'entities.actors_{typeid}.plural',
+      message: 'entities.actors.plural',
       path: API.ACTORS, // filter by actor connection
       entityType: 'actors',
       entityTypeAs: 'associations', // filter by actor connection
@@ -154,6 +137,25 @@ export const CONFIG = {
         attribute: 'draft',
         options: PUBLISH_STATUSES,
         role: USER_ROLES.MANAGER.value,
+        filterUI: 'checkboxes',
+      },
+      {
+        search: false,
+        message: 'attributes.private',
+        attribute: 'private',
+        options: PRIVACY_STATUSES,
+        role: USER_ROLES.MANAGER.value,
+        roleEdit: USER_ROLES.ADMIN.value,
+        filterUI: 'checkboxes',
+      },
+      {
+        search: false,
+        message: 'attributes.is_archive',
+        attribute: 'is_archive',
+        options: ARCHIVE_STATUSES,
+        role: USER_ROLES.ADMIN.value,
+        filterUI: 'checkboxes',
+        default: false,
       },
     ],
   },

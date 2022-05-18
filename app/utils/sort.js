@@ -151,7 +151,7 @@ export const sortEntities = (entities, sortOrder, sortBy, type, asList = true) =
     (entity) => getEntitySortValueMapper(entity, sortBy || 'id', type),
     (a, b) => getEntitySortComparator(a, b, sortOrder || 'asc', type)
   );
-  return asList ? sorted.toList() : sorted;
+  return sorted && asList ? sorted.toList() : sorted;
 };
 
 // if (taxonomyId && parseInt(taxonomyId, 10) === CYCLE_TAXONOMY_ID) {

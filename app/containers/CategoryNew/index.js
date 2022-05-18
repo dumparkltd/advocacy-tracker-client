@@ -120,6 +120,7 @@ export class CategoryNew extends React.PureComponent { // eslint-disable-line re
     groups.push({
       fields: [
         getStatusField(intl.formatMessage),
+        getStatusField(intl.formatMessage, 'private'),
       ],
     });
     if (taxonomy.getIn(['attributes', 'tags_users'])) {

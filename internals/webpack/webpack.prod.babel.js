@@ -124,9 +124,9 @@ module.exports = require('./webpack.base.babel')({
     }),
 
     new WebpackPwaManifest({
-      name: 'WWF Advocacy Tracker',
-      short_name: 'Advocacy Tracker',
-      description: 'WWF Advocacy Tracker',
+      name: 'Sadata',
+      short_name: 'Sadata',
+      description: 'Sadata',
       background_color: '#ffffff',
       theme_color: '#ffffff',
       inject: true,

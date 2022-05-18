@@ -2,28 +2,44 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styled, { withTheme } from 'styled-components';
-import { palette } from 'styled-theme';
-
-import { SHOW_HEADER_TITLE, ROUTES } from 'themes/config';
-
+import {
+  Box, Button, ResponsiveContext, Heading,
+} from 'grommet';
+import { ROUTES } from 'themes/config';
+import { isMinSize } from 'utils/responsive';
 import appMessages from 'containers/App/messages';
 import Icon from 'components/Icon';
-import Button from 'components/buttons/Button';
 import ScreenReaderOnly from 'components/styled/ScreenReaderOnly';
-import PrintHide from 'components/styled/PrintHide';
 
-import Banner from './Banner';
 import Brand from './Brand';
-import BrandText from './BrandText';
-import BrandTitle from './BrandTitle';
-import BrandClaim from './BrandClaim';
-import NavPages from './NavPages';
-import NavAdmin from './NavAdmin';
-import LinkPage from './LinkPage';
-import NavAccount from './NavAccount';
+import LogoWrap from './LogoWrap';
+import messages from './messages';
 
-import LinkAdmin from './LinkAdmin';
-
+// const Claim = styled((p) => <Text {...p} />)`
+//   font-family: ${(props) => props.theme.fonts.title};
+//   font-size: ${(props) => props.theme.text.xxsmall.size};
+//   line-height: ${(props) => props.theme.text.xxsmall.size};
+//   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+//     font-size: ${(props) => props.theme.text.xsmall.size};
+//     line-height: ${(props) => props.theme.text.xsmall.size};
+//   }
+// `;
+const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
+  margin: 0;
+  font-family: ${(props) => props.theme.fonts.title};
+  font-size: ${(props) => props.theme.text.large.size};
+  line-height: ${(props) => props.theme.text.large.size};
+  font-weight: 500;
+  padding: 0;
+  max-width: 120px;
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+    font-size: ${(props) => props.theme.text.xlarge.size};
+    line-height: ${(props) => props.theme.text.xlarge.size};
+  }
+  @media print {
+    font-size: ${(props) => props.theme.sizes.header.print.title};
+  }
+`;
 
 const Styled = styled.div`
   position: ${(props) => {
@@ -35,21 +51,11 @@ const Styled = styled.div`
   top: 0;
   left: 0;
   right: 0;
-  height:${(props) => {
-    if (props.hasBrand) {
-      return props.theme.sizes.header.banner.heightMobile;
-    }
-    return 0;
-  }}px;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    height:${(props) => {
-    if (props.hasBrand) {
-      return props.theme.sizes.header.banner.height;
-    }
-    return 0;
-  }}px;
+  height:${(props) => props.theme.sizes.header.banner.heightMobile}px;
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+    height:${(props) => props.theme.sizes.header.banner.height}px;
   }
-  background-color: ${(props) => props.hasBackground ? palette('header', 0) : 'transparent'};
+  background-color: #000;
   box-shadow: ${(props) => props.hasShadow ? '0px 0px 5px 0px rgba(0,0,0,0.5)' : 'none'};
   z-index: 101;
   @media print {
@@ -61,71 +67,59 @@ const Styled = styled.div`
   }
 `;
 
-const NavSecondary = styled(PrintHide)`
-  display: ${(props) => props.visible ? 'block' : 'none'};
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  width: 100%;
-  z-index: 99999;
-  background-color:  ${palette('header', 0)};
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    position: relative;
-    top: auto;
-    bottom: auto;
-    left: auto;
-    right: auto;
-    z-index: 300;
-    display: block;
+const LinkPage = styled((p) => <Button plain as="a" justify="center" fill="vertical" {...p} />)`
+  color: ${({ active }) => active ? 'black' : 'white'};
+  background-color: ${({ active }) => active ? '#f0f0f0' : 'transparent'};
+  padding-right: 12px;
+  padding-left: 12px;
+  padding-top: 24px;
+  padding-bottom: ${({ wide }) => !wide ? 16 : 0}px;
+  width: ${({ wide }) => !wide ? '100%' : 'auto'};
+  text-align: center;
+  font-size: ${({ theme }) => theme.text.small.size};
+  line-height: ${({ theme }) => theme.text.small.height};
+  font-weight: ${({ wide, active }) => (!wide && active) ? 500 : 300};
+  height:${(props) => props.theme.sizes.header.banner.heightMobile}px;
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+    height:${(props) => props.theme.sizes.header.banner.height}px;
+  }
+  &:hover {
+    color: ${({ active }) => active ? 'black' : 'white'};
+    background-color: ${({ active }) => active ? '#f0f0f0' : '#282a2c'};
   }
 `;
-const ShowSecondary = styled(Button)`
-  display: ${(props) => props.visible ? 'block' : 'none'};
-  position: absolute;
-  right: 0;
-  top: 0;
-  z-index: 300;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    display: none;
-  }
-  background-color: transparent;
-`;
-const HideSecondaryWrap = styled.div`
-  background-color: ${palette('header', 0)};
-  text-align: right;
+const LinkAccount = LinkPage;
+
+
+const ToggleMenu = styled((p) => <Button plain as="a" {...p} />)`
   display: block;
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    display: none;
+  z-index: 300;
+  background-color: transparent;
+  color: white;
+  &:hover {
+    color: white;
+    opacity: 0.9;
   }
 `;
-const HideSecondary = styled(Button)``;
 
-
-// const Search = styled(LinkMain)`
-//   display: none;
-//   color: ${(props) => props.active ? palette('headerNavMainItem', 1) : palette('headerNavMainItem', 0)};
-//   &:hover {
-//     color:${palette('headerNavMainItemHover', 0)};
-//   }
-//   padding: 2px ${(props) => props.theme.sizes.header.paddingLeft.mobile}px 1px;
-//   @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-//     display: inline-block;
-//     min-width: auto;
-//     padding: 15px ${(props) => props.theme.sizes.header.paddingLeft.small}px 0;
-//     position: absolute;
-//     right: 0;
-//     border-left: none;
-//   }
-//   @media (min-width: ${(props) => props.theme.breakpoints.large}) {
-//     padding-left: 24px;
-//     padding-right: 24px;
-//   }
-// `;
+const Section = styled((p) => <Box {...p} />)`
+  border-right: 1px solid ${({ wide }) => wide ? '#282a2c' : 'transparent'};
+  border-bottom: 1px solid ${({ wide }) => !wide ? '#282a2c' : 'transparent'};
+  &:last-child {
+    border-color: transparent;
+  }
+`;
+const MainMenu = styled((p) => <Box {...p} />)`
+  position: ${({ wide }) => !wide ? 'absolute' : 'static'};
+  left: ${({ wide }) => !wide ? 0 : 'auto'};
+  right: ${({ wide }) => !wide ? 0 : 'auto'};
+  width: ${({ wide }) => !wide ? '100%' : 'auto'};
+  top: ${({ wide, theme }) => !wide ? theme.sizes.header.banner.heightMobile : 0}px;
+  background: black;
+`;
 
 const STATE_INITIAL = {
-  showSecondary: false,
+  showMenu: false,
 };
 
 class Header extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
@@ -148,18 +142,19 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
     window.removeEventListener('mousedown', this.handleClickOutside);
   }
 
-  onShowSecondary = (evt) => {
+  onShowMenu = (evt) => {
     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ showSecondary: true });
+    this.setState({ showMenu: true });
   };
 
-  onHideSecondary = (evt) => {
+  onHideMenu = (evt) => {
     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ showSecondary: false });
+    this.setState({ showMenu: false });
   };
 
   onClick = (evt, path, currentPath) => {
     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+    this.onHideMenu();
     if (currentPath) {
       if (currentPath === ROUTES.LOGIN || currentPath === ROUTES.REGISTER) {
         this.props.onPageLink(path, { keepQuery: true });
@@ -177,114 +172,225 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
     this.forceUpdate();
   };
 
-  renderSecondary = (navItems) => (
-    <PrintHide>
-      <ShowSecondary
-        visible={!this.state.showSecondary}
-        onClick={this.onShowSecondary}
-      >
-        <ScreenReaderOnly>
-          <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
-        </ScreenReaderOnly>
-        <Icon name="menu" hasStroke />
-      </ShowSecondary>
-      <NavSecondary
-        visible={this.state.showSecondary}
-        onClick={(evt) => {
-          evt.stopPropagation();
-          this.onHideSecondary();
-        }}
-      >
-        <HideSecondaryWrap>
-          <HideSecondary
-            onClick={this.onHideSecondary}
-          >
-            <ScreenReaderOnly>
-              <FormattedMessage {...appMessages.buttons.hideSecondaryNavigation} />
-            </ScreenReaderOnly>
-            <Icon name="close" size="30px" />
-          </HideSecondary>
-        </HideSecondaryWrap>
-        <NavAccount
-          isSignedIn={this.props.isSignedIn}
-          user={this.props.user}
-          onPageLink={(evt, path, query) => {
-            if (evt !== undefined && evt.stopPropagation) evt.stopPropagation();
-            this.onHideSecondary();
-            this.props.onPageLink(path, query);
-          }}
-          currentPath={this.props.currentPath}
-        />
-        { navItems
-          && (
-            <NavAdmin>
-              { navItems.map((item, i) => (
-                <LinkAdmin
-                  key={i}
-                  href={item.path}
-                  active={item.active}
-                  onClick={(evt) => {
-                    evt.stopPropagation();
-                    this.onHideSecondary();
-                    this.onClick(evt, item.path);
-                  }}
-                >
-                  {item.title}
-                </LinkAdmin>
-              ))}
-            </NavAdmin>
-          )
-        }
-        <NavPages>
-          { this.props.pages && this.props.pages.map((page, i) => (
-            <LinkPage
-              key={i}
-              href={page.path}
-              active={page.active || this.props.currentPath === page.path}
-              onClick={(evt) => this.onClick(evt, page.path)}
-            >
-              {page.title}
-            </LinkPage>
-          ))}
-        </NavPages>
-      </NavSecondary>
-    </PrintHide>
-  );
-
   render() {
-    const { isAuth, navItems } = this.props;
+    const {
+      isAuth, navItems, search, isSignedIn, user, currentPath, isAnalyst,
+    } = this.props;
     const { intl } = this.context;
-
     const appTitle = `${intl.formatMessage(appMessages.app.title)} - ${intl.formatMessage(appMessages.app.claim)}`;
+    const userPath = user ? `${ROUTES.USERS}/${user.id}` : '';
     return (
-      <Styled
-        fixed={isAuth}
-        sticky={!isAuth}
-        hasBackground={!isAuth}
-        hasShadow={!isAuth}
-        hasNav={!isAuth}
-        hasBrand
-      >
-        <Banner>
-          <Brand
-            href="/"
-            onClick={(evt) => this.onClick(evt, '/')}
-            title={appTitle}
-          >
-            {SHOW_HEADER_TITLE && (
-              <BrandText>
-                <BrandClaim>
-                  <FormattedMessage {...appMessages.app.claim} />
-                </BrandClaim>
-                <BrandTitle>
-                  <FormattedMessage {...appMessages.app.title} />
-                </BrandTitle>
-              </BrandText>
-            )}
-          </Brand>
-          {this.renderSecondary(navItems)}
-        </Banner>
-      </Styled>
+      <ResponsiveContext.Consumer>
+        {(size) => {
+          const wide = isMinSize(size, 'large');
+          return (
+            <Styled
+              sticky={!isAuth}
+              hasBackground={!isAuth}
+              hasShadow={!isAuth}
+              hasNav={!isAuth}
+              hasBrand
+            >
+              <Box direction="row" fill>
+                <Box>
+                  <Brand
+                    href="/"
+                    onClick={(evt) => this.onClick(evt, '/')}
+                    title={appTitle}
+                  >
+                    <LogoWrap>
+                      <Icon name="logo" />
+                    </LogoWrap>
+                    <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
+                      <BrandTitle>
+                        <FormattedMessage {...appMessages.app.title} />
+                      </BrandTitle>
+                    </Box>
+                  </Brand>
+                </Box>
+                {!wide && !this.state.showMenu && (
+                  <Box
+                    flex={{ grow: 1 }}
+                    direction="row"
+                    align="center"
+                    justify="end"
+                    pad={{ right: 'small' }}
+                  >
+                    <ToggleMenu
+                      onClick={this.onShowMenu}
+                    >
+                      <ScreenReaderOnly>
+                        <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
+                      </ScreenReaderOnly>
+                      <Icon name="menu" hasStroke size="39px" />
+                    </ToggleMenu>
+                  </Box>
+                )}
+                {!wide && this.state.showMenu && (
+                  <Box
+                    flex={{ grow: 1 }}
+                    direction="row"
+                    align="center"
+                    justify="end"
+                    pad={{ right: 'small' }}
+                  >
+                    <ToggleMenu
+                      onClick={this.onHideMenu}
+                    >
+                      <ScreenReaderOnly>
+                        <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
+                      </ScreenReaderOnly>
+                      <Icon name="close" size="39px" />
+                    </ToggleMenu>
+                  </Box>
+                )}
+                {(wide || this.state.showMenu) && (
+                  <MainMenu
+                    flex={{ grow: 1 }}
+                    direction={wide ? 'row' : 'column'}
+                    align={wide ? 'center' : 'end'}
+                    justify={wide ? 'end' : 'center'}
+                    wide={wide}
+                    elevation={wide ? 'none' : 'medium'}
+                  >
+                    {search && (
+                      <Section
+                        fill={wide ? 'vertical' : 'horizontal'}
+                        justify={wide ? 'center' : 'end'}
+                        align={wide ? 'end' : 'center'}
+                        direction={wide ? 'row' : 'column'}
+                        wide={wide}
+                      >
+                        <LinkPage
+                          href={search.path}
+                          active={search.active}
+                          onClick={(evt) => this.onClick(evt, search.path)}
+                          title={search.title}
+                          wide={wide}
+                        >
+                          {search.title}
+                          {search.icon
+                            && <Icon title={search.title} name={search.icon} text textRight size="1em" />
+                          }
+                        </LinkPage>
+                      </Section>
+                    )}
+                    {this.props.pages && this.props.pages.length > 0 && (
+                      <Section
+                        fill={wide ? 'vertical' : 'horizontal'}
+                        justify={wide ? 'center' : 'end'}
+                        align={wide ? 'end' : 'center'}
+                        direction={wide ? 'row' : 'column'}
+                        wide={wide}
+                      >
+                        {this.props.pages.map((page, i) => (
+                          <LinkPage
+                            key={i}
+                            href={page.path}
+                            active={page.active || this.props.currentPath === page.path}
+                            onClick={(evt) => this.onClick(evt, page.path)}
+                            wide={wide}
+                          >
+                            {page.title}
+                          </LinkPage>
+                        ))}
+                      </Section>
+                    )}
+                    {navItems && navItems.length > 0 && (
+                      <Section
+                        fill={wide ? 'vertical' : 'horizontal'}
+                        justify={wide ? 'center' : 'end'}
+                        align={wide ? 'end' : 'center'}
+                        direction={wide ? 'row' : 'column'}
+                        wide={wide}
+                      >
+                        {navItems.map((item, i) => (
+                          <LinkPage
+                            key={i}
+                            href={item.path}
+                            active={item.active}
+                            onClick={(evt) => {
+                              evt.stopPropagation();
+                              this.onHideMenu();
+                              this.onClick(evt, item.path);
+                            }}
+                            wide={wide}
+                          >
+                            {item.title}
+                          </LinkPage>
+                        ))}
+                      </Section>
+                    )}
+                    <Section
+                      fill={wide ? 'vertical' : 'horizontal'}
+                      justify={wide ? 'center' : 'end'}
+                      align={wide ? 'end' : 'center'}
+                      direction={wide ? 'row' : 'column'}
+                      wide={wide}
+                    >
+                      {isSignedIn && isAnalyst && (
+                        <LinkAccount
+                          href={ROUTES.BOOKMARKS}
+                          active={currentPath === ROUTES.BOOKMARKS}
+                          onClick={(evt) => this.onClick(evt, ROUTES.BOOKMARKS)}
+                          wide={wide}
+                        >
+                          <FormattedMessage {...appMessages.nav.bookmarks} />
+                        </LinkAccount>
+                      )}
+                      {isSignedIn && user && (
+                        <LinkAccount
+                          href={userPath}
+                          active={currentPath === userPath}
+                          onClick={(evt) => this.onClick(evt, userPath)}
+                          wide={wide}
+                        >
+                          Profile
+                        </LinkAccount>
+                      )}
+                      {isSignedIn && !user && wide && (
+                        <LinkAccount wide>
+                          <FormattedMessage {...messages.userLoading} />
+                        </LinkAccount>
+                      )}
+                      {isSignedIn && (
+                        <LinkAccount
+                          href={ROUTES.LOGOUT}
+                          active={currentPath === ROUTES.LOGOUT}
+                          onClick={(evt) => this.onClick(evt, ROUTES.LOGOUT)}
+                          wide={wide}
+                        >
+                          <FormattedMessage {...appMessages.nav.logout} />
+                        </LinkAccount>
+                      )}
+                      {!isSignedIn && (
+                        <LinkAccount
+                          href={ROUTES.REGISTER}
+                          active={currentPath === ROUTES.REGISTER}
+                          onClick={(evt) => this.onClick(evt, ROUTES.REGISTER, currentPath)}
+                          wide={wide}
+                        >
+                          <FormattedMessage {...appMessages.nav.register} />
+                        </LinkAccount>
+                      )}
+                      {!isSignedIn && (
+                        <LinkAccount
+                          href={ROUTES.LOGIN}
+                          active={currentPath === ROUTES.LOGIN}
+                          onClick={(evt) => this.onClick(evt, ROUTES.LOGIN, currentPath)}
+                          wide={wide}
+                        >
+                          <FormattedMessage {...appMessages.nav.login} />
+                        </LinkAccount>
+                      )}
+                    </Section>
+                  </MainMenu>
+                )}
+              </Box>
+            </Styled>
+          );
+        }}
+      </ResponsiveContext.Consumer>
     );
   }
 }
@@ -303,6 +409,7 @@ Header.propTypes = {
   isAuth: PropTypes.bool, // not shown on home page
   theme: PropTypes.object.isRequired,
   search: PropTypes.object,
+  isAnalyst: PropTypes.bool,
 };
 
 export default withTheme(Header);

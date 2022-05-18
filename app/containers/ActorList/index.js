@@ -21,12 +21,13 @@ import {
   selectActiontypesForTargettype,
   selectMembertypesForActortype,
   selectAssociationtypesForActortype,
+  selectActortypeActors,
 } from 'containers/App/selectors';
 
 import { checkActionAttribute } from 'utils/entities';
-
+import qe from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
-import { ROUTES } from 'themes/config';
+import { ROUTES, ACTORTYPES } from 'themes/config';
 
 import EntityList from 'containers/EntityList';
 
@@ -53,7 +54,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
 
   prepareTypeOptions = (types, activeId) => {
     const { intl } = this.context;
-    return Object.values(types.toJS()).map((type) => ({
+    return types.toList().toJS().map((type) => ({
       value: type.id,
       label: intl.formatMessage(appMessages.actortypes[type.id]),
       active: activeId === type.id,
@@ -65,6 +66,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
     const {
       dataReady,
       entities,
+      allEntities,
       taxonomies,
       connections,
       connectedTaxonomies,
@@ -84,6 +86,13 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
     const headerOptions = {
       supTitle: intl.formatMessage(messages.pageTitle),
       actions: [],
+      info: appMessages.actortypes_info[typeId]
+        && (qe(typeId, ACTORTYPES.REG) || qe(typeId, ACTORTYPES.ORG))
+        ? {
+          title: 'Please note',
+          content: intl.formatMessage(appMessages.actortypes_info[typeId]),
+        }
+        : null,
     };
     if (isAnalyst) {
       headerOptions.actions.push({
@@ -102,20 +111,16 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
     }
     if (isManager) {
       headerOptions.actions.push({
-        type: 'text',
-        title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(),
+        title: 'Create new',
+        onClick: () => this.props.handleNew(typeId),
+        icon: 'add',
+        isManager,
       });
       headerOptions.actions.push({
-        type: 'add',
-        title: [
-          intl.formatMessage(appMessages.buttons.add),
-          {
-            title: intl.formatMessage(appMessages.entities[type].single),
-            hiddenSmall: true,
-          },
-        ],
-        onClick: () => this.props.handleNew(typeId),
+        title: intl.formatMessage(appMessages.buttons.import),
+        onClick: () => this.props.handleImport(),
+        icon: 'import',
+        isManager,
       });
     }
 
@@ -129,11 +134,12 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
         />
         <EntityList
           entities={entities}
+          allEntityCount={allEntities && allEntities.size}
           taxonomies={taxonomies}
           connections={connections}
           connectedTaxonomies={connectedTaxonomies}
           config={CONFIG}
-          header={headerOptions}
+          headerOptions={headerOptions}
           dataReady={dataReady}
           entityTitle={{
             single: intl.formatMessage(appMessages.entities[type].single),
@@ -163,6 +169,7 @@ ActorList.propTypes = {
   dataReady: PropTypes.bool,
   isManager: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
+  allEntities: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
   connectedTaxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
@@ -193,6 +200,7 @@ const mapStateToProps = (state, props) => ({
   membertypes: selectMembertypesForActortype(state, { type: props.params.id }),
   associationtypes: selectAssociationtypesForActortype(state, { type: props.params.id }),
   actortypes: selectActortypes(state),
+  allEntities: selectActortypeActors(state, { type: props.params.id }),
 });
 
 function mapDispatchToProps(dispatch) {

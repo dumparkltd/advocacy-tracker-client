@@ -1,5 +1,5 @@
 // import { API, USER_ROLES, ROUTES } from 'themes/config';
-import { API, ROUTES } from 'themes/config';
+import { API, ROUTES, USER_ROLES } from 'themes/config';
 
 export const DEPENDENCIES = [
   API.USERS,
@@ -19,6 +19,7 @@ export const DEPENDENCIES = [
 ];
 
 export const CONFIG = {
+  types: 'users',
   clientPath: ROUTES.USERS,
   serverPath: API.USERS,
   views: {
@@ -44,19 +45,13 @@ export const CONFIG = {
       ],
     },
   },
-  // taxonomies: { // filter by each category
-  //   query: 'cat',
-  //   search: true,
-  //   connectPath: API.USER_CATEGORIES,
-  //   key: 'category_id',
-  //   ownKey: 'user_id',
-  // },
   connections: { // filter by associated entity
     actions: {
       query: 'action',
       type: 'user-actions',
       search: true,
-      message: 'entities.actions_{typeid}.plural',
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,
@@ -69,7 +64,8 @@ export const CONFIG = {
       query: 'actor',
       type: 'user-actors',
       search: true,
-      message: 'entities.actors_{typeid}.plural',
+      messageByType: 'entities.actors_{typeid}.plural',
+      message: 'entities.actors.plural',
       path: API.ACTORS, // filter by actor connection
       entityType: 'actors', // filter by actor connection
       clientPath: ROUTES.ACTOR,
@@ -78,14 +74,18 @@ export const CONFIG = {
       ownKey: 'user_id',
       groupByType: true,
     },
-    // roles: {
-    //   edit: false,
-    //   search: true,
-    //   popover: false,
-    //   message: 'entities.roles.single',
-    //   path: API.ROLES, // filter by actor connection
-    //   key: 'role_id',
-    //   labels: Object.values(USER_ROLES),
-    // },
+    roles: {
+      query: 'role',
+      type: 'user-roles',
+      search: false,
+      message: 'entities.roles.single',
+      entityType: 'roles',
+      path: 'roles',
+      key: 'role_id',
+      ownKey: 'user_id',
+      connectPath: API.USER_ROLES, // filter by actor connection
+      single: true,
+      labels: Object.values(USER_ROLES),
+    },
   },
 };

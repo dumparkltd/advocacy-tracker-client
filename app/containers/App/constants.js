@@ -21,6 +21,8 @@ export const RESET_PROGRESS = 'impactoss/App/RESET_PROGRESS';
 
 export const AUTHENTICATE_SENDING = 'impactoss/App/AUTHENTICATE_SENDING';
 export const AUTHENTICATE = 'impactoss/App/AUTHENTICATE';
+export const RESET_PASSWORD = 'impactoss/App/RESET_PASSWORD';
+export const RECOVER_PASSWORD = 'impactoss/App/RECOVER_PASSWORD';
 export const AUTHENTICATE_SUCCESS = 'impactoss/App/AUTHENTICATE_SUCCESS';
 export const AUTHENTICATE_ERROR = 'impactoss/App/AUTHENTICATE_ERROR';
 export const SET_AUTHENTICATION_STATE = 'impactoss/App/SET_AUTHENTICATION_STATE';
@@ -56,6 +58,10 @@ export const DELETE_SENDING = 'impactoss/App/DELETE_SENDING';
 export const DELETE_SUCCESS = 'impactoss/App/DELETE_SUCCESS';
 export const DELETE_ERROR = 'impactoss/App/DELETE_ERROR';
 
+export const RECOVER_SENDING = 'impactoss/App/RECOVER_SENDING';
+export const RECOVER_SUCCESS = 'impactoss/App/RECOVER_SUCCESS';
+export const RECOVER_ERROR = 'impactoss/App/RECOVER_ERROR';
+
 export const UPDATE_ROUTE_QUERY = 'impactoss/App/UPDATE_ROUTE_QUERY';
 export const UPDATE_PATH = 'impactoss/App/UPDATE_PATH';
 
@@ -69,10 +75,13 @@ export const SUBMIT_INVALID = 'impactoss/App/SUBMIT_INVALID';
 
 export const DISMISS_QUERY_MESSAGES = 'impactoss/App/DISMISS_QUERY_MESSAGES';
 export const SET_ACTIONTYPE = 'impactoss/App/SET_ACTIONTYPE';
+export const SET_ACTORTYPE = 'impactoss/App/SET_ACTORTYPE';
 export const SET_VIEW = 'impactoss/App/SET_VIEW';
+export const SET_SUBJECT = 'impactoss/App/SET_SUBJECT';
 export const SET_MAPSUBJECT = 'impactoss/App/SET_MAPSUBJECT';
 export const SET_INCLUDE_ACTOR_MEMBERS = 'impactoss/App/SET_INCLUDE_ACTOR_MEMBERS';
 export const SET_INCLUDE_TARGET_MEMBERS = 'impactoss/App/SET_INCLUDE_TARGET_MEMBERS';
+export const SET_INCLUDE_MEMBERS_FORFILTERS = 'impactoss/App/SET_INCLUDE_MEMBERS_FORFILTERS';
 
 export const FILTERS_PANEL = 'filters';
 export const EDIT_PANEL = 'edit';

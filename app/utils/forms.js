@@ -23,9 +23,13 @@ import validateLength from 'components/forms/validators/validate-length';
 
 import {
   PUBLISH_STATUSES,
+  PRIVACY_STATUSES,
+  ARCHIVE_STATUSES,
   USER_ROLES,
   DATE_FORMAT,
   API,
+  ACTIONTYPES_CONFIG,
+  ACTORTYPES_CONFIG,
 } from 'themes/config';
 
 import appMessages from 'containers/App/messages';
@@ -155,7 +159,6 @@ export const renderUserMultiControl = (entities, onCreateOption, contextIntl) =>
     //   : null,
   }
   : null;
-
 export const renderActorControl = (
   actortypeId,
   entities,
@@ -189,6 +192,7 @@ export const renderActorsByActortypeControl = (
   ? entitiesByActortype.reduce(
     (controls, entities, typeid) => controls.concat({
       id: `actors.${typeid}`,
+      typeId: typeid,
       model: `.associatedActorsByActortype.${typeid}`,
       dataPath: ['associatedActorsByActortype', typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
@@ -205,7 +209,11 @@ export const renderActorsByActortypeControl = (
         : null,
     }),
     [],
-  ).sort((a, b) => a.id > b.id ? 1 : -1)
+  ).sort((a, b) => {
+    const configA = ACTORTYPES_CONFIG[a.typeId];
+    const configB = ACTORTYPES_CONFIG[b.typeId];
+    return configA.order < configB.order ? -1 : 1;
+  })
   : null;
 // actors grouped by actortype
 export const renderTargetsByActortypeControl = (
@@ -217,6 +225,7 @@ export const renderTargetsByActortypeControl = (
   ? entitiesByActortype.reduce(
     (controls, entities, typeid) => controls.concat({
       id: `targets.${typeid}`,
+      typeId: typeid,
       model: `.associatedTargetsByActortype.${typeid}`,
       dataPath: ['associatedTargetsByActortype', typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
@@ -233,7 +242,11 @@ export const renderTargetsByActortypeControl = (
         : null,
     }),
     [],
-  ).sort((a, b) => a.id > b.id ? 1 : -1)
+  ).sort((a, b) => {
+    const configA = ACTORTYPES_CONFIG[a.typeId];
+    const configB = ACTORTYPES_CONFIG[b.typeId];
+    return configA.order < configB.order ? -1 : 1;
+  })
   : null;
 
 export const renderMembersByActortypeControl = (
@@ -244,7 +257,8 @@ export const renderMembersByActortypeControl = (
 ) => entitiesByActortype
   ? entitiesByActortype.reduce(
     (controls, entities, typeid) => controls.concat({
-      id: `actors.${typeid}`,
+      id: `members.${typeid}`,
+      typeId: typeid,
       model: `.associatedMembersByActortype.${typeid}`,
       dataPath: ['associatedMembersByActortype', typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
@@ -261,7 +275,11 @@ export const renderMembersByActortypeControl = (
         : null,
     }),
     [],
-  ).sort((a, b) => a.id > b.id ? 1 : -1)
+  ).sort((a, b) => {
+    const configA = ACTORTYPES_CONFIG[a.typeId];
+    const configB = ACTORTYPES_CONFIG[b.typeId];
+    return configA.order < configB.order ? -1 : 1;
+  })
   : null;
 export const renderAssociationsByActortypeControl = (
   entitiesByActortype,
@@ -271,7 +289,8 @@ export const renderAssociationsByActortypeControl = (
 ) => entitiesByActortype
   ? entitiesByActortype.reduce(
     (controls, entities, typeid) => controls.concat({
-      id: `actors.${typeid}`,
+      id: `associations.${typeid}`,
+      typeId: typeid,
       model: `.associatedAssociationsByActortype.${typeid}`,
       dataPath: ['associatedAssociationsByActortype', typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
@@ -288,7 +307,11 @@ export const renderAssociationsByActortypeControl = (
         : null,
     }),
     [],
-  ).sort((a, b) => a.id > b.id ? 1 : -1)
+  ).sort((a, b) => {
+    const configA = ACTORTYPES_CONFIG[a.typeId];
+    const configB = ACTORTYPES_CONFIG[b.typeId];
+    return configA.order < configB.order ? -1 : 1;
+  })
   : null;
 
 export const renderActionsByActiontypeControl = (
@@ -300,7 +323,8 @@ export const renderActionsByActiontypeControl = (
 ) => entitiesByActiontype
   ? entitiesByActiontype.reduce(
     (controls, entities, typeid) => controls.concat({
-      id: `actors.${typeid}`,
+      id: `actions.${typeid}`,
+      typeId: typeid,
       model: `.${model}.${typeid}`,
       dataPath: [model, typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actions_${typeid}`].plural),
@@ -317,7 +341,11 @@ export const renderActionsByActiontypeControl = (
         : null,
     }),
     [],
-  ).sort((a, b) => a.id > b.id ? 1 : -1)
+  ).sort((a, b) => {
+    const configA = ACTIONTYPES_CONFIG[a.typeId];
+    const configB = ACTIONTYPES_CONFIG[b.typeId];
+    return configA.order < configB.order ? -1 : 1;
+  })
   : null;
 
 export const renderActionsAsTargetByActiontypeControl = (
@@ -328,7 +356,8 @@ export const renderActionsAsTargetByActiontypeControl = (
 ) => entitiesByActiontype
   ? entitiesByActiontype.reduce(
     (controls, entities, typeid) => controls.concat({
-      id: `actorsAsTarget.${typeid}`,
+      id: `actionsAsTarget.${typeid}`,
+      typeId: typeid,
       model: `.associatedActionsAsTargetByActiontype.${typeid}`,
       dataPath: ['associatedActionsAsTargetByActiontype', typeid],
       label: contextIntl.formatMessage(appMessages.entities[`actions_${typeid}`].plural),
@@ -345,7 +374,11 @@ export const renderActionsAsTargetByActiontypeControl = (
         : null,
     }),
     [],
-  ).sort((a, b) => a.id > b.id ? 1 : -1)
+  ).sort((a, b) => {
+    const configA = ACTIONTYPES_CONFIG[a.typeId];
+    const configB = ACTIONTYPES_CONFIG[b.typeId];
+    return configA.order < configB.order ? -1 : 1;
+  })
   : null;
 
 // actors grouped by actortype
@@ -533,13 +566,25 @@ export const getRoleFormField = (formatMessage, roleOptions) => ({
     || userRole.value === USER_ROLES.DEFAULT.value)),
 });
 
-export const getStatusField = (formatMessage) => ({
-  id: 'status',
-  controlType: 'select',
-  model: '.attributes.draft',
-  label: formatMessage(appMessages.attributes.draft),
-  options: PUBLISH_STATUSES,
-});
+export const getStatusField = (formatMessage, attribute = 'draft', options) => {
+  let myOptions = options;
+  if (attribute === 'draft') {
+    myOptions = PUBLISH_STATUSES;
+  }
+  if (attribute === 'private') {
+    myOptions = PRIVACY_STATUSES;
+  }
+  if (attribute === 'is_archive') {
+    myOptions = ARCHIVE_STATUSES;
+  }
+  return {
+    id: 'status',
+    controlType: 'select',
+    model: `.attributes.${attribute}`,
+    label: formatMessage(appMessages.attributes[attribute]),
+    options: myOptions,
+  };
+};
 
 export const getTitleFormField = (
   formatMessage,
@@ -584,7 +629,6 @@ export const getTextFormField = (formatMessage, att, required = false) => getFor
   label: att,
   required,
 });
-
 export const getAmountFormField = (formatMessage, required, att = 'amount') => getFormField({
   formatMessage,
   controlType: att,
@@ -644,7 +688,6 @@ export const getMarkdownFormField = (formatMessage, required, attribute = 'descr
     : (appMessages.hints[attribute] && formatMessage(appMessages.hints[attribute])),
 });
 
-// unused
 export const getTextareaField = (formatMessage, attribute = 'description', required) => getFormField({
   formatMessage,
   controlType: 'textarea',
@@ -811,10 +854,14 @@ const getCategoryFields = (args, formatMessage) => ({
         fields: [
           getCheckboxField(formatMessage, 'user_only'),
           getStatusField(formatMessage),
+          getStatusField(formatMessage, 'private'),
         ],
       }]
       : [{
-        fields: [getStatusField(formatMessage)],
+        fields: [
+          getStatusField(formatMessage),
+          getStatusField(formatMessage, 'private'),
+        ],
       }],
   },
   body: {
@@ -866,6 +913,7 @@ const getActorFields = ({ typeId }, formatMessage) => ({
     aside: [{ // fieldGroup
       fields: [
         getStatusField(formatMessage),
+        getStatusField(formatMessage, 'private'),
       ],
     }],
   },
@@ -933,6 +981,7 @@ const getActionFields = ({ typeId }, formatMessage) => ({
     aside: [{ // fieldGroup
       fields: [
         getStatusField(formatMessage),
+        getStatusField(formatMessage, 'private'),
       ],
     }],
   },
@@ -1012,38 +1061,37 @@ const getResourceFields = ({ typeId }, formatMessage) => ({
     }],
     aside: [{ // fieldGroup
       fields: [
-        checkResourceAttribute(typeId, 'url') && getLinkFormField(
-          formatMessage,
-          checkResourceRequired(typeId, 'url'),
-          'url',
-        ),
+        getStatusField(formatMessage),
+        getStatusField(formatMessage, 'private'),
       ],
     }],
   },
   body: {
-    main: [{
-      fields: [
-        checkResourceAttribute(typeId, 'url') && getLinkFormField(
-          formatMessage,
-          checkResourceRequired(typeId, 'url'),
-          'url',
-        ),
-      ],
-    },
-    {
-      fields: [
-        checkResourceAttribute(typeId, 'description') && getMarkdownFormField(
-          formatMessage,
-          checkResourceRequired(typeId, 'description'),
-          'description',
-        ),
-        checkResourceAttribute(typeId, 'status') && getMarkdownFormField(
-          formatMessage,
-          checkResourceRequired(typeId, 'status'),
-          'status',
-        ),
-      ],
-    }],
+    main: [
+      {
+        fields: [
+          checkResourceAttribute(typeId, 'url') && getLinkFormField(
+            formatMessage,
+            checkResourceRequired(typeId, 'url'),
+            'url',
+          ),
+        ],
+      },
+      {
+        fields: [
+          checkResourceAttribute(typeId, 'description') && getMarkdownFormField(
+            formatMessage,
+            checkResourceRequired(typeId, 'description'),
+            'description',
+          ),
+          checkResourceAttribute(typeId, 'status') && getMarkdownFormField(
+            formatMessage,
+            checkResourceRequired(typeId, 'status'),
+            'status',
+          ),
+        ],
+      },
+    ],
     aside: [{ // fieldGroup
       fields: [
         checkResourceAttribute(typeId, 'publication_date') && getDateField(

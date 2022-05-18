@@ -4,22 +4,24 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { Box, Text, Button } from 'grommet';
+import styled from 'styled-components';
 
 import {
   getTitleField,
   getStatusField,
+  getStatusFieldIf,
   getMetaField,
   getMarkdownField,
   getDateField,
   getTextField,
-  getInfoField,
+  getReferenceField,
   getLinkField,
-  getAmountField,
   getTaxonomyFields,
   hasTaxonomyCategories,
   getActorConnectionField,
@@ -29,35 +31,62 @@ import {
   getUserConnectionField,
 } from 'utils/fields';
 
-// import { qe } from 'utils/quasi-equals';
+import qe from 'utils/quasi-equals';
 import {
   getEntityTitleTruncated,
   checkActionAttribute,
 } from 'utils/entities';
 
-import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
+import {
+  loadEntitiesIfNeeded,
+  updatePath,
+  closeEntity,
+  setSubject,
+  openNewEntityModal,
+  setActiontype,
+} from 'containers/App/actions';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES } from 'themes/config';
+import {
+  // ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG, ACTORTYPES, RESOURCE_FIELDS,
+  ROUTES,
+  ACTIONTYPES,
+  ACTORTYPES_CONFIG,
+  ACTIONTYPE_TARGETTYPES,
+  ACTIONTYPE_ACTORTYPES,
+  ACTIONTYPE_ACTIONTYPES,
+} from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
-import EntityView from 'components/EntityView';
+import ViewHeader from 'components/EntityView/ViewHeader';
+import Main from 'components/EntityView/Main';
+import Aside from 'components/EntityView/Aside';
+import ViewWrapper from 'components/EntityView/ViewWrapper';
+import ViewPanel from 'components/EntityView/ViewPanel';
+import ViewPanelInside from 'components/EntityView/ViewPanelInside';
+import FieldGroup from 'components/fields/FieldGroup';
 
 import {
   selectReady,
   selectIsUserManager,
+  selectIsUserAdmin,
   selectActorConnections,
-  selectActionConnections,
   selectResourceConnections,
   selectIndicatorConnections,
-  selectUserConnections,
+  selectActionConnections,
   selectTaxonomiesWithCategories,
+  selectSubjectQuery,
+  selectActiontypes,
+  selectUserConnections,
+  selectActiontypeQuery,
+  selectSessionUserId,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
 import messages from './messages';
+
+import ActionMap from './ActionMap';
+import Activities from './Activities';
 
 import {
   selectViewEntity,
@@ -73,434 +102,504 @@ import {
 
 import { DEPENDENCIES } from './constants';
 
-export class ActionView extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
+const SubjectButton = styled((p) => <Button plain {...p} />)`
+  padding: 2px 4px;
+  border-bottom: 2px solid;
+  border-bottom-color: ${({ active }) => active ? 'brand' : 'transparent'};
+  background: none;
+`;
+
+const getActortypeColumns = (typeid) => {
+  let columns = [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: ['code', 'title'],
+  }];
+  // if (qe(typeid, ACTORTYPES.COUNTRY)) {
+  //   columns = [
+  //     ...columns,
+  //     {
+  //       id: 'classes',
+  //       type: 'associations',
+  //       actortype_id: ACTORTYPES.CLASS,
+  //       title: 'Classes',
+  //     },
+  //   ];
+  // }
+  if (
+    ACTORTYPES_CONFIG[parseInt(typeid, 10)]
+    && ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns
+  ) {
+    columns = [
+      ...columns,
+      ...ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns,
+    ];
   }
+  return columns;
+};
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    // reload entities if invalidated
-    if (!nextProps.dataReady) {
-      this.props.loadEntitiesIfNeeded();
-    }
-  }
-
-  getHeaderMainFields = (entity, isManager) => {
-    const { intl } = this.context;
-    const typeId = entity.getIn(['attributes', 'measuretype_id']);
-
-    return ([ // fieldGroups
-      { // fieldGroup
-        fields: [
-          getInfoField(
-            'measuretype_id',
-            intl.formatMessage(appMessages.actiontypes[typeId]),
-            true // large
-          ), // required
-          checkActionAttribute(typeId, 'code', isManager) && getInfoField(
-            'code',
-            entity.getIn(['attributes', 'code']),
-          ),
-          checkActionAttribute(typeId, 'title') && getTitleField(entity),
-        ],
-      },
-    ]);
-  };
-
-  getHeaderAsideFields = (entity, viewTaxonomies) => {
-    const fields = ([
-      {
-        fields: [
-          getStatusField(entity),
-          getMetaField(entity),
-        ],
-      },
-    ]);
-    if (hasTaxonomyCategories(viewTaxonomies)) {
-      fields.push({ // fieldGroup
-        label: appMessages.entities.taxonomies.plural,
-        icon: 'categories',
-        fields: getTaxonomyFields(viewTaxonomies),
-      });
-    }
-    return fields;
-  };
-
-
-  getBodyMainFields = (
-    entity,
+export function ActionView(props) {
+  const {
+    viewEntity,
+    dataReady,
+    isManager,
+    taxonomies,
+    viewTaxonomies,
     actorsByActortype,
     targetsByActortype,
     resourcesByResourcetype,
     indicators,
-    users,
-    taxonomies,
+    onEntityClick,
     actorConnections,
-    actionConnections,
     resourceConnections,
     indicatorConnections,
-    userConnections,
+    actionConnections,
     subActionsByType,
     topActionsByType,
-    onEntityClick,
-  ) => {
-    const { intl } = this.context;
-    const typeId = entity.getIn(['attributes', 'measuretype_id']);
-    const fields = [];
-    let hasLandbasedValue;
-    if (checkActionAttribute(typeId, 'has_reference_landbased_ml')) {
-      if (
-        typeof entity.getIn(['attributes', 'has_reference_landbased_ml']) !== 'undefined'
-        && entity.getIn(['attributes', 'has_reference_landbased_ml']) !== null
-      ) {
-        hasLandbasedValue = intl.formatMessage(
-          appMessages.ui.checkAttributeStatuses[
-            entity.getIn(['attributes', 'has_reference_landbased_ml']).toString()
-          ],
-        );
-      }
-    }
-    // own attributes
-    fields.push(
-      {
-        fields: [
-          checkActionAttribute(typeId, 'description')
-            && getMarkdownField(entity, 'description', true),
-          checkActionAttribute(typeId, 'comment')
-            && getMarkdownField(entity, 'comment', true),
-        ],
-      },
-      {
-        fields: [
-          checkActionAttribute(typeId, 'reference_ml')
-            && getMarkdownField(entity, 'reference_ml', true),
-          checkActionAttribute(typeId, 'status_lbs_protocol')
-            && getMarkdownField(entity, 'status_lbs_protocol', true),
-          checkActionAttribute(typeId, 'has_reference_landbased_ml')
-            && getInfoField(
-              'has_reference_landbased_ml',
-              hasLandbasedValue,
-            ),
-          checkActionAttribute(typeId, 'reference_landbased_ml')
-            && getMarkdownField(entity, 'reference_landbased_ml', true),
-        ],
-      },
-      {
-        fields: [
-          checkActionAttribute(typeId, 'target_comment')
-            && getMarkdownField(entity, 'target_comment', true),
-          checkActionAttribute(typeId, 'status_comment')
-            && getMarkdownField(entity, 'status_comment', true),
-        ],
-      },
-    );
-    // indicators
-    if (indicators) {
-      const indicatorConnectionsLocal = [];
-      indicatorConnectionsLocal.push(
-        getIndicatorConnectionField({
-          indicators,
-          onEntityClick,
-          connections: indicatorConnections,
-          skipLabel: true,
-        }),
-      );
-      fields.push({
-        label: appMessages.nav.indicators,
-        fields: indicatorConnectionsLocal,
-      });
-    }
-    // users
-    if (users) {
-      const userConnectionsLocal = [];
-      userConnectionsLocal.push(
-        getUserConnectionField({
-          users,
-          onEntityClick,
-          connections: userConnections,
-          skipLabel: true,
-        }),
-      );
-      fields.push({
-        label: appMessages.nav.userActions,
-        fields: userConnectionsLocal,
-      });
-    }
-    // connected actions
-    if (topActionsByType) {
-      const actionConnectionsLocal = [];
-      topActionsByType.forEach((actions, actiontypeid) => {
-        actionConnectionsLocal.push(
-          getActionConnectionField({
-            actions,
-            taxonomies,
-            onEntityClick,
-            connections: actionConnections,
-            typeid: actiontypeid,
-            // onCreateOption: () => onCreateOption({
-            //   path: API.ACTIONS,
-            //   attributes: {
-            //     measuretype_id: actiontypeid,
-            //   },
-            //   connect: {
-            //     type: 'actorActions',
-            //     create: [{
-            //       actor_id: entity.get('id'),
-            //     }],
-            //   },
-            // }),
-          }),
-        );
-      });
-      fields.push({
-        label: appMessages.entities.actions.topActions,
-        fields: actionConnectionsLocal,
-      });
-    }
-    if (subActionsByType) {
-      const actionConnectionsLocal = [];
-      subActionsByType.forEach((actions, actiontypeid) => {
-        actionConnectionsLocal.push(
-          getActionConnectionField({
-            actions,
-            taxonomies,
-            onEntityClick,
-            connections: actionConnections,
-            typeid: actiontypeid,
-            // onCreateOption: () => onCreateOption({
-            //   path: API.ACTIONS,
-            //   attributes: {
-            //     measuretype_id: actiontypeid,
-            //   },
-            //   connect: {
-            //     type: 'actorActions',
-            //     create: [{
-            //       actor_id: entity.get('id'),
-            //     }],
-            //   },
-            // }),
-          }),
-        );
-      });
-      fields.push({
-        label: appMessages.entities.actions.subActions,
-        fields: actionConnectionsLocal,
-      });
-    }
+    onLoadData,
+    subject,
+    onSetSubject,
+    intl,
+    handleEdit,
+    handleClose,
+    params,
+    // activitytypes,
+    handleTypeClick,
+    users,
+    userConnections,
+    viewActiontypeId,
+    onSetActiontype,
+    onCreateOption,
+    actiontypes,
+    isAdmin,
+    myId,
+  } = props;
 
-    // actors
-    if (actorsByActortype) {
-      const actorConnectionsLocal = [];
-      actorsByActortype.forEach((actors, actortypeid) => {
-        actorConnectionsLocal.push(
-          getActorConnectionField({
-            actors,
-            taxonomies,
-            onEntityClick,
-            connections: actorConnections,
-            typeid: actortypeid,
-          }),
-        );
-      });
-      fields.push({
-        label: appMessages.nav.actors,
-        fields: actorConnectionsLocal,
-      });
-    }
-    // // targets
-    if (targetsByActortype) {
-      const targetConnectionsLocal = [];
-      targetsByActortype.forEach((targets, actortypeid) => {
-        targetConnectionsLocal.push(
-          getActorConnectionField({
-            actors: targets,
-            taxonomies,
-            onEntityClick,
-            connections: actorConnections,
-            typeid: actortypeid,
-          }),
-        );
-      });
-      fields.push({
-        label: appMessages.nav.targets,
-        fields: targetConnectionsLocal,
-      });
-    }
-    // // resurces
-    if (resourcesByResourcetype) {
-      const resourcesConnectionsLocal = [];
-      resourcesByResourcetype.forEach((resources, resourcetypeid) => {
-        resourcesConnectionsLocal.push(
-          getResourceConnectionField({
-            resources,
-            onEntityClick,
-            connections: resourceConnections,
-            typeid: resourcetypeid,
-          }),
-        );
-      });
-      fields.push({
-        label: appMessages.nav.resources,
-        fields: resourcesConnectionsLocal,
-      });
-    }
-    return fields;
-  };
+  useEffect(() => {
+    // kick off loading of data
+    onLoadData();
+  }, []);
 
-  getBodyAsideFields = (entity) => {
-    const fields = [];
-    const typeId = entity.getIn(['attributes', 'measuretype_id']);
-    fields.push(
-      {
-        fields: [
-          checkActionAttribute(typeId, 'url') && getLinkField(entity),
-        ],
-      },
-      {
-        type: 'dark',
-        fields: [
-          checkActionAttribute(typeId, 'amount') && getAmountField(entity, 'amount', true),
-          checkActionAttribute(typeId, 'amount_comment') && getTextField(entity, 'amount_comment'),
-        ],
-      },
-      {
-        type: 'dark',
-        fields: [
-          checkActionAttribute(typeId, 'date_start') && getDateField(entity, 'date_start', true),
-          checkActionAttribute(typeId, 'date_end') && getDateField(entity, 'date_end'),
-          checkActionAttribute(typeId, 'date_comment') && getTextField(entity, 'date_comment'),
-        ],
-      }
-    );
-    return fields;
-  };
+  const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
+  // const viewActivitytype = activitytypes && activitytypes.find((type) => qe(type.get('id'), typeId));
 
-  render() {
-    const { intl } = this.context;
-    const {
-      viewEntity,
-      dataReady,
-      isManager,
-      taxonomies,
-      viewTaxonomies,
-      actorsByActortype,
-      targetsByActortype,
-      resourcesByResourcetype,
-      onEntityClick,
-      actorConnections,
-      actionConnections,
-      resourceConnections,
-      indicatorConnections,
-      userConnections,
-      indicators,
-      users,
-      subActionsByType,
-      topActionsByType,
-    } = this.props;
-    const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
-    let buttons = [];
-    if (dataReady) {
-      buttons.push({
+  let buttons = [];
+  if (dataReady) {
+    buttons = [
+      ...buttons,
+      {
         type: 'icon',
         onClick: () => window.print(),
         title: 'Print',
         icon: 'print',
-      });
-      buttons = isManager
-        ? buttons.concat([
-          {
-            type: 'edit',
-            onClick: this.props.handleEdit,
-          },
-          {
-            type: 'close',
-            onClick: () => this.props.handleClose(typeId),
-          },
-        ])
-        : buttons.concat([{
-          type: 'close',
-          onClick: () => this.props.handleClose(typeId),
-        }]);
+      },
+    ];
+    if (isManager) {
+      buttons = [
+        ...buttons,
+        {
+          type: 'edit',
+          onClick: handleEdit,
+        },
+      ];
     }
-    const pageTitle = typeId
-      ? intl.formatMessage(appMessages.entities[`actions_${typeId}`].single)
-      : intl.formatMessage(appMessages.entities.actions.single);
-
-    const metaTitle = viewEntity
-      ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
-      : `${pageTitle}: ${this.props.params.id}`;
-
-    return (
-      <div>
-        <Helmet
-          title={metaTitle}
-          meta={[
-            { name: 'description', content: intl.formatMessage(messages.metaDescription) },
-          ]}
-        />
-        <Content>
-          <ContentHeader
-            title={pageTitle}
-            type={CONTENT_SINGLE}
-            buttons={buttons}
-          />
-          { !dataReady
-            && <Loading />
-          }
-          { !viewEntity && dataReady
-            && (
-              <div>
-                <FormattedMessage {...messages.notFound} />
-              </div>
-            )
-          }
-          { viewEntity && dataReady
-            && (
-              <EntityView
-                fields={{
-                  header: {
-                    main: this.getHeaderMainFields(viewEntity, isManager),
-                    aside: this.getHeaderAsideFields(viewEntity, viewTaxonomies, isManager),
-                  },
-                  body: {
-                    main: this.getBodyMainFields(
-                      viewEntity,
-                      actorsByActortype,
-                      targetsByActortype,
-                      resourcesByResourcetype,
-                      indicators,
-                      users,
-                      taxonomies,
-                      actorConnections,
-                      actionConnections,
-                      resourceConnections,
-                      indicatorConnections,
-                      userConnections,
-                      subActionsByType,
-                      topActionsByType,
-                      onEntityClick,
-                      isManager,
-                    ),
-                    aside: this.getBodyAsideFields(viewEntity, isManager),
-                  },
-                }}
-              />
-            )
-          }
-        </Content>
-      </div>
-    );
   }
+  const pageTitle = typeId
+    ? intl.formatMessage(appMessages.entities[`actions_${typeId}`].single)
+    : intl.formatMessage(appMessages.entities.actions.single);
+
+  const metaTitle = viewEntity
+    ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
+    : `${pageTitle}: ${params.id}`;
+
+  const hasTarget = ACTIONTYPE_TARGETTYPES[typeId] && ACTIONTYPE_TARGETTYPES[typeId].length > 0;
+  const hasActor = ACTIONTYPE_ACTORTYPES[typeId] && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
+  const childActiontypeIds = typeId
+    ? Object.keys(ACTIONTYPE_ACTIONTYPES).reduce(
+      (memo, childTypeId) => {
+        const parents = ACTIONTYPE_ACTIONTYPES[childTypeId];
+        const isParent = parents.indexOf(typeId.toString()) > -1;
+        return isParent ? [...memo, childTypeId] : memo;
+      },
+      [],
+    )
+    : [];
+  const hasChildren = childActiontypeIds && childActiontypeIds.length > 0;
+
+  const hasMemberOption = !!typeId && !qe(typeId, ACTIONTYPES.NATL);
+  const hasMap = qe(typeId, ACTIONTYPES.EXPRESS);
+  let viewSubject = subject || 'actors';
+  if (viewSubject === 'children' && !hasChildren) {
+    viewSubject = 'actors';
+  }
+  if (viewSubject === 'targets' && !hasTarget) {
+    viewSubject = 'actors';
+  }
+  if (viewSubject === 'actors' && !hasActor) {
+    viewSubject = 'targets';
+  }
+
+  const actortypesForSubject = viewSubject === 'actors'
+    ? actorsByActortype
+    : targetsByActortype;
+
+  // check date comment for date spceficity
+  // const DATE_SPECIFICITIES = ['y', 'm', 'd'];
+  const dateSpecificity = 'd';
+  // if (
+  //   viewEntity
+  //   && viewEntity.getIn(['attributes', 'date_comment'])
+  //   && DATE_SPECIFICITIES.indexOf(viewEntity.getIn(['attributes', 'date_comment']).trim()) > -1
+  // ) {
+  //   dateSpecificity = viewEntity.getIn(['attributes', 'date_comment']).trim();
+  // }
+  let datesEqual;
+  if (
+    viewEntity
+    && viewEntity.getIn(['attributes', 'date_start'])
+    && viewEntity.getIn(['attributes', 'date_end'])
+  ) {
+    const [ds] = viewEntity.getIn(['attributes', 'date_start']).split('T');
+    const [de] = viewEntity.getIn(['attributes', 'date_end']).split('T');
+    datesEqual = ds === de;
+  }
+
+  const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+
+  return (
+    <div>
+      <Helmet
+        title={metaTitle}
+        meta={[
+          { name: 'description', content: intl.formatMessage(messages.metaDescription) },
+        ]}
+      />
+      <Content isSingle>
+        { !dataReady && <Loading /> }
+        { !viewEntity && dataReady && (
+          <div>
+            <FormattedMessage {...messages.notFound} />
+          </div>
+        )}
+        { viewEntity && dataReady && (
+          <ViewWrapper>
+            <ViewHeader
+              title={typeId
+                ? intl.formatMessage(appMessages.actiontypes[typeId])
+                : intl.formatMessage(appMessages.entities.actions.plural)
+              }
+              buttons={buttons}
+              onClose={() => handleClose(typeId)}
+              onTypeClick={() => handleTypeClick(typeId)}
+            />
+            <ViewPanel>
+              <ViewPanelInside>
+                <Main hasAside={isManager}>
+                  <FieldGroup
+                    group={{ // fieldGroup
+                      fields: [
+                        checkActionAttribute(typeId, 'code', isManager) && getReferenceField(
+                          viewEntity,
+                          'code',
+                          isManager,
+                        ),
+                        checkActionAttribute(typeId, 'title') && getTitleField(viewEntity),
+                      ],
+                    }}
+                  />
+                </Main>
+                {isManager && (
+                  <Aside>
+                    <FieldGroup
+                      group={{
+                        fields: [
+                          getStatusField(viewEntity),
+                          (isAdmin || isMine) && getStatusFieldIf({
+                            entity: viewEntity,
+                            attribute: 'private',
+                          }),
+                          isAdmin && getStatusFieldIf({
+                            entity: viewEntity,
+                            attribute: 'is_archive',
+                          }),
+                          getMetaField(viewEntity),
+                        ],
+                      }}
+                      aside
+                    />
+                  </Aside>
+                )}
+              </ViewPanelInside>
+            </ViewPanel>
+            <ViewPanel>
+              <ViewPanelInside>
+                <Main hasAside bottom>
+                  <FieldGroup
+                    group={{
+                      fields: [
+                        checkActionAttribute(typeId, 'description')
+                          && getMarkdownField(viewEntity, 'description', true),
+                        checkActionAttribute(typeId, 'comment')
+                          && getMarkdownField(viewEntity, 'comment', true),
+                        checkActionAttribute(typeId, 'status_comment')
+                          && getMarkdownField(viewEntity, 'status_comment', true),
+                      ],
+                    }}
+                  />
+                  {indicators && (
+                    <FieldGroup
+                      group={{
+                        label: appMessages.nav.indicators,
+                        fields: [
+                          getIndicatorConnectionField({
+                            indicators,
+                            onEntityClick,
+                            connections: indicatorConnections,
+                            skipLabel: true,
+                            // TODO columns
+                          }),
+                        ],
+                      }}
+                    />
+                  )}
+                  <Box>
+                    <Box direction="row" gap="small" margin={{ vertical: 'small', horizontal: 'medium' }}>
+                      {hasActor && (
+                        <SubjectButton
+                          onClick={() => onSetSubject('actors')}
+                          active={viewSubject === 'actors'}
+                        >
+                          <Text size="large">Actors</Text>
+                        </SubjectButton>
+                      )}
+                      {hasTarget && (
+                        <SubjectButton
+                          onClick={() => onSetSubject('targets')}
+                          active={viewSubject === 'targets'}
+                        >
+                          <Text size="large">Targets</Text>
+                        </SubjectButton>
+                      )}
+                      {hasChildren && (
+                        <SubjectButton
+                          onClick={() => onSetSubject('children')}
+                          active={viewSubject === 'children'}
+                        >
+                          <Text size="large">Child activities</Text>
+                        </SubjectButton>
+                      )}
+                    </Box>
+                    {viewSubject !== 'children' && (!actortypesForSubject || actortypesForSubject.size === 0) && (
+                      <Box margin={{ top: 'small', horizontal: 'medium', bottom: 'large' }}>
+                        {viewSubject === 'actors' && (
+                          <Text>
+                            No actors for activity in database
+                          </Text>
+                        )}
+                        {viewSubject === 'targets' && (
+                          <Text>
+                            No activity targets in database
+                          </Text>
+                        )}
+                      </Box>
+                    )}
+                    <Box>
+                      {dataReady && actortypesForSubject && hasMap && (
+                        <ActionMap
+                          entities={actortypesForSubject}
+                          mapSubject={viewSubject}
+                          onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+                          hasMemberOption={hasMemberOption}
+                          typeId={typeId}
+                        />
+                      )}
+                      {viewSubject === 'targets' && (
+                        <FieldGroup
+                          group={{
+                            fields: [
+                              checkActionAttribute(typeId, 'target_comment')
+                                && getMarkdownField(viewEntity, 'target_comment', true),
+                            ],
+                          }}
+                        />
+                      )}
+                      {viewSubject === 'children' && (
+                        <Activities
+                          viewEntity={viewEntity}
+                          taxonomies={taxonomies}
+                          actionConnections={actionConnections}
+                          onSetActiontype={onSetActiontype}
+                          onEntityClick={onEntityClick}
+                          onCreateOption={onCreateOption}
+                          viewActiontypeId={childActiontypeIds.indexOf(viewActiontypeId) > -1 ? viewActiontypeId : childActiontypeIds[0]}
+                          actionsByActiontype={subActionsByType}
+                          actiontypes={actiontypes.filter((type) => childActiontypeIds.indexOf(type.get('id')) > -1)}
+                        />
+                      )}
+                      {viewSubject !== 'children' && actortypesForSubject && (
+                        <FieldGroup
+                          group={{
+                            fields: actortypesForSubject.reduce(
+                              (memo, actors, typeid) => memo.concat([
+                                getActorConnectionField({
+                                  actors,
+                                  taxonomies,
+                                  onEntityClick,
+                                  connections: actorConnections,
+                                  typeid,
+                                  columns: getActortypeColumns(typeid),
+                                }),
+                              ]),
+                              [],
+                            ),
+                          }}
+                        />
+                      )}
+                      {resourcesByResourcetype && (
+                        <FieldGroup
+                          group={{
+                            type: 'dark',
+                            label: appMessages.nav.resources,
+                            fields: resourcesByResourcetype.reduce(
+                              (memo, resources, resourcetypeid) => {
+                                const columns = [
+                                  {
+                                    id: 'main',
+                                    type: 'main',
+                                    sort: 'title',
+                                    attributes: ['title'],
+                                  },
+                                ];
+                                return memo.concat([
+                                  getResourceConnectionField({
+                                    resources,
+                                    taxonomies,
+                                    onEntityClick,
+                                    connections: resourceConnections,
+                                    typeid: resourcetypeid,
+                                    columns,
+                                  }),
+                                ]);
+                              },
+                              [],
+                            ),
+                          }}
+                        />
+                      )}
+                    </Box>
+                  </Box>
+                </Main>
+                <Aside bottom>
+                  <FieldGroup
+                    aside
+                    group={{
+                      fields: [
+                        checkActionAttribute(typeId, 'url') && getLinkField(viewEntity),
+                      ],
+                    }}
+                  />
+                  <FieldGroup
+                    aside
+                    group={{
+                      type: 'dark',
+                      fields: [
+                        checkActionAttribute(typeId, 'date_start')
+                          && getDateField(
+                            viewEntity,
+                            'date_start',
+                            {
+                              specificity: dateSpecificity,
+                              attributeLabel: datesEqual ? 'date' : 'date_start',
+                            }
+                          ),
+                        !datesEqual
+                          && checkActionAttribute(typeId, 'date_end')
+                          && getDateField(viewEntity, 'date_end', { specificity: dateSpecificity }),
+                        !dateSpecificity
+                          && checkActionAttribute(typeId, 'date_comment')
+                          && getTextField(viewEntity, 'date_comment'),
+                      ],
+                    }}
+                  />
+                  {hasTaxonomyCategories(viewTaxonomies) && (
+                    <FieldGroup
+                      aside
+                      group={{
+                        label: appMessages.entities.taxonomies.plural,
+                        icon: 'categories',
+                        fields: getTaxonomyFields(viewTaxonomies),
+                      }}
+                    />
+                  )}
+                  {users && (
+                    <FieldGroup
+                      group={{
+                        label: appMessages.nav.userActions,
+                        fields: [
+                          getUserConnectionField({
+                            users,
+                            onEntityClick,
+                            connections: userConnections,
+                            skipLabel: true,
+                            // TODO columns
+                          }),
+                        ],
+                      }}
+                    />
+                  )}
+                  {topActionsByType && (
+                    <FieldGroup
+                      aside
+                      group={{
+                        label: appMessages.entities.actions.topActions,
+                        fields: topActionsByType.reduce(
+                          (memo, actions, typeid) => {
+                            const columns = [
+                              {
+                                id: 'main',
+                                type: 'main',
+                                sort: 'title',
+                                attributes: ['title'],
+                              },
+                            ];
+                            return memo.concat([
+                              getActionConnectionField({
+                                actions,
+                                taxonomies,
+                                onEntityClick,
+                                connections: actionConnections,
+                                typeid,
+                                columns,
+                              }),
+                            ]);
+                          },
+                          [],
+                        ),
+                      }}
+                    />
+                  )}
+                </Aside>
+              </ViewPanelInside>
+            </ViewPanel>
+          </ViewWrapper>
+        )}
+      </Content>
+    </div>
+  );
 }
 
 ActionView.propTypes = {
   viewEntity: PropTypes.object,
-  loadEntitiesIfNeeded: PropTypes.func,
+  onLoadData: PropTypes.func,
+  handleTypeClick: PropTypes.func,
   dataReady: PropTypes.bool,
   handleEdit: PropTypes.func,
   handleClose: PropTypes.func,
   onEntityClick: PropTypes.func,
   isManager: PropTypes.bool,
+  isAdmin: PropTypes.bool,
+  myId: PropTypes.string,
   viewTaxonomies: PropTypes.object,
   taxonomies: PropTypes.object,
   actorsByActortype: PropTypes.object,
@@ -509,13 +608,21 @@ ActionView.propTypes = {
   actorConnections: PropTypes.object,
   actionConnections: PropTypes.object,
   resourceConnections: PropTypes.object,
-  indicatorConnections: PropTypes.object,
+  // activitytypes: PropTypes.object,
   params: PropTypes.object,
   subActionsByType: PropTypes.object,
   topActionsByType: PropTypes.object,
+  onSetSubject: PropTypes.func,
+  intl: intlShape.isRequired,
+  subject: PropTypes.string,
+  indicatorConnections: PropTypes.object,
   indicators: PropTypes.object,
   userConnections: PropTypes.object,
   users: PropTypes.object,
+  viewActiontypeId: PropTypes.string,
+  onCreateOption: PropTypes.func,
+  onSetActiontype: PropTypes.func,
+  actiontypes: PropTypes.object,
 };
 
 ActionView.contextTypes = {
@@ -532,20 +639,25 @@ const mapStateToProps = (state, props) => ({
   actorsByActortype: selectActorsByType(state, props.params.id),
   resourcesByResourcetype: selectResourcesByType(state, props.params.id),
   targetsByActortype: selectTargetsByType(state, props.params.id),
-  indicators: selectEntityIndicators(state, props.params.id),
   actorConnections: selectActorConnections(state),
   actionConnections: selectActionConnections(state),
   resourceConnections: selectResourceConnections(state),
+  topActionsByType: selectTopActionsByActiontype(state, props.params.id),
+  subActionsByType: selectSubActionsByActiontype(state, props.params.id),
+  subject: selectSubjectQuery(state),
+  indicators: selectEntityIndicators(state, props.params.id),
   indicatorConnections: selectIndicatorConnections(state),
   users: selectEntityUsers(state, props.params.id),
   userConnections: selectUserConnections(state),
-  topActionsByType: selectTopActionsByActiontype(state, props.params.id),
-  subActionsByType: selectSubActionsByActiontype(state, props.params.id),
+  viewActiontypeId: selectActiontypeQuery(state),
+  actiontypes: selectActiontypes(state),
+  isAdmin: selectIsUserAdmin(state),
+  myId: selectSessionUserId(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
   return {
-    loadEntitiesIfNeeded: () => {
+    onLoadData: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     onEntityClick: (id, path) => {
@@ -557,7 +669,19 @@ function mapDispatchToProps(dispatch, props) {
     handleClose: (typeId) => {
       dispatch(closeEntity(`${ROUTES.ACTIONS}/${typeId}`));
     },
+    handleTypeClick: (typeId) => {
+      dispatch(updatePath(`${ROUTES.ACTIONS}/${typeId}`));
+    },
+    onSetSubject: (type) => {
+      dispatch(setSubject(type));
+    },
+    onSetActiontype: (type) => {
+      dispatch(setActiontype(type));
+    },
+    onCreateOption: (args) => {
+      dispatch(openNewEntityModal(args));
+    },
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ActionView);
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(ActionView));

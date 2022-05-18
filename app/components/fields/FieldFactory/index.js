@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import Field from 'components/fields/Field';
 
 import ConnectionsField from 'components/fields/ConnectionsField';
-import ConnectionGroupsField from 'components/fields/ConnectionGroupsField';
 import DateField from 'components/fields/DateField';
 import MarkdownField from 'components/fields/MarkdownField';
 import EmailField from 'components/fields/EmailField';
@@ -15,6 +14,7 @@ import ReferenceField from 'components/fields/ReferenceField';
 import RoleField from 'components/fields/RoleField';
 import StatusField from 'components/fields/StatusField';
 import TextField from 'components/fields/TextField';
+import NumberField from 'components/fields/NumberField';
 import TitleField from 'components/fields/TitleField';
 import TitleTextField from 'components/fields/TitleTextField';
 import TitleShortField from 'components/fields/TitleShortField';
@@ -51,8 +51,8 @@ class FieldFactory extends React.PureComponent { // eslint-disable-line react/pr
         return (<MarkdownField field={field} />);
       case 'connections':
         return (<ConnectionsField field={field} />);
-      case 'connectionGroups':
-        return (<ConnectionGroupsField field={field} />);
+      case 'number':
+        return (<NumberField field={field} />);
       case 'text':
       default:
         return (<TextField field={field} />);
@@ -81,7 +81,7 @@ class FieldFactory extends React.PureComponent { // eslint-disable-line react/pr
       // or showEmpty
       || (typeof field.showEmpty !== 'undefined' && field.showEmpty))
       ? (
-        <Field nested={nested} noPadding={field.type === 'smartTaxonomy'}>
+        <Field nested={nested} noPadding={field.type === 'reference'}>
           {this.renderField(field)}
         </Field>
       )

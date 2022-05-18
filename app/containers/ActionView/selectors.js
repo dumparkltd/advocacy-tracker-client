@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
-import { API } from 'themes/config';
+import { API, ACTORTYPES_CONFIG } from 'themes/config';
 import {
   selectReady,
   selectEntity,
@@ -17,11 +17,14 @@ import {
   selectActorActionsGroupedByActor,
   selectActionActorsGroupedByActor,
   selectActorActionsGroupedByAction,
+  selectActorActionsGroupedByActionAttributes,
   selectActorCategoriesGroupedByActor,
   selectActionCategoriesGroupedByAction,
   selectActionResourcesGroupedByAction,
   selectResourceConnections,
   selectActionResourcesGroupedByResource,
+  selectMembershipsGroupedByMember,
+  selectMembershipsGroupedByAssociation,
   selectActionIndicatorsGroupedByAction,
   selectIndicatorConnections,
   selectActionIndicatorsGroupedByIndicator,
@@ -32,14 +35,15 @@ import {
   selectUserConnections,
   selectUserActionsGroupedByUser,
   selectUserActorsGroupedByUser,
+  selectUserActorsGroupedByActor,
 } from 'containers/App/selectors';
 
 import {
-  entitySetSingles,
+  entitySetUser,
   prepareTaxonomiesIsAssociated,
   setActorConnections,
-  setActionConnections,
   setResourceConnections,
+  setActionConnections,
   setIndicatorConnections,
   setUserConnections,
 } from 'utils/entities';
@@ -49,15 +53,7 @@ import { DEPENDENCIES } from './constants';
 export const selectViewEntity = createSelector(
   (state, id) => selectEntity(state, { path: API.ACTIONS, id }),
   (state) => selectEntities(state, API.USERS),
-  (entity, users) => entity && entitySetSingles(
-    entity, [
-      {
-        related: users,
-        key: 'user',
-        relatedKey: 'updated_by_id',
-      },
-    ],
-  )
+  (entity, users) => entitySetUser(entity, users)
 );
 
 // TODO optimise use selectActionCategoriesGroupedByAction
@@ -74,6 +70,124 @@ export const selectViewTaxonomies = createSelector(
     'measure_id',
     id,
   )
+);
+
+
+// connected actions (topactions)
+const selectTopActionJoins = createSelector(
+  (state, id) => id,
+  selectActionActionsGroupedByTopAction,
+  (actionId, joinsByAssociation) => joinsByAssociation.get(
+    parseInt(actionId, 10)
+  )
+);
+const selectTopActionsJoined = createSelector(
+  selectActions,
+  selectTopActionJoins,
+  (actions, joins) => actions && joins && joins.reduce(
+    (memo, id) => {
+      const entity = actions.get(id.toString());
+      return entity
+        ? memo.set(id, entity)
+        : memo;
+    },
+    Map(),
+  )
+);
+// connected actions (topactions)
+const selectSubActionJoins = createSelector(
+  (state, id) => id,
+  selectActionActionsGroupedBySubAction,
+  (actionId, joinsByAssociation) => joinsByAssociation.get(
+    parseInt(actionId, 10)
+  )
+);
+const selectSubActionsJoined = createSelector(
+  selectActions,
+  selectSubActionJoins,
+  (actions, joins) => actions && joins && joins.reduce(
+    (memo, id) => {
+      const entity = actions.get(id.toString());
+      return entity
+        ? memo.set(id, entity)
+        : memo;
+    },
+    Map(),
+  )
+);
+
+
+// get associated actors with associoted actions and categories
+// - group by actortype
+export const selectTopActionsByActiontype = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectTopActionsJoined,
+  selectActionConnections,
+  selectActorActionsGroupedByAction,
+  selectActionActorsGroupedByAction,
+  selectActionCategoriesGroupedByAction,
+  selectCategories,
+  selectUserActionsGroupedByAction,
+  (
+    ready,
+    actions,
+    actionConnections,
+    actorActions,
+    actionActors,
+    actionCategories,
+    categories,
+    userActions,
+  ) => {
+    if (!ready) return Map();
+    return actions && actions
+      .map((action) => setActionConnections({
+        action,
+        actionConnections,
+        actorActions,
+        actionActors,
+        categories,
+        actionCategories,
+        users: userActions,
+      }))
+      .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
+      .sortBy((val, key) => key);
+  }
+);
+// get associated actors with associoted actions and categories
+// - group by actortype
+export const selectSubActionsByActiontype = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectSubActionsJoined,
+  selectActionConnections,
+  selectActorActionsGroupedByAction,
+  selectActionActorsGroupedByAction,
+  selectActionCategoriesGroupedByAction,
+  selectCategories,
+  selectUserActionsGroupedByAction,
+  (
+    ready,
+    actions,
+    actionConnections,
+    actorActions,
+    actionActors,
+    actionCategories,
+    categories,
+    userActions,
+  ) => {
+    if (!ready) return Map();
+    return actions && actions
+      .map((action) => setActionConnections({
+        action,
+        actionConnections,
+        actorActions,
+        actionActors,
+        categories,
+        actionCategories,
+        users: userActions,
+      }))
+      .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
+      .sortBy((val, key) => key);
+  }
 );
 
 const selectActorAssociations = createSelector(
@@ -103,31 +217,50 @@ export const selectActorsByType = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectActorsAssociated,
   selectActorConnections,
+  selectActorActionsGroupedByActionAttributes,
   selectActorActionsGroupedByActor,
   selectActionActorsGroupedByActor,
+  selectMembershipsGroupedByMember,
+  selectMembershipsGroupedByAssociation,
   selectActorCategoriesGroupedByActor,
+  selectUserActorsGroupedByActor,
   selectCategories,
   (
     ready,
     actors,
     actorConnections,
-    actorActions,
-    actionActors,
+    actorActionsByActionFull,
+    actorActionsByActor,
+    actionActorsByActor,
+    memberships,
+    associations,
     actorCategories,
+    userActorsByActor,
     categories,
   ) => {
     if (!ready) return Map();
-    return actors && actors
+    const actorsWithConnections = actors && actors
       .map((actor) => setActorConnections({
         actor,
         actorConnections,
-        actorActions,
-        actionActors,
+        actorActions: actorActionsByActor,
+        actionActors: actionActorsByActor,
         categories,
         actorCategories,
-      }))
+        memberships,
+        associations,
+        users: userActorsByActor,
+      }));
+    return actorsWithConnections && actorsWithConnections
       .groupBy((r) => r.getIn(['attributes', 'actortype_id']))
-      .sortBy((val, key) => key);
+      .sortBy(
+        (val, key) => key,
+        (a, b) => {
+          const configA = ACTORTYPES_CONFIG[a];
+          const configB = ACTORTYPES_CONFIG[b];
+          return configA.order < configB.order ? -1 : 1;
+        }
+      );
   }
 );
 
@@ -161,7 +294,10 @@ export const selectTargetsByType = createSelector(
   selectActorConnections,
   selectActorActionsGroupedByActor,
   selectActionActorsGroupedByActor,
+  selectMembershipsGroupedByMember,
+  selectMembershipsGroupedByAssociation,
   selectActorCategoriesGroupedByActor,
+  selectUserActorsGroupedByActor,
   selectCategories,
   (
     ready,
@@ -169,7 +305,10 @@ export const selectTargetsByType = createSelector(
     actorConnections,
     actorActions,
     actionActors,
+    memberships,
+    associations,
     actorCategories,
+    userActorsByActor,
     categories,
   ) => {
     if (!ready) return Map();
@@ -181,9 +320,19 @@ export const selectTargetsByType = createSelector(
         actionActors,
         categories,
         actorCategories,
+        memberships,
+        associations,
+        users: userActorsByActor,
       }))
       .groupBy((r) => r.getIn(['attributes', 'actortype_id']))
-      .sortBy((val, key) => key);
+      .sortBy(
+        (val, key) => key,
+        (a, b) => {
+          const configA = ACTORTYPES_CONFIG[a];
+          const configB = ACTORTYPES_CONFIG[b];
+          return configA.order < configB.order ? -1 : 1;
+        }
+      );
   }
 );
 
@@ -275,6 +424,7 @@ export const selectEntityIndicators = createSelector(
       .sortBy((val, key) => key);
   }
 );
+
 const selectUserAssociations = createSelector(
   (state, id) => id,
   selectUserActionsGroupedByAction,
@@ -317,118 +467,6 @@ export const selectEntityUsers = createSelector(
         userActions,
         userActors,
       }))
-      .sortBy((val, key) => key);
-  }
-);
-
-
-// connected actions (topactions)
-const selectTopActionJoins = createSelector(
-  (state, id) => id,
-  selectActionActionsGroupedByTopAction,
-  (actionId, joinsByAssociation) => joinsByAssociation.get(
-    parseInt(actionId, 10)
-  )
-);
-const selectTopActionsJoined = createSelector(
-  selectActions,
-  selectTopActionJoins,
-  (actions, joins) => actions && joins && joins.reduce(
-    (memo, id) => {
-      const entity = actions.get(id.toString());
-      return entity
-        ? memo.set(id, entity)
-        : memo;
-    },
-    Map(),
-  )
-);
-// connected actions (topactions)
-const selectSubActionJoins = createSelector(
-  (state, id) => id,
-  selectActionActionsGroupedBySubAction,
-  (actionId, joinsByAssociation) => joinsByAssociation.get(
-    parseInt(actionId, 10)
-  )
-);
-const selectSubActionsJoined = createSelector(
-  selectActions,
-  selectSubActionJoins,
-  (actions, joins) => actions && joins && joins.reduce(
-    (memo, id) => {
-      const entity = actions.get(id.toString());
-      return entity
-        ? memo.set(id, entity)
-        : memo;
-    },
-    Map(),
-  )
-);
-
-
-// get associated actors with associoted actions and categories
-// - group by actortype
-export const selectTopActionsByActiontype = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectTopActionsJoined,
-  selectActionConnections,
-  selectActorActionsGroupedByAction,
-  selectActionActorsGroupedByAction,
-  selectActionCategoriesGroupedByAction,
-  selectCategories,
-  (
-    ready,
-    actions,
-    actionConnections,
-    actorActions,
-    actionActors,
-    actionCategories,
-    categories,
-  ) => {
-    if (!ready) return Map();
-    return actions && actions
-      .map((action) => setActionConnections({
-        action,
-        actionConnections,
-        actorActions,
-        actionActors,
-        categories,
-        actionCategories,
-      }))
-      .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
-      .sortBy((val, key) => key);
-  }
-);
-// get associated actors with associoted actions and categories
-// - group by actortype
-export const selectSubActionsByActiontype = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectSubActionsJoined,
-  selectActionConnections,
-  selectActorActionsGroupedByAction,
-  selectActionActorsGroupedByAction,
-  selectActionCategoriesGroupedByAction,
-  selectCategories,
-  (
-    ready,
-    actions,
-    actionConnections,
-    actorActions,
-    actionActors,
-    actionCategories,
-    categories,
-  ) => {
-    if (!ready) return Map();
-    return actions && actions
-      .map((action) => setActionConnections({
-        action,
-        actionConnections,
-        actorActions,
-        actionActors,
-        categories,
-        actionCategories,
-      }))
-      .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
       .sortBy((val, key) => key);
   }
 );

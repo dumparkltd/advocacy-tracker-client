@@ -4,6 +4,8 @@ import { fromJS } from 'immutable';
 export const FORM_INITIAL = fromJS({
   attributes: {
     draft: true,
+    private: false,
+    is_archive: false,
     measuretype_id: '',
     actortype_id: '',
     resourcetype_id: '',
@@ -25,12 +27,5 @@ export const FORM_INITIAL = fromJS({
     status_comment: '',
     activity_summary: '',
     short_title: '',
-    gdp: '',
-    population: '',
-    amount: '',
-    amount_comment: '',
-    reference_ml: '',
-    status_lbs_protocol: '',
-    has_reference_landbased_ml: false,
   },
 });

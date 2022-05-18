@@ -14,12 +14,18 @@ export const getOptionSortValueMapper = (option) => {
 };
 export const getOptionSortCheckedValueMapper = (option) => {
   if (option.get('initialChecked')) {
-    return -2;
+    return -3;
   }
   if (option.get('isIndeterminate')) {
+    return -2;
+  }
+  if (option.get('query') === 'any') {
     return -1;
   }
-  if (option.get('query') === 'without' || (typeof option.get('value') === 'string' && option.get('value').slice(-5) === ':null')) {
+  if (
+    option.get('query') === 'without'
+    || (typeof option.get('value') === 'string' && option.get('value').slice(-5) === ':null')
+  ) {
     return 0;
   }
   return 1;
@@ -64,7 +70,6 @@ export const filterOptionsByKeywords = (options, query) => { // filter checkboxe
   if (query) {
     try {
       const regex = new RegExp(regExMultipleWords(query), 'i');
-
       return options.filter((option) => regex.test(prepareOptionSearchTarget(
         option,
         (option.get('searchFields') && option.get('searchFields').size > 0)

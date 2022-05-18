@@ -27,6 +27,7 @@ import {
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
+import qe from 'utils/quasi-equals';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
 import { ROUTES, USER_ROLES, API } from 'themes/config';
@@ -45,6 +46,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectSessionUserId,
 } from 'containers/App/selectors';
 
 import Messages from 'components/Messages';
@@ -119,12 +121,13 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
     ]);
   };
 
-  getHeaderAsideFields = (entity) => {
+  getHeaderAsideFields = (entity, isAdmin, isMine) => {
     const { intl } = this.context;
     return ([
       {
         fields: [
           getStatusField(intl.formatMessage),
+          (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
           getMetaField(entity),
         ],
       },
@@ -140,11 +143,18 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
 
   render() {
     const { intl } = this.context;
-    const { viewEntity, dataReady, viewDomain } = this.props;
+    const {
+      viewEntity,
+      dataReady,
+      viewDomain,
+      isAdmin,
+      myId,
+    } = this.props;
     const reference = this.props.params.id;
     const {
       saveSending, saveError, deleteSending, deleteError, submitValid,
     } = viewDomain.get('page').toJS();
+    const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
 
     return (
       <div>
@@ -211,11 +221,11 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
                 handleSubmitFail={this.props.handleSubmitFail}
                 handleCancel={this.props.handleCancel}
                 handleUpdate={this.props.handleUpdate}
-                handleDelete={this.props.isUserAdmin ? this.props.handleDelete : null}
+                handleDelete={isAdmin ? this.props.handleDelete : null}
                 fields={{
                   header: {
                     main: this.getHeaderMainFields(),
-                    aside: this.getHeaderAsideFields(viewEntity),
+                    aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
                   },
                   body: {
                     main: this.getBodyMainFields(viewEntity),
@@ -247,11 +257,12 @@ PageEdit.propTypes = {
   viewDomain: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
-  isUserAdmin: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   params: PropTypes.object,
   viewEntity: PropTypes.object,
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
+  myId: PropTypes.string,
 };
 
 PageEdit.contextTypes = {
@@ -260,10 +271,11 @@ PageEdit.contextTypes = {
 
 const mapStateToProps = (state, props) => ({
   viewDomain: selectDomain(state),
-  isUserAdmin: selectIsUserAdmin(state),
+  isAdmin: selectIsUserAdmin(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),
+  myId: selectSessionUserId(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

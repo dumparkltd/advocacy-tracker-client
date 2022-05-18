@@ -9,36 +9,21 @@ import PropTypes from 'prop-types';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-
-import Button from 'components/buttons/Button';
+import { Button, Box, Text } from 'grommet';
+import { FormUp, FormDown } from 'grommet-icons';
 
 import messages from './messages';
 
-const Styled = styled(Button)`
-  display: table;
-  width: 100%;
-  text-align: left;
+const Styled = styled((p) => <Button plain {...p} />)`
   color: ${palette('asideListGroup', 0)};
-  background-color: ${palette('asideListGroup', 1)};
-  padding: 0.25em 8px 0.25em 16px;
-  font-size: 0.9em;
+  padding: 0.25em 8px;
+  padding-right: 4px;
   &:hover {
     color: ${palette('asideListGroupHover', 0)};
-    background-color: ${palette('asideListGroupHover', 1)};
-  }
-  @media (min-width: ${(props) => props.theme.breakpoints.small}) {
-    padding: 0.25em 8px 0.25em 16px;
-    font-size: 0.9em;
-  }
-  @media print {
-    font-size: ${(props) => props.theme.sizes.print.small};
+    /* background-color: ${palette('asideListGroupHover', 1)}; */
   }
 `;
-const GroupLabel = styled.div`
-  display: table-cell;
-  vertical-align: middle;
-  width: 99%;
-`;
+
 class EntityListSidebarGroupLabel extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   render() {
     const {
@@ -46,14 +31,24 @@ class EntityListSidebarGroupLabel extends React.PureComponent { // eslint-disabl
     } = this.props;
     const { intl } = this.context;
     return (
-      <Styled
-        onClick={onToggle}
-        title={intl.formatMessage(
-          expanded ? messages.groupExpand.hide : messages.groupExpand.show
-        )}
-      >
-        <GroupLabel>{label}</GroupLabel>
-      </Styled>
+      <Box>
+        <Styled
+          onClick={onToggle}
+          title={intl.formatMessage(
+            expanded ? messages.groupExpand.hide : messages.groupExpand.show
+          )}
+        >
+          <Box direction="row" justify="between" align="center">
+            <Text size="xlarge" weight={600}>{label}</Text>
+            {expanded && (
+              <FormUp size="medium" />
+            )}
+            {!expanded && (
+              <FormDown size="medium" />
+            )}
+          </Box>
+        </Styled>
+      </Box>
     );
   }
 }

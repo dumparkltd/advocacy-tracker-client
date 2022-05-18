@@ -20,8 +20,6 @@ import {
   getCodeFormField,
   renderTaxonomyControl,
   getLinkFormField,
-  getAmountFormField,
-  getNumberFormField,
   renderActionsByActiontypeControl,
   renderActionsAsTargetByActiontypeControl,
   renderAssociationsByActortypeControl,
@@ -31,7 +29,6 @@ import {
   getTextareaField,
   renderUserMultiControl,
 } from 'utils/forms';
-import { getInfoField } from 'utils/fields';
 
 // import { qe } from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
@@ -121,11 +118,6 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          getInfoField(
-            'actortype_id',
-            intl.formatMessage(appMessages.actortypes[typeId]),
-            true // large
-          ), // required
           checkActorAttribute(typeId, 'code') && getCodeFormField(
             intl.formatMessage,
             'code',
@@ -154,16 +146,14 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
     ]);
   };
 
-  getHeaderAsideFields = (taxonomies, onCreateOption) => {
+  getHeaderAsideFields = () => {
     const { intl } = this.context;
     return ([
       {
-        fields: [getStatusField(intl.formatMessage)],
-      },
-      { // fieldGroup
-        label: intl.formatMessage(appMessages.entities.taxonomies.plural),
-        icon: 'categories',
-        fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
+        fields: [
+          getStatusField(intl.formatMessage),
+          getStatusField(intl.formatMessage, 'private'),
+        ],
       },
     ]);
   }
@@ -174,8 +164,6 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
     actionsByActiontype,
     actionsAsTargetByActiontype,
     membersByActortype,
-    associationsByActortype,
-    userOptions,
     onCreateOption,
   ) => {
     const { intl } = this.context;
@@ -195,16 +183,6 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
         ),
       ],
     });
-    if (userOptions) {
-      groups.push(
-        {
-          label: intl.formatMessage(appMessages.nav.userActors),
-          fields: [
-            renderUserMultiControl(userOptions, null, intl),
-          ],
-        },
-      );
-    }
     if (actionsByActiontype) {
       const actionConnections = renderActionsByActiontypeControl(
         actionsByActiontype,
@@ -253,6 +231,48 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
         );
       }
     }
+    return groups;
+  }
+
+  getBodyAsideFields = (
+    type,
+    taxonomies,
+    connectedTaxonomies,
+    associationsByActortype,
+    userOptions,
+    onCreateOption,
+  ) => {
+    const { intl } = this.context;
+    const typeId = type.get('id');
+    const groups = [ // fieldGroups
+      { // fieldGroup
+        fields: [
+          checkActorAttribute(typeId, 'email') && getEmailField(intl.formatMessage, checkActorRequired(typeId, 'email')),
+          checkActorAttribute(typeId, 'phone') && getTextFormField(intl.formatMessage, 'phone', checkActorRequired(typeId, 'phone')),
+          checkActorAttribute(typeId, 'address') && getTextareaField(intl.formatMessage, 'address', checkActorRequired(typeId, 'address')),
+          checkActorAttribute(typeId, 'url') && getLinkFormField(
+            intl.formatMessage,
+            checkActorRequired(typeId, 'url'),
+            'url',
+          ),
+        ],
+      },
+      { // fieldGroup
+        label: intl.formatMessage(appMessages.entities.taxonomies.plural),
+        icon: 'categories',
+        fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
+      },
+    ];
+    if (userOptions) {
+      groups.push(
+        {
+          label: intl.formatMessage(appMessages.nav.userActors),
+          fields: [
+            renderUserMultiControl(userOptions, null, intl),
+          ],
+        },
+      );
+    }
     if (associationsByActortype) {
       const associationConnections = renderAssociationsByActortypeControl(
         associationsByActortype,
@@ -270,39 +290,6 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
       }
     }
     return groups;
-  }
-
-  getBodyAsideFields = (type) => {
-    const { intl } = this.context;
-    const typeId = type.get('id');
-    return ([ // fieldGroups
-      { // fieldGroup
-        fields: [
-          checkActorAttribute(typeId, 'address') && getTextareaField(intl.formatMessage, 'address', checkActorRequired(typeId, 'address')),
-          checkActorAttribute(typeId, 'phone') && getTextFormField(intl.formatMessage, 'phone', checkActorRequired(typeId, 'phone')),
-          checkActorAttribute(typeId, 'email') && getEmailField(intl.formatMessage, checkActorRequired(typeId, 'email')),
-          checkActorAttribute(typeId, 'url') && getLinkFormField(
-            intl.formatMessage,
-            checkActorRequired(typeId, 'url'),
-            'url',
-          ),
-        ],
-      },
-      { // fieldGroup
-        fields: [
-          checkActorAttribute(typeId, 'gdp') && getAmountFormField(
-            intl.formatMessage,
-            checkActorRequired(typeId, 'gdp'),
-            'gdp',
-          ),
-          checkActorAttribute(typeId, 'population') && getNumberFormField(
-            intl.formatMessage,
-            checkActorRequired(typeId, 'population'),
-            'population',
-          ),
-        ],
-      },
-    ]);
   };
 
   render() {
@@ -387,7 +374,6 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
                   membersByActortype,
                   associationsByActortype,
                   userOptions,
-                  // actortypeTaxonomies,
                 )}
                 handleSubmitFail={this.props.handleSubmitFail}
                 handleCancel={() => this.props.handleCancel(typeId)}
@@ -395,10 +381,7 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
                 fields={{ // isManager, taxonomies,
                   header: {
                     main: this.getHeaderMainFields(actortype),
-                    aside: this.getHeaderAsideFields(
-                      taxonomies,
-                      onCreateOption
-                    ),
+                    aside: this.getHeaderAsideFields(),
                   },
                   body: {
                     main: this.getBodyMainFields(
@@ -407,12 +390,15 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
                       actionsByActiontype,
                       actionsAsTargetByActiontype,
                       membersByActortype,
-                      associationsByActortype,
-                      userOptions,
                       onCreateOption,
                     ),
                     aside: this.getBodyAsideFields(
                       actortype,
+                      taxonomies,
+                      connectedTaxonomies,
+                      associationsByActortype,
+                      userOptions,
+                      onCreateOption,
                     ),
                   },
                 }}
@@ -540,19 +526,7 @@ function mapDispatchToProps(dispatch) {
           }),
         );
       }
-      // users
-      if (formData.get('associatedUsers') && userOptions) {
-        saveData = saveData.set(
-          'userActors',
-          Map({
-            delete: List(),
-            create: getCheckedValuesFromOptions(formData.get('associatedUsers'))
-              .map((id) => Map({
-                user_id: id,
-              })),
-          })
-        );
-      }
+      //
       // actions if allowed by actortype
       if (actionsByActiontype && formData.get('associatedActionsByActiontype')) {
         saveData = saveData.set(
@@ -641,6 +615,18 @@ function mapDispatchToProps(dispatch) {
                 create: [],
               }),
             )
+        );
+      }
+      if (formData.get('associatedUsers') && userOptions) {
+        saveData = saveData.set(
+          'userActors',
+          Map({
+            delete: List(),
+            create: getCheckedValuesFromOptions(formData.get('associatedUsers'))
+              .map((id) => Map({
+                user_id: id,
+              })),
+          })
         );
       }
       dispatch(save(saveData.toJS(), actortype.get('id')));

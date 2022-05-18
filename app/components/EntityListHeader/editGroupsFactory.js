@@ -3,7 +3,11 @@ import { startsWith } from 'utils/string';
 
 import { qe } from 'utils/quasi-equals';
 import {
-  API, INDICATOR_ACTIONTYPES, USER_ACTIONTYPES, USER_ACTORTYPES,
+  API,
+  INDICATOR_ACTIONTYPES,
+  USER_ACTIONTYPES,
+  USER_ACTORTYPES,
+  ACTIONTYPE_ACTIONTYPES,
 } from 'themes/config';
 
 export const makeEditGroups = ({
@@ -25,6 +29,36 @@ export const makeEditGroups = ({
   // const selectedActortypes = actortypes && actortypes.filter(
   //   (actortype) => selectedActortypeIds.find((id) => qe(id, actortype.get('id'))),
   // );
+
+  // attributes
+  if (config.attributes) {
+    // first prepare taxonomy options
+    editGroups.attributes = {
+      id: 'attributes', // filterGroupId
+      label: messages.attributes,
+      show: true,
+      options: reduce(
+        config.attributes.options,
+        (optionsMemo, option) => {
+          if (
+            (typeof option.edit === 'undefined' || option.edit)
+            && (typeof option.role === 'undefined' || hasUserRole[option.roleEdit || option.role])
+          ) {
+            return optionsMemo.concat({
+              id: option.attribute, // filterOptionId
+              label: option.label,
+              message: option.message,
+              active: !!activeEditOption
+                && activeEditOption.group === 'attributes'
+                && activeEditOption.optionId === option.attribute,
+            });
+          }
+          return optionsMemo;
+        },
+        [],
+      ),
+    };
+  }
   // taxonomy option group
   if (config.taxonomies && taxonomies) {
     // first prepare taxonomy options
@@ -109,33 +143,61 @@ export const makeEditGroups = ({
       } else {
         let types;
         let typeAttribute_id;
-        if (option.type === 'action-actors') {
-          types = actortypes;
-          typeAttribute_id = 'actortypeattribute_id';
-        } else if (option.type === 'action-targets') {
-          types = targettypes;
-          typeAttribute_id = 'actortype_id';
-        } else if (option.type === 'target-actions') {
-          types = actiontypesForTarget;
-          typeAttribute_id = 'measuretype_id';
-        } else if (option.type === 'actor-actions') {
-          types = actiontypes;
-          typeAttribute_id = 'measuretype_id';
-        } else if (option.type === 'resource-actions') {
-          types = actiontypes;
-          typeAttribute_id = 'measuretype_id';
-        } else if (option.type === 'association-members') {
-          types = membertypes;
-          typeAttribute_id = 'actortype_id';
-        } else if (option.type === 'member-associations') {
-          types = associationtypes;
-          typeAttribute_id = 'actortype_id';
-        } else if (option.type === 'action-resources') {
-          types = resourcetypes;
-          typeAttribute_id = 'resourcetype_id';
-        } else if (option.type === 'indicator-actions') {
-          types = actiontypes;
-          typeAttribute_id = 'measuretype_id';
+
+        switch (option.type) {
+          case 'user-actors':
+          case 'action-actors':
+            types = actortypes;
+            break;
+          case 'action-targets':
+            types = targettypes;
+            break;
+          case 'actor-actions':
+          case 'user-actions':
+          case 'resource-actions':
+          case 'action-parents':
+          case 'action-children':
+            types = actiontypes;
+            break;
+          case 'target-actions':
+            types = actiontypesForTarget;
+            break;
+          case 'association-members':
+            types = membertypes;
+            break;
+          case 'member-associations':
+            types = associationtypes;
+            break;
+          case 'action-resources':
+            types = resourcetypes;
+            break;
+          default:
+            break;
+        }
+        switch (option.type) {
+          // actors
+          case 'user-actors':
+          case 'action-actors':
+          case 'action-targets':
+          case 'association-members':
+          case 'member-associations':
+            typeAttribute_id = 'actortype_id';
+            break;
+          // actions
+          case 'target-actions':
+          case 'actor-actions':
+          case 'user-actions':
+          case 'resource-actions':
+          case 'action-parents':
+          case 'action-children':
+            typeAttribute_id = 'measuretype_id';
+            break;
+          // resources
+          case 'action-resources':
+            typeAttribute_id = 'resourcetype_id';
+            break;
+          default:
+            break;
         }
         editGroups[connectionKey] = {
           id: connectionKey, // filterGroupId
@@ -144,7 +206,14 @@ export const makeEditGroups = ({
           options: types && types
             .filter((type) => {
               if (option.type === 'action-parents') {
-                return type.get('id') === typeId && (!option.typeFilter || type.getIn(['attributes', option.typeFilter]));
+                return ACTIONTYPE_ACTIONTYPES[typeId] && ACTIONTYPE_ACTIONTYPES[typeId].indexOf(type.get('id')) > -1;
+              }
+              if (option.type === 'action-children') {
+                const validActiontypeIds = Object.keys(ACTIONTYPE_ACTIONTYPES).filter((actiontypeId) => {
+                  const actiontypeIds = ACTIONTYPE_ACTIONTYPES[actiontypeId];
+                  return actiontypeIds && actiontypeIds.indexOf(typeId) > -1;
+                });
+                return validActiontypeIds.indexOf(type.get('id')) > -1;
               }
               if (option.typeFilterPass === 'reverse') {
                 return !type.getIn(['attributes', option.typeFilter]);
@@ -165,11 +234,11 @@ export const makeEditGroups = ({
                 return memo.concat({
                   id, // filterOptionId
                   label: option.label,
-                  message: (option.message && option.message.indexOf('{typeid}') > -1)
-                    ? option.message.replace('{typeid}', type.get('id'))
+                  message: (option.messageByType && option.messageByType.indexOf('{typeid}') > -1)
+                    ? option.messageByType.replace('{typeid}', type.get('id'))
                     : option.message,
                   path: option.connectPath,
-                  connection: option.entityType,
+                  connection: option.entityTypeAs || option.entityType,
                   key: option.key,
                   ownKey: option.ownKey,
                   active: !!activeEditOption
@@ -188,34 +257,5 @@ export const makeEditGroups = ({
     });
   }
 
-  // attributes
-  if (config.attributes) {
-    // first prepare taxonomy options
-    editGroups.attributes = {
-      id: 'attributes', // filterGroupId
-      label: messages.attributes,
-      show: true,
-      options: reduce(
-        config.attributes.options,
-        (optionsMemo, option) => {
-          if (
-            (typeof option.edit === 'undefined' || option.edit)
-            && (typeof option.role === 'undefined' || hasUserRole[option.role])
-          ) {
-            return optionsMemo.concat({
-              id: option.attribute, // filterOptionId
-              label: option.label,
-              message: option.message,
-              active: !!activeEditOption
-                && activeEditOption.group === 'attributes'
-                && activeEditOption.optionId === option.attribute,
-            });
-          }
-          return optionsMemo;
-        },
-        [],
-      ),
-    };
-  }
   return editGroups;
 };

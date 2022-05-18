@@ -89,7 +89,10 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
   getHeaderAsideFields = () => {
     const { intl } = this.context;
     return ([{
-      fields: [getStatusField(intl.formatMessage)],
+      fields: [
+        getStatusField(intl.formatMessage),
+        getStatusField(intl.formatMessage, 'private'),
+      ],
     }]);
   };
 

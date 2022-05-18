@@ -1,4 +1,11 @@
-import { API, ROUTES } from 'themes/config';
+import {
+  API,
+  ROUTES,
+  USER_ROLES,
+  PUBLISH_STATUSES,
+  PRIVACY_STATUSES,
+} from 'themes/config';
+
 // specify the filter and query  options
 export const DEPENDENCIES = [
   API.PAGES,
@@ -6,34 +13,33 @@ export const DEPENDENCIES = [
 ];
 
 export const CONFIG = {
+  types: 'pages',
   serverPath: API.PAGES,
   clientPath: ROUTES.PAGES,
   views: {
     list: {
-      search: ['title'],
-      sorting: [
-        {
-          attribute: 'order',
-          type: 'number',
-          order: 'asc',
-          default: true,
-        },
-        {
-          attribute: 'title',
-          type: 'string',
-          order: 'asc',
-        },
-        {
-          attribute: 'id', // proxy for created at
-          type: 'number',
-          order: 'desc',
-        },
-        {
-          attribute: 'updated_at',
-          type: 'date',
-          order: 'desc',
-        },
-      ],
+      search: ['title', 'description'],
     },
+  },
+  attributes: { // filter by attribute value
+    options: [
+      {
+        search: false,
+        message: 'attributes.draft',
+        attribute: 'draft',
+        options: PUBLISH_STATUSES,
+        role: USER_ROLES.MANAGER.value,
+        filterUI: 'checkboxes',
+      },
+      {
+        search: false,
+        message: 'attributes.private',
+        attribute: 'private',
+        options: PRIVACY_STATUSES,
+        role: USER_ROLES.MANAGER.value,
+        roleEdit: USER_ROLES.ADMIN.value,
+        filterUI: 'checkboxes',
+      },
+    ],
   },
 };

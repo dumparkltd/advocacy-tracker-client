@@ -2,15 +2,9 @@ import { createSelector } from 'reselect';
 import { API } from 'themes/config';
 
 import {
-  selectEntitiesSearchQuery,
-  selectSortByQuery,
-  selectSortOrderQuery,
+  selectEntities,
   selectLocationQuery,
 } from 'containers/App/selectors';
-
-import { sortEntities, getSortOption } from 'utils/sort';
-
-import { CONFIG } from './constants';
 
 export const selectTypeQuery = createSelector(
   selectLocationQuery,
@@ -22,20 +16,6 @@ export const selectTypeQuery = createSelector(
 // 2. selectEntitiesSearchQuery filters by keyword
 // 3. selectUsers
 export const selectBookmarks = createSelector(
-  (state, locationQuery) => selectEntitiesSearchQuery(state, {
-    path: API.BOOKMARKS,
-    searchAttributes: ['title'],
-    locationQuery,
-  }),
-  selectSortByQuery,
-  selectSortOrderQuery,
-  (entities, sort, order) => {
-    const sortOption = getSortOption(CONFIG.sorting, sort);
-    return sortEntities(
-      entities,
-      order || (sortOption ? sortOption.order : 'desc'),
-      sort || (sortOption ? sortOption.attribute : 'id'),
-      sortOption ? sortOption.type : 'number'
-    );
-  }
+  (state) => selectEntities(state, API.BOOKMARKS),
+  (entities) => entities && entities.toList()
 );

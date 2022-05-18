@@ -16,13 +16,14 @@ export const DEPENDENCIES = [
   API.ACTORS,
   API.ACTORTYPES,
   API.RESOURCES,
-  API.INDICATORS,
   API.RESOURCETYPES,
   API.ACTIONTYPES,
   API.ACTORTYPE_TAXONOMIES,
   API.ACTIONTYPE_TAXONOMIES,
   API.ACTOR_CATEGORIES,
   API.ACTION_CATEGORIES,
+  API.INDICATORS,
+  API.ACTION_INDICATORS,
   API.ACTION_ACTIONS,
   API.USER_ACTIONS,
   API.USERS,
@@ -32,7 +33,9 @@ export const FORM_INITIAL = fromJS({
   id: '',
   attributes: Object.keys(ACTION_FIELDS.ATTRIBUTES).reduce((memo, att) => ({
     ...memo,
-    [att]: ACTION_FIELDS.ATTRIBUTES[att].defaultValue || '',
+    [att]: typeof ACTION_FIELDS.ATTRIBUTES[att].defaultValue !== 'undefined'
+      ? ACTION_FIELDS.ATTRIBUTES[att].defaultValue
+      : '',
   }), {}),
   associatedTaxonomies: {},
   associatedActorsByActortype: {},

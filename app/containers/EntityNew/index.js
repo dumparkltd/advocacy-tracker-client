@@ -57,7 +57,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
       scrollToTop(this.scrollContainer.current);
     }
     if (!this.props.attributes && nextProps.attributes) {
-      this.props.initialiseForm('actorNew.form.data', this.getInitialFormData(nextProps));
+      this.props.initialiseForm('entityNew.form.data', this.getInitialFormData(nextProps));
     }
   }
 
@@ -68,17 +68,17 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
     const { attributes, path } = props;
     if (path === API.ACTORS) {
       return attributes && attributes.get('actortype_id')
-        ? Map(FORM_INITIAL.set('attributes', attributes))
+        ? Map(FORM_INITIAL.setIn(['attributes', 'actortype_id'], attributes.get('actortype_id')))
         : Map(FORM_INITIAL.setIn(['attributes', 'actortype_id'], DEFAULT_ACTORTYPE));
     }
     if (path === API.ACTIONS) {
       return attributes && attributes.get('measuretype_id')
-        ? Map(FORM_INITIAL.set('attributes', attributes))
+        ? Map(FORM_INITIAL.setIn(['attributes', 'measuretype_id'], attributes.get('measuretype_id')))
         : Map(FORM_INITIAL.setIn(['attributes', 'measuretype_id'], DEFAULT_ACTIONTYPE));
     }
     if (path === API.RESOURCES) {
       return attributes && attributes.get('resourcetype_id')
-        ? Map(FORM_INITIAL.set('attributes', attributes))
+        ? Map(FORM_INITIAL.setIn(['attributes', 'resourcetype_id'], attributes.get('resourcetype_id')))
         : Map(FORM_INITIAL.setIn(['attributes', 'resourcetype_id'], DEFAULT_RESOURCETYPE));
     }
     return Map(FORM_INITIAL);
@@ -101,6 +101,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
       type,
     } = this.props;
     const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
+
     let pageTitle;
     let currentTypeId;
     if (path === API.CATEGORIES && taxonomy && taxonomy.get('attributes')) {
@@ -235,7 +236,6 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
 EntityNew.propTypes = {
   path: PropTypes.string.isRequired,
   attributes: PropTypes.object,
-  // connect: PropTypes.object,
   taxonomy: PropTypes.object,
   parentTaxonomy: PropTypes.object,
   categoryParentOptions: PropTypes.object,
@@ -316,16 +316,19 @@ function mapDispatchToProps(dispatch, props) {
           saveData = saveData.setIn(['attributes', 'parent_id'], null);
         }
       }
-
-      if (props.connect) {
-        if (props.connect.get('type') === 'actorActions') {
-          saveData = saveData.set(
-            'actorActions',
-            Map().set('create', props.connect.get('create')),
-          );
-        }
+      if (
+        props.connect && (
+          props.connect.get('type') === 'actorActions'
+          || props.connect.get('type') === 'actionActors'
+          || props.connect.get('type') === 'userActions'
+          || props.connect.get('type') === 'subActions'
+        )
+      ) {
+        saveData = saveData.set(
+          props.connect.get('type'),
+          Map().set('create', props.connect.get('create')),
+        );
       }
-
       dispatch(newEntity({
         entity: saveData.toJS(),
         path: props.path,

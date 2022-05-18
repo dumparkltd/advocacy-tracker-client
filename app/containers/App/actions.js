@@ -55,17 +55,25 @@ import {
   UPDATE_PATH,
   AUTHENTICATE_FORWARD,
   UPDATE_ENTITY_FORM,
+  RESET_PASSWORD,
+  RECOVER_PASSWORD,
+  RECOVER_SENDING,
+  RECOVER_SUCCESS,
+  RECOVER_ERROR,
   CLOSE_ENTITY,
   OPEN_NEW_ENTITY_MODAL,
   RESET_PROGRESS,
   SUBMIT_INVALID,
   DISMISS_QUERY_MESSAGES,
   SET_ACTIONTYPE,
+  SET_ACTORTYPE,
   OPEN_BOOKMARK,
   SET_VIEW,
+  SET_SUBJECT,
   SET_MAPSUBJECT,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
+  SET_INCLUDE_MEMBERS_FORFILTERS,
 } from './constants';
 
 export function submitInvalid(valid) {
@@ -104,6 +112,29 @@ export function saveErrorDismiss() {
 export function saveError(error, data) {
   return {
     type: SAVE_ERROR,
+    data,
+    error,
+  };
+}
+
+
+export function recoverSending(data) {
+  return {
+    type: RECOVER_SENDING,
+    data,
+  };
+}
+
+export function recoverSuccess(data) {
+  return {
+    type: RECOVER_SUCCESS,
+    data,
+  };
+}
+
+export function recoverError(error, data) {
+  return {
+    type: RECOVER_ERROR,
     data,
     error,
   };
@@ -343,6 +374,19 @@ export function authenticate(data) {
   };
 }
 
+export function resetPassword(data) {
+  return {
+    type: RESET_PASSWORD,
+    data,
+  };
+}
+export function recoverPassword(data) {
+  return {
+    type: RECOVER_PASSWORD,
+    data,
+  };
+}
+
 /**
  * Dispatched when authentication successful
  *
@@ -447,14 +491,26 @@ export function dismissQueryMessages() {
 
 export function setActortype(actortype) {
   return {
-    type: SET_ACTIONTYPE,
+    type: SET_ACTORTYPE,
     actortype,
+  };
+}
+export function setActiontype(actiontype) {
+  return {
+    type: SET_ACTIONTYPE,
+    actiontype,
   };
 }
 export function setView(view) {
   return {
     type: SET_VIEW,
     view,
+  };
+}
+export function setSubject(subject) {
+  return {
+    type: SET_SUBJECT,
+    subject,
   };
 }
 export function setMapSubject(subject) {
@@ -472,6 +528,12 @@ export function setIncludeActorMembers(value) {
 export function setIncludeTargetMembers(value) {
   return {
     type: SET_INCLUDE_TARGET_MEMBERS,
+    value,
+  };
+}
+export function setIncludeMembersForFiltering(value) {
+  return {
+    type: SET_INCLUDE_MEMBERS_FORFILTERS,
     value,
   };
 }

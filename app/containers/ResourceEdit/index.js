@@ -22,11 +22,12 @@ import {
   renderActionsByActiontypeControl,
   getConnectionUpdatesFromFormData,
 } from 'utils/forms';
-import { getInfoField, getMetaField } from 'utils/fields';
+import { getMetaField } from 'utils/fields';
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
 import { checkResourceAttribute, checkResourceRequired } from 'utils/entities';
+import qe from 'utils/quasi-equals';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
 import { USER_ROLES, ROUTES, API } from 'themes/config';
@@ -47,6 +48,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectSessionUserId,
 } from 'containers/App/selectors';
 
 import Messages from 'components/Messages';
@@ -123,11 +125,6 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
       [ // fieldGroups
         { // fieldGroup
           fields: [
-            getInfoField(
-              'resourcetype_id',
-              intl.formatMessage(appMessages.resourcetypes[typeId]),
-              true // large
-            ), // required
             checkResourceAttribute(typeId, 'title') && getTitleFormField(
               intl.formatMessage,
               'title',
@@ -140,12 +137,14 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     );
   };
 
-  getHeaderAsideFields = (entity) => {
+  getHeaderAsideFields = (entity, isAdmin, isMine) => {
     const { intl } = this.context;
     return ([
       {
         fields: [
           getStatusField(intl.formatMessage),
+          (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
+          isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
           getMetaField(entity),
         ],
       },
@@ -236,6 +235,8 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
       connectedTaxonomies,
       actionsByActiontype,
       onCreateOption,
+      isAdmin,
+      myId,
     } = this.props;
     const typeId = viewEntity && viewEntity.getIn(['attributes', 'resourcetype_id']);
 
@@ -246,6 +247,8 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     const type = intl.formatMessage(
       appMessages.entities[typeId ? `resources_${typeId}` : 'resources'].single
     );
+    const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+
     return (
       <div>
         <Helmet
@@ -314,11 +317,11 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
                 handleSubmitFail={this.props.handleSubmitFail}
                 handleCancel={this.props.handleCancel}
                 handleUpdate={this.props.handleUpdate}
-                handleDelete={this.props.isUserAdmin ? this.props.handleDelete : null}
+                handleDelete={isAdmin ? this.props.handleDelete : null}
                 fields={{
                   header: {
                     main: this.getHeaderMainFields(viewEntity),
-                    aside: this.getHeaderAsideFields(viewEntity),
+                    aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
                   },
                   body: {
                     main: this.getBodyMainFields(
@@ -359,13 +362,14 @@ ResourceEdit.propTypes = {
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
-  isUserAdmin: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   params: PropTypes.object,
   actionsByActiontype: PropTypes.object,
   onCreateOption: PropTypes.func,
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   connectedTaxonomies: PropTypes.object,
+  myId: PropTypes.string,
 };
 
 ResourceEdit.contextTypes = {
@@ -373,12 +377,13 @@ ResourceEdit.contextTypes = {
 };
 const mapStateToProps = (state, props) => ({
   viewDomain: selectDomain(state),
-  isUserAdmin: selectIsUserAdmin(state),
+  isAdmin: selectIsUserAdmin(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
   connectedTaxonomies: selectConnectedTaxonomies(state),
+  myId: selectSessionUserId(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

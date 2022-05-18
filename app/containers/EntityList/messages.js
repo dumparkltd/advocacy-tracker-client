@@ -42,6 +42,10 @@ export default defineMessages({
     id: 'app.containers.EntityList.filterFormWithoutPrefix',
     defaultMessage: 'Without',
   },
+  filterFormAnyPrefix: {
+    id: 'app.containers.EntityList.filterFormAnyPrefix',
+    defaultMessage: 'Some',
+  },
   filterFormError: {
     id: 'app.containers.EntityList.filterFormError',
     defaultMessage: 'Errors',

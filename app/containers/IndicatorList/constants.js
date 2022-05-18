@@ -3,6 +3,8 @@ import {
   ROUTES,
   USER_ROLES,
   PUBLISH_STATUSES,
+  PRIVACY_STATUSES,
+  ARCHIVE_STATUSES,
 } from 'themes/config';
 
 export const DEPENDENCIES = [
@@ -19,29 +21,12 @@ export const DEPENDENCIES = [
 ];
 
 export const CONFIG = {
+  types: 'indicators',
   serverPath: API.INDICATORS,
   clientPath: ROUTES.INDICATOR,
   views: {
     list: {
       search: ['title', 'description'],
-      sorting: [
-        {
-          attribute: 'title',
-          type: 'string',
-          order: 'asc',
-        },
-        {
-          attribute: 'updated_at',
-          type: 'date',
-          order: 'desc',
-          default: true,
-        },
-        {
-          attribute: 'id', // proxy for created at
-          type: 'number',
-          order: 'desc',
-        },
-      ],
     },
   },
   connections: { // filter by associated entity
@@ -49,7 +34,8 @@ export const CONFIG = {
       query: 'action',
       type: 'indicator-actions',
       search: true,
-      message: 'entities.actions_{typeid}.plural',
+      messageByType: 'entities.actions_{typeid}.plural',
+      message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,
@@ -67,6 +53,25 @@ export const CONFIG = {
         attribute: 'draft',
         options: PUBLISH_STATUSES,
         role: USER_ROLES.MANAGER.value,
+        filterUI: 'checkboxes',
+      },
+      {
+        search: false,
+        message: 'attributes.private',
+        attribute: 'private',
+        options: PRIVACY_STATUSES,
+        role: USER_ROLES.MANAGER.value,
+        roleEdit: USER_ROLES.ADMIN.value,
+        filterUI: 'checkboxes',
+      },
+      {
+        search: false,
+        message: 'attributes.is_archive',
+        attribute: 'is_archive',
+        options: ARCHIVE_STATUSES,
+        role: USER_ROLES.ADMIN.value,
+        filterUI: 'checkboxes',
+        default: false,
       },
     ],
   },

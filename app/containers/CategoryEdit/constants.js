@@ -35,6 +35,8 @@ export const FORM_INITIAL = fromJS({
     user_only: false,
     draft: true,
     date: '',
+    private: false,
+    is_archive: false,
   },
   associatedActions: [],
   associatedActorsByActortype: {},
