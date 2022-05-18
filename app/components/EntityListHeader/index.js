@@ -451,267 +451,285 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     );
     return (
       <ResponsiveContext.Consumer>
-        {(size) => (
-          <Styled>
-            <TheHeader align="center">
-              {config.types && typeOptions && (
-                <HeaderSection noBorder>
-                  <ButtonFlatIconOnly onClick={() => onSelectType()}>
-                    <Icon name="arrowLeft" size="2em" />
-                  </ButtonFlatIconOnly>
-                </HeaderSection>
-              )}
-              {currentTypeOption && !isMinSize(size, 'large') && (
-                <Text>
-                  {truncateText(
-                    currentTypeOption.label,
-                    TEXT_TRUNCATE.TYPE_SELECT,
-                    false,
-                  )}
-                </Text>
-              )}
-              {config.types && typeOptions && isMinSize(size, 'large') && (
-                <HeaderSectionType justify="start">
-                  {config.types && (
-                    <Label>
-                      <FormattedMessage
-                        {...messages.selectType}
-                        values={{
-                          types: intl.formatMessage(appMessages[config.types].single),
-                        }}
-                      />
-                    </Label>
-                  )}
-                  {currentTypeOption && (
-                    <SelectType
-                      as="button"
-                      ref={this.typeButtonRef}
-                      onClick={(evt) => this.state.showTypes
-                        ? this.onHideTypes(evt)
-                        : this.onShowTypes(evt)
-                      }
-                    >
-                      <LinkTitle active>
-                        {truncateText(
-                          currentTypeOption.label,
-                          TEXT_TRUNCATE.TYPE_SELECT,
-                          false,
-                        )}
-                        {!this.state.showTypes && (
-                          <Icon name="dropdownOpen" text textRight size="1em" />
-                        )}
-                        {this.state.showTypes && (
-                          <Icon name="dropdownClose" text textRight size="1em" />
-                        )}
-                      </LinkTitle>
-                    </SelectType>
-                  )}
-                  {this.state.showTypes && typeOptions && (
-                    <TypeOptions ref={this.typeWrapperRef}>
-                      {typeOptions.map((option) => (
-                        <TypeOption
-                          key={option.value}
-                          active={option.active}
-                          onClick={() => {
-                            this.onHideTypes();
-                            onSelectType(option.value);
-                          }}
-                        >
-                          {option.label}
-                        </TypeOption>
-                      ))}
-                    </TypeOptions>
-                  )}
-                </HeaderSectionType>
-              )}
-              <HeaderSection grow align="center" gap="medium" justify="end">
-                {dataReady && isMinSize(size, 'large') && (
-                  <EntityListSearch>
-                    <TagList
-                      filters={currentFilters}
-                    />
-                  </EntityListSearch>
+        {(size) => {
+          const iconSize = isMinSize(size, 'medium') ? 'xxsmall' : 'small';
+          return (
+            <Styled>
+              <TheHeader align="center">
+                {config.types && typeOptions && (
+                  <HeaderSection noBorder>
+                    <ButtonFlatIconOnly onClick={() => onSelectType()}>
+                      <Icon name="arrowLeft" size="2em" />
+                    </ButtonFlatIconOnly>
+                  </HeaderSection>
                 )}
-              </HeaderSection>
-              {dataReady && isMinSize(size, 'large') && (
-                <HeaderSection align="center">
-                  <ButtonOptions
-                    onClick={onShowFilters}
-                    label={(
-                      <Box direction="row" gap="small" align="center">
-                        <Box>{<Icon name="filter" text />}</Box>
-                        <Text>{intl.formatMessage(messages.listOptions.showFilter)}</Text>
-                      </Box>
+                {currentTypeOption && !isMinSize(size, 'large') && (
+                  <Text>
+                    {truncateText(
+                      currentTypeOption.label,
+                      TEXT_TRUNCATE.TYPE_SELECT,
+                      false,
                     )}
-                  />
-                </HeaderSection>
-              )}
-              {normalActions && (
-                <HeaderSection noBorder={!canEdit}>
-                  <Box fill="vertical" direction="row" align="center" pad={{ vertical: 'xsmall' }}>
-                    {normalActions.map(
-                      (action, i) => {
-                        if (action.type === 'bookmarker') {
-                          return (
-                            <Box key={i}>
-                              <Bookmarker viewTitle={action.title} type={action.entityType} />
-                            </Box>
-                          );
-                        }
-                        if (action.type === 'icon') {
-                          return (
-                            <Box key={i}>
-                              <ButtonFlatIconOnly
-                                onClick={action.onClick && (() => action.onClick())}
-                                title={action.title}
-                                subtle
-                              >
-                                <Icon name={action.icon} />
-                              </ButtonFlatIconOnly>
-                            </Box>
-                          );
-                        }
-                        return null;
-                      }
+                  </Text>
+                )}
+                {config.types && typeOptions && isMinSize(size, 'large') && (
+                  <HeaderSectionType justify="start">
+                    {config.types && (
+                      <Label>
+                        <FormattedMessage
+                          {...messages.selectType}
+                          values={{
+                            types: intl.formatMessage(appMessages[config.types].single),
+                          }}
+                        />
+                      </Label>
                     )}
-                  </Box>
+                    {currentTypeOption && (
+                      <SelectType
+                        as="button"
+                        ref={this.typeButtonRef}
+                        onClick={(evt) => this.state.showTypes
+                          ? this.onHideTypes(evt)
+                          : this.onShowTypes(evt)
+                        }
+                      >
+                        <LinkTitle active>
+                          {truncateText(
+                            currentTypeOption.label,
+                            TEXT_TRUNCATE.TYPE_SELECT,
+                            false,
+                          )}
+                          {!this.state.showTypes && (
+                            <Icon name="dropdownOpen" text textRight size="1em" />
+                          )}
+                          {this.state.showTypes && (
+                            <Icon name="dropdownClose" text textRight size="1em" />
+                          )}
+                        </LinkTitle>
+                      </SelectType>
+                    )}
+                    {this.state.showTypes && typeOptions && (
+                      <TypeOptions ref={this.typeWrapperRef}>
+                        {typeOptions.map((option) => (
+                          <TypeOption
+                            key={option.value}
+                            active={option.active}
+                            onClick={() => {
+                              this.onHideTypes();
+                              onSelectType(option.value);
+                            }}
+                          >
+                            {option.label}
+                          </TypeOption>
+                        ))}
+                      </TypeOptions>
+                    )}
+                  </HeaderSectionType>
+                )}
+                <HeaderSection grow align="center" gap="medium" justify="end">
+                  {dataReady && isMinSize(size, 'large') && (
+                    <EntityListSearch>
+                      <TagList
+                        filters={currentFilters}
+                      />
+                    </EntityListSearch>
+                  )}
                 </HeaderSection>
-              )}
-              {canEdit && isMinSize(size, 'large') && (
-                <HeaderSection noBorder>
-                  <Box
-                    fill="vertical"
-                    pad={{ top: 'xsmall', bottom: 'xxsmall' }}
-                    align="start"
-                    justify="center"
-                    gap="xsmall"
-                  >
+                {dataReady && isMinSize(size, 'small') && (
+                  <HeaderSection align="center">
                     <ButtonOptions
-                      onClick={onShowEditOptions}
+                      onClick={onShowFilters}
                       label={(
                         <Box direction="row" gap="small" align="center">
-                          <Box>
-                            <Edit color="dark-3" size="xxsmall" />
-                          </Box>
-                          <Text color="dark-3" size="small">{intl.formatMessage(messages.listOptions.showEditOptions)}</Text>
+                          <Box>{<Icon name="filter" text />}</Box>
+                          {isMinSize(size, 'medium') && (
+                            <Text>{intl.formatMessage(messages.listOptions.showFilter)}</Text>
+                          )}
                         </Box>
                       )}
                     />
-                    {managerActions && managerActions.map(
-                      (action, i) => {
-                        if (action.icon === 'add') {
-                          return (
-                            <ButtonOptions
-                              key={i}
-                              onClick={action.onClick}
-                              label={(
-                                <Box direction="row" gap="small" align="center">
-                                  <Box>
-                                    <Add color="dark-3" size="xxsmall" />
-                                  </Box>
-                                  <Text color="dark-3" size="small">{action.title}</Text>
-                                </Box>
-                              )}
-                            />
-                          );
-                        }
-                        if (action.icon === 'import') {
-                          return (
-                            <ButtonOptions
-                              key={i}
-                              onClick={action.onClick}
-                              label={(
-                                <Box direction="row" gap="small" align="center">
-                                  <Box>
-                                    <Multiple color="dark-3" size="xxsmall" />
-                                  </Box>
-                                  <Text color="dark-3" size="small">{action.title}</Text>
-                                </Box>
-                              )}
-                            />
-                          );
-                        }
-                        return (
-                          <ButtonOptions
-                            key={i}
-                            onClick={action.onClick}
-                            label={(
-                              <Box direction="row" gap="small">
-                                <Text color="dark-3" size="small">{action.title}</Text>
+                  </HeaderSection>
+                )}
+                {normalActions && (
+                  <HeaderSection noBorder={!canEdit}>
+                    <Box
+                      fill="vertical"
+                      direction="row"
+                      align="center"
+                      pad={{ vertical: 'xsmall' }}
+                    >
+                      {normalActions.map(
+                        (action, i) => {
+                          if (action.type === 'bookmarker') {
+                            return (
+                              <Box key={i}>
+                                <Bookmarker viewTitle={action.title} type={action.entityType} />
                               </Box>
+                            );
+                          }
+                          if (action.type === 'icon') {
+                            return (
+                              <Box key={i}>
+                                <ButtonFlatIconOnly
+                                  onClick={action.onClick && (() => action.onClick())}
+                                  title={action.title}
+                                  subtle
+                                >
+                                  <Icon name={action.icon} />
+                                </ButtonFlatIconOnly>
+                              </Box>
+                            );
+                          }
+                          return null;
+                        }
+                      )}
+                    </Box>
+                  </HeaderSection>
+                )}
+                {canEdit && isMinSize(size, 'small') && (
+                  <HeaderSection noBorder>
+                    <Box
+                      fill="vertical"
+                      pad={{ top: 'xsmall', bottom: 'xxsmall' }}
+                      align={isMinSize(size, 'medium') ? 'start' : 'center'}
+                      justify="center"
+                      gap={isMinSize(size, 'medium') ? 'xsmall' : 'small'}
+                      direction={isMinSize(size, 'medium') ? 'column' : 'row'}
+                    >
+                      <ButtonOptions
+                        onClick={onShowEditOptions}
+                        label={(
+                          <Box direction="row" gap="small" align="center">
+                            <Box>
+                              <Edit color="dark-3" size={iconSize} />
+                            </Box>
+                            {isMinSize(size, 'medium') && (
+                              <Text color="dark-3" size="small">{intl.formatMessage(messages.listOptions.showEditOptions)}</Text>
                             )}
-                          />
-                        );
-                      }
-                    )}
-                  </Box>
-                </HeaderSection>
-              )}
-            </TheHeader>
-            {showFilters && (
-              <EntityListSidebar
-                hasEntities={entities && entities.size > 0}
-                panelGroups={panelGroups}
-                onHideSidebar={onHideFilters}
-                onHideOptions={this.onHideForm}
-                setActiveOption={this.onSetActiveOption}
-                onUpdateQuery={(args) => {
-                  this.onHideForm();
-                  onUpdateQuery(args);
-                }}
-                memberOption={config.hasMemberOption
-                  ? {
-                    key: 'filter-member-option',
-                    active: !!includeMembers,
-                    label: 'Include members when filtering by region or group',
-                    onClick: () => {
-                      this.onHideForm();
-                      onSetFilterMemberOption(!includeMembers);
-                    },
-                  }
-                  : null
-                }
-              />
-            )}
-            {showEditOptions && (
-              <EntityListSidebar
-                isEditPanel
-                hasEntities={entities && entities.size > 0}
-                hasSelected={hasSelected}
-                panelGroups={panelGroups}
-                onHideSidebar={onHideEditOptions}
-                setActiveOption={this.onSetActiveOption}
-              />
-            )}
-            {activeOption && formOptions && (
-              <EntityListForm
-                model={formModel}
-                activeOptionId={`${activeOption.group}-${activeOption.optionId}`}
-                formOptions={formOptions}
-                buttons={showEditOptions
-                  ? this.getFormButtons(activeOption)
-                  : null
-                }
-                onCancel={this.onHideForm}
-                showCancelButton={showFilters}
-                onSelect={() => {
-                  if (showFilters) {
+                          </Box>
+                        )}
+                      />
+                      {managerActions && managerActions.map(
+                        (action, i) => {
+                          if (action.icon === 'add') {
+                            return (
+                              <ButtonOptions
+                                key={i}
+                                onClick={action.onClick}
+                                label={(
+                                  <Box direction="row" gap="small" align="center">
+                                    <Box>
+                                      <Add color="dark-3" size={iconSize} />
+                                    </Box>
+                                    {isMinSize(size, 'medium') && (
+                                      <Text color="dark-3" size="small">{action.title}</Text>
+                                    )}
+                                  </Box>
+                                )}
+                              />
+                            );
+                          }
+                          if (isMinSize(size, 'medium')) {
+                            if (action.icon === 'import' && isMinSize(size, 'medium')) {
+                              return (
+                                <ButtonOptions
+                                  key={i}
+                                  onClick={action.onClick}
+                                  label={(
+                                    <Box direction="row" gap="small" align="center">
+                                      <Box>
+                                        <Multiple color="dark-3" size={iconSize} />
+                                      </Box>
+                                      <Text color="dark-3" size="small">{action.title}</Text>
+                                    </Box>
+                                  )}
+                                />
+                              );
+                            }
+                            return (
+                              <ButtonOptions
+                                key={i}
+                                onClick={action.onClick}
+                                label={(
+                                  <Box direction="row" gap="small">
+                                    <Text color="dark-3" size="small">{action.title}</Text>
+                                  </Box>
+                                )}
+                              />
+                            );
+                          }
+                          return null;
+                        }
+                      )}
+                    </Box>
+                  </HeaderSection>
+                )}
+              </TheHeader>
+              {showFilters && (
+                <EntityListSidebar
+                  hasEntities={entities && entities.size > 0}
+                  panelGroups={panelGroups}
+                  onHideSidebar={onHideFilters}
+                  onHideOptions={this.onHideForm}
+                  setActiveOption={this.onSetActiveOption}
+                  onUpdateQuery={(args) => {
                     this.onHideForm();
-                    // onHideFilters();
+                    onUpdateQuery(args);
+                  }}
+                  memberOption={config.hasMemberOption
+                    ? {
+                      key: 'filter-member-option',
+                      active: !!includeMembers,
+                      label: 'Include members when filtering by region or group',
+                      onClick: () => {
+                        this.onHideForm();
+                        onSetFilterMemberOption(!includeMembers);
+                      },
+                    }
+                    : null
                   }
-                }}
-                onSubmit={showEditOptions
-                  ? (associations) => {
-                  // close and reset option panel
-                    this.setState({ activeOption: null });
-                    onUpdate(associations, activeOption);
+                />
+              )}
+              {showEditOptions && (
+                <EntityListSidebar
+                  isEditPanel
+                  hasEntities={entities && entities.size > 0}
+                  hasSelected={hasSelected}
+                  panelGroups={panelGroups}
+                  onHideSidebar={onHideEditOptions}
+                  setActiveOption={this.onSetActiveOption}
+                />
+              )}
+              {activeOption && formOptions && (
+                <EntityListForm
+                  model={formModel}
+                  activeOptionId={`${activeOption.group}-${activeOption.optionId}`}
+                  formOptions={formOptions}
+                  buttons={showEditOptions
+                    ? this.getFormButtons(activeOption)
+                    : null
                   }
-                  : null
-                }
-              />
-            )}
-          </Styled>
-        )}
+                  onCancel={this.onHideForm}
+                  showCancelButton={showFilters}
+                  onSelect={() => {
+                    if (showFilters) {
+                      this.onHideForm();
+                      // onHideFilters();
+                    }
+                  }}
+                  onSubmit={showEditOptions
+                    ? (associations) => {
+                    // close and reset option panel
+                      this.setState({ activeOption: null });
+                      onUpdate(associations, activeOption);
+                    }
+                    : null
+                  }
+                />
+              )}
+            </Styled>
+          );
+        }}
       </ResponsiveContext.Consumer>
     );
   }
