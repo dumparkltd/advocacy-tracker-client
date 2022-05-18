@@ -2287,12 +2287,12 @@ export default defineMessages({
     },
     archiveStatuses: {
       archived: {
-        id: 'app.containers.App.ui.privacyStatuses.archived',
+        id: 'app.containers.App.ui.archiveStatuses.archived',
         defaultMessage: 'Archived',
       },
       current: {
-        id: 'app.containers.App.ui.privacyStatuses.current',
-        defaultMessage: 'Current',
+        id: 'app.containers.App.ui.archiveStatuses.current',
+        defaultMessage: 'Active',
       },
     },
     privacyStatuses: {
