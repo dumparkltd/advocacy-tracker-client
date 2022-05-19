@@ -428,7 +428,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                       {mapSubject === 'actors'
                         && ACTIONTYPE_ACTORTYPES[typeId]
                         && ACTIONTYPE_ACTORTYPES[typeId].length > 1
-                        && ACTIONTYPE_ACTORTYPES[typeId].map(
+                        && ACTIONTYPE_ACTORTYPES[typeId].filter(
+                          (actortypeId) => entityActors.get(parseInt(actortypeId, 10))
+                        ).map(
                           (actortypeId) => (
                             <ButtonPill
                               key={actortypeId}
@@ -444,7 +446,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                       {mapSubject === 'targets'
                         && ACTIONTYPE_TARGETTYPES[typeId]
                         && ACTIONTYPE_TARGETTYPES[typeId].length > 1
-                        && ACTIONTYPE_TARGETTYPES[typeId].map(
+                        && ACTIONTYPE_TARGETTYPES[typeId].filter(
+                          (actortypeId) => entityActors.get(parseInt(actortypeId, 10))
+                        ).map(
                           (actortypeId) => (
                             <ButtonPill
                               key={actortypeId}
