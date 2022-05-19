@@ -50,6 +50,7 @@ import {
   // ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG, ACTORTYPES, RESOURCE_FIELDS,
   ROUTES,
   ACTIONTYPES,
+  ACTORTYPES,
   ACTORTYPES_CONFIG,
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_ACTORTYPES,
@@ -116,17 +117,6 @@ const getActortypeColumns = (typeid) => {
     sort: 'title',
     attributes: ['code', 'title'],
   }];
-  // if (qe(typeid, ACTORTYPES.COUNTRY)) {
-  //   columns = [
-  //     ...columns,
-  //     {
-  //       id: 'classes',
-  //       type: 'associations',
-  //       actortype_id: ACTORTYPES.CLASS,
-  //       title: 'Classes',
-  //     },
-  //   ];
-  // }
   if (
     ACTORTYPES_CONFIG[parseInt(typeid, 10)]
     && ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns
@@ -136,7 +126,22 @@ const getActortypeColumns = (typeid) => {
       ...ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns,
     ];
   }
-  return columns;
+  return qe(typeid, ACTORTYPES.REG)
+    ? columns
+    : [
+      ...columns,
+      {
+        id: 'actions', // one row per type,
+        type: 'actionsSimple', // one row per type,
+        subject: 'actors', // one row per type,
+      },
+    ];
+  // {
+  //   id: 'targets', // one row per type,
+  //   type: 'actionsSimple', // one row per type,
+  //   subject: 'targets', // one row per type,
+  //   actions: 'targetingActions'
+  // },
 };
 
 export function ActionView(props) {
