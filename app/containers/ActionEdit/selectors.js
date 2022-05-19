@@ -49,6 +49,11 @@ export const selectDomain = createSelector(
   (substate) => substate
 );
 
+export const selectDomainPage = createSelector(
+  (state) => state.getIn(['actionEdit', 'page']),
+  (substate) => substate
+);
+
 export const selectViewEntity = createSelector(
   (state, id) => selectEntity(state, { path: API.ACTIONS, id }),
   (state) => selectEntities(state, API.USERS),

@@ -62,23 +62,18 @@ import {
   selectSessionUserId,
 } from 'containers/App/selectors';
 
-import Messages from 'components/Messages';
-import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
 
 import { getEntityTitle } from 'utils/entities';
 
+import FormWrapper from './FormWrapper';
+
 import {
-  selectDomain,
+  selectDomainPage,
   selectViewEntity,
   selectParentOptions,
   selectParentTaxonomy,
-  // selectUsers,
-  // selectActions,
-  // selectActorsByActortype,
-  // selectConnectedTaxonomies,
 } from './selectors';
 
 import messages from './messages';
@@ -277,24 +272,21 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
       viewEntity,
       dataReady,
       isAdmin,
-      viewDomain,
+      viewDomainPage,
       parentOptions,
       parentTaxonomy,
       myId,
-      // actorsByActortype,
-      // actions,
-      // users,
-      // connectedTaxonomies,
-      // onCreateOption,
+      onErrorDismiss,
+      onServerErrorDismiss,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
+      handleDelete,
     } = this.props;
     const reference = this.props.params.id;
-    const {
-      saveSending,
-      saveError,
-      deleteSending,
-      deleteError,
-      submitValid,
-    } = viewDomain.get('page').toJS();
+    const { saveSending, saveError, deleteSending } = viewDomainPage.toJS();
 
     let pageTitle = intl.formatMessage(messages.pageTitle);
     if (viewEntity && viewEntity.get('taxonomy')) {
@@ -320,39 +312,15 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
             buttons={
               viewEntity && dataReady ? [{
                 type: 'cancel',
-                onClick: () => this.props.handleCancel(reference),
+                onClick: () => handleCancel(reference),
               },
               {
                 type: 'save',
                 disabled: saveSending,
-                onClick: () => this.props.handleSubmitRemote('categoryEdit.form.data'),
+                onClick: () => handleSubmitRemote('categoryEdit.form.data'),
               }] : null
             }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {deleteError
-            && <Messages type="error" messages={[deleteError]} />
-          }
-          {(saveSending || deleteSending || !dataReady)
-            && <Loading />
-          }
           {!viewEntity && dataReady && !saveError && !deleteSending
             && (
               <div>
@@ -360,26 +328,27 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
               </div>
             )
           }
-          {viewEntity && dataReady && !deleteSending
+          {viewEntity && !deleteSending
             && (
-              <EntityForm
+              <FormWrapper
                 model="categoryEdit.form.data"
-                formData={viewDomain.getIn(['form', 'data'])}
                 saving={saveSending}
-                handleSubmit={(formData) => this.props.handleSubmit(
+                handleSubmit={(formData) => handleSubmit(
                   formData,
                   // actions,
                   // actorsByActortype,
                   viewEntity.get('taxonomy'),
                 )}
-                handleSubmitFail={this.props.handleSubmitFail}
-                handleCancel={() => this.props.handleCancel(reference)}
-                handleUpdate={this.props.handleUpdate}
+                handleSubmitFail={handleSubmitFail}
+                handleCancel={() => handleCancel(reference)}
+                handleUpdate={handleUpdate}
                 handleDelete={() => isAdmin
-                  ? this.props.handleDelete(viewEntity.getIn(['attributes', 'taxonomy_id']))
+                  ? handleDelete(viewEntity.getIn(['attributes', 'taxonomy_id']))
                   : null
                 }
-                fields={{
+                onErrorDismiss={onErrorDismiss}
+                onServerErrorDismiss={onServerErrorDismiss}
+                fields={dataReady && {
                   header: {
                     main: this.getHeaderMainFields(),
                     aside: this.getHeaderAsideFields(
@@ -393,24 +362,13 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
                       viewEntity,
                       parentOptions,
                       parentTaxonomy,
-                      // viewEntity,
-                      // connectedTaxonomies,
-                      // actorsByActortype,
-                      // actions,
-                      // onCreateOption,
-                      // viewDomain.getIn(['form', 'data', 'attributes', 'user_only']),
                     ),
-                    aside: this.getBodyAsideFields(
-                      // viewEntity, users, isAdmin
-                    ),
+                    aside: this.getBodyAsideFields(),
                   },
                 }}
                 scrollContainer={this.scrollContainer.current}
               />
             )
-          }
-          {(saveSending || deleteSending)
-            && <Loading />
           }
         </Content>
       </div>
@@ -428,7 +386,7 @@ CategoryEdit.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func.isRequired,
-  viewDomain: PropTypes.object,
+  viewDomainPage: PropTypes.object,
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
@@ -452,7 +410,7 @@ CategoryEdit.contextTypes = {
 
 const mapStateToProps = (state, props) => ({
   isAdmin: selectIsUserAdmin(state),
-  viewDomain: selectDomain(state),
+  viewDomainPage: selectDomainPage(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),

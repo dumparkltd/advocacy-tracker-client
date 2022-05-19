@@ -39,7 +39,7 @@ import {
 
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
+import FormWrapper from './FormWrapper';
 
 import { selectDomainPage } from './selectors';
 
@@ -144,7 +144,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
               }] : null
             }
           />
-          <EntityForm
+          <FormWrapper
             model="pageNew.form.data"
             handleSubmit={(formData) => handleSubmit(formData)}
             handleSubmitFail={handleSubmitFail}

@@ -49,14 +49,12 @@ import {
   selectSessionUserId,
 } from 'containers/App/selectors';
 
-import Messages from 'components/Messages';
-import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
+import FormWrapper from './FormWrapper';
 
 import {
-  selectDomain,
+  selectDomainPage,
   selectViewEntity,
 } from './selectors';
 
@@ -146,14 +144,20 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
     const {
       viewEntity,
       dataReady,
-      viewDomain,
+      viewDomainPage,
       isAdmin,
       myId,
+      onErrorDismiss,
+      onServerErrorDismiss,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
+      handleDelete,
     } = this.props;
     const reference = this.props.params.id;
-    const {
-      saveSending, saveError, deleteSending, deleteError, submitValid,
-    } = viewDomain.get('page').toJS();
+    const { saveSending, saveError, deleteSending } = viewDomainPage.toJS();
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
 
     return (
@@ -171,39 +175,15 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
             buttons={
               viewEntity && dataReady ? [{
                 type: 'cancel',
-                onClick: this.props.handleCancel,
+                onClick: handleCancel,
               },
               {
                 type: 'save',
                 disabled: saveSending,
-                onClick: () => this.props.handleSubmitRemote('pageEdit.form.data'),
+                onClick: () => handleSubmitRemote('pageEdit.form.data'),
               }] : null
             }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {deleteError
-            && <Messages type="error" messages={deleteError} />
-          }
-          {(saveSending || deleteSending || !dataReady)
-            && <Loading />
-          }
           {!viewEntity && dataReady && !saveError && !deleteSending
             && (
               <div>
@@ -211,18 +191,19 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
               </div>
             )
           }
-          {viewEntity && dataReady && !deleteSending
+          {viewEntity && !deleteSending
             && (
-              <EntityForm
+              <FormWrapper
                 model="pageEdit.form.data"
-                formData={viewDomain.getIn(['form', 'data'])}
                 saving={saveSending}
-                handleSubmit={(formData) => this.props.handleSubmit(formData)}
-                handleSubmitFail={this.props.handleSubmitFail}
-                handleCancel={this.props.handleCancel}
-                handleUpdate={this.props.handleUpdate}
-                handleDelete={isAdmin ? this.props.handleDelete : null}
-                fields={{
+                handleSubmit={(formData) => handleSubmit(formData)}
+                handleSubmitFail={handleSubmitFail}
+                handleCancel={handleCancel}
+                handleUpdate={handleUpdate}
+                handleDelete={isAdmin ? handleDelete : null}
+                onErrorDismiss={onErrorDismiss}
+                onServerErrorDismiss={onServerErrorDismiss}
+                fields={dataReady && {
                   header: {
                     main: this.getHeaderMainFields(),
                     aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
@@ -234,9 +215,6 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
                 scrollContainer={this.scrollContainer.current}
               />
             )
-          }
-          { (saveSending || deleteSending)
-            && <Loading />
           }
         </Content>
       </div>
@@ -254,7 +232,7 @@ PageEdit.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func.isRequired,
-  viewDomain: PropTypes.object,
+  viewDomainPage: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
@@ -270,7 +248,7 @@ PageEdit.contextTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  viewDomain: selectDomain(state),
+  viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
