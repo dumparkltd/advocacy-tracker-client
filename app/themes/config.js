@@ -766,6 +766,15 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
+        id: 'date',
+        type: 'date',
+        sort: 'date_start',
+        sortOrder: 'asc',
+        attribute: 'date_start',
+        align: 'end',
+        primary: true,
+      },
+      {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 9, // event type
