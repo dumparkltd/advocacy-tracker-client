@@ -70,7 +70,7 @@ const ControlFooter = styled.div`
   background-color: ${palette('background', 1)};
   box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2);
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    height: 50px;
+    height: 59px;
   }
 `;
 
