@@ -322,7 +322,6 @@ export function ActorView(props) {
                         viewSubject={viewSubject}
                         taxonomies={taxonomies}
                         actionConnections={actionConnections}
-                        hasMembers={hasMembers}
                         onSetActiontype={onSetActiontype}
                         viewActiontypeId={viewActiontypeId}
                         actionsByActiontype={actionsByActiontype}
