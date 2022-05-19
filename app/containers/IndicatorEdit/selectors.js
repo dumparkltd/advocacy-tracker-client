@@ -26,6 +26,11 @@ export const selectDomain = createSelector(
   (substate) => substate
 );
 
+export const selectDomainPage = createSelector(
+  (state) => state.getIn(['indicatorEdit', 'page']),
+  (substate) => substate
+);
+
 export const selectViewEntity = createSelector(
   (state, id) => selectEntity(state, { path: API.INDICATORS, id }),
   (state) => selectEntities(state, API.USERS),

@@ -22,7 +22,10 @@ export const selectDomain = createSelector(
   (state) => state.get('actorNew'),
   (substate) => substate
 );
-
+export const selectDomainPage = createSelector(
+  (state) => state.getIn(['actorNew', 'page']),
+  (substate) => substate
+);
 export const selectConnectedTaxonomies = createSelector(
   selectActionTaxonomies,
   selectCategories,

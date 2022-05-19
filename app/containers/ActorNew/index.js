@@ -32,7 +32,7 @@ import {
 
 // import { qe } from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
-import { hasNewError } from 'utils/entity-form';
+import { hasNewErrorNEW } from 'utils/entity-form';
 import { checkActorAttribute, checkActorRequired } from 'utils/entities';
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
@@ -58,14 +58,13 @@ import {
   selectActortype,
 } from 'containers/App/selectors';
 
-import Messages from 'components/Messages';
-import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
+
+import FormWrapper from './FormWrapper';
 
 import {
-  selectDomain,
+  selectDomainPage,
   selectConnectedTaxonomies,
   selectActionsByActiontype,
   selectActionsAsTargetByActiontype,
@@ -98,7 +97,7 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
     }
-    if (hasNewError(nextProps, this.props) && this.scrollContainer) {
+    if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
     }
   }
@@ -296,7 +295,7 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
     const { intl } = this.context;
     const {
       dataReady,
-      viewDomain,
+      viewDomainPage,
       connectedTaxonomies,
       actionsByActiontype,
       actionsAsTargetByActiontype,
@@ -307,9 +306,16 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
       membersByActortype,
       associationsByActortype,
       userOptions,
+      onErrorDismiss,
+      onServerErrorDismiss,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
     } = this.props;
     const typeId = params.id;
-    const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
+    const { saveSending } = viewDomainPage.toJS();
 
     const type = intl.formatMessage(appMessages.entities[`actors_${typeId}`].single);
     return (
@@ -330,85 +336,57 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
             buttons={
               dataReady ? [{
                 type: 'cancel',
-                onClick: () => this.props.handleCancel(typeId),
+                onClick: () => handleCancel(typeId),
               },
               {
                 type: 'save',
                 disabled: saveSending,
-                onClick: () => this.props.handleSubmitRemote('actorNew.form.data'),
+                onClick: () => handleSubmitRemote('actorNew.form.data'),
               }] : null
             }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {(saveSending || !dataReady)
-            && <Loading />
-          }
-          {dataReady
-            && (
-              <EntityForm
-                model="actorNew.form.data"
-                formData={viewDomain.getIn(['form', 'data'])}
-                saving={saveSending}
-                handleSubmit={(formData) => this.props.handleSubmit(
-                  formData,
+          <FormWrapper
+            model="actorNew.form.data"
+            handleSubmit={(formData) => handleSubmit(
+              formData,
+              actortype,
+              actionsByActiontype,
+              actionsAsTargetByActiontype,
+              membersByActortype,
+              associationsByActortype,
+              userOptions,
+            )}
+            handleSubmitFail={handleSubmitFail}
+            handleCancel={() => handleCancel(typeId)}
+            handleUpdate={handleUpdate}
+            onErrorDismiss={onErrorDismiss}
+            onServerErrorDismiss={onServerErrorDismiss}
+            scrollContainer={this.scrollContainer.current}
+            fields={dataReady && { // isManager, taxonomies,
+              header: {
+                main: this.getHeaderMainFields(actortype),
+                aside: this.getHeaderAsideFields(),
+              },
+              body: {
+                main: this.getBodyMainFields(
                   actortype,
+                  connectedTaxonomies,
                   actionsByActiontype,
                   actionsAsTargetByActiontype,
                   membersByActortype,
+                  onCreateOption,
+                ),
+                aside: this.getBodyAsideFields(
+                  actortype,
+                  taxonomies,
+                  connectedTaxonomies,
                   associationsByActortype,
                   userOptions,
-                )}
-                handleSubmitFail={this.props.handleSubmitFail}
-                handleCancel={() => this.props.handleCancel(typeId)}
-                handleUpdate={this.props.handleUpdate}
-                fields={{ // isManager, taxonomies,
-                  header: {
-                    main: this.getHeaderMainFields(actortype),
-                    aside: this.getHeaderAsideFields(),
-                  },
-                  body: {
-                    main: this.getBodyMainFields(
-                      actortype,
-                      connectedTaxonomies,
-                      actionsByActiontype,
-                      actionsAsTargetByActiontype,
-                      membersByActortype,
-                      onCreateOption,
-                    ),
-                    aside: this.getBodyAsideFields(
-                      actortype,
-                      taxonomies,
-                      connectedTaxonomies,
-                      associationsByActortype,
-                      userOptions,
-                      onCreateOption,
-                    ),
-                  },
-                }}
-                scrollContainer={this.scrollContainer.current}
-              />
-            )
-          }
-          { saveSending
-            && <Loading />
-          }
+                  onCreateOption,
+                ),
+              },
+            }}
+          />
         </Content>
       </div>
     );
@@ -423,7 +401,7 @@ ActorNew.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
-  viewDomain: PropTypes.object,
+  viewDomainPage: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   taxonomies: PropTypes.object,
@@ -446,7 +424,6 @@ ActorNew.contextTypes = {
 };
 
 const mapStateToProps = (state, { params }) => ({
-  viewDomain: selectDomain(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   taxonomies: selectActortypeTaxonomiesWithCats(
@@ -463,6 +440,7 @@ const mapStateToProps = (state, { params }) => ({
   membersByActortype: selectMembersByActortype(state, params.id),
   associationsByActortype: selectAssociationsByActortype(state, params.id),
   userOptions: selectUserOptions(state, params.id),
+  viewDomainPage: selectDomainPage(state),
 });
 
 function mapDispatchToProps(dispatch) {

@@ -62,6 +62,9 @@ const TableCell = styled.span`
   }};
   clear: both;
   vertical-align: middle;
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+    display: table-cell;
+  }
 `;
 
 const TableCellInner = styled(TableCell)`

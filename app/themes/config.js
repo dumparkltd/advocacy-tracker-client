@@ -551,6 +551,9 @@ export const ACTIONTYPE_RESOURCETYPES = {
 export const ACTIONTYPE_ACTIONTYPES = {
   // top-actions - no sub-actions
   // [ACTIONTYPES.EVENT]: [],
+  [ACTIONTYPES.EVENT]: [
+    ACTIONTYPES.AP,
+  ],
   [ACTIONTYPES.OP]: [
     ACTIONTYPES.EVENT,
     ACTIONTYPES.AP,
@@ -761,6 +764,15 @@ export const ACTIONTYPES_CONFIG = {
         type: 'main',
         sort: 'title',
         attributes: ['title'],
+      },
+      {
+        id: 'date',
+        type: 'date',
+        sort: 'date_start',
+        sortOrder: 'asc',
+        attribute: 'date_start',
+        align: 'end',
+        primary: true,
       },
       {
         id: 'taxonomy',

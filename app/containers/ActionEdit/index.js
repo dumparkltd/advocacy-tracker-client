@@ -65,16 +65,14 @@ import {
   selectSessionUserId,
 } from 'containers/App/selectors';
 
-import Messages from 'components/Messages';
-import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
 
 import appMessages from 'containers/App/messages';
+import FormWrapper from './FormWrapper';
 
 import {
-  selectDomain,
+  selectDomainPage,
   selectViewEntity,
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
@@ -418,7 +416,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     const {
       viewEntity,
       dataReady,
-      viewDomain,
+      viewDomainPage,
       taxonomies,
       connectedTaxonomies,
       actorsByActortype,
@@ -431,14 +429,20 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       userOptions,
       isAdmin,
       myId,
+      onErrorDismiss,
+      onServerErrorDismiss,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
+      handleDelete,
     } = this.props;
     const { intl } = this.context;
     // const reference = this.props.params.id;
     const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
 
-    const {
-      saveSending, saveError, deleteSending, deleteError, submitValid,
-    } = viewDomain.get('page').toJS();
+    const { saveSending, saveError, deleteSending } = viewDomainPage.toJS();
 
     const type = typeId
       ? intl.formatMessage(appMessages.entities[`actions_${typeId}`].single)
@@ -461,40 +465,16 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
               viewEntity && dataReady
                 ? [{
                   type: 'cancel',
-                  onClick: this.props.handleCancel,
+                  onClick: handleCancel,
                 },
                 {
                   type: 'save',
                   disabled: saveSending,
-                  onClick: () => this.props.handleSubmitRemote('actionEdit.form.data'),
+                  onClick: () => handleSubmitRemote('actionEdit.form.data'),
                 }]
                 : null
             }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {deleteError
-            && <Messages type="error" messages={deleteError} />
-          }
-          {(saveSending || deleteSending || !dataReady)
-            && <Loading />
-          }
           {!viewEntity && dataReady && !saveError && !deleteSending
             && (
               <div>
@@ -502,13 +482,12 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
               </div>
             )
           }
-          {viewEntity && dataReady && !deleteSending
+          {viewEntity && !deleteSending
             && (
-              <EntityForm
+              <FormWrapper
                 model="actionEdit.form.data"
-                formData={viewDomain.getIn(['form', 'data'])}
                 saving={saveSending}
-                handleSubmit={(formData) => this.props.handleSubmit(
+                handleSubmit={(formData) => handleSubmit(
                   formData,
                   taxonomies,
                   actorsByActortype,
@@ -519,11 +498,13 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                   indicatorOptions,
                   userOptions,
                 )}
-                handleSubmitFail={this.props.handleSubmitFail}
-                handleCancel={this.props.handleCancel}
-                handleUpdate={this.props.handleUpdate}
-                handleDelete={isAdmin ? this.props.handleDelete : null}
-                fields={{
+                handleSubmitFail={handleSubmitFail}
+                handleCancel={handleCancel}
+                handleUpdate={handleUpdate}
+                handleDelete={isAdmin ? handleDelete : null}
+                onErrorDismiss={onErrorDismiss}
+                onServerErrorDismiss={onServerErrorDismiss}
+                fields={dataReady && {
                   header: {
                     main: this.getHeaderMainFields(viewEntity),
                     aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
@@ -553,9 +534,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
               />
             )
           }
-          {(saveSending || deleteSending)
-            && <Loading />
-          }
         </Content>
       </div>
     );
@@ -572,7 +550,7 @@ ActionEdit.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func.isRequired,
-  viewDomain: PropTypes.object,
+  viewDomainPage: PropTypes.object,
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
@@ -598,7 +576,7 @@ ActionEdit.contextTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  viewDomain: selectDomain(state),
+  viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),

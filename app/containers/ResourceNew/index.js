@@ -25,7 +25,7 @@ import { getInfoField } from 'utils/fields';
 
 // import { qe } from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
-import { hasNewError } from 'utils/entity-form';
+import { hasNewErrorNEW } from 'utils/entity-form';
 import { checkResourceAttribute, checkResourceRequired } from 'utils/entities';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
@@ -48,14 +48,12 @@ import {
   selectResourcetype,
 } from 'containers/App/selectors';
 
-import Messages from 'components/Messages';
-import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
+import FormWrapper from './FormWrapper';
 
 import {
-  selectDomain,
+  selectDomainPage,
   selectConnectedTaxonomies,
   selectActionsByActiontype,
 } from './selectors';
@@ -84,7 +82,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
     }
-    if (hasNewError(nextProps, this.props) && this.scrollContainer) {
+    if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
     }
   }
@@ -208,15 +206,22 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
     const { intl } = this.context;
     const {
       dataReady,
-      viewDomain,
+      viewDomainPage,
       connectedTaxonomies,
       actionsByActiontype,
       onCreateOption,
       resourcetype,
       params,
+      onErrorDismiss,
+      onServerErrorDismiss,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
     } = this.props;
     const typeId = params.id;
-    const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
+    const { saveSending } = viewDomainPage.toJS();
 
     const type = intl.formatMessage(appMessages.entities[`resources_${typeId}`].single);
     return (
@@ -237,75 +242,47 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
             buttons={
               dataReady ? [{
                 type: 'cancel',
-                onClick: () => this.props.handleCancel(typeId),
+                onClick: () => handleCancel(typeId),
               },
               {
                 type: 'save',
                 disabled: saveSending,
-                onClick: () => this.props.handleSubmitRemote('resourceNew.form.data'),
+                onClick: () => handleSubmitRemote('resourceNew.form.data'),
               }] : null
             }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {(saveSending || !dataReady)
-            && <Loading />
-          }
-          {dataReady
-            && (
-              <EntityForm
-                model="resourceNew.form.data"
-                formData={viewDomain.getIn(['form', 'data'])}
-                saving={saveSending}
-                handleSubmit={(formData) => this.props.handleSubmit(
-                  formData,
+          <FormWrapper
+            model="resourceNew.form.data"
+            handleSubmit={(formData) => handleSubmit(
+              formData,
+              resourcetype,
+              actionsByActiontype,
+              // resourcetypeTaxonomies,
+            )}
+            handleSubmitFail={handleSubmitFail}
+            handleCancel={() => handleCancel(typeId)}
+            handleUpdate={handleUpdate}
+            onErrorDismiss={onErrorDismiss}
+            onServerErrorDismiss={onServerErrorDismiss}
+            fields={dataReady && { // isManager, taxonomies,
+              header: {
+                main: this.getHeaderMainFields(resourcetype),
+                aside: this.getHeaderAsideFields(),
+              },
+              body: {
+                main: this.getBodyMainFields(
                   resourcetype,
+                  connectedTaxonomies,
                   actionsByActiontype,
-                  // resourcetypeTaxonomies,
-                )}
-                handleSubmitFail={this.props.handleSubmitFail}
-                handleCancel={() => this.props.handleCancel(typeId)}
-                handleUpdate={this.props.handleUpdate}
-                fields={{ // isManager, taxonomies,
-                  header: {
-                    main: this.getHeaderMainFields(resourcetype),
-                    aside: this.getHeaderAsideFields(),
-                  },
-                  body: {
-                    main: this.getBodyMainFields(
-                      resourcetype,
-                      connectedTaxonomies,
-                      actionsByActiontype,
-                      onCreateOption,
-                    ),
-                    aside: this.getBodyAsideFields(
-                      resourcetype,
-                    ),
-                  },
-                }}
-                scrollContainer={this.scrollContainer.current}
-              />
-            )
-          }
-          { saveSending
-            && <Loading />
-          }
+                  onCreateOption,
+                ),
+                aside: this.getBodyAsideFields(
+                  resourcetype,
+                ),
+              },
+            }}
+            scrollContainer={this.scrollContainer.current}
+          />
         </Content>
       </div>
     );
@@ -320,7 +297,7 @@ ResourceNew.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
-  viewDomain: PropTypes.object,
+  viewDomainPage: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   onCreateOption: PropTypes.func,
@@ -338,7 +315,7 @@ ResourceNew.contextTypes = {
 };
 
 const mapStateToProps = (state, { params }) => ({
-  viewDomain: selectDomain(state),
+  viewDomainPage: selectDomainPage(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   connectedTaxonomies: selectConnectedTaxonomies(state),

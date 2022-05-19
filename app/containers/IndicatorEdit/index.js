@@ -48,14 +48,12 @@ import {
   selectSessionUserId,
 } from 'containers/App/selectors';
 
-import Messages from 'components/Messages';
-import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
+import FormWrapper from './FormWrapper';
 
 import {
-  selectDomain,
+  selectDomainPage,
   selectViewEntity,
   selectActionsByActiontype,
   selectConnectedTaxonomies,
@@ -72,7 +70,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
   }
 
   UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
+    loadEntitiesIfNeeded();
     if (this.props.dataReady && this.props.viewEntity) {
       this.props.initialiseForm('indicatorEdit.form.data', this.getInitialFormData());
     }
@@ -212,17 +210,23 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
     const {
       viewEntity,
       dataReady,
-      viewDomain,
+      viewDomainPage,
       connectedTaxonomies,
       actionsByActiontype,
       onCreateOption,
       isAdmin,
       myId,
+      onErrorDismiss,
+      onServerErrorDismiss,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
+      handleDelete,
     } = this.props;
 
-    const {
-      saveSending, saveError, deleteSending, deleteError, submitValid,
-    } = viewDomain.get('page').toJS();
+    const { saveSending, saveError, deleteSending } = viewDomainPage.toJS();
 
     const type = intl.formatMessage(appMessages.entities.indicators.single);
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
@@ -241,39 +245,15 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
             buttons={
               viewEntity && dataReady ? [{
                 type: 'cancel',
-                onClick: this.props.handleCancel,
+                onClick: handleCancel,
               },
               {
                 type: 'save',
                 disabled: saveSending,
-                onClick: () => this.props.handleSubmitRemote('indicatorEdit.form.data'),
+                onClick: () => handleSubmitRemote('indicatorEdit.form.data'),
               }] : null
             }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {deleteError
-            && <Messages type="error" messages={deleteError} />
-          }
-          {(saveSending || deleteSending || !dataReady)
-            && <Loading />
-          }
           {!viewEntity && dataReady && !saveError && !deleteSending
             && (
               <div>
@@ -281,21 +261,22 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
               </div>
             )
           }
-          {viewEntity && dataReady && !deleteSending
+          {viewEntity && !deleteSending
             && (
-              <EntityForm
+              <FormWrapper
                 model="indicatorEdit.form.data"
-                formData={viewDomain.getIn(['form', 'data'])}
                 saving={saveSending}
-                handleSubmit={(formData) => this.props.handleSubmit(
+                handleSubmit={(formData) => handleSubmit(
                   formData,
                   actionsByActiontype,
                 )}
-                handleSubmitFail={this.props.handleSubmitFail}
-                handleCancel={this.props.handleCancel}
-                handleUpdate={this.props.handleUpdate}
-                handleDelete={isAdmin ? this.props.handleDelete : null}
-                fields={{
+                handleSubmitFail={handleSubmitFail}
+                handleCancel={handleCancel}
+                handleUpdate={handleUpdate}
+                handleDelete={isAdmin ? handleDelete : null}
+                onErrorDismiss={onErrorDismiss}
+                onServerErrorDismiss={onServerErrorDismiss}
+                fields={dataReady && {
                   header: {
                     main: this.getHeaderMainFields(viewEntity),
                     aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
@@ -316,9 +297,6 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
               />
             )
           }
-          { (saveSending || deleteSending)
-            && <Loading />
-          }
         </Content>
       </div>
     );
@@ -335,7 +313,7 @@ IndicatorEdit.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func.isRequired,
-  viewDomain: PropTypes.object,
+  viewDomainPage: PropTypes.object,
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
@@ -353,7 +331,7 @@ IndicatorEdit.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 const mapStateToProps = (state, props) => ({
-  viewDomain: selectDomain(state),
+  viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),

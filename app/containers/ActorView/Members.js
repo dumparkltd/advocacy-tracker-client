@@ -129,13 +129,13 @@ export function Members(props) {
                     },
                     {
                       id: 'actorActions',
-                      type: 'actorActions',
+                      type: 'actionsSimple',
                       subject: 'actors',
                       actions: 'actions',
                     },
                     {
                       id: 'actorActionsTargets',
-                      type: 'actorActions',
+                      type: 'actionsSimple',
                       subject: 'targets',
                       actions: 'targetingActions',
                     },
@@ -159,6 +159,26 @@ export function Members(props) {
                     typeid,
                     taxonomies,
                     connections: actorConnections,
+                    columns: [
+                      {
+                        id: 'main',
+                        type: 'main',
+                        sort: 'title',
+                        attributes: ['code', 'title'],
+                      },
+                      {
+                        id: 'actorActions',
+                        type: 'actionsSimple',
+                        subject: 'actors',
+                        actions: 'actions',
+                      },
+                      {
+                        id: 'actorActionsTargets',
+                        type: 'actionsSimple',
+                        subject: 'targets',
+                        actions: 'targetingActions',
+                      },
+                    ],
                   }),
                 ]),
                 [],

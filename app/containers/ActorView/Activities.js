@@ -23,6 +23,7 @@ import {
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
   API,
+  MEMBERSHIPS,
 } from 'themes/config';
 import FieldGroup from 'components/fields/FieldGroup';
 import ButtonPill from 'components/buttons/ButtonPill';
@@ -76,7 +77,6 @@ export function Activities(props) {
     actionsAsTargetAsMemberByActortype,
     viewActortype, // the type of current entity
     onEntityClick,
-    hasMembers,
     intl,
     onCreateOption,
   } = props;
@@ -90,8 +90,11 @@ export function Activities(props) {
   // console.log('actionsAsTargetAsMemberByActortype', actionsAsTargetAsMemberByActortype && actionsAsTargetAsMemberByActortype.toJS())
   // console.log('viewActortype', viewActortype && viewActortype.toJS())
   // console.log('hasMembers', hasMembers)
+  // console.log('viewActortype.get', viewActortype.get('id'))
   // figure out connected action types ##################################################
-  const canBeMember = viewActortype && !hasMembers;
+  const canBeMember = viewActortype
+    && Object.keys(MEMBERSHIPS).indexOf(viewActortype.get('id')) > -1
+    && MEMBERSHIPS[viewActortype.get('id')].length > 0;
 
   let actiontypesForSubject;
   let actiontypesAsMemberByActortypeForSubject;
@@ -246,6 +249,7 @@ export function Activities(props) {
       mapSubject = 'actors';
     }
   }
+
   return (
     <Box>
       {(!actiontypeIdsForSubjectOptions || actiontypeIdsForSubjectOptions.size === 0) && (
@@ -383,7 +387,6 @@ Activities.propTypes = {
   onSetActiontype: PropTypes.func,
   onEntityClick: PropTypes.func,
   viewActiontypeId: PropTypes.string,
-  hasMembers: PropTypes.bool,
   actionsByActiontype: PropTypes.instanceOf(Map),
   actionsAsTargetByActiontype: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),

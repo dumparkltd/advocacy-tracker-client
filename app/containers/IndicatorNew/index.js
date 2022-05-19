@@ -22,7 +22,7 @@ import {
 
 // import { qe } from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
-import { hasNewError } from 'utils/entity-form';
+import { hasNewErrorNEW } from 'utils/entity-form';
 // import { checkResourceAttribute, checkResourceRequired } from 'utils/entities';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
@@ -44,14 +44,12 @@ import {
   selectReadyForAuthCheck,
 } from 'containers/App/selectors';
 
-import Messages from 'components/Messages';
-import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
 
+import FormWrapper from './FormWrapper';
 import {
-  selectDomain,
+  selectDomainPage,
   selectConnectedTaxonomies,
   selectActionsByActiontype,
 } from './selectors';
@@ -80,7 +78,7 @@ export class IndicatorNew extends React.PureComponent { // eslint-disable-line r
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
     }
-    if (hasNewError(nextProps, this.props) && this.scrollContainer) {
+    if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
     }
   }
@@ -154,12 +152,19 @@ export class IndicatorNew extends React.PureComponent { // eslint-disable-line r
     const { intl } = this.context;
     const {
       dataReady,
-      viewDomain,
+      viewDomainPage,
       connectedTaxonomies,
       actionsByActiontype,
       onCreateOption,
+      onErrorDismiss,
+      onServerErrorDismiss,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
     } = this.props;
-    const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
+    const { saveSending } = viewDomainPage.toJS();
 
     const type = intl.formatMessage(appMessages.entities.indicators.single);
     return (
@@ -180,69 +185,41 @@ export class IndicatorNew extends React.PureComponent { // eslint-disable-line r
             buttons={
               dataReady ? [{
                 type: 'cancel',
-                onClick: () => this.props.handleCancel(),
+                onClick: () => handleCancel(),
               },
               {
                 type: 'save',
                 disabled: saveSending,
-                onClick: () => this.props.handleSubmitRemote('indicatorNew.form.data'),
+                onClick: () => handleSubmitRemote('indicatorNew.form.data'),
               }] : null
             }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {(saveSending || !dataReady)
-            && <Loading />
-          }
-          {dataReady
-            && (
-              <EntityForm
-                model="indicatorNew.form.data"
-                formData={viewDomain.getIn(['form', 'data'])}
-                saving={saveSending}
-                handleSubmit={(formData) => this.props.handleSubmit(
-                  formData,
+          <FormWrapper
+            model="indicatorNew.form.data"
+            handleSubmit={(formData) => handleSubmit(
+              formData,
+              actionsByActiontype,
+            )}
+            handleSubmitFail={handleSubmitFail}
+            handleCancel={handleCancel}
+            handleUpdate={handleUpdate}
+            onErrorDismiss={onErrorDismiss}
+            onServerErrorDismiss={onServerErrorDismiss}
+            fields={dataReady && { // isManager, taxonomies,
+              header: {
+                main: this.getHeaderMainFields(),
+                aside: this.getHeaderAsideFields(),
+              },
+              body: {
+                main: this.getBodyMainFields(
+                  connectedTaxonomies,
                   actionsByActiontype,
-                )}
-                handleSubmitFail={this.props.handleSubmitFail}
-                handleCancel={() => this.props.handleCancel()}
-                handleUpdate={this.props.handleUpdate}
-                fields={{ // isManager, taxonomies,
-                  header: {
-                    main: this.getHeaderMainFields(),
-                    aside: this.getHeaderAsideFields(),
-                  },
-                  body: {
-                    main: this.getBodyMainFields(
-                      connectedTaxonomies,
-                      actionsByActiontype,
-                      onCreateOption,
-                    ),
-                  },
-                }}
-                scrollContainer={this.scrollContainer.current}
-              />
-            )
-          }
-          { saveSending
-            && <Loading />
-          }
+                  onCreateOption,
+                ),
+              },
+            }}
+            scrollContainer={this.scrollContainer.current}
+          />
         </Content>
       </div>
     );
@@ -257,7 +234,7 @@ IndicatorNew.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
-  viewDomain: PropTypes.object,
+  viewDomainPage: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   onCreateOption: PropTypes.func,
@@ -273,7 +250,7 @@ IndicatorNew.contextTypes = {
 };
 
 const mapStateToProps = (state) => ({
-  viewDomain: selectDomain(state),
+  viewDomainPage: selectDomainPage(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   connectedTaxonomies: selectConnectedTaxonomies(state),

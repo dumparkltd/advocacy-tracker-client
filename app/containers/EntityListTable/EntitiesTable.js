@@ -194,43 +194,17 @@ export function EntitiesTable({
                         column={col}
                       />
                     )}
-                    {col.type === 'attribute' && (
+                    {(
+                      col.type === 'plain'
+                      || col.type === 'attribute'
+                      || col.type === 'amount'
+                      || col.type === 'userrole'
+                      || col.type === 'date'
+                    ) && (
                       <CellBodyPlain
                         entity={entity[col.id]}
                         column={col}
-                      />
-                    )}
-                    {col.type === 'amount' && (
-                      <CellBodyPlain
-                        entity={entity[col.id]}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'userrole' && (
-                      <CellBodyPlain
-                        entity={entity[col.id]}
-                        column={col}
-                        primary
-                      />
-                    )}
-                    {col.type === 'date' && (
-                      <CellBodyPlain
-                        entity={entity[col.id]}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'actors' && (
-                      <CellBodyActors
-                        entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'targets' && (
-                      <CellBodyActors
-                        entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
-                        column={col}
+                        primary={col.type === 'userrole'}
                       />
                     )}
                     {col.type === 'users' && (
@@ -247,21 +221,14 @@ export function EntitiesTable({
                         column={col}
                       />
                     )}
-                    {col.type === 'members' && (
-                      <CellBodyActors
-                        entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'associations' && (
-                      <CellBodyActors
-                        entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'userActors' && (
+                    {(
+                      col.type === 'actorsSimple'
+                      || col.type === 'actors'
+                      || col.type === 'targets'
+                      || col.type === 'members'
+                      || col.type === 'associations'
+                      || col.type === 'userActors'
+                    ) && (
                       <CellBodyActors
                         entity={entity[col.id]}
                         onEntityClick={onEntityClick}
@@ -281,42 +248,29 @@ export function EntitiesTable({
                         column={col}
                       />
                     )}
-                    {col.type === 'resourceActions' && (
+                    {(
+                      col.type === 'actionsSimple'
+                      || col.type === 'resourceActions'
+                      || col.type === 'indicatorActions'
+                      || col.type === 'userActions'
+                    ) && (
                       <CellBodyActions
                         entity={entity[col.id]}
                         column={col}
                         onEntityClick={onEntityClick}
                       />
                     )}
-                    {col.type === 'indicatorActions' && (
-                      <CellBodyActions
-                        entity={entity[col.id]}
-                        column={col}
-                        onEntityClick={onEntityClick}
-                      />
-                    )}
-                    {col.type === 'userActions' && (
-                      <CellBodyActions
-                        entity={entity[col.id]}
-                        column={col}
-                        onEntityClick={onEntityClick}
-                      />
-                    )}
-                    {col.type === 'actorActions' && (
-                      <CellBodyBarChart
-                        value={entity[col.id].value}
-                        maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
-                        issecondary={col.members}
-                        subject={col.subject}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'actiontype' && (
+                    {(
+                      col.type === 'actionsBars'
+                      || col.type === 'actorActions'
+                      || col.type === 'actiontype'
+                    ) && (
                       <CellBodyBarChart
                         value={entity[col.id].value}
                         maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
                         subject={col.subject}
                         column={col}
+                        issecondary={col.type !== 'actiontype' && col.members}
                       />
                     )}
                   </TableCellBodyInner>

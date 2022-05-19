@@ -148,18 +148,12 @@ export const prepareHeader = ({
       case 'resourceActions':
       case 'indicatorActions':
       case 'userActions':
-        return ({
-          ...col,
-          title: col.title || 'Activities',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
-          onSort,
-        });
+      case 'actionsSimple':
       case 'actorActions':
-        if (col.subject === 'actors') {
-          label = col.members ? 'Activities as member' : 'Activities';
-        } else {
+        if (col.subject !== 'actors') {
           label = col.members ? 'Targeted as member' : 'Targeted by';
+        } else {
+          label = col.members ? 'Activities as member' : 'Activities';
         }
         return ({
           ...col,
@@ -226,12 +220,15 @@ export const prepareEntities = ({
 }) => entities.reduce(
   (memoEntities, entity) => {
     const id = entity.get('id');
+    // console.log(entity.toJS())
+    // console.log(connections && connections.toJS())
     const entityValues = columns.reduce(
       (memoEntity, col) => {
         const path = (config && config.clientPath) || entityPath;
         let relatedEntities;
         let relatedEntityIds;
         let temp;
+        let attribute;
         switch (col.type) {
           case 'main':
             return {
@@ -289,6 +286,22 @@ export const prepareEntities = ({
                   && intl.formatDate(entity.getIn(['attributes', col.attribute])),
                 draft: entity.getIn(['attributes', 'draft']),
                 sortValue: entity.getIn(['attributes', col.attribute]),
+              },
+            };
+          case 'actionsSimple':
+            attribute = col.actions || 'actions';
+            temp = entity.get(attribute) || (entity.get(`${attribute}ByType`) && entity.get(`${attribute}ByType`).flatten());
+            relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getRelatedValue(relatedEntities, col.label || 'actions'),
+                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
+                tooltip: relatedEntities && relatedEntities.size > 1
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
+                multiple: relatedEntities && relatedEntities.size > 1,
+                sortValue: getRelatedSortValue(relatedEntities),
               },
             };
           case 'targets':
