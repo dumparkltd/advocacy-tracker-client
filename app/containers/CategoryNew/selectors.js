@@ -24,7 +24,10 @@ export const selectDomain = createSelector(
   (state) => state.get('categoryNew'),
   (substate) => substate
 );
-
+export const selectDomainPage = createSelector(
+  (state) => state.getIn(['categoryNew', 'page']),
+  (substate) => substate
+);
 
 export const selectParentOptions = createSelector(
   selectTaxonomy,
