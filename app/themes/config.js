@@ -551,6 +551,9 @@ export const ACTIONTYPE_RESOURCETYPES = {
 export const ACTIONTYPE_ACTIONTYPES = {
   // top-actions - no sub-actions
   // [ACTIONTYPES.EVENT]: [],
+  [ACTIONTYPES.EVENT]: [
+    ACTIONTYPES.AP,
+  ],
   [ACTIONTYPES.OP]: [
     ACTIONTYPES.EVENT,
     ACTIONTYPES.AP,
