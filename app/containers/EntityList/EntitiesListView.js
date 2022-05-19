@@ -16,6 +16,7 @@ import {
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
+  MEMBERSHIPS,
   // ACTIONTYPES,
 } from 'themes/config';
 import { CONTENT_LIST } from 'containers/App/constants';
@@ -311,17 +312,19 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           },
         ];
       }
-      if (mapSubjectClean === 'targets' && qe(typeId, ACTORTYPES.COUNTRY)) {
+      const canBeMember = Object.keys(MEMBERSHIPS).indexOf(typeId) > -1
+        && MEMBERSHIPS[typeId].length > 0;
+      if (mapSubjectClean === 'targets' && canBeMember) {
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions and groups (countries belong to)',
+          label: 'Include activities targeting associated actors',
         };
-      } else if (mapSubjectClean === 'actors' && qe(typeId, ACTORTYPES.COUNTRY)) {
+      } else if (mapSubjectClean === 'actors' && canBeMember) {
         memberOption = {
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of groups (countries belong to)',
+          label: 'Include activities of associated actors',
         };
       }
       // RESOURCES ================================================================
