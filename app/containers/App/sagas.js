@@ -736,9 +736,10 @@ const getNextQuery = (query, extend, location) => {
     // if arg already set and not replacing
     if (queryUpdated[param.arg] && !param.replace) {
       // if multipleAttributeValues are not allowed
+      const val = param.value && param.value.toString();
       if (
-        param.value
-        && param.value.indexOf(':') > -1
+        val
+        && val.indexOf(':') > -1
         && typeof param.multipleAttributeValues !== 'undefined'
         && param.multipleAttributeValues === false
       ) {
@@ -952,7 +953,6 @@ export function* dismissQueryMessagesSaga() {
 export function* updatePathSaga({ path, args }) {
   const relativePath = path.startsWith('/') ? path : `/${path}`;
   const location = yield select(selectLocation);
-
   let queryNext = {};
   if (args && (args.query || args.keepQuery)) {
     if (args.query) {
