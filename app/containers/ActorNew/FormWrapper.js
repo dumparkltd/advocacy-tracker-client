@@ -70,7 +70,7 @@ FormWrapper.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   viewDomain: PropTypes.object,
-  fields: PropTypes.object,
+  fields: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   scrollContainer: PropTypes.object,

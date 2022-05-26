@@ -32,12 +32,10 @@ import appMessages from 'containers/App/messages';
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
 import Content from 'components/Content';
-import Messages from 'components/Messages';
-import Loading from 'components/Loading';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
+import FormWrapper from './FormWrapper';
 
-import { selectDomain } from './selectors';
+import { selectDomainPage } from './selectors';
 import { FORM_INITIAL } from './constants';
 
 import messages from './messages';
@@ -91,7 +89,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
   render() {
     const { intl } = this.context;
     const {
-      viewDomain,
+      viewDomainPage,
       path,
       attributes,
       inModal,
@@ -99,9 +97,14 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
       categoryParentOptions,
       parentTaxonomy,
       type,
+      onErrorDismiss,
+      onServerErrorDismiss,
+      onCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
     } = this.props;
-    const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
-
+    const { saveSending } = viewDomainPage.toJS();
     let pageTitle;
     let currentTypeId;
     if (path === API.CATEGORIES && taxonomy && taxonomy.get('attributes')) {
@@ -111,7 +114,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
     } else if (path === API.ACTORS) {
       // figure out actortype id from form if not set
       currentTypeId = (type && type.get('id'))
-        || viewDomain.getIn(['form', 'data', 'attributes', 'actortype_id'])
+        || attributes.get('actortype_id')
         || DEFAULT_ACTORTYPE;
       // check if single actortype set
       // get current actortype
@@ -128,7 +131,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
     } else if (path === API.ACTIONS) {
       // figure out actortype id from form if not set
       currentTypeId = (type && type.get('id'))
-        || viewDomain.getIn(['form', 'data', 'attributes', 'measuretype_id'])
+        || attributes.get('measuretype_id')
         || DEFAULT_ACTIONTYPE;
       // check if single actortype set
       // figure out title and icon
@@ -143,7 +146,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
     } else if (path === API.RESOURCES) {
       // figure out actortype id from form if not set
       currentTypeId = (type && type.get('id'))
-        || viewDomain.getIn(['form', 'data', 'attributes', 'resourcetype_id'])
+        || attributes.get('resourcetype_id')
         || DEFAULT_RESOURCETYPE;
       // check if single actortype set
       // figure out title and icon
@@ -175,41 +178,21 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
             {
               type: 'save',
               disabled: saveSending,
-              onClick: () => this.props.handleSubmitRemote('entityNew.form.data'),
+              onClick: () => handleSubmitRemote('entityNew.form.data'),
             }]}
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {(saveSending)
-            && <Loading />
-          }
-          <EntityForm
+          <FormWrapper
             model="entityNew.form.data"
-            formData={viewDomain.getIn(['form', 'data'])}
             inModal={inModal}
             saving={saveSending}
-            handleSubmit={(formData) => this.props.handleSubmit(
+            handleSubmit={(formData) => handleSubmit(
               formData,
               attributes
             )}
-            handleSubmitFail={this.props.handleSubmitFail}
-            handleCancel={this.props.onCancel}
+            handleSubmitFail={handleSubmitFail}
+            handleCancel={onCancel}
+            onErrorDismiss={onErrorDismiss}
+            onServerErrorDismiss={onServerErrorDismiss}
             scrollContainer={this.scrollContainer.current}
             fields={getEntityAttributeFields(
               path,
@@ -224,9 +207,6 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
               intl,
             )}
           />
-          {saveSending
-            && <Loading />
-          }
         </Content>
       </div>
     );
@@ -245,7 +225,7 @@ EntityNew.propTypes = {
   onCancel: PropTypes.func.isRequired,
   inModal: PropTypes.bool,
   // onSaveSuccess: PropTypes.func,
-  viewDomain: PropTypes.object,
+  viewDomainPage: PropTypes.object,
   initialiseForm: PropTypes.func,
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
@@ -268,7 +248,7 @@ const mapStateToProps = (state, { path, attributes }) => {
     type = selectEntity(state, { path: API.RESOURCETYPES, id: attributes.get('resourcetype_id') });
   }
   return {
-    viewDomain: selectDomain(state),
+    viewDomainPage: selectDomainPage(state),
     taxonomy: path === API.CATEGORIES && attributes && attributes.get('taxonomy_id')
       ? selectEntity(state, { path: API.TAXONOMIES, id: attributes.get('taxonomy_id') })
       : null,
