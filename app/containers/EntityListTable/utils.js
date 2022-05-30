@@ -21,13 +21,14 @@ export const prepareHeader = ({
 }) => columns.map(
   (col) => {
     let label;
+    const sortActive = sortBy === col.id;
     switch (col.type) {
       case 'main':
         return ({
           ...col,
           title,
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
           onSelect: onSelectAll,
           selectedState,
@@ -38,40 +39,40 @@ export const prepareHeader = ({
           title: col.unit
             ? `${intl.formatMessage(appMessages.attributes[col.attribute])} (${col.unit})`
             : intl.formatMessage(appMessages.attributes[col.attribute]),
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'date':
         return ({
           ...col,
           title: 'Date',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'desc',
           onSort,
         });
       case 'attribute':
         return ({
           ...col,
           title: intl.formatMessage(appMessages.attributes[col.attribute]),
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'userrole':
         return ({
           ...col,
           title: 'User role',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'targets':
         return ({
           ...col,
           title: 'Targets',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'actors':
@@ -79,40 +80,40 @@ export const prepareHeader = ({
         return ({
           ...col,
           title: 'Actors',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'users':
         return ({
           ...col,
           title: 'Users (staff)',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'indicators':
         return ({
           ...col,
           title: 'Topics',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'associations':
         return ({
           ...col,
           title: col.title || 'Member of',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'members':
         return ({
           ...col,
           title: col.title || 'Members',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'actiontype':
@@ -121,8 +122,8 @@ export const prepareHeader = ({
           title: appMessages.entities[`actions_${col.actiontype_id}`]
             ? intl.formatMessage(appMessages.entities[`actions_${col.actiontype_id}`].pluralShort)
             : 'Actions',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'taxonomy':
@@ -131,8 +132,8 @@ export const prepareHeader = ({
           title: appMessages.entities.taxonomies[col.taxonomy_id]
             ? intl.formatMessage(appMessages.entities.taxonomies[col.taxonomy_id].shortSingle)
             : 'Categories',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'hasResources':
@@ -141,8 +142,8 @@ export const prepareHeader = ({
           title: appMessages.entities[`resources_${col.resourcetype_id}`]
             ? intl.formatMessage(appMessages.entities[`resources_${col.resourcetype_id}`].singleShort)
             : 'Resource',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'resourceActions':
@@ -158,8 +159,8 @@ export const prepareHeader = ({
         return ({
           ...col,
           title: label,
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       default:

@@ -37,7 +37,7 @@ export function CellHeaderPlain({ column }) {
                 );
                 column.onSort(column.id || column.type, nextSortOrderOption.value);
               } else {
-                column.onSort(column.id || column.type, sortOrderOption.order);
+                column.onSort(column.id || column.type, sortOrderOption.value);
               }
             }}
           >
