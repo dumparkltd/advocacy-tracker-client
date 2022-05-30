@@ -768,10 +768,10 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'date',
         type: 'date',
-        sort: 'date_start',
-        sortOrder: 'asc',
+        sort: 'date',
+        sortOrder: 'desc',
+        sortDefault: true,
         attribute: 'date_start',
-        align: 'end',
         primary: true,
       },
       {
