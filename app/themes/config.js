@@ -710,6 +710,15 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
+        id: 'date',
+        type: 'date',
+        sort: 'date',
+        sortOrder: 'desc',
+        sortDefault: true,
+        attribute: 'date_start',
+        primary: true,
+      },
+      {
         id: 'indicators',
         type: 'indicators',
         sort: 'title',
@@ -807,6 +816,15 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
+        id: 'date',
+        type: 'date',
+        sort: 'date',
+        sortOrder: 'desc',
+        sortDefault: true,
+        attribute: 'date_start',
+        primary: true,
+      },
+      {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 10, // event type
@@ -831,6 +849,15 @@ export const ACTIONTYPES_CONFIG = {
         type: 'main',
         sort: 'title',
         attributes: ['title'],
+      },
+      {
+        id: 'date',
+        type: 'date',
+        sort: 'date',
+        sortOrder: 'desc',
+        sortDefault: true,
+        attribute: 'date_start',
+        primary: true,
       },
       {
         id: 'taxonomy',
@@ -862,6 +889,15 @@ export const ACTIONTYPES_CONFIG = {
         type: 'main',
         sort: 'title',
         attributes: ['title'],
+      },
+      {
+        id: 'date',
+        type: 'date',
+        sort: 'date',
+        sortOrder: 'desc',
+        sortDefault: true,
+        attribute: 'date_start',
+        primary: true,
       },
       {
         id: 'taxonomy',
