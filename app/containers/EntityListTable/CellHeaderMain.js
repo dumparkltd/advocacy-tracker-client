@@ -29,7 +29,9 @@ const SortButton = styled(ButtonFlatIconOnly)`
 
 
 export function CellHeaderMain({ column, canEdit }) {
-  const sortOrderOption = column.onSort && SORT_ORDER_OPTIONS.find((option) => column.sortOrder === option.value);
+  const sortOrderOption = column.onSort && SORT_ORDER_OPTIONS.find(
+    (option) => column.sortOrder === option.value
+  );
   return (
     <Box direction="row" align="center" justify="start">
       {canEdit && (
@@ -63,7 +65,7 @@ export function CellHeaderMain({ column, canEdit }) {
                 const nextSortOrderOption = SORT_ORDER_OPTIONS.find((option) => sortOrderOption.nextValue === option.value);
                 column.onSort(column.id || column.type, nextSortOrderOption.value);
               } else {
-                column.onSort(column.id || column.type, sortOrderOption.order);
+                column.onSort(column.id || column.type, sortOrderOption.value);
               }
             }}
           >

@@ -13,7 +13,7 @@
 export const NODE_ENV = sessionStorage.NODE_ENV || 'production';
 
 const IS_DEV = true;
-export const version = '1.0';
+export const version = '1.0.2';
 
 export const ENDPOINTS = {
   API: (
@@ -892,6 +892,15 @@ export const ACTIONTYPES_CONFIG = {
         type: 'main',
         sort: 'title',
         attributes: ['title'],
+      },
+      {
+        id: 'date',
+        type: 'date',
+        sort: 'date',
+        sortOrder: 'desc',
+        sortDefault: true,
+        attribute: 'date_start',
+        primary: true,
       },
       {
         id: 'taxonomy',
