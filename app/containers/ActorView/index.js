@@ -309,7 +309,7 @@ export function ActorView(props) {
                     {viewSubject === 'members' && hasMembers && (
                       <Members
                         membersByType={membersByType}
-                        onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+                        onEntityClick={(id, path) => onEntityClick(id, path)}
                         taxonomies={taxonomies}
                         actorConnections={actorConnections}
                       />

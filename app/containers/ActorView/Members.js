@@ -18,7 +18,7 @@ import {
 } from 'utils/fields';
 import qe from 'utils/quasi-equals';
 
-import { ACTORTYPES } from 'themes/config';
+import { ACTORTYPES, ROUTES } from 'themes/config';
 import FieldGroup from 'components/fields/FieldGroup';
 
 // import appMessages from 'containers/App/messages';
@@ -104,7 +104,7 @@ export function Members(props) {
                 countryData={countryData}
                 countryFeatures={countriesJSON.features}
                 styleType="members"
-                onCountryClick={(id) => onEntityClick(id)}
+                onCountryClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
                 fitBounds
                 projection="gall-peters"
               />
