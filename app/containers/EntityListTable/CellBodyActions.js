@@ -37,12 +37,7 @@ const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} 
   line-height: 13px;
 `;
 
-const getActionLink = (actor) => `${ROUTES.ACTION}/${actor.get('id')}`;
-
-const getActionOnClick = (actor, onEntityClick) => (evt) => {
-  if (evt) evt.preventDefault();
-  onEntityClick(actor.get('id'), ROUTES.ACTION);
-};
+const getActionLink = (action) => `${ROUTES.ACTION}/${action.get('id')}`;
 
 export function CellBodyActions({
   entity,
@@ -57,7 +52,10 @@ export function CellBodyActions({
       {entity.single && (
         <Link
           href={getActionLink(entity.single)}
-          onClick={getActionOnClick(entity.single, onEntityClick)}
+          onClick={(evt) => {
+            if (evt) evt.preventDefault();
+            onEntityClick(entity.get('id'), ROUTES.ACTION);
+          }}
           title={entity.value}
           alignSelf={align}
         >
@@ -124,16 +122,19 @@ export function CellBodyActions({
                               ? 1
                               : -1
                           ).map(
-                            (actor) => (
-                              <Box key={actor.get('id')} flex={{ shrink: 0 }}>
+                            (action) => (
+                              <Box key={action.get('id')} flex={{ shrink: 0 }}>
                                 <LinkInTT
-                                  key={actor.get('id')}
-                                  href={getActionLink(actor)}
-                                  onClick={getActionOnClick(actor, onEntityClick)}
-                                  title={actor.getIn(['attributes', 'title'])}
+                                  key={action.get('id')}
+                                  href={getActionLink(action)}
+                                  onClick={(evt) => {
+                                    if (evt) evt.preventDefault();
+                                    onEntityClick(action.get('id'), ROUTES.ACTION);
+                                  }}
+                                  title={action.getIn(['attributes', 'title'])}
                                 >
                                   <LabelInTT>
-                                    {truncateText(actor.getIn(['attributes', 'title']), 30)}
+                                    {truncateText(action.getIn(['attributes', 'title']), 30)}
                                   </LabelInTT>
                                 </LinkInTT>
                               </Box>
