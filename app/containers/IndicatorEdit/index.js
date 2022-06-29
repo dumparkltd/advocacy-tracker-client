@@ -16,6 +16,7 @@ import {
   entityOptions,
   getTitleFormField,
   getStatusField,
+  getCodeFormField,
   getMarkdownFormField,
   renderActionsByActiontypeControl,
   getConnectionUpdatesFromFormData,
@@ -119,6 +120,11 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
       [ // fieldGroups
         { // fieldGroup
           fields: [
+            getCodeFormField(
+              intl.formatMessage,
+              'code',
+              true,
+            ),
             getTitleFormField(
               intl.formatMessage,
               'title',

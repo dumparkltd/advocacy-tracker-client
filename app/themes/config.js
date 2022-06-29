@@ -463,6 +463,9 @@ export const INDICATOR_FIELDS = {
       required: true,
       type: 'text',
     },
+    code: {
+      type: 'text',
+    },
     description: {
       type: 'markdown',
     },

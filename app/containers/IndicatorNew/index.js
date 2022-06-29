@@ -18,6 +18,7 @@ import {
   getMarkdownFormField,
   renderActionsByActiontypeControl,
   getStatusField,
+  getCodeFormField,
 } from 'utils/forms';
 
 // import { qe } from 'utils/quasi-equals';
@@ -90,6 +91,11 @@ export class IndicatorNew extends React.PureComponent { // eslint-disable-line r
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
+          getCodeFormField(
+            intl.formatMessage,
+            'code',
+            true,
+          ),
           getTitleFormField(
             intl.formatMessage,
             'title',

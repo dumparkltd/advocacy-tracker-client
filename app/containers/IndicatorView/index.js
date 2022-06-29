@@ -17,6 +17,7 @@ import {
   getMetaField,
   getMarkdownField,
   getActionConnectionField,
+  getReferenceField,
 } from 'utils/fields';
 // import { qe } from 'utils/quasi-equals';
 import { getEntityTitleTruncated } from 'utils/entities';
@@ -203,7 +204,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
           { viewEntity && dataReady && (
             <ViewWrapper>
               <ViewHeader
-                title={pageTitle}
+                title={intl.formatMessage(appMessages.entities.indicators.plural)}
                 buttons={buttons}
                 onClose={() => handleClose()}
                 onTypeClick={() => handleClose()}
@@ -214,6 +215,11 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                     <FieldGroup
                       group={{ // fieldGroup
                         fields: [
+                          getReferenceField(
+                            viewEntity,
+                            'code',
+                            isManager,
+                          ),
                           getTitleField(viewEntity),
                         ],
                       }}
