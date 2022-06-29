@@ -94,7 +94,6 @@ export class IndicatorNew extends React.PureComponent { // eslint-disable-line r
           getCodeFormField(
             intl.formatMessage,
             'code',
-            true,
           ),
           getTitleFormField(
             intl.formatMessage,
