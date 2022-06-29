@@ -123,7 +123,6 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
             getCodeFormField(
               intl.formatMessage,
               'code',
-              true,
             ),
             getTitleFormField(
               intl.formatMessage,
