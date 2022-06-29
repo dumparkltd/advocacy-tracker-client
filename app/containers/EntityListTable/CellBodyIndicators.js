@@ -37,11 +37,11 @@ const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} 
   line-height: 13px;
 `;
 
-const getIndicatorLink = (indicator) => `${ROUTES.USERS}/${indicator.get('id')}`;
+const getIndicatorLink = (indicator) => `${ROUTES.INDICATOR}/${indicator.get('id')}`;
 
 const getIndicatorOnClick = (indicator, onEntityClick) => (evt) => {
   if (evt) evt.preventDefault();
-  onEntityClick(indicator.get('id'), ROUTES.USERS);
+  onEntityClick(indicator.get('id'), ROUTES.INDICATOR);
 };
 
 export function CellBodyIndicators({
