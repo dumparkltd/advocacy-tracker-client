@@ -297,13 +297,13 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       }
     }
     if (subActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        subActionsByActiontype,
-        connectedTaxonomies,
+      const actionConnections = renderActionsByActiontypeControl({
+        entitiesByActiontype: subActionsByActiontype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-        'associatedSubActionsByActiontype',
-      );
+        contextIntl: intl,
+        model: 'associatedSubActionsByActiontype',
+      });
       if (actionConnections) {
         groups.push(
           {
@@ -393,13 +393,13 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       }
     }
     if (topActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        topActionsByActiontype,
-        connectedTaxonomies,
+      const actionConnections = renderActionsByActiontypeControl({
+        entitiesByActiontype: topActionsByActiontype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-        'associatedTopActionsByActiontype',
-      );
+        contextIntl: intl,
+        model: 'associatedTopActionsByActiontype',
+      });
       if (actionConnections) {
         groups.push(
           {

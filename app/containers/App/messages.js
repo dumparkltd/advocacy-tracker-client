@@ -16,6 +16,28 @@ export default defineMessages({
       defaultMessage: 'Samoa\'s home of human rights implementation',
     },
   },
+  supportlevels: {
+    0: {
+      id: 'app.containers.App.actorroles.0',
+      defaultMessage: 'No support level assigned',
+    },
+    1: {
+      id: 'app.containers.App.supportlevels.1',
+      defaultMessage: '1 - Strong support',
+    },
+    2: {
+      id: 'app.containers.App.supportlevels.2',
+      defaultMessage: '2 - Quite positive',
+    },
+    3: {
+      id: 'app.containers.App.supportlevels.3',
+      defaultMessage: '3 - On the fence',
+    },
+    4: {
+      id: 'app.containers.App.supportlevels.4',
+      defaultMessage: '4 - Rather sceptical',
+    },
+  },
   actortypes: {
     single: {
       id: 'app.containers.App.actortypes.single',
@@ -784,6 +806,10 @@ export default defineMessages({
     id: {
       id: 'app.containers.App.attributes.id',
       defaultMessage: 'ID',
+    },
+    supportlevel_id: {
+      id: 'app.containers.App.attributes.supportlevel_id',
+      defaultMessage: 'Level of support',
     },
     actortype_id: {
       id: 'app.containers.App.attributes.actortype_id',

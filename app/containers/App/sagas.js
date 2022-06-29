@@ -310,17 +310,37 @@ function stampPayload(payload, type) {
 function* createConnectionsSaga({
   entityId, path, updates, keyPair,
 }) {
-  // make sure to use new entity id for full payload
-  // we should have either the one (actor_id) or the other (measure_id)
-  const updatesUpdated = updates;
-  if (updatesUpdated.create) {
-    updatesUpdated.create = updatesUpdated.create.map((create) => ({
-      [keyPair[0]]: create[keyPair[0]] || entityId,
-      [keyPair[1]]: create[keyPair[1]] || entityId,
-    }));
+  if (updates.create) {
+    const create = updates.create.reduce(
+      (memo, createX) => {
+        // get attributes other than key pair
+        const attributes = Object.keys(createX).reduce(
+          (m, key) => {
+            if (keyPair.indexOf(key) > -1) {
+              return m;
+            }
+            return ({
+              ...m,
+              [key]: createX[key],
+            });
+          },
+          {},
+        );
+        // make sure to use new entity id for full payload
+        // we should have either the one (actor_id) or the other (measure_id)
+        return ([
+          ...memo,
+          {
+            [keyPair[0]]: createX[keyPair[0]] || entityId,
+            [keyPair[1]]: createX[keyPair[1]] || entityId,
+            ...attributes,
+          },
+        ]);
+      },
+      [],
+    );
+    yield call(saveConnectionsSaga, { data: { path, updates: { create } } });
   }
-
-  yield call(saveConnectionsSaga, { data: { path, updates: updatesUpdated } });
 }
 
 export function* saveEntitySaga({ data }, updateClient = true, multiple = false) {
@@ -707,6 +727,7 @@ export function* saveConnectionsSaga({ data }) {
   if (data.updates && (
     (data.updates.create && data.updates.create.length > 0)
     || (data.updates.delete && data.updates.delete.length > 0)
+    || (data.updates.update && data.updates.update.length > 0)
   )) {
     const dataTS = stampPayload(data);
     try {
