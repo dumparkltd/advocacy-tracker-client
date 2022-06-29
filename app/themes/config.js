@@ -19,7 +19,7 @@ export const ENDPOINTS = {
   API: (
     NODE_ENV === 'production' && !IS_DEV
       ? 'https://advocacy-tracker-api.herokuapp.com'
-      : 'https://advocacy-tracker-test.herokuapp.com'
+      : 'https://advocacy-tracker-dev.herokuapp.com'
   ), // server API endpoint
   SIGN_IN: 'auth/sign_in',
   SIGN_OUT: 'auth/sign_out',
@@ -174,7 +174,7 @@ export const ACTION_FIELDS = {
       connection: API.ACTION_CATEGORIES,
       groupby: {
         table: API.TAXONOMIES,
-        on: 'taxonomy_id',
+        on: '_id',
       },
     },
     actors: {
@@ -261,7 +261,7 @@ export const ACTOR_FIELDS = {
       connection: API.ACTOR_CATEGORIES,
       groupby: {
         table: API.TAXONOMIES,
-        on: 'taxonomy_id',
+        on: '_id',
       },
     },
     actions: {
@@ -463,6 +463,9 @@ export const INDICATOR_FIELDS = {
       required: true,
       type: 'text',
     },
+    code: {
+      type: 'text',
+    },
     description: {
       type: 'markdown',
     },
@@ -624,9 +627,9 @@ export const ACTORTYPES_CONFIG = {
     order: 3,
     columns: [
       {
-        id: 'taxonomy',
-        type: 'taxonomy',
-        taxonomy_id: 2, // sector
+        id: '',
+        type: '',
+        _id: 2, // sector
       },
       {
         id: 'members', // one row per type,
@@ -643,8 +646,8 @@ export const ACTORTYPES_CONFIG = {
     order: 5,
     columns: [
       // {
-      //   id: 'taxonomy',
-      //   type: 'taxonomy',
+      //   id: '',
+      //   type: '',
       //   taxonomy_id: 3, // role
       // },
       {
@@ -1088,7 +1091,7 @@ export const ARCHIVE_STATUSES = [
 export const DEFAULT_RESOURCETYPE = RESOURCETYPES.REF;
 export const DEFAULT_ACTIONTYPE = ACTIONTYPES.TASK;
 export const DEFAULT_ACTORTYPE = ACTORTYPES.COUNTRY;
-export const DEFAULT_TAXONOMY = '6';
+export const DEFAULT_TAXONOMY = '11';
 export const NO_PARENT_KEY = 'parentUndefined';
 
 export const MAP_OPTIONS = {

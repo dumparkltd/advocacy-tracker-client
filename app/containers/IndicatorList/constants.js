@@ -26,7 +26,7 @@ export const CONFIG = {
   clientPath: ROUTES.INDICATOR,
   views: {
     list: {
-      search: ['title', 'description'],
+      search: ['code', 'title', 'description'],
     },
   },
   connections: { // filter by associated entity
