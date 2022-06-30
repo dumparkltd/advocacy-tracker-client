@@ -131,7 +131,13 @@ export const renderActionControl = (entities, taxonomies, onCreateOption, contex
       : null,
   }
   : null;
-export const renderIndicatorControl = (entities, onCreateOption, contextIntl) => entities
+export const renderIndicatorControl = ({
+  entities,
+  // onCreateOption,
+  contextIntl,
+  connections,
+  connectionAttributes,
+}) => entities
   ? {
     id: 'indicators',
     model: '.associatedIndicators',
@@ -141,6 +147,8 @@ export const renderIndicatorControl = (entities, onCreateOption, contextIntl) =>
     options: entityOptions(entities, true),
     advanced: true,
     selectAll: true,
+    connections,
+    connectionAttributes,
     // onCreate: onCreateOption
     //   ? () => onCreateOption({ path: API.INDICATORS })
     //   : null,
@@ -321,7 +329,7 @@ export const renderActionsByActiontypeControl = ({
   taxonomies,
   onCreateOption,
   contextIntl,
-  connectionAttributeOptionsForType,
+  connectionAttributesForType,
   model = 'associatedActionsByActiontype',
 }) => entitiesByActiontype
   ? entitiesByActiontype.reduce(
@@ -335,7 +343,7 @@ export const renderActionsByActiontypeControl = ({
       options: entityOptions(entities),
       advanced: true,
       selectAll: true,
-      connectionAttributeOptions: connectionAttributeOptionsForType && connectionAttributeOptionsForType(typeid),
+      connectionAttributes: connectionAttributesForType && connectionAttributesForType(typeid),
       tagFilterGroups: makeTagFilterGroups(taxonomies, contextIntl),
       onCreate: onCreateOption
         ? () => onCreateOption({
@@ -536,7 +544,7 @@ export const getConnectionUpdatesFromFormData = ({
   connectionAttribute,
   createConnectionKey,
   createKey,
-  connectionAttributeOptions,
+  connectionAttributes,
 }) => {
   let formConnectionIds = List();
   let formConnections = List();
@@ -555,7 +563,7 @@ export const getConnectionUpdatesFromFormData = ({
   const previousConnectionIds = getAssociatedEntities(connections);
   // store associated Actions as { [action.id]: association, ... }
   const previousConnections = getAssociations(connections);
-  // console.log(previousConnections && previousConnections.toJS())
+  // console.log('previousConnections', previousConnections && previousConnections.toJS())
   // console.log('previousConnectionIds', previousConnectionIds && previousConnectionIds.toJS())
   // console.log('previousConnections', previousConnections && previousConnections.toJS())
   // console.log('formConnectionIds', formConnectionIds && formConnectionIds.toJS())
@@ -586,13 +594,13 @@ export const getConnectionUpdatesFromFormData = ({
     List(),
   );
 
-  const updateList = connectionAttributeOptions
+  const updateList = connectionAttributes
     ? formConnections.reduce(
       (payloads, connection) => {
-        const id = connection.get('value');
-        if (previousConnectionIds.has(id)) {
+        const id = connection.get('value') && connection.get('value').toString();
+        if (id && previousConnectionIds.has(id)) {
           const previousConnection = previousConnections.get(id);
-          const attributeChanges = connectionAttributeOptions.reduce(
+          const attributeChanges = connectionAttributes.reduce(
             (memo, attribute) => {
               const previousValue = previousConnection.getIn(['association', attribute]);
               const formValue = connection.getIn(['association', attribute]);
@@ -607,7 +615,7 @@ export const getConnectionUpdatesFromFormData = ({
             {},
           );
 
-          if (Object.keys(attributeChanges).length > 0) {
+          if (Object.keys(attributeChanges).length > 0 && previousConnection.get('association')) {
             return payloads.push(
               Map({
                 id: previousConnectionIds.get(id),

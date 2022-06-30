@@ -1,6 +1,6 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
-import { API } from 'themes/config';
+import { API, ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
 
 import {
   selectReady,
@@ -14,6 +14,7 @@ import {
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByIndicatorAttributes,
   selectActionResourcesGroupedByAction,
   selectUserActionsGroupedByAction,
 } from 'containers/App/selectors';
@@ -22,6 +23,7 @@ import {
   entitySetUser,
   setActionConnections,
 } from 'utils/entities';
+import qe from 'utils/quasi-equals';
 
 import { DEPENDENCIES } from './constants';
 
@@ -57,40 +59,60 @@ const selectActionsAssociated = createSelector(
 // - group by actortype
 export const selectActionsByType = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectViewEntity,
   selectActionsAssociated,
   selectActionConnections,
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByIndicatorAttributes,
   selectActionResourcesGroupedByAction,
   selectActionCategoriesGroupedByAction,
   selectUserActionsGroupedByAction,
   selectCategories,
   (
     ready,
+    viewEntity,
     actions,
     actionConnections,
     actorActions,
     actionActors,
     actionIndicators,
+    actionIndicatorsAttributes,
     actionResources,
     actionCategories,
     userActions,
     categories,
   ) => {
     if (!ready) return Map();
-    return actions && actions
+    let actionsWithConnections = actions && actions
       .map((action) => setActionConnections({
         action,
         actionConnections,
         actorActions,
         actionActors,
         actionIndicators,
+        actionIndicatorsAttributes,
         actionResources,
         categories,
         actionCategories,
         users: userActions,
-      }))
+      }));
+    actionsWithConnections = actionsWithConnections && actionsWithConnections
+      .map((action) => {
+        const hasSupportLevel = action
+          && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[action.getIn(['attributes', 'measuretype_id'])]
+          && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[action.getIn(['attributes', 'measuretype_id'])].length > 0;
+        if (hasSupportLevel) {
+          const viewEntityActions = actionIndicatorsAttributes.get(parseInt(viewEntity.get('id'), 10));
+          const actionConnection = viewEntityActions.find(
+            (connection) => qe(action.get('id'), connection.get('measure_id'))
+          );
+          return action.setIn(['supportlevel', viewEntity.get('id')], actionConnection.get('supportlevel_id'));
+        }
+        return action;
+      });
+    return actionsWithConnections && actionsWithConnections
       .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
       .sortBy((val, key) => key);
   }

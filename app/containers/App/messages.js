@@ -18,7 +18,7 @@ export default defineMessages({
   },
   supportlevels: {
     0: {
-      id: 'app.containers.App.actorroles.0',
+      id: 'app.containers.App.supportlevels.0',
       defaultMessage: 'No support level assigned',
     },
     1: {

@@ -508,7 +508,7 @@ export const prepareEntities = ({
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: intl.formatMessage(appMessages.actorroles[temp]),
+                value: intl.formatMessage(appMessages.supportlevels[temp]),
               },
             };
           default:

@@ -7,7 +7,7 @@ import {
   selectEntities,
   selectActionsCategorised,
   selectActiontypes,
-  selectActionIndicatorsGroupedByIndicator,
+  selectActionIndicatorsGroupedByIndicatorAttributes,
   selectCategories,
   selectTaxonomiesSorted,
   selectReady,
@@ -15,7 +15,7 @@ import {
 
 import {
   entitySetUser,
-  entitiesSetAssociated,
+  entitiesSetAssociated_NEW,
   prepareTaxonomies,
 } from 'utils/entities';
 
@@ -51,7 +51,7 @@ export const selectActionsByActiontype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectViewEntity,
   selectActionsCategorised,
-  selectActionIndicatorsGroupedByIndicator,
+  selectActionIndicatorsGroupedByIndicatorAttributes,
   selectActiontypes,
   (ready, viewIndicator, actions, associations, actiontypes) => {
     if (!viewIndicator || !ready) return null;
@@ -64,10 +64,10 @@ export const selectActionsByActiontype = createSelector(
           action.getIn(['attributes', 'measuretype_id']),
         )
       );
-      return entitiesSetAssociated(
+      return entitiesSetAssociated_NEW(
         filtered,
-        associations,
-        viewIndicator.get('id'),
+        associations.get(parseInt(viewIndicator.get('id'), 10)),
+        'measure_id'
       );
     });
   }

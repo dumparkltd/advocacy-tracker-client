@@ -27,7 +27,11 @@ import { hasNewErrorNEW } from 'utils/entity-form';
 // import { checkResourceAttribute, checkResourceRequired } from 'utils/entities';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES, USER_ROLES } from 'themes/config';
+import {
+  ROUTES,
+  USER_ROLES,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
+} from 'themes/config';
 import appMessages from 'containers/App/messages';
 
 import {
@@ -140,6 +144,20 @@ export class IndicatorNew extends React.PureComponent { // eslint-disable-line r
         taxonomies: connectedTaxonomies,
         onCreateOption,
         contextIntl: intl,
+        connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
+          ? [
+            {
+              attribute: 'supportlevel_id',
+              type: 'select',
+              options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId].map(
+                (level) => ({
+                  label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                  ...level,
+                }),
+              ),
+            },
+          ]
+          : null,
       });
       if (actionConnections) {
         groups.push(

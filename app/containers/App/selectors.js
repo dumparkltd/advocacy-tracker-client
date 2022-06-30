@@ -1224,6 +1224,13 @@ export const selectActorActionsForAction = createSelector(
     .filter((connection) => qe(connection.getIn(['attributes', 'measure_id']), id))
     .map((connection) => connection.get('attributes'))
 );
+export const selectActionIndicatorsForAction = createSelector(
+  (state) => selectEntities(state, API.ACTION_INDICATORS),
+  (state, id) => id,
+  (connections, id) => connections && connections
+    .filter((connection) => qe(connection.getIn(['attributes', 'measure_id']), id))
+    .map((connection) => connection.get('attributes'))
+);
 
 // potential connections ///////////////////////////////////////////////////////
 
@@ -1387,6 +1394,17 @@ export const selectActionIndicatorsGroupedByIndicator = createSelector(
       )
     ),
 );
+export const selectActionIndicatorsGroupedByIndicatorAttributes = createSelector(
+  (state) => selectEntities(state, API.ACTION_INDICATORS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'indicator_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.get('attributes')
+      )
+    ),
+);
 export const selectActionIndicatorsGroupedByAction = createSelector(
   (state) => selectEntities(state, API.ACTION_INDICATORS),
   (entities) => entities
@@ -1395,6 +1413,17 @@ export const selectActionIndicatorsGroupedByAction = createSelector(
     ).map(
       (group) => group.map(
         (entity) => entity.getIn(['attributes', 'indicator_id'])
+      )
+    ),
+);
+export const selectActionIndicatorsGroupedByActionAttributes = createSelector(
+  (state) => selectEntities(state, API.ACTION_INDICATORS),
+  (entities) => entities
+    && entities.groupBy(
+      (entity) => entity.getIn(['attributes', 'measure_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.get('attributes')
       )
     ),
 );

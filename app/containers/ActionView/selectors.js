@@ -1,6 +1,10 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
-import { API, ACTORTYPES_CONFIG } from 'themes/config';
+import {
+  API,
+  ACTORTYPES_CONFIG,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
+} from 'themes/config';
 import {
   selectReady,
   selectEntity,
@@ -36,6 +40,7 @@ import {
   selectUserActionsGroupedByUser,
   selectUserActorsGroupedByUser,
   selectUserActorsGroupedByActor,
+  selectActionIndicatorsGroupedByActionAttributes,
 } from 'containers/App/selectors';
 
 import {
@@ -47,6 +52,7 @@ import {
   setIndicatorConnections,
   setUserConnections,
 } from 'utils/entities';
+import qe from 'utils/quasi-equals';
 
 import { DEPENDENCIES } from './constants';
 
@@ -405,23 +411,48 @@ const selectIndicatorsAssociated = createSelector(
 // - group by actortype
 export const selectEntityIndicators = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectViewEntity,
   selectIndicatorsAssociated,
   selectIndicatorConnections,
+  selectActionIndicatorsGroupedByActionAttributes,
   selectActionIndicatorsGroupedByIndicator,
   (
     ready,
+    viewEntity,
     indicators,
     indicatorConnections,
+    actionIndicatorsByActionFull,
     actionIndicators,
   ) => {
     if (!ready) return Map();
-    return indicators && indicators
+    let indicatorsWithConnections = indicators && indicators
       .map((indicator) => setIndicatorConnections({
         indicator,
         indicatorConnections,
         actionIndicators,
-      }))
-      .sortBy((val, key) => key);
+      }));
+    const hasSupportLevel = viewEntity
+      && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[viewEntity.getIn(['attributes', 'measuretype_id'])]
+      && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[viewEntity.getIn(['attributes', 'measuretype_id'])].length > 0;
+    if (hasSupportLevel) {
+      const viewEntityActors = actionIndicatorsByActionFull.get(parseInt(viewEntity.get('id'), 10));
+      if (viewEntityActors) {
+        indicatorsWithConnections = indicatorsWithConnections.map(
+          (indicator) => {
+            let indicatorX = indicator;
+            // console.log(actor && actor.toJS())
+            const indicatorConnection = viewEntityActors.find(
+              (connection) => qe(indicator.get('id'), connection.get('indicator_id'))
+            );
+            if (indicatorConnection) {
+              indicatorX = indicatorX.setIn(['supportlevel', viewEntity.get('id')], indicatorConnection.get('supportlevel_id'));
+            }
+            return indicatorX;
+          }
+        );
+      }
+    }
+    return indicatorsWithConnections && indicatorsWithConnections.sortBy((val, key) => key);
   }
 );
 
