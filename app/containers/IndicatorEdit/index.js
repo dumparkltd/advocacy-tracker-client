@@ -28,7 +28,12 @@ import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { USER_ROLES, ROUTES, API } from 'themes/config';
+import {
+  USER_ROLES,
+  ROUTES,
+  API,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
+} from 'themes/config';
 import appMessages from 'containers/App/messages';
 
 import {
@@ -171,12 +176,26 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
     );
 
     if (actionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        actionsByActiontype,
-        connectedTaxonomies,
+      const actionConnections = renderActionsByActiontypeControl({
+        entitiesByActiontype: actionsByActiontype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-      );
+        contextIntl: intl,
+        connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
+          ? [
+            {
+              attribute: 'supportlevel_id',
+              type: 'select',
+              options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId].map(
+                (level) => ({
+                  label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                  ...level,
+                }),
+              ),
+            },
+          ]
+          : null,
+      });
       if (actionConnections) {
         groups.push(
           {
@@ -385,23 +404,26 @@ function mapDispatchToProps(dispatch, props) {
               connectionAttribute: ['associatedActionsByActiontype', actiontypeid.toString()],
               createConnectionKey: 'measure_id',
               createKey: 'indicator_id',
+              connectionAttributes: ['supportlevel_id'],
             }))
             .reduce(
               (memo, deleteCreateLists) => {
                 const deletes = memo.get('delete').concat(deleteCreateLists.get('delete'));
                 const creates = memo.get('create').concat(deleteCreateLists.get('create'));
+                const updates = memo.get('update').concat(deleteCreateLists.get('update'));
                 return memo
                   .set('delete', deletes)
-                  .set('create', creates);
+                  .set('create', creates)
+                  .set('update', updates);
               },
               fromJS({
                 delete: [],
                 create: [],
+                update: [],
               }),
             )
         );
       }
-      // console.log(saveData.toJS());
       dispatch(save(saveData.toJS()));
     },
     handleCancel: () => {

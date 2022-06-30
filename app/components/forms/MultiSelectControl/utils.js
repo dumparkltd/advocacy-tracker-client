@@ -100,11 +100,13 @@ export const getCheckedValuesFromOptions = (options, onlyChanged = false) => {
 };
 
 export const getCheckedOptions = (options, onlyChanged = false) => {
+  if (!options) return List();
   const opts = onlyChanged ? getChangedOptions(options) : options;
   return opts.filter((o) => o.get('checked'));
 };
 
 export const getUncheckedValuesFromOptions = (options, onlyChanged = false) => {
+  if (!options) return List();
   const opts = onlyChanged ? getChangedOptions(options) : options;
   return opts.filterNot((o) => o.get('checked')).map((o) => o.get('value'));
 };
