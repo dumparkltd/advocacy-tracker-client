@@ -18,7 +18,14 @@ export function updateAssociationsRequest(path, associations) {
       )
     );
   }
-
+  // update action-category associations
+  if (associations.update) {
+    requests = requests.concat(
+      associations.update.map(
+        (payload) => updateEntityRequest(path, payload)
+      )
+    );
+  }
   return Promise.all(requests);
 }
 export function updateAssociationsBatchRequest(path, associations) {

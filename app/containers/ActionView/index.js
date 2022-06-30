@@ -55,6 +55,8 @@ import {
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_ACTIONTYPES,
+  INDICATOR_ACTIONTYPES,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
 import Loading from 'components/Loading';
@@ -142,6 +144,30 @@ const getActortypeColumns = (typeid) => {
   //   subject: 'targets', // one row per type,
   //   actions: 'targetingActions'
   // },
+};
+
+const getIndicatorColumns = (viewEntity, intl) => {
+  let columns = [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: ['code', 'title'],
+  }];
+  if (
+    ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[viewEntity.getIn(['attributes', 'measuretype_id'])]
+    && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[viewEntity.getIn(['attributes', 'measuretype_id'])].length > 0
+  ) {
+    columns = [
+      ...columns,
+      {
+        id: 'supportlevel_id',
+        type: 'supportlevel',
+        actionId: viewEntity.get('id'),
+        title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+      },
+    ];
+  }
+  return columns;
 };
 
 export function ActionView(props) {
@@ -234,6 +260,8 @@ export function ActionView(props) {
 
   const hasMemberOption = !!typeId && !qe(typeId, ACTIONTYPES.NATL);
   const hasMap = qe(typeId, ACTIONTYPES.EXPRESS);
+  const hasIndicators = typeId && INDICATOR_ACTIONTYPES.indexOf(typeId.toString()) > -1;
+
   let viewSubject = subject || 'actors';
   if (viewSubject === 'children' && !hasChildren) {
     viewSubject = 'actors';
@@ -271,7 +299,6 @@ export function ActionView(props) {
   }
 
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
-
   return (
     <div>
       <Helmet
@@ -352,7 +379,7 @@ export function ActionView(props) {
                       ],
                     }}
                   />
-                  {indicators && (
+                  {indicators && hasIndicators && (
                     <FieldGroup
                       group={{
                         label: appMessages.nav.indicators,
@@ -362,7 +389,7 @@ export function ActionView(props) {
                             onEntityClick,
                             connections: indicatorConnections,
                             skipLabel: true,
-                            // TODO columns
+                            columns: getIndicatorColumns(viewEntity, intl),
                           }),
                         ],
                       }}

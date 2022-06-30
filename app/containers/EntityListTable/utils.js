@@ -498,6 +498,19 @@ export const prepareEntities = ({
                   : null,
               },
             };
+          case 'supportlevel':
+            temp = entity.get('supportlevel')
+              && entity.getIn(['supportlevel', col.actionId]);
+            if (!temp) {
+              temp = 0;
+            }
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: intl.formatMessage(appMessages.supportlevels[temp]),
+              },
+            };
           default:
             return memoEntity;
         }

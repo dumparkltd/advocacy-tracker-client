@@ -274,8 +274,38 @@ export const entitiesSetCategoryIds = (
     )
   )
 );
-
-
+const entitySetAssociated_NEW = (
+  entity, // associated entity
+  associations,
+  key,
+  // associationId,
+) => {
+  if (associations) {
+    // console.log('entitySetAssociated', associations && associations.toJS())
+    // console.log('entitySetAssociated', key)
+    const entityAssociationKey = associations.findKey(
+      (association) => qe(association.get(key), entity.get('id'))
+    );
+    // console.log('entitySetAssociated', entityAssociation && entityAssociation.toJS())
+    if (entityAssociationKey) {
+      return entity
+        .set('associated', entityAssociationKey)
+        .set('association', associations.get(entityAssociationKey));
+    }
+  }
+  return entity.set('associated', false);
+};
+export const entitiesSetAssociated_NEW = (
+  entities,
+  associations,
+  key,
+) => entities && entities.map(
+  (entity) => entitySetAssociated_NEW(
+    entity,
+    associations,
+    key,
+  ),
+);
 const entitySetAssociated = (
   entity, // associated entity
   associations,
@@ -818,6 +848,7 @@ export const setActionConnections = ({
   actionActors,
   actionResources,
   actionIndicators,
+  actionIndicatorAttributes,
   categories,
   actionCategories,
   users,
@@ -876,6 +907,7 @@ export const setActionConnections = ({
     .set('targetsByType', entityTargetsByActortype)
     .set('resourcesByType', entityResourcesByResourcetype)
     .set('indicators', entityIndicators)
+    .set('indicatorAttributes', actionIndicatorAttributes && actionIndicatorAttributes.get(parseInt(action.get('id'), 10)))
     .set('users', entityUsers);
 };
 

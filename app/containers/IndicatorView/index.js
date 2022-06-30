@@ -25,7 +25,11 @@ import qe from 'utils/quasi-equals';
 
 import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
 
-import { ROUTES, ACTIONTYPES_CONFIG } from 'themes/config';
+import {
+  ROUTES,
+  ACTIONTYPES_CONFIG,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
+} from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
@@ -56,26 +60,46 @@ import {
 
 import { DEPENDENCIES } from './constants';
 
-const getActiontypeColumns = (typeid) => {
-  if (
-    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    return ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-      (col) => {
-        if (typeof col.showOnSingle !== 'undefined') {
-          return col.showOnSingle;
-        }
-        return true;
-      }
-    );
-  }
-  return [{
+const getActiontypeColumns = (typeid, viewEntity, intl) => {
+  let columns = [{
     id: 'main',
     type: 'main',
     sort: 'title',
     attributes: ['title'],
   }];
+  // supportlevel
+  if (
+    ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeid]
+    && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeid].length > 0
+  ) {
+    columns = [
+      ...columns,
+      {
+        id: 'supportlevel_id',
+        type: 'supportlevel',
+        actionId: viewEntity.get('id'),
+        title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+      },
+    ];
+  }
+  if (
+    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
+    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
+  ) {
+    const typeColumns = ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
+      (col) => {
+        if (typeof col.showOnSingle !== 'undefined') {
+          return col.showOnSingle;
+        }
+        return col.id !== 'main';
+      }
+    );
+    columns = [
+      ...columns,
+      ...typeColumns,
+    ];
+  }
+  return columns;
 };
 
 export class IndicatorView extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
@@ -271,7 +295,11 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                                 onEntityClick,
                                 connections: actionConnections,
                                 typeid: actiontypeid,
-                                columns: getActiontypeColumns(actiontypeid),
+                                columns: getActiontypeColumns(
+                                  actiontypeid,
+                                  viewEntity,
+                                  intl,
+                                ),
                               }),
                             ]),
                             [],

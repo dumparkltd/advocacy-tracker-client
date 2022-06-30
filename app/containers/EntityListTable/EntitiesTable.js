@@ -200,6 +200,7 @@ export function EntitiesTable({
                       || col.type === 'amount'
                       || col.type === 'userrole'
                       || col.type === 'date'
+                      || col.type === 'supportlevel'
                     ) && (
                       <CellBodyPlain
                         entity={entity[col.id]}
