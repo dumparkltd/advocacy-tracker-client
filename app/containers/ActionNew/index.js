@@ -38,7 +38,11 @@ import { hasNewErrorNEW } from 'utils/entity-form';
 import { checkActionAttribute, checkActionRequired } from 'utils/entities';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { USER_ROLES, ROUTES } from 'themes/config';
+import {
+  USER_ROLES,
+  ROUTES,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
+} from 'themes/config';
 
 import {
   loadEntitiesIfNeeded,
@@ -191,14 +195,28 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
       },
     );
     if (indicatorOptions) {
-      groups.push(
-        {
-          label: intl.formatMessage(appMessages.nav.indicators),
-          fields: [
-            renderIndicatorControl(indicatorOptions, null, intl),
-          ],
-        },
-      );
+      const indicatorConnections = renderIndicatorControl({
+        entities: indicatorOptions,
+        contextIntl: intl,
+        connectionAttributes: [{
+          attribute: 'supportlevel_id',
+          type: 'select',
+          options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId].map(
+            (level) => ({
+              label: intl.formatMessage(appMessages.supportlevels[level.value]),
+              ...level,
+            }),
+          ),
+        }],
+      });
+      if (indicatorConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.indicators),
+            fields: [indicatorConnections],
+          },
+        );
+      }
     }
 
     if (actorsByActortype) {
@@ -234,13 +252,13 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
       }
     }
     if (subActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        subActionsByActiontype,
-        connectedTaxonomies,
+      const actionConnections = renderActionsByActiontypeControl({
+        entitiesByActiontype: subActionsByActiontype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-        'associatedSubActionsByActiontype',
-      );
+        contextIntl: intl,
+        model: 'associatedSubActionsByActiontype',
+      });
       if (actionConnections) {
         groups.push(
           {
@@ -324,13 +342,13 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
       );
     }
     if (topActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        topActionsByActiontype,
-        connectedTaxonomies,
+      const actionConnections = renderActionsByActiontypeControl({
+        entitiesByActiontype: topActionsByActiontype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-        'associatedTopActionsByActiontype',
-      );
+        contextIntl: intl,
+        model: 'associatedTopActionsByActiontype',
+      });
       if (actionConnections) {
         groups.push(
           {

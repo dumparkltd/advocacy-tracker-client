@@ -108,12 +108,39 @@ export const ACTORTYPES = {
   GROUP: '5',
 };
 
-export const ACTIONTYPE_DISCLAIMERS = [];
-
 export const RESOURCETYPES = {
   REF: '1',
   WEB: '2',
   DOC: '3',
+};
+
+export const ACTION_INDICATOR_SUPPORTLEVELS = {
+  0: {
+    value: '0',
+    default: true,
+  },
+  1: {
+    value: '1',
+  },
+  2: {
+    value: '2',
+  },
+  3: {
+    value: '3',
+  },
+  4: {
+    value: '4',
+  },
+};
+
+export const ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS = {
+  [ACTIONTYPES.EXPRESS]: [
+    ACTION_INDICATOR_SUPPORTLEVELS['0'],
+    ACTION_INDICATOR_SUPPORTLEVELS['1'],
+    ACTION_INDICATOR_SUPPORTLEVELS['2'],
+    ACTION_INDICATOR_SUPPORTLEVELS['3'],
+    ACTION_INDICATOR_SUPPORTLEVELS['4'],
+  ],
 };
 
 export const ACTIONTYPE_NAVGROUPS = {

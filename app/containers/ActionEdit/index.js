@@ -45,7 +45,12 @@ import qe from 'utils/quasi-equals';
 
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { USER_ROLES, API, ROUTES } from 'themes/config';
+import {
+  USER_ROLES,
+  API,
+  ROUTES,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
+} from 'themes/config';
 
 import {
   loadEntitiesIfNeeded,
@@ -63,6 +68,7 @@ import {
   selectReadyForAuthCheck,
   selectIsUserAdmin,
   selectSessionUserId,
+  selectActionIndicatorsForAction,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -205,7 +211,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     return groups;
   };
 
-  getBodyMainFields = (
+  getBodyMainFields = ({
     entity,
     connectedTaxonomies,
     actorsByActortype,
@@ -214,7 +220,8 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     subActionsByActiontype,
     indicatorOptions,
     onCreateOption,
-  ) => {
+    entityIndicatorConnections,
+  }) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'measuretype_id']);
 
@@ -250,11 +257,28 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       },
     );
     if (indicatorOptions) {
-      const indicatorConnections = renderIndicatorControl(
-        indicatorOptions,
-        null,
-        intl,
-      );
+      let connectionAttributes = [];
+      if (ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId]) {
+        connectionAttributes = [
+          ...connectionAttributes,
+          {
+            attribute: 'supportlevel_id',
+            type: 'select',
+            options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId].map(
+              (level) => ({
+                label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                ...level,
+              }),
+            ),
+          },
+        ];
+      }
+      const indicatorConnections = renderIndicatorControl({
+        entities: indicatorOptions,
+        contextIntl: intl,
+        connections: entityIndicatorConnections,
+        connectionAttributes,
+      });
       if (indicatorConnections) {
         groups.push(
           {
@@ -297,13 +321,13 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       }
     }
     if (subActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        subActionsByActiontype,
-        connectedTaxonomies,
+      const actionConnections = renderActionsByActiontypeControl({
+        entitiesByActiontype: subActionsByActiontype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-        'associatedSubActionsByActiontype',
-      );
+        contextIntl: intl,
+        model: 'associatedSubActionsByActiontype',
+      });
       if (actionConnections) {
         groups.push(
           {
@@ -393,13 +417,13 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       }
     }
     if (topActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        topActionsByActiontype,
-        connectedTaxonomies,
+      const actionConnections = renderActionsByActiontypeControl({
+        entitiesByActiontype: topActionsByActiontype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-        'associatedTopActionsByActiontype',
-      );
+        contextIntl: intl,
+        model: 'associatedTopActionsByActiontype',
+      });
       if (actionConnections) {
         groups.push(
           {
@@ -437,6 +461,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       handleSubmitFail,
       handleUpdate,
       handleDelete,
+      entityIndicatorConnections,
     } = this.props;
     const { intl } = this.context;
     // const reference = this.props.params.id;
@@ -510,8 +535,8 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                     aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
                   },
                   body: {
-                    main: this.getBodyMainFields(
-                      viewEntity,
+                    main: this.getBodyMainFields({
+                      entity: viewEntity,
                       connectedTaxonomies,
                       actorsByActortype,
                       targetsByActortype,
@@ -519,7 +544,8 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       subActionsByActiontype,
                       indicatorOptions,
                       onCreateOption,
-                    ),
+                      entityIndicatorConnections,
+                    }),
                     aside: this.getBodyAsideFields(
                       viewEntity,
                       taxonomies,
@@ -569,28 +595,30 @@ ActionEdit.propTypes = {
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   myId: PropTypes.string,
+  entityIndicatorConnections: PropTypes.object,
 };
 
 ActionEdit.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = (state, props) => ({
+const mapStateToProps = (state, { params }) => ({
   viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
-  viewEntity: selectViewEntity(state, props.params.id),
-  taxonomies: selectTaxonomyOptions(state, props.params.id),
+  viewEntity: selectViewEntity(state, params.id),
+  taxonomies: selectTaxonomyOptions(state, params.id),
   connectedTaxonomies: selectConnectedTaxonomies(state),
-  actorsByActortype: selectActorsByActortype(state, props.params.id),
-  targetsByActortype: selectTargetsByActortype(state, props.params.id),
-  resourcesByResourcetype: selectResourcesByResourcetype(state, props.params.id),
-  topActionsByActiontype: selectTopActionsByActiontype(state, props.params.id),
-  subActionsByActiontype: selectSubActionsByActiontype(state, props.params.id),
-  indicatorOptions: selectIndicatorOptions(state, props.params.id),
-  userOptions: selectUserOptions(state, props.params.id),
+  actorsByActortype: selectActorsByActortype(state, params.id),
+  targetsByActortype: selectTargetsByActortype(state, params.id),
+  resourcesByResourcetype: selectResourcesByResourcetype(state, params.id),
+  topActionsByActiontype: selectTopActionsByActiontype(state, params.id),
+  subActionsByActiontype: selectSubActionsByActiontype(state, params.id),
+  indicatorOptions: selectIndicatorOptions(state, params.id),
+  userOptions: selectUserOptions(state, params.id),
   myId: selectSessionUserId(state),
+  entityIndicatorConnections: selectActionIndicatorsForAction(state, params.id),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -775,6 +803,7 @@ function mapDispatchToProps(dispatch, props) {
             connectionAttribute: 'associatedIndicators',
             createConnectionKey: 'indicator_id',
             createKey: 'measure_id',
+            connectionAttributes: ['supportlevel_id'],
           })
         );
       }
