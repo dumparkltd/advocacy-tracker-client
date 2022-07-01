@@ -16,14 +16,8 @@ import {
   Layer,
   Text,
 } from 'grommet';
-import { CircleInformation, FormClose } from 'grommet-icons';
-const DropContent = styled((p) => (
-  <Box
-    pad="small"
-    background="light-1"
-    {...p}
-  />
-))`
+import { CircleInformation, CircleQuestion, FormClose } from 'grommet-icons';
+const DropContent = styled.div`
   max-width: 280px;
 `;
 const LayerWrap = styled((p) => (
@@ -67,7 +61,7 @@ const Markdown = styled(ReactMarkdown)`
 `;
 
 function InfoOverlay({
-  dark, content, tooltip, title, padButton, colorButton,
+  dark, content, tooltip, title, padButton, colorButton, icon,
 }) {
   const infoRef = useRef(null);
   const [info, showInfo] = useState(false);
@@ -81,12 +75,21 @@ function InfoOverlay({
       >
         <Button
           plain
-          icon={(
-            <CircleInformation
-              color={colorButton || (dark ? 'light-5' : 'dark-5')}
-              size="21px"
-            />
-          )}
+          icon={
+            icon === 'question'
+              ? (
+                <CircleQuestion
+                  color={colorButton || (dark ? 'light-5' : 'dark-5')}
+                  size="21px"
+                />
+              )
+              : (
+                <CircleInformation
+                  color={colorButton || (dark ? 'light-5' : 'dark-5')}
+                  size="21px"
+                />
+              )
+          }
           fill={false}
           onMouseOver={() => tooltip && showInfo(true)}
           onMouseLeave={() => tooltip && showInfo(false)}
@@ -97,8 +100,9 @@ function InfoOverlay({
       </Box>
       {info && infoRef && tooltip && (
         <Drop
-          align={{ top: 'top', right: 'left' }}
+          align={{ bottom: 'top' }}
           target={infoRef.current}
+          plain
         >
           <DropContent>
             {content}
@@ -139,8 +143,12 @@ function InfoOverlay({
 InfoOverlay.propTypes = {
   dark: PropTypes.bool,
   tooltip: PropTypes.bool,
-  content: PropTypes.string,
+  content: PropTypes.oneOfType([
+    PropTypes.node,
+    PropTypes.string,
+  ]),
   title: PropTypes.string,
+  icon: PropTypes.string,
   colorButton: PropTypes.string,
   padButton: PropTypes.oneOfType([
     PropTypes.object,

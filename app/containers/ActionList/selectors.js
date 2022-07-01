@@ -26,6 +26,7 @@ import {
   selectCategories,
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
   selectResources,
   selectIndicators,
   selectIncludeMembersForFiltering,
@@ -208,6 +209,7 @@ const selectActionsWithConnections = createSelector(
   selectActionActorsAssociationsGroupedByAction,
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
   selectUserActionsGroupedByAction,
   selectActionActionsGroupedByTopAction,
   selectActionActionsGroupedBySubAction,
@@ -224,6 +226,7 @@ const selectActionsWithConnections = createSelector(
     targetAssociationConnectionsGrouped,
     resourceAssociationsGrouped,
     indicatorAssociationsGrouped,
+    indicatorAssociationsFullGrouped,
     userAssociationsGrouped,
     parentConnectionsGrouped,
     childConnectionsGrouped,
@@ -350,6 +353,9 @@ const selectActionsWithConnections = createSelector(
           const entityIndicators = indicatorAssociationsGrouped.get(
             parseInt(entity.get('id'), 10)
           );
+          const entityIndicatorConnections = indicatorAssociationsFullGrouped.get(
+            parseInt(entity.get('id'), 10)
+          );
           const entityUsers = userAssociationsGrouped.get(
             parseInt(entity.get('id'), 10)
           );
@@ -409,6 +415,7 @@ const selectActionsWithConnections = createSelector(
             // directly connected resources
             .set('resources', entityResources)
             .set('indicators', entityIndicators)
+            .set('indicatorConnections', entityIndicatorConnections)
             .set('parents', entityParents)
             .set('parentsByType', entityParentsByType)
             .set('children', entityChildren)

@@ -6,7 +6,11 @@ import qe from 'utils/quasi-equals';
 import appMessage from 'utils/app-message';
 import { lowerCase } from 'utils/string';
 import appMessages from 'containers/App/messages';
-import { API, USER_ROLES } from 'themes/config';
+import {
+  API,
+  USER_ROLES,
+  ACTION_INDICATOR_SUPPORTLEVELS,
+} from 'themes/config';
 
 export const prepareHeader = ({
   columns,
@@ -99,6 +103,16 @@ export const prepareHeader = ({
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
+          info: {
+            type: 'key-categorical',
+            attribute: 'supportlevel_id',
+            options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS).map(
+              (level) => ({
+                ...level,
+                label: intl.formatMessage(appMessages.supportlevels[level.value]),
+              })
+            ),
+          },
         });
       case 'associations':
         return ({
@@ -169,12 +183,32 @@ export const prepareHeader = ({
   }
 );
 
-const getRelatedEntities = (relatedIDs, connections) => {
+const getRelatedEntities = (
+  relatedIDs,
+  connections,
+  column,
+  connectionAttributeValues,
+  connectionAttributes,
+) => {
   if (relatedIDs && relatedIDs.size > 0) {
     return relatedIDs.reduce(
-      (memo, relatedID) => {
+      (memo, relatedID, entityId) => {
         if (connections.get(relatedID.toString())) {
-          return memo.set(relatedID, connections.get(relatedID.toString()));
+          let entityConnection = connections.get(relatedID.toString());
+          if (connectionAttributeValues) {
+            const myConnectionAttributeValues = connectionAttributeValues.get(entityId.toString());
+            entityConnection = connectionAttributes.reduce(
+              (memo2, attribute) => {
+                const value = myConnectionAttributeValues.get(attribute.attribute);
+                return memo2.set(
+                  attribute.optionAs,
+                  attribute.options[value],
+                );
+              },
+              entityConnection,
+            );
+          }
+          return memo.set(relatedID, entityConnection);
         }
         return memo;
       },
@@ -336,14 +370,26 @@ export const prepareEntities = ({
             };
           case 'indicators':
             temp = entity.get('indicators');
-            relatedEntities = getRelatedEntities(temp, connections.get('indicators'), col);
+            relatedEntities = getRelatedEntities(
+              temp,
+              connections.get('indicators'),
+              col,
+              entity.get('indicatorConnections'),
+              [{
+                attribute: 'supportlevel_id',
+                options: ACTION_INDICATOR_SUPPORTLEVELS,
+                optionAs: 'supportlevel',
+              }],
+            );
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
                 value: getRelatedValue(relatedEntities, col.label || 'topics'),
                 single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
-                tooltip: relatedEntities,
+                tooltip: relatedEntities
+                  && relatedEntities.size > 1
+                  && relatedEntities.groupBy((t) => t.getIn(['supportlevel', 'value'])),
                 multiple: relatedEntities && relatedEntities.size > 1,
                 sortValue: getRelatedSortValue(relatedEntities),
               },

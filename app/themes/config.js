@@ -115,21 +115,36 @@ export const RESOURCETYPES = {
 };
 
 export const ACTION_INDICATOR_SUPPORTLEVELS = {
+  // not assigned
   0: {
     value: '0',
     default: true,
+    color: '#EDEFF0',
+    order: 5,
   },
+  // strong
   1: {
     value: '1',
+    color: '#047C3E',
+    order: 1,
   },
+  // quite positive
   2: {
     value: '2',
+    color: '#3ea667',
+    order: 2,
   },
+  // on the fence
   3: {
     value: '3',
+    color: '#EFCFB1',
+    order: 3,
   },
+  // rather sceptical
   4: {
     value: '4',
+    color: '#DA5C35',
+    order: 4,
   },
 };
 
@@ -752,11 +767,6 @@ export const ACTIONTYPES_CONFIG = {
         id: 'indicators',
         type: 'indicators',
         sort: 'title',
-      },
-      {
-        id: 'taxonomy',
-        type: 'taxonomy',
-        taxonomy_id: 6, // level of support
       },
       {
         id: 'taxonomy-13',

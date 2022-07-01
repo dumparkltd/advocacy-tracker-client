@@ -5,7 +5,8 @@ import { Box, Text } from 'grommet';
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import Icon from 'components/Icon';
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
-
+import InfoOverlay from 'components/InfoOverlay';
+import CellHeaderInfo from './CellHeaderInfo';
 
 const SortButton = styled(ButtonFlatIconOnly)`
   color: inherit;
@@ -27,6 +28,14 @@ export function CellHeaderPlain({ column }) {
           {column.label || column.title}
         </Text>
       </Box>
+      {column.info && (
+        <InfoOverlay
+          tooltip
+          icon="question"
+          padButton={{ horizontal: 'xsmall' }}
+          content={<CellHeaderInfo info={column.info} />}
+        />
+      )}
       {column.onSort && (
         <Box pad={{ left: 'xxsmall' }}>
           <SortButton
