@@ -907,7 +907,7 @@ export const setActionConnections = ({
     .set('targetsByType', entityTargetsByActortype)
     .set('resourcesByType', entityResourcesByResourcetype)
     .set('indicators', entityIndicators)
-    .set('indicatorAttributes', actionIndicatorAttributes && actionIndicatorAttributes.get(parseInt(action.get('id'), 10)))
+    .set('indicatorConnections', actionIndicatorAttributes && actionIndicatorAttributes.get(parseInt(action.get('id'), 10)))
     .set('users', entityUsers);
 };
 

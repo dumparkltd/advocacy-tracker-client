@@ -14,6 +14,7 @@ import {
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
   selectActionIndicatorsGroupedByIndicatorAttributes,
   selectActionResourcesGroupedByAction,
   selectUserActionsGroupedByAction,
@@ -65,6 +66,7 @@ export const selectActionsByType = createSelector(
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
   selectActionIndicatorsGroupedByIndicatorAttributes,
   selectActionResourcesGroupedByAction,
   selectActionCategoriesGroupedByAction,
@@ -78,7 +80,8 @@ export const selectActionsByType = createSelector(
     actorActions,
     actionActors,
     actionIndicators,
-    actionIndicatorsAttributes,
+    actionIndicatorsByActionAttributes,
+    actionIndicatorsByIndicatorAttributes,
     actionResources,
     actionCategories,
     userActions,
@@ -92,7 +95,7 @@ export const selectActionsByType = createSelector(
         actorActions,
         actionActors,
         actionIndicators,
-        actionIndicatorsAttributes,
+        actionIndicatorAttributes: actionIndicatorsByActionAttributes,
         actionResources,
         categories,
         actionCategories,
@@ -104,7 +107,7 @@ export const selectActionsByType = createSelector(
           && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[action.getIn(['attributes', 'measuretype_id'])]
           && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[action.getIn(['attributes', 'measuretype_id'])].length > 0;
         if (hasSupportLevel) {
-          const viewEntityActions = actionIndicatorsAttributes.get(parseInt(viewEntity.get('id'), 10));
+          const viewEntityActions = actionIndicatorsByIndicatorAttributes.get(parseInt(viewEntity.get('id'), 10));
           const actionConnection = viewEntityActions.find(
             (connection) => qe(action.get('id'), connection.get('measure_id'))
           );
