@@ -67,21 +67,6 @@ const getActiontypeColumns = (typeid, viewEntity, intl) => {
     sort: 'title',
     attributes: ['title'],
   }];
-  // supportlevel
-  if (
-    ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeid]
-    && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeid].length > 0
-  ) {
-    columns = [
-      ...columns,
-      {
-        id: 'supportlevel_id',
-        type: 'supportlevel',
-        actionId: viewEntity.get('id'),
-        title: intl.formatMessage(appMessages.attributes.supportlevel_id),
-      },
-    ];
-  }
   if (
     ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
     && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
@@ -97,6 +82,21 @@ const getActiontypeColumns = (typeid, viewEntity, intl) => {
     columns = [
       ...columns,
       ...typeColumns,
+    ];
+  }
+  // supportlevel
+  if (
+    ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeid]
+    && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeid].length > 0
+  ) {
+    columns = [
+      ...columns,
+      {
+        id: 'supportlevel_id',
+        type: 'supportlevel',
+        actionId: viewEntity.get('id'),
+        title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+      },
     ];
   }
   return columns;

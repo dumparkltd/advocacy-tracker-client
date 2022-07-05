@@ -555,6 +555,7 @@ export const prepareEntities = ({
               [col.id]: {
                 ...col,
                 value: intl.formatMessage(appMessages.supportlevels[temp]),
+                color: ACTION_INDICATOR_SUPPORTLEVELS[temp].color,
               },
             };
           default:

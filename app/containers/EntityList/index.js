@@ -216,7 +216,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onSetIncludeTargetMembers,
       includeActorMembers,
       includeTargetMembers,
-      columns,
       headerColumnsUtility,
       headerOptions,
       taxonomies,
@@ -375,7 +374,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             entityIdsSelected={entityIdsSelectedFiltered}
 
             config={config}
-            columns={columns}
             headerColumnsUtility={headerColumnsUtility}
             entityTitle={entityTitle}
 
@@ -539,7 +537,6 @@ EntityList.propTypes = {
   connections: PropTypes.instanceOf(Map),
   connectedTaxonomies: PropTypes.instanceOf(Map),
   config: PropTypes.object,
-  columns: PropTypes.array,
   headerColumnsUtility: PropTypes.array,
   dataReady: PropTypes.bool,
   headerOptions: PropTypes.object,
