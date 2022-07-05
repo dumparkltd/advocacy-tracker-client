@@ -106,12 +106,12 @@ export const prepareHeader = ({
           info: {
             type: 'key-categorical',
             attribute: 'supportlevel_id',
-            options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS).map(
-              (level) => ({
+            options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+              .sort((a, b) => a.order < b.order ? -1 : 1)
+              .map((level) => ({
                 ...level,
                 label: intl.formatMessage(appMessages.supportlevels[level.value]),
-              })
-            ),
+              })),
           },
         });
       case 'associations':
