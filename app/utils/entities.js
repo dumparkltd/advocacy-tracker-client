@@ -239,6 +239,20 @@ export const filterEntitiesByAttributes = (entities, query) => entities
     )
   );
 
+// query is object not string!
+export const filterEntitiesByConnectionAttributes = (entities, query) => entities
+  && entities.filter(
+    (entity) => every(
+      query,
+      (value, attribute) => {
+        const [path, att] = attribute.split('|');
+        return entity.get(path) && entity.get(path).some(
+          (connection) => qe(connection.get(att), value)
+        );
+      },
+    )
+  );
+
 export const filterEntitiesByKeywords = (
   entities,
   query,

@@ -288,6 +288,20 @@ export const selectAttributeQuery = createSelector(
     {},
   )
 );
+const selectConnectionWhereQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('xwhere')
+);
+export const selectConnectionAttributeQuery = createSelector(
+  selectConnectionWhereQuery,
+  (whereQuery) => whereQuery && asList(whereQuery).reduce(
+    (memo, where) => {
+      const attrValue = where.split(':');
+      return Object.assign(memo, { [attrValue[0]]: attrValue[1] });
+    },
+    {},
+  )
+);
 
 export const selectWithoutQuery = createSelector(
   selectLocationQuery,
@@ -357,6 +371,7 @@ export const selectIndicatorQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('indicators')
 );
+
 export const selectSearchQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('search')

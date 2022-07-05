@@ -38,6 +38,7 @@ import {
   selectUserActionsGroupedByAction,
   selectUserQuery,
   selectIndicatorQuery,
+  selectConnectionAttributeQuery,
 } from 'containers/App/selectors';
 
 import {
@@ -46,6 +47,7 @@ import {
   filterEntitiesByMultipleConnections,
   filterEntitiesByCategories,
   // filterEntitiesByConnectedCategories,
+  filterEntitiesByConnectionAttributes,
   filterEntitiesWithoutAssociation,
   filterEntitiesWithAnyAssociation,
   entitiesSetCategoryIds,
@@ -489,8 +491,15 @@ const selectActionsByIndicators = createSelector(
     ? filterEntitiesByConnection(entities, query, 'indicators')
     : entities
 );
-const selectActionsByResources = createSelector(
+const selectActionsByConnectionAttributes = createSelector(
   selectActionsByIndicators,
+  selectConnectionAttributeQuery,
+  (entities, query) => query
+    ? filterEntitiesByConnectionAttributes(entities, query)
+    : entities
+);
+const selectActionsByResources = createSelector(
+  selectActionsByConnectionAttributes,
   selectResourceQuery,
   (entities, query) => query
     ? filterEntitiesByConnection(entities, query, 'resources')
