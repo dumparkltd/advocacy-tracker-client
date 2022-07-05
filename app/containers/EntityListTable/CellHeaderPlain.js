@@ -6,7 +6,7 @@ import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import Icon from 'components/Icon';
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
 import InfoOverlay from 'components/InfoOverlay';
-import CellHeaderInfo from './CellHeaderInfo';
+import CellHeaderInfoOverlay from './CellHeaderInfoOverlay';
 
 const SortButton = styled(ButtonFlatIconOnly)`
   color: inherit;
@@ -33,7 +33,7 @@ export function CellHeaderPlain({ column }) {
           tooltip
           icon="question"
           padButton={{ horizontal: 'xsmall' }}
-          content={<CellHeaderInfo info={column.info} />}
+          content={<CellHeaderInfoOverlay info={column.info} />}
         />
       )}
       {column.onSort && (

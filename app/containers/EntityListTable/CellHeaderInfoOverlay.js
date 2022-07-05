@@ -15,13 +15,19 @@ const Dot = styled.div`
   border: 2px solid white;
 `;
 
-export function CellHeaderInfo({ info }) {
+export function CellHeaderInfoOverlay({ info }) {
   return (
     <>
       {info.type === 'key-categorical' && (
         <Box
-          background="light-1"
           pad="small"
+          margin={{ horizontal: 'xsmall', vertical: 'xsmall' }}
+          background="white"
+          elevation="small"
+          overflow={{
+            vertical: 'auto',
+            horizontal: 'hidden',
+          }}
         >
           <Box border="bottom" flex={{ shrink: 0 }} margin={{ bottom: 'small' }}>
             <Text size="small" weight={500}>
@@ -44,8 +50,8 @@ export function CellHeaderInfo({ info }) {
   );
 }
 
-CellHeaderInfo.propTypes = {
+CellHeaderInfoOverlay.propTypes = {
   info: PropTypes.object,
 };
 
-export default CellHeaderInfo;
+export default CellHeaderInfoOverlay;
