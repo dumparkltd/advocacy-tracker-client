@@ -389,7 +389,7 @@ export const prepareEntities = ({
                 single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
                 tooltip: relatedEntities
                   && relatedEntities.size > 1
-                  && relatedEntities.groupBy((t) => t.getIn(['supportlevel', 'value'])),
+                  && relatedEntities.groupBy((t) => t.getIn(['supportlevel', 'value']) || '0'),
                 multiple: relatedEntities && relatedEntities.size > 1,
                 sortValue: getRelatedSortValue(relatedEntities),
               },

@@ -248,6 +248,7 @@ export const filterEntitiesByConnectionAttributes = (entities, query) => entitie
         const [path, att] = attribute.split('|');
         return entity.get(path) && entity.get(path).some(
           (connection) => qe(connection.get(att), value)
+            || (qe(value, 0) && !connection.get(att))
         );
       },
     )
