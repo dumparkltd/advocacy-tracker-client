@@ -16,8 +16,10 @@ export function CellBodyPlain({
     <Box>
       {color && (
         <LabelWrap>
-          <Dot color={color} />
-          <Text size="small" weight={500} wordBreak="keep-all">
+          <Box flex={{ shrink: 0 }}>
+            <Dot color={color} />
+          </Box>
+          <Text size="xsmall" weight={primary ? 500 : 300} wordBreak="keep-all">
             {value}
           </Text>
         </LabelWrap>
