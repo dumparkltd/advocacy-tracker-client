@@ -296,10 +296,15 @@ export const selectConnectionAttributeQuery = createSelector(
   selectConnectionWhereQuery,
   (whereQuery) => whereQuery && asList(whereQuery).reduce(
     (memo, where) => {
-      const attrValue = where.split(':');
-      return Object.assign(memo, { [attrValue[0]]: attrValue[1] });
+      const [attr, value] = where.split(':');
+      // store as array not object, as query can include multiple values for same attribute
+      const res = [
+        ...memo,
+        { [attr]: value },
+      ];
+      return res;
     },
-    {},
+    [],
   )
 );
 

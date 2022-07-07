@@ -4,16 +4,9 @@ import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { Box, Text } from 'grommet';
 import appMessages from 'containers/App/messages';
+import Dot from 'components/styled/Dot';
 
 const LabelWrap = styled((p) => <Box direction="row" gap="xsmall" align="center" {...p} />)``;
-const Dot = styled.div`
-  display: block;
-  width: 14px;
-  height: 14px;
-  border-radius: 99999px;
-  background: ${({ color }) => color || 'red'};
-  border: 2px solid white;
-`;
 
 export function CellHeaderInfoOverlay({ info }) {
   return (

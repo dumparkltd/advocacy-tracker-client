@@ -272,7 +272,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       intl.formatMessage(messages.filterFormAnyPrefix),
       intl.formatMessage(messages.filterFormError),
     );
-    // console.log(config, filters)
     const hasList = config.views && config.views.list;
     const hasMap = typeId
       && config.views

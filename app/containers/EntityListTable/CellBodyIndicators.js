@@ -9,6 +9,7 @@ import styled from 'styled-components';
 import { truncateText } from 'utils/string';
 
 import { ROUTES, ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
+import Dot from 'components/styled/Dot';
 import appMessages from 'containers/App/messages';
 
 const Link = styled((p) => <Button as="a" plain {...p} />)`
@@ -39,13 +40,6 @@ const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} 
 `;
 
 const LabelWrap = styled((p) => <Box direction="row" gap="xsmall" align="center" {...p} />)``;
-const Dot = styled.div`
-  display: block;
-  width: 10px;
-  height: 10px;
-  border-radius: 99999px;
-  background: ${({ color }) => color || 'red'};
-`;
 
 const getIndicatorLink = (indicator) => `${ROUTES.INDICATOR}/${indicator.get('id')}`;
 

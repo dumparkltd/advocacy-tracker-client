@@ -98,6 +98,17 @@ export const currentFilters = (
         intl,
         isManager,
       ));
+      if (config.connections[connectionKey].connectionAttributeFilters) {
+        config.connections[connectionKey].connectionAttributeFilters.forEach((connectionAttribute) => {
+          filterTags = filterTags.concat(getCurrentConnectionAttributeFilters(
+            connectionKey,
+            connectionAttribute,
+            locationQuery,
+            onTagClick,
+            intl,
+          ));
+        });
+      }
     });
   }
   if (config.attributes) {
@@ -445,6 +456,47 @@ const getCurrentConnectionFilters = (
         }
       });
     }
+  }
+  return tags;
+};
+const getCurrentConnectionAttributeFilters = (
+  connectionKey,
+  connectionAttribute,
+  locationQuery,
+  onClick,
+  intl,
+) => {
+  const tags = [];
+  const locationQueryValue = locationQuery.get('xwhere');
+  if (locationQueryValue) {
+    asList(locationQueryValue).forEach((queryValue) => {
+      const [path, attValue] = queryValue.split('|');
+      const [att, value] = attValue.split(':');
+      // console.log(path, att, value)
+      if (att === connectionAttribute.attribute && path === connectionAttribute.path) {
+        const option = Object.values(connectionAttribute.options).find((o) => qe(value, o.value));
+        if (option) {
+          tags.push({
+            ...option,
+            label: truncateText(
+              intl.formatMessage(appMessages[connectionAttribute.optionMessages][value]),
+              TEXT_TRUNCATE.ATTRIBUTE_TAG,
+              false,
+            ),
+            type: 'connectionAttributes',
+            groupId: connectionAttribute.path,
+            attribute: connectionAttribute.attribute,
+            dot: option.color,
+            group: appMessage(intl, connectionAttribute.message),
+            onClick: () => onClick({
+              value: queryValue,
+              query: 'xwhere',
+              checked: false,
+            }),
+          });
+        }
+      }
+    });
   }
   return tags;
 };

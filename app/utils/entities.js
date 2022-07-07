@@ -244,8 +244,11 @@ export const filterEntitiesByConnectionAttributes = (entities, query) => entitie
   && entities.filter(
     (entity) => every(
       query,
-      (value, attribute) => {
-        const [path, att] = attribute.split('|');
+      (condition) => {
+        // condition stored as object { path|att: value }
+        // e.g. { 'indicatorConnections|supportlevel_id': '0' }
+        const [path, att] = Object.keys(condition)[0].split('|');
+        const value = Object.values(condition)[0];
         return entity.get(path) && entity.get(path).some(
           (connection) => qe(connection.get(att), value)
             || (qe(value, 0) && !connection.get(att))

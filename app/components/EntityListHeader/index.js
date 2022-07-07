@@ -379,6 +379,8 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
         },
         {},
       );
+      console.log(currentFilters);
+      console.log(panelGroups);
       if (activeOption) {
         formOptions = makeActiveFilterOptions({
           entities,

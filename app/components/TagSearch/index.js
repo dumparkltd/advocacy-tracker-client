@@ -9,16 +9,13 @@ import { FormattedMessage } from 'react-intl';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { reduce } from 'lodash/collection';
-import appMessage from 'utils/app-message';
-import { lowerCase } from 'utils/string';
-
 import Icon from 'components/Icon';
 import Button from 'components/buttons/Button';
-import ButtonTagFilter from 'components/buttons/ButtonTagFilter';
-import ButtonTagFilterInverse from 'components/buttons/ButtonTagFilterInverse';
+import ButtonTagFilterWrap from 'components/buttons/ButtonTagFilterWrap';
 import DebounceInput from 'react-debounce-input';
 import PrintOnly from 'components/styled/PrintOnly';
+
+import { getFilterLabel } from 'components/TagList/utils';
 
 import messages from './messages';
 
@@ -90,25 +87,6 @@ export class TagSearch extends React.Component { // eslint-disable-line react/pr
     };
   }
 
-  getFilterLabel = (filter) => {
-    const { intl } = this.context;
-    // not used I think?
-    if (filter.message) {
-      return filter.messagePrefix
-        ? `${filter.messagePrefix} ${lowerCase(appMessage(intl, filter.message))}`
-        : appMessage(intl, filter.message);
-    }
-    if (filter.labels) {
-      return reduce(filter.labels, (memo, label) => {
-        if (!label.label) return memo;
-        let labelValue = label.appMessage ? appMessage(intl, label.label) : label.label;
-        labelValue = label.postfix ? `${labelValue}${label.postfix}` : labelValue;
-        return `${memo}${label.lowerCase ? lowerCase(labelValue) : labelValue} `;
-      }, '').trim();
-    }
-    return filter.label;
-  }
-
   render() {
     const {
       filters,
@@ -136,45 +114,17 @@ export class TagSearch extends React.Component { // eslint-disable-line react/pr
             <FormattedMessage {...messages.labelPrintFilters} />
           </LabelPrint>
         )}
-        { filters.length > 0
-          && (
-            <Tags>
-              {
-                filters.map((filter, i) => filter.inverse
-                  ? (
-                    <ButtonTagFilterInverse
-                      key={i}
-                      onClick={filter.onClick}
-                      palette={filter.type || 'attributes'}
-                      paletteHover={`${filter.type || 'attributes'}Hover`}
-                      pIndex={parseInt(filter.id, 10) || 0}
-                      disabled={!filter.onClick}
-                    >
-                      {this.getFilterLabel(filter)}
-                      { filter.onClick
-                      && <Icon name="removeSmall" text textRight hidePrint />
-                      }
-                    </ButtonTagFilterInverse>
-                  )
-                  : (
-                    <ButtonTagFilter
-                      key={i}
-                      onClick={filter.onClick}
-                      palette={filter.type || 'attributes'}
-                      paletteHover={`${filter.type || 'attributes'}Hover`}
-                      pIndex={parseInt(filter.id, 10) || 0}
-                      disabled={!filter.onClick}
-                    >
-                      {this.getFilterLabel(filter)}
-                      { filter.onClick
-                      && <Icon name="removeSmall" text textRight hidePrint />
-                      }
-                    </ButtonTagFilter>
-                  ))
-              }
-            </Tags>
-          )
-        }
+        {filters.length > 0 && (
+          <Tags>
+            {filters.map((filter, i) => (
+              <ButtonTagFilterWrap
+                key={i}
+                filter={filter}
+                label={getFilterLabel(filter)}
+              />
+            ))}
+          </Tags>
+        )}
         <SearchInput
           id="search"
           minLength={1}
@@ -189,7 +139,7 @@ export class TagSearch extends React.Component { // eslint-disable-line react/pr
               : messages.searchPlaceholderEntities
           ))}
         />
-        { hasFilters && this.props.onClear && (
+        {hasFilters && this.props.onClear && (
           <Clear
             onClick={this.props.onClear}
             small={this.props.multiselect}

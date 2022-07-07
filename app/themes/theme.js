@@ -143,6 +143,8 @@ theme.palette = {
   usersHover: ['#023066'],
   attributesHover: [dark[2]],
   attributes: [dark[3]],
+  connectionAttributesHover: [dark[0]],
+  connectionAttributes: [dark[0]],
   rolesHover: [dark[2]],
   roles: [dark[3]],
 

@@ -9,9 +9,8 @@ import { intlShape, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Box } from 'grommet';
 
-import { getFilterLabel } from 'components/TagList';
-import Icon from 'components/Icon';
-import ButtonTagFilter from 'components/buttons/ButtonTagFilter';
+import { getFilterLabel } from 'components/TagList/utils';
+import ButtonTagFilterWrap from 'components/buttons/ButtonTagFilterWrap';
 import EntityListSidebarOption from './EntityListSidebarOption';
 
 export function FilterOptionList({
@@ -37,26 +36,21 @@ export function FilterOptionList({
             left: 'medium',
           }}
           align="start"
-          gap="hair"
+          gap="xxsmall"
         >
           {option.get('currentFilters').map(
             (f, j) => {
               const filter = f.toJS();
               return (
                 <Box key={j} align="start">
-                  <ButtonTagFilter
+                  <ButtonTagFilterWrap
                     onClick={(arg) => {
                       onHideOptions();
                       filter.onClick(arg);
                     }}
-                    palette={filter.type || 'attributes'}
-                    paletteHover={`${filter.type || 'attributes'}Hover`}
-                    pIndex={parseInt(filter.id, 10) || 0}
-                    disabled={!filter.onClick}
-                  >
-                    {getFilterLabel(filter, intl, true)}
-                    {filter.onClick && <Icon name="removeSmall" text textRight hidePrint />}
-                  </ButtonTagFilter>
+                    filter={filter}
+                    label={getFilterLabel(filter, intl, true)}
+                  />
                 </Box>
               );
             }

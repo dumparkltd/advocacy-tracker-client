@@ -897,7 +897,7 @@ export const makeConnectionFilterOptions = (
         filterOptions: {
           groupId: group,
           options: {},
-          multiple: false,
+          multiple: true,
           required: false,
           search: false,
           advanced: false,
