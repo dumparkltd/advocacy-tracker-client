@@ -287,38 +287,83 @@ const getCurrentConnectionFilters = (
 ) => {
   const tags = [];
   const {
-    query, path, groupByType, labels,
+    query,
+    path,
+    groupByType,
+    labels,
+    connectionAttributeFilters,
   } = option;
   if (locationQuery.get(query) && connections.get(path)) {
     const locationQueryValue = locationQuery.get(query);
     asList(locationQueryValue).forEach((queryValue) => {
-      let value;
+      let value = queryValue;
       let optionId;
+      let connectionAttributeQuery;
+      let connectedAttributes;
+      let connectionAttributeName;
       if (connections.get(path)) {
-        if (groupByType) {
-          [optionId, value] = queryValue.indexOf(':') > -1 ? queryValue.split(':') : [null, queryValue];
-        } else {
-          value = queryValue;
+        // check for connection attribute queries
+        if (connectionAttributeFilters && value.indexOf('>') > -1) {
+          let values;
+          [value, connectionAttributeQuery] = value.split('>');
+          [connectionAttributeName, values] = connectionAttributeQuery.split('=');
+          values = values.split('|');
+          const filter = connectionAttributeFilters.find((
+            (caf) => caf.attribute === connectionAttributeName
+          ));
+          if (filter && filter.options) {
+            connectedAttributes = Object.values(filter.options).filter(
+              (o) => values.indexOf(o.value.toString()) > -1
+            ).map(
+              (o) => {
+                let newQueryValue = value;
+                const newValues = values.filter(
+                  (v) => !qe(v, o.value)
+                );
+                if (newValues.length > 0) {
+                  newQueryValue = `${newQueryValue}>${connectionAttributeName}=${newValues.join('|')}`;
+                }
+                return ({
+                  ...o,
+                  label: intl.formatMessage(appMessages[filter.optionMessages][o.value]),
+                  attribute: connectionAttributeName,
+                  onClick: () => onClick({
+                    query,
+                    value: newQueryValue,
+                    prevValue: queryValue,
+                    replace: true,
+                  }),
+                });
+              }
+            ).sort(
+              (a, b) => a.order > b.order ? 1 : -1,
+            );
+          }
+        }
+        if (groupByType && queryValue.indexOf(':') > -1) {
+          [optionId, value] = queryValue.split(':');
         }
       }
-      if (value) {
-        const connection = connections.getIn([path, value]);
-        if (connection) {
-          const isCodePublic = checkCodeVisibility(connection, option.entityType, isManager);
-          tags.push({
-            label: getConnectionLabel(connection, value, !isCodePublic, labels, intl),
-            labelLong: getConnectionLabel(connection, value, true, labels, intl),
-            type: option.entityType,
-            group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
-            onClick: () => onClick({
-              value: queryValue,
-              query,
-              checked: false,
-            }),
-            groupId: connectionKey,
-            optionId,
-          });
-        }
+      const connection = connections.getIn([path, value]);
+      if (connection) {
+        const isCodePublic = checkCodeVisibility(connection, option.entityType, isManager);
+        tags.push({
+          label: getConnectionLabel(connection, value, !isCodePublic, labels, intl),
+          labelLong: getConnectionLabel(connection, value, true, labels, intl),
+          type: option.entityType,
+          group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
+          connectedAttributes,
+          connectionAttributeName,
+          query,
+          queryValue,
+          onClick: () => onClick({
+            value: queryValue,
+            query,
+            checked: false,
+          }),
+          groupId: connectionKey,
+          optionId,
+        });
       }
     });
   }

@@ -7,7 +7,7 @@ import {
 } from 'redux-saga/effects';
 import { push, replace, goBack } from 'react-router-redux';
 import { reduce, keyBy } from 'lodash/collection';
-import { without } from 'lodash/array';
+// import { without } from 'lodash/array';
 
 import asArray from 'utils/as-array';
 import {
@@ -765,7 +765,7 @@ const getNextQuery = (query, extend, location) => {
         && param.multipleAttributeValues === false
       ) {
         if (param.add) {
-          const [attribute] = param.value.split(':');
+          const [attribute] = val.split(':');
           const keepAttributeValues = queryPrevious[param.arg]
             ? asArray(queryPrevious[param.arg]).filter(
               (attVal) => {
@@ -778,19 +778,28 @@ const getNextQuery = (query, extend, location) => {
             ...keepAttributeValues,
             param.value,
           ];
-        } else if (param.remove && queryUpdated[param.arg]) {
+        } else if (param.remove) {
           queryUpdated[param.arg] = asArray(queryPrevious[param.arg]).filter(
             (attVal) => !qe(attVal, param.value)
           );
         }
-      // if multiple values set
       } else if (Array.isArray(queryUpdated[param.arg])) {
+        const isIncluded = !!queryUpdated[param.arg].find(
+          (qv) => {
+            console.log(qv);
+            return qe(qv.toString().split('>')[0], param.value.toString());
+          }
+        );
+        console.log('value', param.value);
+        console.log('isIncluded', isIncluded);
         // add if not already present
-        if (param.add && queryUpdated[param.arg].indexOf(param.value.toString()) === -1) {
+        if (param.add && !isIncluded) {
           queryUpdated[param.arg].push(param.value);
         // remove if present
-        } else if (extend && param.remove && param.value && queryUpdated[param.arg].indexOf(param.value.toString()) > -1) {
-          queryUpdated[param.arg] = without(queryUpdated[param.arg], param.value.toString());
+        } else if (extend && param.remove && param.value && isIncluded) {
+          queryUpdated[param.arg] = queryUpdated[param.arg].filter(
+            (qv) => !qe(qv.toString().split('>')[0], param.value.toString())
+          );
           // convert to single value if only one value left
           if (queryUpdated[param.arg].length === 1) {
             /* eslint-disable prefer-destructuring */
@@ -808,7 +817,16 @@ const getNextQuery = (query, extend, location) => {
       }
     // if set and removing
     } else if (queryUpdated[param.arg] && param.value && param.replace) {
-      queryUpdated[param.arg] = param.value;
+      // only replace the previous value if defined
+      if (param.prevValue && queryUpdated[param.arg]) {
+        queryUpdated[param.arg] = asArray(queryUpdated[param.arg]).map(
+          (argValue) => qe(argValue, param.prevValue)
+            ? param.value
+            : argValue
+        );
+      } else {
+        queryUpdated[param.arg] = param.value;
+      }
     } else if (queryUpdated[param.arg] && (param.remove || typeof param.value === 'undefined')) {
       delete queryUpdated[param.arg];
     // if not set or replacing with new value

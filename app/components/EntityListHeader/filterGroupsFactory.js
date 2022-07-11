@@ -142,14 +142,13 @@ export const makeFilterGroups = ({
                 && activeFilterOption.group === connectionKey
                 && activeFilterOption.optionId === option.type,
               currentFilters: optionCurrentFilters,
+              ...option,
             }],
           };
           if (option.connectionAttributeFilters) {
             const connectionFilterOptions = option.connectionAttributeFilters.map((
               (cfOption) => ({
                 id: cfOption.path, // filterOptionId
-                label: cfOption.label,
-                message: cfOption.message,
                 active: !!activeFilterOption
                   && activeFilterOption.group === connectionKey
                   && activeFilterOption.optionId === cfOption.path,

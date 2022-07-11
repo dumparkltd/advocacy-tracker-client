@@ -488,7 +488,15 @@ const selectActionsByIndicators = createSelector(
   selectActionsByUsers,
   selectIndicatorQuery,
   (entities, query) => query
-    ? filterEntitiesByConnection(entities, query, 'indicators')
+    ? filterEntitiesByConnection(
+      entities,
+      query,
+      'indicators',
+      {
+        id: 'indicator_id',
+        path: 'indicatorConnections',
+      },
+    )
     : entities
 );
 const selectActionsByConnectionAttributes = createSelector(

@@ -72,6 +72,7 @@ function TagList({
                     key={j}
                     filter={filter}
                     label={getFilterLabel(filter, intl, long)}
+                    labelLong={getFilterLabel(filter, intl, true)}
                     long={long}
                   />
                 ))}

@@ -21,12 +21,52 @@ import appMessage from 'utils/app-message';
 import { qe } from 'utils/quasi-equals';
 
 // check if entity has nested connection by id
+// - connectionAttributes: { path: 'indicatorConnections', id: 'indicator_id' }
+// - connectionAttributeQuery: { attribute: connectionAttribute, values: [value2,value3] }
 export const testEntityEntityAssociation = (
   entity,
   path,
   associatedId,
-) => entity.get(path)
-  && entity.get(path).includes(parseInt(associatedId, 10));
+  connectionAttribute, // information on any connection attributes
+  connectionAttributeQuery,
+) => {
+  // first check if entities are connected at all
+  const passConnection = entity.get(path)
+    && entity.get(path).includes(parseInt(associatedId, 10));
+  // then check for any connection attribute queries
+  // ignore connection attribute query if info not present
+  if (
+    !connectionAttribute
+    || !connectionAttribute.path
+    || !connectionAttribute.id
+    || !connectionAttributeQuery
+    || !connectionAttributeQuery.attribute
+    || !connectionAttributeQuery.values
+  ) {
+    return passConnection;
+  }
+  // ... otherwise check all connections
+  return passConnection
+    && entity.get(connectionAttribute.path)
+    && entity.get(connectionAttribute.path).some(
+      (connection) => {
+        const isAssociated = connection.get(connectionAttribute.id)
+          && qe(connection.get(connectionAttribute.id), associatedId);
+        if (!isAssociated) {
+          return false;
+        }
+        const attValue = connection.get(connectionAttributeQuery.attribute);
+
+        // test "null case"
+        if (!attValue) {
+          return connectionAttributeQuery.values.indexOf('0') > -1;
+        }
+        return connectionAttributeQuery.values.indexOf(
+          connection.get(connectionAttributeQuery.attribute).toString()
+        ) > -1; // allow any value
+      }
+    );
+};
 
 // check if entity has nested category by id
 export const testEntityCategoryAssociation = (
@@ -198,17 +238,42 @@ export const filterEntitiesByConnectedCategories = (
 
 // filter entities by by association with one or more entities of specific connection type
 // assumes prior nesting of relationships
+// - query: type:id>connectionAttribute=value
+// - connectionAttributes: { path: 'indicatorConnections', id: 'indicator_id' }
 export const filterEntitiesByConnection = (
   entities,
   query,
   path,
+  connectionAttribute,
 ) => entities && entities.filter(
   // consider replacing with .every()
   (entity) => asList(query).every(
     (queryValue) => {
-      const value = queryValue.indexOf(':') > -1 ? queryValue.split(':')[1] : queryValue;
+      let value = queryValue;
+      let connectionAttributeQuery;
+      // check for connection attribute queries
+      if (value.indexOf('>') > -1) {
+        [value, connectionAttributeQuery] = value.split('>');
+        const [attribute, values] = connectionAttributeQuery.split('=');
+        connectionAttributeQuery = {
+          attribute,
+          values: values.split('|'),
+        };
+      }
+      // check for type:id form
+      // sometimes related entity ids are stored as [type]:[id]
+      // ignore type
+      if (value.indexOf(':') > -1) {
+        [, value] = queryValue.split(':');
+      }
       return entity.get(path)
-        && testEntityEntityAssociation(entity, path, value);
+        && testEntityEntityAssociation(
+          entity,
+          path,
+          value,
+          connectionAttribute,
+          connectionAttributeQuery,
+        );
     },
   )
 );
