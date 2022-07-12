@@ -888,11 +888,11 @@ export const makeConnectionFilterOptions = (
         connections,
       });
       filterOptions.tagFilterGroups = option && makeTagFilterGroups(connectedTaxonomies, contextIntl);
-    } else if (option.connectionAttributeFilters) {
+    } else if (
+      option.connectionAttributeFilter
+      && option.connectionAttributeFilter.path === activeOptionId
+    ) {
       // "connection-attribute" option
-      const xOption = option.connectionAttributeFilters.find(
-        (o) => o.path === activeOptionId
-      );
       filterOptions = getConnectionAttributeFilterOptions({
         filterOptions: {
           groupId: group,
@@ -903,7 +903,7 @@ export const makeConnectionFilterOptions = (
           advanced: false,
           selectAll: false,
         },
-        option: xOption,
+        option: option.connectionAttributeFilter,
         entities,
         messages,
         contextIntl,

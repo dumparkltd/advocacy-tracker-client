@@ -145,18 +145,16 @@ export const makeFilterGroups = ({
               ...option,
             }],
           };
-          if (option.connectionAttributeFilters) {
-            const connectionFilterOptions = option.connectionAttributeFilters.map((
-              (cfOption) => ({
-                id: cfOption.path, // filterOptionId
-                active: !!activeFilterOption
-                  && activeFilterOption.group === connectionKey
-                  && activeFilterOption.optionId === cfOption.path,
-                currentFilters: currentFilters.filter(
-                  (f) => qe(f.groupId, cfOption.path)
-                ),
-              })
-            ));
+          if (option.connectionAttributeFilter) {
+            const connectionFilterOptions = [{
+              id: option.connectionAttributeFilter.path, // filterOptionId
+              active: !!activeFilterOption
+                && activeFilterOption.group === connectionKey
+                && activeFilterOption.optionId === option.connectionAttributeFilter.path,
+              currentFilters: currentFilters.filter(
+                (f) => qe(f.groupId, option.connectionAttributeFilter.path)
+              ),
+            }];
             filterGroups[connectionKey].options = [
               ...filterGroups[connectionKey].options,
               ...connectionFilterOptions,

@@ -4,7 +4,7 @@
  *
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { List } from 'immutable';
 
@@ -31,13 +31,22 @@ overflow-y: auto;
 `;
 
 function OptionsOverlay({
-  dark, options, title, padButton, colorButton, onChange,
+  dark,
+  options,
+  title,
+  padButton,
+  colorButton,
+  onChange,
 }) {
   const infoRef = useRef(null);
   const [showOptions, setShowOptions] = useState(false);
   const [myOptions, setOptions] = useState(options);
-  console.log(options && options.toJS(0));
-  console.log(myOptions && myOptions.toJS());
+
+  useEffect(
+    () => setOptions(options),
+    [options],
+  );
+
   return (
     <>
       <Box
@@ -70,7 +79,8 @@ function OptionsOverlay({
             <Box>
               <MultiSelect
                 title={title}
-                options={myOptions}
+                values={myOptions}
+                options={options}
                 onChange={(optionsChanged) => {
                   const optionsUpdated = myOptions.map(
                     (o) => {
@@ -86,15 +96,18 @@ function OptionsOverlay({
                 }}
                 fixedOrder
                 search={false}
-                onCancel={() => setShowOptions(false)}
+                onCancel={() => {
+                  setShowOptions(false);
+                  onChange(options);
+                }}
                 buttons={[{
-                  type: 'primary',
-                  onClick: () => {
-                    onChange(myOptions);
-                    setShowOptions(false);
-                  },
                   submit: false,
+                  type: 'primary',
                   title: 'Confirm',
+                  onClick: () => {
+                    setShowOptions(false);
+                    onChange(myOptions);
+                  },
                 }]}
               />
             </Box>

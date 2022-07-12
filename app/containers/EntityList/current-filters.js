@@ -98,16 +98,14 @@ export const currentFilters = (
         intl,
         isManager,
       ));
-      if (config.connections[connectionKey].connectionAttributeFilters) {
-        config.connections[connectionKey].connectionAttributeFilters.forEach((connectionAttribute) => {
-          filterTags = filterTags.concat(getCurrentConnectionAttributeFilters(
-            connectionKey,
-            connectionAttribute,
-            locationQuery,
-            onTagClick,
-            intl,
-          ));
-        });
+      if (config.connections[connectionKey].connectionAttributeFilter) {
+        filterTags = filterTags.concat(getCurrentConnectionAttributeFilters(
+          connectionKey,
+          config.connections[connectionKey].connectionAttributeFilter,
+          locationQuery,
+          onTagClick,
+          intl,
+        ));
       }
     });
   }
@@ -291,7 +289,7 @@ const getCurrentConnectionFilters = (
     path,
     groupByType,
     labels,
-    connectionAttributeFilters,
+    connectionAttributeFilter,
   } = option;
   if (locationQuery.get(query) && connections.get(path)) {
     const locationQueryValue = locationQuery.get(query);
@@ -303,16 +301,13 @@ const getCurrentConnectionFilters = (
       let connectionAttributeName;
       if (connections.get(path)) {
         // check for connection attribute queries
-        if (connectionAttributeFilters && value.indexOf('>') > -1) {
+        if (connectionAttributeFilter && value.indexOf('>') > -1) {
           let values;
           [value, connectionAttributeQuery] = value.split('>');
           [connectionAttributeName, values] = connectionAttributeQuery.split('=');
           values = values.split('|');
-          const filter = connectionAttributeFilters.find((
-            (caf) => caf.attribute === connectionAttributeName
-          ));
-          if (filter && filter.options) {
-            connectedAttributes = Object.values(filter.options).filter(
+          if (connectionAttributeFilter && connectionAttributeFilter.options) {
+            connectedAttributes = Object.values(connectionAttributeFilter.options).filter(
               (o) => values.indexOf(o.value.toString()) > -1
             ).map(
               (o) => {
@@ -325,7 +320,7 @@ const getCurrentConnectionFilters = (
                 }
                 return ({
                   ...o,
-                  label: intl.formatMessage(appMessages[filter.optionMessages][o.value]),
+                  label: intl.formatMessage(appMessages[connectionAttributeFilter.optionMessages][o.value]),
                   attribute: connectionAttributeName,
                   onClick: () => onClick({
                     query,

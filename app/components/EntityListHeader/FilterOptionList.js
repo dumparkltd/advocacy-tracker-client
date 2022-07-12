@@ -25,6 +25,7 @@ export function FilterOptionList({
   intl,
   onUpdateQuery,
 }) {
+  const optionCAF = option.get('connectionAttributeFilter');
   return (
     <Box>
       <EntityListSidebarOption
@@ -46,13 +47,6 @@ export function FilterOptionList({
           {option.get('currentFilters').map(
             (f, j) => {
               const filter = f.toJS();
-              const connectionAttributeFilter = option.get('connectionAttributeFilters')
-                && filter.connectedAttributes
-                && option
-                  .get('connectionAttributeFilters')
-                  .find(
-                    (caf) => caf.get('attribute') === filter.connectionAttributeName
-                  );
               return (
                 <Box key={j} align="start">
                   <Box direction="row">
@@ -65,7 +59,7 @@ export function FilterOptionList({
                       label={getFilterLabel(filter, intl, true)}
                       showConnectedAttributes={false}
                     />
-                    {connectionAttributeFilter && (
+                    {optionCAF && (
                       <OptionsOverlay
                         title="Select attribute options"
                         onChange={
@@ -75,31 +69,28 @@ export function FilterOptionList({
                               .filter((o) => o.get('checked'))
                               .map((o) => o.get('value'))
                               .toJS();
-                            console.log(newValues);
                             // option active
                             onUpdateQuery({
                               arg: filter.query,
                               value: newValues.length > 0
-                                ? `${value}>${filter.connectionAttributeName}=${newValues.join('|')}`
+                                ? `${value}>${optionCAF.get('attribute')}=${newValues.join('|')}`
                                 : value,
                               prevValue: filter.queryValue,
                               replace: true,
                             });
                           }
                         }
-                        options={connectionAttributeFilter
+                        options={optionCAF
                           .get('options')
-                          .map(
-                            (o) => o.set(
-                              'label',
-                              intl.formatMessage(appMessages[connectionAttributeFilter.get('optionMessages')][o.get('value')])
-                            ).set(
-                              'checked',
-                              f.get('connectedAttributes').some(
+                          .map((o) => {
+                            const label = intl.formatMessage(appMessages[optionCAF.get('optionMessages')][o.get('value')]);
+                            const checked = f.get('connectedAttributes')
+                              ? f.get('connectedAttributes').some(
                                 (att) => att.get('value') === o.get('value')
                               )
-                            )
-                          )
+                              : false;
+                            return o.set('label', label).set('checked', checked);
+                          })
                           .toList()
                         }
                       />

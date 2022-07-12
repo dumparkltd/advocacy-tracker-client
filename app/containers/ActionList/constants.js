@@ -145,14 +145,14 @@ export const CONFIG = {
       connectPath: API.ACTION_INDICATORS, // filter by actor connection
       key: 'indicator_id',
       ownKey: 'measure_id',
-      connectionAttributeFilters: [{
+      connectionAttributeFilter: {
         path: 'indicatorConnections',
         // query: 'indicatorConnections',
         attribute: 'supportlevel_id',
         message: 'attributes.supportlevel_id',
         options: ACTION_INDICATOR_SUPPORTLEVELS,
         optionMessages: 'supportlevels',
-      }],
+      },
     },
     // filter by associated entity
     resources: {

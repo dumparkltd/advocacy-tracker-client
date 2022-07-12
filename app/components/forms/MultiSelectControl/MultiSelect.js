@@ -247,6 +247,12 @@ class MultiSelect extends React.Component {
     { optionsInitial }, // state
   ) => options.map((option) => {
     const value = values.find((v) => option.get('value') === v.get('value'));// && option.get('query') === v.get('query'));
+    // const optionInitial = optionsInitial.find(
+    //   (oi) => oi.get('value') === option.get('value')
+    // );
+    // const isNew = !fixedOrder && !optionInitial;
+    // const isIndeterminateInitial = threeState && this.isOptionIndeterminate(optionInitial);
+    // const isCheckedIntitial = optionInitial.get('checked');
     const isNew = !fixedOrder && !optionsInitial.includes(option);
     const isIndeterminateInitial = threeState && this.isOptionIndeterminate(option);
     const isCheckedIntitial = option.get('checked');
@@ -257,19 +263,18 @@ class MultiSelect extends React.Component {
         .set('isIndeterminate', isIndeterminateInitial)
     );
     return value
-      ? optionUpdated.withMutations(
-        (o) => o.set('checked', value.get('checked'))
-          .set(
-            'changedToChecked',
-            value.get('checked') && !isCheckedIntitial,
-          )
-          .set(
-            'changedToUnchecked',
-            !value.get('checked')
-            && !this.isOptionIndeterminate(value)
-            && (isCheckedIntitial || isIndeterminateInitial)
-          )
-      )
+      ? optionUpdated.withMutations((o) => o
+        .set('checked', value.get('checked'))
+        .set(
+          'changedToChecked',
+          value.get('checked') && !isCheckedIntitial,
+        )
+        .set(
+          'changedToUnchecked',
+          !value.get('checked')
+          && !this.isOptionIndeterminate(value)
+          && (isCheckedIntitial || isIndeterminateInitial)
+        ))
       : optionUpdated;
   });
 
@@ -353,7 +358,6 @@ class MultiSelect extends React.Component {
     const optionsChangedToUnchecked = options.filter((option) => option.get('changedToUnchecked'));
     const hasChanges = optionsChangedToChecked.size > 0 || optionsChangedToUnchecked.size > 0;
     const showChangeHint = this.props.advanced && hasChanges;
-
     options = this.filterOptions(options, this.props, this.state);
     const filteredOptionsSelected = options.filter((option) => option.get('checked') || this.isOptionIndeterminate(option));
 
