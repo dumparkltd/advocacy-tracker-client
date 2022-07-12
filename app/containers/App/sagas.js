@@ -752,12 +752,13 @@ const getNextQuery = (query, extend, location) => {
     ? location.get('query').toJS()
     : location.get('query').filter((val, key) => key === 'view').toJS();
   // and figure out new query
+
   return asArray(query).reduce((memo, param) => {
     const queryUpdated = memo;
     // if arg already set and not replacing
     if (queryUpdated[param.arg] && !param.replace) {
-      // if multipleAttributeValues are not allowed
       const val = param.value && param.value.toString();
+      // check for connection attribute queries
       if (
         val
         && val.indexOf(':') > -1
@@ -783,15 +784,11 @@ const getNextQuery = (query, extend, location) => {
             (attVal) => !qe(attVal, param.value)
           );
         }
-      } else if (Array.isArray(queryUpdated[param.arg])) {
+      } else {
+        queryUpdated[param.arg] = asArray(queryUpdated[param.arg]);
         const isIncluded = !!queryUpdated[param.arg].find(
-          (qv) => {
-            console.log(qv);
-            return qe(qv.toString().split('>')[0], param.value.toString());
-          }
+          (qv) => qe(qv.toString().split('>')[0], param.value.toString())
         );
-        console.log('value', param.value);
-        console.log('isIncluded', isIncluded);
         // add if not already present
         if (param.add && !isIncluded) {
           queryUpdated[param.arg].push(param.value);
@@ -805,16 +802,17 @@ const getNextQuery = (query, extend, location) => {
             /* eslint-disable prefer-destructuring */
             queryUpdated[param.arg] = queryUpdated[param.arg][0];
             /* eslint-enable prefer-destructuring */
+          } else if (queryUpdated[param.arg].length === 0) {
+            delete queryUpdated[param.arg];
           }
         }
       // if single value set
       // add if not already present and convert to array
-      } else if (param.value && param.add && queryUpdated[param.arg] !== param.value.toString()) {
-        queryUpdated[param.arg] = [queryUpdated[param.arg], param.value];
-      // remove if present
-      } else if (extend && param.remove && (!param.value || (param.value && queryUpdated[param.arg] === param.value.toString()))) {
-        delete queryUpdated[param.arg];
       }
+      // if (extend && param.remove && (!param.value || (param.value && queryUpdated[param.arg] === param.value.toString()))) {
+      //   console.log('remove')
+      //   delete queryUpdated[param.arg];
+      // }
     // if set and removing
     } else if (queryUpdated[param.arg] && param.value && param.replace) {
       // only replace the previous value if defined
