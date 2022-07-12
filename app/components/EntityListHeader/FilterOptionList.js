@@ -47,9 +47,10 @@ export function FilterOptionList({
           {option.get('currentFilters').map(
             (f, j) => {
               const filter = f.toJS();
+              const hasAttributeOptions = optionCAF && ['without', 'any'].indexOf(filter.query) === -1;
               return (
                 <Box key={j} align="start">
-                  <Box direction="row">
+                  <Box direction="row" align="center">
                     <ButtonTagFilterWrap
                       onClick={(args) => {
                         onHideOptions();
@@ -59,7 +60,7 @@ export function FilterOptionList({
                       label={getFilterLabel(filter, intl, true)}
                       showConnectedAttributes={false}
                     />
-                    {optionCAF && (
+                    {optionCAF && hasAttributeOptions && (
                       <OptionsOverlay
                         title="Select attribute options"
                         onChange={
@@ -96,7 +97,7 @@ export function FilterOptionList({
                       />
                     )}
                   </Box>
-                  {filter.connectedAttributes && (
+                  {filter.connectedAttributes && hasAttributeOptions && (
                     <Box
                       margin={{ left: 'medium', vertical: 'xsmall' }}
                       gap="xxsmall"

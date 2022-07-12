@@ -14,11 +14,18 @@ import {
   Button,
   Layer,
 } from 'grommet';
-import { Filter } from 'grommet-icons';
-
 import qe from 'utils/quasi-equals';
-
+import Icon from 'components/Icon';
 import MultiSelect from 'components/forms/MultiSelectControl/MultiSelect';
+
+
+const StyledButton = styled((p) => <Button {...p} />)`
+  color: ${({ theme }) => theme.global.colors.text.secondary};
+  &:hover {
+    color: ${({ theme }) => theme.global.colors.highlight};
+  }
+`;
+
 const LayerWrap = styled((p) => (
   <Box
     background="white"
@@ -31,11 +38,8 @@ overflow-y: auto;
 `;
 
 function OptionsOverlay({
-  dark,
   options,
   title,
-  padButton,
-  colorButton,
   onChange,
 }) {
   const infoRef = useRef(null);
@@ -51,15 +55,18 @@ function OptionsOverlay({
     <>
       <Box
         fill={false}
-        pad={padButton || { horizontal: 'small' }}
+        pad={{ horizontal: 'xsmall' }}
         ref={infoRef}
         flex={{ grow: 0, shrink: 0 }}
       >
-        <Button
+        <StyledButton
           plain
+          title={title}
+          pad="small"
           icon={(
-            <Filter
-              color={colorButton || (dark ? 'light-5' : 'dark-5')}
+            <Icon
+              title={title}
+              name="filter"
               size="18px"
             />
           )}
@@ -119,15 +126,9 @@ function OptionsOverlay({
 }
 
 OptionsOverlay.propTypes = {
-  dark: PropTypes.bool,
   options: PropTypes.instanceOf(List),
   title: PropTypes.string,
-  colorButton: PropTypes.string,
   onChange: PropTypes.func,
-  padButton: PropTypes.oneOfType([
-    PropTypes.object,
-    PropTypes.string,
-  ]),
 };
 
 export default OptionsOverlay;

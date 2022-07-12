@@ -146,7 +146,7 @@ export const makeFilterGroups = ({
             }],
           };
           if (option.connectionAttributeFilter) {
-            const connectionFilterOptions = [{
+            const connectionFilterOption = {
               id: option.connectionAttributeFilter.path, // filterOptionId
               active: !!activeFilterOption
                 && activeFilterOption.group === connectionKey
@@ -154,10 +154,11 @@ export const makeFilterGroups = ({
               currentFilters: currentFilters.filter(
                 (f) => qe(f.groupId, option.connectionAttributeFilter.path)
               ),
-            }];
+              ...option.connectionAttributeFilter,
+            };
             filterGroups[connectionKey].options = [
               ...filterGroups[connectionKey].options,
-              ...connectionFilterOptions,
+              connectionFilterOption,
             ];
           }
         }

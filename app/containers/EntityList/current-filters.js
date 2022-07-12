@@ -449,6 +449,7 @@ const getCurrentConnectionFilters = (
             ],
             group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
             type: option.entityType,
+            query: 'without',
             onClick: () => onClick({
               value: queryValue,
               query: 'without',
@@ -484,6 +485,7 @@ const getCurrentConnectionFilters = (
             ],
             group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
             type: option.entityType,
+            query: 'any',
             onClick: () => onClick({
               value: queryValue,
               query: 'any',

@@ -707,13 +707,13 @@ const getConnectionFilterOptions = ({
   if (entities.size === 0) {
     if (locationQueryValue) {
       asList(locationQueryValue).forEach((queryValue) => {
-        const value = queryValue;
+        const value = queryValue.split('>')[0];
         const connection = connections.get(path) && connections.getIn([path, value]);
         const reference = showEntityReference && connection && getEntityReference(connection);
         resultOptions.options[value] = {
           reference,
           label: connection ? getEntityTitle(connection, option.labels, contextIntl) : upperFirst(value),
-          info: connection.getIn(['attributes', 'description']),
+          info: connection && connection.getIn(['attributes', 'description']),
           showCount: true,
           value,
           count: 0,
@@ -825,7 +825,7 @@ const getConnectionFilterOptions = ({
             }
           });
         }
-        if (optionConnections) {
+        if (!optionConnections) {
           if (resultOptions.options.without) {
             // no connection present
             // add without option

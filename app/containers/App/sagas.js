@@ -752,7 +752,8 @@ const getNextQuery = (query, extend, location) => {
     ? location.get('query').toJS()
     : location.get('query').filter((val, key) => key === 'view').toJS();
   // and figure out new query
-
+  // console.log('query', query)
+  // console.log('queryPrevious', queryPrevious)
   return asArray(query).reduce((memo, param) => {
     const queryUpdated = memo;
     // if arg already set and not replacing
@@ -787,15 +788,16 @@ const getNextQuery = (query, extend, location) => {
       } else {
         queryUpdated[param.arg] = asArray(queryUpdated[param.arg]);
         const isIncluded = !!queryUpdated[param.arg].find(
-          (qv) => qe(qv.toString().split('>')[0], param.value.toString())
+          (qv) => qe(qv.toString().split('>')[0], param.value.toString().split('>')[0])
         );
+
         // add if not already present
         if (param.add && !isIncluded) {
           queryUpdated[param.arg].push(param.value);
         // remove if present
         } else if (extend && param.remove && param.value && isIncluded) {
           queryUpdated[param.arg] = queryUpdated[param.arg].filter(
-            (qv) => !qe(qv.toString().split('>')[0], param.value.toString())
+            (qv) => !qe(qv.toString().split('>')[0], param.value.toString().split('>')[0])
           );
           // convert to single value if only one value left
           if (queryUpdated[param.arg].length === 1) {
