@@ -842,20 +842,24 @@ const checkAttribute = (typeId, att, attributes, isManager) => {
       return false;
     }
     if (attributes[att].optional) {
-      return attributes[att].optional.indexOf(typeId.toString()) > -1;
+      return Array.isArray(attributes[att].optional)
+        ? attributes[att].optional.indexOf(typeId.toString()) > -1
+        : attributes[att].optional;
     }
     if (attributes[att].required) {
-      return attributes[att].required.indexOf(typeId.toString()) > -1;
+      return Array.isArray(attributes[att].required)
+        ? attributes[att].required.indexOf(typeId.toString()) > -1
+        : attributes[att].required;
     }
   } else if (!typeId && attributes && attributes[att]) {
     if (attributes[att].hideAnalyst && !isManager) {
       return false;
     }
     if (attributes[att].optional) {
-      return attributes[att].optional.indexOf(typeId.toString()) > -1;
+      return !!attributes[att].optional;
     }
     if (attributes[att].required) {
-      return attributes[att].required.indexOf(typeId.toString()) > -1;
+      return !!attributes[att].required;
     }
   }
   return false;

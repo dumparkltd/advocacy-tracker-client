@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
-
+import { Box } from 'grommet';
 import {
   getTitleField,
   getStatusField,
@@ -48,9 +48,11 @@ import {
   selectTaxonomiesWithCategories,
   selectActionConnections,
   selectSessionUserId,
+  selectCountriesWithPositions,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
+import CountryMap from './CountryMap';
 import messages from './messages';
 
 import {
@@ -181,6 +183,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
       onEntityClick,
       handleEdit,
       handleClose,
+      countries,
     } = this.props;
     let buttons = [];
     if (dataReady) {
@@ -209,7 +212,6 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
       ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
       : `${pageTitle}: ${this.props.params.id}`;
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
-
     return (
       <div>
         <Helmet
@@ -282,10 +284,18 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                         ],
                       }}
                     />
+                    {dataReady && countries && (
+                      <Box pad={{ vertical: 'small' }}>
+                        <CountryMap
+                          countries={countries}
+                          indicatorId={viewEntity.get('id')}
+                          onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+                        />
+                      </Box>
+                    )}
                     {actionsByActiontype && (
                       <FieldGroup
                         group={{
-                          label: appMessages.nav.actions,
                           fields: actionsByActiontype.reduce(
                             (memo, actions, actiontypeid) => ([
                               ...memo,
@@ -328,6 +338,7 @@ IndicatorView.propTypes = {
   taxonomies: PropTypes.object,
   actionConnections: PropTypes.object,
   actionsByActiontype: PropTypes.object,
+  countries: PropTypes.object,
   params: PropTypes.object,
   myId: PropTypes.string,
   isManager: PropTypes.bool,
@@ -347,6 +358,7 @@ const mapStateToProps = (state, props) => ({
   taxonomies: selectTaxonomiesWithCategories(state),
   actionsByActiontype: selectActionsByType(state, props.params.id),
   actionConnections: selectActionConnections(state),
+  countries: selectCountriesWithPositions(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
