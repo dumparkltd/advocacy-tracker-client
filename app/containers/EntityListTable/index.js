@@ -173,8 +173,10 @@ export function EntityListTable({
   // sort entities
   const sortedEntities = entityRows && entityRows.sort(
     (a, b) => {
-      const aSortValue = a[cleanSortBy] && (a[cleanSortBy].sortValue || a[cleanSortBy].value);
-      const bSortValue = b[cleanSortBy] && (b[cleanSortBy].sortValue || b[cleanSortBy].value);
+      const aSortValue = a[cleanSortBy]
+        && (a[cleanSortBy].sortValue || a[cleanSortBy].order || a[cleanSortBy].value);
+      const bSortValue = b[cleanSortBy]
+        && (b[cleanSortBy].sortValue || b[cleanSortBy].order || b[cleanSortBy].value);
       const aHasSortValue = aSortValue || isNumber(aSortValue);
       const bHasSortValue = bSortValue || isNumber(bSortValue);
       // always prefer values over none, regardless of order

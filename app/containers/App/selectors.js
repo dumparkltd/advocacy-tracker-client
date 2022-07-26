@@ -25,6 +25,8 @@ import {
   ACTIONTYPE_RESOURCETYPES,
   DEFAULT_ACTIONTYPE,
   DEFAULT_ACTORTYPE,
+  ACTORTYPES,
+  ACTIONTYPES,
   ACTORTYPES_CONFIG,
   ACTIONTYPES_CONFIG,
   INDICATOR_ACTIONTYPES,
@@ -1671,4 +1673,111 @@ export const selectViewActorActortypeId = createSelector(
     }
     return null;
   }
+);
+
+export const selectCountriesWithPositions = createSelector(
+  (state) => selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
+  (state) => selectActortypeActors(state, { type: ACTORTYPES.GROUP }),
+  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
+  selectMembershipsGroupedByMember,
+  selectActorActionsGroupedByActor,
+  selectIndicators,
+  selectActionIndicatorsGroupedByIndicatorAttributes,
+  (
+    countries,
+    groups,
+    statements,
+    memberships,
+    actorActions,
+    indicators,
+    actionIndicators,
+  ) => countries
+    && groups
+    && statements
+    && memberships
+    && actorActions
+    && indicators
+    && actionIndicators
+    && countries.map(
+      (country) => {
+        // actorActions
+        // direct
+        let countryStatements = actorActions.get(parseInt(country.get('id'), 10));
+        if (countryStatements) {
+          countryStatements = countryStatements
+            .filter((actionId) => statements.get(actionId.toString()))
+            .toList();
+          // merge with indirect
+          const countryMemberships = memberships.get(parseInt(country.get('id'), 10));
+          countryStatements = countryMemberships
+            ? countryMemberships.reduce(
+              (memo, groupId) => {
+                if (groups.get(groupId.toString()) && actorActions && actorActions.get(groupId)) {
+                  return memo.concat(
+                    actorActions
+                      .get(groupId)
+                      .filter((actionId) => statements.get(actionId.toString()))
+                      .toList()
+                  ).toSet();
+                }
+                return memo;
+              },
+              countryStatements,
+            )
+            : countryStatements;
+          // now for each indicator
+          const countryIndicators = countryStatements && indicators.map(
+            (indicator) => {
+              // get all statements for topic
+              let indicatorStatements = actionIndicators.get(parseInt(indicator.get('id'), 10));
+              if (indicatorStatements) {
+                // filter for current country
+                indicatorStatements = indicatorStatements.filter(
+                  (indicatorStatement) => {
+                    const statementId = indicatorStatement.get('measure_id');
+                    return countryStatements.includes(parseInt(statementId, 10));
+                  }
+                ).map(
+                  (indicatorStatement) => {
+                    const statement = statements.get(indicatorStatement.get('measure_id').toString());
+                    return statement
+                      ? indicatorStatement.set(
+                        'measure',
+                        statement.get('attributes'),
+                      )
+                      : indicatorStatement;
+                  }
+                ).sort(
+                  // sort by date - latest first
+                  (a, b) => {
+                    const aDate = a.getIn(['measure', 'date_start']);
+                    const bDate = b.getIn(['measure', 'date_start']);
+                    /* eslint-disable no-restricted-globals */
+                    const aIsDate = new Date(aDate) instanceof Date && !isNaN(new Date(aDate));
+                    const bIsDate = new Date(bDate) instanceof Date && !isNaN(new Date(bDate));
+                    /* eslint-enable no-restricted-globals */
+                    if (aIsDate && bIsDate) {
+                      return new Date(aDate) < new Date(bDate) ? 1 : -1;
+                    }
+                    if (aIsDate) {
+                      return -1;
+                    }
+                    if (bIsDate) {
+                      return 1;
+                    }
+                    return 1;
+                  }
+                ).toList();
+                return indicatorStatements || null;
+              }
+              return null;
+            },
+          );
+          return country
+            .set('statements', countryStatements)
+            .set('indicatorPositions', countryIndicators);
+        }
+        return country;
+      }
+    )
 );

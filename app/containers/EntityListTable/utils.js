@@ -177,6 +177,20 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
+      case 'supportlevel':
+        return ({
+          ...col,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'stackedBar':
+        return ({
+          ...col,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
       default:
         return col;
     }
@@ -280,7 +294,7 @@ export const prepareEntities = ({
                 draft: entity.getIn(['attributes', 'draft']),
                 archived: entity.getIn(['attributes', 'is_archive']),
                 private: entity.getIn(['attributes', 'private']),
-                sortValue: entity.getIn(['attributes', col.sort]),
+                sortValue: entity.getIn(['attributes', col.sort || 'title']),
                 selected: entityIdsSelected && entityIdsSelected.includes(id),
                 href: url || `${path}/${id}`,
                 onClick: (evt) => {
@@ -519,7 +533,7 @@ export const prepareEntities = ({
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: getRelatedValue(relatedEntities, 'actions'),
+                value: getRelatedValue(relatedEntities, col.type === 'indicatorActions' ? 'statements' : 'actions'),
                 single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
                 tooltip: relatedEntities && relatedEntities.size > 1
                   && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
@@ -556,6 +570,20 @@ export const prepareEntities = ({
                 ...col,
                 value: intl.formatMessage(appMessages.supportlevels[temp]),
                 color: ACTION_INDICATOR_SUPPORTLEVELS[temp].color,
+              },
+            };
+          case 'stackedBar':
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                values: entity.get(col.values) && entity.get(col.values).toJS(),
+                sortValue: entity.get(col.values)
+                  ? entity.get(col.values).reduce(
+                    (sum, val) => (val.count || 0) + sum,
+                    0,
+                  )
+                  : null,
               },
             };
           default:
@@ -626,6 +654,21 @@ export const getColumnMaxValues = (entities, columns) => entities.reduce(
     (maxValueMemo2, column) => {
       if (column.type === 'actorActions' || column.type === 'actiontype') {
         const val = entity[column.id].value;
+        return val
+          ? {
+            ...maxValueMemo2,
+            [column.id]: maxValueMemo2[column.id]
+              ? Math.max(maxValueMemo2[column.id], val)
+              : val,
+          }
+          : maxValueMemo2;
+      }
+      if (column.type === 'stackedBar') {
+        const { values } = entity[column.id];
+        const val = values && Object.values(values).reduce(
+          (memo, value) => (value.count || 0) + memo,
+          0,
+        );
         return val
           ? {
             ...maxValueMemo2,

@@ -23,8 +23,9 @@ export function CellHeaderInfoOverlay({ info }) {
           }}
         >
           <Box border="bottom" flex={{ shrink: 0 }} margin={{ bottom: 'small' }}>
-            <Text size="small" weight={500}>
-              <FormattedMessage {...appMessages.attributes[info.attribute]} />
+            <Text size="small" weight={600}>
+              {info.title}
+              {!info.title && (<FormattedMessage {...appMessages.attributes[info.attribute]} />)}
             </Text>
           </Box>
           <Box gap="small">
@@ -36,6 +37,31 @@ export function CellHeaderInfoOverlay({ info }) {
                 </Text>
               </LabelWrap>
             ))}
+          </Box>
+        </Box>
+      )}
+      {info.type === 'text' && (
+        <Box
+          pad="small"
+          margin={{ horizontal: 'xsmall', vertical: 'xsmall' }}
+          background="white"
+          elevation="small"
+          overflow={{
+            vertical: 'auto',
+            horizontal: 'hidden',
+          }}
+        >
+          {info.title && (
+            <Box border="bottom" flex={{ shrink: 0 }} margin={{ bottom: 'small' }}>
+              <Text size="small" weight={600}>
+                {info.title}
+              </Text>
+            </Box>
+          )}
+          <Box gap="small">
+            <Text size="small" weight={500}>
+              {info.text}
+            </Text>
           </Box>
         </Box>
       )}

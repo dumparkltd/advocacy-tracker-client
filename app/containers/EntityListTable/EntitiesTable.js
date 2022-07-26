@@ -13,6 +13,7 @@ import CellBodyIndicators from './CellBodyIndicators';
 import CellBodyCategories from './CellBodyCategories';
 import CellBodyHasResource from './CellBodyHasResource';
 import CellBodyBarChart from './CellBodyBarChart';
+import CellBodyStackedBarChart from './CellBodyStackedBarChart';
 import CellHeaderMain from './CellHeaderMain';
 import CellHeaderPlain from './CellHeaderPlain';
 
@@ -272,6 +273,16 @@ export function EntitiesTable({
                         subject={col.subject}
                         column={col}
                         issecondary={col.type !== 'actiontype' && col.members}
+                      />
+                    )}
+                    {col.type === 'stackedBar' && (
+                      <CellBodyStackedBarChart
+                        values={entity[col.id] && entity[col.id].values
+                          ? Object.values(entity[col.id].values)
+                          : null
+                        }
+                        maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
+                        column={col}
                       />
                     )}
                   </TableCellBodyInner>
