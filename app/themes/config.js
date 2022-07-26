@@ -8,20 +8,17 @@
  * Images: images are stored in 'themes/media' folder
  *
  */
-
+import { version } from '../../package.json';
 // General ********************
-export const NODE_ENV = sessionStorage.NODE_ENV || 'production';
+export const NODE_ENV = (process && process.env && process.env.NODE_ENV) || 'production';
+export const IS_DEV = NODE_ENV !== 'production';
 
-const IS_DEV = true;
-export const version = '1.0.4[#77]';
-
+export const VERSION = `${version}${IS_DEV ? ' [DEV]' : ''}`;
 
 export const ENDPOINTS = {
-  API: (
-    NODE_ENV === 'production' && !IS_DEV
-      ? 'https://advocacy-tracker-api.herokuapp.com'
-      : 'https://advocacy-tracker-dev.herokuapp.com'
-  ), // server API endpoint
+  API: IS_DEV // server API endpoint
+    ? 'https://advocacy-tracker-dev.herokuapp.com'
+    : 'https://advocacy-tracker-api.herokuapp.com',
   SIGN_IN: 'auth/sign_in',
   SIGN_OUT: 'auth/sign_out',
   PASSWORD: 'auth/password',
