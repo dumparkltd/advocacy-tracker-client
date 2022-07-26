@@ -787,8 +787,8 @@ const getNextQuery = (query, extend, location) => {
         }
       } else {
         queryUpdated[param.arg] = asArray(queryUpdated[param.arg]);
-        const isIncluded = !!queryUpdated[param.arg].find(
-          (qv) => qe(qv.toString().split('>')[0], param.value.toString().split('>')[0])
+        const isIncluded = !!param.value && !!queryUpdated[param.arg].find(
+          (qv) => qe(qv && qv.toString().split('>')[0], param.value.toString().split('>')[0])
         );
 
         // add if not already present
