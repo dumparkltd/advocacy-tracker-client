@@ -25,6 +25,8 @@ import {
   selectActionIndicatorsGroupedByAction,
   selectMembershipsGroupedByMember,
   selectMembershipsGroupedByAssociation,
+  selectActionIndicatorsGroupedByActionAttributes,
+  selectActionIndicatorsGroupedByIndicatorAttributes,
   selectActors,
   selectActorCategoriesGroupedByActor,
   // selectActiontypes,
@@ -110,6 +112,8 @@ export const selectActionsWith = createSelector(
   selectActionActorsGroupedByAction,
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
+  selectActionIndicatorsGroupedByIndicatorAttributes,
   selectCategories,
   selectActionCategoriesGroupedByAction,
   selectUserActionsGroupedByAction,
@@ -123,6 +127,8 @@ export const selectActionsWith = createSelector(
     actionActors,
     actionResources,
     actionIndicators,
+    actionIndicatorsByActionAttributes,
+    actionIndicatorsByIndicatorAttributes,
     categories,
     actionCategories,
     userActions,
@@ -139,7 +145,7 @@ export const selectActionsWith = createSelector(
       return null;
     }
 
-    return actions && actions
+    const actionsWithConnections = actions && actions
       .filter(
         (action) => validActiontypeIds.indexOf(action.getIn(['attributes', 'measuretype_id']).toString()) > -1
       )
@@ -150,10 +156,12 @@ export const selectActionsWith = createSelector(
         actionActors,
         actionResources,
         actionIndicators,
+        actionIndicatorAttributes: actionIndicatorsByActionAttributes,
         categories,
         actionCategories,
         users: userActions,
       }));
+    return actionsWithConnections;
   }
 );
 export const selectActionsByType = createSelector(
