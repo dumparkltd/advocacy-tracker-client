@@ -392,7 +392,7 @@ export function MapContainer({
           onFeatureClick={(evt) => {
             if (evt !== undefined && evt.stopPropagation) evt.stopPropagation();
             setTooltip(null);
-            if (tooltip.feature && tooltip.feature.attributes) {
+            if (tooltip.feature) {
               onCountryClick(tooltip.feature.id);
             }
           }}
