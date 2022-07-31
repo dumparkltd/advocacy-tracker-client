@@ -19,9 +19,9 @@ import { ACTORTYPES } from 'themes/config';
 // import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
 // import { hasGroupActors } from 'utils/entities';
-import MapContainer from 'containers/MapContainer';
-import TooltipContent from 'containers/MapContainer/TooltipContent';
-import MapKey from 'containers/MapContainer/MapInfoOptions/MapKey';
+import MapContainerOLD from 'containers/MapContainerOLD';
+import TooltipContent from 'containers/MapContainerOLD/TooltipContent';
+import MapKey from 'containers/MapContainerOLD/MapInfoOptions/MapKey';
 const MapKeyWrapper = styled((p) => <Box margin={{ horizontal: 'medium', vertical: 'xsmall' }} {...p} />)`
   max-width: 400px;
 `;
@@ -108,7 +108,7 @@ export function IndicatorMap({
         <Text weight={600}>{indicator.getIn(['attributes', 'title'])}</Text>
       </MapTitle>
       <MapWrapper>
-        <MapContainer
+        <MapContainerOLD
           countryData={countryData}
           countryFeatures={countriesJSON.features}
           indicator="indicator"

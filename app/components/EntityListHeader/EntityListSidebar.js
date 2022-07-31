@@ -17,7 +17,7 @@ import SupTitle from 'components/SupTitle';
 
 import Sidebar from 'components/styled/Sidebar';
 import SidebarHeader from 'components/styled/SidebarHeader';
-import MapMemberOption from 'containers/MapContainer/MapInfoOptions/MapMemberOption';
+import MapMemberOption from 'containers/MapContainerOLD/MapInfoOptions/MapMemberOption';
 
 import EntityListSidebarGroups from './EntityListSidebarGroups';
 

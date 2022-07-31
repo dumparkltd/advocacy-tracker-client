@@ -17,7 +17,7 @@ import countriesTopo from 'data/ne_countries_10m_v5.topo.json';
 // import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
 // import { hasGroupActors } from 'utils/entities';
-import MapContainer from 'containers/MapContainer';
+import MapContainerOLD from 'containers/MapContainerOLD';
 // import messages from './messages';
 
 const Styled = styled((p) => <Box margin={{ horizontal: 'small' }} {...p} />)`
@@ -53,7 +53,7 @@ export function CountryMap({
   return (
     <Styled hasHeader noOverflow>
       <MapWrapper>
-        <MapContainer
+        <MapContainerOLD
           mapId="ll-map-country"
           countryData={countryData}
           countryFeatures={countriesJSON.features}

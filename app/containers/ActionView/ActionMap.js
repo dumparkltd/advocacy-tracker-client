@@ -32,8 +32,8 @@ import {
 // import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
 // import { hasGroupActors } from 'utils/entities';
-import MapContainer from 'containers/MapContainer';
-import MapMemberOption from 'containers/MapContainer/MapInfoOptions/MapMemberOption';
+import MapContainerOLD from 'containers/MapContainerOLD';
+import MapMemberOption from 'containers/MapContainerOLD/MapInfoOptions/MapMemberOption';
 
 // import messages from './messages';
 
@@ -159,7 +159,7 @@ export function ActionMap({
   return (
     <Styled hasHeader noOverflow>
       <MapWrapper>
-        <MapContainer
+        <MapContainerOLD
           countryData={countryData}
           countryFeatures={countriesJSON.features}
           indicator="actions"

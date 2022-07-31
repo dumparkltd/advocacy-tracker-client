@@ -19,7 +19,7 @@ import {
 import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
 // import { hasGroupActors } from 'utils/entities';
-import MapContainer from 'containers/MapContainer';
+import MapContainerOLD from 'containers/MapContainerOLD';
 
 // import messages from './messages';
 import Dot from 'components/styled/Dot';
@@ -111,7 +111,7 @@ export function CountryMap({
         </MapTitle>
       </MapOptions>
       <MapWrapper>
-        <MapContainer
+        <MapContainerOLD
           countryData={countryData}
           countryFeatures={countriesJSON.features}
           indicator={indicatorId}

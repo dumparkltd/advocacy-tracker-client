@@ -33,9 +33,9 @@ import EntityListViewOptions from 'components/EntityListViewOptions';
 import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
 import { hasGroupActors } from 'utils/entities';
-import MapContainer from 'containers/MapContainer';
-import MapInfoOptions from 'containers/MapContainer/MapInfoOptions';
-import TooltipContent from 'containers/MapContainer/TooltipContent';
+import MapContainerOLD from 'containers/MapContainerOLD';
+import MapInfoOptions from 'containers/MapContainerOLD/MapInfoOptions';
+import TooltipContent from 'containers/MapContainerOLD/TooltipContent';
 // import messages from './messages';
 
 const LoadingWrap = styled.div`
@@ -621,7 +621,7 @@ export function EntitiesMap({
 
   return (
     <Styled headerStyle="types" noOverflow>
-      <MapContainer
+      <MapContainerOLD
         typeLabels={typeLabels}
         countryFeatures={countriesJSON.features}
         countryData={countryData}

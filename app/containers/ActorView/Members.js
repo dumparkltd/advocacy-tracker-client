@@ -23,7 +23,7 @@ import FieldGroup from 'components/fields/FieldGroup';
 
 // import appMessages from 'containers/App/messages';
 // import ActorMap from './ActorMap';
-import MapContainer from 'containers/MapContainer';
+import MapContainerOLD from 'containers/MapContainerOLD';
 // import messages from './messages';
 
 const MapOuterWrapper = styled((p) => <Box {...p} />)`
@@ -100,7 +100,7 @@ export function Members(props) {
         <Box>
           <MapOuterWrapper hasHeader noOverflow>
             <MapWrapper>
-              <MapContainer
+              <MapContainerOLD
                 countryData={countryData}
                 countryFeatures={countriesJSON.features}
                 styleType="members"

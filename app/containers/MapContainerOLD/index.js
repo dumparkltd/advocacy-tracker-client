@@ -77,7 +77,7 @@ const getBBox = (bounds, xLat = 0.5, xLon = 180) => {
   });
 };
 
-export function MapContainer({
+export function MapContainerOLD({
   countryFeatures,
   countryData,
   indicator,
@@ -402,7 +402,7 @@ export function MapContainer({
   );
 }
 
-MapContainer.propTypes = {
+MapContainerOLD.propTypes = {
   countryFeatures: PropTypes.array,
   countryData: PropTypes.array,
   indicator: PropTypes.string,
@@ -421,4 +421,4 @@ MapContainer.propTypes = {
   // onSetMapSubject: PropTypes.func,
 };
 
-export default MapContainer;
+export default MapContainerOLD;
