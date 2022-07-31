@@ -471,6 +471,15 @@ export const selectIncludeInofficialStatements = createSelector(
     return true; // default
   }
 );
+export const selectMapIndicator = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('topic')) {
+      return locationQuery.get('topic');
+    }
+    return null; // default
+  }
+);
 
 // database ////////////////////////////////////////////////////////////////////////
 
@@ -1687,6 +1696,7 @@ export const selectViewActorActortypeId = createSelector(
 );
 
 export const selectCountriesWithPositions = createSelector(
+  (state, params) => params && typeof params.includeActorMembers !== 'undefined' ? params.includeActorMembers : true,
   (state) => selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
   (state) => selectActortypeActors(state, { type: ACTORTYPES.GROUP }),
   (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
@@ -1697,6 +1707,7 @@ export const selectCountriesWithPositions = createSelector(
   selectActionIndicatorsGroupedByIndicatorAttributes,
   selectIncludeInofficialStatements,
   (
+    includeActorMembers,
     countries,
     groups,
     statements,
@@ -1716,6 +1727,7 @@ export const selectCountriesWithPositions = createSelector(
     && countries.map(
       (country) => {
         // actorActions
+        let countryIndicators;
         // direct
         let countryStatements = actorActions.get(parseInt(country.get('id'), 10));
         if (countryStatements) {
@@ -1729,10 +1741,15 @@ export const selectCountriesWithPositions = createSelector(
               return actionCategories && actionCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
             })
             .toList();
-          // merge with indirect
+        }
+        // merge with indirect
+        if (includeActorMembers) {
           const countryMemberships = memberships.get(parseInt(country.get('id'), 10));
-          countryStatements = countryMemberships
-            ? countryMemberships.reduce(
+          // console.log('countryid', country.get('id'))
+          // console.log('memberships', memberships && memberships.toJS())
+          // console.log('countryMemberships', countryMemberships && countryMemberships.toJS())
+          if (countryMemberships) {
+            countryStatements = countryMemberships.reduce(
               (memo, groupId) => {
                 if (groups.get(groupId.toString()) && actorActions && actorActions.get(groupId)) {
                   return memo.concat(
@@ -1744,11 +1761,13 @@ export const selectCountriesWithPositions = createSelector(
                 }
                 return memo;
               },
-              countryStatements,
-            )
-            : countryStatements;
+              countryStatements || List(),
+            );
+          }
+        }
+        if (countryStatements && countryStatements.size > 0) {
           // now for each indicator
-          const countryIndicators = countryStatements && indicators.map(
+          countryIndicators = countryStatements && indicators.map(
             (indicator) => {
               // get all statements for topic
               let indicatorStatements = actionIndicators.get(parseInt(indicator.get('id'), 10));

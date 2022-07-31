@@ -10,17 +10,25 @@ import { Map, List } from 'immutable';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
+import { Box, Text } from 'grommet';
 // import { FormattedMessage } from 'react-intl';
 
-import { ACTORTYPES, ROUTES, ACTIONTYPES } from 'themes/config';
+import {
+  ACTORTYPES,
+  ROUTES,
+  ACTIONTYPES,
+  ACTION_INDICATOR_SUPPORTLEVELS,
+} from 'themes/config';
 
 import {
   selectActors,
   selectActions,
   selectActortypeActors,
+  selectCountriesWithPositions,
   selectActionActorsGroupedByAction,
   selectActorActionsGroupedByAction,
   selectMembershipsGroupedByAssociation,
+  selectMapIndicator,
 } from 'containers/App/selectors';
 
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
@@ -59,6 +67,7 @@ export function EntitiesMap({
   targettypes,
   typeId,
   mapSubject,
+  mapIndicator,
   onSetMapSubject,
   onSetIncludeActorMembers,
   onSetIncludeTargetMembers,
@@ -84,7 +93,7 @@ export function EntitiesMap({
   let hasByTarget;
   let hasActions;
   let subjectOptions = [];
-  let memberOption = [];
+  let memberOption;
   let typeLabels;
   let typeLabelsFor;
   let indicator = includeActorMembers ? 'actionsTotal' : 'actions';
@@ -460,6 +469,13 @@ export function EntitiesMap({
           label: 'Include activities of groups (countries belong to)',
         };
       }
+
+      const isPositionIndicator = qe(typeId, ACTIONTYPES.EXPRESS)
+        && typeof mapIndicator !== 'undefined'
+        && mapIndicator !== null;
+      if (isPositionIndicator) {
+        indicator = null;
+      }
       // entities are filtered actions
       let countryCounts = null;
       [countryCounts, actionsTotalShowing] = entities.reduce(([memo, memo2], action) => {
@@ -542,6 +558,38 @@ export function EntitiesMap({
           const actionsTotal = countActions + countActionsMembers;
           const targetingActionsTotal = countTargetingActions + countTargetingActionsMembers;
           let stats;
+          if (isPositionIndicator) {
+            const countryPositions = country.getIn(['indicatorPositions', mapIndicator.toString()]);
+            const countryPosition = countryPositions && countryPositions.first();
+            const level = countryPosition && parseInt(countryPosition.get('supportlevel_id'), 10);
+            const statement = countryPosition && countryPosition.get('measure');
+            const position = ACTION_INDICATOR_SUPPORTLEVELS[level || 0];
+            return {
+              ...feature,
+              id: country.get('id'),
+              attributes: country.get('attributes').toJS(),
+              tooltip: {
+                id: country.get('id'),
+                title: country.getIn(['attributes', 'title']),
+                content: (
+                  <Box gap="small" pad={{ top: 'small' }}>
+                    <Text weight={600}>
+                      {intl.formatMessage(appMessages.supportlevels[position.value])}
+                    </Text>
+                    {statement && (
+                      <Text size="xsmall">
+                        {`Statement: ${statement.get('title')}`}
+                      </Text>
+                    )}
+                  </Box>
+                ),
+              },
+              style: {
+                fillColor: position.color,
+              },
+            };
+            //
+          }
           if (mapSubjectClean === 'actors') {
             stats = [
               {
@@ -558,6 +606,10 @@ export function EntitiesMap({
                 ],
               },
             ];
+            // level of support
+            // add tooltip stats
+            // if (qe(typeId, ACTIONTYPES.EXPRESS)) {
+            // }
           } else if (mapSubjectClean === 'targets') {
             stats = [
               {
@@ -681,6 +733,7 @@ EntitiesMap.propTypes = {
   dataReady: PropTypes.bool,
   typeId: PropTypes.string,
   mapSubject: PropTypes.string,
+  mapIndicator: PropTypes.string,
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeTargetMembers: PropTypes.func,
@@ -691,13 +744,17 @@ EntitiesMap.propTypes = {
   intl: intlShape.isRequired,
 };
 
-const mapStateToProps = (state) => ({
-  countries: selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
+const mapStateToProps = (state, { typeId, config, includeActorMembers }) => ({
+  countries: (config.types === 'actiontypes'
+    && qe(typeId, ACTIONTYPES.EXPRESS))
+    ? selectCountriesWithPositions(state, { includeActorMembers })
+    : selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
   actors: selectActors(state),
   actions: selectActions(state),
   actionActorsByAction: selectActionActorsGroupedByAction(state), // for figuring out targeted countries
   actorActionsByAction: selectActorActionsGroupedByAction(state), // for figuring out targeted countries
   membershipsByAssociation: selectMembershipsGroupedByAssociation(state),
+  mapIndicator: selectMapIndicator(state),
 });
 
 export default connect(mapStateToProps, null)(injectIntl(EntitiesMap));

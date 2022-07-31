@@ -124,6 +124,7 @@ export function MapInfoOptions({
     && minMaxValues
     && minMaxValues.points;
   }
+
   return (
     <Styled hasTabs={options.length > 1}>
       <Pane>

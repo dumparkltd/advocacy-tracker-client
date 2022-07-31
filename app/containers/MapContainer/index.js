@@ -116,23 +116,24 @@ export function MapContainer({
   }
   if (
     reduceCountryAreas
-    && indicator
     && !showPointsOnly
   ) {
     countryData = reduceCountryAreas && reduceCountryAreas(countriesJSON.features);
-    [maxValue, minValue] = countryData
-      ? countryData.reduce(
-        ([max, min], feature) => ([
-          max !== null ? Math.max(max, feature.values[indicator]) : feature.values[indicator],
-          min !== null ? Math.min(min, feature.values[indicator]) : feature.values[indicator],
-        ]),
-        [null, null],
-      )
-      : [0, 0];
-    minMaxValues.countries = {
-      max: maxValue,
-      min: minValue,
-    };
+    if (indicator) {
+      [maxValue, minValue] = countryData
+        ? countryData.reduce(
+          ([max, min], feature) => ([
+            max !== null ? Math.max(max, feature.values[indicator]) : feature.values[indicator],
+            min !== null ? Math.min(min, feature.values[indicator]) : feature.values[indicator],
+          ]),
+          [null, null],
+        )
+        : [0, 0];
+      minMaxValues.countries = {
+        max: maxValue,
+        min: minValue,
+      };
+    }
   }
 
   let allMapOptions = mapOptions;
@@ -159,7 +160,7 @@ export function MapContainer({
           locationData={locationData}
           countryFeatures={countriesJSON.features}
           indicator={indicator}
-          onActorClick={(id) => onActorClick(id)}
+          onCountryClick={(id) => onActorClick(id)}
           maxValueCountries={minMaxValues
             && minMaxValues.countries
             ? minMaxValues.countries.max

@@ -97,7 +97,7 @@ export function MapWrapper({
   countryData,
   locationData,
   indicator,
-  onActorClick,
+  onCountryClick,
   maxValueCountries,
   includeSecondaryMembers,
   mapSubject,
@@ -355,6 +355,7 @@ export function MapWrapper({
         countryData,
         {
           style: (f) => {
+            // console.log(f)
             const defaultStyle = styleType && mapOptions.STYLE[styleType]
               ? {
                 ...mapOptions.DEFAULT_STYLE,
@@ -570,7 +571,7 @@ export function MapWrapper({
           position={null}
           direction={tooltip.direction}
           features={tooltip.features && tooltip.features.map((f) => f && f.tooltip)}
-          onFeatureClick={onActorClick ? (id) => onActorClick(id) : null}
+          onFeatureClick={onCountryClick ? (id) => onCountryClick(id) : null}
           onClose={(id) => setTooltip({
             ...tooltip,
             features: tooltip.features.reduce(
@@ -589,7 +590,7 @@ MapWrapper.propTypes = {
   countryData: PropTypes.array, // country data overlay
   locationData: PropTypes.array, // location data overlay
   indicator: PropTypes.string,
-  onActorClick: PropTypes.func,
+  onCountryClick: PropTypes.func,
   maxValueCountries: PropTypes.number,
   includeSecondaryMembers: PropTypes.bool,
   fitBounds: PropTypes.bool,
