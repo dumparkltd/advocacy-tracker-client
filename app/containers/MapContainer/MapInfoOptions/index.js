@@ -22,7 +22,7 @@ const Styled = styled.div`
   z-index: 50;
   bottom: 10px;
   width: 100%;
-  height: 250px;
+  height: ${({ hasTabs }) => hasTabs ? 250 : 220}px;
   left: 0;
   max-width: 380px;
   @media (min-width: 370px) {
@@ -80,7 +80,8 @@ export function MapInfoOptions({
   const [tab, setTab] = useState(options[0].id);
   const activeTab = options.find((o) => qe(tab, o.id));
   const renderTabs = (shadow) => options
-    && options.map(
+    && options.length > 1
+    ? options.map(
       (option) => {
         const active = qe(tab, option.id);
         return (
@@ -109,7 +110,8 @@ export function MapInfoOptions({
           </Box>
         );
       }
-    );
+    )
+    : null;
   let activeIndicatorOption;
   let showIndicatorInfo;
   if (activeTab.id === 'indicators') {
@@ -123,7 +125,7 @@ export function MapInfoOptions({
     && minMaxValues.points;
   }
   return (
-    <Styled>
+    <Styled hasTabs={options.length > 1}>
       <Pane>
         <Box fill="horizontal" direction="row" style={{ zIndex: 1 }}>
           {renderTabs(true)}
@@ -201,7 +203,7 @@ export function MapInfoOptions({
               {activeTab.subjectOptions && (
                 <MapSubjectOptions options={activeTab.subjectOptions} />
               )}
-              {minMaxValues.countries.max > 0 && (
+              {minMaxValues.countries && minMaxValues.countries.max > 0 && (
                 <MapKey maxValue={minMaxValues.countries.max} mapSubject={countryMapSubject} />
               )}
               <Box gap="xsmall" margin={{ vertical: 'small' }}>

@@ -120,7 +120,6 @@ export function MapContainer({
     && !showPointsOnly
   ) {
     countryData = reduceCountryAreas && reduceCountryAreas(countriesJSON.features);
-
     [maxValue, minValue] = countryData
       ? countryData.reduce(
         ([max, min], feature) => ([

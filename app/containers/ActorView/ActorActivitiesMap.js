@@ -33,9 +33,9 @@ import {
 // import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
 // import { hasGroupActors } from 'utils/entities';
-import MapContainerOLD from 'containers/MapContainerOLD';
-import MapMemberOption from 'containers/MapContainerOLD/MapInfoOptions/MapMemberOption';
-import MapKey from 'containers/MapContainerOLD/MapInfoOptions/MapKey';
+import MapContainer from 'containers/MapContainer/MapWrapper';
+import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import MapKey from 'containers/MapContainer/MapInfoOptions/MapKey';
 // import messages from './messages';
 
 const Styled = styled((p) => <Box {...p} />)`
@@ -408,7 +408,7 @@ export function ActorActivitiesMap({
   return (
     <Styled hasHeader noOverflow>
       <MapWrapper>
-        <MapContainerOLD
+        <MapContainer
           countryData={countryData}
           countryFeatures={countriesJSON.features}
           indicator="actions"
@@ -435,10 +435,10 @@ export function ActorActivitiesMap({
       {(memberOption || memberTargetOption) && (
         <MapOptions>
           {memberTargetOption && (
-            <MapMemberOption option={memberTargetOption} />
+            <MapOption option={memberTargetOption} type="members" />
           )}
           {memberOption && (
-            <MapMemberOption option={memberOption} />
+            <MapOption option={memberOption} type="members" />
           )}
         </MapOptions>
       )}

@@ -18,6 +18,7 @@ const TTSectionTitle = styled.div`
 const TooltipContent = ({
   stats,
   isCount,
+  includeZero = false,
 }) => (
   <Styled>
     {stats && stats.map((stat, i) => (
@@ -29,18 +30,22 @@ const TooltipContent = ({
         )}
         {stat.values && (
           <Box gap="xxsmall">
-            {stat.values.map((value, j) => (
-              <NumberField
-                key={j}
-                field={{
-                  title: value.label,
-                  value: value.value,
-                  unit: value.unit,
-                  isCount,
-                  showEmpty: !isCount && appMessages.labels.noIndicatorValue,
-                }}
-              />
-            ))}
+            {stat.values.filter(
+              (value) => includeZero || (value.value && value.value !== 0)
+            ).map(
+              (value, j) => (
+                <NumberField
+                  key={j}
+                  field={{
+                    title: value.label,
+                    value: includeZero && !value.value ? 0 : value.value,
+                    unit: value.unit,
+                    isCount,
+                    showEmpty: !isCount && appMessages.labels.noIndicatorValue,
+                  }}
+                />
+              )
+            )}
           </Box>
         )}
       </Box>
@@ -51,6 +56,7 @@ const TooltipContent = ({
 TooltipContent.propTypes = {
   stats: PropTypes.array,
   isCount: PropTypes.bool,
+  includeZero: PropTypes.bool,
 };
 
 export default TooltipContent;

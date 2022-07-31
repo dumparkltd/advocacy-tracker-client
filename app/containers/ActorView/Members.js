@@ -23,7 +23,7 @@ import FieldGroup from 'components/fields/FieldGroup';
 
 // import appMessages from 'containers/App/messages';
 // import ActorMap from './ActorMap';
-import MapContainerOLD from 'containers/MapContainerOLD';
+import MapContainer from 'containers/MapContainer/MapWrapper';
 // import messages from './messages';
 
 const MapOuterWrapper = styled((p) => <Box {...p} />)`
@@ -74,6 +74,7 @@ export function Members(props) {
             id: country.get('id'),
             attributes: country.get('attributes').toJS(),
             tooltip: {
+              id: country.get('id'),
               title: country.getIn(['attributes', 'title']),
             },
             values: {
@@ -100,11 +101,11 @@ export function Members(props) {
         <Box>
           <MapOuterWrapper hasHeader noOverflow>
             <MapWrapper>
-              <MapContainerOLD
+              <MapContainer
                 countryData={countryData}
                 countryFeatures={countriesJSON.features}
                 styleType="members"
-                onCountryClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+                onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
                 fitBounds
                 projection="gall-peters"
               />
