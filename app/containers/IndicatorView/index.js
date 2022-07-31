@@ -23,7 +23,23 @@ import {
 import { getEntityTitleTruncated } from 'utils/entities';
 import qe from 'utils/quasi-equals';
 
-import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
+import {
+  loadEntitiesIfNeeded,
+  updatePath,
+  closeEntity,
+  setIncludeInofficialStatements,
+} from 'containers/App/actions';
+
+import {
+  selectReady,
+  selectIsUserManager,
+  selectIsUserAdmin,
+  selectTaxonomiesWithCategories,
+  selectActionConnections,
+  selectSessionUserId,
+  selectCountriesWithPositions,
+  selectIncludeInofficialStatements,
+} from 'containers/App/selectors';
 
 import {
   ROUTES,
@@ -40,16 +56,6 @@ import ViewWrapper from 'components/EntityView/ViewWrapper';
 import ViewPanel from 'components/EntityView/ViewPanel';
 import ViewPanelInside from 'components/EntityView/ViewPanelInside';
 import FieldGroup from 'components/fields/FieldGroup';
-
-import {
-  selectReady,
-  selectIsUserManager,
-  selectIsUserAdmin,
-  selectTaxonomiesWithCategories,
-  selectActionConnections,
-  selectSessionUserId,
-  selectCountriesWithPositions,
-} from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
 import CountryMap from './CountryMap';
@@ -184,6 +190,8 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
       handleEdit,
       handleClose,
       countries,
+      onSetIncludeInofficial,
+      includeInofficial,
     } = this.props;
     let buttons = [];
     if (dataReady) {
@@ -290,6 +298,8 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                           countries={countries}
                           indicatorId={viewEntity.get('id')}
                           onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+                          includeInofficial={includeInofficial}
+                          onSetIncludeInofficial={onSetIncludeInofficial}
                         />
                       </Box>
                     )}
@@ -343,6 +353,8 @@ IndicatorView.propTypes = {
   myId: PropTypes.string,
   isManager: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  onSetIncludeInofficial: PropTypes.func,
+  includeInofficial: PropTypes.bool,
 };
 
 IndicatorView.contextTypes = {
@@ -359,6 +371,7 @@ const mapStateToProps = (state, props) => ({
   actionsByActiontype: selectActionsByType(state, props.params.id),
   actionConnections: selectActionConnections(state),
   countries: selectCountriesWithPositions(state),
+  includeInofficial: selectIncludeInofficialStatements(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -371,6 +384,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     handleClose: () => {
       dispatch(closeEntity(ROUTES.INDICATORS));
+    },
+    onSetIncludeInofficial: (value) => {
+      dispatch(setIncludeInofficialStatements(value));
     },
     onEntityClick: (id, path) => {
       dispatch(updatePath(`${path}/${id}`));

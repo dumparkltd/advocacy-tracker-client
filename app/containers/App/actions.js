@@ -74,6 +74,7 @@ import {
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
   SET_INCLUDE_MEMBERS_FORFILTERS,
+  SET_INCLUDE_INOFFICAL_STATEMENTS,
 } from './constants';
 
 export function submitInvalid(valid) {
@@ -534,6 +535,12 @@ export function setIncludeTargetMembers(value) {
 export function setIncludeMembersForFiltering(value) {
   return {
     type: SET_INCLUDE_MEMBERS_FORFILTERS,
+    value,
+  };
+}
+export function setIncludeInofficialStatements(value) {
+  return {
+    type: SET_INCLUDE_INOFFICAL_STATEMENTS,
     value,
   };
 }

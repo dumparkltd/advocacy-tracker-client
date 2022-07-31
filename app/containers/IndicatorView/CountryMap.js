@@ -20,6 +20,7 @@ import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
 // import { hasGroupActors } from 'utils/entities';
 import MapContainer from 'containers/MapContainer/MapWrapper';
+import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
 // import messages from './messages';
 import Dot from 'components/styled/Dot';
@@ -42,6 +43,8 @@ export function CountryMap({
   indicatorId,
   onEntityClick,
   intl,
+  onSetIncludeInofficial,
+  includeInofficial,
 }) {
   // const { intl } = this.context;
   // let type;
@@ -121,6 +124,13 @@ export function CountryMap({
         />
       </MapWrapper>
       <MapOptions>
+        <MapOption
+          option={{
+            active: !includeInofficial,
+            onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
+            label: 'Only show "official" statements (Level of Authority)',
+          }}
+        />
         <Box pad={{ vertical: 'small' }} gap="xsmall">
           <Text weight={600} size="small">Number of UN Member States by level of support</Text>
           <Box style={{ maxWidth: '300px' }}>
@@ -151,6 +161,8 @@ CountryMap.propTypes = {
   onEntityClick: PropTypes.func,
   indicatorId: PropTypes.string,
   intl: intlShape,
+  onSetIncludeInofficial: PropTypes.func,
+  includeInofficial: PropTypes.bool,
 };
 
 export default injectIntl(CountryMap);

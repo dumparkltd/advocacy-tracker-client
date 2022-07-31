@@ -34,6 +34,7 @@ import {
   USER_ACTORTYPES,
   MEMBERSHIPS,
   ACTION_INDICATOR_SUPPORTLEVELS,
+  OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
 
 import {
@@ -457,6 +458,15 @@ export const selectIncludeMembersForFiltering = createSelector(
   (locationQuery) => {
     if (locationQuery && locationQuery.get('fm')) {
       return qe(locationQuery.get('fm'), 1) || locationQuery.get('fm') === 'true';
+    }
+    return true; // default
+  }
+);
+export const selectIncludeInofficialStatements = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('inofficial')) {
+      return qe(locationQuery.get('inofficial'), 1) || locationQuery.get('inofficial') === 'true';
     }
     return true; // default
   }
@@ -1680,18 +1690,22 @@ export const selectCountriesWithPositions = createSelector(
   (state) => selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
   (state) => selectActortypeActors(state, { type: ACTORTYPES.GROUP }),
   (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
+  selectActionCategoriesGroupedByAction,
   selectMembershipsGroupedByMember,
   selectActorActionsGroupedByActor,
   selectIndicators,
   selectActionIndicatorsGroupedByIndicatorAttributes,
+  selectIncludeInofficialStatements,
   (
     countries,
     groups,
     statements,
+    actionCategoriesByAction,
     memberships,
     actorActions,
     indicators,
     actionIndicators,
+    includeInofficial,
   ) => countries
     && groups
     && statements
@@ -1707,6 +1721,13 @@ export const selectCountriesWithPositions = createSelector(
         if (countryStatements) {
           countryStatements = countryStatements
             .filter((actionId) => statements.get(actionId.toString()))
+            .filter((actionId) => {
+              if (includeInofficial) {
+                return true;
+              }
+              const actionCategories = actionCategoriesByAction.get(parseInt(actionId, 10));
+              return actionCategories && actionCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+            })
             .toList();
           // merge with indirect
           const countryMemberships = memberships.get(parseInt(country.get('id'), 10));
