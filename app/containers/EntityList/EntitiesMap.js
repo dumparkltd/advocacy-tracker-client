@@ -10,10 +10,7 @@ import { Map, List } from 'immutable';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 
-import * as topojson from 'topojson-client';
 // import { FormattedMessage } from 'react-intl';
-
-import countriesTopo from 'data/ne_countries_10m_v5.topo.json';
 
 import { ACTORTYPES, ROUTES, ACTIONTYPES } from 'themes/config';
 
@@ -34,8 +31,6 @@ import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
 import { hasGroupActors } from 'utils/entities';
 import MapContainer from 'containers/MapContainer';
-import MapInfoOptions from 'containers/MapContainer/MapInfoOptions';
-import TooltipContent from 'containers/MapContainer/TooltipContent';
 // import messages from './messages';
 
 const LoadingWrap = styled.div`
@@ -85,32 +80,29 @@ export function EntitiesMap({
 }) {
   // const { intl } = this.context;
   // let { countries } = this.props;
-  const countriesJSON = topojson.feature(
-    countriesTopo,
-    Object.values(countriesTopo.objects)[0],
-  );
-  let countryData;
   let type;
   let hasByTarget;
   let hasActions;
-  let subjectOptions;
-  let memberOption;
+  let subjectOptions = [];
+  let memberOption = [];
   let typeLabels;
   let typeLabelsFor;
   let indicator = includeActorMembers ? 'actionsTotal' : 'actions';
   let actionsTotalShowing;
   let infoTitle;
   let infoSubTitle;
+  let reduceCountryAreas;
+  let reducePoints;
   let mapSubjectClean = mapSubject || 'actors';
   const entitiesTotal = entities ? entities.size : 0;
-  // let cleanMapSubject = 'actors';
+
   if (dataReady) {
     // actors ===================================================
     if (config.types === 'actortypes') {
       type = actortypes.find((at) => qe(at.get('id'), typeId));
-      hasByTarget = false; // type.getIn(['attributes', 'is_target']);
+      hasByTarget = type.getIn(['attributes', 'is_target']);
       hasActions = type.getIn(['attributes', 'is_active']);
-      if (hasByTarget && qe(typeId, ACTORTYPES.COUNTRY)) { // ie countries & groups
+      if (hasByTarget) { // ie countries & groups
         if (mapSubjectClean === 'targets') {
           indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';
         }
@@ -178,7 +170,7 @@ export function EntitiesMap({
           single: intl.formatMessage(appMessages.entities[`actors_${typeId}`].single),
           plural: intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural),
         };
-        countryData = countriesJSON.features.map((feature) => {
+        reduceCountryAreas = (features) => features.map((feature) => {
           const country = entities.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3));
           if (country) {
             const countActions = country.get('actions')
@@ -238,13 +230,11 @@ export function EntitiesMap({
               id: country.get('id'),
               attributes: country.get('attributes').toJS(),
               tooltip: {
+                id: country.get('id'),
                 title: country.getIn(['attributes', 'title']),
-                content: (
-                  <TooltipContent
-                    stats={stats}
-                    isCount
-                  />
-                ),
+                stats,
+                isCount: true,
+                isCountryData: true,
               },
               values: {
                 actions: countActions,
@@ -348,7 +338,7 @@ export function EntitiesMap({
           },
           countryActionIds,
         );
-        countryData = countriesJSON.features.map((feature) => {
+        reduceCountryAreas = (features) => features.map((feature) => {
           const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3));
           if (country) {
             const actionIds = countryActionIds && countryActionIds.get(parseInt(country.get('id'), 10));
@@ -379,13 +369,11 @@ export function EntitiesMap({
               id: country.get('id'),
               attributes: country.get('attributes').toJS(),
               tooltip: {
+                id: country.get('id'),
                 title: country.getIn(['attributes', 'title']),
-                content: (
-                  <TooltipContent
-                    stats={stats}
-                    isCount
-                  />
-                ),
+                stats,
+                isCount: true,
+                isCountryData: true,
               },
               values: {
                 targetingActions: countTargetingActions,
@@ -422,12 +410,11 @@ export function EntitiesMap({
         plural: intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural),
       };
       type = actiontypes.find((at) => qe(at.get('id'), typeId));
-      hasByTarget = false; // type.getIn(['attributes', 'has_target']);
-      if (hasByTarget) {
-        if (mapSubjectClean === 'targets') {
-          indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';
-        }
-        // cleanMapSubject = mapSubject;
+      hasByTarget = type.getIn(['attributes', 'has_target']);
+      hasActions = qe(typeId, ACTIONTYPES.EXPRESS)
+        || qe(typeId, ACTIONTYPES.INTERACTION)
+        || qe(typeId, ACTIONTYPES.EVENT);
+      if (hasActions) {
         subjectOptions = [
           {
             title: qe(ACTIONTYPES.DONOR, typeId) ? 'By donor' : 'By actor',
@@ -435,6 +422,18 @@ export function EntitiesMap({
             active: mapSubjectClean === 'actors',
             disabled: mapSubjectClean === 'actors',
           },
+        ];
+      }
+      if (hasByTarget) {
+        if (!hasActions) {
+          mapSubjectClean = 'targets';
+        }
+        if (mapSubjectClean === 'targets') {
+          indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';
+        }
+        // cleanMapSubject = mapSubject;
+        subjectOptions = [
+          ...subjectOptions,
           {
             title: qe(ACTIONTYPES.DONOR, typeId) ? 'By recipient' : 'By target',
             onClick: () => onSetMapSubject('targets'),
@@ -532,7 +531,7 @@ export function EntitiesMap({
         return [updated, total];
       }, [Map(), 0]);
 
-      countryData = countriesJSON.features.map((feature) => {
+      reduceCountryAreas = (features) => features.map((feature) => {
         const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3));
         if (country) {
           const cCounts = countryCounts.get(parseInt(country.get('id'), 10));
@@ -581,13 +580,11 @@ export function EntitiesMap({
             id: country.get('id'),
             attributes: country.get('attributes').toJS(),
             tooltip: {
+              id: country.get('id'),
               title: country.getIn(['attributes', 'title']),
-              content: (
-                <TooltipContent
-                  stats={stats}
-                  isCount
-                />
-              ),
+              stats,
+              isCount: true,
+              isCountryData: true,
             },
             values: {
               actions: countActions,
@@ -611,27 +608,32 @@ export function EntitiesMap({
       infoSubTitle = `Showing ${actionsTotalShowing} of ${entities ? entities.size : 0} activities total${hasFilters ? ' (filtered)' : ''}`;
     }
   }
-  let maxValue;
-  if (countryData) {
-    maxValue = countryData.reduce(
-      (max, f) => max ? Math.max(max, f.values[indicator]) : f.values[indicator],
-      null,
-    );
-  }
 
   return (
     <Styled headerStyle="types" noOverflow>
       <MapContainer
+        fullMap
+        reduceCountryAreas={reduceCountryAreas}
+        reducePoints={reducePoints}
         typeLabels={typeLabels}
-        countryFeatures={countriesJSON.features}
-        countryData={countryData}
-        indicator={indicator}
-        onCountryClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
-        maxValue={maxValue}
-        includeActorMembers={includeActorMembers}
-        includeTargetMembers={includeTargetMembers}
-        mapSubject={mapSubjectClean}
-        scrollWheelZoom
+        mapData={{
+          typeLabels,
+          indicator,
+          includeSecondaryMembers: includeActorMembers || includeTargetMembers,
+          scrollWheelZoom: true,
+          mapSubject: mapSubjectClean,
+          hasPointOption: false,
+          hasPointOverlay: true,
+        }}
+        onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+        mapInfo={[{
+          id: 'countries',
+          tabTitle: 'Activities',
+          title: infoTitle,
+          subTitle: infoSubTitle,
+          subjectOptions,
+          memberOption,
+        }]}
       />
       {!dataReady && (
         <LoadingWrap>
@@ -641,22 +643,22 @@ export function EntitiesMap({
       {viewOptions && viewOptions.length > 1 && (
         <EntityListViewOptions options={viewOptions} isOnMap />
       )}
-      {dataReady && (
-        <MapInfoOptions
-          config={{
-            title: infoTitle,
-            subTitle: infoSubTitle,
-            subjectOptions: hasByTarget && subjectOptions,
-            memberOption,
-            maxValue,
-          }}
-          mapSubject={mapSubjectClean}
-        />
-      )}
     </Styled>
   );
 }
 
+// {dataReady && (
+//   <MapInfoOptions
+//   config={{
+//     title: infoTitle,
+//     subTitle: infoSubTitle,
+//     subjectOptions: hasByTarget && subjectOptions,
+//     memberOption,
+//     maxValue,
+//   }}
+//   mapSubject={mapSubjectClean}
+//   />
+// )}
 EntitiesMap.propTypes = {
   config: PropTypes.object,
   entities: PropTypes.instanceOf(List),

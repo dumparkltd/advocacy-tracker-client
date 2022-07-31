@@ -259,7 +259,7 @@ export function ActionView(props) {
   const hasChildren = childActiontypeIds && childActiontypeIds.length > 0;
 
   const hasMemberOption = !!typeId && !qe(typeId, ACTIONTYPES.NATL);
-  const hasMap = qe(typeId, ACTIONTYPES.EXPRESS);
+  const hasMap = true;
   const hasIndicators = typeId && INDICATOR_ACTIONTYPES.indexOf(typeId.toString()) > -1;
 
   let viewSubject = subject || 'actors';
@@ -441,7 +441,7 @@ export function ActionView(props) {
                         <ActionMap
                           entities={actortypesForSubject}
                           mapSubject={viewSubject}
-                          onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+                          onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
                           hasMemberOption={hasMemberOption}
                           typeId={typeId}
                         />

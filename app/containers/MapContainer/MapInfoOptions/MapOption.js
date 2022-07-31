@@ -8,25 +8,26 @@ const Styled = styled((p) => <Box direction="row" align="center" gap="small" {..
   padding: 5px 0;
 `;
 
-export function MapMemberOption({ option }) {
+export function MapOption({ option, type = 'option' }) {
   const {
     active, onClick, label, key = 0,
   } = option;
   return (
     <Styled>
       <input
-        id={`map-member-${key}`}
+        id={`map-${type}-${key}`}
         type="checkbox"
         checked={active}
         onChange={onClick}
       />
-      <Text as="label" htmlFor={`map-member-${key}`} size="xsmall">{label}</Text>
+      <Text as="label" htmlFor={`map-${type}-${key}`} size="xsmall">{label}</Text>
     </Styled>
   );
 }
 
-MapMemberOption.propTypes = {
+MapOption.propTypes = {
   option: PropTypes.object,
+  type: PropTypes.string,
 };
 
-export default MapMemberOption;
+export default MapOption;

@@ -28,7 +28,7 @@ import Content from 'components/styled/Content';
 import Loading from 'components/Loading';
 import EntityListViewOptions from 'components/EntityListViewOptions';
 import MapSubjectOptions from 'containers/MapContainer/MapInfoOptions/MapSubjectOptions';
-import MapMemberOption from 'containers/MapContainer/MapInfoOptions/MapMemberOption';
+import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 import EntityListTable from 'containers/EntityListTable';
 import ButtonPill from 'components/buttons/ButtonPill';
 
@@ -483,7 +483,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                     </Box>
                     {memberOption && (
                       <Box>
-                        <MapMemberOption option={memberOption} />
+                        <MapOption option={memberOption} type="member" />
                       </Box>
                     )}
                     {entityActors.get(parseInt(viewType, 10)) && (
@@ -587,7 +587,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                     hasSearch
                     columns={columns}
                     headerColumnsUtility={headerColumnsUtility}
-                    memberOption={memberOption && <MapMemberOption option={memberOption} />}
+                    memberOption={memberOption && <MapOption option={memberOption} type="member" />}
                     subjectOptions={subjectOptions && <MapSubjectOptions inList options={subjectOptions} />}
                     listUpdating={listUpdating}
                     entities={entities}
