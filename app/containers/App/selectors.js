@@ -33,6 +33,7 @@ import {
   USER_ACTIONTYPES,
   USER_ACTORTYPES,
   MEMBERSHIPS,
+  ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
 import {
@@ -1748,7 +1749,7 @@ export const selectCountriesWithPositions = createSelector(
                       : indicatorStatement;
                   }
                 ).sort(
-                  // sort by date - latest first
+                  // sort: first check for dates, then use higher level of suuport
                   (a, b) => {
                     const aDate = a.getIn(['measure', 'date_start']);
                     const bDate = b.getIn(['measure', 'date_start']);
@@ -1757,6 +1758,12 @@ export const selectCountriesWithPositions = createSelector(
                     const bIsDate = new Date(bDate) instanceof Date && !isNaN(new Date(bDate));
                     /* eslint-enable no-restricted-globals */
                     if (aIsDate && bIsDate) {
+                      // check for support level if dates equals
+                      if (aDate === bDate) {
+                        const aSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[a.get('supportlevel_id') || 0];
+                        const bSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[b.get('supportlevel_id') || 0];
+                        return aSupportLevel < bSupportLevel ? -1 : 1;
+                      }
                       return new Date(aDate) < new Date(bDate) ? 1 : -1;
                     }
                     if (aIsDate) {
