@@ -83,8 +83,8 @@ export function EntitiesMap({
   let type;
   let hasByTarget;
   let hasActions;
-  let subjectOptions;
-  let memberOption;
+  let subjectOptions = [];
+  let memberOption = [];
   let typeLabels;
   let typeLabelsFor;
   let indicator = includeActorMembers ? 'actionsTotal' : 'actions';
@@ -95,14 +95,14 @@ export function EntitiesMap({
   let reducePoints;
   let mapSubjectClean = mapSubject || 'actors';
   const entitiesTotal = entities ? entities.size : 0;
-  // let cleanMapSubject = 'actors';
+
   if (dataReady) {
     // actors ===================================================
     if (config.types === 'actortypes') {
       type = actortypes.find((at) => qe(at.get('id'), typeId));
       hasByTarget = type.getIn(['attributes', 'is_target']);
       hasActions = type.getIn(['attributes', 'is_active']);
-      if (hasByTarget && qe(typeId, ACTORTYPES.COUNTRY)) { // ie countries & groups
+      if (hasByTarget) { // ie countries & groups
         if (mapSubjectClean === 'targets') {
           indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';
         }
@@ -410,12 +410,11 @@ export function EntitiesMap({
         plural: intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural),
       };
       type = actiontypes.find((at) => qe(at.get('id'), typeId));
-      hasByTarget = false; // type.getIn(['attributes', 'has_target']);
-      if (hasByTarget) {
-        if (mapSubjectClean === 'targets') {
-          indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';
-        }
-        // cleanMapSubject = mapSubject;
+      hasByTarget = type.getIn(['attributes', 'has_target']);
+      hasActions = qe(typeId, ACTIONTYPES.EXPRESS)
+        || qe(typeId, ACTIONTYPES.INTERACTION)
+        || qe(typeId, ACTIONTYPES.EVENT);
+      if (hasActions) {
         subjectOptions = [
           {
             title: qe(ACTIONTYPES.DONOR, typeId) ? 'By donor' : 'By actor',
@@ -423,6 +422,18 @@ export function EntitiesMap({
             active: mapSubjectClean === 'actors',
             disabled: mapSubjectClean === 'actors',
           },
+        ];
+      }
+      if (hasByTarget) {
+        if (!hasActions) {
+          mapSubjectClean = 'targets';
+        }
+        if (mapSubjectClean === 'targets') {
+          indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';
+        }
+        // cleanMapSubject = mapSubject;
+        subjectOptions = [
+          ...subjectOptions,
           {
             title: qe(ACTIONTYPES.DONOR, typeId) ? 'By recipient' : 'By target',
             onClick: () => onSetMapSubject('targets'),
@@ -620,7 +631,7 @@ export function EntitiesMap({
           tabTitle: 'Activities',
           title: infoTitle,
           subTitle: infoSubTitle,
-          subjectOptions: hasByTarget && subjectOptions,
+          subjectOptions,
           memberOption,
         }]}
       />

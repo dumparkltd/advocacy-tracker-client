@@ -46,6 +46,11 @@ export const CONFIG = {
     map: {
       types: [
         ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.INTERACTION,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
       ],
     },
   },
