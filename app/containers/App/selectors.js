@@ -1784,7 +1784,7 @@ export const selectCountriesWithPositions = createSelector(
                     return statement
                       ? indicatorStatement.set(
                         'measure',
-                        statement.get('attributes'),
+                        statement.get('attributes').set('id', statement.get('id')),
                       )
                       : indicatorStatement;
                   }

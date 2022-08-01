@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { Map, List } from 'immutable';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
-import { Box, Text } from 'grommet';
+import { Box, Text, Button } from 'grommet';
 
 import {
   ACTORTYPES,
@@ -39,6 +39,17 @@ import MapContainer from 'containers/MapContainer';
 
 const Styled = styled(ContainerWrapper)`
   background: white;
+`;
+
+const StatementButton = styled((p) => <Button {...p} />)`
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 16px;
+  display: inline-block;
+  stroke: ${({ theme }) => theme.global.colors.a};
+  &:hover {
+    stroke: ${({ theme }) => theme.global.colors.aHover};
+  }
 `;
 
 export function EntitiesMapActions({
@@ -187,43 +198,71 @@ export function EntitiesMapActions({
             )
           );
         }
-        if (hasActiveStatements) {
-          const countryPositions = country.getIn(['indicatorPositions', mapIndicator.toString()])
-            && country.getIn(['indicatorPositions', mapIndicator.toString()]).filter(
-              (position) => indicatorEntities.some(
-                (entity) => qe(entity.get('id'), position.get('measure_id'))
-              )
-            );
-          const countryPosition = countryPositions && countryPositions.first();
-          const level = countryPosition && parseInt(countryPosition.get('supportlevel_id'), 10);
-          const statement = countryPosition && countryPosition.get('measure');
-          const position = ACTION_INDICATOR_SUPPORTLEVELS[level || 0];
-          return {
-            ...feature,
-            id: country.get('id'),
-            attributes: country.get('attributes').toJS(),
-            tooltip: {
-              id: country.get('id'),
-              title: country.getIn(['attributes', 'title']),
-              content: (
-                <Box gap="small" pad={{ top: 'small' }}>
-                  <Text weight={600}>
-                    {intl.formatMessage(appMessages.supportlevels[position.value])}
-                  </Text>
-                  {statement && (
-                    <Text size="xsmall">
-                      {`Statement: ${statement.get('title')}`}
-                    </Text>
-                  )}
-                </Box>
-              ),
-            },
-            values: {
-              [mapIndicator]: level || 0,
-            },
+        // if (hasActiveStatements) {
+        const countryPositions = hasActiveStatements
+          && country.get('indicatorPositions')
+          && country.getIn(['indicatorPositions', mapIndicator.toString()]).filter(
+            (position) => indicatorEntities.some(
+              (entity) => qe(entity.get('id'), position.get('measure_id'))
+            )
+          );
+        const countryPosition = countryPositions && countryPositions.first();
+        const statement = countryPosition && countryPosition.get('measure');
+        const level = countryPosition
+          && parseInt(countryPosition.get('supportlevel_id'), 10);
+        const position = level || level === 0
+          ? ACTION_INDICATOR_SUPPORTLEVELS[level || 0]
+          : {
+            value: '99',
+            color: '#EDEFF0',
           };
-        }
+        return {
+          ...feature,
+          id: country.get('id'),
+          attributes: country.get('attributes').toJS(),
+          tooltip: {
+            id: country.get('id'),
+            title: country.getIn(['attributes', 'title']),
+            content: (
+              <Box gap="small" pad={{ top: 'small' }}>
+                <Text weight={600}>
+                  {intl.formatMessage(appMessages.supportlevels[position.value])}
+                </Text>
+                {statement && (
+                  <Box gap="xxsmall">
+                    <Box direction="row" gap="xxsmall" align="center">
+                      <Text size="xxxsmall" color="textSecondary">
+                        Statement
+                      </Text>
+                      {statement.get('date_start') && (
+                        <Text size="xxxsmall" color="textSecondary">
+                          {`(${intl.formatDate(statement.get('date_start'))})`}
+                        </Text>
+                      )}
+                    </Box>
+                    <StatementButton
+                      as="a"
+                      plain
+                      href={`${ROUTES.ACTION}/${statement.get('id')}`}
+                      onClick={(evt) => {
+                        if (evt && evt.preventDefault) evt.preventDefault();
+                        if (evt && evt.stopPropagation) evt.stopPropagation();
+                        onEntityClick(statement.get('id'), ROUTES.ACTION);
+                      }}
+                    >
+                      {statement.get('title')}
+                    </StatementButton>
+                  </Box>
+                )}
+              </Box>
+            ),
+          },
+          values: {
+            [mapIndicator]: level || 0,
+          },
+        };
       }
+      // }
       return {
         ...feature,
         values: {

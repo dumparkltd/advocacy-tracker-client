@@ -127,7 +127,7 @@ const Tooltip = ({
                   >
                     <Box direction="row" align="center">
                       <Text size="small">{isLocationData ? 'Location details' : 'Country details'}</Text>
-                      <FormNext size="xsmall" style={{ stroke: 'inherit' }} />
+                      <FormNext size="xsmall" style={{ stroke: 'inherit', fill: 'inherit' }} />
                     </Box>
                   </CountryButton>
                 </ButtonWrap>

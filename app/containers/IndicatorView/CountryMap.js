@@ -7,13 +7,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Map } from 'immutable';
 import styled from 'styled-components';
-import { Box, Text } from 'grommet';
+import { Box, Text, Button } from 'grommet';
 
 import * as topojson from 'topojson-client';
 import { injectIntl, intlShape } from 'react-intl';
 
 import countriesTopo from 'data/ne_countries_10m_v5.topo.json';
 import {
+  ROUTES,
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 import appMessages from 'containers/App/messages';
@@ -37,7 +38,16 @@ const MapWrapper = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} /
 `;
 const MapTitle = styled((p) => <Box margin={{ vertical: 'xsmall' }} {...p} />)``;
 const MapOptions = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)``;
-
+const StatementButton = styled((p) => <Button {...p} />)`
+  font-weight: 500;
+  font-size: 13px;
+  line-height: 16px;
+  display: inline-block;
+  stroke: ${({ theme }) => theme.global.colors.a};
+  &:hover {
+    stroke: ${({ theme }) => theme.global.colors.aHover};
+  }
+`;
 export function CountryMap({
   countries,
   indicatorId,
@@ -78,9 +88,30 @@ export function CountryMap({
                     <Text weight={600}>
                       {intl.formatMessage(appMessages.supportlevels[position.value])}
                     </Text>
-                    <Text size="xsmall">
-                      {`Statement: ${statement.get('title')}`}
-                    </Text>
+                    <Box gap="xxsmall">
+                      <Box direction="row" gap="xxsmall" align="center">
+                        <Text size="xxxsmall" color="textSecondary">
+                          Statement
+                        </Text>
+                        {statement.get('date_start') && (
+                          <Text size="xxxsmall" color="textSecondary">
+                            {`(${intl.formatDate(statement.get('date_start'))})`}
+                          </Text>
+                        )}
+                      </Box>
+                      <StatementButton
+                        as="a"
+                        plain
+                        href={`${ROUTES.ACTION}/${statement.get('id')}`}
+                        onClick={(evt) => {
+                          if (evt && evt.preventDefault) evt.preventDefault();
+                          if (evt && evt.stopPropagation) evt.stopPropagation();
+                          onEntityClick(statement.get('id'), ROUTES.ACTION);
+                        }}
+                      >
+                        {statement.get('title')}
+                      </StatementButton>
+                    </Box>
                   </Box>
                 ),
               },

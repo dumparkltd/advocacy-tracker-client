@@ -475,6 +475,10 @@ theme.global = {
     background: '#f1f0f1',
     backgroundLight: '#fcfcfc',
     inactive: '#f1f0f1', // on light background (empowerment)
+    a: '#00728f',
+    aHover: '#08586c',
+    textLight: '#1c2121', // on light background (empowerment)
+    textSecondary: '#777b7e', // on light background (empowerment)
     text: {
       brand: '#000000',
       dark: '#FFFFFF', //  on dark background
