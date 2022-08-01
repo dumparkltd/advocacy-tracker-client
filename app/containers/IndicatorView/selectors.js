@@ -1,6 +1,10 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
-import { API, ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
+import {
+  API,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
+  OFFICIAL_STATEMENT_CATEGORY_ID,
+} from 'themes/config';
 
 import {
   selectReady,
@@ -18,6 +22,8 @@ import {
   selectActionIndicatorsGroupedByIndicatorAttributes,
   selectActionResourcesGroupedByAction,
   selectUserActionsGroupedByAction,
+  selectActorsWithPositions,
+  selectIncludeInofficialStatements,
 } from 'containers/App/selectors';
 
 import {
@@ -72,6 +78,7 @@ export const selectActionsByType = createSelector(
   selectActionCategoriesGroupedByAction,
   selectUserActionsGroupedByAction,
   selectCategories,
+  selectIncludeInofficialStatements,
   (
     ready,
     viewEntity,
@@ -86,9 +93,19 @@ export const selectActionsByType = createSelector(
     actionCategories,
     userActions,
     categories,
+    includeInofficial,
   ) => {
     if (!ready) return Map();
     let actionsWithConnections = actions && actions
+      .filter(
+        (action) => {
+          if (includeInofficial) {
+            return true;
+          }
+          const acs = actionCategories.get(parseInt(action.get('id'), 10));
+          return acs && acs.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+        }
+      )
       .map((action) => setActionConnections({
         action,
         actionConnections,
@@ -118,5 +135,35 @@ export const selectActionsByType = createSelector(
     return actionsWithConnections && actionsWithConnections
       .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
       .sortBy((val, key) => key);
+  }
+);
+export const selectActorsByType = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  (state, id) => id,
+  selectActorsWithPositions,
+  (
+    ready,
+    viewEntityId,
+    actors,
+  ) => {
+    if (!ready) return Map();
+    return actors && actors
+      .filter(
+        (actor) => actor.get('indicatorPositions')
+          && actor.getIn(['indicatorPositions', viewEntityId.toString()])
+          && actor.getIn(['indicatorPositions', viewEntityId.toString()]).size > 0
+      )
+      .map(
+        (actor) => actor.setIn(
+          ['supportlevel', viewEntityId.toString()],
+          actor.getIn(['indicatorPositions', viewEntityId.toString()]).first().get('supportlevel_id') || 0
+        )
+      )
+      .groupBy(
+        (actor) => actor.getIn(['attributes', 'actortype_id'])
+      )
+      .sortBy(
+        (val, key) => key
+      );
   }
 );

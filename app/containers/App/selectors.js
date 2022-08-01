@@ -1828,3 +1828,148 @@ export const selectCountriesWithPositions = createSelector(
       }
     )
 );
+export const selectActorsWithPositions = createSelector(
+  (state, params) => params && typeof params.includeActorMembers !== 'undefined'
+    ? params.includeActorMembers
+    : true,
+  (state, params) => params && typeof params.includeInofficial !== 'undefined'
+    ? params.includeInofficial
+    : false,
+  (state) => selectActors(state),
+  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
+  selectActionCategoriesGroupedByAction,
+  selectMembershipsGroupedByMember,
+  selectActorActionsGroupedByActor,
+  selectIndicators,
+  selectActionIndicatorsGroupedByIndicatorAttributes,
+  selectIncludeInofficialStatements,
+  (
+    includeActorMembers,
+    includeInofficialParam,
+    actors,
+    statements,
+    actionCategoriesByAction,
+    memberships,
+    actorActions,
+    indicators,
+    actionIndicators,
+    includeInofficial,
+  ) => {
+    if (
+      !actors
+      || !statements
+      || !memberships
+      || !actorActions
+      || !indicators
+      || !actionIndicators
+    ) {
+      return null;
+    }
+    const groups = actors.filter(
+      (actor) => qe(actor.getIn(['attributes', 'actortype_id']), ACTORTYPES.GROUP)
+    );
+    return actors.map(
+      (actor) => {
+        // actorActions
+        let actorIndicators;
+        // direct
+        let actorStatements = actorActions.get(parseInt(actor.get('id'), 10));
+        if (actorStatements) {
+          actorStatements = actorStatements
+            .filter((actionId) => statements.get(actionId.toString()))
+            .filter((actionId) => {
+              if (includeInofficialParam || includeInofficial) {
+                return true;
+              }
+              const actionCategories = actionCategoriesByAction.get(parseInt(actionId, 10));
+              return actionCategories && actionCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+            })
+            .toList();
+        }
+        // merge with indirect
+        if (includeActorMembers && groups && qe(actor.getIn(['attributes', 'actortype_id']), ACTORTYPES.COUNTRY)) {
+          const actorMemberships = memberships.get(parseInt(actor.get('id'), 10));
+          // console.log('actorid', actor.get('id'))
+          // console.log('memberships', memberships && memberships.toJS())
+          // console.log('actorMemberships', actorMemberships && actorMemberships.toJS())
+          if (actorMemberships) {
+            actorStatements = actorMemberships.reduce(
+              (memo, groupId) => {
+                if (groups.get(groupId.toString()) && actorActions && actorActions.get(groupId)) {
+                  return memo.concat(
+                    actorActions
+                      .get(groupId)
+                      .filter((actionId) => statements.get(actionId.toString()))
+                      .toList()
+                  ).toSet();
+                }
+                return memo;
+              },
+              actorStatements || List(),
+            );
+          }
+        }
+        if (actorStatements && actorStatements.size > 0) {
+          // now for each indicator
+          actorIndicators = actorStatements && indicators.map(
+            (indicator) => {
+              // get all statements for topic
+              let indicatorStatements = actionIndicators.get(parseInt(indicator.get('id'), 10));
+              if (indicatorStatements) {
+                // filter for current actor
+                indicatorStatements = indicatorStatements.filter(
+                  (indicatorStatement) => {
+                    const statementId = indicatorStatement.get('measure_id');
+                    return actorStatements.includes(parseInt(statementId, 10));
+                  }
+                ).map(
+                  (indicatorStatement) => {
+                    const statement = statements.get(indicatorStatement.get('measure_id').toString());
+                    return statement
+                      ? indicatorStatement.set(
+                        'measure',
+                        statement.get('attributes').set('id', statement.get('id')),
+                      )
+                      : indicatorStatement;
+                  }
+                ).sort(
+                  // sort: first check for dates, then use higher level of suuport
+                  (a, b) => {
+                    const aDate = a.getIn(['measure', 'date_start']);
+                    const bDate = b.getIn(['measure', 'date_start']);
+                    /* eslint-disable no-restricted-globals */
+                    const aIsDate = new Date(aDate) instanceof Date && !isNaN(new Date(aDate));
+                    const bIsDate = new Date(bDate) instanceof Date && !isNaN(new Date(bDate));
+                    /* eslint-enable no-restricted-globals */
+                    if (aIsDate && bIsDate) {
+                      // check for support level if dates equals
+                      if (aDate === bDate) {
+                        const aSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[a.get('supportlevel_id') || 0];
+                        const bSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[b.get('supportlevel_id') || 0];
+                        return aSupportLevel < bSupportLevel ? -1 : 1;
+                      }
+                      return new Date(aDate) < new Date(bDate) ? 1 : -1;
+                    }
+                    if (aIsDate) {
+                      return -1;
+                    }
+                    if (bIsDate) {
+                      return 1;
+                    }
+                    return 1;
+                  }
+                ).toList();
+                return indicatorStatements || null;
+              }
+              return null;
+            },
+          );
+          return actor
+            .set('statements', actorStatements)
+            .set('indicatorPositions', actorIndicators);
+        }
+        return actor;
+      }
+    );
+  }
+);
