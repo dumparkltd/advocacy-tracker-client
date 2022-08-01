@@ -20,7 +20,7 @@ import { getFilterLabel } from './utils';
 
 // import messages from './messages';
 
-const Styled = styled((p) => <Box direction="row" align="end" justify="end" {...p} />)``;
+const Styled = styled((p) => <Box direction="row" align="start" justify="start" {...p} />)``;
 
 const Tags = styled((p) => <Box direction="row" {...p} />)``;
 
