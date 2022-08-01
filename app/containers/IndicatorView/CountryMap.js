@@ -71,6 +71,7 @@ export function CountryMap({
               id: country.get('id'),
               positionId: position.value,
               tooltip: {
+                id: country.get('id'),
                 title: country.getIn(['attributes', 'title']),
                 content: (
                   <Box gap="small" pad={{ top: 'small' }}>
