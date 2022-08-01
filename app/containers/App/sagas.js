@@ -42,6 +42,7 @@ import {
   SET_VIEW,
   SET_SUBJECT,
   SET_MAPSUBJECT,
+  SET_MAPINDICATOR,
   OPEN_BOOKMARK,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
@@ -914,6 +915,19 @@ export function* setMapSubjectSaga({ subject }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
+export function* setMapIndicatorSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'topic',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
 export function* setSubjectSaga({ subject }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
@@ -1076,6 +1090,7 @@ export default function* rootSaga() {
   yield takeEvery(SET_VIEW, setViewSaga);
   yield takeEvery(SET_SUBJECT, setSubjectSaga);
   yield takeEvery(SET_MAPSUBJECT, setMapSubjectSaga);
+  yield takeEvery(SET_MAPINDICATOR, setMapIndicatorSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_MEMBERS, setIncludeActorMembersSaga);
   yield takeEvery(SET_INCLUDE_TARGET_MEMBERS, setIncludeTargetMembersSaga);
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);

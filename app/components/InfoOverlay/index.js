@@ -17,7 +17,13 @@ import {
   Text,
 } from 'grommet';
 import { CircleInformation, CircleQuestion, FormClose } from 'grommet-icons';
-const DropContent = styled.div`
+const DropContent = styled((p) => (
+  <Box
+    pad="small"
+    background="light-1"
+    {...p}
+  />
+))`
   max-width: 280px;
 `;
 const LayerWrap = styled((p) => (
@@ -61,17 +67,19 @@ const Markdown = styled(ReactMarkdown)`
 `;
 
 function InfoOverlay({
-  dark, content, tooltip, title, padButton, colorButton, icon,
+  dark, content, tooltip, title, padButton, colorButton, icon, markdown, inline,
 }) {
   const infoRef = useRef(null);
   const [info, showInfo] = useState(false);
   return (
     <>
       <Box
+        as={inline ? 'span' : 'div'}
         fill={false}
-        pad={padButton || { horizontal: 'small' }}
+        pad={inline ? null : (padButton || { horizontal: 'small' })}
         ref={infoRef}
-        flex={{ grow: 0, shrink: 0 }}
+        flex={inline ? false : { grow: 0, shrink: 0 }}
+        style={inline ? { width: 'auto', display: 'inline-block' } : null}
       >
         <Button
           plain
@@ -102,10 +110,15 @@ function InfoOverlay({
         <Drop
           align={{ bottom: 'top' }}
           target={infoRef.current}
-          plain
+          plain={!markdown}
         >
           <DropContent>
-            {content}
+            {markdown && (
+              <div>
+                <Markdown source={content} className="react-markdown" linkTarget="_blank" />
+              </div>
+            )}
+            {!markdown && content}
           </DropContent>
         </Drop>
       )}
@@ -142,6 +155,8 @@ function InfoOverlay({
 
 InfoOverlay.propTypes = {
   dark: PropTypes.bool,
+  markdown: PropTypes.bool,
+  inline: PropTypes.bool,
   tooltip: PropTypes.bool,
   content: PropTypes.oneOfType([
     PropTypes.node,

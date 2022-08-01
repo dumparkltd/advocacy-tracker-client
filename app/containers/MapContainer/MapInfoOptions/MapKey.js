@@ -4,6 +4,7 @@ import { MAP_OPTIONS } from 'themes/config';
 import { Box } from 'grommet';
 import Gradient from './Gradient';
 import Bins from './Bins';
+import Categories from './Categories';
 import Circles from './Circles';
 
 export function MapKey({
@@ -15,6 +16,7 @@ export function MapKey({
   unit,
   type = 'gradient',
   circleLayerConfig,
+  config,
 }) {
   const stops = maxValue && mapSubject && MAP_OPTIONS.GRADIENT[mapSubject];
   const noStops = stops && stops.length;
@@ -37,6 +39,9 @@ export function MapKey({
       )}
       {type === 'gradient' && !!maxValue && maxValue <= maxBinValue && maxValue > 0 && (
         <Bins config={{ range: [1, maxValue], maxValue, stops }} />
+      )}
+      {type === 'categories' && config.categories && config.categories.length > 1 && (
+        <Categories config={config} />
       )}
       {type === 'circles' && (
         <Circles
@@ -62,6 +67,7 @@ MapKey.propTypes = {
   minValue: PropTypes.number,
   maxBinValue: PropTypes.number,
   isIndicator: PropTypes.bool,
+  config: PropTypes.object,
   circleLayerConfig: PropTypes.object,
 };
 

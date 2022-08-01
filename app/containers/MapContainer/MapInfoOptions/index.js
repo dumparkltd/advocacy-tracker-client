@@ -10,6 +10,7 @@ import qe from 'utils/quasi-equals';
 import MapKey from './MapKey';
 import MapSubjectOptions from './MapSubjectOptions';
 import MapOption from './MapOption';
+import SelectFFIndicators from './SelectFFIndicators';
 import SelectIndicators from './SelectIndicators';
 
 const Title = styled((p) => <Text weight={500} {...p} />)`
@@ -78,10 +79,9 @@ export function MapInfoOptions({
 }) {
   if (!options) return null;
   const [tab, setTab] = useState(options[0].id);
-  const activeTab = options.find((o) => qe(tab, o.id));
+  const activeOption = options.find((o) => qe(tab, o.id));
   const renderTabs = (shadow) => options
-    && options.length > 1
-    ? options.map(
+    && options.map(
       (option) => {
         const active = qe(tab, option.id);
         return (
@@ -110,33 +110,40 @@ export function MapInfoOptions({
           </Box>
         );
       }
-    )
-    : null;
+    );
   let activeIndicatorOption;
   let showIndicatorInfo;
-  if (activeTab.id === 'indicators') {
-    activeIndicatorOption = activeTab.ffOptions.find(
-      (o) => qe(o.value, activeTab.ffActiveOptionId || '0')
+  if (activeOption.id === 'indicators') {
+    activeIndicatorOption = activeOption.ffOptions.find(
+      (o) => qe(o.value, activeOption.ffActiveOptionId || '0')
     );
     showIndicatorInfo = activeIndicatorOption
-    && activeIndicatorOption.value !== '0'
-    && circleLayerConfig
-    && minMaxValues
-    && minMaxValues.points;
+      && activeIndicatorOption.value !== '0'
+      && circleLayerConfig
+      && minMaxValues
+      && minMaxValues.points;
   }
-
+  if (activeOption.id === 'countries' && activeOption.indicatorOptions) {
+    activeIndicatorOption = activeOption.indicatorOptions.find(
+      (o) => o.active
+    );
+  }
   return (
     <Styled hasTabs={options.length > 1}>
       <Pane>
-        <Box fill="horizontal" direction="row" style={{ zIndex: 1 }}>
-          {renderTabs(true)}
-        </Box>
+        {options.length > 1 && (
+          <Box fill="horizontal" direction="row" style={{ zIndex: 1 }}>
+            {renderTabs(true)}
+          </Box>
+        )}
         <Box flex={{ grow: 1 }} direction="row" elevation="medium" background="white" style={{ zIndex: 2 }} />
       </Pane>
       <Pane>
-        <Box fill="horizontal" direction="row">
-          {renderTabs(false)}
-        </Box>
+        {options.length > 1 && (
+          <Box fill="horizontal" direction="row">
+            {renderTabs(false)}
+          </Box>
+        )}
         <Box
           flex={{ grow: 1 }}
           direction="row"
@@ -147,9 +154,9 @@ export function MapInfoOptions({
             top: 'ms',
           }}
         >
-          {activeTab.id === 'indicators' && (
+          {activeOption.id === 'indicators' && (
             <Box fill="horizontal">
-              <SelectIndicators config={activeTab} />
+              <SelectFFIndicators config={activeOption} />
               {showIndicatorInfo && (
                 <Box pad={{ top: 'medium' }} gap="medium">
                   <MapKey
@@ -184,6 +191,7 @@ export function MapInfoOptions({
                         <InfoOverlay
                           title={activeIndicatorOption.title}
                           content={activeIndicatorOption.info}
+                          markdown
                           tooltip
                           inline
                         />
@@ -199,24 +207,89 @@ export function MapInfoOptions({
               )}
             </Box>
           )}
-          {activeTab.id === 'countries' && (
+          {activeOption.id === 'countries' && !activeOption.indicatorOptions && (
             <Box>
-              {activeTab.subjectOptions && (
-                <MapSubjectOptions options={activeTab.subjectOptions} />
+              {activeOption.subjectOptions && (
+                <MapSubjectOptions options={activeOption.subjectOptions} />
               )}
               {minMaxValues.countries && minMaxValues.countries.max > 0 && (
                 <MapKey maxValue={minMaxValues.countries.max} mapSubject={countryMapSubject} />
               )}
               <Box gap="xsmall" margin={{ vertical: 'small' }}>
-                {activeTab.title && (
-                  <Title>{activeTab.title}</Title>
+                {activeOption.title && (
+                  <Title>{activeOption.title}</Title>
                 )}
-                {activeTab.subTitle && (
-                  <SubTitle>{activeTab.subTitle}</SubTitle>
+                {activeOption.subTitle && (
+                  <SubTitle>{activeOption.subTitle}</SubTitle>
                 )}
               </Box>
-              {activeTab.memberOption && (
-                <MapOption option={activeTab.memberOption} type="member" />
+              {activeOption.memberOption && (
+                <MapOption option={activeOption.memberOption} type="member" />
+              )}
+            </Box>
+          )}
+          {activeOption.id === 'countries' && activeOption.indicatorOptions && (
+            <Box fill="horizontal">
+              <Box pad={{ bottom: 'ms' }} gap="xxsmall">
+                <SubTitle>Select a topic to view country positions</SubTitle>
+                <SelectIndicators config={activeOption} />
+              </Box>
+              {activeIndicatorOption.id === 'all'
+                && minMaxValues.countries
+                && minMaxValues.countries.max > 0 && (
+                <MapKey maxValue={minMaxValues.countries.max} mapSubject={countryMapSubject} />
+              )}
+              {activeIndicatorOption.id !== 'all' && activeOption.categoryConfig && (
+                <MapKey type="categories" config={activeOption.categoryConfig} />
+              )}
+              {activeIndicatorOption.id === 'all' && (
+                <Box gap="xsmall" margin={{ vertical: 'small' }}>
+                  {activeOption.title && (
+                    <Title>{activeOption.title}</Title>
+                  )}
+                  {activeOption.subTitle && (
+                    <SubTitle>{activeOption.subTitle}</SubTitle>
+                  )}
+                </Box>
+              )}
+              {activeIndicatorOption.id !== 'all' && (
+                <Box pad={{ vertical: 'small' }} gap="medium">
+                  {activeIndicatorOption.label && (
+                    <div>
+                      {activeIndicatorOption.onClick && (
+                        <IndicatorButton
+                          as={activeIndicatorOption.href ? 'a' : 'button'}
+                          href={activeIndicatorOption.href}
+                          onClick={(evt) => {
+                            if (evt) evt.preventDefault();
+                            activeIndicatorOption.onClick();
+                          }}
+                        >
+                          <Title hasInfo={!!activeIndicatorOption.info}>
+                            {activeIndicatorOption.label}
+                          </Title>
+                        </IndicatorButton>
+                      )}
+                      {!activeIndicatorOption.onClick && (
+                        <Title hasInfo={!!activeIndicatorOption.info}>
+                          {activeIndicatorOption.label}
+                        </Title>
+                      )}
+                      {activeIndicatorOption.info && (
+                        <InfoOverlay
+                          title={activeIndicatorOption.label}
+                          content={activeIndicatorOption.info}
+                          markdown
+                          tooltip
+                          inline
+                        />
+                      )}
+                    </div>
+                  )}
+                </Box>
+              )}
+              {activeOption.memberOption && (
+                <MapOption option={activeOption.memberOption} type="member" />
               )}
             </Box>
           )}

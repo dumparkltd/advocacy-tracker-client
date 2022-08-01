@@ -71,6 +71,7 @@ import {
   SET_VIEW,
   SET_SUBJECT,
   SET_MAPSUBJECT,
+  SET_MAPINDICATOR,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
   SET_INCLUDE_MEMBERS_FORFILTERS,
@@ -518,6 +519,12 @@ export function setMapSubject(subject) {
   return {
     type: SET_MAPSUBJECT,
     subject,
+  };
+}
+export function setMapIndicator(value) {
+  return {
+    type: SET_MAPINDICATOR,
+    value,
   };
 }
 export function setIncludeActorMembers(value) {

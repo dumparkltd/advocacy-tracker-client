@@ -61,6 +61,7 @@ export function MapContainer({
     typeLabels,
     includeSecondaryMembers,
     scrollWheelZoom,
+    valueToStyle,
   } = mapData;
   const {
     keyTitle,
@@ -160,6 +161,7 @@ export function MapContainer({
           locationData={locationData}
           countryFeatures={countriesJSON.features}
           indicator={indicator}
+          valueToStyle={valueToStyle}
           onCountryClick={(id) => onActorClick(id)}
           maxValueCountries={minMaxValues
             && minMaxValues.countries

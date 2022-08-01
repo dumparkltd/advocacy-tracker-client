@@ -110,6 +110,7 @@ export function MapWrapper({
   scrollWheelZoom = false,
   isLocationData = false, // real location data not country points
   circleLayerConfig = {},
+  valueToStyle,
 }) {
   const mapOptions = merge({}, options, MAP_OPTIONS);
   const customMapProjection = mapOptions.PROJ[projection];
@@ -355,19 +356,33 @@ export function MapWrapper({
         countryData,
         {
           style: (f) => {
-            // console.log(f)
+            // default style
             const defaultStyle = styleType && mapOptions.STYLE[styleType]
               ? {
                 ...mapOptions.DEFAULT_STYLE,
                 ...mapOptions.STYLE[styleType],
               }
               : mapOptions.DEFAULT_STYLE;
+            // check if feature is "active"
             const fstyle = f.isActive
               ? {
                 ...defaultStyle,
                 ...mapOptions.STYLE.active,
               }
               : defaultStyle;
+            // check for value-to-style function
+            if (
+              valueToStyle
+              && f.values
+              && typeof f.values[indicator] !== 'undefined'
+            ) {
+              return {
+                ...fstyle,
+                ...valueToStyle(f.values[indicator]),
+                ...f.style,
+              };
+            }
+            // style based on subject/indicator
             if (mapSubject) {
               if (
                 f.values
@@ -591,6 +606,7 @@ MapWrapper.propTypes = {
   locationData: PropTypes.array, // location data overlay
   indicator: PropTypes.string,
   onCountryClick: PropTypes.func,
+  valueToStyle: PropTypes.func,
   maxValueCountries: PropTypes.number,
   includeSecondaryMembers: PropTypes.bool,
   fitBounds: PropTypes.bool,

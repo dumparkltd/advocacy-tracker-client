@@ -11,6 +11,7 @@ import {
 
 import { TEXT_TRUNCATE } from 'themes/config';
 import Icon from 'components/Icon';
+import qe from 'utils/quasi-equals';
 
 import { truncateText } from 'utils/string';
 
@@ -38,12 +39,12 @@ const OptionButton = styled((p) => <Button plain {...p} />)`
   &:hover {
     color:${palette('headerNavMainItemHover', 0)};
   }
-  opacity: ${({ isDefaultOption }) => isDefaultOption ? 0.6 : 1};
+  opacity: ${({ noneOption }) => noneOption ? 0.6 : 1};
   color: ${({ active }) => active ? palette('headerNavMainItem', 1) : 'inherit'};
 `;
 
 const SelectText = styled((p) => <Text {...p} />)`
-  opacity: ${({ isDefaultOption }) => isDefaultOption ? 0.5 : 1}
+  opacity: ${({ noneOption }) => noneOption ? 0.5 : 1}
 `;
 const Reset = styled((p) => <Button plain {...p} />)`
   text-align: center;
@@ -55,16 +56,17 @@ const ResetPlaceholder = styled((p) => <Box {...p} />)`
 
 export function SelectIndicators({ config }) {
   const {
-    onIndicatorSelect,
-    indicatorOptions,
+    onUpdateFFIndicator,
+    ffActiveOptionId,
+    ffOptions,
   } = config;
   const [showOptions, setShowOptions] = useState(false);
   const buttonRef = useRef();
-  const activeOption = indicatorOptions.find(
-    (o) => o.active
+  const activeOption = ffOptions.find(
+    (o) => qe(o.value, ffActiveOptionId || '0')
   );
   if (!activeOption) return null;
-  const isDefaultOption = activeOption.id === 'all';
+  const isNoneOption = qe(ffActiveOptionId, '0');
   return (
     <Box fill="horizontal" direction="row" align="center">
       <Box flex={{ grow: 1 }}>
@@ -75,10 +77,7 @@ export function SelectIndicators({ config }) {
           onClick={() => setShowOptions(!showOptions)}
         >
           <Box direction="row" justify="between" align="center">
-            <SelectText
-              size="large"
-              isDefaultOption={isDefaultOption}
-            >
+            <SelectText size="large" noneOption={qe(activeOption.value, '0')}>
               {truncateText(
                 activeOption.label,
                 TEXT_TRUNCATE.INDICATOR_SELECT,
@@ -97,12 +96,12 @@ export function SelectIndicators({ config }) {
         </SelectButton>
       </Box>
       <Box flex={{ shrink: 0 }} pad={{ left: 'ms' }}>
-        {!isDefaultOption && (
-          <Reset onClick={() => onIndicatorSelect()}>
+        {!isNoneOption && (
+          <Reset onClick={() => onUpdateFFIndicator()}>
             <Icon name="removeSmall" text hidePrint />
           </Reset>
         )}
-        {isDefaultOption && (
+        {isNoneOption && (
           <ResetPlaceholder />
         )}
       </Box>
@@ -114,32 +113,30 @@ export function SelectIndicators({ config }) {
           onClickOutside={() => setShowOptions(false)}
         >
           <Box pad={{ vertical: 'xsmall' }}>
-            {indicatorOptions && indicatorOptions.map(
-              (o) => (
-                <Box key={o.value} flex={{ shrink: 0 }}>
-                  <OptionButton
-                    active={o.active}
-                    isDefaultOption={o.id === 'all'}
-                    onClick={() => {
-                      setShowOptions(false);
-                      if (o.id === 'all') {
-                        onIndicatorSelect();
-                      } else {
-                        onIndicatorSelect(o.value);
-                      }
-                    }}
-                  >
-                    <Text>
-                      {truncateText(
-                        o.label,
-                        TEXT_TRUNCATE.INDICATOR_SELECT_OPTION,
-                        false
-                      )}
-                    </Text>
-                  </OptionButton>
-                </Box>
-              )
-            )}
+            {ffOptions
+              && ffOptions.filter(
+                (o) => !qe(o.value, '0')
+              ).map(
+                (o) => (
+                  <Box key={o.value} flex={{ shrink: 0 }}>
+                    <OptionButton
+                      active={qe(o.value, ffActiveOptionId)}
+                      onClick={() => {
+                        setShowOptions(false);
+                        onUpdateFFIndicator(o.value);
+                      }}
+                    >
+                      <Text>
+                        {truncateText(
+                          o.label,
+                          TEXT_TRUNCATE.INDICATOR_SELECT_OPTION,
+                          false
+                        )}
+                      </Text>
+                    </OptionButton>
+                  </Box>
+                )
+              )}
           </Box>
         </Drop>
       )}
