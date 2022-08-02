@@ -44,7 +44,12 @@ import {
 } from 'containers/App/actions';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES, ACTORTYPES } from 'themes/config';
+import {
+  ROUTES,
+  ACTORTYPES,
+  ACTIONTYPE_ACTORTYPES,
+  ACTIONTYPES,
+} from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
@@ -77,6 +82,7 @@ import messages from './messages';
 import Activities from './Activities';
 import Members from './Members';
 import CountryMap from './CountryMap';
+import Statements from './Statements';
 
 import {
   selectViewEntity,
@@ -173,6 +179,7 @@ export function ActorView(props) {
   const isTarget = viewActortype && viewActortype.getIn(['attributes', 'is_target']);
   const isActive = viewActortype && viewActortype.getIn(['attributes', 'is_active']);
   const hasMembers = viewActortype && viewActortype.getIn(['attributes', 'has_members']);
+  const hasStatements = typeId && ACTIONTYPE_ACTORTYPES[ACTIONTYPES.EXPRESS].indexOf(typeId.toString()) > -1;
   const isCountry = qe(typeId, ACTORTYPES.COUNTRY);
 
   let viewSubject = subject || (hasMembers ? 'members' : 'actors');
@@ -182,6 +189,9 @@ export function ActorView(props) {
   }
   if (isActive) {
     validViewSubjects.push('actors');
+  }
+  if (hasStatements) {
+    validViewSubjects.push('topics');
   }
   if (hasMembers) {
     validViewSubjects.push('members');
@@ -305,6 +315,14 @@ export function ActorView(props) {
                           <Text size="large">Members</Text>
                         </SubjectButton>
                       )}
+                      {hasStatements && (
+                        <SubjectButton
+                          onClick={() => onSetSubject('topics')}
+                          active={viewSubject === 'topics'}
+                        >
+                          <Text size="large">Positions</Text>
+                        </SubjectButton>
+                      )}
                     </Box>
                     {viewSubject === 'members' && hasMembers && (
                       <Members
@@ -312,6 +330,13 @@ export function ActorView(props) {
                         onEntityClick={(id, path) => onEntityClick(id, path)}
                         taxonomies={taxonomies}
                         actorConnections={actorConnections}
+                      />
+                    )}
+                    {viewSubject === 'topics' && hasStatements && (
+                      <Statements
+                        onEntityClick={(id, path) => onEntityClick(id, path)}
+                        statements={actionsByActiontype && actionsByActiontype.get(parseInt(ACTIONTYPES.EXPRESS, 10))}
+                        associationsByType={associationsByType}
                       />
                     )}
                     {(viewSubject === 'actors' || viewSubject === 'targets') && (

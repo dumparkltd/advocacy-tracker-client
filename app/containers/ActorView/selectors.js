@@ -26,7 +26,6 @@ import {
   selectMembershipsGroupedByMember,
   selectMembershipsGroupedByAssociation,
   selectActionIndicatorsGroupedByActionAttributes,
-  selectActionIndicatorsGroupedByIndicatorAttributes,
   selectActors,
   selectActorCategoriesGroupedByActor,
   // selectActiontypes,
@@ -113,7 +112,6 @@ export const selectActionsWith = createSelector(
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
   selectActionIndicatorsGroupedByActionAttributes,
-  selectActionIndicatorsGroupedByIndicatorAttributes,
   selectCategories,
   selectActionCategoriesGroupedByAction,
   selectUserActionsGroupedByAction,
@@ -128,7 +126,6 @@ export const selectActionsWith = createSelector(
     actionResources,
     actionIndicators,
     actionIndicatorsByActionAttributes,
-    actionIndicatorsByIndicatorAttributes,
     categories,
     actionCategories,
     userActions,
@@ -357,6 +354,8 @@ export const selectActionsAsMemberByActortype = createSelector(
   selectCategories,
   selectActionCategoriesGroupedByAction,
   selectActions,
+  selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
   (
     ready,
     associations,
@@ -369,6 +368,8 @@ export const selectActionsAsMemberByActortype = createSelector(
     categories,
     actionCategories,
     actions,
+    actionIndicators,
+    actionIndicatorsByActionAttributes,
   ) => {
     if (!ready || !associations) return Map();
     return associations.map(
@@ -388,6 +389,8 @@ export const selectActionsAsMemberByActortype = createSelector(
               actorActions: actorActionsByAction,
               actionActors,
               actionResources,
+              actionIndicators,
+              actionIndicatorAttributes: actionIndicatorsByActionAttributes,
             })
           )
         )
