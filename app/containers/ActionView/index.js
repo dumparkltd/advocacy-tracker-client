@@ -263,14 +263,18 @@ export function ActionView(props) {
   const hasIndicators = typeId && INDICATOR_ACTIONTYPES.indexOf(typeId.toString()) > -1;
 
   let viewSubject = subject || 'actors';
-  if (viewSubject === 'children' && !hasChildren) {
-    viewSubject = 'actors';
+  const validViewSubjects = [];
+  if (hasChildren) {
+    validViewSubjects.push('children');
   }
-  if (viewSubject === 'targets' && !hasTarget) {
-    viewSubject = 'actors';
+  if (hasTarget) {
+    validViewSubjects.push('targets');
   }
-  if (viewSubject === 'actors' && !hasActor) {
-    viewSubject = 'targets';
+  if (hasActor) {
+    validViewSubjects.push('actors');
+  }
+  if (validViewSubjects.indexOf(viewSubject) === -1) {
+    viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
   }
 
   const actortypesForSubject = viewSubject === 'actors'
