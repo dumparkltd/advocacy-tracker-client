@@ -1695,146 +1695,10 @@ export const selectViewActorActortypeId = createSelector(
   }
 );
 
-export const selectCountriesWithPositions = createSelector(
-  (state, params) => params && typeof params.includeActorMembers !== 'undefined' ? params.includeActorMembers : true,
-  (state) => selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
-  (state) => selectActortypeActors(state, { type: ACTORTYPES.GROUP }),
-  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
-  selectActionCategoriesGroupedByAction,
-  selectMembershipsGroupedByMember,
-  selectActorActionsGroupedByActor,
-  selectIndicators,
-  selectActionIndicatorsGroupedByIndicatorAttributes,
-  selectIncludeInofficialStatements,
-  (
-    includeActorMembers,
-    countries,
-    groups,
-    statements,
-    actionCategoriesByAction,
-    memberships,
-    actorActions,
-    indicators,
-    actionIndicators,
-    includeInofficial,
-  ) => countries
-    && groups
-    && statements
-    && memberships
-    && actorActions
-    && indicators
-    && actionIndicators
-    && countries.map(
-      (country) => {
-        // actorActions
-        let countryIndicators;
-        // direct
-        let countryStatements = actorActions.get(parseInt(country.get('id'), 10));
-        if (countryStatements) {
-          countryStatements = countryStatements
-            .filter((actionId) => statements.get(actionId.toString()))
-            .filter((actionId) => {
-              if (includeInofficial) {
-                return true;
-              }
-              const actionCategories = actionCategoriesByAction.get(parseInt(actionId, 10));
-              return actionCategories && actionCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
-            })
-            .toList();
-        }
-        // merge with indirect
-        if (includeActorMembers) {
-          const countryMemberships = memberships.get(parseInt(country.get('id'), 10));
-          // console.log('countryid', country.get('id'))
-          // console.log('memberships', memberships && memberships.toJS())
-          // console.log('countryMemberships', countryMemberships && countryMemberships.toJS())
-          if (countryMemberships) {
-            countryStatements = countryMemberships.reduce(
-              (memo, groupId) => {
-                if (groups.get(groupId.toString()) && actorActions && actorActions.get(groupId)) {
-                  return memo.concat(
-                    actorActions
-                      .get(groupId)
-                      .filter((actionId) => statements.get(actionId.toString()))
-                      .toList()
-                  ).toSet();
-                }
-                return memo;
-              },
-              countryStatements || List(),
-            );
-          }
-        }
-        if (countryStatements && countryStatements.size > 0) {
-          // now for each indicator
-          countryIndicators = countryStatements && indicators.map(
-            (indicator) => {
-              // get all statements for topic
-              let indicatorStatements = actionIndicators.get(parseInt(indicator.get('id'), 10));
-              if (indicatorStatements) {
-                // filter for current country
-                indicatorStatements = indicatorStatements.filter(
-                  (indicatorStatement) => {
-                    const statementId = indicatorStatement.get('measure_id');
-                    return countryStatements.includes(parseInt(statementId, 10));
-                  }
-                ).map(
-                  (indicatorStatement) => {
-                    const statement = statements.get(indicatorStatement.get('measure_id').toString());
-                    return statement
-                      ? indicatorStatement.set(
-                        'measure',
-                        statement.get('attributes').set('id', statement.get('id')),
-                      )
-                      : indicatorStatement;
-                  }
-                ).sort(
-                  // sort: first check for dates, then use higher level of suuport
-                  (a, b) => {
-                    const aDate = a.getIn(['measure', 'date_start']);
-                    const bDate = b.getIn(['measure', 'date_start']);
-                    /* eslint-disable no-restricted-globals */
-                    const aIsDate = new Date(aDate) instanceof Date && !isNaN(new Date(aDate));
-                    const bIsDate = new Date(bDate) instanceof Date && !isNaN(new Date(bDate));
-                    /* eslint-enable no-restricted-globals */
-                    if (aIsDate && bIsDate) {
-                      // check for support level if dates equals
-                      if (aDate === bDate) {
-                        const aSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[a.get('supportlevel_id') || 0];
-                        const bSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[b.get('supportlevel_id') || 0];
-                        return aSupportLevel < bSupportLevel ? -1 : 1;
-                      }
-                      return new Date(aDate) < new Date(bDate) ? 1 : -1;
-                    }
-                    if (aIsDate) {
-                      return -1;
-                    }
-                    if (bIsDate) {
-                      return 1;
-                    }
-                    return 1;
-                  }
-                ).toList();
-                return indicatorStatements || null;
-              }
-              return null;
-            },
-          );
-          return country
-            .set('statements', countryStatements)
-            .set('indicatorPositions', countryIndicators);
-        }
-        return country;
-      }
-    )
-);
 export const selectActorsWithPositions = createSelector(
-  (state, params) => params && typeof params.includeActorMembers !== 'undefined'
-    ? params.includeActorMembers
-    : true,
-  (state, params) => params && typeof params.includeInofficial !== 'undefined'
-    ? params.includeInofficial
-    : false,
+  (state, params) => params && params.includeActorMembers,
+  (state, params) => params && params.includeInofficial,
+  (state, params) => params && params.type,
   (state) => selectActors(state),
   (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
   selectActionCategoriesGroupedByAction,
@@ -1843,9 +1707,11 @@ export const selectActorsWithPositions = createSelector(
   selectIndicators,
   selectActionIndicatorsGroupedByIndicatorAttributes,
   selectIncludeInofficialStatements,
+  selectIncludeActorMembers,
   (
-    includeActorMembers,
+    includeActorMembersParam,
     includeInofficialParam,
+    actortypeId,
     actors,
     statements,
     actionCategoriesByAction,
@@ -1853,7 +1719,8 @@ export const selectActorsWithPositions = createSelector(
     actorActions,
     indicators,
     actionIndicators,
-    includeInofficial,
+    includeInofficialQuery,
+    includeActorMembersQuery,
   ) => {
     if (
       !actors
@@ -1868,7 +1735,26 @@ export const selectActorsWithPositions = createSelector(
     const groups = actors.filter(
       (actor) => qe(actor.getIn(['attributes', 'actortype_id']), ACTORTYPES.GROUP)
     );
-    return actors.map(
+    const typeActors = actortypeId
+      ? actors.filter(
+        (actor) => qe(actor.getIn(['attributes', 'actortype_id']), actortypeId)
+      )
+      : actors;
+
+    // use query unless param set
+    let includeInofficial = true;
+    if (typeof includeInofficialParam !== 'undefined') {
+      includeInofficial = includeInofficialParam;
+    } else if (typeof includeInofficialQuery !== 'undefined') {
+      includeInofficial = includeInofficialQuery;
+    }
+    let includeMembers = true;
+    if (typeof includeActorMembersParam !== 'undefined') {
+      includeMembers = includeActorMembersParam;
+    } else if (typeof includeActorMembersQuery !== 'undefined') {
+      includeMembers = includeActorMembersQuery;
+    }
+    return typeActors.map(
       (actor) => {
         // actorActions
         let actorIndicators;
@@ -1881,7 +1767,7 @@ export const selectActorsWithPositions = createSelector(
               if (!statements.get(actionId.toString())) {
                 return false;
               }
-              if (includeInofficialParam || includeInofficial) {
+              if (includeInofficial) {
                 return true;
               }
               const actionCategories = actionCategoriesByAction.get(parseInt(actionId, 10));
@@ -1890,7 +1776,7 @@ export const selectActorsWithPositions = createSelector(
             .toList();
         }
         // indirect via group
-        if (includeActorMembers && groups && qe(actor.getIn(['attributes', 'actortype_id']), ACTORTYPES.COUNTRY)) {
+        if (includeMembers && groups && qe(actor.getIn(['attributes', 'actortype_id']), ACTORTYPES.COUNTRY)) {
           const actorMemberships = memberships.get(parseInt(actor.get('id'), 10));
           if (actorMemberships) {
             actorStatementsAsMemberByGroup = actorMemberships.reduce(

@@ -32,6 +32,7 @@ import {
   closeEntity,
   setIncludeInofficialStatements,
   setSubject,
+  setIncludeActorMembers,
 } from 'containers/App/actions';
 
 import {
@@ -44,6 +45,7 @@ import {
   selectSessionUserId,
   selectIncludeInofficialStatements,
   selectSubjectQuery,
+  selectIncludeActorMembers,
 } from 'containers/App/selectors';
 
 import {
@@ -219,6 +221,8 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
       intl,
       onSetSubject,
       subject,
+      onSetIncludeActorMembers,
+      includeActorMembers,
     } = this.props;
 
     const countries = actorsByActortype && actorsByActortype.get(parseInt(ACTORTYPES.COUNTRY, 10));
@@ -335,6 +339,8 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                           onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
                           includeInofficial={includeInofficial}
                           onSetIncludeInofficial={onSetIncludeInofficial}
+                          includeActorMembers={includeActorMembers}
+                          onSetIncludeActorMembers={onSetIncludeActorMembers}
                         />
                       </Box>
                     )}
@@ -433,6 +439,8 @@ IndicatorView.propTypes = {
   onSetSubject: PropTypes.func,
   includeInofficial: PropTypes.bool,
   subject: PropTypes.string,
+  onSetIncludeActorMembers: PropTypes.func,
+  includeActorMembers: PropTypes.bool,
   intl: intlShape,
 };
 
@@ -449,6 +457,7 @@ const mapStateToProps = (state, props) => ({
   actorsByActortype: selectActorsByType(state, props.params.id),
   includeInofficial: selectIncludeInofficialStatements(state),
   subject: selectSubjectQuery(state),
+  includeActorMembers: selectIncludeActorMembers(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -470,6 +479,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetSubject: (type) => {
       dispatch(setSubject(type));
+    },
+    onSetIncludeActorMembers: (active) => {
+      dispatch(setIncludeActorMembers(active));
     },
   };
 }

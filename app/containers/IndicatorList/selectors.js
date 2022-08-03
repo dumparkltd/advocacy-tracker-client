@@ -8,7 +8,7 @@ import {
   selectSortByQuery,
   selectSortOrderQuery,
   selectActions,
-  selectCountriesWithPositions,
+  selectActorsWithPositions,
   selectReady,
   selectActionCategoriesGroupedByAction,
   selectActionIndicatorsGroupedByIndicator,
@@ -20,11 +20,11 @@ import {
   filterEntitiesWithoutAssociation,
   entitiesSetCategoryIds,
 } from 'utils/entities';
-// import { qe } from 'utils/quasi-equals';
 
 import { sortEntities, getSortOption } from 'utils/sort';
 import {
   API,
+  ACTORTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 import { CONFIG, DEPENDENCIES } from './constants';
@@ -66,7 +66,7 @@ const selectIndicatorsSearched = createSelector(
 const selectIndicatorsWithActions = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectIndicatorsSearched,
-  selectCountriesWithPositions,
+  (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
   selectConnections,
   selectActionIndicatorsGroupedByIndicator, // as targets
   (

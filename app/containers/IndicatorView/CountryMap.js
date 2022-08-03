@@ -55,6 +55,8 @@ export function CountryMap({
   intl,
   onSetIncludeInofficial,
   includeInofficial,
+  onSetIncludeActorMembers,
+  includeActorMembers,
 }) {
   // const { intl } = this.context;
   // let type;
@@ -160,10 +162,19 @@ export function CountryMap({
       <MapOptions>
         <MapOption
           option={{
+            active: includeActorMembers,
+            onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+            label: 'Include statements of groups (countries belong to)',
+          }}
+          type="member"
+        />
+        <MapOption
+          option={{
             active: !includeInofficial,
             onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
             label: 'Only show "official" statements (Level of Authority)',
           }}
+          type="official"
         />
         <Box pad={{ vertical: 'small' }} gap="xsmall">
           <Text weight={600} size="small">Number of UN Member States by level of support</Text>
@@ -197,6 +208,8 @@ CountryMap.propTypes = {
   intl: intlShape,
   onSetIncludeInofficial: PropTypes.func,
   includeInofficial: PropTypes.bool,
+  onSetIncludeActorMembers: PropTypes.func,
+  includeActorMembers: PropTypes.bool,
 };
 
 export default injectIntl(CountryMap);

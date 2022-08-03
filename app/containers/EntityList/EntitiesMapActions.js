@@ -21,7 +21,7 @@ import {
 
 import {
   selectActortypeActors,
-  selectCountriesWithPositions,
+  selectActorsWithPositions,
   selectMapIndicator,
   selectIndicators,
   selectCategoryQuery,
@@ -65,8 +65,8 @@ export function EntitiesMapActions({
   mapSubject,
   onSetMapSubject,
   onSetIncludeActorMembers,
-  onSetIncludeTargetMembers,
   includeActorMembers,
+  onSetIncludeTargetMembers,
   includeTargetMembers,
   countries,
   onEntityClick,
@@ -160,7 +160,9 @@ export function EntitiesMapActions({
       infoOptions = [{
         active: includeActorMembers,
         onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-        label: 'Include activities of groups (countries belong to)',
+        label: isStatements
+          ? 'Include statements of groups (countries belong to)'
+          : 'Include activities of groups (countries belong to)',
       }];
     }
   }
@@ -533,8 +535,8 @@ EntitiesMapActions.propTypes = {
   ]),
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
-  onSetIncludeTargetMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
+  onSetIncludeTargetMembers: PropTypes.func,
   includeTargetMembers: PropTypes.bool,
   hasFilters: PropTypes.bool,
   onEntityClick: PropTypes.func,
@@ -545,7 +547,7 @@ EntitiesMapActions.propTypes = {
 
 const mapStateToProps = (state, { typeId, includeActorMembers }) => ({
   countries: qe(typeId, ACTIONTYPES.EXPRESS)
-    ? selectCountriesWithPositions(state, { includeActorMembers })
+    ? selectActorsWithPositions(state, { includeActorMembers, type: ACTORTYPES.COUNTRY })
     : selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
   mapIndicator: selectMapIndicator(state),
   catQuery: selectCategoryQuery(state),
