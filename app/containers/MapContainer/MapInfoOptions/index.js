@@ -129,7 +129,7 @@ export function MapInfoOptions({
     );
   }
   return (
-    <Styled hasTabs={options.length > 1}>
+    <Styled hasTabs={options.length > 1 || activeOption.indicatorOptions}>
       <Pane>
         {options.length > 1 && (
           <Box fill="horizontal" direction="row" style={{ zIndex: 1 }}>
@@ -224,8 +224,20 @@ export function MapInfoOptions({
                 )}
               </Box>
               {activeOption.memberOption && (
-                <MapOption option={activeOption.memberOption} type="member" />
+                <MapOption option={activeOption.memberOption} type="info" />
               )}
+              {activeOption.infoOptions
+                && activeOption.infoOptions.length > 0
+                && activeOption.infoOptions.map(
+                  (infoOption, i) => (
+                    <MapOption
+                      key={i}
+                      option={{ ...infoOption, id: infoOption.id || i }}
+                      type="info"
+                    />
+                  )
+                )
+              }
             </Box>
           )}
           {activeOption.id === 'countries' && activeOption.indicatorOptions && (
@@ -291,6 +303,18 @@ export function MapInfoOptions({
               {activeOption.memberOption && (
                 <MapOption option={activeOption.memberOption} type="member" />
               )}
+              {activeOption.infoOptions
+                && activeOption.infoOptions.length > 0
+                && activeOption.infoOptions.map(
+                  (infoOption, i) => (
+                    <MapOption
+                      key={i}
+                      option={{ ...infoOption, id: infoOption.id || i }}
+                      type="info"
+                    />
+                  )
+                )
+              }
             </Box>
           )}
         </Box>

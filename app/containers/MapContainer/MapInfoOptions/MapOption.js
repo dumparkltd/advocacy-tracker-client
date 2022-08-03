@@ -10,17 +10,17 @@ const Styled = styled((p) => <Box direction="row" align="center" gap="small" {..
 
 export function MapOption({ option, type = 'option' }) {
   const {
-    active, onClick, label, key = 0,
+    active, onClick, label, id = 0,
   } = option;
   return (
     <Styled>
       <input
-        id={`map-${type}-${key}`}
+        id={`map-${type}-${id}`}
         type="checkbox"
         checked={active}
         onChange={onClick}
       />
-      <Text as="label" htmlFor={`map-${type}-${key}`} size="xsmall">{label}</Text>
+      <Text as="label" htmlFor={`map-${type}-${id}`} size="xsmall">{label}</Text>
     </Styled>
   );
 }

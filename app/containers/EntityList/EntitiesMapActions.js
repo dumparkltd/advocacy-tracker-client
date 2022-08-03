@@ -16,6 +16,7 @@ import {
   ROUTES,
   ACTIONTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
+  OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
 
 import {
@@ -23,9 +24,11 @@ import {
   selectCountriesWithPositions,
   selectMapIndicator,
   selectIndicators,
+  selectCategoryQuery,
 } from 'containers/App/selectors';
 import {
   setMapIndicator,
+  updateRouteQuery,
 } from 'containers/App/actions';
 
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
@@ -72,10 +75,12 @@ export function EntitiesMapActions({
   mapIndicator,
   indicators,
   onSetMapIndicator,
+  catQuery,
+  onUpdateQuery,
 }) {
   let subjectOptions = [];
   let indicatorOptions;
-  let memberOption;
+  let infoOptions = [];
   let indicator = includeActorMembers ? 'actionsTotal' : 'actions';
   let mapSubjectClean = mapSubject || 'actors';
   let reduceCountryAreas;
@@ -138,21 +143,46 @@ export function EntitiesMapActions({
   if (mapSubjectClean === 'targets') {
     // note this should always be true!
     if (hasGroupActors(targettypes)) {
-      memberOption = {
+      infoOptions = [{
         active: includeTargetMembers,
         onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
         label: 'Include activities targeting regions and groups (countries belong to)',
-      };
+      }];
     }
   } else if (hasGroupActors(actortypes)) {
-    memberOption = {
-      active: includeActorMembers,
-      onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-      label: 'Include activities of groups (countries belong to)',
-    };
+    if (isPositionIndicator) {
+      infoOptions = [{
+        active: includeActorMembers,
+        onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+        label: 'Include positions of groups (countries belong to)',
+      }];
+    } else {
+      infoOptions = [{
+        active: includeActorMembers,
+        onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+        label: 'Include activities of groups (countries belong to)',
+      }];
+    }
   }
 
   if (isStatements) {
+    const isOfficialFiltered = typeof catQuery === 'object'
+      ? catQuery.includes(OFFICIAL_STATEMENT_CATEGORY_ID.toString())
+      // string
+      : qe(catQuery, OFFICIAL_STATEMENT_CATEGORY_ID);
+    infoOptions.push({
+      active: isOfficialFiltered,
+      label: 'Only show "official" statements (Level of Authority)',
+      onClick: () => onUpdateQuery([{
+        arg: 'cat',
+        value: OFFICIAL_STATEMENT_CATEGORY_ID,
+        add: !isOfficialFiltered,
+        remove: isOfficialFiltered,
+        replace: false,
+        multipleAttributeValues: false,
+      }]),
+    });
+
     indicatorOptions = indicators.sort(
       (a, b) => parseInt(a.get('id'), 10) < parseInt(b.get('id'), 10) ? -1 : 1
     ).reduce(
@@ -274,11 +304,7 @@ export function EntitiesMapActions({
     mapSubjectClean = null;
     mapInfo = [{
       id: 'countries',
-      memberOption: {
-        active: includeActorMembers,
-        onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-        label: 'Include positions of groups (countries belong to)',
-      },
+      infoOptions,
       indicatorOptions,
       onIndicatorSelect: onSetMapIndicator,
       categoryConfig: {
@@ -450,7 +476,7 @@ export function EntitiesMapActions({
       id: 'countries',
       title: infoTitle,
       subTitle: infoSubTitle,
-      memberOption,
+      infoOptions,
       subjectOptions,
       indicatorOptions,
       onIndicatorSelect: onSetMapIndicator,
@@ -501,6 +527,10 @@ EntitiesMapActions.propTypes = {
   typeId: PropTypes.string,
   mapSubject: PropTypes.string,
   mapIndicator: PropTypes.string,
+  catQuery: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.instanceOf(List),
+  ]),
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeTargetMembers: PropTypes.func,
@@ -509,6 +539,7 @@ EntitiesMapActions.propTypes = {
   hasFilters: PropTypes.bool,
   onEntityClick: PropTypes.func,
   onSetMapIndicator: PropTypes.func,
+  onUpdateQuery: PropTypes.func,
   intl: intlShape.isRequired,
 };
 
@@ -517,12 +548,16 @@ const mapStateToProps = (state, { typeId, includeActorMembers }) => ({
     ? selectCountriesWithPositions(state, { includeActorMembers })
     : selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
   mapIndicator: selectMapIndicator(state),
+  catQuery: selectCategoryQuery(state),
   indicators: qe(typeId, ACTIONTYPES.EXPRESS) ? selectIndicators(state) : null,
 });
 
 function mapDispatchToProps(dispatch) {
   return {
     onSetMapIndicator: (value) => dispatch(setMapIndicator(value)),
+    onUpdateQuery: (args) => {
+      dispatch(updateRouteQuery(args));
+    },
   };
 }
 
