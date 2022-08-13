@@ -70,8 +70,7 @@ export function CountryMap({
         (c) => qe(c.getIn(['attributes', 'code']), feature.properties.ADM0_A3),
       );
       if (country) {
-        const countryPositions = country.getIn(['indicatorPositions', indicatorId]);
-        const countryPosition = countryPositions && countryPositions.first();
+        const countryPosition = country.get('position');
         const level = countryPosition && countryPosition.get('supportlevel_id');
         const position = level && ACTION_INDICATOR_SUPPORTLEVELS[parseInt(level, 10)];
         if (position) {

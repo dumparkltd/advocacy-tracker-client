@@ -143,8 +143,15 @@ const getActortypeColumns = (typeid, viewEntity, intl) => {
     {
       id: 'supportlevel_id',
       type: 'supportlevel',
-      actionId: viewEntity.get('id'),
       title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+    },
+    {
+      id: 'positionStatement',
+      type: 'positionStatement',
+    },
+    {
+      id: 'viaGroups',
+      type: 'viaGroups',
     },
   ];
   return columns;

@@ -54,7 +54,7 @@ export function CellBodyActions({
           href={getActionLink(entity.single)}
           onClick={(evt) => {
             if (evt) evt.preventDefault();
-            onEntityClick(entity.get('id'), ROUTES.ACTION);
+            onEntityClick(entity.single.get('id'), ROUTES.ACTION);
           }}
           title={entity.value}
           alignSelf={align}

@@ -230,6 +230,7 @@ export function EntitiesTable({
                       || col.type === 'members'
                       || col.type === 'associations'
                       || col.type === 'userActors'
+                      || col.type === 'viaGroups'
                     ) && (
                       <CellBodyActors
                         entity={entity[col.id]}
@@ -255,6 +256,7 @@ export function EntitiesTable({
                       || col.type === 'resourceActions'
                       || col.type === 'indicatorActions'
                       || col.type === 'userActions'
+                      || col.type === 'positionStatement'
                     ) && (
                       <CellBodyActions
                         entity={entity[col.id]}

@@ -143,7 +143,7 @@ export const selectActorsByType = createSelector(
   selectActorsWithPositions,
   (
     ready,
-    viewEntityId,
+    viewEntityId, // the indicator
     actors,
   ) => {
     if (!ready) return Map();
@@ -154,10 +154,10 @@ export const selectActorsByType = createSelector(
           && actor.getIn(['indicatorPositions', viewEntityId.toString()]).size > 0
       )
       .map(
-        (actor) => actor.setIn(
-          ['supportlevel', viewEntityId.toString()],
-          actor.getIn(['indicatorPositions', viewEntityId.toString()]).first().get('supportlevel_id') || 0
-        )
+        (actor) => {
+          const position = actor.getIn(['indicatorPositions', viewEntityId.toString()]).first();
+          return actor.set('position', position);
+        }
       )
       .groupBy(
         (actor) => actor.getIn(['attributes', 'actortype_id'])

@@ -1797,6 +1797,7 @@ export const selectActorsWithPositions = createSelector(
           }
         }
         // console.log('filter actorStatements', actorStatements && actorStatements.toJS())
+        // console.log('actor', actor.get('id'))
         // console.log('filter actorStatementsAsMemberByGroup', actorStatementsAsMemberByGroup && actorStatementsAsMemberByGroup.toJS())
         if (
           (actorStatements && actorStatements.size > 0)
@@ -1812,26 +1813,31 @@ export const selectActorsWithPositions = createSelector(
                 indicatorStatements = indicatorStatements.reduce(
                   (memo, indicatorStatement, id) => {
                     const statementId = indicatorStatement.get('measure_id');
-                    const hasStatement = actorStatements && actorStatements.includes(parseInt(statementId, 10));
+                    const hasDirectStatement = actorStatements && actorStatements.includes(parseInt(statementId, 10));
                     const groupsWithStatement = actorStatementsAsMemberByGroup
                       && actorStatementsAsMemberByGroup.filter(
                         (ids) => ids.includes(parseInt(statementId, 10))
                       );
-                    if (hasStatement || (groupsWithStatement && groupsWithStatement.size > 0)) {
+                    if (hasDirectStatement || (groupsWithStatement && groupsWithStatement.size > 0)) {
                       const statement = statements.get(statementId.toString());
-                      let res = statement
+                      let result = statement
                         ? indicatorStatement.set(
                           'measure',
                           statement.get('attributes').set('id', statement.get('id')),
                         )
                         : indicatorStatement;
-                      if (!hasStatement && groupsWithStatement && groupsWithStatement.size > 0) {
-                        res = res.set(
+                      if (!hasDirectStatement && groupsWithStatement && groupsWithStatement.size > 0) {
+                        result = result.set(
                           'viaGroupIds',
                           groupsWithStatement.keySeq()
+                        ).set(
+                          'viaGroups',
+                          groupsWithStatement.keySeq().map(
+                            (groupId) => actors.get(groupId.toString())
+                          )
                         );
                       }
-                      return memo.set(id, res);
+                      return memo.set(id, result);
                     }
                     return memo;
                   },
