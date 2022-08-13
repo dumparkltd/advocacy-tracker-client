@@ -197,7 +197,7 @@ export function EntitiesMapActions({
           active: qe(mapIndicator, entity.get('id')),
           onClick: () => onEntityClick(entity.get('id'), ROUTES.INDICATOR),
           href: `${ROUTES.INDICATOR}/${entity.get('id')}`,
-          info: entity.getIn(['attributes', 'description']),
+          // info: entity.getIn(['attributes', 'description']),
         },
       ]),
       [{
