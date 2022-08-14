@@ -182,13 +182,13 @@ export function ActorView(props) {
   const hasStatements = typeId && ACTIONTYPE_ACTORTYPES[ACTIONTYPES.EXPRESS].indexOf(typeId.toString()) > -1;
   const isCountry = qe(typeId, ACTORTYPES.COUNTRY);
 
-  let viewSubject = subject || (hasMembers ? 'members' : 'actors');
+  let viewSubject = subject || 'actors';
   const validViewSubjects = [];
-  if (isTarget) {
-    validViewSubjects.push('targets');
-  }
   if (isActive) {
     validViewSubjects.push('actors');
+  }
+  if (isTarget) {
+    validViewSubjects.push('targets');
   }
   if (hasStatements) {
     validViewSubjects.push('topics');
