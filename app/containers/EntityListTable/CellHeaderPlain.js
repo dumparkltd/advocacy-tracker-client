@@ -22,12 +22,10 @@ export function CellHeaderPlain({ column }) {
   );
   const { align = 'start' } = column;
   return (
-    <Box direction="row" align="center" justify={align}>
-      <Box>
-        <Text weight={500} size="small" textAlign={align} wordBreak="keep-all">
-          {column.label || column.title}
-        </Text>
-      </Box>
+    <Box direction="row" align="center" justify={align} flex={false}>
+      <Text weight={500} size="small" textAlign={align} wordBreak="keep-all">
+        {column.label || column.title}
+      </Text>
       {column.info && (
         <InfoOverlay
           tooltip
@@ -37,7 +35,7 @@ export function CellHeaderPlain({ column }) {
         />
       )}
       {column.onSort && (
-        <Box pad={{ left: 'xxsmall' }}>
+        <Box pad={{ left: 'xxsmall' }} flex={false}>
           <SortButton
             onClick={() => {
               if (column.sortActive) {

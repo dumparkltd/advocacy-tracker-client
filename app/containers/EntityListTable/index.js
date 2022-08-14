@@ -290,6 +290,7 @@ export function EntityListTable({
         headerColumnsUtility={headerColumnsUtility}
         memberOption={memberOption}
         subjectOptions={subjectOptions}
+        inSingleView={inSingleView}
       />
       <ListEntitiesMain>
         {entityIdsOnPage.length === 0

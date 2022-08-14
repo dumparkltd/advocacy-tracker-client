@@ -30,8 +30,11 @@ const TableRow = styled.tr`
   height: 100%;
 `;
 const getColWidth = ({
-  col, count, colSpan = 1,
+  col, count, colSpan = 1, inSingleView,
 }) => {
+  if (inSingleView) {
+    return (100 / count) * colSpan;
+  }
   if (count === 1) {
     return 100;
   }
@@ -41,8 +44,11 @@ const getColWidth = ({
   if (count > 2) {
     return col.type === 'main' ? 35 : (65 / (count - 1)) * colSpan;
   }
+  // if (count === 4) {
+  //   return col.type === 'main' ? 30 : (70 / (count - 1)) * colSpan;
+  // }
   // if (count > 4) {
-  //   return col.type === 'main' ? 40 : (60 / (count - 1)) * colSpan;
+  //   return col.type === 'main' ? 25 : (75 / (count - 1)) * colSpan;
   // }
   return 0;
 };
@@ -106,6 +112,7 @@ export function EntitiesTable({
   headerColumnsUtility,
   memberOption,
   subjectOptions,
+  inSingleView,
 }) {
   const size = React.useContext(ResponsiveContext);
   return (
@@ -125,6 +132,7 @@ export function EntitiesTable({
                       colSpan={col.span || 1}
                       first={i === 0}
                       last={i === headerColumns.length - 1}
+                      inSingleView={inSingleView}
                       utility
                     >
                       {col.type === 'options' && (
@@ -156,8 +164,9 @@ export function EntitiesTable({
                     count={headerColumns.length}
                     first={i === 0}
                     last={i === headerColumns.length - 1}
+                    inSingleView={inSingleView}
                   >
-                    <TableCellHeaderInner>
+                    <TableCellHeaderInner fill={false} flex={{ grow: 0 }} justify="start">
                       {col.type === 'main' && (
                         <CellHeaderMain
                           column={col}
@@ -185,6 +194,7 @@ export function EntitiesTable({
                   count={headerColumns.length}
                   first={i === 0}
                   last={i === headerColumns.length - 1}
+                  inSingleView={inSingleView}
                 >
                   <TableCellBodyInner>
                     {col.type === 'main' && (
@@ -307,6 +317,7 @@ EntitiesTable.propTypes = {
   headerColumns: PropTypes.array,
   headerColumnsUtility: PropTypes.array,
   canEdit: PropTypes.bool,
+  inSingleView: PropTypes.bool,
   onEntityClick: PropTypes.func,
   memberOption: PropTypes.node,
   subjectOptions: PropTypes.node,
