@@ -108,7 +108,6 @@ export function EntitiesTable({
   subjectOptions,
 }) {
   const size = React.useContext(ResponsiveContext);
-
   return (
     <Box fill="horizontal">
       <Table>
@@ -238,7 +237,10 @@ export function EntitiesTable({
                         column={col}
                       />
                     )}
-                    {col.type === 'taxonomy' && (
+                    {(
+                      col.type === 'taxonomy'
+                      || col.type === 'positionStatementAuthority'
+                    ) && (
                       <CellBodyCategories
                         entity={entity[col.id]}
                         column={col}

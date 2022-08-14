@@ -147,6 +147,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
 };
 
 export const OFFICIAL_STATEMENT_CATEGORY_ID = 56;
+export const AUTHORITY_TAXONOMY = 13;
 
 export const ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS = {
   [ACTIONTYPES.EXPRESS]: [
@@ -771,7 +772,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'taxonomy-13',
         type: 'taxonomy',
-        taxonomy_id: 13, // level of authority
+        taxonomy_id: AUTHORITY_TAXONOMY, // level of authority
       },
       {
         id: 'actors',

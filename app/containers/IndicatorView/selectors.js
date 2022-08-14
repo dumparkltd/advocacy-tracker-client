@@ -154,10 +154,10 @@ export const selectActorsByType = createSelector(
           && actor.getIn(['indicatorPositions', viewEntityId.toString()]).size > 0
       )
       .map(
-        (actor) => {
-          const position = actor.getIn(['indicatorPositions', viewEntityId.toString()]).first();
-          return actor.set('position', position);
-        }
+        (actor) => actor.set(
+          'position',
+          actor.getIn(['indicatorPositions', viewEntityId.toString()]).first()
+        )
       )
       .groupBy(
         (actor) => actor.getIn(['attributes', 'actortype_id'])

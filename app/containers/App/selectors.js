@@ -35,6 +35,7 @@ import {
   MEMBERSHIPS,
   ACTION_INDICATOR_SUPPORTLEVELS,
   OFFICIAL_STATEMENT_CATEGORY_ID,
+  AUTHORITY_TAXONOMY,
 } from 'themes/config';
 
 import {
@@ -1034,6 +1035,22 @@ export const selectTaxonomiesWithCategories = createSelector(
   ))
 );
 
+// all categories for a given taxonomy id
+export const selectTaxonomyCategories = createSelector(
+  selectCategories,
+  (state, args) => args ? args.taxonomy_id : null,
+  (entities, taxonomy_id) => {
+    if (entities && taxonomy_id) {
+      return entities.filter(
+        (actor) => qe(
+          taxonomy_id,
+          actor.getIn(['attributes', 'taxonomy_id']),
+        )
+      );
+    }
+    return entities;
+  }
+);
 
 // get all actor taxonomies for a given type
 
@@ -1696,39 +1713,46 @@ export const selectViewActorActortypeId = createSelector(
 );
 
 export const selectActorsWithPositions = createSelector(
+  // from param
   (state, params) => params && params.includeActorMembers,
   (state, params) => params && params.includeInofficial,
   (state, params) => params && params.type,
+  // from query
+  selectIncludeInofficialStatements,
+  selectIncludeActorMembers,
+  // from state
   (state) => selectActors(state),
   (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
+  (state) => selectTaxonomyCategories(state, { taxonomy_id: AUTHORITY_TAXONOMY }),
   selectActionCategoriesGroupedByAction,
   selectMembershipsGroupedByMember,
   selectActorActionsGroupedByActor,
   selectIndicators,
   selectActionIndicatorsGroupedByIndicatorAttributes,
-  selectIncludeInofficialStatements,
-  selectIncludeActorMembers,
   (
     includeActorMembersParam,
     includeInofficialParam,
     actortypeId,
+    includeInofficialQuery,
+    includeActorMembersQuery,
     actors,
     statements,
+    authorityCategories,
     actionCategoriesByAction,
     memberships,
     actorActions,
     indicators,
     actionIndicators,
-    includeInofficialQuery,
-    includeActorMembersQuery,
   ) => {
     if (
       !actors
       || !statements
+      || !actionCategoriesByAction
       || !memberships
       || !actorActions
       || !indicators
       || !actionIndicators
+      || !authorityCategories
     ) {
       return null;
     }
@@ -1756,6 +1780,7 @@ export const selectActorsWithPositions = createSelector(
     }
     return typeActors.map(
       (actor) => {
+        // 1. figure out any actor statements /////////////////////////////////////
         // actorActions
         let actorIndicators;
         let actorStatementsAsMemberByGroup = List();
@@ -1763,15 +1788,15 @@ export const selectActorsWithPositions = createSelector(
         let actorStatements = actorActions.get(parseInt(actor.get('id'), 10));
         if (actorStatements) {
           actorStatements = actorStatements
-            .filter((actionId) => {
-              if (!statements.get(actionId.toString())) {
+            .filter((statementId) => {
+              if (!statements.get(statementId.toString())) {
                 return false;
               }
               if (includeInofficial) {
                 return true;
               }
-              const actionCategories = actionCategoriesByAction.get(parseInt(actionId, 10));
-              return actionCategories && actionCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+              const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
+              return statementCategories && statementCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
             })
             .toList();
         }
@@ -1796,9 +1821,12 @@ export const selectActorsWithPositions = createSelector(
             );
           }
         }
+
         // console.log('filter actorStatements', actorStatements && actorStatements.toJS())
         // console.log('actor', actor.get('id'))
         // console.log('filter actorStatementsAsMemberByGroup', actorStatementsAsMemberByGroup && actorStatementsAsMemberByGroup.toJS())
+
+        // 2. figure out actor positions on all indicators/topics
         if (
           (actorStatements && actorStatements.size > 0)
           || (actorStatementsAsMemberByGroup && actorStatementsAsMemberByGroup.size > 0)
@@ -1820,10 +1848,17 @@ export const selectActorsWithPositions = createSelector(
                       );
                     if (hasDirectStatement || (groupsWithStatement && groupsWithStatement.size > 0)) {
                       const statement = statements.get(statementId.toString());
+                      const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
+                      const statementAuthority = authorityCategories.find(
+                        (cat, catId) => statementCategories.includes(parseInt(catId, 10))
+                      );
                       let result = statement
                         ? indicatorStatement.set(
                           'measure',
                           statement.get('attributes').set('id', statement.get('id')),
+                        ).set(
+                          'authority',
+                          statementAuthority.get('attributes').set('id', statementAuthority.get('id'))
                         )
                         : indicatorStatement;
                       if (!hasDirectStatement && groupsWithStatement && groupsWithStatement.size > 0) {
@@ -1874,8 +1909,14 @@ export const selectActorsWithPositions = createSelector(
               return null;
             },
           );
+          // combine direct and indirect statements
+          if (actorStatementsAsMemberByGroup) {
+            actorStatements = actorStatements
+              ? actorStatements.concat(actorStatementsAsMemberByGroup.flatten().toList()).toSet()
+              : actorStatementsAsMemberByGroup.flatten().toList().toSet();
+          }
           return actor
-            .set('statements', actorStatements && actorStatements.concat(actorStatementsAsMemberByGroup.flatten().toList()).toSet())
+            .set('statements', actorStatements)
             .set('indicatorPositions', actorIndicators);
         }
         return actor;

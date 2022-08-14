@@ -104,6 +104,14 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
+      case 'positionStatementAuthority':
+        return ({
+          ...col,
+          title: 'Level of authority',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
       case 'users':
         return ({
           ...col,
@@ -607,6 +615,17 @@ export const prepareEntities = ({
             };
           case 'positionStatement':
             temp = entity.get('position') && entity.getIn(['position', 'measure']);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getSingleRelatedValueFromAttributes(temp),
+                single: temp,
+                // sortValue: getRelatedSortValue(temp),
+              },
+            };
+          case 'positionStatementAuthority':
+            temp = entity.get('position') && entity.getIn(['position', 'authority']);
             return {
               ...memoEntity,
               [col.id]: {

@@ -150,6 +150,10 @@ const getActortypeColumns = (typeid, viewEntity, intl) => {
       type: 'positionStatement',
     },
     {
+      id: 'authority',
+      type: 'positionStatementAuthority',
+    },
+    {
       id: 'viaGroups',
       type: 'viaGroups',
     },
