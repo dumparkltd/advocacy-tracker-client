@@ -596,14 +596,19 @@ export const prepareEntities = ({
           case 'supportlevel':
             if (entity.get('supportlevel')) {
               temp = entity.get('supportlevel')
-                && entity.getIn(['supportlevel', col.key]);
+                && entity.getIn(['supportlevel', col.actionId]);
             }
             if (entity.get('position')) {
               temp = entity.get('position')
                 && entity.getIn(['position', 'supportlevel_id']);
             }
             if (!temp) {
-              temp = 0;
+              return {
+                ...memoEntity,
+                [col.id]: {
+                  ...col,
+                },
+              };
             }
             return {
               ...memoEntity,

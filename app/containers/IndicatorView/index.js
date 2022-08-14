@@ -30,9 +30,9 @@ import {
   loadEntitiesIfNeeded,
   updatePath,
   closeEntity,
-  setIncludeInofficialStatements,
   setSubject,
   setIncludeActorMembers,
+  setIncludeInofficialStatements,
 } from 'containers/App/actions';
 
 import {
@@ -43,9 +43,9 @@ import {
   selectActionConnections,
   selectActorConnections,
   selectSessionUserId,
-  selectIncludeInofficialStatements,
   selectSubjectQuery,
   selectIncludeActorMembers,
+  selectIncludeInofficialStatements,
 } from 'containers/App/selectors';
 
 import {
@@ -227,11 +227,11 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
       handleEdit,
       handleClose,
       actorsByActortype,
-      onSetIncludeInofficial,
-      includeInofficial,
       intl,
       onSetSubject,
       subject,
+      onSetIncludeInofficial,
+      includeInofficial,
       onSetIncludeActorMembers,
       includeActorMembers,
     } = this.props;
@@ -446,10 +446,10 @@ IndicatorView.propTypes = {
   myId: PropTypes.string,
   isManager: PropTypes.bool,
   isAdmin: PropTypes.bool,
-  onSetIncludeInofficial: PropTypes.func,
-  onSetSubject: PropTypes.func,
-  includeInofficial: PropTypes.bool,
   subject: PropTypes.string,
+  onSetSubject: PropTypes.func,
+  onSetIncludeInofficial: PropTypes.func,
+  includeInofficial: PropTypes.bool,
   onSetIncludeActorMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   intl: intlShape,
@@ -466,8 +466,8 @@ const mapStateToProps = (state, props) => ({
   actionConnections: selectActionConnections(state),
   actorConnections: selectActorConnections(state),
   actorsByActortype: selectActorsByType(state, props.params.id),
-  includeInofficial: selectIncludeInofficialStatements(state),
   subject: selectSubjectQuery(state),
+  includeInofficial: selectIncludeInofficialStatements(state),
   includeActorMembers: selectIncludeActorMembers(state),
 });
 
@@ -482,14 +482,14 @@ function mapDispatchToProps(dispatch, props) {
     handleClose: () => {
       dispatch(closeEntity(ROUTES.INDICATORS));
     },
-    onSetIncludeInofficial: (value) => {
-      dispatch(setIncludeInofficialStatements(value));
-    },
     onEntityClick: (id, path) => {
       dispatch(updatePath(`${path}/${id}`));
     },
     onSetSubject: (type) => {
       dispatch(setSubject(type));
+    },
+    onSetIncludeInofficial: (value) => {
+      dispatch(setIncludeInofficialStatements(value));
     },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));

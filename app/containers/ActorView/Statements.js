@@ -4,189 +4,190 @@
  *
  */
 
-// import React from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-// import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
-// import {
-//   Box,
-//   Text,
-//   Button,
-//   ResponsiveContext,
-// } from 'grommet';
+import { intlShape, injectIntl } from 'react-intl';
+import {
+  Box,
+  // Text,
+  // Button,
+  // ResponsiveContext,
+} from 'grommet';
 import { Map } from 'immutable';
-// import styled from 'styled-components';
-//
-// import qe from 'utils/quasi-equals';
+import styled from 'styled-components';
+
+import qe from 'utils/quasi-equals';
 // import isNumber from 'utils/is-number';
 // import { isMaxSize } from 'utils/responsive';
 
 // import NumberField from 'components/fields/NumberField';
 
-// import { ROUTES } from 'themes/config';
+import { ACTORTYPES } from 'themes/config';
 
-import { updatePath } from 'containers/App/actions';
+import {
+  getIndicatorConnectionField,
+} from 'utils/fields';
 
-// import appMessages from 'containers/App/messages';
+import {
+  updatePath,
+  setIncludeActorMembers,
+  setIncludeInofficialStatements,
+} from 'containers/App/actions';
+
+import appMessages from 'containers/App/messages';
 import {
   selectIndicators,
   selectActorsWithPositions,
+  selectIncludeActorMembers,
+  selectIncludeInofficialStatements,
 } from 'containers/App/selectors';
 
-// const ResourceButton = styled((p) => <Button plain {...p} />)``;
-// const Group = styled(
-//   (p) => (
-//     <Box
-//       margin={{ bottom: 'large', top: 'medium' }}
-//       pad={{ vertical: 'small' }}
-//       {...p}
-//     />
-//   )
-// )``;
-// const GroupTitle = styled.h5`
-//   font-size: 18px;
-//   font-weight: 500;
-//   margin: 0;
-// `;
-// const GroupTitleLabel = styled(GroupTitle)`
-//   font-weight: 300;
-//   color: ${({ theme }) => theme.global.colors.text.secondary};
-// `;
-//
-// const Indicator = styled((p) => <Box margin={{ top: 'medium' }} pad={{ top: 'medium' }} {...p} />)`
-//   border-top: 1px solid ${({ theme }) => theme.global.colors.border.light};
-// `;
+import FieldGroup from 'components/fields/FieldGroup';
+import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+
+const MapOptions = styled(
+  (p) => <Box margin={{ horizontal: 'medium', top: 'medium' }} {...p} />
+)``;
+
+const getIndicatorColumns = (viewEntity, intl) => {
+  let columns = [
+    {
+      id: 'main',
+      type: 'main',
+      sort: 'title',
+      attributes: ['code', 'title'],
+    },
+    {
+      id: 'positionStatement',
+      type: 'positionStatement',
+    },
+    {
+      id: 'supportlevel_id',
+      type: 'supportlevel',
+      actionId: viewEntity.get('id'),
+      title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+    },
+    {
+      id: 'authority',
+      type: 'positionStatementAuthority',
+    },
+  ];
+  if (qe(viewEntity.getIn(['attributes', 'actortype_id']), ACTORTYPES.COUNTRY)) {
+    columns = [
+      ...columns,
+      {
+        id: 'viaGroups',
+        type: 'viaGroups',
+      },
+    ];
+  }
+  return columns;
+};
 
 export function Statements(props) {
   const {
     indicators,
-    // onUpdatePath,
-    statements,
     actorsWithPositions,
-    associationsByType,
-    // intl,
+    includeInofficial,
+    includeActorMembers,
+    onEntityClick,
+    onSetIncludeInofficial,
+    onSetIncludeActorMembers,
+    intl,
+    viewEntity,
   } = props;
-  console.log('indicators', indicators && indicators.toJS());
-  console.log('statements', statements && statements.toJS());
-  console.log('actorsWithPositions', actorsWithPositions && actorsWithPositions.toJS());
-  console.log('associationsByType', associationsByType && associationsByType.toJS());
-  return null;
-  // const size = React.useContext(ResponsiveContext);
-  // const indicatorsByResourceId = indicators && indicators.groupBy(
-  //   (entity) => {
-  //     if (entity.get('resourcesByType')) {
-  //       return entity.get('resourcesByType').flatten().toList().first();
-  //     }
-  //     return 'without';
-  //   }
-  // );
-  // return (
-  //   <Box>
-  //     {(!indicators || indicators.size === 0) && (
-  //       <Box margin={{ vertical: 'small', horizontal: 'medium' }}>
-  //         <Text>
-  //           No indicators for actor in database
-  //         </Text>
-  //       </Box>
-  //     )}
-  //     {indicators && indicators.size > 0 && (
-  //       <Box margin={{ vertical: 'small', horizontal: 'medium' }}>
-  //         {indicatorsByResourceId && indicatorsByResourceId.keySeq().map(
-  //           (resourceId) => {
-  //             const resource = !qe(resourceId, 'without')
-  //               && resources
-  //               && resources.get(resourceId.toString());
-  //             const resourceIndicators = indicatorsByResourceId.get(resourceId);
-  //             return (
-  //               <Group key={`res-${resourceId}`}>
-  //                 {resource && (
-  //                   <Box
-  //                     direction={isMaxSize(size, 'medium') ? 'column' : 'row'}
-  //                     gap="xsmall"
-  //                   >
-  //                     <Box>
-  //                       <GroupTitleLabel>
-  //                         Publication
-  //                       </GroupTitleLabel>
-  //                     </Box>
-  //                     <Box>
-  //                       <ResourceButton
-  //                         as="a"
-  //                         href={`${ROUTES.RESOURCE}/${resourceId}`}
-  //                         onClick={(e) => {
-  //                           if (e) e.preventDefault();
-  //                           onUpdatePath(`${ROUTES.RESOURCE}/${resourceId}`);
-  //                         }}
-  //                       >
-  //                         <GroupTitle>
-  //                           {resource.getIn(['attributes', 'title'])}
-  //                         </GroupTitle>
-  //                       </ResourceButton>
-  //                     </Box>
-  //                   </Box>
-  //                 )}
-  //                 {!resource && (
-  //                   <GroupTitle>
-  //                     Without resource
-  //                   </GroupTitle>
-  //                 )}
-  //                 <Box>
-  //                   {resourceIndicators && resourceIndicators.toList().map((indicator) => {
-  //                     const path = `${ROUTES.ACTION}/${indicator.get('id')}`;
-  //                     const value = isNumber(indicator.get('value'))
-  //                       ? parseFloat(indicator.get('value'), 10)
-  //                       : value;
-  //                     let digits;
-  //                     if (isNumber(value)) {
-  //                       digits = value > 1 ? 1 : 3;
-  //                     }
-  //                     return (
-  //                       <Indicator key={indicator.get('id')}>
-  //                         <Box direction="row">
-  //                           <NumberField
-  //                             field={{
-  //                               title: indicator.getIn(['attributes', 'title']),
-  //                               unit: indicator.getIn(['attributes', 'comment']),
-  //                               value,
-  //                               digits,
-  //                               showEmpty: appMessages.labels.noIndicatorValue,
-  //                               titleLink: {
-  //                                 href: path,
-  //                                 onClick: (evt) => {
-  //                                   if (evt && evt.preventDefault) evt.preventDefault();
-  //                                   onUpdatePath(path);
-  //                                 },
-  //                               },
-  //                             }}
-  //                           />
-  //                         </Box>
-  //                       </Indicator>
-  //                     );
-  //                   })}
-  //                 </Box>
-  //               </Group>
-  //             );
-  //           }
-  //         )}
-  //       </Box>
-  //     )}
-  //   </Box>
-  // );
+  // console.log('statements', statements && statements.toJS());
+  // // console.log('actorsWithPositions', actorsWithPositions && actorsWithPositions.toJS());
+  // console.log('associationsByType', associationsByType && associationsByType.toJS());
+  // console.log('includeInofficial', includeInofficial);
+  // console.log('includeActorMembers', includeActorMembers);
+  const actorWithPositions = actorsWithPositions && actorsWithPositions.get(viewEntity.get('id'));
+  // const indicatorsWithSupport = indicators;
+  const indicatorsWithSupport = indicators && indicators.reduce(
+    (memo, indicator, id) => {
+      const indicatorPositions = actorWithPositions
+        && actorWithPositions.get('indicatorPositions')
+        && actorWithPositions.getIn([
+          'indicatorPositions',
+          indicator.get('id'),
+        ]);
+      if (indicatorPositions) {
+        const relPos = indicatorPositions.first();
+        const result = relPos && indicator
+          .setIn(
+            ['supportlevel', viewEntity.get('id')],
+            relPos.get('supportlevel_id')
+          )
+          .set(
+            'position',
+            relPos,
+          );
+        if (result) {
+          return memo.set(id, result);
+        }
+        return memo;
+      }
+      return memo;
+    },
+    Map()
+  );
+  return (
+    <div>
+      <MapOptions>
+        <MapOption
+          option={{
+            active: includeActorMembers,
+            onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+            label: 'Include statements of groups (countries belong to)',
+          }}
+          type="member"
+        />
+        <MapOption
+          option={{
+            active: !includeInofficial,
+            onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
+            label: 'Only consider "official" statements (Level of Authority)',
+          }}
+          type="official"
+        />
+      </MapOptions>
+      {indicators && (
+        <FieldGroup
+          group={{
+            fields: [
+              getIndicatorConnectionField({
+                indicators: indicatorsWithSupport,
+                onEntityClick,
+                skipLabel: true,
+                columns: getIndicatorColumns(viewEntity, intl),
+              }),
+            ],
+          }}
+        />
+      )}
+    </div>
+  );
 }
 
 Statements.propTypes = {
-  // viewEntity: PropTypes.instanceOf(Map),
+  viewEntity: PropTypes.instanceOf(Map),
   indicators: PropTypes.instanceOf(Map),
-  statements: PropTypes.instanceOf(Map),
   actorsWithPositions: PropTypes.instanceOf(Map),
-  associationsByType: PropTypes.instanceOf(Map),
-  onUpdatePath: PropTypes.func,
-  // intl: intlShape,
+  includeInofficial: PropTypes.bool,
+  onSetIncludeInofficial: PropTypes.func,
+  includeActorMembers: PropTypes.bool,
+  onSetIncludeActorMembers: PropTypes.func,
+  onEntityClick: PropTypes.func,
+  // onUpdatePath: PropTypes.func,
+  intl: intlShape,
 };
 
 const mapStateToProps = (state) => ({
   indicators: selectIndicators(state),
   actorsWithPositions: selectActorsWithPositions(state),
+  includeInofficial: selectIncludeInofficialStatements(state),
+  includeActorMembers: selectIncludeActorMembers(state),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -194,7 +195,13 @@ function mapDispatchToProps(dispatch) {
     onUpdatePath: (path) => {
       dispatch(updatePath(path));
     },
+    onSetIncludeInofficial: (value) => {
+      dispatch(setIncludeInofficialStatements(value));
+    },
+    onSetIncludeActorMembers: (active) => {
+      dispatch(setIncludeActorMembers(active));
+    },
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Statements);
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(Statements));

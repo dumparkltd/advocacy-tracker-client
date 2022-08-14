@@ -334,6 +334,7 @@ export function ActorView(props) {
                     )}
                     {viewSubject === 'topics' && hasStatements && (
                       <Statements
+                        viewEntity={viewEntity}
                         onEntityClick={(id, path) => onEntityClick(id, path)}
                         statements={actionsByActiontype && actionsByActiontype.get(parseInt(ACTIONTYPES.EXPRESS, 10))}
                         associationsByType={associationsByType}

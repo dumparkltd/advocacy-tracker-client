@@ -75,7 +75,7 @@ import {
   selectIsUserAdmin,
   selectActorConnections,
   selectResourceConnections,
-  selectIndicatorConnections,
+  // selectIndicatorConnections,
   selectActionConnections,
   selectTaxonomiesWithCategories,
   selectSubjectQuery,
@@ -162,7 +162,7 @@ const getIndicatorColumns = (viewEntity, intl) => {
       {
         id: 'supportlevel_id',
         type: 'supportlevel',
-        key: viewEntity.get('id'),
+        actionId: viewEntity.get('id'),
         title: intl.formatMessage(appMessages.attributes.supportlevel_id),
       },
     ];
@@ -184,7 +184,7 @@ export function ActionView(props) {
     onEntityClick,
     actorConnections,
     resourceConnections,
-    indicatorConnections,
+    // indicatorConnections,
     actionConnections,
     subActionsByType,
     topActionsByType,
@@ -303,6 +303,8 @@ export function ActionView(props) {
   }
 
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+  console.log(indicators && indicators.toJS());
+  // console.log(indicatorConnections && indicatorConnections.toJS())
   return (
     <div>
       <Helmet
@@ -391,7 +393,7 @@ export function ActionView(props) {
                           getIndicatorConnectionField({
                             indicators,
                             onEntityClick,
-                            connections: indicatorConnections,
+                            // connections: indicatorConnections,
                             skipLabel: true,
                             columns: getIndicatorColumns(viewEntity, intl),
                           }),
@@ -651,7 +653,7 @@ ActionView.propTypes = {
   onSetSubject: PropTypes.func,
   intl: intlShape.isRequired,
   subject: PropTypes.string,
-  indicatorConnections: PropTypes.object,
+  // indicatorConnections: PropTypes.object,
   indicators: PropTypes.object,
   userConnections: PropTypes.object,
   users: PropTypes.object,
@@ -682,7 +684,7 @@ const mapStateToProps = (state, props) => ({
   subActionsByType: selectSubActionsByActiontype(state, props.params.id),
   subject: selectSubjectQuery(state),
   indicators: selectEntityIndicators(state, props.params.id),
-  indicatorConnections: selectIndicatorConnections(state),
+  // indicatorConnections: selectIndicatorConnections(state),
   users: selectEntityUsers(state, props.params.id),
   userConnections: selectUserConnections(state),
   viewActiontypeId: selectActiontypeQuery(state),
