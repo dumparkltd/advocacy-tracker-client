@@ -93,7 +93,7 @@ export function Activities(props) {
   // console.log('viewActortype.get', viewActortype.get('id'))
   // figure out connected action types ##################################################
   const canBeMember = viewActortype
-    && Object.keys(MEMBERSHIPS).indexOf(viewActortype.get('id')) > -1
+    && MEMBERSHIPS[viewActortype.get('id')]
     && MEMBERSHIPS[viewActortype.get('id')].length > 0;
 
   let actiontypesForSubject;
@@ -263,8 +263,9 @@ export function Activities(props) {
                   && actiontypesAsMemberForSubject.entrySeq().reduce(
                     (memo, [, typeActors]) => typeActors.entrySeq().reduce(
                       (memo2, [, actor]) => {
-                        let groupActionsForSubject = actor.get('actionsByType')
-                          && actor.getIn(['actionsByType', id.toString()]);
+                        let groupActionsForSubject = viewSubject === 'actors'
+                          ? actor.get('actionsByType') && actor.getIn(['actionsByType', id.toString()])
+                          : actor.get('targetingActionsByType') && actor.getIn(['targetingActionsByType', id.toString()]);
                         if (groupActionsForSubject) {
                           groupActionsForSubject = groupActionsForSubject.filter(
                             (groupAction) => !memo2.find((a) => qe(a.get('id'), groupAction.get('id')))
@@ -376,7 +377,9 @@ export function Activities(props) {
             return (
               <Box key={actortypeId}>
                 <Box margin={{ horizontal: 'medium', top: 'large' }}>
-                  <SectionTitle>Activities through membership(s)</SectionTitle>
+                  <SectionTitle>
+                    {viewSubject === 'actors' ? 'Activities through memberships' : 'Indirectly targeted'}
+                  </SectionTitle>
                 </Box>
                 {typeActorsForActiveType.entrySeq().map(([actorId, actor]) => {
                   const actortypeLabel = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].singleShort);

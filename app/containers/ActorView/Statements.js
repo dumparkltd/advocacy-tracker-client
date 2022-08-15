@@ -10,21 +10,13 @@ import { connect } from 'react-redux';
 import { intlShape, injectIntl } from 'react-intl';
 import {
   Box,
-  // Text,
-  // Button,
-  // ResponsiveContext,
 } from 'grommet';
 import { Map } from 'immutable';
 import styled from 'styled-components';
 
-import qe from 'utils/quasi-equals';
-// import isNumber from 'utils/is-number';
-// import { isMaxSize } from 'utils/responsive';
 import { lowerCase } from 'utils/string';
 
-// import NumberField from 'components/fields/NumberField';
-
-import { ACTORTYPES } from 'themes/config';
+import { MEMBERSHIPS } from 'themes/config';
 
 import {
   getIndicatorConnectionField,
@@ -74,7 +66,10 @@ const getIndicatorColumns = (viewEntity, intl) => {
       type: 'positionStatementAuthority',
     },
   ];
-  if (qe(viewEntity.getIn(['attributes', 'actortype_id']), ACTORTYPES.COUNTRY)) {
+  if (
+    MEMBERSHIPS[viewEntity.getIn(['attributes', 'actortype_id'])]
+    && MEMBERSHIPS[viewEntity.getIn(['attributes', 'actortype_id'])].length > 0
+  ) {
     columns = [
       ...columns,
       {
@@ -145,7 +140,7 @@ export function Statements(props) {
           option={{
             active: includeActorMembers,
             onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-            label: `Include statements of groups (${type} belongs to)`,
+            label: `Include statements of actors ${type} is a member of`,
           }}
           type="member"
         />

@@ -1711,6 +1711,22 @@ export const selectViewActorActortypeId = createSelector(
   }
 );
 
+const filterStatements = (
+  statements,
+  statementId,
+  includeInofficial,
+  actionCategoriesByAction,
+) => {
+  if (!statements.get(statementId.toString())) {
+    return false;
+  }
+  if (includeInofficial) {
+    return true;
+  }
+  const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
+  return statementCategories && statementCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+};
+
 export const selectActorsWithPositions = createSelector(
   // from param
   (state, params) => params && params.includeActorMembers,
@@ -1792,16 +1808,12 @@ export const selectActorsWithPositions = createSelector(
         let actorStatements = actorActions.get(parseInt(actor.get('id'), 10));
         if (actorStatements) {
           actorStatements = actorStatements
-            .filter((statementId) => {
-              if (!statements.get(statementId.toString())) {
-                return false;
-              }
-              if (includeInofficial) {
-                return true;
-              }
-              const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
-              return statementCategories && statementCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
-            })
+            .filter((statementId) => filterStatements(
+              statements,
+              statementId,
+              includeInofficial,
+              actionCategoriesByAction,
+            ))
             .toList();
         }
         // indirect via group
@@ -1818,7 +1830,12 @@ export const selectActorsWithPositions = createSelector(
                     groupId,
                     actorActions
                       .get(groupId)
-                      .filter((actionId) => statements.get(actionId.toString()))
+                      .filter((statementId) => filterStatements(
+                        statements,
+                        statementId,
+                        includeInofficial,
+                        actionCategoriesByAction,
+                      ))
                       .toList()
                   );
                 }
