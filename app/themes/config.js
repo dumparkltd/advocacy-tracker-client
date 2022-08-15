@@ -10,8 +10,8 @@
  */
 import { version } from '../../package.json';
 // General ********************
-export const NODE_ENV = (process && process.env && process.env.NODE_ENV) || 'production';
-export const IS_DEV = NODE_ENV !== 'production';
+export const SERVER = (process && process.env && process.env.SERVER) || 'production';
+export const IS_DEV = SERVER !== 'production';
 
 export const VERSION = `${version}${IS_DEV ? ' [DEV]' : ''}`;
 
