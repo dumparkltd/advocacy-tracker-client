@@ -256,7 +256,7 @@ export function Activities(props) {
           {actiontypeIdsForSubjectOptions.map(
             (id) => {
               let actiontypeActions = actiontypesForSubject && actiontypesForSubject.get(parseInt(id, 10));
-              if (actiontypesAsMemberForSubject) {
+              if (actiontypeActions && actiontypesAsMemberForSubject) {
                 actiontypeActions = actiontypesAsMemberForSubject
                   && actiontypesAsMemberForSubject.entrySeq().reduce(
                     (memo, [, typeActors]) => typeActors.entrySeq().reduce(
