@@ -25,7 +25,6 @@ import {
   ACTIONTYPE_RESOURCETYPES,
   DEFAULT_ACTIONTYPE,
   DEFAULT_ACTORTYPE,
-  ACTORTYPES,
   ACTIONTYPES,
   ACTORTYPES_CONFIG,
   ACTIONTYPES_CONFIG,
@@ -1756,9 +1755,7 @@ export const selectActorsWithPositions = createSelector(
     ) {
       return null;
     }
-    const groups = actors.filter(
-      (actor) => qe(actor.getIn(['attributes', 'actortype_id']), ACTORTYPES.GROUP)
-    );
+    // limit to type if set
     const typeActors = actortypeId
       ? actors.filter(
         (actor) => qe(actor.getIn(['attributes', 'actortype_id']), actortypeId)
@@ -1778,6 +1775,13 @@ export const selectActorsWithPositions = createSelector(
     } else if (typeof includeActorMembersQuery !== 'undefined') {
       includeMembers = includeActorMembersQuery;
     }
+    // figure out actors that can have members aka "group actors"
+    const groupActors = actors.filter(
+      (actor) => Object.values(MEMBERSHIPS).reduce(
+        (memo, actorGroups) => [...memo, ...actorGroups],
+        [],
+      ).indexOf(actor.getIn(['attributes', 'actortype_id']).toString()) > -1
+    );
     return typeActors.map(
       (actor) => {
         // 1. figure out any actor statements /////////////////////////////////////
@@ -1801,12 +1805,15 @@ export const selectActorsWithPositions = createSelector(
             .toList();
         }
         // indirect via group
-        if (includeMembers && groups && qe(actor.getIn(['attributes', 'actortype_id']), ACTORTYPES.COUNTRY)) {
+        // if actor can belong to a "group"
+        const hasGroups = MEMBERSHIPS[actor.getIn(['attributes', 'actortype_id'])]
+          && MEMBERSHIPS[actor.getIn(['attributes', 'actortype_id'])].length > 0;
+        if (includeMembers && hasGroups) {
           const actorMemberships = memberships.get(parseInt(actor.get('id'), 10));
           if (actorMemberships) {
             actorStatementsAsMemberByGroup = actorMemberships.reduce(
               (memo, groupId) => {
-                if (groups.get(groupId.toString()) && actorActions && actorActions.get(groupId)) {
+                if (groupActors.get(groupId.toString()) && actorActions && actorActions.get(groupId)) {
                   return memo.set(
                     groupId,
                     actorActions
@@ -1821,10 +1828,6 @@ export const selectActorsWithPositions = createSelector(
             );
           }
         }
-
-        // console.log('filter actorStatements', actorStatements && actorStatements.toJS())
-        // console.log('actor', actor.get('id'))
-        // console.log('filter actorStatementsAsMemberByGroup', actorStatementsAsMemberByGroup && actorStatementsAsMemberByGroup.toJS())
 
         // 2. figure out actor positions on all indicators/topics
         if (
