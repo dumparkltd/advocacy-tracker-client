@@ -581,13 +581,13 @@ export const getConnectionUpdatesFromFormData = ({
   const createList = formConnections.reduce(
     (payloads, connection) => {
       const id = connection.get('value');
-      const payload = connection.get('association') || Map();
+      let payload = connection.get('association') || Map();
       if (!previousConnectionIds.has(id)) {
-        return payloads.push(
-          payload
-            .set(createConnectionKey, id)
-            .set(createKey, formData.get('id'))
-        );
+        payload = payload.set(createConnectionKey, id);
+        if (createKey) {
+          payload = payload.set(createKey, formData.get('id'));
+        }
+        return payloads.push(payload);
       }
       return payloads;
     },

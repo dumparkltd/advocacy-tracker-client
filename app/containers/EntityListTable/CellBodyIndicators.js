@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
+import { injectIntl, intlShape } from 'react-intl';
 
 import {
   Box, Text, Button, Drop,
@@ -7,8 +8,9 @@ import {
 import styled from 'styled-components';
 import { truncateText } from 'utils/string';
 
-import { ROUTES } from 'themes/config';
-// import appMessages from 'containers/App/messages';
+import { ROUTES, ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
+import Dot from 'components/styled/Dot';
+import appMessages from 'containers/App/messages';
 
 const Link = styled((p) => <Button as="a" plain {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
@@ -37,6 +39,8 @@ const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} 
   line-height: 13px;
 `;
 
+const LabelWrap = styled((p) => <Box direction="row" gap="xsmall" align="center" {...p} />)``;
+
 const getIndicatorLink = (indicator) => `${ROUTES.INDICATOR}/${indicator.get('id')}`;
 
 const getIndicatorOnClick = (indicator, onEntityClick) => (evt) => {
@@ -44,11 +48,17 @@ const getIndicatorOnClick = (indicator, onEntityClick) => (evt) => {
   onEntityClick(indicator.get('id'), ROUTES.INDICATOR);
 };
 
+const getTitleWithLevel = (indicator, value, intl) => {
+  const level = indicator.getIn(['supportlevel', 'value']);
+  const levelLabel = intl.formatMessage(appMessages.supportlevels[level]);
+  return `${value} (${levelLabel})`;
+};
+
 export function CellBodyIndicators({
   entity,
   align = 'start',
   onEntityClick,
-  // intl,
+  intl,
 }) {
   const buttonRef = useRef();
   const [showContent, setShowContent] = useState(false);
@@ -58,12 +68,19 @@ export function CellBodyIndicators({
         <Link
           href={getIndicatorLink(entity.single)}
           onClick={getIndicatorOnClick(entity.single, onEntityClick)}
-          title={entity.value}
+          title={entity.single.get('supportlevel')
+            ? getTitleWithLevel(entity.single, entity.value, intl)
+            : entity.value}
           alignSelf={align}
         >
-          <Label textAlign={align}>
-            {truncateText(entity.value, 25)}
-          </Label>
+          <LabelWrap>
+            {entity.single.get('supportlevel') && (
+              <Dot color={entity.single.getIn(['supportlevel', 'color'])} />
+            )}
+            <Label textAlign={align}>
+              {truncateText(entity.value, 25)}
+            </Label>
+          </LabelWrap>
         </Link>
       )}
       {entity.multiple && (
@@ -102,32 +119,53 @@ export function CellBodyIndicators({
             gap="medium"
             flex={{ shrink: 0 }}
           >
-            <Box flex={{ shrink: 0 }} gap="xsmall">
-              {entity.tooltip
-                .toList()
-                .sort(
-                  (a, b) => a.getIn(['attributes', 'title'])
-                    > b.getIn(['attributes', 'title'])
-                    ? 1
-                    : -1
-                ).map(
-                  (indicator) => (
-                    <Box key={indicator.get('id')} flex={{ shrink: 0 }}>
-                      <LinkInTT
-                        key={indicator.get('id')}
-                        href={getIndicatorLink(indicator)}
-                        onClick={getIndicatorOnClick(indicator, onEntityClick)}
-                        title={indicator.getIn(['attributes', 'title'])}
-                      >
-                        <LabelInTT>
-                          {truncateText(indicator.getIn(['attributes', 'title']), 30)}
-                        </LabelInTT>
-                      </LinkInTT>
+            {Object.values(ACTION_INDICATOR_SUPPORTLEVELS).sort(
+              (a, b) => a.order < b.order ? -1 : 1
+            ).map(
+              (level) => {
+                if (entity.tooltip.get(level.value)) {
+                  return (
+                    <Box key={level.value} flex={{ shrink: 0 }}>
+                      <Box border="bottom" flex={{ shrink: 0 }} margin={{ bottom: 'small' }}>
+                        <LabelWrap>
+                          <Dot color={level.color} />
+                          <Text size="small" weight={500}>
+                            {intl.formatMessage(appMessages.supportlevels[level.value])}
+                          </Text>
+                        </LabelWrap>
+                      </Box>
+                      <Box flex={{ shrink: 0 }} gap="xsmall">
+                        {entity.tooltip.get(level.value)
+                          .toList()
+                          .sort(
+                            (a, b) => a.getIn(['attributes', 'title'])
+                              > b.getIn(['attributes', 'title'])
+                              ? 1
+                              : -1
+                          ).map(
+                            (indicator) => (
+                              <Box key={indicator.get('id')} flex={{ shrink: 0 }}>
+                                <LinkInTT
+                                  key={indicator.get('id')}
+                                  href={getIndicatorLink(indicator)}
+                                  onClick={getIndicatorOnClick(indicator, onEntityClick)}
+                                  title={indicator.getIn(['attributes', 'title'])}
+                                >
+                                  <LabelInTT>
+                                    {truncateText(indicator.getIn(['attributes', 'title']), 30)}
+                                  </LabelInTT>
+                                </LinkInTT>
+                              </Box>
+                            )
+                          )
+                        }
+                      </Box>
                     </Box>
-                  )
-                )
+                  );
+                }
+                return null;
               }
-            </Box>
+            )}
           </Box>
         </Drop>
       )}
@@ -139,8 +177,8 @@ CellBodyIndicators.propTypes = {
   entity: PropTypes.object,
   align: PropTypes.string,
   onEntityClick: PropTypes.func,
-  // intl: intlShape,
+  intl: intlShape,
 };
 
 
-export default CellBodyIndicators;
+export default injectIntl(CellBodyIndicators);

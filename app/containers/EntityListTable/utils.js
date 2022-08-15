@@ -6,7 +6,11 @@ import qe from 'utils/quasi-equals';
 import appMessage from 'utils/app-message';
 import { lowerCase } from 'utils/string';
 import appMessages from 'containers/App/messages';
-import { API, USER_ROLES } from 'themes/config';
+import {
+  API,
+  USER_ROLES,
+  ACTION_INDICATOR_SUPPORTLEVELS,
+} from 'themes/config';
 
 export const prepareHeader = ({
   columns,
@@ -84,6 +88,30 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
+      case 'viaGroups':
+        return ({
+          ...col,
+          title: 'via Group',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'positionStatement':
+        return ({
+          ...col,
+          title: 'Statement',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'positionStatementAuthority':
+        return ({
+          ...col,
+          title: 'Level of authority',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
       case 'users':
         return ({
           ...col,
@@ -99,6 +127,16 @@ export const prepareHeader = ({
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
+          info: {
+            type: 'key-categorical',
+            attribute: 'supportlevel_id',
+            options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+              .sort((a, b) => a.order < b.order ? -1 : 1)
+              .map((level) => ({
+                ...level,
+                label: intl.formatMessage(appMessages.supportlevels[level.value]),
+              })),
+          },
         });
       case 'associations':
         return ({
@@ -163,18 +201,52 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
+      case 'supportlevel':
+        return ({
+          ...col,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'stackedBar':
+        return ({
+          ...col,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
       default:
         return col;
     }
   }
 );
 
-const getRelatedEntities = (relatedIDs, connections) => {
+const getRelatedEntities = (
+  relatedIDs,
+  connections,
+  column,
+  connectionAttributeValues,
+  connectionAttributes,
+) => {
   if (relatedIDs && relatedIDs.size > 0) {
     return relatedIDs.reduce(
-      (memo, relatedID) => {
+      (memo, relatedID, entityId) => {
         if (connections.get(relatedID.toString())) {
-          return memo.set(relatedID, connections.get(relatedID.toString()));
+          let entityConnection = connections.get(relatedID.toString());
+          if (connectionAttributeValues) {
+            const myConnectionAttributeValues = connectionAttributeValues.get(entityId.toString());
+            entityConnection = connectionAttributes.reduce(
+              (memo2, attribute) => {
+                const value = myConnectionAttributeValues.get(attribute.attribute);
+                return memo2.set(
+                  attribute.optionAs,
+                  attribute.options[value],
+                );
+              },
+              entityConnection,
+            );
+          }
+          return memo.set(relatedID, entityConnection);
         }
         return memo;
       },
@@ -183,6 +255,8 @@ const getRelatedEntities = (relatedIDs, connections) => {
   }
   return null;
 };
+const getRelatedSortValue = (relatedEntities) => getRelatedValue(relatedEntities);
+
 const getRelatedValue = (relatedEntities, typeLabel) => {
   if (relatedEntities && relatedEntities.size > 0) {
     if (relatedEntities.size > 1) {
@@ -194,15 +268,10 @@ const getRelatedValue = (relatedEntities, typeLabel) => {
   }
   return null;
 };
-const getRelatedSortValue = (relatedEntities) => {
-  if (relatedEntities && relatedEntities.size > 0) {
-    if (relatedEntities.size > 1) {
-      return relatedEntities.size;
-    }
-    return relatedEntities.first().getIn(['attributes', 'title']);
-  }
-  return null;
-};
+const getSingleRelatedValueFromAttributes = (relatedEntity) => relatedEntity
+  ? relatedEntity.get('name') || relatedEntity.get('title')
+  : null;
+
 
 export const prepareEntities = ({
   entities,
@@ -246,7 +315,7 @@ export const prepareEntities = ({
                 draft: entity.getIn(['attributes', 'draft']),
                 archived: entity.getIn(['attributes', 'is_archive']),
                 private: entity.getIn(['attributes', 'private']),
-                sortValue: entity.getIn(['attributes', col.sort]),
+                sortValue: entity.getIn(['attributes', col.sort || 'title']),
                 selected: entityIdsSelected && entityIdsSelected.includes(id),
                 href: url || `${path}/${id}`,
                 onClick: (evt) => {
@@ -336,14 +405,26 @@ export const prepareEntities = ({
             };
           case 'indicators':
             temp = entity.get('indicators');
-            relatedEntities = getRelatedEntities(temp, connections.get('indicators'), col);
+            relatedEntities = getRelatedEntities(
+              temp,
+              connections.get('indicators'),
+              col,
+              entity.get('indicatorConnections'),
+              [{
+                attribute: 'supportlevel_id',
+                options: ACTION_INDICATOR_SUPPORTLEVELS,
+                optionAs: 'supportlevel',
+              }],
+            );
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
                 value: getRelatedValue(relatedEntities, col.label || 'topics'),
                 single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
-                tooltip: relatedEntities,
+                tooltip: relatedEntities
+                  && relatedEntities.size > 1
+                  && relatedEntities.groupBy((t) => t.getIn(['supportlevel', 'value']) || '0'),
                 multiple: relatedEntities && relatedEntities.size > 1,
                 sortValue: getRelatedSortValue(relatedEntities),
               },
@@ -361,6 +442,20 @@ export const prepareEntities = ({
                 tooltip: relatedEntities && relatedEntities.size > 1
                   && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
                 multiple: relatedEntities && relatedEntities.size > 1,
+                sortValue: getRelatedSortValue(relatedEntities),
+              },
+            };
+          case 'viaGroups':
+            relatedEntities = entity.getIn(['position', 'viaGroups']);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getRelatedValue(relatedEntities),
+                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
+                multiple: relatedEntities && relatedEntities.size > 1,
+                tooltip: relatedEntities && relatedEntities.size > 1
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
                 sortValue: getRelatedSortValue(relatedEntities),
               },
             };
@@ -473,7 +568,7 @@ export const prepareEntities = ({
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: getRelatedValue(relatedEntities, 'actions'),
+                value: getRelatedValue(relatedEntities, col.type === 'indicatorActions' ? 'statements' : 'actions'),
                 single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
                 tooltip: relatedEntities && relatedEntities.size > 1
                   && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
@@ -499,16 +594,64 @@ export const prepareEntities = ({
               },
             };
           case 'supportlevel':
-            temp = entity.get('supportlevel')
-              && entity.getIn(['supportlevel', col.actionId]);
+            if (entity.get('supportlevel')) {
+              temp = entity.get('supportlevel')
+                && entity.getIn(['supportlevel', col.actionId]);
+            }
+            if (entity.get('position')) {
+              temp = entity.get('position')
+                && entity.getIn(['position', 'supportlevel_id']);
+            }
             if (!temp) {
-              temp = 0;
+              return {
+                ...memoEntity,
+                [col.id]: {
+                  ...col,
+                },
+              };
             }
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
                 value: intl.formatMessage(appMessages.supportlevels[temp]),
+                color: ACTION_INDICATOR_SUPPORTLEVELS[temp].color,
+              },
+            };
+          case 'positionStatement':
+            temp = entity.get('position') && entity.getIn(['position', 'measure']);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getSingleRelatedValueFromAttributes(temp),
+                single: temp,
+                // sortValue: getRelatedSortValue(temp),
+              },
+            };
+          case 'positionStatementAuthority':
+            temp = entity.get('position') && entity.getIn(['position', 'authority']);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getSingleRelatedValueFromAttributes(temp),
+                single: temp,
+                // sortValue: getRelatedSortValue(temp),
+              },
+            };
+          case 'stackedBar':
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                values: entity.get(col.values) && entity.get(col.values).toJS(),
+                sortValue: entity.get(col.values)
+                  ? entity.get(col.values).reduce(
+                    (sum, val) => (val.count || 0) + sum,
+                    0,
+                  )
+                  : null,
               },
             };
           default:
@@ -579,6 +722,21 @@ export const getColumnMaxValues = (entities, columns) => entities.reduce(
     (maxValueMemo2, column) => {
       if (column.type === 'actorActions' || column.type === 'actiontype') {
         const val = entity[column.id].value;
+        return val
+          ? {
+            ...maxValueMemo2,
+            [column.id]: maxValueMemo2[column.id]
+              ? Math.max(maxValueMemo2[column.id], val)
+              : val,
+          }
+          : maxValueMemo2;
+      }
+      if (column.type === 'stackedBar') {
+        const { values } = entity[column.id];
+        const val = values && Object.values(values).reduce(
+          (memo, value) => (value.count || 0) + memo,
+          0,
+        );
         return val
           ? {
             ...maxValueMemo2,

@@ -33,7 +33,7 @@ export function CellHeaderMain({ column, canEdit }) {
     (option) => column.sortOrder === option.value
   );
   return (
-    <Box direction="row" align="center" justify="start">
+    <Box direction="row" align="center" justify="start" flex={false}>
       {canEdit && (
         <Box>
           <Select>
@@ -45,20 +45,18 @@ export function CellHeaderMain({ column, canEdit }) {
           </Select>
         </Box>
       )}
-      <Box>
-        {canEdit && (
-          <Text as="label" htmlFor="select-all" weight={500} size="small">
-            {column.title}
-          </Text>
-        )}
-        {!canEdit && (
-          <Text weight={500} size="small">
-            {column.title}
-          </Text>
-        )}
-      </Box>
+      {canEdit && (
+        <Text as="label" htmlFor="select-all" weight={500} size="small" wordBreak="keep-all">
+          {column.title}
+        </Text>
+      )}
+      {!canEdit && (
+        <Text weight={500} size="small">
+          {column.title}
+        </Text>
+      )}
       {column.onSort && (
-        <Box pad={{ left: 'medium' }}>
+        <Box pad={{ left: 'xxsmall' }} flex={false}>
           <SortButton
             onClick={() => {
               if (column.sortActive) {

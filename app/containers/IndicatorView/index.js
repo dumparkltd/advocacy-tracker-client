@@ -8,7 +8,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { Box, Text, Button } from 'grommet';
+import styled from 'styled-components';
 
 import {
   getTitleField,
@@ -17,18 +19,40 @@ import {
   getMetaField,
   getMarkdownField,
   getActionConnectionField,
+  getActorConnectionField,
   getReferenceField,
 } from 'utils/fields';
 // import { qe } from 'utils/quasi-equals';
 import { getEntityTitleTruncated } from 'utils/entities';
 import qe from 'utils/quasi-equals';
 
-import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
+import {
+  loadEntitiesIfNeeded,
+  updatePath,
+  closeEntity,
+  setSubject,
+  setIncludeActorMembers,
+  setIncludeInofficialStatements,
+} from 'containers/App/actions';
+
+import {
+  selectReady,
+  selectIsUserManager,
+  selectIsUserAdmin,
+  selectTaxonomiesWithCategories,
+  selectActionConnections,
+  selectActorConnections,
+  selectSessionUserId,
+  selectSubjectQuery,
+  selectIncludeActorMembers,
+  selectIncludeInofficialStatements,
+} from 'containers/App/selectors';
 
 import {
   ROUTES,
   ACTIONTYPES_CONFIG,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
+  ACTORTYPES,
 } from 'themes/config';
 
 import Loading from 'components/Loading';
@@ -41,24 +65,24 @@ import ViewPanel from 'components/EntityView/ViewPanel';
 import ViewPanelInside from 'components/EntityView/ViewPanelInside';
 import FieldGroup from 'components/fields/FieldGroup';
 
-import {
-  selectReady,
-  selectIsUserManager,
-  selectIsUserAdmin,
-  selectTaxonomiesWithCategories,
-  selectActionConnections,
-  selectSessionUserId,
-} from 'containers/App/selectors';
-
 import appMessages from 'containers/App/messages';
+import CountryMap from './CountryMap';
 import messages from './messages';
 
 import {
   selectViewEntity,
   selectActionsByType,
+  selectActorsByType,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
+
+const SubjectButton = styled((p) => <Button plain {...p} />)`
+  padding: 2px 4px;
+  border-bottom: 2px solid;
+  border-bottom-color: ${({ active }) => active ? 'brand' : 'transparent'};
+  background: none;
+`;
 
 const getActiontypeColumns = (typeid, viewEntity, intl) => {
   let columns = [{
@@ -67,21 +91,6 @@ const getActiontypeColumns = (typeid, viewEntity, intl) => {
     sort: 'title',
     attributes: ['title'],
   }];
-  // supportlevel
-  if (
-    ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeid]
-    && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeid].length > 0
-  ) {
-    columns = [
-      ...columns,
-      {
-        id: 'supportlevel_id',
-        type: 'supportlevel',
-        actionId: viewEntity.get('id'),
-        title: intl.formatMessage(appMessages.attributes.supportlevel_id),
-      },
-    ];
-  }
   if (
     ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
     && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
@@ -99,6 +108,56 @@ const getActiontypeColumns = (typeid, viewEntity, intl) => {
       ...typeColumns,
     ];
   }
+  // supportlevel
+  if (
+    ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeid]
+    && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeid].length > 0
+  ) {
+    columns = [
+      ...columns,
+      {
+        id: 'supportlevel_id',
+        type: 'supportlevel',
+        actionId: viewEntity.get('id'),
+        title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+      },
+    ];
+  }
+  return columns;
+};
+// const getActortypeColumns = () => [{
+//   id: 'main',
+//   type: 'main',
+//   sort: 'title',
+//   attributes: ['title'],
+// }];
+const getActortypeColumns = (typeid, viewEntity, intl) => {
+  let columns = [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: ['title'],
+  }];
+  columns = [
+    ...columns,
+    {
+      id: 'supportlevel_id',
+      type: 'supportlevel',
+      title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+    },
+    {
+      id: 'positionStatement',
+      type: 'positionStatement',
+    },
+    {
+      id: 'authority',
+      type: 'positionStatementAuthority',
+    },
+    {
+      id: 'viaGroups',
+      type: 'viaGroups',
+    },
+  ];
   return columns;
 };
 
@@ -153,22 +212,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
     return fields;
   };
 
-  // getBodyAsideFields = (entity) => {
-  //   const fields = [];
-  //   const typeId = entity.getIn(['attributes', 'resourcetype_id']);
-  //   fields.push(
-  //     {
-  //       fields: [
-  //         checkResourceAttribute(typeId, 'publication_date') && getDateField(entity, 'publication_date'),
-  //         checkResourceAttribute(typeId, 'access_date') && getDateField(entity, 'access_date'),
-  //       ],
-  //     },
-  //   );
-  //   return fields;
-  // };
-
   render() {
-    const { intl } = this.context;
     const {
       viewEntity,
       dataReady,
@@ -178,10 +222,27 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
       taxonomies,
       actionsByActiontype,
       actionConnections,
+      actorConnections,
       onEntityClick,
       handleEdit,
       handleClose,
+      actorsByActortype,
+      intl,
+      onSetSubject,
+      subject,
+      onSetIncludeInofficial,
+      includeInofficial,
+      onSetIncludeActorMembers,
+      includeActorMembers,
     } = this.props;
+
+    const countries = actorsByActortype && actorsByActortype.get(parseInt(ACTORTYPES.COUNTRY, 10));
+    // view subject
+    let viewSubject = subject || 'statements';
+    const validViewSubjects = ['statements', 'actors'];
+    if (validViewSubjects.indexOf(viewSubject) === -1) {
+      viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
+    }
     let buttons = [];
     if (dataReady) {
       buttons = [
@@ -209,7 +270,6 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
       ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
       : `${pageTitle}: ${this.props.params.id}`;
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
-
     return (
       <div>
         <Helmet
@@ -282,31 +342,83 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                         ],
                       }}
                     />
-                    {actionsByActiontype && (
-                      <FieldGroup
-                        group={{
-                          label: appMessages.nav.actions,
-                          fields: actionsByActiontype.reduce(
-                            (memo, actions, actiontypeid) => ([
-                              ...memo,
-                              getActionConnectionField({
-                                actions,
-                                taxonomies,
-                                onEntityClick,
-                                connections: actionConnections,
-                                typeid: actiontypeid,
-                                columns: getActiontypeColumns(
-                                  actiontypeid,
-                                  viewEntity,
-                                  intl,
-                                ),
-                              }),
-                            ]),
-                            [],
-                          ),
-                        }}
-                      />
+                    {dataReady && countries && (
+                      <Box pad={{ vertical: 'small' }}>
+                        <CountryMap
+                          countries={countries}
+                          indicatorId={viewEntity.get('id')}
+                          onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+                          includeInofficial={includeInofficial}
+                          onSetIncludeInofficial={onSetIncludeInofficial}
+                          includeActorMembers={includeActorMembers}
+                          onSetIncludeActorMembers={onSetIncludeActorMembers}
+                        />
+                      </Box>
                     )}
+                    <Box margin={{ vertical: 'large' }}>
+                      <Box direction="row" gap="small" margin={{ horizontal: 'medium' }}>
+                        <SubjectButton
+                          onClick={() => onSetSubject('statements')}
+                          active={viewSubject === 'statements'}
+                        >
+                          <Text size="large">Statements</Text>
+                        </SubjectButton>
+                        <SubjectButton
+                          onClick={() => onSetSubject('actors')}
+                          active={viewSubject === 'actors'}
+                        >
+                          <Text size="large">Countries & other actors</Text>
+                        </SubjectButton>
+                      </Box>
+                      {viewSubject === 'statements' && actionsByActiontype && (
+                        <FieldGroup
+                          group={{
+                            fields: actionsByActiontype.reduce(
+                              (memo, actions, actiontypeid) => ([
+                                ...memo,
+                                getActionConnectionField({
+                                  actions,
+                                  taxonomies,
+                                  onEntityClick,
+                                  connections: actionConnections,
+                                  typeid: actiontypeid,
+                                  columns: getActiontypeColumns(
+                                    actiontypeid,
+                                    viewEntity,
+                                    intl,
+                                  ),
+                                }),
+                              ]),
+                              [],
+                            ),
+                          }}
+                        />
+                      )}
+                      {viewSubject === 'actors' && (
+                        <FieldGroup
+                          group={{
+                            fields: actorsByActortype.reduce(
+                              (memo, actors, actortypeid) => ([
+                                ...memo,
+                                getActorConnectionField({
+                                  actors,
+                                  taxonomies,
+                                  onEntityClick,
+                                  connections: actorConnections,
+                                  typeid: actortypeid,
+                                  columns: getActortypeColumns(
+                                    actortypeid,
+                                    viewEntity,
+                                    intl,
+                                  ),
+                                }),
+                              ]),
+                              [],
+                            ),
+                          }}
+                        />
+                      )}
+                    </Box>
                   </Main>
                 </ViewPanelInside>
               </ViewPanel>
@@ -327,15 +439,20 @@ IndicatorView.propTypes = {
   onEntityClick: PropTypes.func,
   taxonomies: PropTypes.object,
   actionConnections: PropTypes.object,
+  actorConnections: PropTypes.object,
   actionsByActiontype: PropTypes.object,
+  actorsByActortype: PropTypes.object,
   params: PropTypes.object,
   myId: PropTypes.string,
   isManager: PropTypes.bool,
   isAdmin: PropTypes.bool,
-};
-
-IndicatorView.contextTypes = {
-  intl: PropTypes.object.isRequired,
+  subject: PropTypes.string,
+  onSetSubject: PropTypes.func,
+  onSetIncludeInofficial: PropTypes.func,
+  includeInofficial: PropTypes.bool,
+  onSetIncludeActorMembers: PropTypes.func,
+  includeActorMembers: PropTypes.bool,
+  intl: intlShape,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -347,6 +464,11 @@ const mapStateToProps = (state, props) => ({
   taxonomies: selectTaxonomiesWithCategories(state),
   actionsByActiontype: selectActionsByType(state, props.params.id),
   actionConnections: selectActionConnections(state),
+  actorConnections: selectActorConnections(state),
+  actorsByActortype: selectActorsByType(state, props.params.id),
+  subject: selectSubjectQuery(state),
+  includeInofficial: selectIncludeInofficialStatements(state),
+  includeActorMembers: selectIncludeActorMembers(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -363,7 +485,17 @@ function mapDispatchToProps(dispatch, props) {
     onEntityClick: (id, path) => {
       dispatch(updatePath(`${path}/${id}`));
     },
+    onSetSubject: (type) => {
+      dispatch(setSubject(type));
+    },
+    onSetIncludeInofficial: (value) => {
+      dispatch(setIncludeInofficialStatements(value));
+    },
+    onSetIncludeActorMembers: (active) => {
+      dispatch(setIncludeActorMembers(active));
+    },
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(IndicatorView);
+
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(IndicatorView));

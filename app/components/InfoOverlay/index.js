@@ -16,7 +16,7 @@ import {
   Layer,
   Text,
 } from 'grommet';
-import { CircleInformation, FormClose } from 'grommet-icons';
+import { CircleInformation, CircleQuestion, FormClose } from 'grommet-icons';
 const DropContent = styled((p) => (
   <Box
     pad="small"
@@ -67,26 +67,37 @@ const Markdown = styled(ReactMarkdown)`
 `;
 
 function InfoOverlay({
-  dark, content, tooltip, title, padButton, colorButton,
+  dark, content, tooltip, title, padButton, colorButton, icon, markdown, inline,
 }) {
   const infoRef = useRef(null);
   const [info, showInfo] = useState(false);
   return (
     <>
       <Box
+        as={inline ? 'span' : 'div'}
         fill={false}
-        pad={padButton || { horizontal: 'small' }}
+        pad={inline ? null : (padButton || { horizontal: 'small' })}
         ref={infoRef}
-        flex={{ grow: 0, shrink: 0 }}
+        flex={inline ? false : { grow: 0, shrink: 0 }}
+        style={inline ? { width: 'auto', display: 'inline-block' } : null}
       >
         <Button
           plain
-          icon={(
-            <CircleInformation
-              color={colorButton || (dark ? 'light-5' : 'dark-5')}
-              size="21px"
-            />
-          )}
+          icon={
+            icon === 'question'
+              ? (
+                <CircleQuestion
+                  color={colorButton || (dark ? 'light-5' : 'dark-5')}
+                  size="21px"
+                />
+              )
+              : (
+                <CircleInformation
+                  color={colorButton || (dark ? 'light-5' : 'dark-5')}
+                  size="21px"
+                />
+              )
+          }
           fill={false}
           onMouseOver={() => tooltip && showInfo(true)}
           onMouseLeave={() => tooltip && showInfo(false)}
@@ -97,11 +108,17 @@ function InfoOverlay({
       </Box>
       {info && infoRef && tooltip && (
         <Drop
-          align={{ top: 'top', right: 'left' }}
+          align={{ bottom: 'top' }}
           target={infoRef.current}
+          plain={!markdown}
         >
           <DropContent>
-            {content}
+            {markdown && (
+              <div>
+                <Markdown source={content} className="react-markdown" linkTarget="_blank" />
+              </div>
+            )}
+            {!markdown && content}
           </DropContent>
         </Drop>
       )}
@@ -138,9 +155,15 @@ function InfoOverlay({
 
 InfoOverlay.propTypes = {
   dark: PropTypes.bool,
+  markdown: PropTypes.bool,
+  inline: PropTypes.bool,
   tooltip: PropTypes.bool,
-  content: PropTypes.string,
+  content: PropTypes.oneOfType([
+    PropTypes.node,
+    PropTypes.string,
+  ]),
   title: PropTypes.string,
+  icon: PropTypes.string,
   colorButton: PropTypes.string,
   padButton: PropTypes.oneOfType([
     PropTypes.object,

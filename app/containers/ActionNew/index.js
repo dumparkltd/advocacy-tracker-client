@@ -621,12 +621,12 @@ function mapDispatchToProps(dispatch) {
       if (formData.get('associatedIndicators') && indicatorOptions) {
         saveData = saveData.set(
           'actionIndicators', // targets
-          Map({
-            delete: List(),
-            create: getCheckedValuesFromOptions(formData.get('associatedIndicators'))
-              .map((id) => Map({
-                indicator_id: id,
-              })),
+          getConnectionUpdatesFromFormData({
+            formData,
+            connections: indicatorOptions,
+            connectionAttribute: 'associatedIndicators',
+            createConnectionKey: 'indicator_id',
+            connectionAttributes: ['supportlevel_id'],
           })
         );
       }

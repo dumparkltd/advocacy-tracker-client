@@ -194,31 +194,11 @@ export function Activities(props) {
     activeActiontypeActions = actiontypesForSubject && actiontypesForSubject.get(parseInt(activeActiontypeId, 10));
     if (canBeMember) {
       // figure out inactive action types
-      if (viewSubject === 'actors') {
+      if (viewSubject === 'actors' || viewSubject === 'targets') {
         actiontypesAsMemberForSubject = actiontypesAsMemberByActortypeForSubject.reduce(
           (memo, typeActors, id) => {
-            const typeActorsForActiveType = typeActors.filter(
-              (actor) => actor.get('actionsByType')
-              && actor.getIn(['actionsByType', activeActiontypeId])
-              && actor.getIn(['actionsByType', activeActiontypeId]).size > 0
-            );
-            if (typeActorsForActiveType && typeActorsForActiveType.size > 0) {
-              return memo.merge(Map().set(id, typeActorsForActiveType));
-            }
-            return memo;
-          },
-          Map(),
-        );
-      } else if (viewSubject === 'targets') {
-        actiontypesAsMemberForSubject = actiontypesAsMemberByActortypeForSubject.reduce(
-          (memo, typeActors, id) => {
-            const typeActorsForActiveType = typeActors.filter(
-              (actor) => actor.get('targetingActionsByType')
-                && actor.getIn(['targetingActionsByType', activeActiontypeId])
-                && actor.getIn(['targetingActionsByType', activeActiontypeId]).size > 0
-            );
-            if (typeActorsForActiveType && typeActorsForActiveType.size > 0) {
-              return memo.merge(Map().set(id, typeActorsForActiveType));
+            if (typeActors && typeActors.size > 0) {
+              return memo.merge(Map().set(id, typeActors));
             }
             return memo;
           },
@@ -275,7 +255,30 @@ export function Activities(props) {
         >
           {actiontypeIdsForSubjectOptions.map(
             (id) => {
-              const actiontypeActions = actiontypesForSubject && actiontypesForSubject.get(parseInt(id, 10));
+              let actiontypeActions = actiontypesForSubject && actiontypesForSubject.get(parseInt(id, 10));
+              if (actiontypesAsMemberForSubject) {
+                actiontypeActions = actiontypesAsMemberForSubject
+                  && actiontypesAsMemberForSubject.entrySeq().reduce(
+                    (memo, [, typeActors]) => typeActors.entrySeq().reduce(
+                      (memo2, [, actor]) => {
+                        let groupActionsForSubject = actor.get('actionsByType')
+                          && actor.getIn(['actionsByType', id.toString()]);
+                        if (groupActionsForSubject) {
+                          groupActionsForSubject = groupActionsForSubject.filter(
+                            (groupAction) => !memo2.find((a) => qe(a.get('id'), groupAction.get('id')))
+                          );
+                          return groupActionsForSubject
+                            ? memo2.concat(groupActionsForSubject)
+                            : memo2;
+                        }
+                        return memo2;
+                      },
+                      memo,
+                    ),
+                    actiontypeActions
+                  );
+              }
+              // console.log(actiontypeActions && actiontypeActions.toJS())
               const noActions = actiontypeActions ? actiontypeActions.size : 0;
               return (
                 <TypeButton
@@ -347,33 +350,57 @@ export function Activities(props) {
           }}
         />
       </Box>
-      {canBeMember && actiontypesAsMemberForSubject.entrySeq().map(([actortypeId, typeActors]) => (
-        <Box key={actortypeId}>
-          {typeActors.entrySeq().map(([actorId, actor]) => {
-            const typeLabel = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].singleShort);
-            const prefix = viewSubject === 'actors' ? 'As member of ' : 'Targeted as member of ';
+      {canBeMember
+        && actiontypesAsMemberForSubject
+        && actiontypesAsMemberForSubject.entrySeq().map(
+          ([actortypeId, typeActors]) => {
+            let typeActorsForActiveType;
+            if (viewSubject === 'actors') {
+              typeActorsForActiveType = typeActors.filter(
+                (actor) => actor.get('actionsByType')
+                && actor.getIn(['actionsByType', activeActiontypeId])
+                && actor.getIn(['actionsByType', activeActiontypeId]).size > 0
+              );
+            } else if (viewSubject === 'targets') {
+              typeActorsForActiveType = typeActors.filter(
+                (actor) => actor.get('targetingActionsByType')
+                && actor.getIn(['targetingActionsByType', activeActiontypeId])
+                && actor.getIn(['targetingActionsByType', activeActiontypeId]).size > 0
+              );
+            }
+            if (!typeActorsForActiveType || typeActorsForActiveType.size === 0) {
+              return null;
+            }
             return (
-              <Box key={actorId}>
-                <FieldGroup
-                  group={{
-                    title: `${prefix} ${typeLabel}: "${actor.getIn(['attributes', 'title'])}"`,
-                    fields: [
-                      getActionConnectionField({
-                        actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),
-                        taxonomies,
-                        onEntityClick,
-                        connections: actionConnections,
-                        typeid: activeActiontypeId,
-                        columns: getActiontypeColumns(activeActiontypeId, viewSubject),
-                      }),
-                    ],
-                  }}
-                />
+              <Box key={actortypeId}>
+                {typeActorsForActiveType.entrySeq().map(([actorId, actor]) => {
+                  const typeLabel = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].singleShort);
+                  const prefix = viewSubject === 'actors' ? 'As member of ' : 'Targeted as member of ';
+                  return (
+                    <Box key={actorId}>
+                      <FieldGroup
+                        group={{
+                          title: `${prefix} ${typeLabel}: "${actor.getIn(['attributes', 'title'])}"`,
+                          fields: [
+                            getActionConnectionField({
+                              actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),
+                              taxonomies,
+                              onEntityClick,
+                              connections: actionConnections,
+                              typeid: activeActiontypeId,
+                              columns: getActiontypeColumns(activeActiontypeId, viewSubject),
+                            }),
+                          ],
+                        }}
+                      />
+                    </Box>
+                  );
+                })}
               </Box>
             );
-          })}
-        </Box>
-      ))}
+          }
+        )
+      }
     </Box>
   );
 }

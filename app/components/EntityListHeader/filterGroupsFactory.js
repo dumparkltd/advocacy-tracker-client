@@ -116,7 +116,7 @@ export const makeFilterGroups = ({
       const option = config.connections[connectionKey];
       if (!option.groupByType) {
         let validType = true;
-        if (option.entityType === 'indicators') {
+        if (option.type === 'action-indicators') {
           validType = INDICATOR_ACTIONTYPES.indexOf(typeId) > -1;
         }
         if (option.type === 'action-users') {
@@ -138,13 +138,29 @@ export const makeFilterGroups = ({
               id: option.type, // filterOptionId
               label: option.label,
               message: option.message,
-              color: option.entityType,
               active: !!activeFilterOption
                 && activeFilterOption.group === connectionKey
                 && activeFilterOption.optionId === option.type,
               currentFilters: optionCurrentFilters,
+              ...option,
             }],
           };
+          if (option.connectionAttributeFilter) {
+            const connectionFilterOption = {
+              id: option.connectionAttributeFilter.path, // filterOptionId
+              active: !!activeFilterOption
+                && activeFilterOption.group === connectionKey
+                && activeFilterOption.optionId === option.connectionAttributeFilter.path,
+              currentFilters: currentFilters.filter(
+                (f) => qe(f.groupId, option.connectionAttributeFilter.path)
+              ),
+              ...option.connectionAttributeFilter,
+            };
+            filterGroups[connectionKey].options = [
+              ...filterGroups[connectionKey].options,
+              connectionFilterOption,
+            ];
+          }
         }
       } else {
         let types;

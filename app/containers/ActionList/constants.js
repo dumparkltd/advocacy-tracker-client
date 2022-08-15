@@ -6,6 +6,7 @@ import {
   PRIVACY_STATUSES,
   ARCHIVE_STATUSES,
   ACTIONTYPES,
+  ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
 export const DEPENDENCIES = [
@@ -45,6 +46,11 @@ export const CONFIG = {
     map: {
       types: [
         ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.INTERACTION,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
       ],
     },
   },
@@ -144,6 +150,14 @@ export const CONFIG = {
       connectPath: API.ACTION_INDICATORS, // filter by actor connection
       key: 'indicator_id',
       ownKey: 'measure_id',
+      connectionAttributeFilter: {
+        path: 'indicatorConnections',
+        // query: 'indicatorConnections',
+        attribute: 'supportlevel_id',
+        message: 'attributes.supportlevel_id',
+        options: ACTION_INDICATOR_SUPPORTLEVELS,
+        optionMessages: 'supportlevels',
+      },
     },
     // filter by associated entity
     resources: {
