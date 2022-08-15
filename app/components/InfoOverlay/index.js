@@ -17,10 +17,10 @@ import {
   Text,
 } from 'grommet';
 import { CircleInformation, CircleQuestion, FormClose } from 'grommet-icons';
-const DropContent = styled((p) => (
+const DropContent = styled(({ dropBackground, ...p }) => (
   <Box
     pad="small"
-    background="light-1"
+    background={dropBackground}
     {...p}
   />
 ))`
@@ -67,7 +67,16 @@ const Markdown = styled(ReactMarkdown)`
 `;
 
 function InfoOverlay({
-  dark, content, tooltip, title, padButton, colorButton, icon, markdown, inline,
+  dark,
+  content,
+  tooltip,
+  title,
+  padButton,
+  colorButton,
+  icon,
+  markdown,
+  inline,
+  dropBackground,
 }) {
   const infoRef = useRef(null);
   const [info, showInfo] = useState(false);
@@ -110,9 +119,9 @@ function InfoOverlay({
         <Drop
           align={{ bottom: 'top' }}
           target={infoRef.current}
-          plain={!markdown}
+          plain
         >
-          <DropContent>
+          <DropContent dropBackground={dropBackground}>
             {markdown && (
               <div>
                 <Markdown source={content} className="react-markdown" linkTarget="_blank" />
@@ -164,6 +173,7 @@ InfoOverlay.propTypes = {
   ]),
   title: PropTypes.string,
   icon: PropTypes.string,
+  dropBackground: PropTypes.string,
   colorButton: PropTypes.string,
   padButton: PropTypes.oneOfType([
     PropTypes.object,
