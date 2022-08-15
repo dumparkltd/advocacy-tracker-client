@@ -303,7 +303,7 @@ export function ActionView(props) {
   }
 
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
-  console.log(indicators && indicators.toJS());
+  // console.log(indicators && indicators.toJS());
   // console.log(indicatorConnections && indicatorConnections.toJS())
   return (
     <div>
