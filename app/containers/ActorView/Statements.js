@@ -20,6 +20,7 @@ import styled from 'styled-components';
 import qe from 'utils/quasi-equals';
 // import isNumber from 'utils/is-number';
 // import { isMaxSize } from 'utils/responsive';
+import { lowerCase } from 'utils/string';
 
 // import NumberField from 'components/fields/NumberField';
 
@@ -132,6 +133,11 @@ export function Statements(props) {
     },
     Map()
   );
+  const type = lowerCase(
+    intl.formatMessage(
+      appMessages.entities[`actors_${viewEntity.getIn(['attributes', 'actortype_id'])}`].single
+    )
+  );
   return (
     <div>
       <MapOptions>
@@ -139,7 +145,7 @@ export function Statements(props) {
           option={{
             active: includeActorMembers,
             onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-            label: 'Include statements of groups (countries belong to)',
+            label: `Include statements of groups (${type} belongs to)`,
           }}
           type="member"
         />

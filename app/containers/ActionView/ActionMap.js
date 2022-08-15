@@ -142,7 +142,7 @@ export function ActionMap({
       memberOption = {
         active: includeTargetMembers,
         onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-        label: 'Include members of targeted regions, groups, classes',
+        label: 'Include members of targeted regions and groups',
       };
     }
   }
