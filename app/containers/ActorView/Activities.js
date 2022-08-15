@@ -11,10 +11,9 @@ import { Box, Text } from 'grommet';
 import { List, Map } from 'immutable';
 import styled from 'styled-components';
 
-import {
-  getActionConnectionField,
-} from 'utils/fields';
 import qe from 'utils/quasi-equals';
+import { getActionConnectionField } from 'utils/fields';
+import { lowerCase } from 'utils/string';
 
 import {
   ROUTES,
@@ -31,6 +30,7 @@ import ButtonPill from 'components/buttons/ButtonPill';
 import appMessages from 'containers/App/messages';
 import ActorActivitiesMap from './ActorActivitiesMap';
 
+const SectionTitle = styled((p) => <Text size="medium" weight={500} {...p} />)``;
 const TypeSelectBox = styled((p) => <Box {...p} />)``;
 const TypeButton = styled((p) => <ButtonPill {...p} />)`
   margin-bottom: 5px;
@@ -230,6 +230,7 @@ export function Activities(props) {
     }
   }
 
+  const typeLabel = intl.formatMessage(appMessages.entities[`actions_${activeActiontypeId}`].plural);
   return (
     <Box>
       {(!actiontypeIdsForSubjectOptions || actiontypeIdsForSubjectOptions.size === 0) && (
@@ -255,7 +256,8 @@ export function Activities(props) {
         >
           {actiontypeIdsForSubjectOptions.map(
             (id) => {
-              let actiontypeActions = actiontypesForSubject && actiontypesForSubject.get(parseInt(id, 10));
+              let actiontypeActions = (actiontypesForSubject && actiontypesForSubject.get(parseInt(id, 10)))
+                || List();
               if (actiontypeActions && actiontypesAsMemberForSubject) {
                 actiontypeActions = actiontypesAsMemberForSubject
                   && actiontypesAsMemberForSubject.entrySeq().reduce(
@@ -324,7 +326,7 @@ export function Activities(props) {
       <Box>
         <FieldGroup
           group={{
-            title: viewSubject === 'actors' ? 'Individually' : 'Explicitly targeted',
+            title: viewSubject === 'actors' ? `Own ${lowerCase(typeLabel)}` : 'Explicitly targeted',
             fields: [
               getActionConnectionField({
                 actions: activeActiontypeActions,
@@ -373,14 +375,17 @@ export function Activities(props) {
             }
             return (
               <Box key={actortypeId}>
+                <Box margin={{ horizontal: 'medium', top: 'large' }}>
+                  <SectionTitle>Activities through membership(s)</SectionTitle>
+                </Box>
                 {typeActorsForActiveType.entrySeq().map(([actorId, actor]) => {
-                  const typeLabel = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].singleShort);
+                  const actortypeLabel = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].singleShort);
                   const prefix = viewSubject === 'actors' ? 'As member of ' : 'Targeted as member of ';
                   return (
                     <Box key={actorId}>
                       <FieldGroup
                         group={{
-                          title: `${prefix} ${typeLabel}: "${actor.getIn(['attributes', 'title'])}"`,
+                          title: `${prefix} ${actortypeLabel}: "${actor.getIn(['attributes', 'title'])}"`,
                           fields: [
                             getActionConnectionField({
                               actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),
