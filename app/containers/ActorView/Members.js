@@ -152,7 +152,7 @@ export function Members(props) {
           <FieldGroup
             aside
             group={{
-              fields: membersByType.reduce(
+              fields: otherMembers.reduce(
                 (memo, actors, typeid) => memo.concat([
                   getActorConnectionField({
                     actors,
