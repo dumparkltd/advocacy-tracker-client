@@ -259,23 +259,23 @@ export function ActionView(props) {
   const hasChildren = childActiontypeIds && childActiontypeIds.length > 0;
 
   const hasMemberOption = !!typeId && !qe(typeId, ACTIONTYPES.NATL);
-  const hasMap = true;
   const hasIndicators = typeId && INDICATOR_ACTIONTYPES.indexOf(typeId.toString()) > -1;
 
   let viewSubject = subject || 'actors';
   const validViewSubjects = [];
-  if (hasChildren) {
-    validViewSubjects.push('children');
+  if (hasActor) {
+    validViewSubjects.push('actors');
   }
   if (hasTarget) {
     validViewSubjects.push('targets');
   }
-  if (hasActor) {
-    validViewSubjects.push('actors');
+  if (hasChildren) {
+    validViewSubjects.push('children');
   }
   if (validViewSubjects.indexOf(viewSubject) === -1) {
     viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
   }
+  const hasMap = viewSubject === 'actors' || viewSubject === 'targets';
 
   const actortypesForSubject = viewSubject === 'actors'
     ? actorsByActortype
