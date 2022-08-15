@@ -670,9 +670,9 @@ export const ACTORTYPES_CONFIG = {
     order: 3,
     columns: [
       {
-        id: '',
-        type: '',
-        _id: 2, // sector
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 2, // sector
       },
       {
         id: 'members', // one row per type,
@@ -688,11 +688,11 @@ export const ACTORTYPES_CONFIG = {
     id: ACTORTYPES.CONTACT,
     order: 5,
     columns: [
-      // {
-      //   id: '',
-      //   type: '',
-      //   taxonomy_id: 3, // role
-      // },
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 3, // role
+      },
       {
         id: 'associations', // one row per type,
         type: 'associations', // one row per type,
