@@ -24,6 +24,7 @@
     "build:dev": "cross-env NODE_ENV=production SERVER=development webpack --config internals/webpack/webpack.prod.babel.js --color --progress",
     "build:clean": "rimraf ./build",
     "start": "cross-env NODE_ENV=development SERVER=development node server",
+    "start:pdb": "cross-env NODE_ENV=development SERVER=production node server",
     "start:tunnel": "cross-env NODE_ENV=development ENABLE_TUNNEL=true node server",
     "start:p": "npm run start:production",
     "start:production": "npm run build && npm run start:prod",
