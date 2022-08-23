@@ -148,7 +148,11 @@ export function CellBodyIndicators({
                                 <LinkInTT
                                   key={indicator.get('id')}
                                   href={getIndicatorLink(indicator)}
-                                  onClick={getIndicatorOnClick(indicator, onEntityClick)}
+                                  onClick={(evt) => {
+                                    if (evt) evt.preventDefault();
+                                    setShowContent(false);
+                                    getIndicatorOnClick(indicator, onEntityClick);
+                                  }}
                                   title={indicator.getIn(['attributes', 'title'])}
                                 >
                                   <LabelInTT>

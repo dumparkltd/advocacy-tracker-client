@@ -88,7 +88,11 @@ export function CellBodyHasResource({
             <Box flex={{ shrink: 0 }}>
               <LinkInTT
                 href={getLink(entity.value)}
-                onClick={getOnClick(entity.value, onEntityClick)}
+                onClick={(evt) => {
+                  if (evt) evt.preventDefault();
+                  setShowContent(false);
+                  getOnClick(entity.value, onEntityClick);
+                }}
                 title={entity.value.getIn(['attributes', 'title'])}
               >
                 <LabelInTT>

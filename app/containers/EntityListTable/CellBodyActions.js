@@ -129,6 +129,7 @@ export function CellBodyActions({
                                   href={getActionLink(action)}
                                   onClick={(evt) => {
                                     if (evt) evt.preventDefault();
+                                    setShowContent(false);
                                     onEntityClick(action.get('id'), ROUTES.ACTION);
                                   }}
                                   title={action.getIn(['attributes', 'title'])}

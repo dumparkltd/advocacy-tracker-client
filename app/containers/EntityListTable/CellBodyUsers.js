@@ -116,7 +116,11 @@ export function CellBodyUsers({
                       <LinkInTT
                         key={user.get('id')}
                         href={getUserLink(user)}
-                        onClick={getUserOnClick(user, onEntityClick)}
+                        onClick={(evt) => {
+                          if (evt) evt.preventDefault();
+                          setShowContent(false);
+                          getUserOnClick(user, onEntityClick);
+                        }}
                         title={user.getIn(['attributes', 'name'])}
                       >
                         <LabelInTT>

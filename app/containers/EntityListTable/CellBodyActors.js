@@ -129,7 +129,11 @@ export function CellBodyActors({
                                 <LinkInTT
                                   key={actor.get('id')}
                                   href={getActorLink(actor)}
-                                  onClick={getActorOnClick(actor, onEntityClick)}
+                                  onClick={(evt) => {
+                                    if (evt) evt.preventDefault();
+                                    setShowContent(false);
+                                    getActorOnClick(actor, onEntityClick);
+                                  }}
                                   title={actor.getIn(['attributes', 'title'])}
                                 >
                                   <LabelInTT>
