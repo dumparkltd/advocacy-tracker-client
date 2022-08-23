@@ -39,8 +39,9 @@ const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} 
 
 const getUserLink = (user) => `${ROUTES.USERS}/${user.get('id')}`;
 
-const getUserOnClick = (user, onEntityClick) => (evt) => {
+const getUserOnClick = (user, onEntityClick, setShowContent) => (evt) => {
   if (evt) evt.preventDefault();
+  if (setShowContent) setShowContent(false);
   onEntityClick(user.get('id'), ROUTES.USERS);
 };
 
@@ -116,11 +117,7 @@ export function CellBodyUsers({
                       <LinkInTT
                         key={user.get('id')}
                         href={getUserLink(user)}
-                        onClick={(evt) => {
-                          if (evt) evt.preventDefault();
-                          setShowContent(false);
-                          getUserOnClick(user, onEntityClick);
-                        }}
+                        onClick={getUserOnClick(user, onEntityClick, setShowContent)}
                         title={user.getIn(['attributes', 'name'])}
                       >
                         <LabelInTT>

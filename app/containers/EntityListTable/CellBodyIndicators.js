@@ -43,8 +43,9 @@ const LabelWrap = styled((p) => <Box direction="row" gap="xsmall" align="center"
 
 const getIndicatorLink = (indicator) => `${ROUTES.INDICATOR}/${indicator.get('id')}`;
 
-const getIndicatorOnClick = (indicator, onEntityClick) => (evt) => {
+const getIndicatorOnClick = (indicator, onEntityClick, setShowContent) => (evt) => {
   if (evt) evt.preventDefault();
+  if (setShowContent) setShowContent(false);
   onEntityClick(indicator.get('id'), ROUTES.INDICATOR);
 };
 

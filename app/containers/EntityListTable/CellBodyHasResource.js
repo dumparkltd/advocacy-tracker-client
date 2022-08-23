@@ -24,8 +24,9 @@ const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} 
 
 const getLink = (res) => `${ROUTES.RESOURCE}/${res.get('id')}`;
 
-const getOnClick = (res, onEntityClick) => (evt) => {
+const getOnClick = (res, onEntityClick, setShowContent) => (evt) => {
   if (evt) evt.preventDefault();
+  if (setShowContent) setShowContent(false);
   onEntityClick(res.get('id'), ROUTES.RESOURCE);
 };
 
@@ -88,11 +89,7 @@ export function CellBodyHasResource({
             <Box flex={{ shrink: 0 }}>
               <LinkInTT
                 href={getLink(entity.value)}
-                onClick={(evt) => {
-                  if (evt) evt.preventDefault();
-                  setShowContent(false);
-                  getOnClick(entity.value, onEntityClick);
-                }}
+                onClick={getOnClick(entity.value, onEntityClick, setShowContent)}
                 title={entity.value.getIn(['attributes', 'title'])}
               >
                 <LabelInTT>
