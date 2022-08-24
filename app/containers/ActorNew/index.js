@@ -30,7 +30,6 @@ import {
   renderUserMultiControl,
 } from 'utils/forms';
 
-import { qe } from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
 import { checkActorAttribute, checkActorRequired } from 'utils/entities';
@@ -38,7 +37,7 @@ import { checkActorAttribute, checkActorRequired } from 'utils/entities';
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES, USER_ROLES, ACTORTYPES } from 'themes/config';
+import { ROUTES, USER_ROLES } from 'themes/config';
 import appMessages from 'containers/App/messages';
 
 import {
@@ -111,8 +110,7 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
     const props = nextProps || this.props;
     const { params, sessionUser } = props;
     const dataWithType = FORM_INITIAL.setIn(['attributes', 'actortype_id'], params.id);
-    return qe(params.id, ACTORTYPES.CONTACT)
-      && sessionUser
+    return sessionUser
       && sessionUser.getIn(['attributes', 'id'])
       ? dataWithType.set(
         'associatedUsers',

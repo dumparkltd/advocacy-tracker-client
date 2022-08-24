@@ -33,7 +33,6 @@ import {
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
-import { qe } from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
 import { checkActionAttribute, checkActionRequired } from 'utils/entities';
@@ -43,7 +42,6 @@ import {
   USER_ROLES,
   ROUTES,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
-  ACTIONTYPES,
 } from 'themes/config';
 
 import {
@@ -118,8 +116,7 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     const props = nextProps || this.props;
     const { params, sessionUser } = props;
     const dataWithType = FORM_INITIAL.setIn(['attributes', 'measuretype_id'], params.id);
-    return qe(params.id, ACTIONTYPES.INTERACTION)
-      && sessionUser
+    return sessionUser
       && sessionUser.getIn(['attributes', 'id'])
       ? dataWithType.set(
         'associatedUsers',
