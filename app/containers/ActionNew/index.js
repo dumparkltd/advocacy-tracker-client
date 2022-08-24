@@ -33,6 +33,7 @@ import {
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
+import { qe } from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
 import { checkActionAttribute, checkActionRequired } from 'utils/entities';
@@ -42,6 +43,7 @@ import {
   USER_ROLES,
   ROUTES,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
+  ACTIONTYPES,
 } from 'themes/config';
 
 import {
@@ -59,6 +61,7 @@ import {
   selectReadyForAuthCheck,
   selectActiontypeTaxonomiesWithCats,
   selectActiontype,
+  selectSessionUser,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -102,6 +105,10 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
     }
+    // repopulate if new data becomes ready
+    if (nextProps.dataReady && !this.props.dataReady && nextProps.sessionUser) {
+      this.props.initialiseForm('actionNew.form.data', this.getInitialFormData(nextProps));
+    }
     if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
     }
@@ -109,11 +116,21 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
-    const { params } = props;
-    return Map(FORM_INITIAL.setIn(
-      ['attributes', 'actortype_id'],
-      params.id
-    ));
+    const { params, sessionUser } = props;
+    const dataWithType = FORM_INITIAL.setIn(['attributes', 'measuretype_id'], params.id);
+    return qe(params.id, ACTIONTYPES.INTERACTION)
+      && sessionUser
+      && sessionUser.getIn(['attributes', 'id'])
+      ? dataWithType.set(
+        'associatedUsers',
+        fromJS([{
+          value: sessionUser.getIn(['attributes', 'id']).toString(),
+          checked: true,
+          label: sessionUser.getIn(['attributes', 'name']),
+          reference: sessionUser.getIn(['attributes', 'id']).toString(),
+        }])
+      )
+      : dataWithType;
   }
 
   getHeaderMainFields = (type) => {
@@ -495,6 +512,7 @@ ActionNew.propTypes = {
   connectedTaxonomies: PropTypes.object,
   actiontype: PropTypes.instanceOf(Map),
   params: PropTypes.object,
+  // sessionUser: PropTypes.string,
 };
 
 ActionNew.contextTypes = {
@@ -521,6 +539,7 @@ const mapStateToProps = (state, { params }) => ({
   indicatorOptions: selectIndicatorOptions(state, params.id),
   userOptions: selectUserOptions(state, params.id),
   viewDomainPage: selectDomainPage(state),
+  sessionUser: selectSessionUser(state),
 });
 
 function mapDispatchToProps(dispatch) {
