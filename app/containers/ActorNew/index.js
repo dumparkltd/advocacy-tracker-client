@@ -256,7 +256,18 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
   ) => {
     const { intl } = this.context;
     const typeId = type.get('id');
-    const groups = [ // fieldGroups
+    const groups = []; // fieldGroups
+    if (userOptions) {
+      groups.push(
+        {
+          label: intl.formatMessage(appMessages.nav.userActors),
+          fields: [
+            renderUserMultiControl(userOptions, null, intl),
+          ],
+        },
+      );
+    }
+    groups.push(
       { // fieldGroup
         fields: [
           checkActorAttribute(typeId, 'email') && getEmailField(intl.formatMessage, checkActorRequired(typeId, 'email')),
@@ -269,22 +280,14 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
           ),
         ],
       },
+    );
+    groups.push(
       { // fieldGroup
         label: intl.formatMessage(appMessages.entities.taxonomies.plural),
         icon: 'categories',
         fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
       },
-    ];
-    if (userOptions) {
-      groups.push(
-        {
-          label: intl.formatMessage(appMessages.nav.userActors),
-          fields: [
-            renderUserMultiControl(userOptions, null, intl),
-          ],
-        },
-      );
-    }
+    );
     if (associationsByActortype) {
       const associationConnections = renderAssociationsByActortypeControl(
         associationsByActortype,

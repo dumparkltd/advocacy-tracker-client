@@ -361,6 +361,20 @@ export function ActorView(props) {
                   </Box>
                 </Main>
                 <Aside bottom>
+                  <FieldGroup
+                    group={{
+                      label: appMessages.nav.userActions,
+                      fields: [
+                        getUserConnectionField({
+                          users,
+                          onEntityClick,
+                          connections: userConnections,
+                          skipLabel: true,
+                          // TODO columns
+                        }),
+                      ],
+                    }}
+                  />
                   {isCountry && (
                     <CountryMap actor={viewEntity} />
                   )}
@@ -385,20 +399,6 @@ export function ActorView(props) {
                       }}
                     />
                   )}
-                  <FieldGroup
-                    group={{
-                      label: appMessages.nav.userActions,
-                      fields: [
-                        getUserConnectionField({
-                          users,
-                          onEntityClick,
-                          connections: userConnections,
-                          skipLabel: true,
-                          // TODO columns
-                        }),
-                      ],
-                    }}
-                  />
                   {associationsByType && (
                     <FieldGroup
                       aside

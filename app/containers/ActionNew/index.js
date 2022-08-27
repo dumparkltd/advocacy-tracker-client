@@ -310,7 +310,18 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
   ) => {
     const { intl } = this.context;
     const typeId = type.get('id');
-    const groups = [ // fieldGroups
+    const groups = [];
+    if (userOptions) {
+      groups.push(
+        {
+          label: intl.formatMessage(appMessages.nav.userActions),
+          fields: [
+            renderUserMultiControl(userOptions, null, intl),
+          ],
+        },
+      );
+    }
+    groups.push( // fieldGroups
       { // fieldGroup
         fields: [
           checkActionAttribute(typeId, 'url') && getLinkFormField(
@@ -320,6 +331,8 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
           ),
         ],
       },
+    );
+    groups.push(
       { // fieldGroup
         fields: [
           checkActionAttribute(typeId, 'date_start') && getDateField(
@@ -339,22 +352,14 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
           ),
         ],
       },
+    );
+    groups.push(
       { // fieldGroup
         label: intl.formatMessage(appMessages.entities.taxonomies.plural),
         icon: 'categories',
         fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
       },
-    ];
-    if (userOptions) {
-      groups.push(
-        {
-          label: intl.formatMessage(appMessages.nav.userActions),
-          fields: [
-            renderUserMultiControl(userOptions, null, intl),
-          ],
-        },
-      );
-    }
+    );
     if (topActionsByActiontype) {
       const actionConnections = renderActionsByActiontypeControl({
         entitiesByActiontype: topActionsByActiontype,
