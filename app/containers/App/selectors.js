@@ -1868,19 +1868,22 @@ export const selectActorsWithPositions = createSelector(
                       );
                     if (hasDirectStatement || (groupsWithStatement && groupsWithStatement.size > 0)) {
                       const statement = statements.get(statementId.toString());
-                      const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
-                      const statementAuthority = authorityCategories.find(
-                        (cat, catId) => statementCategories.includes(parseInt(catId, 10))
-                      );
                       let result = statement
                         ? indicatorStatement.set(
                           'measure',
                           statement.get('attributes').set('id', statement.get('id')),
-                        ).set(
-                          'authority',
-                          statementAuthority.get('attributes').set('id', statementAuthority.get('id'))
                         )
                         : indicatorStatement;
+                      const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
+                      const statementAuthority = authorityCategories.find(
+                        (cat, catId) => statementCategories.includes(parseInt(catId, 10))
+                      );
+                      if (statementAuthority) {
+                        result = result.set(
+                          'authority',
+                          statementAuthority.get('attributes').set('id', statementAuthority.get('id'))
+                        );
+                      }
                       if (!hasDirectStatement && groupsWithStatement && groupsWithStatement.size > 0) {
                         result = result.set(
                           'viaGroupIds',
