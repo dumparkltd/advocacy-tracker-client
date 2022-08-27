@@ -529,6 +529,23 @@ export function ActionView(props) {
                   </Box>
                 </Main>
                 <Aside bottom>
+                  {users && (
+                    <FieldGroup
+                      aside
+                      group={{
+                        label: appMessages.nav.userActions,
+                        fields: [
+                          getUserConnectionField({
+                            users,
+                            onEntityClick,
+                            connections: userConnections,
+                            skipLabel: true,
+                            // TODO columns
+                          }),
+                        ],
+                      }}
+                    />
+                  )}
                   <FieldGroup
                     aside
                     group={{
@@ -567,22 +584,6 @@ export function ActionView(props) {
                         label: appMessages.entities.taxonomies.plural,
                         icon: 'categories',
                         fields: getTaxonomyFields(viewTaxonomies),
-                      }}
-                    />
-                  )}
-                  {users && (
-                    <FieldGroup
-                      group={{
-                        label: appMessages.nav.userActions,
-                        fields: [
-                          getUserConnectionField({
-                            users,
-                            onEntityClick,
-                            connections: userConnections,
-                            skipLabel: true,
-                            // TODO columns
-                          }),
-                        ],
                       }}
                     />
                   )}

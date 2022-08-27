@@ -30,7 +30,6 @@ import {
   renderUserMultiControl,
 } from 'utils/forms';
 
-// import { qe } from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
 import { checkActorAttribute, checkActorRequired } from 'utils/entities';
@@ -56,6 +55,7 @@ import {
   selectReadyForAuthCheck,
   selectActortypeTaxonomiesWithCats,
   selectActortype,
+  selectSessionUser,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -94,6 +94,10 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
     if (!nextProps.dataReady) {
       this.props.loadEntitiesIfNeeded();
     }
+    // repopulate if new data becomes ready
+    if (nextProps.dataReady && !this.props.dataReady && nextProps.sessionUser) {
+      this.props.initialiseForm('actorNew.form.data', this.getInitialFormData(nextProps));
+    }
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
     }
@@ -104,11 +108,20 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
-    const { params } = props;
-    return Map(FORM_INITIAL.setIn(
-      ['attributes', 'actortype_id'],
-      params.id,
-    ));
+    const { params, sessionUser } = props;
+    const dataWithType = FORM_INITIAL.setIn(['attributes', 'actortype_id'], params.id);
+    return sessionUser
+      && sessionUser.getIn(['attributes', 'id'])
+      ? dataWithType.set(
+        'associatedUsers',
+        fromJS([{
+          value: sessionUser.getIn(['attributes', 'id']).toString(),
+          checked: true,
+          label: sessionUser.getIn(['attributes', 'name']),
+          reference: sessionUser.getIn(['attributes', 'id']).toString(),
+        }])
+      )
+      : dataWithType;
   }
 
   getHeaderMainFields = (type) => {
@@ -243,7 +256,18 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
   ) => {
     const { intl } = this.context;
     const typeId = type.get('id');
-    const groups = [ // fieldGroups
+    const groups = []; // fieldGroups
+    if (userOptions) {
+      groups.push(
+        {
+          label: intl.formatMessage(appMessages.nav.userActors),
+          fields: [
+            renderUserMultiControl(userOptions, null, intl),
+          ],
+        },
+      );
+    }
+    groups.push(
       { // fieldGroup
         fields: [
           checkActorAttribute(typeId, 'email') && getEmailField(intl.formatMessage, checkActorRequired(typeId, 'email')),
@@ -256,22 +280,14 @@ export class ActorNew extends React.PureComponent { // eslint-disable-line react
           ),
         ],
       },
+    );
+    groups.push(
       { // fieldGroup
         label: intl.formatMessage(appMessages.entities.taxonomies.plural),
         icon: 'categories',
         fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
       },
-    ];
-    if (userOptions) {
-      groups.push(
-        {
-          label: intl.formatMessage(appMessages.nav.userActors),
-          fields: [
-            renderUserMultiControl(userOptions, null, intl),
-          ],
-        },
-      );
-    }
+    );
     if (associationsByActortype) {
       const associationConnections = renderAssociationsByActortypeControl(
         associationsByActortype,
@@ -417,6 +433,7 @@ ActorNew.propTypes = {
   membersByActortype: PropTypes.object,
   associationsByActortype: PropTypes.object,
   userOptions: PropTypes.object,
+  // sessionUser: PropTypes.string,
 };
 
 ActorNew.contextTypes = {
@@ -441,6 +458,7 @@ const mapStateToProps = (state, { params }) => ({
   associationsByActortype: selectAssociationsByActortype(state, params.id),
   userOptions: selectUserOptions(state, params.id),
   viewDomainPage: selectDomainPage(state),
+  sessionUser: selectSessionUser(state),
 });
 
 function mapDispatchToProps(dispatch) {
