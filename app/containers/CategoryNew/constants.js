@@ -7,8 +7,6 @@
 import { fromJS } from 'immutable';
 import { API } from 'themes/config';
 
-export const SAVE = 'impactoss/CategoryNew/SAVE';
-
 export const DEPENDENCIES = [
   API.USERS,
   API.USER_ROLES,

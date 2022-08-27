@@ -28,10 +28,6 @@ export const selectDomain = createSelector(
   (state) => state.get('actionNew'),
   (substate) => substate
 );
-export const selectDomainPage = createSelector(
-  (state) => state.getIn(['actionNew', 'page']),
-  (substate) => substate
-);
 
 export const selectIndicatorOptions = createSelector(
   (state, id) => id,

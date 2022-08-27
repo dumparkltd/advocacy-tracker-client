@@ -6,15 +6,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
 
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import EntityForm from 'containers/EntityForm';
-
-import {
-  selectDomain,
-} from './selectors';
 
 export function FormWrapper({
   viewDomain,
@@ -27,6 +22,7 @@ export function FormWrapper({
   handleUpdate,
   handleSubmit,
   scrollContainer,
+  inModal,
 }) {
   const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
   return (
@@ -49,6 +45,7 @@ export function FormWrapper({
       {fields && (
         <EntityForm
           model={model}
+          inModal={inModal}
           formData={viewDomain.getIn(['form', 'data'])}
           saving={saveSending}
           handleSubmit={handleSubmit}
@@ -75,10 +72,7 @@ FormWrapper.propTypes = {
   onServerErrorDismiss: PropTypes.func.isRequired,
   scrollContainer: PropTypes.object,
   model: PropTypes.string,
+  inModal: PropTypes.bool,
 };
 
-const mapStateToProps = (state) => ({
-  viewDomain: selectDomain(state),
-});
-
-export default connect(mapStateToProps, null)(FormWrapper);
+export default FormWrapper;

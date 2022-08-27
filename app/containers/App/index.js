@@ -13,7 +13,7 @@ import GlobalStyle from 'global-styles';
 
 import styled from 'styled-components';
 import Header from 'components/Header';
-import EntityNew from 'containers/EntityNew';
+import EntityNew from 'containers/EntityNew/indexNew';
 
 import { sortEntities } from 'utils/sort';
 import { ROUTES, API } from 'themes/config';
@@ -189,30 +189,28 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
         <Main isHome={isHomeOrAuth}>
           {React.Children.toArray(children)}
         </Main>
-        {newEntityModal
-          && (
-            <ReactModal
-              isOpen
-              contentLabel={newEntityModal.get('path')}
-              onRequestClose={this.props.onCloseModal}
-              className="new-entity-modal"
-              overlayClassName="new-entity-modal-overlay"
-              style={{
-                overlay: { zIndex: 99999999 },
-              }}
-              appElement={document.getElementById('app')}
-            >
-              <EntityNew
-                path={newEntityModal.get('path')}
-                attributes={newEntityModal.get('attributes')}
-                connect={newEntityModal.get('connect')}
-                onSaveSuccess={this.props.onCloseModal}
-                onCancel={this.props.onCloseModal}
-                inModal
-              />
-            </ReactModal>
-          )
-        }
+        {newEntityModal && (
+          <ReactModal
+            isOpen
+            contentLabel={newEntityModal.get('path')}
+            onRequestClose={this.props.onCloseModal}
+            className="new-entity-modal"
+            overlayClassName="new-entity-modal-overlay"
+            style={{
+              overlay: { zIndex: 99999999 },
+            }}
+            appElement={document.getElementById('app')}
+          >
+            <EntityNew
+              path={newEntityModal.get('path')}
+              attributes={newEntityModal.get('attributes')}
+              connect={newEntityModal.get('connect')}
+              onSaveSuccess={this.props.onCloseModal}
+              onCancel={this.props.onCloseModal}
+              inModal
+            />
+          </ReactModal>
+        )}
         <GlobalStyle />
       </div>
     );

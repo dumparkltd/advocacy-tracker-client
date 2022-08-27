@@ -193,7 +193,7 @@ const GlobalStyle = createGlobalStyle`
     outline: none;
     margin-right: auto;
     margin-left: auto;
-    max-width: 1170px;
+    max-width: 1122px;
   }
   @media (min-width: 769px) {
     .new-entity-modal {
