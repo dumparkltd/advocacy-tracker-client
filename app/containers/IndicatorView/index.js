@@ -143,6 +143,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
       ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
       : `${pageTitle}: ${this.props.params.id}`;
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+
     return (
       <div>
         <Helmet
@@ -215,19 +216,17 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                         ],
                       }}
                     />
-                    {countries && (
-                      <Box pad={{ vertical: 'small' }}>
-                        <CountryMap
-                          countries={countries}
-                          indicatorId={viewEntity.get('id')}
-                          onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
-                          includeInofficial={includeInofficial}
-                          onSetIncludeInofficial={onSetIncludeInofficial}
-                          includeActorMembers={includeActorMembers}
-                          onSetIncludeActorMembers={onSetIncludeActorMembers}
-                        />
-                      </Box>
-                    )}
+                    <Box pad={{ vertical: 'small' }}>
+                      <CountryMap
+                        countries={countries}
+                        indicatorId={viewEntity.get('id')}
+                        onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+                        includeInofficial={includeInofficial}
+                        onSetIncludeInofficial={onSetIncludeInofficial}
+                        includeActorMembers={includeActorMembers}
+                        onSetIncludeActorMembers={onSetIncludeActorMembers}
+                      />
+                    </Box>
                     <Box margin={{ vertical: 'large' }}>
                       <Box direction="row" gap="small" margin={{ horizontal: 'medium' }}>
                         <SubjectButton
