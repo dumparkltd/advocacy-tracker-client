@@ -7,7 +7,7 @@ import {
 } from 'redux-saga/effects';
 import { push, replace, goBack } from 'react-router-redux';
 import { reduce, keyBy } from 'lodash/collection';
-import { without } from 'lodash/array';
+// import { without } from 'lodash/array';
 
 import asArray from 'utils/as-array';
 import {
@@ -42,10 +42,12 @@ import {
   SET_VIEW,
   SET_SUBJECT,
   SET_MAPSUBJECT,
+  SET_MAPINDICATOR,
   OPEN_BOOKMARK,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
   SET_INCLUDE_MEMBERS_FORFILTERS,
+  SET_INCLUDE_INOFFICAL_STATEMENTS,
   PARAMS,
 } from 'containers/App/constants';
 
@@ -752,12 +754,14 @@ const getNextQuery = (query, extend, location) => {
     ? location.get('query').toJS()
     : location.get('query').filter((val, key) => key === 'view').toJS();
   // and figure out new query
+  // console.log('query', query)
+  // console.log('queryPrevious', queryPrevious)
   return asArray(query).reduce((memo, param) => {
     const queryUpdated = memo;
     // if arg already set and not replacing
     if (queryUpdated[param.arg] && !param.replace) {
-      // if multipleAttributeValues are not allowed
       const val = param.value && param.value.toString();
+      // check for connection attribute queries
       if (
         val
         && val.indexOf(':') > -1
@@ -765,7 +769,7 @@ const getNextQuery = (query, extend, location) => {
         && param.multipleAttributeValues === false
       ) {
         if (param.add) {
-          const [attribute] = param.value.split(':');
+          const [attribute] = val.split(':');
           const keepAttributeValues = queryPrevious[param.arg]
             ? asArray(queryPrevious[param.arg]).filter(
               (attVal) => {
@@ -778,37 +782,53 @@ const getNextQuery = (query, extend, location) => {
             ...keepAttributeValues,
             param.value,
           ];
-        } else if (param.remove && queryUpdated[param.arg]) {
+        } else if (param.remove) {
           queryUpdated[param.arg] = asArray(queryPrevious[param.arg]).filter(
             (attVal) => !qe(attVal, param.value)
           );
         }
-      // if multiple values set
-      } else if (Array.isArray(queryUpdated[param.arg])) {
+      } else {
+        queryUpdated[param.arg] = asArray(queryUpdated[param.arg]);
+        const isIncluded = !!param.value && !!queryUpdated[param.arg].find(
+          (qv) => qe(qv && qv.toString().split('>')[0], param.value.toString().split('>')[0])
+        );
+
         // add if not already present
-        if (param.add && queryUpdated[param.arg].indexOf(param.value.toString()) === -1) {
+        if (param.add && !isIncluded) {
           queryUpdated[param.arg].push(param.value);
         // remove if present
-        } else if (extend && param.remove && param.value && queryUpdated[param.arg].indexOf(param.value.toString()) > -1) {
-          queryUpdated[param.arg] = without(queryUpdated[param.arg], param.value.toString());
+        } else if (extend && param.remove && param.value && isIncluded) {
+          queryUpdated[param.arg] = queryUpdated[param.arg].filter(
+            (qv) => !qe(qv.toString().split('>')[0], param.value.toString().split('>')[0])
+          );
           // convert to single value if only one value left
           if (queryUpdated[param.arg].length === 1) {
             /* eslint-disable prefer-destructuring */
             queryUpdated[param.arg] = queryUpdated[param.arg][0];
             /* eslint-enable prefer-destructuring */
+          } else if (queryUpdated[param.arg].length === 0) {
+            delete queryUpdated[param.arg];
           }
         }
       // if single value set
       // add if not already present and convert to array
-      } else if (param.value && param.add && queryUpdated[param.arg] !== param.value.toString()) {
-        queryUpdated[param.arg] = [queryUpdated[param.arg], param.value];
-      // remove if present
-      } else if (extend && param.remove && (!param.value || (param.value && queryUpdated[param.arg] === param.value.toString()))) {
-        delete queryUpdated[param.arg];
       }
+      // if (extend && param.remove && (!param.value || (param.value && queryUpdated[param.arg] === param.value.toString()))) {
+      //   console.log('remove')
+      //   delete queryUpdated[param.arg];
+      // }
     // if set and removing
     } else if (queryUpdated[param.arg] && param.value && param.replace) {
-      queryUpdated[param.arg] = param.value;
+      // only replace the previous value if defined
+      if (param.prevValue && queryUpdated[param.arg]) {
+        queryUpdated[param.arg] = asArray(queryUpdated[param.arg]).map(
+          (argValue) => qe(argValue, param.prevValue)
+            ? param.value
+            : argValue
+        );
+      } else {
+        queryUpdated[param.arg] = param.value;
+      }
     } else if (queryUpdated[param.arg] && (param.remove || typeof param.value === 'undefined')) {
       delete queryUpdated[param.arg];
     // if not set or replacing with new value
@@ -895,6 +915,19 @@ export function* setMapSubjectSaga({ subject }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
+export function* setMapIndicatorSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'topic',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
 export function* setSubjectSaga({ subject }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
@@ -939,6 +972,19 @@ export function* setIncludeMembersForFilterSaga({ value }) {
   const queryNext = getNextQuery(
     {
       arg: 'fm',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
+export function* setIncludeInofficialStatementsSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'inofficial',
       value,
       replace: true,
     },
@@ -1044,9 +1090,11 @@ export default function* rootSaga() {
   yield takeEvery(SET_VIEW, setViewSaga);
   yield takeEvery(SET_SUBJECT, setSubjectSaga);
   yield takeEvery(SET_MAPSUBJECT, setMapSubjectSaga);
+  yield takeEvery(SET_MAPINDICATOR, setMapIndicatorSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_MEMBERS, setIncludeActorMembersSaga);
   yield takeEvery(SET_INCLUDE_TARGET_MEMBERS, setIncludeTargetMembersSaga);
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
+  yield takeEvery(SET_INCLUDE_INOFFICAL_STATEMENTS, setIncludeInofficialStatementsSaga);
   yield takeEvery(OPEN_BOOKMARK, openBookmarkSaga);
   yield takeEvery(DISMISS_QUERY_MESSAGES, dismissQueryMessagesSaga);
 

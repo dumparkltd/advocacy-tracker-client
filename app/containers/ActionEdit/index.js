@@ -365,8 +365,23 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
   ) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'measuretype_id']);
-
-    const groups = [ // fieldGroups
+    const groups = [];
+    if (userOptions) {
+      const userConnections = renderUserMultiControl(
+        userOptions,
+        null,
+        intl,
+      );
+      if (userConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.userActions),
+            fields: [userConnections],
+          },
+        );
+      }
+    }
+    groups.push( // fieldGroups
       { // fieldGroup
         fields: [
           checkActionAttribute(typeId, 'url') && getLinkFormField(
@@ -376,6 +391,8 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           ),
         ],
       },
+    );
+    groups.push(
       { // fieldGroup
         fields: [
           checkActionAttribute(typeId, 'date_start') && getDateField(
@@ -395,27 +412,14 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           ),
         ],
       },
+    );
+    groups.push(
       { // fieldGroup
         label: intl.formatMessage(appMessages.entities.taxonomies.plural),
         icon: 'categories',
         fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
       },
-    ];
-    if (userOptions) {
-      const userConnections = renderUserMultiControl(
-        userOptions,
-        null,
-        intl,
-      );
-      if (userConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.userActions),
-            fields: [userConnections],
-          },
-        );
-      }
-    }
+    );
     if (topActionsByActiontype) {
       const actionConnections = renderActionsByActiontypeControl({
         entitiesByActiontype: topActionsByActiontype,

@@ -8,19 +8,17 @@
  * Images: images are stored in 'themes/media' folder
  *
  */
-
+import { version } from '../../package.json';
 // General ********************
-export const NODE_ENV = sessionStorage.NODE_ENV || 'production';
+export const SERVER = (process && process.env && process.env.SERVER) || 'production';
+export const IS_DEV = SERVER !== 'production';
 
-const IS_DEV = false;
-export const version = '1.0.4';
+export const VERSION = `${version}${IS_DEV ? ' [DEV]' : ''}`;
 
 export const ENDPOINTS = {
-  API: (
-    NODE_ENV === 'production' && !IS_DEV
-      ? 'https://advocacy-tracker-api.herokuapp.com'
-      : 'https://advocacy-tracker-dev.herokuapp.com'
-  ), // server API endpoint
+  API: IS_DEV // server API endpoint
+    ? 'https://advocacy-tracker-dev.herokuapp.com'
+    : 'https://advocacy-tracker-api.herokuapp.com',
   SIGN_IN: 'auth/sign_in',
   SIGN_OUT: 'auth/sign_out',
   PASSWORD: 'auth/password',
@@ -115,23 +113,41 @@ export const RESOURCETYPES = {
 };
 
 export const ACTION_INDICATOR_SUPPORTLEVELS = {
+  // not assigned
   0: {
     value: '0',
     default: true,
+    color: '#EDEFF0',
+    order: 5,
   },
+  // strong
   1: {
     value: '1',
+    color: '#047C3E',
+    order: 1,
   },
+  // quite positive
   2: {
     value: '2',
+    color: '#3ea667',
+    order: 2,
   },
+  // on the fence
   3: {
     value: '3',
+    color: '#EFCFB1',
+    order: 3,
   },
+  // rather sceptical
   4: {
     value: '4',
+    color: '#DA5C35',
+    order: 4,
   },
 };
+
+export const OFFICIAL_STATEMENT_CATEGORY_ID = 56;
+export const AUTHORITY_TAXONOMY = 13;
 
 export const ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS = {
   [ACTIONTYPES.EXPRESS]: [
@@ -654,9 +670,9 @@ export const ACTORTYPES_CONFIG = {
     order: 3,
     columns: [
       {
-        id: '',
-        type: '',
-        _id: 2, // sector
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 2, // sector
       },
       {
         id: 'members', // one row per type,
@@ -672,11 +688,11 @@ export const ACTORTYPES_CONFIG = {
     id: ACTORTYPES.CONTACT,
     order: 5,
     columns: [
-      // {
-      //   id: '',
-      //   type: '',
-      //   taxonomy_id: 3, // role
-      // },
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 3, // role
+      },
       {
         id: 'associations', // one row per type,
         type: 'associations', // one row per type,
@@ -756,7 +772,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'taxonomy-13',
         type: 'taxonomy',
-        taxonomy_id: 13, // level of authority
+        taxonomy_id: AUTHORITY_TAXONOMY, // level of authority
       },
       {
         id: 'actors',
@@ -1045,6 +1061,8 @@ export const TEXT_TRUNCATE = {
   TYPE_SELECT: 24,
   GRACE: 2,
   META_TITLE: 20,
+  INDICATOR_SELECT: 30,
+  INDICATOR_SELECT_OPTION: 40,
 };
 
 export const COLUMN_WIDTHS = {

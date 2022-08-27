@@ -13,6 +13,7 @@ import CellBodyIndicators from './CellBodyIndicators';
 import CellBodyCategories from './CellBodyCategories';
 import CellBodyHasResource from './CellBodyHasResource';
 import CellBodyBarChart from './CellBodyBarChart';
+import CellBodyStackedBarChart from './CellBodyStackedBarChart';
 import CellHeaderMain from './CellHeaderMain';
 import CellHeaderPlain from './CellHeaderPlain';
 
@@ -29,8 +30,11 @@ const TableRow = styled.tr`
   height: 100%;
 `;
 const getColWidth = ({
-  col, count, colSpan = 1,
+  col, count, colSpan = 1, inSingleView,
 }) => {
+  if (inSingleView) {
+    return (100 / count) * colSpan;
+  }
   if (count === 1) {
     return 100;
   }
@@ -40,8 +44,11 @@ const getColWidth = ({
   if (count > 2) {
     return col.type === 'main' ? 35 : (65 / (count - 1)) * colSpan;
   }
+  // if (count === 4) {
+  //   return col.type === 'main' ? 30 : (70 / (count - 1)) * colSpan;
+  // }
   // if (count > 4) {
-  //   return col.type === 'main' ? 40 : (60 / (count - 1)) * colSpan;
+  //   return col.type === 'main' ? 25 : (75 / (count - 1)) * colSpan;
   // }
   return 0;
 };
@@ -105,9 +112,9 @@ export function EntitiesTable({
   headerColumnsUtility,
   memberOption,
   subjectOptions,
+  inSingleView,
 }) {
   const size = React.useContext(ResponsiveContext);
-
   return (
     <Box fill="horizontal">
       <Table>
@@ -125,6 +132,7 @@ export function EntitiesTable({
                       colSpan={col.span || 1}
                       first={i === 0}
                       last={i === headerColumns.length - 1}
+                      inSingleView={inSingleView}
                       utility
                     >
                       {col.type === 'options' && (
@@ -156,8 +164,9 @@ export function EntitiesTable({
                     count={headerColumns.length}
                     first={i === 0}
                     last={i === headerColumns.length - 1}
+                    inSingleView={inSingleView}
                   >
-                    <TableCellHeaderInner>
+                    <TableCellHeaderInner fill={false} flex={{ grow: 0 }} justify="start">
                       {col.type === 'main' && (
                         <CellHeaderMain
                           column={col}
@@ -185,6 +194,7 @@ export function EntitiesTable({
                   count={headerColumns.length}
                   first={i === 0}
                   last={i === headerColumns.length - 1}
+                  inSingleView={inSingleView}
                 >
                   <TableCellBodyInner>
                     {col.type === 'main' && (
@@ -229,6 +239,7 @@ export function EntitiesTable({
                       || col.type === 'members'
                       || col.type === 'associations'
                       || col.type === 'userActors'
+                      || col.type === 'viaGroups'
                     ) && (
                       <CellBodyActors
                         entity={entity[col.id]}
@@ -236,7 +247,10 @@ export function EntitiesTable({
                         column={col}
                       />
                     )}
-                    {col.type === 'taxonomy' && (
+                    {(
+                      col.type === 'taxonomy'
+                      || col.type === 'positionStatementAuthority'
+                    ) && (
                       <CellBodyCategories
                         entity={entity[col.id]}
                         column={col}
@@ -254,6 +268,7 @@ export function EntitiesTable({
                       || col.type === 'resourceActions'
                       || col.type === 'indicatorActions'
                       || col.type === 'userActions'
+                      || col.type === 'positionStatement'
                     ) && (
                       <CellBodyActions
                         entity={entity[col.id]}
@@ -274,6 +289,16 @@ export function EntitiesTable({
                         issecondary={col.type !== 'actiontype' && col.members}
                       />
                     )}
+                    {col.type === 'stackedBar' && (
+                      <CellBodyStackedBarChart
+                        values={entity[col.id] && entity[col.id].values
+                          ? Object.values(entity[col.id].values)
+                          : null
+                        }
+                        maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
+                        column={col}
+                      />
+                    )}
                   </TableCellBodyInner>
                 </TableCellBody>
               ))}
@@ -292,6 +317,7 @@ EntitiesTable.propTypes = {
   headerColumns: PropTypes.array,
   headerColumnsUtility: PropTypes.array,
   canEdit: PropTypes.bool,
+  inSingleView: PropTypes.bool,
   onEntityClick: PropTypes.func,
   memberOption: PropTypes.node,
   subjectOptions: PropTypes.node,

@@ -6,15 +6,15 @@ import { Box, Text, Button } from 'grommet';
 // import ButtonFactory from 'components/buttons/ButtonFactory';
 
 const Styled = styled.div`
-  padding-bottom: ${({ inList }) => inList ? 2 : 8}px;
+  padding-bottom: ${({ inList }) => inList ? 2 : 10}px;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding-bottom: ${({ inList }) => inList ? 5 : 10}px;
+    padding-bottom: ${({ inList }) => inList ? 5 : 15}px;
   }
 `;
 const TypeButton = styled((p) => <Button plain {...p} />)`
-  padding: ${({ inList }) => inList ? '0px 4px' : '2px 4px'};
+  padding: ${({ inList }) => inList ? '0px 2px' : '2px 2px'};
   border-bottom: 2px solid;
-  border-bottom-color: ${({ active }) => active ? 'brand' : 'transparent'};
+  border-bottom-color: ${({ active }) => active ? 'auto' : 'transparent'};
   background: none;
 `;
 

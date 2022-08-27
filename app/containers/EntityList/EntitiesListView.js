@@ -17,6 +17,7 @@ import {
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
   MEMBERSHIPS,
+  ACTION_INDICATOR_SUPPORTLEVELS,
   // ACTIONTYPES,
 } from 'themes/config';
 import { CONTENT_LIST } from 'containers/App/constants';
@@ -27,7 +28,7 @@ import Content from 'components/styled/Content';
 import Loading from 'components/Loading';
 import EntityListViewOptions from 'components/EntityListViewOptions';
 import MapSubjectOptions from 'containers/MapContainer/MapInfoOptions/MapSubjectOptions';
-import MapMemberOption from 'containers/MapContainer/MapInfoOptions/MapMemberOption';
+import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 import EntityListTable from 'containers/EntityListTable';
 import ButtonPill from 'components/buttons/ButtonPill';
 
@@ -348,12 +349,30 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {
           id: 'main',
           type: 'main',
-          sort: 'name',
+          sort: 'title',
           attributes: ['title'],
         },
         {
-          id: 'actions', // one row per type,
+          id: 'statements', // one row per type,
           type: 'indicatorActions', // one row per type,
+        },
+        {
+          id: 'support', // one row per type,
+          type: 'stackedBar', // one row per type,
+          values: 'supportlevels',
+          title: 'Support',
+          options: ACTION_INDICATOR_SUPPORTLEVELS,
+          info: {
+            type: 'key-categorical',
+            title: 'Support by number of countries',
+            attribute: 'supportlevel_id',
+            options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+              .sort((a, b) => a.order < b.order ? -1 : 1)
+              .map((level) => ({
+                ...level,
+                label: intl.formatMessage(appMessages.supportlevels[level.value]),
+              })),
+          },
         },
       ];
     } else if (config.types === 'users' && dataReady) {
@@ -382,7 +401,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {
           id: 'main',
           type: 'main',
-          sort: 'name',
+          sort: 'title',
           attributes: ['title', 'menu_title'],
         },
       ];
@@ -464,7 +483,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                     </Box>
                     {memberOption && (
                       <Box>
-                        <MapMemberOption option={memberOption} />
+                        <MapOption option={memberOption} type="member" />
                       </Box>
                     )}
                     {entityActors.get(parseInt(viewType, 10)) && (
@@ -568,7 +587,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                     hasSearch
                     columns={columns}
                     headerColumnsUtility={headerColumnsUtility}
-                    memberOption={memberOption && <MapMemberOption option={memberOption} />}
+                    memberOption={memberOption && <MapOption option={memberOption} type="member" />}
                     subjectOptions={subjectOptions && <MapSubjectOptions inList options={subjectOptions} />}
                     listUpdating={listUpdating}
                     entities={entities}

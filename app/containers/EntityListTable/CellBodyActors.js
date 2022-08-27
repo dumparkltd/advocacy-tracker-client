@@ -39,8 +39,9 @@ const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} 
 
 const getActorLink = (actor) => `${ROUTES.ACTOR}/${actor.get('id')}`;
 
-const getActorOnClick = (actor, onEntityClick) => (evt) => {
+const getActorOnClick = (actor, onEntityClick, setShowContent) => (evt) => {
   if (evt) evt.preventDefault();
+  if (setShowContent) setShowContent(false);
   onEntityClick(actor.get('id'), ROUTES.ACTOR);
 };
 
@@ -129,7 +130,7 @@ export function CellBodyActors({
                                 <LinkInTT
                                   key={actor.get('id')}
                                   href={getActorLink(actor)}
-                                  onClick={getActorOnClick(actor, onEntityClick)}
+                                  onClick={getActorOnClick(actor, onEntityClick, setShowContent)}
                                   title={actor.getIn(['attributes', 'title'])}
                                 >
                                   <LabelInTT>

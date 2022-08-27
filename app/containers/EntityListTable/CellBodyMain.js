@@ -63,7 +63,7 @@ export function CellBodyMain({
           onClick={entity.onClick}
           title={entity.values.title}
         >
-          <Box direction="row" gap="xsmall">
+          <Box direction="row" gap="xsmall" align="center">
             {Object.keys(entity.values).map((key) => {
               if (!entity.values[key]) {
                 return null;
@@ -88,13 +88,14 @@ export function CellBodyMain({
               }
               if (key === 'code') {
                 return (
-                  <Label
-                    key={key}
-                    color="dark-5"
-                    size="small"
-                  >
-                    {`${entity.values[key]}`}
-                  </Label>
+                  <Box flex={{ shrink: 0 }} key={key}>
+                    <Label
+                      color="dark-5"
+                      size="small"
+                    >
+                      {`${entity.values[key]}`}
+                    </Label>
+                  </Box>
                 );
               }
               return null;

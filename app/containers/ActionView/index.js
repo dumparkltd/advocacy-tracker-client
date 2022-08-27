@@ -75,7 +75,7 @@ import {
   selectIsUserAdmin,
   selectActorConnections,
   selectResourceConnections,
-  selectIndicatorConnections,
+  // selectIndicatorConnections,
   selectActionConnections,
   selectTaxonomiesWithCategories,
   selectSubjectQuery,
@@ -184,7 +184,7 @@ export function ActionView(props) {
     onEntityClick,
     actorConnections,
     resourceConnections,
-    indicatorConnections,
+    // indicatorConnections,
     actionConnections,
     subActionsByType,
     topActionsByType,
@@ -259,19 +259,23 @@ export function ActionView(props) {
   const hasChildren = childActiontypeIds && childActiontypeIds.length > 0;
 
   const hasMemberOption = !!typeId && !qe(typeId, ACTIONTYPES.NATL);
-  const hasMap = qe(typeId, ACTIONTYPES.EXPRESS);
   const hasIndicators = typeId && INDICATOR_ACTIONTYPES.indexOf(typeId.toString()) > -1;
 
   let viewSubject = subject || 'actors';
-  if (viewSubject === 'children' && !hasChildren) {
-    viewSubject = 'actors';
+  const validViewSubjects = [];
+  if (hasActor) {
+    validViewSubjects.push('actors');
   }
-  if (viewSubject === 'targets' && !hasTarget) {
-    viewSubject = 'actors';
+  if (hasTarget) {
+    validViewSubjects.push('targets');
   }
-  if (viewSubject === 'actors' && !hasActor) {
-    viewSubject = 'targets';
+  if (hasChildren) {
+    validViewSubjects.push('children');
   }
+  if (validViewSubjects.indexOf(viewSubject) === -1) {
+    viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
+  }
+  const hasMap = viewSubject === 'actors' || viewSubject === 'targets';
 
   const actortypesForSubject = viewSubject === 'actors'
     ? actorsByActortype
@@ -299,6 +303,8 @@ export function ActionView(props) {
   }
 
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+  // console.log(indicators && indicators.toJS());
+  // console.log(indicatorConnections && indicatorConnections.toJS())
   return (
     <div>
       <Helmet
@@ -387,7 +393,7 @@ export function ActionView(props) {
                           getIndicatorConnectionField({
                             indicators,
                             onEntityClick,
-                            connections: indicatorConnections,
+                            // connections: indicatorConnections,
                             skipLabel: true,
                             columns: getIndicatorColumns(viewEntity, intl),
                           }),
@@ -441,7 +447,7 @@ export function ActionView(props) {
                         <ActionMap
                           entities={actortypesForSubject}
                           mapSubject={viewSubject}
-                          onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+                          onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
                           hasMemberOption={hasMemberOption}
                           typeId={typeId}
                         />
@@ -523,6 +529,23 @@ export function ActionView(props) {
                   </Box>
                 </Main>
                 <Aside bottom>
+                  {users && (
+                    <FieldGroup
+                      aside
+                      group={{
+                        label: appMessages.nav.userActions,
+                        fields: [
+                          getUserConnectionField({
+                            users,
+                            onEntityClick,
+                            connections: userConnections,
+                            skipLabel: true,
+                            // TODO columns
+                          }),
+                        ],
+                      }}
+                    />
+                  )}
                   <FieldGroup
                     aside
                     group={{
@@ -561,22 +584,6 @@ export function ActionView(props) {
                         label: appMessages.entities.taxonomies.plural,
                         icon: 'categories',
                         fields: getTaxonomyFields(viewTaxonomies),
-                      }}
-                    />
-                  )}
-                  {users && (
-                    <FieldGroup
-                      group={{
-                        label: appMessages.nav.userActions,
-                        fields: [
-                          getUserConnectionField({
-                            users,
-                            onEntityClick,
-                            connections: userConnections,
-                            skipLabel: true,
-                            // TODO columns
-                          }),
-                        ],
                       }}
                     />
                   )}
@@ -647,7 +654,7 @@ ActionView.propTypes = {
   onSetSubject: PropTypes.func,
   intl: intlShape.isRequired,
   subject: PropTypes.string,
-  indicatorConnections: PropTypes.object,
+  // indicatorConnections: PropTypes.object,
   indicators: PropTypes.object,
   userConnections: PropTypes.object,
   users: PropTypes.object,
@@ -678,7 +685,7 @@ const mapStateToProps = (state, props) => ({
   subActionsByType: selectSubActionsByActiontype(state, props.params.id),
   subject: selectSubjectQuery(state),
   indicators: selectEntityIndicators(state, props.params.id),
-  indicatorConnections: selectIndicatorConnections(state),
+  // indicatorConnections: selectIndicatorConnections(state),
   users: selectEntityUsers(state, props.params.id),
   userConnections: selectUserConnections(state),
   viewActiontypeId: selectActiontypeQuery(state),

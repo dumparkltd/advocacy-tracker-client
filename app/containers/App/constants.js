@@ -79,9 +79,11 @@ export const SET_ACTORTYPE = 'impactoss/App/SET_ACTORTYPE';
 export const SET_VIEW = 'impactoss/App/SET_VIEW';
 export const SET_SUBJECT = 'impactoss/App/SET_SUBJECT';
 export const SET_MAPSUBJECT = 'impactoss/App/SET_MAPSUBJECT';
+export const SET_MAPINDICATOR = 'impactoss/App/SET_MAPINDICATOR';
 export const SET_INCLUDE_ACTOR_MEMBERS = 'impactoss/App/SET_INCLUDE_ACTOR_MEMBERS';
 export const SET_INCLUDE_TARGET_MEMBERS = 'impactoss/App/SET_INCLUDE_TARGET_MEMBERS';
 export const SET_INCLUDE_MEMBERS_FORFILTERS = 'impactoss/App/SET_INCLUDE_MEMBERS_FORFILTERS';
+export const SET_INCLUDE_INOFFICAL_STATEMENTS = 'impactoss/App/SET_INCLUDE_INOFFICAL_STATEMENTS';
 
 export const FILTERS_PANEL = 'filters';
 export const EDIT_PANEL = 'edit';

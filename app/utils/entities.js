@@ -21,12 +21,52 @@ import appMessage from 'utils/app-message';
 import { qe } from 'utils/quasi-equals';
 
 // check if entity has nested connection by id
+// - connectionAttributes: { path: 'indicatorConnections', id: 'indicator_id' }
+// - connectionAttributeQuery: { attribute: connectionAttribute, values: [value2,value3] }
 export const testEntityEntityAssociation = (
   entity,
   path,
   associatedId,
-) => entity.get(path)
-  && entity.get(path).includes(parseInt(associatedId, 10));
+  connectionAttribute, // information on any connection attributes
+  connectionAttributeQuery,
+) => {
+  // first check if entities are connected at all
+  const passConnection = entity.get(path)
+    && entity.get(path).includes(parseInt(associatedId, 10));
+  // then check for any connection attribute queries
+  // ignore connection attribute query if info not present
+  if (
+    !connectionAttribute
+    || !connectionAttribute.path
+    || !connectionAttribute.id
+    || !connectionAttributeQuery
+    || !connectionAttributeQuery.attribute
+    || !connectionAttributeQuery.values
+  ) {
+    return passConnection;
+  }
+  // ... otherwise check all connections
+  return passConnection
+    && entity.get(connectionAttribute.path)
+    && entity.get(connectionAttribute.path).some(
+      (connection) => {
+        const isAssociated = connection.get(connectionAttribute.id)
+          && qe(connection.get(connectionAttribute.id), associatedId);
+        if (!isAssociated) {
+          return false;
+        }
+        const attValue = connection.get(connectionAttributeQuery.attribute);
+
+        // test "null case"
+        if (!attValue) {
+          return connectionAttributeQuery.values.indexOf('0') > -1;
+        }
+        return connectionAttributeQuery.values.indexOf(
+          connection.get(connectionAttributeQuery.attribute).toString()
+        ) > -1; // allow any value
+      }
+    );
+};
 
 // check if entity has nested category by id
 export const testEntityCategoryAssociation = (
@@ -198,17 +238,42 @@ export const filterEntitiesByConnectedCategories = (
 
 // filter entities by by association with one or more entities of specific connection type
 // assumes prior nesting of relationships
+// - query: type:id>connectionAttribute=value
+// - connectionAttributes: { path: 'indicatorConnections', id: 'indicator_id' }
 export const filterEntitiesByConnection = (
   entities,
   query,
   path,
+  connectionAttribute,
 ) => entities && entities.filter(
   // consider replacing with .every()
   (entity) => asList(query).every(
     (queryValue) => {
-      const value = queryValue.indexOf(':') > -1 ? queryValue.split(':')[1] : queryValue;
+      let value = queryValue;
+      let connectionAttributeQuery;
+      // check for connection attribute queries
+      if (value.indexOf('>') > -1) {
+        [value, connectionAttributeQuery] = value.split('>');
+        const [attribute, values] = connectionAttributeQuery.split('=');
+        connectionAttributeQuery = {
+          attribute,
+          values: values.split('|'),
+        };
+      }
+      // check for type:id form
+      // sometimes related entity ids are stored as [type]:[id]
+      // ignore type
+      if (value.indexOf(':') > -1) {
+        [, value] = queryValue.split(':');
+      }
       return entity.get(path)
-        && testEntityEntityAssociation(entity, path, value);
+        && testEntityEntityAssociation(
+          entity,
+          path,
+          value,
+          connectionAttribute,
+          connectionAttributeQuery,
+        );
     },
   )
 );
@@ -236,6 +301,24 @@ export const filterEntitiesByAttributes = (entities, query) => entities
       (value, attribute) => attribute === 'id'
         ? qe(entity.get('id'), value)
         : qe(entity.getIn(['attributes', attribute]), value),
+    )
+  );
+
+// query is object not string!
+export const filterEntitiesByConnectionAttributes = (entities, query) => entities
+  && entities.filter(
+    (entity) => every(
+      query,
+      (condition) => {
+        // condition stored as object { path|att: value }
+        // e.g. { 'indicatorConnections|supportlevel_id': '0' }
+        const [path, att] = Object.keys(condition)[0].split('|');
+        const value = Object.values(condition)[0];
+        return entity.get(path) && entity.get(path).some(
+          (connection) => qe(connection.get(att), value)
+            || (qe(value, 0) && !connection.get(att))
+        );
+      },
     )
   );
 
@@ -759,20 +842,24 @@ const checkAttribute = (typeId, att, attributes, isManager) => {
       return false;
     }
     if (attributes[att].optional) {
-      return attributes[att].optional.indexOf(typeId.toString()) > -1;
+      return Array.isArray(attributes[att].optional)
+        ? attributes[att].optional.indexOf(typeId.toString()) > -1
+        : attributes[att].optional;
     }
     if (attributes[att].required) {
-      return attributes[att].required.indexOf(typeId.toString()) > -1;
+      return Array.isArray(attributes[att].required)
+        ? attributes[att].required.indexOf(typeId.toString()) > -1
+        : attributes[att].required;
     }
   } else if (!typeId && attributes && attributes[att]) {
     if (attributes[att].hideAnalyst && !isManager) {
       return false;
     }
     if (attributes[att].optional) {
-      return attributes[att].optional.indexOf(typeId.toString()) > -1;
+      return !!attributes[att].optional;
     }
     if (attributes[att].required) {
-      return attributes[att].required.indexOf(typeId.toString()) > -1;
+      return !!attributes[att].required;
     }
   }
   return false;
@@ -907,7 +994,7 @@ export const setActionConnections = ({
     .set('targetsByType', entityTargetsByActortype)
     .set('resourcesByType', entityResourcesByResourcetype)
     .set('indicators', entityIndicators)
-    .set('indicatorAttributes', actionIndicatorAttributes && actionIndicatorAttributes.get(parseInt(action.get('id'), 10)))
+    .set('indicatorConnections', actionIndicatorAttributes && actionIndicatorAttributes.get(parseInt(action.get('id'), 10)))
     .set('users', entityUsers);
 };
 

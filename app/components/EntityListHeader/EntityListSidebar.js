@@ -17,7 +17,7 @@ import SupTitle from 'components/SupTitle';
 
 import Sidebar from 'components/styled/Sidebar';
 import SidebarHeader from 'components/styled/SidebarHeader';
-import MapMemberOption from 'containers/MapContainer/MapInfoOptions/MapMemberOption';
+import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
 import EntityListSidebarGroups from './EntityListSidebarGroups';
 
@@ -134,7 +134,7 @@ export class EntityListSidebar extends React.Component { // eslint-disable-line 
               </Box>
               {memberOption && (
                 <Box margin={{ top: 'small' }}>
-                  <MapMemberOption option={memberOption} />
+                  <MapOption option={memberOption} type="members" />
                 </Box>
               )}
             </SidebarHeader>

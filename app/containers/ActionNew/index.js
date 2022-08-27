@@ -59,6 +59,7 @@ import {
   selectReadyForAuthCheck,
   selectActiontypeTaxonomiesWithCats,
   selectActiontype,
+  selectSessionUser,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -102,6 +103,10 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
     }
+    // repopulate if new data becomes ready
+    if (nextProps.dataReady && !this.props.dataReady && nextProps.sessionUser) {
+      this.props.initialiseForm('actionNew.form.data', this.getInitialFormData(nextProps));
+    }
     if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
     }
@@ -109,11 +114,20 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
-    const { params } = props;
-    return Map(FORM_INITIAL.setIn(
-      ['attributes', 'actortype_id'],
-      params.id
-    ));
+    const { params, sessionUser } = props;
+    const dataWithType = FORM_INITIAL.setIn(['attributes', 'measuretype_id'], params.id);
+    return sessionUser
+      && sessionUser.getIn(['attributes', 'id'])
+      ? dataWithType.set(
+        'associatedUsers',
+        fromJS([{
+          value: sessionUser.getIn(['attributes', 'id']).toString(),
+          checked: true,
+          label: sessionUser.getIn(['attributes', 'name']),
+          reference: sessionUser.getIn(['attributes', 'id']).toString(),
+        }])
+      )
+      : dataWithType;
   }
 
   getHeaderMainFields = (type) => {
@@ -296,7 +310,18 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
   ) => {
     const { intl } = this.context;
     const typeId = type.get('id');
-    const groups = [ // fieldGroups
+    const groups = [];
+    if (userOptions) {
+      groups.push(
+        {
+          label: intl.formatMessage(appMessages.nav.userActions),
+          fields: [
+            renderUserMultiControl(userOptions, null, intl),
+          ],
+        },
+      );
+    }
+    groups.push( // fieldGroups
       { // fieldGroup
         fields: [
           checkActionAttribute(typeId, 'url') && getLinkFormField(
@@ -306,6 +331,8 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
           ),
         ],
       },
+    );
+    groups.push(
       { // fieldGroup
         fields: [
           checkActionAttribute(typeId, 'date_start') && getDateField(
@@ -325,22 +352,14 @@ export class ActionNew extends React.PureComponent { // eslint-disable-line reac
           ),
         ],
       },
+    );
+    groups.push(
       { // fieldGroup
         label: intl.formatMessage(appMessages.entities.taxonomies.plural),
         icon: 'categories',
         fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
       },
-    ];
-    if (userOptions) {
-      groups.push(
-        {
-          label: intl.formatMessage(appMessages.nav.userActions),
-          fields: [
-            renderUserMultiControl(userOptions, null, intl),
-          ],
-        },
-      );
-    }
+    );
     if (topActionsByActiontype) {
       const actionConnections = renderActionsByActiontypeControl({
         entitiesByActiontype: topActionsByActiontype,
@@ -495,6 +514,7 @@ ActionNew.propTypes = {
   connectedTaxonomies: PropTypes.object,
   actiontype: PropTypes.instanceOf(Map),
   params: PropTypes.object,
+  // sessionUser: PropTypes.string,
 };
 
 ActionNew.contextTypes = {
@@ -521,6 +541,7 @@ const mapStateToProps = (state, { params }) => ({
   indicatorOptions: selectIndicatorOptions(state, params.id),
   userOptions: selectUserOptions(state, params.id),
   viewDomainPage: selectDomainPage(state),
+  sessionUser: selectSessionUser(state),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -621,12 +642,12 @@ function mapDispatchToProps(dispatch) {
       if (formData.get('associatedIndicators') && indicatorOptions) {
         saveData = saveData.set(
           'actionIndicators', // targets
-          Map({
-            delete: List(),
-            create: getCheckedValuesFromOptions(formData.get('associatedIndicators'))
-              .map((id) => Map({
-                indicator_id: id,
-              })),
+          getConnectionUpdatesFromFormData({
+            formData,
+            connections: indicatorOptions,
+            connectionAttribute: 'associatedIndicators',
+            createConnectionKey: 'indicator_id',
+            connectionAttributes: ['supportlevel_id'],
           })
         );
       }

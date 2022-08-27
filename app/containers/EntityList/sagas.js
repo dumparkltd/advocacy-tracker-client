@@ -26,6 +26,7 @@ export function* updateQuery({ value }) {
   const params = value.map((val) => ({
     arg: val.get('query'),
     value: val.get('value'),
+    prevValue: val.get('prevValue'),
     replace: val.get('replace'),
     add: val.get('checked'),
     remove: !val.get('checked'),

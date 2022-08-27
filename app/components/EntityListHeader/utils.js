@@ -1,9 +1,13 @@
 import asList from 'utils/as-list';
+import qe from 'utils/quasi-equals';
+
 import { STATES as CHECKBOX } from 'components/forms/IndeterminateCheckbox';
 
 export const optionChecked = (queryValue, value) => !!(
   queryValue
-  && asList(queryValue).includes(value.toString())
+  && asList(queryValue).some(
+    (qv) => qe(qv.split('>')[0], value.toString())
+  )
 );
 
 // attribute checked

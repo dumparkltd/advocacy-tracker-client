@@ -13,12 +13,8 @@ import appMessage from 'utils/app-message';
 import ContainerWithSidebar from 'components/styled/Container/ContainerWithSidebar';
 import MultiSelectControl from 'components/forms/MultiSelectControl';
 
-import {
-  FILTER_FORM_MODEL,
-} from './constants';
-import {
-  setFilter,
-} from './actions';
+import { FILTER_FORM_MODEL } from './constants';
+import { setFilter } from './actions';
 
 const Styled = styled(ContainerWithSidebar)`
   z-index: 101;

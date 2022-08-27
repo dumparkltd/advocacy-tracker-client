@@ -379,6 +379,8 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
         },
         {},
       );
+      // console.log(currentFilters);
+      // console.log(panelGroups);
       if (activeOption) {
         formOptions = makeActiveFilterOptions({
           entities,
@@ -526,7 +528,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     )}
                   </HeaderSectionType>
                 )}
-                <HeaderSection grow align="center" gap="medium" justify="end">
+                <HeaderSection grow align="center" gap="medium" justify="start">
                   {dataReady && isMinSize(size, 'large') && (
                     <EntityListSearch>
                       <TagList
