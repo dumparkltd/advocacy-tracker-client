@@ -337,7 +337,14 @@ function mapDispatchToProps(
           path: API.INDICATORS,
           entity: saveData.toJS(),
           redirect: !inModal ? ROUTES.INDICATOR : null,
-          onSuccess: inModal && onSaveSuccess,
+          onSuccess: inModal && onSaveSuccess
+            ? () => {
+              // cleanup
+              dispatch(submitInvalid(true));
+              dispatch(saveErrorDismiss());
+              onSaveSuccess();
+            }
+            : null,
         })
       );
     },

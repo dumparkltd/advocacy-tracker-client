@@ -222,7 +222,14 @@ function mapDispatchToProps(
           path: API.PAGES,
           entity: formData.toJS(),
           redirect: !inModal ? ROUTES.PAGES : null,
-          onSuccess: inModal && onSaveSuccess,
+          onSuccess: inModal && onSaveSuccess
+            ? () => {
+              // cleanup
+              dispatch(submitInvalid(true));
+              dispatch(saveErrorDismiss());
+              onSaveSuccess();
+            }
+            : null,
         })
       );
     },
