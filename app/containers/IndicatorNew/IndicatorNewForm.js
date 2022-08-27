@@ -220,7 +220,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={dataReady && { // isManager, taxonomies,
+          fields={{ // isManager, taxonomies,
             header: {
               main: this.getHeaderMainFields(),
               aside: this.getHeaderAsideFields(),

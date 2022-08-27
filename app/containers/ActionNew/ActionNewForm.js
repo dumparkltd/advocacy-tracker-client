@@ -447,7 +447,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={dataReady && {
+          fields={{
             header: {
               main: this.getHeaderMainFields(actiontype),
               aside: this.getHeaderAsideFields(),

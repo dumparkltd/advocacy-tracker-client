@@ -256,7 +256,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={dataReady && { // isManager, taxonomies,
+          fields={{ // isManager, taxonomies,
             header: {
               main: this.getHeaderMainFields(resourcetype),
               aside: this.getHeaderAsideFields(),

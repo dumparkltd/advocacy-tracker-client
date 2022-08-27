@@ -371,7 +371,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={dataReady && { // isManager, taxonomies,
+          fields={{ // isManager, taxonomies,
             header: {
               main: this.getHeaderMainFields(actortype),
               aside: this.getHeaderAsideFields(),

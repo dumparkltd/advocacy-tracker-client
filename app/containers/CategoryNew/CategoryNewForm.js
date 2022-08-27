@@ -221,7 +221,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={dataReady && { // isManager, taxonomies,
+          fields={{ // isManager, taxonomies,
             header: {
               main: this.getHeaderMainFields(),
               aside: this.getHeaderAsideFields(
