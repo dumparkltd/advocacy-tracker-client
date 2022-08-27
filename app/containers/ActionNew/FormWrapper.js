@@ -24,7 +24,14 @@ export function FormWrapper({
   scrollContainer,
   inModal,
 }) {
-  const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
+  const {
+    isAnySending,
+    saveSending,
+    saveError,
+    submitValid,
+  } = viewDomain.get('page').toJS();
+  const saving = isAnySending || saveSending;
+
   return (
     <div>
       {!submitValid && (
@@ -41,13 +48,13 @@ export function FormWrapper({
           onDismiss={onServerErrorDismiss}
         />
       )}
-      {(saveSending || !fields) && <Loading />}
+      {(saving || !fields) && <Loading />}
       {fields && (
         <EntityForm
           model={model}
           inModal={inModal}
           formData={viewDomain.getIn(['form', 'data'])}
-          saving={saveSending}
+          saving={saving}
           handleSubmit={handleSubmit}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
@@ -56,7 +63,7 @@ export function FormWrapper({
           scrollContainer={scrollContainer}
         />
       )}
-      {saveSending && <Loading />}
+      {saving && <Loading />}
     </div>
   );
 }

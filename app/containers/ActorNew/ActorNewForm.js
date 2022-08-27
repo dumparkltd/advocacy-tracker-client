@@ -331,7 +331,8 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       inModal,
     } = this.props;
 
-    const { saveSending } = viewDomain.get('page').toJS();
+    const { saveSending, isAnySending } = viewDomain.get('page').toJS();
+    const saving = isAnySending || saveSending;
 
     const type = intl.formatMessage(appMessages.entities[`actors_${typeId}`].single);
     return (
@@ -346,7 +347,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
             },
             {
               type: 'save',
-              disabled: saveSending,
+              disabled: saving,
               onClick: () => handleSubmitRemote(formDataPath),
             }] : null
           }

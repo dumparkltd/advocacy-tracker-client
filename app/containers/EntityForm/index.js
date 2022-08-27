@@ -126,6 +126,14 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     };
   }
 
+  // dont update when saving
+  shouldComponentUpdate(nextProps) {
+    if (this.props.saving || nextProps.saving) {
+      return false;
+    }
+    return true;
+  }
+
   getControlProps = (field) => {
     switch (field.controlType) {
       case 'select': // we will render select options as children, so don't pass options prop directly to the control

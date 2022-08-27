@@ -180,7 +180,8 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
       formDataPath,
       inModal,
     } = this.props;
-    const { saveSending } = viewDomain.get('page').toJS();
+    const { saveSending, isAnySending } = viewDomain.get('page').toJS();
+    const saving = isAnySending || saveSending;
 
     let pageTitle = intl.formatMessage(messages.pageTitle);
     if (taxonomy && taxonomy.get('attributes')) {
@@ -201,7 +202,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
             },
             {
               type: 'save',
-              disabled: saveSending,
+              disabled: saving,
               onClick: () => handleSubmitRemote(formDataPath),
             }] : null
           }

@@ -186,8 +186,8 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
       formDataPath,
       inModal,
     } = this.props;
-    const { saveSending } = viewDomain.get('page').toJS();
-
+    const { saveSending, isAnySending } = viewDomain.get('page').toJS();
+    const saving = isAnySending || saveSending;
     const type = intl.formatMessage(appMessages.entities.indicators.single);
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
@@ -201,7 +201,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
             },
             {
               type: 'save',
-              disabled: saveSending,
+              disabled: saving,
               onClick: () => handleSubmitRemote(formDataPath),
             }] : null
           }

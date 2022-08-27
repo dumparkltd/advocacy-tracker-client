@@ -406,7 +406,8 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       inModal,
     } = this.props;
 
-    const { saveSending } = viewDomain.get('page').toJS();
+    const { saveSending, isAnySending } = viewDomain.get('page').toJS();
+    const saving = isAnySending || saveSending;
     const type = intl.formatMessage(appMessages.entities[`actions_${typeId}`].single);
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
@@ -420,7 +421,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             },
             {
               type: 'save',
-              disabled: saveSending,
+              disabled: saving,
               onClick: () => handleSubmitRemote(formDataPath),
             }] : null
           }

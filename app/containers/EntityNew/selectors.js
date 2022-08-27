@@ -2,10 +2,13 @@ import { createSelector } from 'reselect';
 
 export const selectDomain = createSelector(
   (state) => state.get('entityNew'),
-  (substate) => substate
-);
-
-export const selectDomainPage = createSelector(
-  (state) => state.getIn(['entityNew', 'page']),
-  (substate) => substate
+  (substate) => substate.get('page')
+    && substate.getIn(['page', 'saveSendingAll'])
+    ? substate.setIn(
+      ['page', 'isAnySending'],
+      substate.getIn(['page', 'saveSendingAll']).some(
+        (value) => value,
+      )
+    )
+    : substate
 );

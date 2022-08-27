@@ -220,8 +220,8 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
       formDataPath,
       inModal,
     } = this.props;
-    const { saveSending } = viewDomain.get('page').toJS();
-
+    const { saveSending, isAnySending } = viewDomain.get('page').toJS();
+    const saving = isAnySending || saveSending;
     const type = intl.formatMessage(appMessages.entities[`resources_${typeId}`].single);
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
@@ -235,7 +235,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
             },
             {
               type: 'save',
-              disabled: saveSending,
+              disabled: saving,
               onClick: () => handleSubmitRemote(formDataPath),
             }] : null
           }
