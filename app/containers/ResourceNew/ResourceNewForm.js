@@ -94,9 +94,8 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
     ));
   }
 
-  getHeaderMainFields = (type) => {
+  getHeaderMainFields = (typeId) => {
     const { intl } = this.context;
-    const typeId = type.get('id');
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
@@ -129,13 +128,12 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
   }
 
   getBodyMainFields = (
-    type,
+    typeId,
     connectedTaxonomies,
     actionsByActiontype,
     onCreateOption,
   ) => {
     const { intl } = this.context;
-    const typeId = type.get('id');
     const groups = [];
     groups.push({ // fieldGroup
       fields: [
@@ -179,9 +177,8 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
     return groups;
   }
 
-  getBodyAsideFields = (type) => {
+  getBodyAsideFields = (typeId) => {
     const { intl } = this.context;
-    const typeId = type.get('id');
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
@@ -258,18 +255,18 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
           scrollContainer={this.scrollContainer.current}
           fields={{ // isManager, taxonomies,
             header: {
-              main: this.getHeaderMainFields(resourcetype),
+              main: this.getHeaderMainFields(typeId),
               aside: this.getHeaderAsideFields(),
             },
             body: {
               main: this.getBodyMainFields(
-                resourcetype,
+                typeId,
                 connectedTaxonomies,
                 actionsByActiontype,
                 inModal ? null : onCreateOption,
               ),
               aside: this.getBodyAsideFields(
-                resourcetype,
+                typeId,
               ),
             },
           }}

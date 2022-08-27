@@ -122,9 +122,8 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       : dataWithType;
   }
 
-  getHeaderMainFields = (type) => {
+  getHeaderMainFields = (typeId) => {
     const { intl } = this.context;
-    const typeId = type.get('id');
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
@@ -169,7 +168,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
   }
 
   getBodyMainFields = (
-    type,
+    typeId,
     connectedTaxonomies,
     actionsByActiontype,
     actionsAsTargetByActiontype,
@@ -177,7 +176,6 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
     onCreateOption,
   ) => {
     const { intl } = this.context;
-    const typeId = type.get('id');
     const groups = [];
     groups.push({
       fields: [
@@ -245,7 +243,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
   }
 
   getBodyAsideFields = (
-    type,
+    typeId,
     taxonomies,
     connectedTaxonomies,
     associationsByActortype,
@@ -253,7 +251,6 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
     onCreateOption,
   ) => {
     const { intl } = this.context;
-    const typeId = type.get('id');
     const groups = []; // fieldGroups
     if (userOptions) {
       groups.push(
@@ -373,12 +370,12 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
           scrollContainer={this.scrollContainer.current}
           fields={{ // isManager, taxonomies,
             header: {
-              main: this.getHeaderMainFields(actortype),
+              main: this.getHeaderMainFields(typeId),
               aside: this.getHeaderAsideFields(),
             },
             body: {
               main: this.getBodyMainFields(
-                actortype,
+                typeId,
                 connectedTaxonomies,
                 actionsByActiontype,
                 actionsAsTargetByActiontype,
@@ -386,7 +383,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
                 inModal ? null : onCreateOption,
               ),
               aside: this.getBodyAsideFields(
-                actortype,
+                typeId,
                 taxonomies,
                 connectedTaxonomies,
                 associationsByActortype,

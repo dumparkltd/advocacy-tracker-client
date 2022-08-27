@@ -110,7 +110,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
         getStatusField(intl.formatMessage, 'private'),
       ],
     });
-    if (taxonomy.getIn(['attributes', 'tags_users'])) {
+    if (taxonomy && taxonomy.getIn(['attributes', 'tags_users'])) {
       groups.push({
         fields: [
           getCheckboxField(

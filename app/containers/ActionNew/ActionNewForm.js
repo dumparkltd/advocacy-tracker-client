@@ -128,9 +128,8 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       : dataWithType;
   }
 
-  getHeaderMainFields = (type) => {
+  getHeaderMainFields = (typeId) => {
     const { intl } = this.context;
-    const typeId = type.get('id');
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
@@ -163,7 +162,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
   }
 
   getBodyMainFields = (
-    type,
+    typeId,
     connectedTaxonomies,
     actorsByActortype,
     targetsByActortype,
@@ -173,7 +172,8 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     onCreateOption,
   ) => {
     const { intl } = this.context;
-    const typeId = type.get('id');
+    // if (!type) return [];
+    // const typeId = type.get('id');
     const groups = [];
     groups.push(
       {
@@ -299,7 +299,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
   };
 
   getBodyAsideFields = (
-    type,
+    typeId,
     taxonomies,
     connectedTaxonomies,
     topActionsByActiontype,
@@ -307,7 +307,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     onCreateOption,
   ) => {
     const { intl } = this.context;
-    const typeId = type.get('id');
+    // const typeId = type.get('id');
     const groups = [];
     if (userOptions) {
       groups.push(
@@ -449,12 +449,12 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           scrollContainer={this.scrollContainer.current}
           fields={{
             header: {
-              main: this.getHeaderMainFields(actiontype),
+              main: this.getHeaderMainFields(typeId),
               aside: this.getHeaderAsideFields(),
             },
             body: {
               main: this.getBodyMainFields(
-                actiontype,
+                typeId,
                 connectedTaxonomies,
                 actorsByActortype,
                 targetsByActortype,
@@ -464,7 +464,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
                 inModal ? null : onCreateOption,
               ),
               aside: this.getBodyAsideFields(
-                actiontype,
+                typeId,
                 taxonomies,
                 connectedTaxonomies,
                 topActionsByActiontype,
