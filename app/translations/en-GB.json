@@ -124,7 +124,7 @@
   "app.components.MultiSelectControl.empty": "No options currently available",
   "app.components.MultiSelectControl.showingOptions": "Showing {no} of {total} options. ",
   "app.components.MultiSelectControl.showMore": "Show more",
-  "app.components.MultiSelectControl.changeHint": "Your changes:",
+  "app.components.MultiSelectControl.changeHint": " ",
   "app.components.MultiSelectControl.changeHintSelected": " {no} selected",
   "app.components.MultiSelectControl.changeHintUnselected": " {no} unselected",
   "app.components.MultiSelectField.empty": "No {entities} present. ",

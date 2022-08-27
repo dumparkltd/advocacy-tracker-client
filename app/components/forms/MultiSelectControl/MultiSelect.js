@@ -5,7 +5,7 @@ import { filter, find } from 'lodash/collection';
 import { Map, List, fromJS } from 'immutable';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import { Box } from 'grommet';
 
 import ButtonFactory from 'components/buttons/ButtonFactory';
@@ -41,7 +41,7 @@ const ChangeHint = styled.div`
   box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2);
   text-align: right;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    bottom: ${(props) => props.hasFooter ? '50px' : '0px'};
+    bottom: ${(props) => props.hasFooter ? '59px' : '0px'};
   }
 `;
 
@@ -52,12 +52,12 @@ const ChangeHintHighlighted = styled.span`
 const ControlMain = styled.div`
   position: absolute;
   top: 40px;
-  bottom: ${(props) => props.hasFooter ? '50px' : '0px'};
+  bottom: ${(props) => props.hasFooter ? '59px' : '0px'};
   left: 0;
   right: 0;
   overflow-y: auto;
   padding:0;
-  padding-bottom: ${(props) => props.hasChangeNote ? '50px' : '0px'};
+  padding-bottom: ${(props) => props.hasChangeNote ? '59px' : '0px'};
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     top: 60px;
   }
@@ -420,7 +420,9 @@ class MultiSelect extends React.Component {
         </ControlMain>
         {showChangeHint && (
           <ChangeHint hasFooter={this.props.buttons}>
-            <FormattedMessage {...messages.changeHint} />
+            {messages.changeHint && this.props.intl.formatMessage(messages.changeHint).trim() !== '' && (
+              <FormattedMessage {...messages.changeHint} />
+            )}
             {optionsChangedToChecked.size > 0 && (
               <ChangeHintHighlighted>
                 <FormattedMessage {...messages.changeHintSelected} values={{ no: optionsChangedToChecked.size }} />
@@ -477,6 +479,7 @@ MultiSelect.propTypes = {
   fixedOrder: PropTypes.bool,
   panelId: PropTypes.string,
   tagFilterGroups: PropTypes.array,
+  intl: intlShape.isRequired,
 };
 
 MultiSelect.defaultProps = {
@@ -490,4 +493,4 @@ MultiSelect.defaultProps = {
   closeOnClickOutside: true,
 };
 
-export default MultiSelect;
+export default injectIntl(MultiSelect);
