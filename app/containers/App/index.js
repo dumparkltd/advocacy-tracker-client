@@ -13,7 +13,7 @@ import GlobalStyle from 'global-styles';
 
 import styled from 'styled-components';
 import Header from 'components/Header';
-import EntityNew from 'containers/EntityNew/indexNew';
+import EntityNew from 'containers/EntityNew';
 
 import { sortEntities } from 'utils/sort';
 import { ROUTES, API } from 'themes/config';
