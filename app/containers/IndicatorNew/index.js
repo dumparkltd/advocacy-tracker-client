@@ -10,7 +10,6 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { intlShape, injectIntl } from 'react-intl';
 
-import appMessages from 'containers/App/messages';
 import messages from './messages';
 
 import IndicatorNewForm from './IndicatorNewForm';
@@ -20,11 +19,10 @@ export function IndicatorNew({
   viewDomain,
   intl,
 }) {
-  const type = intl.formatMessage(appMessages.entities.indicators.single);
   return (
     <div>
       <Helmet
-        title={`${intl.formatMessage(messages.pageTitle, { type })}`}
+        title={`${intl.formatMessage(messages.pageTitle)}`}
         meta={[
           {
             name: 'description',
