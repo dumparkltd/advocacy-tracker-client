@@ -33,6 +33,8 @@ import {
   loadEntitiesIfNeeded,
   updatePath,
   openNewEntityModal,
+  submitInvalid,
+  saveErrorDismiss,
 } from './actions';
 
 import { DEPENDENCIES } from './constants';
@@ -260,6 +262,9 @@ export function mapDispatchToProps(dispatch) {
       dispatch(updatePath(path, args));
     },
     onCloseModal: () => {
+      // cleanup
+      dispatch(submitInvalid(true));
+      dispatch(saveErrorDismiss());
       dispatch(openNewEntityModal(null));
     },
   };
