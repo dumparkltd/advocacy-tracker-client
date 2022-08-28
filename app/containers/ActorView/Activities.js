@@ -341,6 +341,7 @@ export function Activities(props) {
                   attributes: {
                     measuretype_id: activeActiontypeId,
                   },
+                  autoUser: true,
                   connect: {
                     type: viewSubject === 'actors' ? 'actorActions' : 'actionActors',
                     create: [{

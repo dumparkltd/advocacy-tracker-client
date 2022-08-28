@@ -424,13 +424,14 @@ ActorNewForm.propTypes = {
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
   inModal: PropTypes.bool,
+  // autoUser: PropTypes.bool,
 };
 
 ActorNewForm.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = (state, { typeId }) => ({
+const mapStateToProps = (state, { typeId, autoUser }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   taxonomies: selectActortypeTaxonomiesWithCats(
@@ -447,7 +448,7 @@ const mapStateToProps = (state, { typeId }) => ({
   membersByActortype: selectMembersByActortype(state, typeId),
   associationsByActortype: selectAssociationsByActortype(state, typeId),
   userOptions: selectUserOptions(state, typeId),
-  sessionUser: selectSessionUser(state),
+  sessionUser: autoUser && selectSessionUser(state),
 });
 
 function mapDispatchToProps(

@@ -38,6 +38,7 @@ export function ActorNew({
         typeId={typeId}
         viewDomain={viewDomain}
         formDataPath="actorNew.form.data"
+        autoUser
       />
     </div>
   );

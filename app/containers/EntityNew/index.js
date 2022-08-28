@@ -24,6 +24,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
     const {
       path,
       attributes,
+      autoUser,
       connect,
       viewDomain,
       onSaveSuccess,
@@ -41,6 +42,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           onCancel={onCancel}
           formDataPath="entityNew.form.data"
           typeId={attributes.get('measuretype_id')}
+          autoUser={autoUser}
         />
       );
     }
@@ -55,6 +57,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           onCancel={onCancel}
           formDataPath="entityNew.form.data"
           typeId={attributes.get('actortype_id')}
+          autoUser={autoUser}
         />
       );
     }
@@ -97,6 +100,7 @@ EntityNew.propTypes = {
   viewDomain: PropTypes.object,
   onSaveSuccess: PropTypes.func,
   onCancel: PropTypes.func,
+  autoUser: PropTypes.bool,
 };
 
 const mapStateToProps = (state) => ({

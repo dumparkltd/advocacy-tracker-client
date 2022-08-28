@@ -113,14 +113,10 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
-    const {
-      typeId, sessionUser, inModal, modalConnect,
-    } = props;
+    const { typeId, sessionUser } = props;
     const dataWithType = FORM_INITIAL.setIn(['attributes', 'measuretype_id'], typeId);
-    // do not connect with session user wehen connecting other "background" user
     return sessionUser
       && sessionUser.getIn(['attributes', 'id'])
-      && !(inModal && modalConnect.get('type') === 'userActions')
       ? dataWithType.set(
         'associatedUsers',
         fromJS([{
@@ -556,13 +552,14 @@ ActionNewForm.propTypes = {
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
   inModal: PropTypes.bool,
+  // autoUser: PropTypes.bool,
 };
 
 ActionNewForm.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = (state, { typeId }) => ({
+const mapStateToProps = (state, { typeId, autoUser }) => ({
   authReady: selectReadyForAuthCheck(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   taxonomies: selectActiontypeTaxonomiesWithCats(
@@ -581,7 +578,7 @@ const mapStateToProps = (state, { typeId }) => ({
   subActionsByActiontype: selectSubActionsByActiontype(state, typeId),
   indicatorOptions: selectIndicatorOptions(state, typeId),
   userOptions: selectUserOptions(state, typeId),
-  sessionUser: selectSessionUser(state),
+  sessionUser: autoUser && selectSessionUser(state),
 });
 
 function mapDispatchToProps(

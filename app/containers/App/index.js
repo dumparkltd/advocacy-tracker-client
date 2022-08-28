@@ -207,6 +207,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
               path={newEntityModal.get('path')}
               attributes={newEntityModal.get('attributes')}
               connect={newEntityModal.get('connect')}
+              autoUser={newEntityModal.get('autoUser')}
               onSaveSuccess={this.props.onCloseModal}
               onCancel={this.props.onCloseModal}
               inModal

@@ -128,6 +128,7 @@ export function Activities(props) {
                   attributes: {
                     measuretype_id: viewActiontypeId,
                   },
+                  autoUser: true,
                   connect: {
                     type: 'subActions',
                     create: [{
