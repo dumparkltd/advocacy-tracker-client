@@ -6,8 +6,6 @@
 import { fromJS } from 'immutable';
 import { API, RESOURCE_FIELDS } from 'themes/config';
 
-export const SAVE = 'impactoss/ActorNew/SAVE';
-
 export const DEPENDENCIES = [
   API.USER_ROLES,
   API.CATEGORIES,

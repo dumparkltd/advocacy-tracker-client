@@ -126,6 +126,14 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     };
   }
 
+  // dont update when saving
+  shouldComponentUpdate(nextProps) {
+    if (this.props.saving || nextProps.saving) {
+      return false;
+    }
+    return true;
+  }
+
   getControlProps = (field) => {
     switch (field.controlType) {
       case 'select': // we will render select options as children, so don't pass options prop directly to the control
@@ -151,12 +159,12 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
 
   handleSubmit = (formData) => !this.props.saving && this.props.handleSubmit(formData);
 
-  renderMultiSelect = (field, formData, hasEntityNewModal, scrollContainer) => (
+  renderMultiSelect = (field, formData, closeMultiselectOnClickOutside, scrollContainer) => (
     <MultiSelectField
       field={field}
       scrollContainer={scrollContainer}
       fieldData={formData.getIn(field.dataPath)}
-      closeOnClickOutside={!hasEntityNewModal}
+      closeOnClickOutside={closeMultiselectOnClickOutside}
       handleUpdate={(fieldData) => this.props.handleUpdate(formData.setIn(field.dataPath, fieldData))}
     />
   )
@@ -208,7 +216,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     </FieldWrap>
   );
 
-  renderFormField = (field, nested, hasEntityNewModal, scrollContainer) => {
+  renderFormField = (field, nested, closeMultiselectOnClickOutside, scrollContainer) => {
     // field.controlType === 'date' && console.log('field', field)
     let formField;
     if (!field.controlType) {
@@ -225,7 +233,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
           formField = this.renderMultiSelect(
             field,
             this.props.formData,
-            hasEntityNewModal,
+            closeMultiselectOnClickOutside,
             scrollContainer,
           );
           break;
@@ -254,7 +262,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     );
   }
 
-  renderGroup = (group, hasEntityNewModal, scrollContainer) => (
+  renderGroup = (group, closeMultiselectOnClickOutside, scrollContainer) => (
     <FieldGroupWrapper>
       { group.label
         && (
@@ -279,7 +287,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
               {this.renderFormField(
                 field,
                 false,
-                hasEntityNewModal,
+                closeMultiselectOnClickOutside,
                 scrollContainer,
               )}
               {
@@ -306,7 +314,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     fieldGroups,
     hasAside = true,
     bottom = false,
-    hasEntityNewModal = false,
+    closeMultiselectOnClickOutside = false,
     scrollContainer,
   ) => (
     <Main hasAside={hasAside} bottom={bottom}>
@@ -321,7 +329,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
             }
             return (
               <div key={i}>
-                {this.renderGroup(fieldGroup, hasEntityNewModal, scrollContainer)}
+                {this.renderGroup(fieldGroup, closeMultiselectOnClickOutside, scrollContainer)}
               </div>
             );
           }
@@ -333,7 +341,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
   renderAside = (
     fieldGroups,
     bottom = false,
-    hasEntityNewModal = false,
+    closeMultiselectOnClickOutside = false,
     scrollContainer,
   ) => (
     <Aside bottom={bottom}>
@@ -348,7 +356,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
             }
             return (
               <div key={i}>
-                {this.renderGroup(fieldGroup, hasEntityNewModal, scrollContainer)}
+                {this.renderGroup(fieldGroup, closeMultiselectOnClickOutside, scrollContainer)}
               </div>
             );
           }
@@ -365,10 +373,10 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       handleSubmitFail,
       inModal,
       validators,
-      newEntityModal,
+      newEntityModal, // is any new entity modal active
       scrollContainer,
     } = this.props;
-    const hasEntityNewModal = !!newEntityModal;
+    const closeMultiselectOnClickOutside = !newEntityModal || inModal;
     return (
       <FormWrapper withoutShadow={inModal} hasMarginBottom={!inModal}>
         <StyledForm
@@ -378,83 +386,78 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
           validators={validators}
         >
           <FormBody>
-            { fields.header && (
+            {fields.header && (
               <ViewPanel>
                 {fields.header.main && this.renderMain(
                   fields.header.main,
                   !!fields.header.aside,
                   false,
-                  hasEntityNewModal,
+                  closeMultiselectOnClickOutside,
                   scrollContainer,
                 )}
                 {fields.header.aside && this.renderAside(
                   fields.header.aside,
                   false,
-                  hasEntityNewModal,
+                  closeMultiselectOnClickOutside,
                   scrollContainer,
                 )}
               </ViewPanel>
             )}
-            { fields.body
-              && (
-                <ViewPanel>
-                  {fields.body.main && this.renderMain(
-                    fields.body.main,
-                    true,
-                    true,
-                    hasEntityNewModal,
-                    scrollContainer,
-                  )}
-                  {fields.body.aside && this.renderAside(
-                    fields.body.aside,
-                    true,
-                    hasEntityNewModal,
-                    scrollContainer,
-                  )}
-                </ViewPanel>
-              )
-            }
+            {fields.body && (
+              <ViewPanel>
+                {fields.body.main && this.renderMain(
+                  fields.body.main,
+                  true,
+                  true,
+                  closeMultiselectOnClickOutside,
+                  scrollContainer,
+                )}
+                {fields.body.aside && this.renderAside(
+                  fields.body.aside,
+                  true,
+                  closeMultiselectOnClickOutside,
+                  scrollContainer,
+                )}
+              </ViewPanel>
+            )}
           </FormBody>
           <FormFooter>
-            {this.props.handleDelete && !this.state.deleteConfirmed
-              && (
-                <DeleteWrapper>
-                  <ButtonPreDelete type="button" onClick={this.preDelete}>
-                    <Icon name="trash" sizes={{ mobile: '1.8em' }} />
-                  </ButtonPreDelete>
-                </DeleteWrapper>
-              )
-            }
-            {this.props.handleDelete && this.state.deleteConfirmed
-              && (
-                <FormFooterButtons left>
-                  <DeleteConfirmText>
-                    <FormattedMessage {...messages.confirmDeleteQuestion} />
-                  </DeleteConfirmText>
-                  <ButtonCancel
-                    type="button"
-                    onClick={() => this.preDelete(false)}
-                  >
-                    <FormattedMessage {...messages.buttons.cancelDelete} />
-                  </ButtonCancel>
-                  <ButtonDelete type="button" onClick={this.props.handleDelete}>
-                    <FormattedMessage {...messages.buttons.confirmDelete} />
-                  </ButtonDelete>
-                </FormFooterButtons>
-              )
-            }
-            {!this.state.deleteConfirmed
-              && (
-                <FormFooterButtons>
-                  <ButtonCancel type="button" onClick={handleCancel}>
-                    <FormattedMessage {...appMessages.buttons.cancel} />
-                  </ButtonCancel>
-                  <ButtonSubmit type="submit" disabled={this.props.saving}>
-                    <FormattedMessage {...appMessages.buttons.save} />
-                  </ButtonSubmit>
-                </FormFooterButtons>
-              )
-            }
+            {this.props.handleDelete && !this.state.deleteConfirmed && (
+              <DeleteWrapper>
+                <ButtonPreDelete type="button" onClick={this.preDelete}>
+                  <Icon name="trash" sizes={{ mobile: '1.8em' }} />
+                </ButtonPreDelete>
+              </DeleteWrapper>
+            )}
+            {this.props.handleDelete && this.state.deleteConfirmed && (
+              <FormFooterButtons left>
+                <DeleteConfirmText>
+                  <FormattedMessage {...messages.confirmDeleteQuestion} />
+                </DeleteConfirmText>
+                <ButtonCancel
+                  type="button"
+                  onClick={() => this.preDelete(false)}
+                >
+                  <FormattedMessage {...messages.buttons.cancelDelete} />
+                </ButtonCancel>
+                <ButtonDelete type="button" onClick={this.props.handleDelete}>
+                  <FormattedMessage {...messages.buttons.confirmDelete} />
+                </ButtonDelete>
+              </FormFooterButtons>
+            )}
+            {!this.state.deleteConfirmed && (
+              <FormFooterButtons>
+                <ButtonCancel
+                  type="button"
+                  onClick={handleCancel}
+                >
+                  <FormattedMessage {...appMessages.buttons.cancel} />
+                </ButtonCancel>
+                <ButtonSubmit type="submit" disabled={this.props.saving}>
+                  <FormattedMessage {...appMessages.buttons.save} />
+                </ButtonSubmit>
+              </FormFooterButtons>
+            )}
             <Clear />
           </FormFooter>
         </StyledForm>
