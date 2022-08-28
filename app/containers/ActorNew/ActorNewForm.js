@@ -330,7 +330,10 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
 
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
-
+    const isPristine = viewDomain.get('form')
+      && viewDomain.getIn(['form', 'forms'])
+      && viewDomain.getIn(['form', 'forms', '$form'])
+      && viewDomain.getIn(['form', 'forms', '$form', 'pristine']);
     const type = intl.formatMessage(appMessages.entities[`actors_${typeId}`].single);
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
@@ -344,7 +347,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
             },
             {
               type: 'save',
-              disabled: saving,
+              disabled: saving || isPristine,
               onClick: () => handleSubmitRemote(formDataPath),
             }] : null
           }

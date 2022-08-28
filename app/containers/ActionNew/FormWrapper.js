@@ -54,6 +54,7 @@ export function FormWrapper({
           model={model}
           inModal={inModal}
           formData={viewDomain.getIn(['form', 'data'])}
+          formState={viewDomain.getIn(['form', 'forms', '$form'])}
           saving={saving}
           handleSubmit={handleSubmit}
           handleSubmitFail={handleSubmitFail}

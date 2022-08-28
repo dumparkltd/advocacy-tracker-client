@@ -157,8 +157,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     this.setState({ deleteConfirmed: confirm });
   }
 
-  handleSubmit = (formData) => !this.props.saving && this.props.handleSubmit(formData);
-
   renderMultiSelect = (field, formData, closeMultiselectOnClickOutside, scrollContainer) => (
     <MultiSelectField
       field={field}
@@ -370,18 +368,30 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       fields,
       model,
       handleCancel,
+      handleSubmit,
       handleSubmitFail,
       inModal,
       validators,
       newEntityModal, // is any new entity modal active
       scrollContainer,
+      saving,
+      formState,
     } = this.props;
     const closeMultiselectOnClickOutside = !newEntityModal || inModal;
+    const saveActive = !saving
+      && formState
+      && formState.valid
+      && !formState.pristine;
     return (
       <FormWrapper withoutShadow={inModal} hasMarginBottom={!inModal}>
         <StyledForm
           model={model}
-          onSubmit={this.handleSubmit}
+          onSubmit={(d) => {
+            console.log('submit', d && d.toJS());
+            if (saveActive) {
+              handleSubmit(d);
+            }
+          }}
           onSubmitFailed={handleSubmitFail}
           validators={validators}
         >
@@ -453,7 +463,10 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                 >
                   <FormattedMessage {...appMessages.buttons.cancel} />
                 </ButtonCancel>
-                <ButtonSubmit type="submit" disabled={this.props.saving}>
+                <ButtonSubmit
+                  type="submit"
+                  disabled={!saveActive}
+                >
                   <FormattedMessage {...appMessages.buttons.save} />
                 </ButtonSubmit>
               </FormFooterButtons>
@@ -481,6 +494,7 @@ EntityForm.propTypes = {
   formData: PropTypes.object,
   inModal: PropTypes.bool,
   saving: PropTypes.bool,
+  formState: PropTypes.object,
   newEntityModal: PropTypes.object,
   validators: PropTypes.object,
   scrollContainer: PropTypes.object,

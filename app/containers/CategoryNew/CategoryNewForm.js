@@ -182,7 +182,10 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
-
+    const isPristine = viewDomain.get('form')
+      && viewDomain.getIn(['form', 'forms'])
+      && viewDomain.getIn(['form', 'forms', '$form'])
+      && viewDomain.getIn(['form', 'forms', '$form', 'pristine']);
     let pageTitle = intl.formatMessage(messages.pageTitle);
     if (taxonomy && taxonomy.get('attributes')) {
       pageTitle = intl.formatMessage(messages.pageTitleTaxonomy, {
@@ -202,7 +205,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
             },
             {
               type: 'save',
-              disabled: saving,
+              disabled: saving || isPristine,
               onClick: () => handleSubmitRemote(formDataPath),
             }] : null
           }

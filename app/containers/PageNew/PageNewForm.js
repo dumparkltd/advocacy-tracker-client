@@ -113,7 +113,10 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
       inModal,
     } = this.props;
     const { saveSending } = viewDomain.get('page').toJS();
-
+    const isPristine = viewDomain.get('form')
+      && viewDomain.getIn(['form', 'forms'])
+      && viewDomain.getIn(['form', 'forms', '$form'])
+      && viewDomain.getIn(['form', 'forms', '$form', 'pristine']);
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
         <ContentHeader
@@ -126,7 +129,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
             },
             {
               type: 'save',
-              disabled: saveSending,
+              disabled: saveSending || isPristine,
               onClick: () => handleSubmitRemote(formDataPath),
             }] : null
           }

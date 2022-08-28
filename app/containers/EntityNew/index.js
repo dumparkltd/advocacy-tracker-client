@@ -18,6 +18,7 @@ import {
 } from 'themes/config';
 
 import { selectDomain } from './selectors';
+import { resetForm } from './actions';
 
 export class EntityNew extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   render() {
@@ -28,6 +29,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
       viewDomain,
       onSaveSuccess,
       onCancel,
+      onResetForm,
     } = this.props;
     // console.log('path', path)
     // console.log('viewDomain', viewDomain.toJS())
@@ -41,7 +43,10 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           modalConnect={connect}
           viewDomain={viewDomain}
           onSaveSuccess={onSaveSuccess}
-          onCancel={onCancel}
+          onCancel={(arg) => {
+            onResetForm();
+            onCancel(arg);
+          }}
           formDataPath="entityNew.form.data"
           typeId={attributes.get('measuretype_id')}
         />
@@ -55,7 +60,10 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           modalConnect={connect}
           viewDomain={viewDomain}
           onSaveSuccess={onSaveSuccess}
-          onCancel={onCancel}
+          onCancel={(arg) => {
+            onResetForm();
+            onCancel(arg);
+          }}
           formDataPath="entityNew.form.data"
           typeId={attributes.get('actortype_id')}
         />
@@ -69,7 +77,10 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           modalConnect={connect}
           viewDomain={viewDomain}
           onSaveSuccess={onSaveSuccess}
-          onCancel={onCancel}
+          onCancel={(arg) => {
+            onResetForm();
+            onCancel(arg);
+          }}
           formDataPath="entityNew.form.data"
           typeId={attributes.get('taxonomy_id')}
         />
@@ -83,7 +94,10 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           modalConnect={connect}
           viewDomain={viewDomain}
           onSaveSuccess={onSaveSuccess}
-          onCancel={onCancel}
+          onCancel={(arg) => {
+            onResetForm();
+            onCancel(arg);
+          }}
           formDataPath="entityNew.form.data"
           typeId={attributes.get('resourcetype_id')}
         />
@@ -100,11 +114,20 @@ EntityNew.propTypes = {
   viewDomain: PropTypes.object,
   onSaveSuccess: PropTypes.func,
   onCancel: PropTypes.func,
+  onResetForm: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({
   viewDomain: selectDomain(state),
 });
 
-
-export default reduxConnect(mapStateToProps, null)(EntityNew);
+function mapDispatchToProps(
+  dispatch,
+) {
+  return {
+    onResetForm: () => {
+      dispatch(resetForm());
+    },
+  };
+}
+export default reduxConnect(mapStateToProps, mapDispatchToProps)(EntityNew);

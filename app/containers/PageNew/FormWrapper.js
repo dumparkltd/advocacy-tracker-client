@@ -25,6 +25,10 @@ export function FormWrapper({
   inModal,
 }) {
   const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
+  const isPristine = viewDomain.get('form')
+    && viewDomain.getIn(['form', 'forms'])
+    && viewDomain.getIn(['form', 'forms', '$form'])
+    && viewDomain.getIn(['form', 'forms', '$form', 'pristine']);
   return (
     <div>
       {!submitValid && (
@@ -48,6 +52,7 @@ export function FormWrapper({
           inModal={inModal}
           formData={viewDomain.getIn(['form', 'data'])}
           saving={saveSending}
+          isPristine={isPristine}
           handleSubmit={handleSubmit}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}

@@ -408,6 +408,14 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
 
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
+    // console.log('viewDomain', viewDomain && viewDomain.toJS())
+    const formState = viewDomain.get('form')
+      && viewDomain.getIn(['form', 'forms'])
+      && viewDomain.getIn(['form', 'forms', '$form']);
+    const saveActive = !saving
+      && formState
+      && formState.valid
+      && !formState.pristine;
     const type = intl.formatMessage(appMessages.entities[`actions_${typeId}`].single);
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
@@ -421,7 +429,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             },
             {
               type: 'save',
-              disabled: saving,
+              disabled: !saveActive,
               onClick: () => handleSubmitRemote(formDataPath),
             }] : null
           }
