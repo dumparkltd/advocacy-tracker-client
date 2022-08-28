@@ -356,6 +356,7 @@ export const selectActionsAsMemberByActortype = createSelector(
   selectActions,
   selectActionIndicatorsGroupedByAction,
   selectActionIndicatorsGroupedByActionAttributes,
+  selectUserActionsGroupedByAction,
   (
     ready,
     associations,
@@ -370,6 +371,7 @@ export const selectActionsAsMemberByActortype = createSelector(
     actions,
     actionIndicators,
     actionIndicatorsByActionAttributes,
+    userActions,
   ) => {
     if (!ready || !associations) return Map();
     return associations.map(
@@ -391,6 +393,7 @@ export const selectActionsAsMemberByActortype = createSelector(
               actionResources,
               actionIndicators,
               actionIndicatorAttributes: actionIndicatorsByActionAttributes,
+              users: userActions,
             })
           )
         )
@@ -419,6 +422,7 @@ export const selectActionsAsTargetAsMemberByActortype = createSelector(
   selectCategories,
   selectActionCategoriesGroupedByAction,
   selectActions,
+  selectUserActionsGroupedByAction,
   (
     ready,
     associations,
@@ -431,6 +435,7 @@ export const selectActionsAsTargetAsMemberByActortype = createSelector(
     categories,
     actionCategories,
     actions,
+    userActions,
   ) => {
     if (!ready || !associations) return Map();
     return associations.map(
@@ -450,6 +455,7 @@ export const selectActionsAsTargetAsMemberByActortype = createSelector(
               actorActions: actorActionsByAction,
               actionActors,
               actionResources,
+              users: userActions,
             })
           )
         )
