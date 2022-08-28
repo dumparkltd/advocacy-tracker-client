@@ -506,6 +506,13 @@ theme.global = {
     xxlarge: '100px',
   },
 };
+// also grommet but not global somehow
+theme.accordion = {
+  border: {
+    style: 'hidden',
+    color: 'transparent',
+  },
+};
 theme.layer = {
   zIndex: 201,
   overlay: {

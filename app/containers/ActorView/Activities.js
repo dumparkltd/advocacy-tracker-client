@@ -12,52 +12,23 @@ import { List, Map } from 'immutable';
 import styled from 'styled-components';
 
 import qe from 'utils/quasi-equals';
-import { getActionConnectionField } from 'utils/fields';
-import { lowerCase } from 'utils/string';
 
 import {
   ACTIONTYPES_CONFIG,
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
-  API,
   MEMBERSHIPS,
 } from 'themes/config';
-import FieldGroup from 'components/fields/FieldGroup';
 import ButtonPill from 'components/buttons/ButtonPill';
 
 import appMessages from 'containers/App/messages';
+import ActivitiesByType from './ActivitiesByType';
 
-const SectionTitle = styled((p) => <Text size="medium" weight={500} {...p} />)``;
 const TypeSelectBox = styled((p) => <Box {...p} />)``;
 const TypeButton = styled((p) => <ButtonPill {...p} />)`
   margin-bottom: 5px;
 `;
-// max-width: ${({ listItems }) => 100 / listItems}%;
 
-const getActiontypeColumns = (typeid, viewSubject) => {
-  if (
-    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    return ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-      (col) => {
-        if (typeof col.showOnSingle !== 'undefined') {
-          if (viewSubject && Array.isArray(col.showOnSingle)) {
-            return col.showOnSingle.indexOf(viewSubject) > -1;
-          }
-          return col.showOnSingle;
-        }
-        return true;
-      }
-    );
-  }
-  return [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: ['title'],
-  }];
-};
 
 export function Activities(props) {
   const {
@@ -235,92 +206,19 @@ export function Activities(props) {
           )}
         </TypeSelectBox>
       )}
-      <Box>
-        <FieldGroup
-          group={{
-            title: viewSubject === 'actors' ? `Own ${lowerCase(typeLabel)}` : 'Explicitly targeted',
-            fields: [
-              getActionConnectionField({
-                actions: activeActiontypeActions,
-                taxonomies,
-                onEntityClick,
-                connections: actionConnections,
-                typeid: activeActiontypeId,
-                columns: getActiontypeColumns(activeActiontypeId, viewSubject),
-                onCreateOption: () => onCreateOption({
-                  path: API.ACTIONS,
-                  attributes: {
-                    measuretype_id: activeActiontypeId,
-                  },
-                  autoUser: true,
-                  connect: {
-                    type: viewSubject === 'actors' ? 'actorActions' : 'actionActors',
-                    create: [{
-                      actor_id: viewEntity.get('id'),
-                    }],
-                  },
-                }),
-              }),
-            ],
-          }}
-        />
-      </Box>
-      {canBeMember
-        && actiontypesAsMemberForSubject
-        && actiontypesAsMemberForSubject.entrySeq().map(
-          ([actortypeId, typeActors]) => {
-            let typeActorsForActiveType;
-            if (viewSubject === 'actors') {
-              typeActorsForActiveType = typeActors.filter(
-                (actor) => actor.get('actionsByType')
-                && actor.getIn(['actionsByType', activeActiontypeId])
-                && actor.getIn(['actionsByType', activeActiontypeId]).size > 0
-              );
-            } else if (viewSubject === 'targets') {
-              typeActorsForActiveType = typeActors.filter(
-                (actor) => actor.get('targetingActionsByType')
-                && actor.getIn(['targetingActionsByType', activeActiontypeId])
-                && actor.getIn(['targetingActionsByType', activeActiontypeId]).size > 0
-              );
-            }
-            if (!typeActorsForActiveType || typeActorsForActiveType.size === 0) {
-              return null;
-            }
-            return (
-              <Box key={actortypeId}>
-                <Box margin={{ horizontal: 'medium', top: 'large' }}>
-                  <SectionTitle>
-                    {viewSubject === 'actors' ? 'Activities through memberships' : 'Indirectly targeted'}
-                  </SectionTitle>
-                </Box>
-                {typeActorsForActiveType.entrySeq().map(([actorId, actor]) => {
-                  const actortypeLabel = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].singleShort);
-                  const prefix = viewSubject === 'actors' ? 'As member of ' : 'Targeted as member of ';
-                  return (
-                    <Box key={actorId}>
-                      <FieldGroup
-                        group={{
-                          title: `${prefix} ${actortypeLabel}: "${actor.getIn(['attributes', 'title'])}"`,
-                          fields: [
-                            getActionConnectionField({
-                              actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),
-                              taxonomies,
-                              onEntityClick,
-                              connections: actionConnections,
-                              typeid: activeActiontypeId,
-                              columns: getActiontypeColumns(activeActiontypeId, viewSubject),
-                            }),
-                          ],
-                        }}
-                      />
-                    </Box>
-                  );
-                })}
-              </Box>
-            );
-          }
-        )
-      }
+      <ActivitiesByType
+        viewEntity={viewEntity}
+        viewSubject={viewSubject}
+        taxonomies={taxonomies}
+        actionConnections={actionConnections}
+        canBeMember={canBeMember}
+        activeActiontypeId={activeActiontypeId}
+        activeActiontypeActions={activeActiontypeActions}
+        typeLabel={typeLabel}
+        actiontypesAsMemberForSubject={actiontypesAsMemberForSubject}
+        onEntityClick={onEntityClick}
+        onCreateOption={onCreateOption}
+      />
     </Box>
   );
 }

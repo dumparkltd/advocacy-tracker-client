@@ -9,8 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
-import { Box, Text, Button } from 'grommet';
-import styled from 'styled-components';
+import { Box, Text } from 'grommet';
 
 import {
   getTitleField,
@@ -57,6 +56,8 @@ import ViewWrapper from 'components/EntityView/ViewWrapper';
 import ViewPanel from 'components/EntityView/ViewPanel';
 import ViewPanelInside from 'components/EntityView/ViewPanelInside';
 import FieldGroup from 'components/fields/FieldGroup';
+import SubjectButton from 'components/styled/SubjectButton';
+import SubjectButtonGroup from 'components/styled/SubjectButtonGroup';
 
 import appMessages from 'containers/App/messages';
 import CountryMap from './CountryMap';
@@ -71,12 +72,6 @@ import {
 
 import { DEPENDENCIES } from './constants';
 
-const SubjectButton = styled((p) => <Button plain {...p} />)`
-  padding: 2px 4px;
-  border-bottom: 2px solid;
-  border-bottom-color: ${({ active }) => active ? 'brand' : 'transparent'};
-  background: none;
-`;
 export class IndicatorView extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
     this.props.loadEntitiesIfNeeded();
@@ -228,7 +223,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                       />
                     </Box>
                     <Box margin={{ vertical: 'large' }}>
-                      <Box direction="row" gap="small" margin={{ horizontal: 'medium' }}>
+                      <SubjectButtonGroup margin={{ horizontal: 'medium' }}>
                         <SubjectButton
                           onClick={() => onSetSubject('statements')}
                           active={viewSubject === 'statements'}
@@ -241,7 +236,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                         >
                           <Text size="large">Countries & other actors</Text>
                         </SubjectButton>
-                      </Box>
+                      </SubjectButtonGroup>
                       {viewSubject === 'statements' && (
                         <Statements
                           viewEntity={viewEntity}

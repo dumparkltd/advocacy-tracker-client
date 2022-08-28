@@ -9,8 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
-import { Box, Text, Button } from 'grommet';
-import styled from 'styled-components';
+import { Box, Text } from 'grommet';
 
 import {
   getTitleField,
@@ -44,6 +43,8 @@ import ViewWrapper from 'components/EntityView/ViewWrapper';
 import ViewPanel from 'components/EntityView/ViewPanel';
 import ViewPanelInside from 'components/EntityView/ViewPanelInside';
 import FieldGroup from 'components/fields/FieldGroup';
+import SubjectButton from 'components/styled/SubjectButton';
+import SubjectButtonGroup from 'components/styled/SubjectButtonGroup';
 
 import {
   selectReady,
@@ -106,13 +107,6 @@ const getActortypeColumns = (typeid) => {
   }
   return columns;
 };
-
-const SubjectButton = styled((p) => <Button plain {...p} />)`
-  padding: 2px 4px;
-  border-bottom: 2px solid;
-  border-bottom-color: ${({ active }) => active ? 'brand' : 'transparent'};
-  background: none;
-`;
 
 const VALID_SUBJECTS = ['uactivities', 'uactors'];
 
@@ -242,7 +236,7 @@ export function UserView({
                 <Main hasAside bottom>
                   {isManager && (
                     <Box>
-                      <Box direction="row" gap="small" margin={{ vertical: 'small', horizontal: 'medium' }}>
+                      <SubjectButtonGroup>
                         <SubjectButton
                           onClick={() => onSetSubject('uactivities')}
                           active={viewSubject === 'uactivities'}
@@ -255,7 +249,7 @@ export function UserView({
                         >
                           <Text size="large">Actors</Text>
                         </SubjectButton>
-                      </Box>
+                      </SubjectButtonGroup>
                       {(viewSubject === 'uactivities') && (
                         <Activities
                           viewEntity={user}
