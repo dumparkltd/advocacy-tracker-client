@@ -43,7 +43,7 @@ const MapOptions = styled(
   (p) => <Box margin={{ horizontal: 'medium', top: 'medium' }} {...p} />
 )``;
 
-const getIndicatorColumns = (viewEntity, intl) => {
+const getIndicatorColumns = (viewEntity, canBeMember, intl) => {
   let columns = [
     {
       id: 'main',
@@ -66,10 +66,7 @@ const getIndicatorColumns = (viewEntity, intl) => {
       type: 'positionStatementAuthority',
     },
   ];
-  if (
-    MEMBERSHIPS[viewEntity.getIn(['attributes', 'actortype_id'])]
-    && MEMBERSHIPS[viewEntity.getIn(['attributes', 'actortype_id'])].length > 0
-  ) {
+  if (canBeMember) {
     columns = [
       ...columns,
       {
@@ -133,17 +130,22 @@ export function Statements(props) {
       appMessages.entities[`actors_${viewEntity.getIn(['attributes', 'actortype_id'])}`].single
     )
   );
+  const canBeMember = MEMBERSHIPS[viewEntity.getIn(['attributes', 'actortype_id'])]
+    && MEMBERSHIPS[viewEntity.getIn(['attributes', 'actortype_id'])].length > 0;
+
   return (
     <div>
       <MapOptions>
-        <MapOption
-          option={{
-            active: includeActorMembers,
-            onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-            label: `Include statements of actors ${type} is a member of`,
-          }}
-          type="member"
-        />
+        {canBeMember && (
+          <MapOption
+            option={{
+              active: includeActorMembers,
+              onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+              label: `Include statements of actors ${type} is a member of`,
+            }}
+            type="member"
+          />
+        )}
         <MapOption
           option={{
             active: !includeInofficial,
@@ -161,7 +163,7 @@ export function Statements(props) {
                 indicators: indicatorsWithSupport,
                 onEntityClick,
                 skipLabel: true,
-                columns: getIndicatorColumns(viewEntity, intl),
+                columns: getIndicatorColumns(viewEntity, canBeMember, intl),
               }),
             ],
           }}
