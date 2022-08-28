@@ -136,7 +136,7 @@ export function ActionMap({
   let memberOption;
   let mapTitle;
   if (mapSubject === 'targets') {
-    mapTitle = 'Countries targeted by activity';
+    mapTitle = `${countryData ? countryData.length : 'No'} countries targeted by activity`;
     // note this should always be true!
     if (hasMemberOption && hasAssociations) {
       memberOption = {
@@ -147,7 +147,7 @@ export function ActionMap({
     }
   }
   if (mapSubject === 'actors') {
-    mapTitle = 'Countries responsible by activity';
+    mapTitle = `${countryData ? countryData.length : 'No'} countries responsible by activity`;
     if (hasMemberOption && hasAssociations) {
       memberOption = {
         active: includeActorMembers,
