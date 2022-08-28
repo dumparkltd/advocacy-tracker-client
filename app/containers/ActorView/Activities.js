@@ -81,16 +81,6 @@ export function Activities(props) {
     onCreateOption,
   } = props;
 
-  // console.log('viewSubject', viewSubject)
-  // console.log('viewActiontypeId', viewActiontypeId)
-  // console.log('actionsByActiontype', actionsByActiontype && actionsByActiontype.toJS())
-  // console.log('actionsAsTargetByActiontype', actionsAsTargetByActiontype && actionsAsTargetByActiontype.toJS())
-  // console.log('actiontypes', actiontypes && actiontypes.toJS())
-  // console.log('actionsAsMemberByActortype', actionsAsMemberByActortype && actionsAsMemberByActortype.toJS())
-  // console.log('actionsAsTargetAsMemberByActortype', actionsAsTargetAsMemberByActortype && actionsAsTargetAsMemberByActortype.toJS())
-  // console.log('viewActortype', viewActortype && viewActortype.toJS())
-  // console.log('hasMembers', hasMembers)
-  // console.log('viewActortype.get', viewActortype.get('id'))
   // figure out connected action types ##################################################
   const canBeMember = viewActortype
     && MEMBERSHIPS[viewActortype.get('id')]
@@ -255,53 +245,18 @@ export function Activities(props) {
           wrap
         >
           {actiontypeIdsForSubjectOptions.map(
-            (id) => {
-              let actiontypeActions = (actiontypesForSubject && actiontypesForSubject.get(parseInt(id, 10)))
-                || List();
-              if (actiontypeActions && actiontypesAsMemberForSubject) {
-                actiontypeActions = actiontypesAsMemberForSubject
-                  && actiontypesAsMemberForSubject.entrySeq().reduce(
-                    (memo, [, typeActors]) => typeActors.entrySeq().reduce(
-                      (memo2, [, actor]) => {
-                        let groupActionsForSubject = viewSubject === 'actors'
-                          ? actor.get('actionsByType') && actor.getIn(['actionsByType', id.toString()])
-                          : actor.get('targetingActionsByType') && actor.getIn(['targetingActionsByType', id.toString()]);
-                        if (groupActionsForSubject) {
-                          groupActionsForSubject = groupActionsForSubject.filter(
-                            (groupAction) => !memo2.find((a) => qe(a.get('id'), groupAction.get('id')))
-                          );
-                          return groupActionsForSubject
-                            ? memo2.concat(groupActionsForSubject)
-                            : memo2;
-                        }
-                        return memo2;
-                      },
-                      memo,
-                    ),
-                    actiontypeActions
-                  );
-              }
-              // console.log(actiontypeActions && actiontypeActions.toJS())
-              const noActions = actiontypeActions ? actiontypeActions.size : 0;
-              return (
-                <TypeButton
-                  key={id}
-                  onClick={() => onSetActiontype(id)}
-                  active={qe(activeActiontypeId, id) || actiontypeIdsForSubjectOptions.size === 1}
-                  listItems={actiontypeIdsForSubjectOptions.size}
-                >
-                  <Text size="small">
-                    {`${noActions} `}
-                    {actiontypeIdsForSubjectOptions.size > 4 && (
-                      <FormattedMessage {...appMessages.entities[`actions_${id}`][noActions === 1 ? 'singleShort' : 'pluralShort']} />
-                    )}
-                    {actiontypeIdsForSubjectOptions.size <= 4 && (
-                      <FormattedMessage {...appMessages.entities[`actions_${id}`][noActions === 1 ? 'single' : 'plural']} />
-                    )}
-                  </Text>
-                </TypeButton>
-              );
-            }
+            (id) => (
+              <TypeButton
+                key={id}
+                onClick={() => onSetActiontype(id)}
+                active={qe(activeActiontypeId, id) || actiontypeIdsForSubjectOptions.size === 1}
+                listItems={actiontypeIdsForSubjectOptions.size}
+              >
+                <Text size="small">
+                  <FormattedMessage {...appMessages.entities[`actions_${id}`].pluralShort} />
+                </Text>
+              </TypeButton>
+            )
           )}
         </TypeSelectBox>
       )}
