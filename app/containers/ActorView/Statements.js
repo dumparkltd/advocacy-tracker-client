@@ -15,9 +15,8 @@ import { Map } from 'immutable';
 import styled from 'styled-components';
 
 import { lowerCase } from 'utils/string';
-import qe from 'utils/quasi-equals';
 
-import { MEMBERSHIPS, ACTORTYPES } from 'themes/config';
+import { MEMBERSHIPS } from 'themes/config';
 
 import {
   getIndicatorConnectionField,
@@ -79,8 +78,7 @@ const getIndicatorColumns = (viewEntity, hasMemberOption, intl) => {
   return columns;
 };
 const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
-  && MEMBERSHIPS[typeId].length > 0
-  && !qe(typeId, ACTORTYPES.CONTACT);
+  && MEMBERSHIPS[typeId].length > 0;
 
 export function Statements(props) {
   const {
@@ -188,14 +186,9 @@ Statements.propTypes = {
   intl: intlShape,
 };
 
-const mapStateToProps = (state, { viewEntity }) => ({
+const mapStateToProps = (state) => ({
   indicators: selectIndicators(state),
-  actorsWithPositions: selectActorsWithPositions(
-    state,
-    {
-      includeActorMembers: viewEntity && hasMemberOption(viewEntity.getIn(['attributes', 'actortype_id'])),
-    },
-  ),
+  actorsWithPositions: selectActorsWithPositions(state),
   includeInofficial: selectIncludeInofficialStatements(state),
   includeActorMembers: selectIncludeActorMembers(state),
 });
