@@ -95,7 +95,7 @@ export function Statements(props) {
     viewEntity,
   } = props;
   // console.log('statements', statements && statements.toJS());
-  console.log('actorsWithPositions', actorsWithPositions && actorsWithPositions.toJS());
+  // console.log('actorsWithPositions', actorssWithPositions && actorsWithPositions.toJS());
   // console.log('associationsByType', associationsByType && associationsByType.toJS());
   // console.log('includeInofficial', includeInofficial);
   // console.log('includeActorMembers', includeActorMembers);
