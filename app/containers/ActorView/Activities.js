@@ -6,9 +6,10 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import { Box, Text } from 'grommet';
-import { List, Map } from 'immutable';
+import { Map } from 'immutable';
 import styled from 'styled-components';
 
 import qe from 'utils/quasi-equals';
@@ -20,9 +21,23 @@ import {
   MEMBERSHIPS,
 } from 'themes/config';
 import ButtonPill from 'components/buttons/ButtonPill';
-
+import {
+  setActiontype,
+} from 'containers/App/actions';
+import {
+  selectActiontypes,
+  selectActiontypeQuery,
+} from 'containers/App/selectors';
 import appMessages from 'containers/App/messages';
 import ActivitiesByType from './ActivitiesByType';
+
+import {
+  selectActionsAsTargetByType,
+  selectActionsAsMemberByActortype,
+  selectActionsAsTargetAsMemberByActortype,
+  selectActionsViaMembersByActortype,
+  selectActionsAsTargetViaMembersByActortype,
+} from './selectors';
 
 const TypeSelectBox = styled((p) => <Box {...p} />)``;
 const TypeButton = styled((p) => <ButtonPill {...p} />)`
@@ -35,7 +50,6 @@ export function Activities(props) {
     viewEntity, // current entity
     viewSubject,
     taxonomies,
-    actionConnections,
     onSetActiontype,
     viewActiontypeId, // as set in URL
     actionsByActiontype,
@@ -43,23 +57,29 @@ export function Activities(props) {
     actiontypes,
     actionsAsMemberByActortype,
     actionsAsTargetAsMemberByActortype,
-    viewActortype, // the type of current entity
     onEntityClick,
     intl,
-    onCreateOption,
+    actionsViaMembersByActortype,
+    actionsAsTargetViaMembersByActortype,
   } = props;
 
+  const viewActortypeId = viewEntity.getIn(['attributes', 'actortype_id']).toString();
   // figure out connected action types ##################################################
-  const canBeMember = viewActortype
-    && MEMBERSHIPS[viewActortype.get('id')]
-    && MEMBERSHIPS[viewActortype.get('id')].length > 0;
-
+  const canBeMember = viewActortypeId
+    && MEMBERSHIPS[viewActortypeId]
+    && MEMBERSHIPS[viewActortypeId].length > 0;
+  const canHaveMembers = viewActortypeId
+    && Object.values(MEMBERSHIPS).reduce(
+      (memo, actorGroups) => [...memo, ...actorGroups],
+      [],
+    ).indexOf(viewActortypeId) > -1;
   let actiontypesForSubject;
   let actiontypesAsMemberByActortypeForSubject;
-  let actiontypeIdsAsMemberForSubject;
+  let actiontypesViaMembersByActortypeForSubject;
+  let actiontypesAsMemberForSubject;
+  let actiontypesViaMembersForSubject;
   let actiontypesForSubjectOptions;
   let actiontypeIdsForSubjectOptions;
-  let actiontypesAsMemberForSubject;
   let activeActiontypeId;
   let activeActiontypeActions;
 
@@ -70,7 +90,7 @@ export function Activities(props) {
       actiontypesForSubjectOptions = actiontypes.filter(
         (at) => {
           const atId = at.get('id');
-          return ACTIONTYPE_ACTORTYPES[atId] && ACTIONTYPE_ACTORTYPES[atId].indexOf(viewActortype.get('id')) > -1;
+          return ACTIONTYPE_ACTORTYPES[atId] && ACTIONTYPE_ACTORTYPES[atId].indexOf(viewActortypeId) > -1;
         }
       );
     } else if (viewSubject === 'targets') {
@@ -78,7 +98,7 @@ export function Activities(props) {
       actiontypesForSubjectOptions = actiontypes.filter(
         (at) => {
           const atId = at.get('id');
-          return ACTIONTYPE_TARGETTYPES[atId] && ACTIONTYPE_TARGETTYPES[atId].indexOf(viewActortype.get('id') > -1);
+          return ACTIONTYPE_TARGETTYPES[atId] && ACTIONTYPE_TARGETTYPES[atId].indexOf(viewActortypeId) > -1;
         }
       );
     }
@@ -89,50 +109,21 @@ export function Activities(props) {
     // indirect actions by type for selected subject
     if (canBeMember) {
       if (viewSubject === 'actors') {
-        actiontypesAsMemberByActortypeForSubject = actionsAsMemberByActortype;
         // indirect actiontypeids for selected subject
-        actiontypeIdsAsMemberForSubject = actiontypesAsMemberByActortypeForSubject
-          .reduce(
-            (memo, typeActors) => memo.concat(
-              typeActors.reduce(
-                (memo2, actor) => memo2.concat(actor.get('actionsByType').keySeq()),
-                List(),
-              )
-            ),
-            List(),
-          )
-          .toSet()
-          .filter(
-            (atId) => ACTIONTYPE_ACTORTYPES[atId] && ACTIONTYPE_ACTORTYPES[atId].indexOf(viewActortype.get('id')) > -1
-          );
+        actiontypesAsMemberByActortypeForSubject = actionsAsMemberByActortype;
       } else if (viewSubject === 'targets') {
         actiontypesAsMemberByActortypeForSubject = actionsAsTargetAsMemberByActortype;
+      }
+    }
+    if (canHaveMembers) {
+      if (viewSubject === 'actors') {
         // indirect actiontypeids for selected subject
-        actiontypeIdsAsMemberForSubject = actiontypesAsMemberByActortypeForSubject
-          .reduce(
-            (memo, typeActors) => memo.concat(
-              typeActors.reduce(
-                (memo2, actor) => memo2.concat(actor.get('targetingActionsByType').keySeq()),
-                List(),
-              )
-            ),
-            List(),
-          )
-          .toSet()
-          .filter(
-            (atId) => ACTIONTYPE_TARGETTYPES[atId] && ACTIONTYPE_TARGETTYPES[atId].indexOf(viewActortype.get('id')) > -1
-          );
+        actiontypesViaMembersByActortypeForSubject = actionsViaMembersByActortype;
+      } else if (viewSubject === 'targets') {
+        actiontypesViaMembersByActortypeForSubject = actionsAsTargetViaMembersByActortype;
       }
     }
 
-    // concat w/ active types for available tabs
-    if (actiontypeIdsAsMemberForSubject) {
-      actiontypeIdsForSubjectOptions = actiontypeIdsForSubjectOptions
-        ? actiontypeIdsForSubjectOptions.concat(
-          actiontypeIdsAsMemberForSubject
-        ).toSet()
-        : (actiontypeIdsAsMemberForSubject && actiontypeIdsAsMemberForSubject.toSet());
-    }
     // sort
     actiontypeIdsForSubjectOptions = actiontypeIdsForSubjectOptions
       && actiontypeIdsForSubjectOptions.sort((a, b) => {
@@ -150,10 +141,10 @@ export function Activities(props) {
 
     // direct actions for selected subject and type
     activeActiontypeActions = actiontypesForSubject && actiontypesForSubject.get(parseInt(activeActiontypeId, 10));
-    if (canBeMember) {
-      // figure out inactive action types
-      if (viewSubject === 'actors' || viewSubject === 'targets') {
-        actiontypesAsMemberForSubject = actiontypesAsMemberByActortypeForSubject.reduce(
+    // figure out inactive action types
+    if (canBeMember && (viewSubject === 'actors' || viewSubject === 'targets')) {
+      actiontypesAsMemberForSubject = actiontypesAsMemberByActortypeForSubject
+        && actiontypesAsMemberByActortypeForSubject.reduce(
           (memo, typeActors, id) => {
             if (typeActors && typeActors.size > 0) {
               return memo.merge(Map().set(id, typeActors));
@@ -162,10 +153,21 @@ export function Activities(props) {
           },
           Map(),
         );
-      }
+    }
+    // figure out inactive action types
+    if (canHaveMembers && (viewSubject === 'actors' || viewSubject === 'targets')) {
+      actiontypesViaMembersForSubject = actiontypesViaMembersByActortypeForSubject
+        && actiontypesViaMembersByActortypeForSubject.reduce(
+          (memo, typeActors, id) => {
+            if (typeActors && typeActors.size > 0) {
+              return memo.merge(Map().set(id, typeActors));
+            }
+            return memo;
+          },
+          Map(),
+        );
     }
   }
-
   const typeLabel = intl.formatMessage(appMessages.entities[`actions_${activeActiontypeId}`].plural);
   return (
     <Box>
@@ -210,14 +212,14 @@ export function Activities(props) {
         viewEntity={viewEntity}
         viewSubject={viewSubject}
         taxonomies={taxonomies}
-        actionConnections={actionConnections}
         canBeMember={canBeMember}
+        canHaveMembers={canHaveMembers}
         activeActiontypeId={activeActiontypeId}
         activeActiontypeActions={activeActiontypeActions}
         typeLabel={typeLabel}
         actiontypesAsMemberForSubject={actiontypesAsMemberForSubject}
+        actiontypesViaMembersForSubject={actiontypesViaMembersForSubject}
         onEntityClick={onEntityClick}
-        onCreateOption={onCreateOption}
       />
     </Box>
   );
@@ -226,9 +228,7 @@ export function Activities(props) {
 Activities.propTypes = {
   viewEntity: PropTypes.instanceOf(Map),
   viewSubject: PropTypes.string,
-  viewActortype: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
-  actionConnections: PropTypes.instanceOf(Map),
   onSetActiontype: PropTypes.func,
   onEntityClick: PropTypes.func,
   viewActiontypeId: PropTypes.string,
@@ -237,9 +237,28 @@ Activities.propTypes = {
   actiontypes: PropTypes.instanceOf(Map),
   actionsAsMemberByActortype: PropTypes.instanceOf(Map),
   actionsAsTargetAsMemberByActortype: PropTypes.instanceOf(Map),
-  onCreateOption: PropTypes.func,
+  actionsViaMembersByActortype: PropTypes.instanceOf(Map),
+  actionsAsTargetViaMembersByActortype: PropTypes.instanceOf(Map),
   intl: intlShape,
 };
 
 
-export default injectIntl(Activities);
+const mapStateToProps = (state, { viewEntity }) => ({
+  actiontypes: selectActiontypes(state),
+  viewActiontypeId: selectActiontypeQuery(state),
+  actionsAsTargetByActiontype: selectActionsAsTargetByType(state, viewEntity.get('id')),
+  actionsAsMemberByActortype: selectActionsAsMemberByActortype(state, viewEntity.get('id')),
+  actionsAsTargetAsMemberByActortype: selectActionsAsTargetAsMemberByActortype(state, viewEntity.get('id')),
+  actionsViaMembersByActortype: selectActionsViaMembersByActortype(state, viewEntity.get('id')),
+  actionsAsTargetViaMembersByActortype: selectActionsAsTargetViaMembersByActortype(state, viewEntity.get('id')),
+});
+
+function mapDispatchToProps(dispatch) {
+  return {
+    onSetActiontype: (type) => {
+      dispatch(setActiontype(type));
+    },
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(Activities));

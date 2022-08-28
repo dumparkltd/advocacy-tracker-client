@@ -38,8 +38,6 @@ import {
   updatePath,
   closeEntity,
   setSubject,
-  setActiontype,
-  openNewEntityModal,
 } from 'containers/App/actions';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
@@ -48,6 +46,7 @@ import {
   ACTORTYPES,
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPES,
+  MEMBERSHIPS,
 } from 'themes/config';
 
 import Loading from 'components/Loading';
@@ -69,12 +68,9 @@ import {
   selectIsUserAdmin,
   selectSessionUserId,
   selectTaxonomiesWithCategories,
-  selectActionConnections,
   selectActorConnections,
   selectSubjectQuery,
-  selectActiontypeQuery,
   selectActortypes,
-  selectActiontypes,
   selectUserConnections,
 } from 'containers/App/selectors';
 
@@ -89,11 +85,8 @@ import {
   selectViewEntity,
   selectViewTaxonomies,
   selectActionsByType,
-  selectActionsAsTargetByType,
   selectMembersByType,
   selectAssociationsByType,
-  selectActionsAsMemberByActortype,
-  selectActionsAsTargetAsMemberByActortype,
   selectEntityUsers,
 } from './selectors';
 
@@ -118,16 +111,8 @@ export function ActorView(props) {
     membersByType,
     actortypes,
     taxonomies,
-    actionConnections,
     actorConnections,
-    onSetActiontype,
-    viewActiontypeId,
     actionsByActiontype,
-    actionsAsTargetByActiontype,
-    actiontypes,
-    actionsAsMemberByActortype,
-    actionsAsTargetAsMemberByActortype,
-    onCreateOption,
     users,
     userConnections,
     isAdmin,
@@ -170,9 +155,14 @@ export function ActorView(props) {
     ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
     : `${pageTitle}: ${params.id}`;
 
+  const viewActortypeId = viewActortype && viewActortype.get('id').toString();
   const isTarget = viewActortype && viewActortype.getIn(['attributes', 'is_target']);
   const isActive = viewActortype && viewActortype.getIn(['attributes', 'is_active']);
-  const hasMembers = viewActortype && viewActortype.getIn(['attributes', 'has_members']);
+  const hasMembers = viewActortypeId
+    && Object.values(MEMBERSHIPS).reduce(
+      (memo, actorGroups) => [...memo, ...actorGroups],
+      [],
+    ).indexOf(viewActortypeId) > -1;
   const hasStatements = typeId && ACTIONTYPE_ACTORTYPES[ACTIONTYPES.EXPRESS].indexOf(typeId.toString()) > -1;
   const isCountry = qe(typeId, ACTORTYPES.COUNTRY);
 
@@ -338,18 +328,9 @@ export function ActorView(props) {
                       <Activities
                         viewEntity={viewEntity}
                         onEntityClick={onEntityClick}
-                        viewActortype={viewActortype}
                         viewSubject={viewSubject}
                         taxonomies={taxonomies}
-                        actionConnections={actionConnections}
-                        onSetActiontype={onSetActiontype}
-                        viewActiontypeId={viewActiontypeId}
                         actionsByActiontype={actionsByActiontype}
-                        actionsAsTargetByActiontype={actionsAsTargetByActiontype}
-                        actiontypes={actiontypes}
-                        actionsAsMemberByActortype={actionsAsMemberByActortype}
-                        actionsAsTargetAsMemberByActortype={actionsAsTargetAsMemberByActortype}
-                        onCreateOption={onCreateOption}
                       />
                     )}
                   </Box>
@@ -431,10 +412,8 @@ ActorView.propTypes = {
   onEntityClick: PropTypes.func,
   viewTaxonomies: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
-  actionConnections: PropTypes.instanceOf(Map),
   actorConnections: PropTypes.instanceOf(Map),
   actionsByActiontype: PropTypes.instanceOf(Map),
-  actionsAsTargetByActiontype: PropTypes.instanceOf(Map),
   membersByType: PropTypes.instanceOf(Map),
   associationsByType: PropTypes.instanceOf(Map),
   params: PropTypes.object,
@@ -443,8 +422,6 @@ ActorView.propTypes = {
   subject: PropTypes.string,
   viewActiontypeId: PropTypes.string,
   onSetSubject: PropTypes.func,
-  onSetActiontype: PropTypes.func,
-  onCreateOption: PropTypes.func,
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   actionsAsMemberByActortype: PropTypes.instanceOf(Map),
@@ -462,17 +439,11 @@ const mapStateToProps = (state, props) => ({
   viewTaxonomies: selectViewTaxonomies(state, props.params.id),
   taxonomies: selectTaxonomiesWithCategories(state),
   actionsByActiontype: selectActionsByType(state, props.params.id),
-  actionsAsTargetByActiontype: selectActionsAsTargetByType(state, props.params.id),
-  actionsAsMemberByActortype: selectActionsAsMemberByActortype(state, props.params.id),
-  actionsAsTargetAsMemberByActortype: selectActionsAsTargetAsMemberByActortype(state, props.params.id),
-  actionConnections: selectActionConnections(state),
   actorConnections: selectActorConnections(state),
   membersByType: selectMembersByType(state, props.params.id),
   associationsByType: selectAssociationsByType(state, props.params.id),
   subject: selectSubjectQuery(state),
-  viewActiontypeId: selectActiontypeQuery(state),
   actortypes: selectActortypes(state),
-  actiontypes: selectActiontypes(state),
   users: selectEntityUsers(state, props.params.id),
   userConnections: selectUserConnections(state),
   isAdmin: selectIsUserAdmin(state),
@@ -498,12 +469,6 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetSubject: (type) => {
       dispatch(setSubject(type));
-    },
-    onSetActiontype: (type) => {
-      dispatch(setActiontype(type));
-    },
-    onCreateOption: (args) => {
-      dispatch(openNewEntityModal(args));
     },
   };
 }

@@ -6,13 +6,14 @@
 
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { intlShape, injectIntl } from 'react-intl';
 import {
   Box,
   Accordion,
   AccordionPanel,
 } from 'grommet';
-import { Map } from 'immutable';
+import { List, Map } from 'immutable';
 // import styled from 'styled-components';
 
 import { getActionConnectionField } from 'utils/fields';
@@ -25,6 +26,12 @@ import {
 import FieldGroup from 'components/fields/FieldGroup';
 import AccordionHeader from 'components/AccordionHeader';
 
+import {
+  openNewEntityModal,
+} from 'containers/App/actions';
+import {
+  selectActionConnections,
+} from 'containers/App/selectors';
 import appMessages from 'containers/App/messages';
 
 const getActiontypeColumns = (typeid, viewSubject) => {
@@ -68,9 +75,11 @@ export function ActivitiesByType(props) {
     taxonomies,
     actionConnections,
     canBeMember,
+    canHaveMembers,
     activeActiontypeId,
     activeActiontypeActions,
     actiontypesAsMemberForSubject,
+    actiontypesViaMembersForSubject,
     onEntityClick,
     intl,
     onCreateOption,
@@ -82,9 +91,10 @@ export function ActivitiesByType(props) {
     setActive(defaultState);
   }, [viewSubject, activeActiontypeId]);
 
-  const associationsWithActionsViaMemberships = canBeMember
-    && actiontypesAsMemberForSubject
-    && actiontypesAsMemberForSubject
+  let associationsWithActionsViaMemberships;
+  let uniqueActionsAsMember;
+  if (canBeMember && actiontypesAsMemberForSubject) {
+    associationsWithActionsViaMemberships = actiontypesAsMemberForSubject
       .flatten(true)
       .filter((association) => {
         if (viewSubject === 'actors') {
@@ -99,23 +109,55 @@ export function ActivitiesByType(props) {
         }
         return false;
       });
-  const uniqueActionsViaMemberships = canBeMember
-    && associationsWithActionsViaMemberships
-    && associationsWithActionsViaMemberships.map(
-      (association) => {
-        if (viewSubject === 'actors') {
-          return association.getIn(['actionsByType', activeActiontypeId]);
+    uniqueActionsAsMember = associationsWithActionsViaMemberships
+      && associationsWithActionsViaMemberships.map(
+        (association) => {
+          if (viewSubject === 'actors') {
+            return association.getIn(['actionsByType', activeActiontypeId]);
+          }
+          return association.getIn(['targetingActionsByType', activeActiontypeId]);
         }
-        return association.getIn(['targetingActionsByType', activeActiontypeId]);
-      }
-    ).toSet();
+      ).toSet();
+  }
+  let membersWithActionsViaMembership;
+  let uniqueActionsViaMembers;
+  if (canHaveMembers && actiontypesViaMembersForSubject) {
+    membersWithActionsViaMembership = actiontypesViaMembersForSubject
+      .flatten(true)
+      .filter((member) => {
+        if (viewSubject === 'actors') {
+          return member.get('actionsByType')
+            && member.getIn(['actionsByType', activeActiontypeId])
+            && member.getIn(['actionsByType', activeActiontypeId]).size > 0;
+        }
+        if (viewSubject === 'targets') {
+          return member.get('targetingActionsByType')
+            && member.getIn(['targetingActionsByType', activeActiontypeId])
+            && member.getIn(['targetingActionsByType', activeActiontypeId]).size > 0;
+        }
+        return false;
+      });
+    uniqueActionsViaMembers = membersWithActionsViaMembership
+      && membersWithActionsViaMembership.reduce(
+        (memo, member) => {
+          if (viewSubject === 'actors') {
+            return memo.concat(member.getIn(['actionsByType', activeActiontypeId]).valueSeq());
+          }
+          return memo.concat(member.getIn(['targetingActionsByType', activeActiontypeId]).valueSeq());
+        },
+        List(),
+      ).toSet();
+  }
+  const hasAsMemberPanel = canBeMember && uniqueActionsAsMember && uniqueActionsAsMember.size > 0;
+  const hasViaMembersPanel = canHaveMembers && uniqueActionsViaMembers && uniqueActionsViaMembers.size > 0;
   return (
-    <Box>
+    <Box margin={{ bottom: 'xlarge' }}>
       <Accordion
         activeIndex={actives}
         onActive={(newActive) => setActive(newActive)}
         multiple
         margin="medium"
+        animate={false}
       >
         <AccordionPanel
           header={(
@@ -164,12 +206,12 @@ export function ActivitiesByType(props) {
             />
           </Box>
         </AccordionPanel>
-        {canBeMember && uniqueActionsViaMemberships && uniqueActionsViaMemberships.size > 0 && (
+        {hasAsMemberPanel && (
           <AccordionPanel
             header={(
               <AccordionHeader
                 title={
-                  `As member${viewSubject === 'actors' ? '' : ' (of target)'}: ${uniqueActionsViaMemberships.size} ${getTypeLabel(activeActiontypeId, uniqueActionsViaMemberships.size, intl)}`
+                  `As member${viewSubject === 'actors' ? '' : ' (of target)'}: ${uniqueActionsAsMember.size} ${getTypeLabel(activeActiontypeId, uniqueActionsAsMember.size, intl)}`
                 }
                 open={actives.includes(1)}
               />
@@ -202,6 +244,44 @@ export function ActivitiesByType(props) {
             )}
           </AccordionPanel>
         )}
+        {hasViaMembersPanel && (
+          <AccordionPanel
+            header={(
+              <AccordionHeader
+                title={
+                  `From members${viewSubject === 'actors' ? '' : ' (as targets)'}: ${uniqueActionsViaMembers.size} ${getTypeLabel(activeActiontypeId, uniqueActionsViaMembers.size, intl)}`
+                }
+                open={actives.includes(hasAsMemberPanel ? 2 : 1)}
+              />
+            )}
+          >
+            {membersWithActionsViaMembership && membersWithActionsViaMembership.entrySeq().map(
+              ([actorId, actor]) => {
+                const actortypeLabel = lowerCase(intl.formatMessage(appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].singleShort));
+                return (
+                  <Box key={actorId} pad={{ top: 'medium', bottom: 'hair' }}>
+                    <FieldGroup
+                      seamless
+                      group={{
+                        title: `From member: "${actor.getIn(['attributes', 'title'])}" (${actortypeLabel})`,
+                        fields: [
+                          getActionConnectionField({
+                            actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),
+                            taxonomies,
+                            onEntityClick,
+                            connections: actionConnections,
+                            typeid: activeActiontypeId,
+                            columns: getActiontypeColumns(activeActiontypeId, viewSubject),
+                          }),
+                        ],
+                      }}
+                    />
+                  </Box>
+                );
+              }
+            )}
+          </AccordionPanel>
+        )}
       </Accordion>
     </Box>
   );
@@ -214,12 +294,25 @@ ActivitiesByType.propTypes = {
   actionConnections: PropTypes.instanceOf(Map),
   onEntityClick: PropTypes.func,
   canBeMember: PropTypes.bool,
+  canHaveMembers: PropTypes.bool,
   activeActiontypeId: PropTypes.string,
   activeActiontypeActions: PropTypes.instanceOf(Map),
   actiontypesAsMemberForSubject: PropTypes.instanceOf(Map),
+  actiontypesViaMembersForSubject: PropTypes.instanceOf(Map),
   onCreateOption: PropTypes.func,
   intl: intlShape,
 };
 
+const mapStateToProps = (state) => ({
+  actionConnections: selectActionConnections(state),
+});
 
-export default injectIntl(ActivitiesByType);
+function mapDispatchToProps(dispatch) {
+  return {
+    onCreateOption: (args) => {
+      dispatch(openNewEntityModal(args));
+    },
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(ActivitiesByType));
