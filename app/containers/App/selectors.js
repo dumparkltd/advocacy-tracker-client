@@ -1875,7 +1875,7 @@ export const selectActorsWithPositions = createSelector(
                         )
                         : indicatorStatement;
                       const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
-                      const statementAuthority = authorityCategories.find(
+                      const statementAuthority = statementCategories && authorityCategories.find(
                         (cat, catId) => statementCategories.includes(parseInt(catId, 10))
                       );
                       if (statementAuthority) {

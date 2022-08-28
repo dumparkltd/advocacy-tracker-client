@@ -15,8 +15,9 @@ import { Map } from 'immutable';
 import styled from 'styled-components';
 
 import { lowerCase } from 'utils/string';
+import qe from 'utils/quasi-equals';
 
-import { MEMBERSHIPS } from 'themes/config';
+import { MEMBERSHIPS, ACTORTYPES } from 'themes/config';
 
 import {
   getIndicatorConnectionField,
@@ -43,7 +44,7 @@ const MapOptions = styled(
   (p) => <Box margin={{ horizontal: 'medium', top: 'medium' }} {...p} />
 )``;
 
-const getIndicatorColumns = (viewEntity, canBeMember, intl) => {
+const getIndicatorColumns = (viewEntity, hasMemberOption, intl) => {
   let columns = [
     {
       id: 'main',
@@ -66,7 +67,7 @@ const getIndicatorColumns = (viewEntity, canBeMember, intl) => {
       type: 'positionStatementAuthority',
     },
   ];
-  if (canBeMember) {
+  if (hasMemberOption) {
     columns = [
       ...columns,
       {
@@ -77,6 +78,9 @@ const getIndicatorColumns = (viewEntity, canBeMember, intl) => {
   }
   return columns;
 };
+const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
+  && MEMBERSHIPS[typeId].length > 0
+  && !qe(typeId, ACTORTYPES.CONTACT);
 
 export function Statements(props) {
   const {
@@ -91,7 +95,7 @@ export function Statements(props) {
     viewEntity,
   } = props;
   // console.log('statements', statements && statements.toJS());
-  // // console.log('actorsWithPositions', actorsWithPositions && actorsWithPositions.toJS());
+  console.log('actorsWithPositions', actorsWithPositions && actorsWithPositions.toJS());
   // console.log('associationsByType', associationsByType && associationsByType.toJS());
   // console.log('includeInofficial', includeInofficial);
   // console.log('includeActorMembers', includeActorMembers);
@@ -125,18 +129,16 @@ export function Statements(props) {
     },
     Map()
   );
+  const typeId = viewEntity.getIn(['attributes', 'actortype_id']);
   const type = lowerCase(
     intl.formatMessage(
-      appMessages.entities[`actors_${viewEntity.getIn(['attributes', 'actortype_id'])}`].single
+      appMessages.entities[`actors_${typeId}`].single
     )
   );
-  const canBeMember = MEMBERSHIPS[viewEntity.getIn(['attributes', 'actortype_id'])]
-    && MEMBERSHIPS[viewEntity.getIn(['attributes', 'actortype_id'])].length > 0;
-
   return (
     <div>
       <MapOptions>
-        {canBeMember && (
+        {hasMemberOption(typeId) && (
           <MapOption
             option={{
               active: includeActorMembers,
@@ -163,7 +165,7 @@ export function Statements(props) {
                 indicators: indicatorsWithSupport,
                 onEntityClick,
                 skipLabel: true,
-                columns: getIndicatorColumns(viewEntity, canBeMember, intl),
+                columns: getIndicatorColumns(viewEntity, hasMemberOption(typeId), intl),
               }),
             ],
           }}
@@ -186,9 +188,14 @@ Statements.propTypes = {
   intl: intlShape,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state, { viewEntity }) => ({
   indicators: selectIndicators(state),
-  actorsWithPositions: selectActorsWithPositions(state),
+  actorsWithPositions: selectActorsWithPositions(
+    state,
+    {
+      includeActorMembers: viewEntity && hasMemberOption(viewEntity.getIn(['attributes', 'actortype_id'])),
+    },
+  ),
   includeInofficial: selectIncludeInofficialStatements(state),
   includeActorMembers: selectIncludeActorMembers(state),
 });
