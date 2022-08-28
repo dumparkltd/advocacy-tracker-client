@@ -33,7 +33,8 @@ import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
-import { checkActionAttribute, checkActionRequired } from 'utils/entities';
+import { checkActionAttribute, checkActionRequired, getEntityTitle } from 'utils/entities';
+import { lowerCase } from 'utils/string';
 
 import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
 import {
@@ -112,10 +113,14 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
-    const { typeId, sessionUser } = props;
+    const {
+      typeId, sessionUser, inModal, modalConnect,
+    } = props;
     const dataWithType = FORM_INITIAL.setIn(['attributes', 'measuretype_id'], typeId);
+    // do not connect with session user wehen connecting other "background" user
     return sessionUser
       && sessionUser.getIn(['attributes', 'id'])
+      && !(inModal && modalConnect.get('type') === 'userActions')
       ? dataWithType.set(
         'associatedUsers',
         fromJS([{
@@ -404,15 +409,58 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       handleUpdate,
       formDataPath,
       inModal,
+      modalConnect,
     } = this.props;
-
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
     const type = intl.formatMessage(appMessages.entities[`actions_${typeId}`].single);
+    let subTitle;
+    if (inModal && modalConnect && modalConnect.get('create')) {
+      // connect action to actor
+      if (
+        modalConnect.get('type') === 'actorActions'
+        || modalConnect.get('type') === 'actionActors'
+      ) {
+        const actorId = modalConnect
+          .get('create')
+          .find((item) => item.keySeq().includes('actor_id'))
+          .get('actor_id');
+        // console.log(actorId)
+        let actor;
+        if (modalConnect.get('type') === 'actorActions') {
+          actor = actorId && actorsByActortype.flatten(true).get(actorId);
+        } else if (modalConnect.get('type') === 'actionActors') {
+          actor = actorId && targetsByActortype.flatten(true).get(actorId);
+        }
+        const actorType = actor && intl.formatMessage(appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].single);
+        subTitle = actor && `For ${lowerCase(actorType)}: ${getEntityTitle(actor)}`;
+      }
+      // connect action with top action
+      if (modalConnect.get('type') === 'subActions') {
+        const actionId = modalConnect
+          .get('create')
+          .find((item) => item.keySeq().includes('other_measure_id'))
+          .get('other_measure_id');
+        // console.log(actorId)
+        const action = actionId && topActionsByActiontype.flatten(true).get(actionId);
+        const actionType = action && intl.formatMessage(appMessages.entities[`actions_${action.getIn(['attributes', 'measuretype_id'])}`].single);
+        subTitle = action && `For ${lowerCase(actionType)}: ${getEntityTitle(action)}`;
+      }
+      // connect action with user
+      if (modalConnect.get('type') === 'userActions') {
+        const userId = modalConnect
+          .get('create')
+          .find((item) => item.keySeq().includes('user_id'))
+          .get('user_id');
+        const user = userId && userOptions.get(userId);
+        subTitle = user && `For ${lowerCase(intl.formatMessage(appMessages.entities.users.single))}: ${getEntityTitle(user)}`;
+      }
+    }
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
         <ContentHeader
           title={intl.formatMessage(messages.pageTitle, { type })}
+          subTitle={subTitle}
           type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
           buttons={
             dataReady ? [{
@@ -489,21 +537,22 @@ ActionNewForm.propTypes = {
   handleUpdate: PropTypes.func.isRequired,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
-  actorsByActortype: PropTypes.object,
-  targetsByActortype: PropTypes.object,
-  resourcesByResourcetype: PropTypes.object,
+  actorsByActortype: PropTypes.instanceOf(Map),
+  targetsByActortype: PropTypes.instanceOf(Map),
+  resourcesByResourcetype: PropTypes.instanceOf(Map),
   initialiseForm: PropTypes.func,
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
-  viewDomain: PropTypes.object,
-  taxonomies: PropTypes.object,
-  indicatorOptions: PropTypes.object,
-  userOptions: PropTypes.object,
-  topActionsByActiontype: PropTypes.object,
-  subActionsByActiontype: PropTypes.object,
+  viewDomain: PropTypes.instanceOf(Map),
+  taxonomies: PropTypes.instanceOf(Map),
+  indicatorOptions: PropTypes.instanceOf(Map),
+  userOptions: PropTypes.instanceOf(Map),
+  topActionsByActiontype: PropTypes.instanceOf(Map),
+  subActionsByActiontype: PropTypes.instanceOf(Map),
   onCreateOption: PropTypes.func,
-  connectedTaxonomies: PropTypes.object,
+  connectedTaxonomies: PropTypes.instanceOf(Map),
   actiontype: PropTypes.instanceOf(Map),
+  modalConnect: PropTypes.instanceOf(Map),
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
   inModal: PropTypes.bool,
