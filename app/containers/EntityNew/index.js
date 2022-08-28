@@ -29,10 +29,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
       onSaveSuccess,
       onCancel,
     } = this.props;
-    // console.log('path', path)
-    // console.log('viewDomain', viewDomain.toJS())
-    // console.log('attributes', attributes.toJS())
-    // console.log('connect', connect.toJS())
+
     if (path === API.ACTIONS) {
       return (
         <ActionNewForm

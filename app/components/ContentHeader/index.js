@@ -23,7 +23,7 @@ const Styled = styled.div`
   }};
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: ${({ isModal, hasViewOptions }) => {
-    if (isModal) return '20px 0 20px 40px';
+    if (isModal) return '20px 0 20px 24px';
     if (hasViewOptions) return '0 0 1em';
     return '3em 0 1em';
   }};
