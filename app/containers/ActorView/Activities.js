@@ -16,8 +16,6 @@ import { getActionConnectionField } from 'utils/fields';
 import { lowerCase } from 'utils/string';
 
 import {
-  ROUTES,
-  ACTIONTYPES,
   ACTIONTYPES_CONFIG,
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
@@ -28,7 +26,6 @@ import FieldGroup from 'components/fields/FieldGroup';
 import ButtonPill from 'components/buttons/ButtonPill';
 
 import appMessages from 'containers/App/messages';
-import ActorActivitiesMap from './ActorActivitiesMap';
 
 const SectionTitle = styled((p) => <Text size="medium" weight={500} {...p} />)``;
 const TypeSelectBox = styled((p) => <Box {...p} />)``;
@@ -197,28 +194,6 @@ export function Activities(props) {
       }
     }
   }
-  // figure out if we have a map and what to show #################################################
-
-  // we have the option to include actions for
-  //    actors that can be members (i.e. countries)
-  // we can have
-  // let mapSubject = false;
-  // let hasActivityMap = typeId && qe(typeId, ACTORTYPES.COUNTRY);
-  let mapSubject = false;
-  const hasMemberOption = activeActiontypeId && !qe(activeActiontypeId, ACTIONTYPES.NATL);
-  const hasActivityMap = false; // typeId && qe(typeId, ACTORTYPES.COUNTRY);
-  let hasTarget;
-  const activeActionType = actiontypes && activeActiontypeId && actiontypes.get(activeActiontypeId.toString());
-  if (hasActivityMap) {
-    if (viewSubject === 'actors') {
-      mapSubject = 'targets';
-      hasTarget = activeActionType && activeActionType.getIn(['attributes', 'has_target']);
-      // only show target maps
-      // hasActivityMap = !qe(activeActiontypeId, ACTIONTYPES.NATL);
-    } else if (viewSubject === 'targets') {
-      mapSubject = 'actors';
-    }
-  }
 
   const typeLabel = intl.formatMessage(appMessages.entities[`actions_${activeActiontypeId}`].plural);
   return (
@@ -259,25 +234,6 @@ export function Activities(props) {
             )
           )}
         </TypeSelectBox>
-      )}
-      {actiontypeIdsForSubjectOptions && actiontypeIdsForSubjectOptions.size > 0 && (
-        <Box>
-          {viewEntity && hasActivityMap && (
-            <ActorActivitiesMap
-              actor={viewEntity}
-              actions={activeActiontypeActions}
-              actionsAsMember={actiontypesAsMemberForSubject}
-              hasMemberOption={hasMemberOption}
-              viewSubject={viewSubject}
-              mapSubject={mapSubject}
-              actiontypeHasTarget={hasTarget}
-              dataReady
-              onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
-              actiontypeId={activeActiontypeId}
-              actorCanBeMember={canBeMember}
-            />
-          )}
-        </Box>
       )}
       <Box>
         <FieldGroup
