@@ -1,6 +1,6 @@
 /*
  *
- * Statements
+ * TabStatements
  *
  */
 
@@ -40,7 +40,7 @@ import FieldGroup from 'components/fields/FieldGroup';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
 const MapOptions = styled(
-  (p) => <Box margin={{ horizontal: 'medium', top: 'medium' }} {...p} />
+  (p) => <Box margin={{ top: 'medium', bottom: 'small' }} {...p} />
 )``;
 
 const getIndicatorColumns = (viewEntity, hasMemberOption, intl) => {
@@ -80,7 +80,7 @@ const getIndicatorColumns = (viewEntity, hasMemberOption, intl) => {
 const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
   && MEMBERSHIPS[typeId].length > 0;
 
-export function Statements(props) {
+export function TabStatements(props) {
   const {
     indicators,
     actorsWithPositions,
@@ -157,6 +157,7 @@ export function Statements(props) {
       </MapOptions>
       {indicators && (
         <FieldGroup
+          seamless
           group={{
             fields: [
               getIndicatorConnectionField({
@@ -173,7 +174,7 @@ export function Statements(props) {
   );
 }
 
-Statements.propTypes = {
+TabStatements.propTypes = {
   viewEntity: PropTypes.instanceOf(Map),
   indicators: PropTypes.instanceOf(Map),
   actorsWithPositions: PropTypes.instanceOf(Map),
@@ -207,4 +208,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(Statements));
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(TabStatements));

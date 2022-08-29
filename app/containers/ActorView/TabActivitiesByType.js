@@ -1,6 +1,6 @@
 /*
  *
- * ActivitiesByType
+ * TabActivitiesByType
  *
  */
 
@@ -68,7 +68,7 @@ const getTypeLabel = (
 
 const defaultState = [0];
 
-export function ActivitiesByType(props) {
+export function TabActivitiesByType(props) {
   const {
     viewEntity, // current entity
     viewSubject,
@@ -158,7 +158,6 @@ export function ActivitiesByType(props) {
         activeIndex={actives}
         onActive={(newActive) => setActive(newActive)}
         multiple
-        margin="medium"
         animate={false}
       >
         <AccordionPanel
@@ -289,7 +288,7 @@ export function ActivitiesByType(props) {
   );
 }
 
-ActivitiesByType.propTypes = {
+TabActivitiesByType.propTypes = {
   viewEntity: PropTypes.instanceOf(Map),
   viewSubject: PropTypes.string,
   taxonomies: PropTypes.instanceOf(Map),
@@ -317,4 +316,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(ActivitiesByType));
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(TabActivitiesByType));

@@ -61,6 +61,7 @@ import ViewPanelInside from 'components/EntityView/ViewPanelInside';
 import FieldGroup from 'components/fields/FieldGroup';
 import SubjectButton from 'components/styled/SubjectButton';
 import SubjectButtonGroup from 'components/styled/SubjectButtonGroup';
+import SubjectTabWrapper from 'components/styled/SubjectTabWrapper';
 
 import {
   selectReady,
@@ -76,10 +77,10 @@ import {
 
 import appMessages from 'containers/App/messages';
 import messages from './messages';
-import Activities from './Activities';
-import Members from './Members';
+import TabActivities from './TabActivities';
+import TabMembers from './TabMembers';
 import CountryMap from './CountryMap';
-import Statements from './Statements';
+import TabStatements from './TabStatements';
 
 import {
   selectViewEntity,
@@ -308,31 +309,33 @@ export function ActorView(props) {
                         </SubjectButton>
                       )}
                     </SubjectButtonGroup>
-                    {viewSubject === 'members' && hasMembers && (
-                      <Members
-                        membersByType={membersByType}
-                        onEntityClick={(id, path) => onEntityClick(id, path)}
-                        taxonomies={taxonomies}
-                        actorConnections={actorConnections}
-                      />
-                    )}
-                    {viewSubject === 'topics' && hasStatements && (
-                      <Statements
-                        viewEntity={viewEntity}
-                        onEntityClick={(id, path) => onEntityClick(id, path)}
-                        statements={actionsByActiontype && actionsByActiontype.get(parseInt(ACTIONTYPES.EXPRESS, 10))}
-                        associationsByType={associationsByType}
-                      />
-                    )}
-                    {(viewSubject === 'actors' || viewSubject === 'targets') && (
-                      <Activities
-                        viewEntity={viewEntity}
-                        onEntityClick={onEntityClick}
-                        viewSubject={viewSubject}
-                        taxonomies={taxonomies}
-                        actionsByActiontype={actionsByActiontype}
-                      />
-                    )}
+                    <SubjectTabWrapper>
+                      {viewSubject === 'members' && hasMembers && (
+                        <TabMembers
+                          membersByType={membersByType}
+                          onEntityClick={(id, path) => onEntityClick(id, path)}
+                          taxonomies={taxonomies}
+                          actorConnections={actorConnections}
+                        />
+                      )}
+                      {viewSubject === 'topics' && hasStatements && (
+                        <TabStatements
+                          viewEntity={viewEntity}
+                          onEntityClick={(id, path) => onEntityClick(id, path)}
+                          statements={actionsByActiontype && actionsByActiontype.get(parseInt(ACTIONTYPES.EXPRESS, 10))}
+                          associationsByType={associationsByType}
+                        />
+                      )}
+                      {(viewSubject === 'actors' || viewSubject === 'targets') && (
+                        <TabActivities
+                          viewEntity={viewEntity}
+                          onEntityClick={onEntityClick}
+                          viewSubject={viewSubject}
+                          taxonomies={taxonomies}
+                          actionsByActiontype={actionsByActiontype}
+                        />
+                      )}
+                    </SubjectTabWrapper>
                   </Box>
                 </Main>
                 <Aside bottom>

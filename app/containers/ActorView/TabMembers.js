@@ -29,29 +29,17 @@ import MapContainer from 'containers/MapContainer/MapWrapper';
 const MapOuterWrapper = styled((p) => <Box {...p} />)`
   z-index: 0;
 `;
-const MapWrapper = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)`
+const MapWrapper = styled((p) => <Box {...p} />)`
   position: relative;
   height: 400px;
 `;
 
-export function Members(props) {
+export function TabMembers(props) {
   const {
-    // viewEntity,
-    // viewSubject,
     onEntityClick,
     membersByType,
-    // actiontypes,
     taxonomies,
     actorConnections,
-    // onSetActiontype,
-    // viewActiontypeId,
-    // actionsByActiontype,
-    // actionsAsTargetByActiontype,
-    // actionsAsMemberByActortype,
-    // actionsAsTargetAsMemberByActortype,
-    // viewActortype,
-    // hasMembers,
-    // intl,
   } = props;
   const countriesJSON = topojson.feature(
     countriesTopo,
@@ -91,7 +79,7 @@ export function Members(props) {
   return (
     <Box>
       {(!membersByType || membersByType.size === 0) && (
-        <Box margin={{ vertical: 'small', horizontal: 'medium' }}>
+        <Box margin={{ vertical: 'small' }}>
           <Text>
             No members found in database
           </Text>
@@ -112,7 +100,7 @@ export function Members(props) {
             </MapWrapper>
           </MapOuterWrapper>
           <FieldGroup
-            aside
+            seamless
             group={{
               fields: [
                 getActorConnectionField({
@@ -148,51 +136,49 @@ export function Members(props) {
         </Box>
       )}
       {otherMembers && otherMembers.size > 0 && (
-        <Box>
-          <FieldGroup
-            aside
-            group={{
-              fields: otherMembers.reduce(
-                (memo, actors, typeid) => memo.concat([
-                  getActorConnectionField({
-                    actors,
-                    onEntityClick,
-                    typeid,
-                    taxonomies,
-                    connections: actorConnections,
-                    columns: [
-                      {
-                        id: 'main',
-                        type: 'main',
-                        sort: 'title',
-                        attributes: ['code', 'title'],
-                      },
-                      {
-                        id: 'actorActions',
-                        type: 'actionsSimple',
-                        subject: 'actors',
-                        actions: 'actions',
-                      },
-                      {
-                        id: 'actorActionsTargets',
-                        type: 'actionsSimple',
-                        subject: 'targets',
-                        actions: 'targetingActions',
-                      },
-                    ],
-                  }),
-                ]),
-                [],
-              ),
-            }}
-          />
-        </Box>
+        <FieldGroup
+          seamless
+          group={{
+            fields: otherMembers.reduce(
+              (memo, actors, typeid) => memo.concat([
+                getActorConnectionField({
+                  actors,
+                  onEntityClick,
+                  typeid,
+                  taxonomies,
+                  connections: actorConnections,
+                  columns: [
+                    {
+                      id: 'main',
+                      type: 'main',
+                      sort: 'title',
+                      attributes: ['code', 'title'],
+                    },
+                    {
+                      id: 'actorActions',
+                      type: 'actionsSimple',
+                      subject: 'actors',
+                      actions: 'actions',
+                    },
+                    {
+                      id: 'actorActionsTargets',
+                      type: 'actionsSimple',
+                      subject: 'targets',
+                      actions: 'targetingActions',
+                    },
+                  ],
+                }),
+              ]),
+              [],
+            ),
+          }}
+        />
       )}
     </Box>
   );
 }
 
-Members.propTypes = {
+TabMembers.propTypes = {
   onEntityClick: PropTypes.func,
   membersByType: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
@@ -200,4 +186,4 @@ Members.propTypes = {
 };
 
 
-export default Members;
+export default TabMembers;

@@ -1,6 +1,6 @@
 /*
  *
- * Activities
+ * TabActivities
  *
  */
 
@@ -29,7 +29,7 @@ import {
   selectActiontypeQuery,
 } from 'containers/App/selectors';
 import appMessages from 'containers/App/messages';
-import ActivitiesByType from './ActivitiesByType';
+import TabActivitiesByType from './TabActivitiesByType';
 
 import {
   selectActionsAsTargetByType,
@@ -45,7 +45,7 @@ const TypeButton = styled((p) => <ButtonPill {...p} />)`
 `;
 
 
-export function Activities(props) {
+export function TabActivities(props) {
   const {
     viewEntity, // current entity
     viewSubject,
@@ -172,7 +172,7 @@ export function Activities(props) {
   return (
     <Box>
       {(!actiontypeIdsForSubjectOptions || actiontypeIdsForSubjectOptions.size === 0) && (
-        <Box margin={{ vertical: 'small', horizontal: 'medium' }}>
+        <Box margin={{ vertical: 'small' }}>
           {viewSubject === 'actors' && (
             <Text>
               No activities for actor in database
@@ -189,7 +189,7 @@ export function Activities(props) {
         <TypeSelectBox
           direction="row"
           gap="xxsmall"
-          margin={{ top: 'small', horizontal: 'medium', bottom: 'medium' }}
+          margin={{ top: 'small', bottom: 'medium' }}
           wrap
         >
           {actiontypeIdsForSubjectOptions.map(
@@ -208,7 +208,7 @@ export function Activities(props) {
           )}
         </TypeSelectBox>
       )}
-      <ActivitiesByType
+      <TabActivitiesByType
         viewEntity={viewEntity}
         viewSubject={viewSubject}
         taxonomies={taxonomies}
@@ -225,7 +225,7 @@ export function Activities(props) {
   );
 }
 
-Activities.propTypes = {
+TabActivities.propTypes = {
   viewEntity: PropTypes.instanceOf(Map),
   viewSubject: PropTypes.string,
   taxonomies: PropTypes.instanceOf(Map),
@@ -261,4 +261,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(Activities));
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(TabActivities));
