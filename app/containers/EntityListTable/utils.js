@@ -186,14 +186,21 @@ export const prepareHeader = ({
         });
       case 'resourceActions':
       case 'indicatorActions':
-      case 'userActions':
-      case 'actionsSimple':
       case 'actorActions':
         if (col.subject !== 'actors') {
           label = col.members ? 'Targeted as member' : 'Targeted by';
         } else {
           label = col.members ? 'Activities as member' : 'Activities';
         }
+        return ({
+          ...col,
+          title: label,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'userActions':
+        label = 'Assigned to';
         return ({
           ...col,
           title: label,
@@ -290,7 +297,6 @@ export const prepareEntities = ({
 }) => entities.reduce(
   (memoEntities, entity) => {
     const id = entity.get('id');
-    // console.log(entity.toJS())
     // console.log(connections && connections.toJS())
     const entityValues = columns.reduce(
       (memoEntity, col) => {
@@ -525,11 +531,14 @@ export const prepareEntities = ({
           case 'actorActions':
             temp = entity.get(col.actions)
               || (entity.get(`${col.actions}ByType`) && entity.get(`${col.actions}ByType`).flatten());
+            relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
                 value: temp && temp.size,
+                tooltip: relatedEntities && relatedEntities.size > 0
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
               },
             };
           case 'userrole':
@@ -584,6 +593,7 @@ export const prepareEntities = ({
                 .toList()
                 .toSet();
             }
+            relatedEntities = getRelatedEntities(relatedEntityIds.flatten(), connections.get('measures'), col);
             return {
               ...memoEntity,
               [col.id]: {
@@ -591,6 +601,8 @@ export const prepareEntities = ({
                 value: relatedEntityIds && relatedEntityIds.size > 0
                   ? relatedEntityIds.size
                   : null,
+                tooltip: relatedEntities && relatedEntities.size > 0
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
               },
             };
           case 'supportlevel':
@@ -641,13 +653,28 @@ export const prepareEntities = ({
               },
             };
           case 'stackedBar':
+            temp = entity.get(col.values);
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                values: entity.get(col.values) && entity.get(col.values).toJS(),
-                sortValue: entity.get(col.values)
-                  ? entity.get(col.values).reduce(
+                values: temp && temp.map(
+                  (value) => {
+                    if (value.actors) {
+                      relatedEntities = getRelatedEntities(value.actors, connections.get('actors'), col);
+                      if (relatedEntities && relatedEntities.size > 0) {
+                        return {
+                          ...value,
+                          tooltip: relatedEntities && relatedEntities.size > 0
+                            && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
+                        };
+                      }
+                    }
+                    return value;
+                  }
+                ).toJS(),
+                sortValue: temp
+                  ? temp.reduce(
                     (sum, val) => (val.count || 0) + sum,
                     0,
                   )
