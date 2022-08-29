@@ -358,7 +358,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         },
         {
           id: 'support', // one row per type,
-          type: 'stackedBar', // one row per type,
+          type: 'stackedBarActions', // one row per type,
           values: 'supportlevels',
           title: 'Support',
           options: ACTION_INDICATOR_SUPPORTLEVELS,

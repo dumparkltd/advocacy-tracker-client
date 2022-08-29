@@ -291,7 +291,7 @@ export function EntitiesTable({
                         rowConfig={entity[col.id]}
                       />
                     )}
-                    {col.type === 'stackedBar' && (
+                    {col.type === 'stackedBarActions' && (
                       <CellBodyStackedBarChart
                         values={entity[col.id] && entity[col.id].values
                           ? Object.values(entity[col.id].values)

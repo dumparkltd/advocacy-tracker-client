@@ -215,7 +215,7 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
-      case 'stackedBar':
+      case 'stackedBarActions':
         return ({
           ...col,
           sortActive,
@@ -652,7 +652,7 @@ export const prepareEntities = ({
                 // sortValue: getRelatedSortValue(temp),
               },
             };
-          case 'stackedBar':
+          case 'stackedBarActions':
             temp = entity.get(col.values);
             return {
               ...memoEntity,
@@ -758,7 +758,7 @@ export const getColumnMaxValues = (entities, columns) => entities.reduce(
           }
           : maxValueMemo2;
       }
-      if (column.type === 'stackedBar') {
+      if (column.type === 'stackedBarActions') {
         const { values } = entity[column.id];
         const val = values && Object.values(values).reduce(
           (memo, value) => (value.count || 0) + memo,
