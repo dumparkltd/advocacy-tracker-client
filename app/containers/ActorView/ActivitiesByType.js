@@ -110,13 +110,14 @@ export function ActivitiesByType(props) {
         return false;
       });
     uniqueActionsAsMember = associationsWithActionsViaMemberships
-      && associationsWithActionsViaMemberships.map(
-        (association) => {
+      && associationsWithActionsViaMemberships.reduce(
+        (memo, association) => {
           if (viewSubject === 'actors') {
-            return association.getIn(['actionsByType', activeActiontypeId]);
+            return memo.concat(association.getIn(['actionsByType', activeActiontypeId]).valueSeq());
           }
-          return association.getIn(['targetingActionsByType', activeActiontypeId]);
-        }
+          return memo.concat(association.getIn(['targetingActionsByType', activeActiontypeId]).valueSeq());
+        },
+        List(),
       ).toSet();
   }
   let membersWithActionsViaMembership;
@@ -150,6 +151,7 @@ export function ActivitiesByType(props) {
   }
   const hasAsMemberPanel = canBeMember && uniqueActionsAsMember && uniqueActionsAsMember.size > 0;
   const hasViaMembersPanel = canHaveMembers && uniqueActionsViaMembers && uniqueActionsViaMembers.size > 0;
+
   return (
     <Box margin={{ bottom: 'xlarge' }}>
       <Accordion
