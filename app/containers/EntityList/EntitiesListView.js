@@ -227,6 +227,18 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
           label: 'Include activities of groups (countries belong to)',
         };
+      } else if (mapSubjectClean === 'targets' && qe(viewType, ACTORTYPES.ORG)) {
+        memberOption = {
+          active: includeTargetMembers,
+          onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+          label: 'Include activities targeting groups (organisations belong to)',
+        };
+      } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.ORG)) {
+        memberOption = {
+          active: includeActorMembers,
+          onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+          label: 'Include activities of groups (organisations belong to)',
+        };
       }
       if (mapSubjectClean === 'actors' || mapSubjectClean === 'targets') {
         entityActors = getActorsForEntities(
