@@ -501,3 +501,44 @@ export const selectEntityUsers = createSelector(
       .sortBy((val, key) => key);
   }
 );
+
+export const selectChildTargetsByType = createSelector(
+  (state, targetIds) => targetIds,
+  selectActors,
+  selectActorConnections,
+  selectMembershipsGroupedByMember,
+  selectMembershipsGroupedByAssociation,
+  selectActorCategoriesGroupedByActor,
+  selectUserActorsGroupedByActor,
+  selectCategories,
+  (
+    targetIds,
+    actors,
+    actorConnections,
+    memberships,
+    associations,
+    actorCategories,
+    userActorsByActor,
+    categories,
+  ) => {
+    if (!targetIds) return null;
+    return targetIds
+      .map(
+        (actorId) => {
+          const actor = actors.get(actorId.toString());
+          return actor && setActorConnections({
+            actor,
+            actorConnections,
+            categories,
+            actorCategories,
+            memberships,
+            associations,
+            users: userActorsByActor,
+          });
+        }
+      )
+      .groupBy(
+        (actor) => actor.getIn(['attributes', 'actortype_id'])
+      );
+  },
+);

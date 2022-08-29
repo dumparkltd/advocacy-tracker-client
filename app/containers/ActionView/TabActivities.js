@@ -1,11 +1,12 @@
 /*
  *
- * Activities
+ * TabActivities
  *
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
 import { Box, Text } from 'grommet';
 import { Map } from 'immutable';
@@ -24,6 +25,14 @@ import FieldGroup from 'components/fields/FieldGroup';
 import ButtonPill from 'components/buttons/ButtonPill';
 
 import appMessages from 'containers/App/messages';
+
+import {
+  setActiontype,
+  openNewEntityModal,
+} from 'containers/App/actions';
+import {
+  selectActionConnections,
+} from 'containers/App/selectors';
 
 const TypeSelectBox = styled((p) => <Box {...p} />)``;
 const TypeButton = styled((p) => <ButtonPill {...p} />)`
@@ -53,7 +62,7 @@ const getActiontypeColumns = (typeid) => {
   }];
 };
 
-export function Activities(props) {
+export function TabActivities(props) {
   const {
     viewEntity, // current entity
     // viewSubject,
@@ -83,7 +92,7 @@ export function Activities(props) {
         <TypeSelectBox
           direction="row"
           gap="xxsmall"
-          margin={{ top: 'small', horizontal: 'medium', bottom: 'medium' }}
+          margin={{ top: 'small', bottom: 'medium' }}
           wrap
         >
           {actiontypeIds.map(
@@ -112,8 +121,9 @@ export function Activities(props) {
           )}
         </TypeSelectBox>
       )}
-      <Box>
+      <Box pad={{ vertical: 'small' }}>
         <FieldGroup
+          seamless
           group={{
             fields: [
               getActionConnectionField({
@@ -145,9 +155,8 @@ export function Activities(props) {
   );
 }
 
-Activities.propTypes = {
+TabActivities.propTypes = {
   viewEntity: PropTypes.instanceOf(Map),
-  // viewActortype: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
   actionConnections: PropTypes.instanceOf(Map),
   onSetActiontype: PropTypes.func,
@@ -158,5 +167,19 @@ Activities.propTypes = {
   onCreateOption: PropTypes.func,
 };
 
+const mapStateToProps = (state) => ({
+  actionConnections: selectActionConnections(state),
+});
 
-export default Activities;
+function mapDispatchToProps(dispatch) {
+  return {
+    onSetActiontype: (type) => {
+      dispatch(setActiontype(type));
+    },
+    onCreateOption: (args) => {
+      dispatch(openNewEntityModal(args));
+    },
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(TabActivities);

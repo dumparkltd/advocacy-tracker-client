@@ -487,6 +487,7 @@ theme.global = {
     },
     border: {
       light: '#CECED2',
+      lighter: '#f1f0f1',
       dark: '#FFFFFF',
     },
     private: '#DA1D52',
