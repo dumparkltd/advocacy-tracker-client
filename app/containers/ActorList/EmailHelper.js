@@ -101,7 +101,7 @@ export function EmailHelper({
           You can use the filter options to identify contacts without or invalid email addresses
         </TextNote>
       )}
-      {valid.size && valid.size > 0 && (
+      {valid && valid.size > 0 && (
         <Box margin={{ top: 'medium' }}>
           <TextHeading>
             {`Select and copy email address of ${valid.size} contacts`}
