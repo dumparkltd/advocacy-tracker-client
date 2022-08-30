@@ -493,6 +493,7 @@ theme.global = {
     private: '#DA1D52',
     archived: '#00728F',
     draft: '#BCB9B8',
+    dark: '#1c2121',
   },
   edgeSize: {
     hair: '1px',

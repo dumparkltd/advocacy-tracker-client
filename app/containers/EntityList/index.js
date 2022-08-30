@@ -310,8 +310,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         {
           title: 'Edit selected',
           onClick: (evt) => this.onShowEditOptions(evt),
-          icon: <Edit />,
+          icon: <Edit color="white" size="xxsmall" />,
           type: 'listOption',
+          active: true,
           isManager,
         },
       ];

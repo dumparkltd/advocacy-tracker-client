@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Icon from 'components/Icon';
 import appMessages from 'containers/App/messages';
-
+import { Box, Text } from 'grommet';
 import ButtonDefaultWithIcon from '../ButtonDefaultWithIcon';
 import ButtonDefault from '../ButtonDefault';
 import ButtonSubmit from '../ButtonSubmit';
@@ -18,6 +18,7 @@ class ButtonFactory extends React.PureComponent { // eslint-disable-line react/p
     const { button, args } = this.props;
     const { intl } = this.context;
     switch (button.type) {
+      case 'listOption':
       case 'primary':
         return (
           <ButtonDefault
@@ -26,7 +27,13 @@ class ButtonFactory extends React.PureComponent { // eslint-disable-line react/p
             disabled={button.disabled}
             inactive={!button.active}
           >
-            {button.title}
+            {button.icon && (
+              <Box align="center" direction="row" gap="small">
+                {button.icon}
+                <Text>{button.title}</Text>
+              </Box>
+            )}
+            {!button.icon && button.title}
           </ButtonDefault>
         );
       case 'secondary':

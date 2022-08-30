@@ -12,8 +12,8 @@ const getActiveHoverBackground = (disabled) => disabled
   : palette('buttonDefaultHover', 1);
 
 // eslint-disable no-nested-ternary
+// letter-spacing: 1px;
 const ButtonDefault = styled(Button)`
-  letter-spacing: 1px;
   color: ${(props) => props.inactive
     ? palette('buttonToggleInactive', 0)
     : palette('buttonDefault', 0)
@@ -33,7 +33,7 @@ const ButtonDefault = styled(Button)`
   }};
   border-radius: 999px;
   border: 1px solid ${({ theme, inactive }) => !inactive ? palette('buttonDefault', 1) : theme.global.colors['light-4']};
-  padding: 0.4em 1.2em;
+  padding: 0.3em 1em;
   cursor: ${(props) => props.disabled ? 'default' : 'pointer'};
   &:hover {
     color: ${(props) => props.inactive
@@ -55,7 +55,7 @@ const ButtonDefault = styled(Button)`
   }};
   }
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: 0.5em 1.75em;
+    padding: 0.3em 1.2em;
   }
 `;
 

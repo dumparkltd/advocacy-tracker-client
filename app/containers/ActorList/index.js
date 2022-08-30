@@ -193,7 +193,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
             this.onSetEmailEntities(selectedEntities);
           }
         },
-        icon: <MailOption />,
+        icon: <MailOption color="dark" size="xxsmall" />,
         type: 'listOption',
         isManager,
       });
