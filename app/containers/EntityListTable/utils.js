@@ -280,7 +280,7 @@ const getSingleRelatedValueFromAttributes = (relatedEntity) => relatedEntity
   : null;
 
 
-export const prepareEntities = ({
+export const prepareEntityRows = ({
   entities,
   columns,
   entityIdsSelected,
