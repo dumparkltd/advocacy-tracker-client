@@ -504,14 +504,14 @@ function mapDispatchToProps(
         // const validCategories = actortypeTaxonomies && actortypeTaxonomies
         //   .map((actortypet) => actortypet.get('categories').keySeq())
         //   .valueSeq()
-        //   .flatten();
+        //   .flatten(true);
         // get list of selected categories by taxonomy,
         // filter by valid categories
         const selectedCategories = formData
           .get('associatedTaxonomies')
           .map(getCheckedValuesFromOptions)
           .valueSeq()
-          .flatten();
+          .flatten(true);
           // .filter((id) => !validCategories || validCategories.includes(id));
         // const categoryIds =
         saveData = saveData.set(

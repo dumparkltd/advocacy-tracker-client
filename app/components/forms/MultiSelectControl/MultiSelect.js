@@ -298,7 +298,7 @@ class MultiSelect extends React.Component {
     // get all actually connected categories from connections
     const optionTagIds = options
       .map((option) => option.get('tags'))
-      .flatten()
+      .flatten(true)
       .toSet()
       .toList();
 

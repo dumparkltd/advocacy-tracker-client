@@ -366,7 +366,7 @@ export const prepareEntityRows = ({
             };
           case 'actionsSimple':
             attribute = col.actions || 'actions';
-            temp = entity.get(attribute) || (entity.get(`${attribute}ByType`) && entity.get(`${attribute}ByType`).flatten());
+            temp = entity.get(attribute) || (entity.get(`${attribute}ByType`) && entity.get(`${attribute}ByType`).flatten(true));
             relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
             return {
               ...memoEntity,
@@ -381,7 +381,7 @@ export const prepareEntityRows = ({
               },
             };
           case 'targets':
-            temp = entity.get('targets') || (entity.get('targetsByType') && entity.get('targetsByType').flatten());
+            temp = entity.get('targets') || (entity.get('targetsByType') && entity.get('targetsByType').flatten(true));
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -437,7 +437,7 @@ export const prepareEntityRows = ({
             };
           case 'actors':
           case 'userActors':
-            temp = entity.get('actors') || (entity.get('actorsByType') && entity.get('actorsByType').flatten());
+            temp = entity.get('actors') || (entity.get('actorsByType') && entity.get('actorsByType').flatten(true));
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -466,7 +466,7 @@ export const prepareEntityRows = ({
               },
             };
           case 'members':
-            temp = entity.get('members') || (entity.get('membersByType') && entity.get('membersByType').flatten());
+            temp = entity.get('members') || (entity.get('membersByType') && entity.get('membersByType').flatten(true));
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -481,7 +481,7 @@ export const prepareEntityRows = ({
               },
             };
           case 'associations':
-            temp = entity.get('associations') || (entity.get('associationsByType') && entity.get('associationsByType').flatten());
+            temp = entity.get('associations') || (entity.get('associationsByType') && entity.get('associationsByType').flatten(true));
 
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
@@ -530,8 +530,11 @@ export const prepareEntityRows = ({
             };
           case 'actorActions':
             temp = entity.get(col.actions)
-              || (entity.get(`${col.actions}ByType`) && entity.get(`${col.actions}ByType`).flatten());
+              || (entity.get(`${col.actions}ByType`) && entity.get(`${col.actions}ByType`).flatten(true));
+            console.log('actorActions-entity', entity && entity.toJS());
+            console.log('actorActions-temp', temp && temp.toJS());
             relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
+            console.log('actorActions-relatedEntities', relatedEntities && relatedEntities.toJS());
             return {
               ...memoEntity,
               [col.id]: {
@@ -567,7 +570,7 @@ export const prepareEntityRows = ({
           case 'indicatorActions':
           case 'userActions':
             temp = entity.get('actions')
-              || (entity.get('actionsByType') && entity.get('actionsByType').flatten());
+              || (entity.get('actionsByType') && entity.get('actionsByType').flatten(true));
             relatedEntities = temp && getRelatedEntities(
               temp,
               connections.get(API.ACTIONS),
@@ -593,7 +596,7 @@ export const prepareEntityRows = ({
                 .toList()
                 .toSet();
             }
-            relatedEntities = getRelatedEntities(relatedEntityIds.flatten(), connections.get('measures'), col);
+            relatedEntities = getRelatedEntities(relatedEntityIds.flatten(true), connections.get('measures'), col);
             return {
               ...memoEntity,
               [col.id]: {

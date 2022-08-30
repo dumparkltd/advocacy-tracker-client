@@ -1943,8 +1943,8 @@ export const selectActorsWithPositions = createSelector(
           // combine direct and indirect statements
           if (actorStatementsAsMemberByGroup) {
             actorStatements = actorStatements
-              ? actorStatements.concat(actorStatementsAsMemberByGroup.flatten().toList()).toSet()
-              : actorStatementsAsMemberByGroup.flatten().toList().toSet();
+              ? actorStatements.concat(actorStatementsAsMemberByGroup.flatten(true).toList()).toSet()
+              : actorStatementsAsMemberByGroup.flatten(true).toList().toSet();
           }
           return actor
             .set('statements', actorStatements)
