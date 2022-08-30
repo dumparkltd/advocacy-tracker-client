@@ -6,15 +6,10 @@ import {
   getEntityTitle,
   getEntityReference,
   getCategoryShortTitle,
-  checkActionAttribute,
-  checkActionRequired,
-  checkActorAttribute,
-  checkActorRequired,
-  checkResourceAttribute,
-  checkResourceRequired,
 } from 'utils/entities';
+import qe from 'utils/quasi-equals';
 
-import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
+import { getCheckedValuesFromOptions, getCheckedOptions } from 'components/forms/MultiSelectControl';
 import validateDateFormat from 'components/forms/validators/validate-date-format';
 import validateRequired from 'components/forms/validators/validate-required';
 import validateNumber from 'components/forms/validators/validate-number';
@@ -39,7 +34,8 @@ export const entityOption = (entity, defaultToId, hasTags) => Map({
   label: getEntityTitle(entity),
   reference: getEntityReference(entity, defaultToId),
   description: entity.getIn(['attributes', 'description']),
-  checked: !!entity.get('associated'),
+  checked: !!entity.get('associated'), // convert to boolean
+  association: !!entity.get('associated') && entity.get('association'),
   tags: hasTags && entity.get('categories'),
   draft: entity.getIn(['attributes', 'draft']),
 });
@@ -129,7 +125,13 @@ export const renderActionControl = (entities, taxonomies, onCreateOption, contex
       : null,
   }
   : null;
-export const renderIndicatorControl = (entities, onCreateOption, contextIntl) => entities
+export const renderIndicatorControl = ({
+  entities,
+  // onCreateOption,
+  contextIntl,
+  connections,
+  connectionAttributes,
+}) => entities
   ? {
     id: 'indicators',
     model: '.associatedIndicators',
@@ -139,6 +141,8 @@ export const renderIndicatorControl = (entities, onCreateOption, contextIntl) =>
     options: entityOptions(entities, true),
     advanced: true,
     selectAll: true,
+    connections,
+    connectionAttributes,
     // onCreate: onCreateOption
     //   ? () => onCreateOption({ path: API.INDICATORS })
     //   : null,
@@ -314,13 +318,14 @@ export const renderAssociationsByActortypeControl = (
   })
   : null;
 
-export const renderActionsByActiontypeControl = (
+export const renderActionsByActiontypeControl = ({
   entitiesByActiontype,
   taxonomies,
   onCreateOption,
   contextIntl,
+  connectionAttributesForType,
   model = 'associatedActionsByActiontype',
-) => entitiesByActiontype
+}) => entitiesByActiontype
   ? entitiesByActiontype.reduce(
     (controls, entities, typeid) => controls.concat({
       id: `actions.${typeid}`,
@@ -332,6 +337,7 @@ export const renderActionsByActiontypeControl = (
       options: entityOptions(entities),
       advanced: true,
       selectAll: true,
+      connectionAttributes: connectionAttributesForType && connectionAttributesForType(typeid),
       tagFilterGroups: makeTagFilterGroups(taxonomies, contextIntl),
       onCreate: onCreateOption
         ? () => onCreateOption({
@@ -481,6 +487,18 @@ const getAssociatedEntities = (entities) => entities
   )
   : Map();
 
+const getAssociations = (entities) => entities
+  ? entities.reduce(
+    (entitiesAssociated, entity) => {
+      if (entity && entity.get('associated')) {
+        return entitiesAssociated.set(entity.get('id'), entity);
+      }
+      return entitiesAssociated;
+    },
+    Map(),
+  )
+  : Map();
+
 const getAssociatedCategories = (taxonomy) => taxonomy.get('categories')
   ? getAssociatedEntities(taxonomy.get('categories'))
   : Map();
@@ -520,36 +538,100 @@ export const getConnectionUpdatesFromFormData = ({
   connectionAttribute,
   createConnectionKey,
   createKey,
+  connectionAttributes,
 }) => {
   let formConnectionIds = List();
+  let formConnections = List();
   if (formData) {
     if (Array.isArray(connectionAttribute)) {
+      // store associated Actions as [ [action.id] ]
       formConnectionIds = getCheckedValuesFromOptions(formData.getIn(connectionAttribute));
+      // store associated Actions as [ action ]
+      formConnections = getCheckedOptions(formData.getIn(connectionAttribute));
     } else {
       formConnectionIds = getCheckedValuesFromOptions(formData.get(connectionAttribute));
+      formConnections = getCheckedOptions(formData.get(connectionAttribute));
     }
   }
   // store associated Actions as { [action.id]: [association.id], ... }
-  const associatedConnections = getAssociatedEntities(connections);
-  return Map({
-    delete: associatedConnections.reduce(
-      (associatedIds, associatedId, id) => !formConnectionIds.includes(id)
-        ? associatedIds.push(associatedId)
-        : associatedIds,
-      List()
-    ),
-    create: formConnectionIds.reduce(
-      (payloads, id) => !associatedConnections.has(id)
-        ? payloads.push(Map({
-          [createConnectionKey]: id,
-          [createKey]: formData.get('id'),
-        }))
-        : payloads,
+  const previousConnectionIds = getAssociatedEntities(connections);
+  // store associated Actions as { [action.id]: association, ... }
+  const previousConnections = getAssociations(connections);
+  // console.log('previousConnections', previousConnections && previousConnections.toJS())
+  // console.log('previousConnectionIds', previousConnectionIds && previousConnectionIds.toJS())
+  // console.log('previousConnections', previousConnections && previousConnections.toJS())
+  // console.log('formConnectionIds', formConnectionIds && formConnectionIds.toJS())
+  // console.log('formConnections', formConnections && formConnections.toJS())
+
+  // connection ids to be deleted / removed in formData
+  const deleteListOfIds = previousConnectionIds.reduce(
+    (associatedIds, associationId, id) => !formConnectionIds.includes(id)
+      ? associatedIds.push(associationId)
+      : associatedIds,
+    List()
+  );
+
+  // new connections / added in formData
+  const createList = formConnections.reduce(
+    (payloads, connection) => {
+      const id = connection.get('value');
+      let payload = connection.get('association') || Map();
+      if (!previousConnectionIds.has(id)) {
+        payload = payload.set(createConnectionKey, id);
+        if (createKey) {
+          payload = payload.set(createKey, formData.get('id'));
+        }
+        return payloads.push(payload);
+      }
+      return payloads;
+    },
+    List(),
+  );
+
+  const updateList = connectionAttributes
+    ? formConnections.reduce(
+      (payloads, connection) => {
+        const id = connection.get('value') && connection.get('value').toString();
+        if (id && previousConnectionIds.has(id)) {
+          const previousConnection = previousConnections.get(id);
+          const attributeChanges = connectionAttributes.reduce(
+            (memo, attribute) => {
+              const previousValue = previousConnection.getIn(['association', attribute]);
+              const formValue = connection.getIn(['association', attribute]);
+              if (!qe(previousValue, formValue)) {
+                return {
+                  ...memo,
+                  [attribute]: formValue,
+                };
+              }
+              return memo;
+            },
+            {},
+          );
+
+          if (Object.keys(attributeChanges).length > 0 && previousConnection.get('association')) {
+            return payloads.push(
+              Map({
+                id: previousConnectionIds.get(id),
+                attributes: {
+                  ...previousConnection.get('association').toJS(),
+                  ...attributeChanges,
+                },
+              })
+            );
+          }
+        }
+        return payloads;
+      },
       List(),
-    ),
+    )
+    : List();
+  return Map({
+    delete: deleteListOfIds,
+    create: createList,
+    update: updateList,
   });
 };
-
 
 // only show the highest rated role (lower role ids means higher)
 export const getHighestUserRoleId = (roles) => roles.reduce((currentHighestRoleId, role) => role.get('associated') && parseInt(role.get('id'), 10) < parseInt(currentHighestRoleId, 10)
@@ -840,286 +922,4 @@ export const getFormField = ({
     field.errorMessages.required = formatMessage(appMessages.forms.fieldRequired);
   }
   return field;
-};
-
-const getCategoryFields = (args, formatMessage) => ({
-  header: {
-    main: [{ // fieldGroup
-      fields: [
-        getTitleFormField(formatMessage),
-      ],
-    }],
-    aside: args.taxonomy && args.taxonomy.getIn(['attributes', 'tags_users'])
-      ? [{
-        fields: [
-          getCheckboxField(formatMessage, 'user_only'),
-          getStatusField(formatMessage),
-          getStatusField(formatMessage, 'private'),
-        ],
-      }]
-      : [{
-        fields: [
-          getStatusField(formatMessage),
-          getStatusField(formatMessage, 'private'),
-        ],
-      }],
-  },
-  body: {
-    main: [{
-      fields: [getMarkdownFormField(formatMessage)],
-    }],
-    aside: [{
-      fields: [
-        (args.categoryParentOptions && args.parentTaxonomy)
-          ? renderParentCategoryControl(
-            args.categoryParentOptions,
-            getEntityTitle(args.parentTaxonomy),
-          )
-          : null,
-      ],
-    }],
-  },
-});
-
-const getActorFields = ({ typeId }, formatMessage) => ({
-  header: {
-    main: [{ // fieldGroup
-      fields: [
-        checkActorAttribute(typeId, 'code') && getCodeFormField(
-          formatMessage,
-          'code',
-          checkActorRequired(typeId, 'code'),
-        ),
-        checkActorAttribute(typeId, 'prefix') && getCodeFormField(
-          formatMessage,
-          'prefix',
-          checkActorRequired(typeId, 'prefix'),
-        ),
-        checkActorAttribute(typeId, 'title') && getTitleFormField(
-          formatMessage,
-          'title',
-          'title',
-          checkActorRequired(typeId, 'title'),
-        ),
-        checkActorAttribute(typeId, 'name') && getTitleFormField(
-          formatMessage,
-          'title',
-          'title',
-          checkActorRequired(typeId, 'name'),
-          'name' // label
-        ),
-      ],
-    }],
-    aside: [{ // fieldGroup
-      fields: [
-        getStatusField(formatMessage),
-        getStatusField(formatMessage, 'private'),
-      ],
-    }],
-  },
-  body: {
-    main: [{
-      fields: [
-        checkActorAttribute(typeId, 'description') && getMarkdownFormField(
-          formatMessage,
-          checkActorRequired(typeId, 'description'),
-          'description',
-        ),
-        checkActorAttribute(typeId, 'activity_summary') && getMarkdownFormField(
-          formatMessage,
-          checkActorRequired(typeId, 'activity_summary'),
-          'activity_summary',
-        ),
-      ],
-    }],
-    aside: [{ // fieldGroup
-      fields: [
-        checkActorAttribute(typeId, 'address') && getTextareaField(formatMessage, 'address', checkActorRequired(typeId, 'address')),
-        checkActorAttribute(typeId, 'phone') && getTextFormField(formatMessage, 'phone', checkActorRequired(typeId, 'phone')),
-        checkActorAttribute(typeId, 'email') && getEmailField(formatMessage, checkActorRequired(typeId, 'email')),
-        checkActorAttribute(typeId, 'url') && getLinkFormField(
-          formatMessage,
-          checkActorRequired(typeId, 'url'),
-          'url',
-        ),
-      ],
-    },
-    { // fieldGroup
-      fields: [
-        checkActorAttribute(typeId, 'gdp') && getAmountFormField(
-          formatMessage,
-          checkActorRequired(typeId, 'gdp'),
-          'gdp',
-        ),
-        checkActorAttribute(typeId, 'population') && getNumberFormField(
-          formatMessage,
-          checkActorRequired(typeId, 'population'),
-          'population',
-        ),
-      ],
-    }],
-  },
-});
-
-const getActionFields = ({ typeId }, formatMessage) => ({
-  header: {
-    main: [{ // fieldGroup
-      fields: [
-        checkActionAttribute(typeId, 'code') && getCodeFormField(
-          formatMessage,
-          'code',
-          checkActionRequired(typeId, 'code'),
-        ),
-        checkActionAttribute(typeId, 'title') && getTitleFormField(
-          formatMessage,
-          'title',
-          'title',
-          checkActionRequired(typeId, 'title'),
-        ),
-      ],
-    }],
-    aside: [{ // fieldGroup
-      fields: [
-        getStatusField(formatMessage),
-        getStatusField(formatMessage, 'private'),
-      ],
-    }],
-  },
-  body: {
-    main: [{
-      fields: [
-        checkActionAttribute(typeId, 'description') && getMarkdownFormField(
-          formatMessage,
-          checkActionRequired(typeId, 'description'),
-          'description',
-        ),
-        checkActionAttribute(typeId, 'comment') && getMarkdownFormField(
-          formatMessage,
-          checkActionRequired(typeId, 'comment'),
-          'comment',
-        ),
-      ],
-    }],
-    aside: [
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'date_start') && getDateField(
-            formatMessage,
-            'date_start',
-            checkActionRequired(typeId, 'date_start'),
-          ),
-          checkActionAttribute(typeId, 'date_end') && getDateField(
-            formatMessage,
-            'date_end',
-            checkActionRequired(typeId, 'date_end'),
-          ),
-          checkActionAttribute(typeId, 'date_comment') && getTextareaField(
-            formatMessage,
-            'date_comment',
-            checkActionRequired(typeId, 'date_comment'),
-          ),
-        ],
-      },
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'url') && getLinkFormField(
-            formatMessage,
-            checkActionRequired(typeId, 'url'),
-            'url',
-          ),
-        ],
-      },
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'amount') && getAmountFormField(
-            formatMessage,
-            checkActionRequired(typeId, 'amount'),
-            'amount',
-          ),
-          checkActionAttribute(typeId, 'amount_comment') && getFormField({
-            formatMessage,
-            required: checkActionRequired(typeId, 'amount_comment'),
-            attribute: 'amount_comment',
-            controlType: 'input',
-          }),
-        ],
-      },
-    ],
-  },
-});
-const getResourceFields = ({ typeId }, formatMessage) => ({
-  header: {
-    main: [{ // fieldGroup
-      fields: [
-        checkResourceAttribute(typeId, 'title') && getTitleFormField(
-          formatMessage,
-          'title',
-          'title',
-          checkResourceRequired(typeId, 'title'),
-        ),
-      ],
-    }],
-    aside: [{ // fieldGroup
-      fields: [
-        getStatusField(formatMessage),
-        getStatusField(formatMessage, 'private'),
-      ],
-    }],
-  },
-  body: {
-    main: [
-      {
-        fields: [
-          checkResourceAttribute(typeId, 'url') && getLinkFormField(
-            formatMessage,
-            checkResourceRequired(typeId, 'url'),
-            'url',
-          ),
-        ],
-      },
-      {
-        fields: [
-          checkResourceAttribute(typeId, 'description') && getMarkdownFormField(
-            formatMessage,
-            checkResourceRequired(typeId, 'description'),
-            'description',
-          ),
-          checkResourceAttribute(typeId, 'status') && getMarkdownFormField(
-            formatMessage,
-            checkResourceRequired(typeId, 'status'),
-            'status',
-          ),
-        ],
-      },
-    ],
-    aside: [{ // fieldGroup
-      fields: [
-        checkResourceAttribute(typeId, 'publication_date') && getDateField(
-          formatMessage,
-          'publication_date',
-          checkResourceRequired(typeId, 'publication_date'),
-        ),
-        checkResourceAttribute(typeId, 'access_date') && getDateField(
-          formatMessage,
-          'access_date',
-          checkResourceRequired(typeId, 'access_date'),
-        ),
-      ],
-    }],
-  },
-});
-
-export const getEntityAttributeFields = (path, args, contextIntl) => {
-  switch (path) {
-    case API.CATEGORIES:
-      return getCategoryFields(args.categories, contextIntl.formatMessage);
-    case API.ACTIONS:
-      return getActionFields(args, contextIntl.formatMessage);
-    case API.ACTORS:
-      return getActorFields(args, contextIntl.formatMessage);
-    case API.RESOURCES:
-      return getResourceFields(args, contextIntl.formatMessage);
-    default:
-      return {};
-  }
 };

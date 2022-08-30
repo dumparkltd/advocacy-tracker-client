@@ -5,7 +5,8 @@ import { Box, Text } from 'grommet';
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import Icon from 'components/Icon';
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
-
+import InfoOverlay from 'components/InfoOverlay';
+import CellHeaderInfoOverlay from './CellHeaderInfoOverlay';
 
 const SortButton = styled(ButtonFlatIconOnly)`
   color: inherit;
@@ -21,14 +22,20 @@ export function CellHeaderPlain({ column }) {
   );
   const { align = 'start' } = column;
   return (
-    <Box direction="row" align="center" justify={align}>
-      <Box>
-        <Text weight={500} size="small" textAlign={align} wordBreak="keep-all">
-          {column.label || column.title}
-        </Text>
-      </Box>
+    <Box direction="row" align="center" justify={align} flex={false}>
+      <Text weight={500} size="small" textAlign={align} wordBreak="keep-all">
+        {column.label || column.title}
+      </Text>
+      {column.info && (
+        <InfoOverlay
+          tooltip
+          icon="question"
+          padButton={{ horizontal: 'xsmall' }}
+          content={<CellHeaderInfoOverlay info={column.info} />}
+        />
+      )}
       {column.onSort && (
-        <Box pad={{ left: 'xxsmall' }}>
+        <Box pad={{ left: 'xxsmall' }} flex={false}>
           <SortButton
             onClick={() => {
               if (column.sortActive) {
@@ -37,7 +44,7 @@ export function CellHeaderPlain({ column }) {
                 );
                 column.onSort(column.id || column.type, nextSortOrderOption.value);
               } else {
-                column.onSort(column.id || column.type, sortOrderOption.order);
+                column.onSort(column.id || column.type, sortOrderOption.value);
               }
             }}
           >

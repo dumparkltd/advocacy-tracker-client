@@ -19,6 +19,9 @@ const initialState = fromJS({
   saveSending: false,
   saveSuccess: false,
   saveError: false,
+  saveSendingAll: {},
+  saveSuccessAll: {},
+  saveErrorAll: {},
   deleteSending: false,
   deleteSuccess: false,
   deleteError: false,
@@ -26,29 +29,57 @@ const initialState = fromJS({
 });
 
 export const entityFormReducer = (state = initialState, action) => {
+  let res = state;
   switch (action.type) {
     case LOGOUT_SUCCESS:
     case LOCATION_CHANGE:
       return initialState;
     case SAVE_SENDING:
-      return state
+      res = res
         .set('saveSending', true)
         .set('saveSuccess', false)
         .set('saveError', false);
+      if (action.data) {
+        res = res
+          .setIn(['saveSendingAll', action.data.timestamp], true)
+          .setIn(['saveSuccessAll', action.data.timestamp], false)
+          .setIn(['saveErrorAll', action.data.timestamp], false);
+      }
+      return res;
     case SAVE_SUCCESS:
-      return state
+      res = res
         .set('saveSending', false)
         .set('saveSuccess', true);
+      if (action.data) {
+        res = res
+          .setIn(['saveSendingAll', action.data.timestamp], false)
+          .setIn(['saveSuccessAll', action.data.timestamp], true);
+      }
+      return res;
     case SAVE_ERROR:
-      return state
+      res = res
         .set('saveSending', false)
         .set('saveSuccess', false)
         .set('saveError', checkResponseError(action.error));
+      if (action.data) {
+        res = res
+          .setIn(['saveSendingAll', action.data.timestamp], false)
+          .setIn(['saveSuccessAll', action.data.timestamp], false)
+          .setIn(['saveErrorAll', action.data.timestamp], checkResponseError(action.error));
+      }
+      return res;
     case SAVE_ERROR_DISMISS:
-      return state
+      res = res
         .set('saveSending', false)
         .set('saveSuccess', false)
         .set('saveError', false);
+      if (action.data) {
+        res = res
+          .setIn(['saveSendingAll', action.data.timestamp], false)
+          .setIn(['saveSuccessAll', action.data.timestamp], false)
+          .setIn(['saveErrorAll', action.data.timestamp], false);
+      }
+      return res;
     case DELETE_SENDING:
       return state
         .set('deleteSending', true)

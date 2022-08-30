@@ -26,9 +26,8 @@ import {
 } from 'containers/App/selectors';
 
 import { checkActionAttribute } from 'utils/entities';
-import qe from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
-import { ROUTES, ACTORTYPES } from 'themes/config';
+import { ROUTES } from 'themes/config';
 
 import EntityList from 'containers/EntityList';
 
@@ -88,7 +87,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
       supTitle: intl.formatMessage(messages.pageTitle),
       actions: [],
       info: appMessages.actortypes_info[typeId]
-        && (qe(typeId, ACTORTYPES.REG) || qe(typeId, ACTORTYPES.ORG))
+        && intl.formatMessage(appMessages.actiontypes_info[typeId]).trim() !== ''
         ? {
           title: 'Please note',
           content: intl.formatMessage(appMessages.actortypes_info[typeId]),

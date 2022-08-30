@@ -1,12 +1,13 @@
 import { List } from 'immutable';
 import { find, forEach } from 'lodash/collection';
 import { upperFirst } from 'lodash/string';
+import appMessages from 'containers/App/messages';
+
 import { lowerCase } from 'utils/string';
 import isNumber from 'utils/is-number';
 import asArray from 'utils/as-array';
 import asList from 'utils/as-list';
-
-import appMessages from 'containers/App/messages';
+import qe from 'utils/quasi-equals';
 
 import {
   testEntityCategoryAssociation,
@@ -34,8 +35,8 @@ export const makeActiveFilterOptions = ({
   isManager,
   includeMembers,
 }) => {
-  // create filterOptions
   switch (activeFilterOption.group) {
+  // create filterOptions
     case 'taxonomies':
       return makeTaxonomyFilterOptions(
         entities,
@@ -407,9 +408,7 @@ export const makeGroupedConnectionFilterOptions = (
             // if not taxonomy already considered
               // optionConnections = optionConnections.push(connection);
               // if category already added
-              if (filterOptions.options[connectedAttributeId]) {
-                filterOptions.options[connectedAttributeId].count += 1;
-              } else {
+              if (!filterOptions.options[connectedAttributeId]) {
                 const value = `${typeId}:${connectedAttributeId}`;
                 const reference = showEntityReference && getEntityReference(connection);
                 const label = getEntityTitle(connection, option.labels, contextIntl);
@@ -612,6 +611,246 @@ export const makeGroupedConnectionFilterOptions = (
   filterOptions.tagFilterGroups = option && makeTagFilterGroups(connectedTaxonomies, contextIntl);
   return filterOptions;
 };
+const getConnectionAttributeFilterOptions = ({
+  filterOptions,
+  option,
+  entities,
+  messages,
+  contextIntl,
+  locationQuery,
+}) => {
+  const resultOptions = {
+    ...filterOptions,
+    messagePrefix: messages.titlePrefix,
+    message: option.message,
+  };
+  const {
+    path,
+    options,
+    attribute,
+    optionMessages,
+  } = option;
+  const locationQueryValue = locationQuery.get('xwhere');
+  if (entities.size === 0) {
+    if (locationQueryValue) {
+      asList(locationQueryValue).forEach((lqv) => {
+        // if no entities found show any active options
+        const [queryPath, queryAttributeValue] = lqv.split('|');
+        const [queryAttribute, queryValue] = queryAttributeValue.split(':');
+        if (path === queryPath && attribute === queryAttribute) {
+          const value = queryValue;
+          const attributeOption = options[value];
+          if (attributeOption) {
+            resultOptions.options[value] = {
+              value: lqv,
+              label: contextIntl.formatMessage(appMessages[optionMessages][value]),
+              query: 'xwhere',
+              checked: true,
+            };
+          }
+        }
+      });
+    }
+  } else {
+    resultOptions.options = Object.values(options).reduce(
+      (memo, o) => {
+        if (entities.some(
+          (entity) => {
+            const connectionAttributes = entity.get(path);
+            return connectionAttributes && connectionAttributes.some(
+              (ca) => qe(ca.get(attribute), o.value)
+                || (qe(o.value, 0) && !ca.get(attribute)),
+            );
+          }
+        )) {
+          const queryValue = `${path}|${attribute}:${o.value}`;
+          const checked = asList(locationQueryValue).indexOf(queryValue) > -1;
+          return ({
+            ...memo,
+            [o.value]: {
+              value: queryValue,
+              label: contextIntl.formatMessage(appMessages[optionMessages][o.value]),
+              checked,
+              query: 'xwhere',
+            },
+          });
+        }
+        return memo;
+      },
+      {}
+    ); // reduce
+  }
+  return resultOptions;
+};
+
+const getConnectionFilterOptions = ({
+  filterOptions,
+  option,
+  entities,
+  isManager,
+  messages,
+  contextIntl,
+  locationQuery,
+  connections,
+}) => {
+  const resultOptions = {
+    ...filterOptions,
+    messagePrefix: messages.titlePrefix,
+    message: option.message,
+    search: option.search,
+  };
+  const { query, path } = option;
+  const showEntityReference = getShowEntityReference(option.entityType, null, isManager);
+  const entityType = option.entityTypeAs || option.entityType;
+  let locationQueryValue = locationQuery.get(query);
+  // if no entities found show any active options
+  if (entities.size === 0) {
+    if (locationQueryValue) {
+      asList(locationQueryValue).forEach((queryValue) => {
+        const value = queryValue.split('>')[0];
+        const connection = connections.get(path) && connections.getIn([path, value]);
+        const reference = showEntityReference && connection && getEntityReference(connection);
+        resultOptions.options[value] = {
+          reference,
+          label: connection ? getEntityTitle(connection, option.labels, contextIntl) : upperFirst(value),
+          info: connection && connection.getIn(['attributes', 'description']),
+          showCount: true,
+          value,
+          count: 0,
+          query,
+          checked: true,
+          tags: connection ? connection.get('categories') : null,
+          draft: connection && connection.getIn(['attributes', 'draft']),
+        };
+      });
+    }
+    // also check for active without options
+    if (locationQuery.get('without')) {
+      locationQueryValue = locationQuery.get('without');
+      asList(locationQueryValue).forEach((queryValue) => {
+        if (query === queryValue) {
+          resultOptions.options[queryValue] = {
+            messagePrefix: messages.without,
+            label: option.label,
+            message: option.message,
+            showCount: true,
+            labelEmphasis: true,
+            value: queryValue,
+            count: 0,
+            query: 'without',
+            checked: true,
+          };
+        }
+      });
+    }
+  } else {
+    entities.forEach((entity) => {
+      // FK connection (1 : n)
+      if (option.attribute) {
+        let connection;
+        const connectedAttributeId = entity.getIn(['attributes', 'parent_id']);
+        if (connectedAttributeId) {
+          connection = connections.getIn([path, connectedAttributeId.toString()]);
+          if (connection) {
+          // if not taxonomy already considered
+            // optionConnections = optionConnections.push(connection);
+            // if category already added
+            if (filterOptions.options[connectedAttributeId]) {
+              resultOptions.options[connectedAttributeId].count += 1;
+            } else {
+              const value = connectedAttributeId;
+              const reference = showEntityReference && getEntityReference(connection);
+              const label = getEntityTitle(connection, option.labels, contextIntl);
+              resultOptions.options[connectedAttributeId] = {
+                reference,
+                label,
+                info: connection.getIn(['attributes', 'description']),
+                showCount: true,
+                value,
+                count: 1,
+                query,
+                checked: optionChecked(locationQueryValue, value),
+                tags: connection.get('categories'),
+                draft: connection.getIn(['attributes', 'draft']),
+              };
+            }
+          }
+        }
+        if (!connection) {
+          if (resultOptions.options.without) {
+            // no connection present
+            // add without option
+            resultOptions.options.without.count += 1;
+          } else {
+            const { message } = option;
+            resultOptions.options.without = {
+              messagePrefix: messages.without,
+              label: option.label,
+              message,
+              showCount: true,
+              labelEmphasis: true,
+              value: `att:${option.attribute}`,
+              count: 1,
+              query: 'without',
+              checked: optionChecked(locationQuery.get('without'), `att:${option.attribute}`),
+            };
+          }
+        }
+      // join connection (n : m)
+      } else {
+        let optionConnections = false;
+        const entityConnections = entity.get(entityType);
+        // if entity has connected entities
+        if (entityConnections) {
+          // add connected entities if not present otherwise increase count
+          entityConnections.forEach((connectedId) => {
+            const connection = connections.getIn([entityType, connectedId.toString()]);
+            if (connection && !resultOptions.options[connectedId]) {
+              optionConnections = true;
+              const value = connectedId;
+              const reference = showEntityReference && getEntityReference(connection);
+              const label = getEntityTitle(connection, option.labels, contextIntl);
+              resultOptions.options[connectedId] = {
+                reference,
+                label,
+                info: connection.getIn(['attributes', 'description']),
+                value,
+                count: 1,
+                query,
+                checked: optionChecked(locationQueryValue, value),
+                tags: connection.get('categories'),
+                draft: connection.getIn(['attributes', 'draft']),
+              };
+              // }
+            }
+          });
+        }
+        if (!optionConnections) {
+          if (resultOptions.options.without) {
+            // no connection present
+            // add without option
+            resultOptions.options.without.count += 1;
+          } else {
+            const { message } = option;
+            resultOptions.options.without = {
+              messagePrefix: messages.without,
+              label: option.label,
+              message,
+              showCount: true,
+              labelEmphasis: true,
+              value: entityType,
+              count: 1,
+              query: 'without',
+              checked: optionChecked(locationQuery.get('without'), entityType),
+            };
+          }
+        }
+      }
+    }); // for each entities
+  }
+  return resultOptions;
+};
+
 export const makeConnectionFilterOptions = (
   entities,
   config,
@@ -624,178 +863,54 @@ export const makeConnectionFilterOptions = (
   group,
   isManager,
 ) => {
-  const filterOptions = {
-    groupId: group,
-    options: {},
-    multiple: true,
-    required: false,
-    search: true,
-    advanced: true,
-    selectAll: false,
-  };
+  let filterOptions = {};
   const option = config[group];
   // if option active
   if (option) {
-    // the option path
-    const { query, path } = option;
-    const showEntityReference = getShowEntityReference(option.entityType, null, isManager);
-    const entityType = option.entityTypeAs || option.entityType;
-    filterOptions.messagePrefix = messages.titlePrefix;
-    filterOptions.message = option.message;
-    filterOptions.search = option.search;
-    let locationQueryValue = locationQuery.get(query);
-    // if no entities found show any active options
-    if (entities.size === 0) {
-      if (locationQueryValue) {
-        asList(locationQueryValue).forEach((queryValue) => {
-          const value = queryValue;
-          const connection = connections.get(path) && connections.getIn([path, value]);
-          const reference = showEntityReference && connection && getEntityReference(connection);
-          filterOptions.options[value] = {
-            reference,
-            label: connection ? getEntityTitle(connection, option.labels, contextIntl) : upperFirst(value),
-            info: connection.getIn(['attributes', 'description']),
-            showCount: true,
-            value,
-            count: 0,
-            query,
-            checked: true,
-            tags: connection ? connection.get('categories') : null,
-            draft: connection && connection.getIn(['attributes', 'draft']),
-          };
-        });
-      }
-      // also check for active without options
-      if (locationQuery.get('without')) {
-        locationQueryValue = locationQuery.get('without');
-        asList(locationQueryValue).forEach((queryValue) => {
-          if (query === queryValue) {
-            filterOptions.options[queryValue] = {
-              messagePrefix: messages.without,
-              label: option.label,
-              message: option.message,
-              showCount: true,
-              labelEmphasis: true,
-              value: queryValue,
-              count: 0,
-              query: 'without',
-              checked: true,
-            };
-          }
-        });
-      }
-    } else {
-      entities.forEach((entity) => {
-        // FK connection (1 : n)
-        if (option.attribute) {
-          let connection;
-          const connectedAttributeId = entity.getIn(['attributes', 'parent_id']);
-          if (connectedAttributeId) {
-            connection = connections.getIn([path, connectedAttributeId.toString()]);
-            if (connection) {
-            // if not taxonomy already considered
-              // optionConnections = optionConnections.push(connection);
-              // if category already added
-              if (filterOptions.options[connectedAttributeId]) {
-                filterOptions.options[connectedAttributeId].count += 1;
-              } else {
-                const value = connectedAttributeId;
-                const reference = showEntityReference && getEntityReference(connection);
-                const label = getEntityTitle(connection, option.labels, contextIntl);
-                filterOptions.options[connectedAttributeId] = {
-                  reference,
-                  label,
-                  info: connection.getIn(['attributes', 'description']),
-                  showCount: true,
-                  value,
-                  count: 1,
-                  query,
-                  checked: optionChecked(locationQueryValue, value),
-                  tags: connection.get('categories'),
-                  draft: connection.getIn(['attributes', 'draft']),
-                };
-              }
-            }
-          }
-          if (!connection) {
-            if (filterOptions.options.without) {
-              // no connection present
-              // add without option
-              filterOptions.options.without.count += 1;
-            } else {
-              const { message } = option;
-              filterOptions.options.without = {
-                messagePrefix: messages.without,
-                label: option.label,
-                message,
-                showCount: true,
-                labelEmphasis: true,
-                value: `att:${option.attribute}`,
-                count: 1,
-                query: 'without',
-                checked: optionChecked(locationQuery.get('without'), `att:${option.attribute}`),
-              };
-            }
-          }
-        // join connection (n : m)
-        } else {
-          let optionConnections = List();
-          const entityConnections = entity.get(entityType);
-          // if entity has connected entities
-          if (entityConnections) {
-            // add connected entities if not present otherwise increase count
-            entityConnections.forEach((connectedId) => {
-              const connection = connections.getIn([entityType, connectedId.toString()]);
-              if (connection) {
-                optionConnections = optionConnections.push(connection);
-                // if category already added
-                if (filterOptions.options[connectedId]) {
-                  filterOptions.options[connectedId].count += 1;
-                } else {
-                  const value = connectedId;
-                  const reference = showEntityReference && getEntityReference(connection);
-                  const label = getEntityTitle(connection, option.labels, contextIntl);
-                  filterOptions.options[connectedId] = {
-                    reference,
-                    label,
-                    info: connection.getIn(['attributes', 'description']),
-                    showCount: true,
-                    value,
-                    count: 1,
-                    query,
-                    checked: optionChecked(locationQueryValue, value),
-                    tags: connection.get('categories'),
-                    draft: connection.getIn(['attributes', 'draft']),
-                  };
-                }
-              }
-            });
-          }
-          if (optionConnections.size === 0) {
-            if (filterOptions.options.without) {
-              // no connection present
-              // add without option
-              filterOptions.options.without.count += 1;
-            } else {
-              const { message } = option;
-              filterOptions.options.without = {
-                messagePrefix: messages.without,
-                label: option.label,
-                message,
-                showCount: true,
-                labelEmphasis: true,
-                value: entityType,
-                count: 1,
-                query: 'without',
-                checked: optionChecked(locationQuery.get('without'), entityType),
-              };
-            }
-          }
-        }
-      }); // for each entities
+    // make sure we don't have a "connection-attribute" option
+    if (option.type === activeOptionId) {
+      filterOptions = getConnectionFilterOptions({
+        option,
+        filterOptions: {
+          groupId: group,
+          options: {},
+          multiple: true,
+          required: false,
+          search: true,
+          advanced: true,
+          selectAll: false,
+        },
+        entities,
+        isManager,
+        messages,
+        contextIntl,
+        locationQuery,
+        connections,
+      });
+      filterOptions.tagFilterGroups = option && makeTagFilterGroups(connectedTaxonomies, contextIntl);
+    } else if (
+      option.connectionAttributeFilter
+      && option.connectionAttributeFilter.path === activeOptionId
+    ) {
+      // "connection-attribute" option
+      filterOptions = getConnectionAttributeFilterOptions({
+        filterOptions: {
+          groupId: group,
+          options: {},
+          multiple: true,
+          required: false,
+          search: false,
+          advanced: false,
+          selectAll: false,
+        },
+        option: option.connectionAttributeFilter,
+        entities,
+        messages,
+        contextIntl,
+        locationQuery,
+      });
     }
   }
-  filterOptions.tagFilterGroups = option && makeTagFilterGroups(connectedTaxonomies, contextIntl);
   return filterOptions;
 };
 export const makeAnyWithoutConnectionFilterOptions = (

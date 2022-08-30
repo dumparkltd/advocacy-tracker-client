@@ -51,7 +51,7 @@ class ConnectionsField extends React.PureComponent { // eslint-disable-line reac
           </EmptyHint>
         )}
         {field.onCreate && (
-          <div>
+          <div style={{ textAlign: 'right' }}>
             <ButtonFactory
               button={{
                 type: 'addFlatPrimary',

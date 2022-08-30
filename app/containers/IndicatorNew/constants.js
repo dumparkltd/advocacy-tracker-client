@@ -6,8 +6,6 @@
 import { fromJS } from 'immutable';
 import { API, INDICATOR_FIELDS } from 'themes/config';
 
-export const SAVE = 'impactoss/IndicatorNew/SAVE';
-
 export const DEPENDENCIES = [
   API.USER_ROLES,
   API.CATEGORIES,

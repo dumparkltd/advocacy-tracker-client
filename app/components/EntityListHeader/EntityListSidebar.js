@@ -17,7 +17,7 @@ import SupTitle from 'components/SupTitle';
 
 import Sidebar from 'components/styled/Sidebar';
 import SidebarHeader from 'components/styled/SidebarHeader';
-import MapMemberOption from 'containers/MapContainer/MapInfoOptions/MapMemberOption';
+import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
 import EntityListSidebarGroups from './EntityListSidebarGroups';
 
@@ -43,6 +43,10 @@ const SidebarWrapper = styled.div`
   bottom: 0;
   right: 0;
   z-index: 100;
+  width: 100%;
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+    width: auto;
+  }
 `;
 
 const STATE_INITIAL = {
@@ -130,7 +134,7 @@ export class EntityListSidebar extends React.Component { // eslint-disable-line 
               </Box>
               {memberOption && (
                 <Box margin={{ top: 'small' }}>
-                  <MapMemberOption option={memberOption} />
+                  <MapOption option={memberOption} type="members" />
                 </Box>
               )}
             </SidebarHeader>

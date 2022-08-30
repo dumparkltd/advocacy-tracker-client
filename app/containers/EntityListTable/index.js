@@ -27,6 +27,7 @@ import appMessages from 'containers/App/messages';
 
 import Messages from 'components/Messages';
 import { filterEntitiesByKeywords } from 'utils/entities';
+import { prepSortTarget } from 'utils/sort';
 import qe from 'utils/quasi-equals';
 
 import EntitiesTable from './EntitiesTable';
@@ -35,7 +36,7 @@ import EntityListFooter from './EntityListFooter';
 
 import { getPager } from './pagination';
 import {
-  prepareEntities,
+  prepareEntityRows,
   prepareHeader,
   getListHeaderLabel,
   getSelectedState,
@@ -110,20 +111,23 @@ export function EntityListTable({
   includeMembers,
 }) {
   if (!columns) return null;
+  const sortColumn = columns.find((c) => !!c.sortDefault);
+  const sortDefault = {
+    sort: sortColumn ? sortColumn.sort : 'main',
+    order: sortColumn ? sortColumn.sortOrder : 'asc',
+  };
   const [showAllConnections, setShowAllConnections] = useState(false);
-  const [localSort, setLocalSort] = useState({
-    sort: 'main',
-    order: 'asc',
-  });
+  const [localSort, setLocalSort] = useState(sortDefault);
 
-  const cleanSortOrder = inSingleView ? localSort.order : sortOrder;
-  const cleanSortBy = inSingleView ? localSort.sort : (sortBy || 'main');
+  const cleanSortOrder = inSingleView ? localSort.order : (sortOrder || sortDefault.order);
+  const cleanSortBy = inSingleView ? localSort.sort : (sortBy || sortDefault.sort);
   const cleanOnSort = inSingleView
     ? (sort, order) => setLocalSort({
       sort: sort || cleanSortBy,
       order: order || cleanSortOrder,
     })
     : onSort;
+
   // filter entitities by keyword
   const searchAttributes = (
     config.views
@@ -142,7 +146,7 @@ export function EntityListTable({
   }
   const activeColumns = columns.filter((col) => !col.skip);
   // warning converting List to Array
-  const entityRows = prepareEntities({
+  const entityRows = prepareEntityRows({
     entities: searchedEntities,
     columns: activeColumns,
     config,
@@ -169,9 +173,11 @@ export function EntityListTable({
   // sort entities
   const sortedEntities = entityRows && entityRows.sort(
     (a, b) => {
-      const aSortValue = a[cleanSortBy] && (a[cleanSortBy].sortValue || a[cleanSortBy].value);
+      const aSortValue = a[cleanSortBy]
+        && (a[cleanSortBy].sortValue || a[cleanSortBy].order || a[cleanSortBy].value);
+      const bSortValue = b[cleanSortBy]
+        && (b[cleanSortBy].sortValue || b[cleanSortBy].order || b[cleanSortBy].value);
       const aHasSortValue = aSortValue || isNumber(aSortValue);
-      const bSortValue = b[cleanSortBy] && (b[cleanSortBy].sortValue || b[cleanSortBy].value);
       const bHasSortValue = bSortValue || isNumber(bSortValue);
       // always prefer values over none, regardless of order
       if (aHasSortValue && !bHasSortValue) {
@@ -198,7 +204,9 @@ export function EntityListTable({
             result = aSortValue < bSortValue ? 1 : -1;
           }
         } else {
-          result = aSortValue > bSortValue ? 1 : -1;
+          const aClean = prepSortTarget(aSortValue);
+          const bClean = prepSortTarget(bSortValue);
+          result = aClean > bClean ? 1 : -1;
         }
       }
       return cleanSortOrder === 'desc' ? result * -1 : result;
@@ -282,6 +290,7 @@ export function EntityListTable({
         headerColumnsUtility={headerColumnsUtility}
         memberOption={memberOption}
         subjectOptions={subjectOptions}
+        inSingleView={inSingleView}
       />
       <ListEntitiesMain>
         {entityIdsOnPage.length === 0

@@ -45,7 +45,12 @@ import qe from 'utils/quasi-equals';
 
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { USER_ROLES, API, ROUTES } from 'themes/config';
+import {
+  USER_ROLES,
+  API,
+  ROUTES,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
+} from 'themes/config';
 
 import {
   loadEntitiesIfNeeded,
@@ -63,18 +68,17 @@ import {
   selectReadyForAuthCheck,
   selectIsUserAdmin,
   selectSessionUserId,
+  selectActionIndicatorsForAction,
 } from 'containers/App/selectors';
 
-import Messages from 'components/Messages';
-import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
 
 import appMessages from 'containers/App/messages';
+import FormWrapper from './FormWrapper';
 
 import {
-  selectDomain,
+  selectDomainPage,
   selectViewEntity,
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
@@ -207,7 +211,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     return groups;
   };
 
-  getBodyMainFields = (
+  getBodyMainFields = ({
     entity,
     connectedTaxonomies,
     actorsByActortype,
@@ -216,7 +220,8 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     subActionsByActiontype,
     indicatorOptions,
     onCreateOption,
-  ) => {
+    entityIndicatorConnections,
+  }) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'measuretype_id']);
 
@@ -252,11 +257,28 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       },
     );
     if (indicatorOptions) {
-      const indicatorConnections = renderIndicatorControl(
-        indicatorOptions,
-        null,
-        intl,
-      );
+      let connectionAttributes = [];
+      if (ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId]) {
+        connectionAttributes = [
+          ...connectionAttributes,
+          {
+            attribute: 'supportlevel_id',
+            type: 'select',
+            options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId].map(
+              (level) => ({
+                label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                ...level,
+              }),
+            ),
+          },
+        ];
+      }
+      const indicatorConnections = renderIndicatorControl({
+        entities: indicatorOptions,
+        contextIntl: intl,
+        connections: entityIndicatorConnections,
+        connectionAttributes,
+      });
       if (indicatorConnections) {
         groups.push(
           {
@@ -299,13 +321,13 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       }
     }
     if (subActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        subActionsByActiontype,
-        connectedTaxonomies,
+      const actionConnections = renderActionsByActiontypeControl({
+        entitiesByActiontype: subActionsByActiontype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-        'associatedSubActionsByActiontype',
-      );
+        contextIntl: intl,
+        model: 'associatedSubActionsByActiontype',
+      });
       if (actionConnections) {
         groups.push(
           {
@@ -343,8 +365,23 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
   ) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'measuretype_id']);
-
-    const groups = [ // fieldGroups
+    const groups = [];
+    if (userOptions) {
+      const userConnections = renderUserMultiControl(
+        userOptions,
+        null,
+        intl,
+      );
+      if (userConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.userActions),
+            fields: [userConnections],
+          },
+        );
+      }
+    }
+    groups.push( // fieldGroups
       { // fieldGroup
         fields: [
           checkActionAttribute(typeId, 'url') && getLinkFormField(
@@ -354,6 +391,8 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           ),
         ],
       },
+    );
+    groups.push(
       { // fieldGroup
         fields: [
           checkActionAttribute(typeId, 'date_start') && getDateField(
@@ -373,35 +412,22 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           ),
         ],
       },
+    );
+    groups.push(
       { // fieldGroup
         label: intl.formatMessage(appMessages.entities.taxonomies.plural),
         icon: 'categories',
         fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
       },
-    ];
-    if (userOptions) {
-      const userConnections = renderUserMultiControl(
-        userOptions,
-        null,
-        intl,
-      );
-      if (userConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.userActions),
-            fields: [userConnections],
-          },
-        );
-      }
-    }
+    );
     if (topActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        topActionsByActiontype,
-        connectedTaxonomies,
+      const actionConnections = renderActionsByActiontypeControl({
+        entitiesByActiontype: topActionsByActiontype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-        'associatedTopActionsByActiontype',
-      );
+        contextIntl: intl,
+        model: 'associatedTopActionsByActiontype',
+      });
       if (actionConnections) {
         groups.push(
           {
@@ -418,7 +444,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     const {
       viewEntity,
       dataReady,
-      viewDomain,
+      viewDomainPage,
       taxonomies,
       connectedTaxonomies,
       actorsByActortype,
@@ -431,14 +457,21 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       userOptions,
       isAdmin,
       myId,
+      onErrorDismiss,
+      onServerErrorDismiss,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
+      handleDelete,
+      entityIndicatorConnections,
     } = this.props;
     const { intl } = this.context;
     // const reference = this.props.params.id;
     const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
 
-    const {
-      saveSending, saveError, deleteSending, deleteError, submitValid,
-    } = viewDomain.get('page').toJS();
+    const { saveSending, saveError, deleteSending } = viewDomainPage.toJS();
 
     const type = typeId
       ? intl.formatMessage(appMessages.entities[`actions_${typeId}`].single)
@@ -461,40 +494,16 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
               viewEntity && dataReady
                 ? [{
                   type: 'cancel',
-                  onClick: this.props.handleCancel,
+                  onClick: handleCancel,
                 },
                 {
                   type: 'save',
                   disabled: saveSending,
-                  onClick: () => this.props.handleSubmitRemote('actionEdit.form.data'),
+                  onClick: () => handleSubmitRemote('actionEdit.form.data'),
                 }]
                 : null
             }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {deleteError
-            && <Messages type="error" messages={deleteError} />
-          }
-          {(saveSending || deleteSending || !dataReady)
-            && <Loading />
-          }
           {!viewEntity && dataReady && !saveError && !deleteSending
             && (
               <div>
@@ -502,13 +511,12 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
               </div>
             )
           }
-          {viewEntity && dataReady && !deleteSending
+          {viewEntity && !deleteSending
             && (
-              <EntityForm
+              <FormWrapper
                 model="actionEdit.form.data"
-                formData={viewDomain.getIn(['form', 'data'])}
                 saving={saveSending}
-                handleSubmit={(formData) => this.props.handleSubmit(
+                handleSubmit={(formData) => handleSubmit(
                   formData,
                   taxonomies,
                   actorsByActortype,
@@ -519,18 +527,20 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                   indicatorOptions,
                   userOptions,
                 )}
-                handleSubmitFail={this.props.handleSubmitFail}
-                handleCancel={this.props.handleCancel}
-                handleUpdate={this.props.handleUpdate}
-                handleDelete={isAdmin ? this.props.handleDelete : null}
-                fields={{
+                handleSubmitFail={handleSubmitFail}
+                handleCancel={handleCancel}
+                handleUpdate={handleUpdate}
+                handleDelete={isAdmin ? handleDelete : null}
+                onErrorDismiss={onErrorDismiss}
+                onServerErrorDismiss={onServerErrorDismiss}
+                fields={dataReady && {
                   header: {
                     main: this.getHeaderMainFields(viewEntity),
                     aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
                   },
                   body: {
-                    main: this.getBodyMainFields(
-                      viewEntity,
+                    main: this.getBodyMainFields({
+                      entity: viewEntity,
                       connectedTaxonomies,
                       actorsByActortype,
                       targetsByActortype,
@@ -538,7 +548,8 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       subActionsByActiontype,
                       indicatorOptions,
                       onCreateOption,
-                    ),
+                      entityIndicatorConnections,
+                    }),
                     aside: this.getBodyAsideFields(
                       viewEntity,
                       taxonomies,
@@ -552,9 +563,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                 scrollContainer={this.scrollContainer.current}
               />
             )
-          }
-          {(saveSending || deleteSending)
-            && <Loading />
           }
         </Content>
       </div>
@@ -572,7 +580,7 @@ ActionEdit.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func.isRequired,
-  viewDomain: PropTypes.object,
+  viewDomainPage: PropTypes.object,
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
@@ -591,28 +599,30 @@ ActionEdit.propTypes = {
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   myId: PropTypes.string,
+  entityIndicatorConnections: PropTypes.object,
 };
 
 ActionEdit.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = (state, props) => ({
-  viewDomain: selectDomain(state),
+const mapStateToProps = (state, { params }) => ({
+  viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
-  viewEntity: selectViewEntity(state, props.params.id),
-  taxonomies: selectTaxonomyOptions(state, props.params.id),
+  viewEntity: selectViewEntity(state, params.id),
+  taxonomies: selectTaxonomyOptions(state, params.id),
   connectedTaxonomies: selectConnectedTaxonomies(state),
-  actorsByActortype: selectActorsByActortype(state, props.params.id),
-  targetsByActortype: selectTargetsByActortype(state, props.params.id),
-  resourcesByResourcetype: selectResourcesByResourcetype(state, props.params.id),
-  topActionsByActiontype: selectTopActionsByActiontype(state, props.params.id),
-  subActionsByActiontype: selectSubActionsByActiontype(state, props.params.id),
-  indicatorOptions: selectIndicatorOptions(state, props.params.id),
-  userOptions: selectUserOptions(state, props.params.id),
+  actorsByActortype: selectActorsByActortype(state, params.id),
+  targetsByActortype: selectTargetsByActortype(state, params.id),
+  resourcesByResourcetype: selectResourcesByResourcetype(state, params.id),
+  topActionsByActiontype: selectTopActionsByActiontype(state, params.id),
+  subActionsByActiontype: selectSubActionsByActiontype(state, params.id),
+  indicatorOptions: selectIndicatorOptions(state, params.id),
+  userOptions: selectUserOptions(state, params.id),
   myId: selectSessionUserId(state),
+  entityIndicatorConnections: selectActionIndicatorsForAction(state, params.id),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -797,6 +807,7 @@ function mapDispatchToProps(dispatch, props) {
             connectionAttribute: 'associatedIndicators',
             createConnectionKey: 'indicator_id',
             createKey: 'measure_id',
+            connectionAttributes: ['supportlevel_id'],
           })
         );
       }

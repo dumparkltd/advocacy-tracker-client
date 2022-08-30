@@ -9,8 +9,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
-import { Box, Text, Button } from 'grommet';
-import styled from 'styled-components';
+import { Box, Text } from 'grommet';
 
 import {
   getTitleField,
@@ -24,7 +23,6 @@ import {
   getLinkField,
   getTaxonomyFields,
   hasTaxonomyCategories,
-  getActorConnectionField,
   getActionConnectionField,
   getResourceConnectionField,
   getIndicatorConnectionField,
@@ -42,18 +40,16 @@ import {
   updatePath,
   closeEntity,
   setSubject,
-  openNewEntityModal,
-  setActiontype,
 } from 'containers/App/actions';
 
 import {
   // ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG, ACTORTYPES, RESOURCE_FIELDS,
   ROUTES,
-  ACTIONTYPES,
-  ACTORTYPES_CONFIG,
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_ACTIONTYPES,
+  INDICATOR_ACTIONTYPES,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
 import Loading from 'components/Loading';
@@ -65,15 +61,15 @@ import ViewWrapper from 'components/EntityView/ViewWrapper';
 import ViewPanel from 'components/EntityView/ViewPanel';
 import ViewPanelInside from 'components/EntityView/ViewPanelInside';
 import FieldGroup from 'components/fields/FieldGroup';
+import SubjectButton from 'components/styled/SubjectButton';
+import SubjectButtonGroup from 'components/styled/SubjectButtonGroup';
+import SubjectTabWrapper from 'components/styled/SubjectTabWrapper';
 
 import {
   selectReady,
   selectIsUserManager,
   selectIsUserAdmin,
-  selectActorConnections,
   selectResourceConnections,
-  selectIndicatorConnections,
-  selectActionConnections,
   selectTaxonomiesWithCategories,
   selectSubjectQuery,
   selectActiontypes,
@@ -85,14 +81,12 @@ import {
 import appMessages from 'containers/App/messages';
 import messages from './messages';
 
-import ActionMap from './ActionMap';
-import Activities from './Activities';
+import TabActivities from './TabActivities';
+import TabActors from './TabActors';
 
 import {
   selectViewEntity,
   selectViewTaxonomies,
-  selectActorsByType,
-  selectTargetsByType,
   selectResourcesByType,
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
@@ -102,38 +96,25 @@ import {
 
 import { DEPENDENCIES } from './constants';
 
-const SubjectButton = styled((p) => <Button plain {...p} />)`
-  padding: 2px 4px;
-  border-bottom: 2px solid;
-  border-bottom-color: ${({ active }) => active ? 'brand' : 'transparent'};
-  background: none;
-`;
-
-const getActortypeColumns = (typeid) => {
+const getIndicatorColumns = (viewEntity, intl) => {
   let columns = [{
     id: 'main',
     type: 'main',
     sort: 'title',
     attributes: ['code', 'title'],
   }];
-  // if (qe(typeid, ACTORTYPES.COUNTRY)) {
-  //   columns = [
-  //     ...columns,
-  //     {
-  //       id: 'classes',
-  //       type: 'associations',
-  //       actortype_id: ACTORTYPES.CLASS,
-  //       title: 'Classes',
-  //     },
-  //   ];
-  // }
   if (
-    ACTORTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns
+    ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[viewEntity.getIn(['attributes', 'measuretype_id'])]
+    && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[viewEntity.getIn(['attributes', 'measuretype_id'])].length > 0
   ) {
     columns = [
       ...columns,
-      ...ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns,
+      {
+        id: 'supportlevel_id',
+        type: 'supportlevel',
+        actionId: viewEntity.get('id'),
+        title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+      },
     ];
   }
   return columns;
@@ -146,15 +127,10 @@ export function ActionView(props) {
     isManager,
     taxonomies,
     viewTaxonomies,
-    actorsByActortype,
-    targetsByActortype,
     resourcesByResourcetype,
     indicators,
     onEntityClick,
-    actorConnections,
     resourceConnections,
-    indicatorConnections,
-    actionConnections,
     subActionsByType,
     topActionsByType,
     onLoadData,
@@ -164,13 +140,10 @@ export function ActionView(props) {
     handleEdit,
     handleClose,
     params,
-    // activitytypes,
     handleTypeClick,
     users,
     userConnections,
     viewActiontypeId,
-    onSetActiontype,
-    onCreateOption,
     actiontypes,
     isAdmin,
     myId,
@@ -227,22 +200,22 @@ export function ActionView(props) {
     : [];
   const hasChildren = childActiontypeIds && childActiontypeIds.length > 0;
 
-  const hasMemberOption = !!typeId && !qe(typeId, ACTIONTYPES.NATL);
-  const hasMap = qe(typeId, ACTIONTYPES.EXPRESS);
-  let viewSubject = subject || 'actors';
-  if (viewSubject === 'children' && !hasChildren) {
-    viewSubject = 'actors';
-  }
-  if (viewSubject === 'targets' && !hasTarget) {
-    viewSubject = 'actors';
-  }
-  if (viewSubject === 'actors' && !hasActor) {
-    viewSubject = 'targets';
-  }
+  const hasIndicators = typeId && INDICATOR_ACTIONTYPES.indexOf(typeId.toString()) > -1;
 
-  const actortypesForSubject = viewSubject === 'actors'
-    ? actorsByActortype
-    : targetsByActortype;
+  let viewSubject = subject || 'actors';
+  const validViewSubjects = [];
+  if (hasActor) {
+    validViewSubjects.push('actors');
+  }
+  if (hasTarget) {
+    validViewSubjects.push('targets');
+  }
+  if (hasChildren) {
+    validViewSubjects.push('children');
+  }
+  if (validViewSubjects.indexOf(viewSubject) === -1) {
+    viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
+  }
 
   // check date comment for date spceficity
   // const DATE_SPECIFICITIES = ['y', 'm', 'd'];
@@ -347,7 +320,7 @@ export function ActionView(props) {
                       ],
                     }}
                   />
-                  {indicators && (
+                  {indicators && hasIndicators && (
                     <FieldGroup
                       group={{
                         label: appMessages.nav.indicators,
@@ -355,16 +328,16 @@ export function ActionView(props) {
                           getIndicatorConnectionField({
                             indicators,
                             onEntityClick,
-                            connections: indicatorConnections,
+                            // connections: indicatorConnections,
                             skipLabel: true,
-                            // TODO columns
+                            columns: getIndicatorColumns(viewEntity, intl),
                           }),
                         ],
                       }}
                     />
                   )}
                   <Box>
-                    <Box direction="row" gap="small" margin={{ vertical: 'small', horizontal: 'medium' }}>
+                    <SubjectButtonGroup>
                       {hasActor && (
                         <SubjectButton
                           onClick={() => onSetSubject('actors')}
@@ -389,73 +362,31 @@ export function ActionView(props) {
                           <Text size="large">Child activities</Text>
                         </SubjectButton>
                       )}
-                    </Box>
-                    {viewSubject !== 'children' && (!actortypesForSubject || actortypesForSubject.size === 0) && (
-                      <Box margin={{ top: 'small', horizontal: 'medium', bottom: 'large' }}>
-                        {viewSubject === 'actors' && (
-                          <Text>
-                            No actors for activity in database
-                          </Text>
-                        )}
-                        {viewSubject === 'targets' && (
-                          <Text>
-                            No activity targets in database
-                          </Text>
-                        )}
-                      </Box>
-                    )}
-                    <Box>
-                      {dataReady && actortypesForSubject && hasMap && (
-                        <ActionMap
-                          entities={actortypesForSubject}
-                          mapSubject={viewSubject}
-                          onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
-                          hasMemberOption={hasMemberOption}
-                          typeId={typeId}
-                        />
-                      )}
-                      {viewSubject === 'targets' && (
-                        <FieldGroup
-                          group={{
-                            fields: [
-                              checkActionAttribute(typeId, 'target_comment')
-                                && getMarkdownField(viewEntity, 'target_comment', true),
-                            ],
-                          }}
-                        />
-                      )}
+                    </SubjectButtonGroup>
+                    <SubjectTabWrapper>
                       {viewSubject === 'children' && (
-                        <Activities
+                        <TabActivities
                           viewEntity={viewEntity}
                           taxonomies={taxonomies}
-                          actionConnections={actionConnections}
-                          onSetActiontype={onSetActiontype}
                           onEntityClick={onEntityClick}
-                          onCreateOption={onCreateOption}
                           viewActiontypeId={childActiontypeIds.indexOf(viewActiontypeId) > -1 ? viewActiontypeId : childActiontypeIds[0]}
-                          actionsByActiontype={subActionsByType}
                           actiontypes={actiontypes.filter((type) => childActiontypeIds.indexOf(type.get('id')) > -1)}
+                          actionsByActiontype={subActionsByType}
                         />
                       )}
-                      {viewSubject !== 'children' && actortypesForSubject && (
-                        <FieldGroup
-                          group={{
-                            fields: actortypesForSubject.reduce(
-                              (memo, actors, typeid) => memo.concat([
-                                getActorConnectionField({
-                                  actors,
-                                  taxonomies,
-                                  onEntityClick,
-                                  connections: actorConnections,
-                                  typeid,
-                                  columns: getActortypeColumns(typeid),
-                                }),
-                              ]),
-                              [],
-                            ),
-                          }}
+                      {viewSubject !== 'children' && (
+                        <TabActors
+                          hasChildren={hasChildren}
+                          childActionsByActiontype={subActionsByType}
+                          viewEntity={viewEntity}
+                          typeId={typeId.toString()}
+                          viewSubject={viewSubject}
+                          taxonomies={taxonomies}
+                          onEntityClick={onEntityClick}
                         />
                       )}
+                    </SubjectTabWrapper>
+                    <Box>
                       {resourcesByResourcetype && (
                         <FieldGroup
                           group={{
@@ -491,6 +422,23 @@ export function ActionView(props) {
                   </Box>
                 </Main>
                 <Aside bottom>
+                  {users && (
+                    <FieldGroup
+                      aside
+                      group={{
+                        label: appMessages.nav.userActions,
+                        fields: [
+                          getUserConnectionField({
+                            users,
+                            onEntityClick,
+                            connections: userConnections,
+                            skipLabel: true,
+                            // TODO columns
+                          }),
+                        ],
+                      }}
+                    />
+                  )}
                   <FieldGroup
                     aside
                     group={{
@@ -532,22 +480,6 @@ export function ActionView(props) {
                       }}
                     />
                   )}
-                  {users && (
-                    <FieldGroup
-                      group={{
-                        label: appMessages.nav.userActions,
-                        fields: [
-                          getUserConnectionField({
-                            users,
-                            onEntityClick,
-                            connections: userConnections,
-                            skipLabel: true,
-                            // TODO columns
-                          }),
-                        ],
-                      }}
-                    />
-                  )}
                   {topActionsByType && (
                     <FieldGroup
                       aside
@@ -566,9 +498,7 @@ export function ActionView(props) {
                             return memo.concat([
                               getActionConnectionField({
                                 actions,
-                                taxonomies,
                                 onEntityClick,
-                                connections: actionConnections,
                                 typeid,
                                 columns,
                               }),
@@ -602,11 +532,7 @@ ActionView.propTypes = {
   myId: PropTypes.string,
   viewTaxonomies: PropTypes.object,
   taxonomies: PropTypes.object,
-  actorsByActortype: PropTypes.object,
-  targetsByActortype: PropTypes.object,
   resourcesByResourcetype: PropTypes.object,
-  actorConnections: PropTypes.object,
-  actionConnections: PropTypes.object,
   resourceConnections: PropTypes.object,
   // activitytypes: PropTypes.object,
   params: PropTypes.object,
@@ -615,20 +541,13 @@ ActionView.propTypes = {
   onSetSubject: PropTypes.func,
   intl: intlShape.isRequired,
   subject: PropTypes.string,
-  indicatorConnections: PropTypes.object,
+  // indicatorConnections: PropTypes.object,
   indicators: PropTypes.object,
   userConnections: PropTypes.object,
   users: PropTypes.object,
   viewActiontypeId: PropTypes.string,
-  onCreateOption: PropTypes.func,
-  onSetActiontype: PropTypes.func,
   actiontypes: PropTypes.object,
 };
-
-ActionView.contextTypes = {
-  intl: PropTypes.object.isRequired,
-};
-
 
 const mapStateToProps = (state, props) => ({
   isManager: selectIsUserManager(state),
@@ -636,17 +555,13 @@ const mapStateToProps = (state, props) => ({
   viewEntity: selectViewEntity(state, props.params.id),
   viewTaxonomies: selectViewTaxonomies(state, props.params.id),
   taxonomies: selectTaxonomiesWithCategories(state),
-  actorsByActortype: selectActorsByType(state, props.params.id),
   resourcesByResourcetype: selectResourcesByType(state, props.params.id),
-  targetsByActortype: selectTargetsByType(state, props.params.id),
-  actorConnections: selectActorConnections(state),
-  actionConnections: selectActionConnections(state),
   resourceConnections: selectResourceConnections(state),
   topActionsByType: selectTopActionsByActiontype(state, props.params.id),
   subActionsByType: selectSubActionsByActiontype(state, props.params.id),
   subject: selectSubjectQuery(state),
   indicators: selectEntityIndicators(state, props.params.id),
-  indicatorConnections: selectIndicatorConnections(state),
+  // indicatorConnections: selectIndicatorConnections(state),
   users: selectEntityUsers(state, props.params.id),
   userConnections: selectUserConnections(state),
   viewActiontypeId: selectActiontypeQuery(state),
@@ -674,12 +589,6 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetSubject: (type) => {
       dispatch(setSubject(type));
-    },
-    onSetActiontype: (type) => {
-      dispatch(setActiontype(type));
-    },
-    onCreateOption: (args) => {
-      dispatch(openNewEntityModal(args));
     },
   };
 }

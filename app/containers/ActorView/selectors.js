@@ -25,6 +25,7 @@ import {
   selectActionIndicatorsGroupedByAction,
   selectMembershipsGroupedByMember,
   selectMembershipsGroupedByAssociation,
+  selectActionIndicatorsGroupedByActionAttributes,
   selectActors,
   selectActorCategoriesGroupedByActor,
   // selectActiontypes,
@@ -110,6 +111,7 @@ export const selectActionsWith = createSelector(
   selectActionActorsGroupedByAction,
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
   selectCategories,
   selectActionCategoriesGroupedByAction,
   selectUserActionsGroupedByAction,
@@ -123,6 +125,7 @@ export const selectActionsWith = createSelector(
     actionActors,
     actionResources,
     actionIndicators,
+    actionIndicatorsByActionAttributes,
     categories,
     actionCategories,
     userActions,
@@ -139,7 +142,7 @@ export const selectActionsWith = createSelector(
       return null;
     }
 
-    return actions && actions
+    const actionsWithConnections = actions && actions
       .filter(
         (action) => validActiontypeIds.indexOf(action.getIn(['attributes', 'measuretype_id']).toString()) > -1
       )
@@ -150,10 +153,12 @@ export const selectActionsWith = createSelector(
         actionActors,
         actionResources,
         actionIndicators,
+        actionIndicatorAttributes: actionIndicatorsByActionAttributes,
         categories,
         actionCategories,
         users: userActions,
       }));
+    return actionsWithConnections;
   }
 );
 export const selectActionsByType = createSelector(
@@ -300,6 +305,7 @@ export const selectMembersByType = createSelector(
   }
 );
 
+// all groups joins current actor has as member
 const selectAssociationJoins = createSelector(
   (state, id) => id,
   selectMembershipsGroupedByMember,
@@ -307,6 +313,7 @@ const selectAssociationJoins = createSelector(
     parseInt(actorId, 10)
   )
 );
+// all groups current actor is member of
 const selectAssociationsJoined = createSelector(
   selectActors,
   selectAssociationJoins,
@@ -336,7 +343,7 @@ export const selectAssociationsByType = createSelector(
   }
 );
 
-// get any indirect actions actor is associated with via any associations it belongs to
+// get any indirect actions that an actor is associated with via any associations it belongs to
 export const selectActionsAsMemberByActortype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectAssociationsJoined, // all groups current actor is member of
@@ -345,10 +352,12 @@ export const selectActionsAsMemberByActortype = createSelector(
   selectActionConnections,
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
-  selectActionResourcesGroupedByAction,
   selectCategories,
   selectActionCategoriesGroupedByAction,
   selectActions,
+  selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
+  selectUserActionsGroupedByAction,
   (
     ready,
     associations,
@@ -357,43 +366,52 @@ export const selectActionsAsMemberByActortype = createSelector(
     actionConnections,
     actorActionsByAction,
     actionActors,
-    actionResources,
     categories,
     actionCategories,
     actions,
+    actionIndicators,
+    actionIndicatorsByActionAttributes,
+    userActions,
   ) => {
     if (!ready || !associations) return Map();
-    return associations.map(
-      (actor) => setActorConnections({ actor, actorActions: actorActionsByActor, actorConnections })
-    ).filter(
-      (actor) => actor.get('actionsByType') && actor.get('actionsByType').size > 0
-    ).map(
-      (actor) => actor.set(
-        'actionsByType',
-        actor.get('actionsByType').map(
-          (actionIdsForType) => actionIdsForType.map(
-            (actionId) => setActionConnections({
-              action: actions.get(actionId.toString()),
-              categories,
-              actionCategories,
-              actionConnections,
-              actorActions: actorActionsByAction,
-              actionActors,
-              actionResources,
-            })
+    return associations
+      .map(
+        (actor) => setActorConnections({ actor, actorActions: actorActionsByActor, actorConnections })
+      )
+      .filter(
+        (actor) => actor.get('actionsByType') && actor.get('actionsByType').size > 0
+      )
+      .map(
+        (actor) => actor.set(
+          'actionsByType',
+          actor.get('actionsByType').map(
+            (actionIdsForType) => actionIdsForType.map(
+              (actionId) => setActionConnections({
+                action: actions.get(actionId.toString()),
+                categories,
+                actionCategories,
+                actionConnections,
+                actorActions: actorActionsByAction,
+                actionActors,
+                actionIndicators,
+                actionIndicatorAttributes: actionIndicatorsByActionAttributes,
+                users: userActions,
+              })
+            )
           )
         )
       )
-    ).groupBy(
-      (r) => r.getIn(['attributes', 'actortype_id'])
-    ).sortBy(
-      (val, key) => key,
-      (a, b) => {
-        const configA = ACTORTYPES_CONFIG[a];
-        const configB = ACTORTYPES_CONFIG[b];
-        return configA.order < configB.order ? -1 : 1;
-      }
-    );
+      .groupBy(
+        (r) => r.getIn(['attributes', 'actortype_id'])
+      )
+      .sortBy(
+        (val, key) => key,
+        (a, b) => {
+          const configA = ACTORTYPES_CONFIG[a];
+          const configB = ACTORTYPES_CONFIG[b];
+          return configA.order < configB.order ? -1 : 1;
+        }
+      );
   },
 );
 export const selectActionsAsTargetAsMemberByActortype = createSelector(
@@ -404,10 +422,10 @@ export const selectActionsAsTargetAsMemberByActortype = createSelector(
   selectActionConnections,
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
-  selectActionResourcesGroupedByAction,
   selectCategories,
   selectActionCategoriesGroupedByAction,
   selectActions,
+  selectUserActionsGroupedByAction,
   (
     ready,
     associations,
@@ -416,45 +434,191 @@ export const selectActionsAsTargetAsMemberByActortype = createSelector(
     actionConnections,
     actorActionsByAction,
     actionActors,
-    actionResources,
     categories,
     actionCategories,
     actions,
+    userActions,
   ) => {
     if (!ready || !associations) return Map();
-    return associations.map(
-      (actor) => setActorConnections({ actor, actionActors: actionActorsByActor, actorConnections })
-    ).filter(
-      (actor) => actor.get('targetingActionsByType') && actor.get('targetingActionsByType').size > 0
-    ).map(
-      (actor) => actor.set(
-        'targetingActionsByType',
-        actor.get('targetingActionsByType').map(
-          (actionIdsForType) => actionIdsForType.map(
-            (actionId) => setActionConnections({
-              action: actions.get(actionId.toString()),
-              categories,
-              actionCategories,
-              actionConnections,
-              actorActions: actorActionsByAction,
-              actionActors,
-              actionResources,
-            })
+    return associations
+      .map(
+        (actor) => setActorConnections({ actor, actionActors: actionActorsByActor, actorConnections })
+      )
+      .filter(
+        (actor) => actor.get('targetingActionsByType') && actor.get('targetingActionsByType').size > 0
+      )
+      .map(
+        (actor) => actor.set(
+          'targetingActionsByType',
+          actor.get('targetingActionsByType').map(
+            (actionIdsForType) => actionIdsForType.map(
+              (actionId) => setActionConnections({
+                action: actions.get(actionId.toString()),
+                categories,
+                actionCategories,
+                actionConnections,
+                actorActions: actorActionsByAction,
+                actionActors,
+                users: userActions,
+              })
+            )
           )
         )
       )
-    ).groupBy(
-      (r) => r.getIn(['attributes', 'actortype_id'])
-    ).sortBy(
-      (val, key) => key,
-      (a, b) => {
-        const configA = ACTORTYPES_CONFIG[a];
-        const configB = ACTORTYPES_CONFIG[b];
-        return configA.order < configB.order ? -1 : 1;
-      }
-    );
+      .groupBy(
+        (r) => r.getIn(['attributes', 'actortype_id'])
+      )
+      .sortBy(
+        (val, key) => key,
+        (a, b) => {
+          const configA = ACTORTYPES_CONFIG[a];
+          const configB = ACTORTYPES_CONFIG[b];
+          return configA.order < configB.order ? -1 : 1;
+        }
+      );
   },
 );
+
+// get any indirect actions that is actor is associated with via any members it has
+
+export const selectActionsViaMembersByActortype = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectMembersJoined, // all members of current actor
+  selectActorActionsGroupedByActor,
+  selectActorConnections,
+  selectActionConnections,
+  selectActorActionsGroupedByAction,
+  selectActionActorsGroupedByAction,
+  selectCategories,
+  selectActionCategoriesGroupedByAction,
+  selectActions,
+  selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
+  selectUserActionsGroupedByAction,
+  (
+    ready,
+    members,
+    actorActionsByActor,
+    actorConnections,
+    actionConnections,
+    actorActionsByAction,
+    actionActors,
+    categories,
+    actionCategories,
+    actions,
+    actionIndicators,
+    actionIndicatorsByActionAttributes,
+    userActions,
+  ) => {
+    if (!ready || !members) return Map();
+    return members
+      .map(
+        (actor) => setActorConnections({ actor, actorActions: actorActionsByActor, actorConnections })
+      )
+      .filter(
+        (actor) => actor.get('actionsByType') && actor.get('actionsByType').size > 0
+      )
+      .map(
+        (actor) => actor.set(
+          'actionsByType',
+          actor.get('actionsByType').map(
+            (actionIdsForType) => actionIdsForType.map(
+              (actionId) => setActionConnections({
+                action: actions.get(actionId.toString()),
+                categories,
+                actionCategories,
+                actionConnections,
+                actorActions: actorActionsByAction,
+                actionActors,
+                actionIndicators,
+                actionIndicatorAttributes: actionIndicatorsByActionAttributes,
+                users: userActions,
+              })
+            )
+          )
+        )
+      )
+      .groupBy(
+        (r) => r.getIn(['attributes', 'actortype_id'])
+      )
+      .sortBy(
+        (val, key) => key,
+        (a, b) => {
+          const configA = ACTORTYPES_CONFIG[a];
+          const configB = ACTORTYPES_CONFIG[b];
+          return configA.order < configB.order ? -1 : 1;
+        }
+      );
+  },
+);
+export const selectActionsAsTargetViaMembersByActortype = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectMembersJoined, // all associations
+  selectActionActorsGroupedByActor,
+  selectActorConnections,
+  selectActionConnections,
+  selectActorActionsGroupedByAction,
+  selectActionActorsGroupedByAction,
+  // selectActionResourcesGroupedByAction,
+  selectCategories,
+  selectActionCategoriesGroupedByAction,
+  selectActions,
+  selectUserActionsGroupedByAction,
+  (
+    ready,
+    members,
+    actionActorsByActor,
+    actorConnections,
+    actionConnections,
+    actorActionsByAction,
+    actionActors,
+    // actionResources,
+    categories,
+    actionCategories,
+    actions,
+    userActions,
+  ) => {
+    if (!ready || !members) return Map();
+    return members
+      .map(
+        (actor) => setActorConnections({ actor, actionActors: actionActorsByActor, actorConnections })
+      )
+      .filter(
+        (actor) => actor.get('targetingActionsByType') && actor.get('targetingActionsByType').size > 0
+      )
+      .map(
+        (actor) => actor.set(
+          'targetingActionsByType',
+          actor.get('targetingActionsByType').map(
+            (actionIdsForType) => actionIdsForType.map(
+              (actionId) => setActionConnections({
+                action: actions.get(actionId.toString()),
+                categories,
+                actionCategories,
+                actionConnections,
+                actorActions: actorActionsByAction,
+                actionActors,
+                // actionResources,
+                users: userActions,
+              })
+            )
+          )
+        )
+      )
+      .groupBy(
+        (r) => r.getIn(['attributes', 'actortype_id'])
+      )
+      .sortBy(
+        (val, key) => key,
+        (a, b) => {
+          const configA = ACTORTYPES_CONFIG[a];
+          const configB = ACTORTYPES_CONFIG[b];
+          return configA.order < configB.order ? -1 : 1;
+        }
+      );
+  },
+);
+
 const selectUserAssociations = createSelector(
   (state, id) => id,
   selectUserActorsGroupedByActor,

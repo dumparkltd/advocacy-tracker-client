@@ -71,9 +71,11 @@ import {
   SET_VIEW,
   SET_SUBJECT,
   SET_MAPSUBJECT,
+  SET_MAPINDICATOR,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
   SET_INCLUDE_MEMBERS_FORFILTERS,
+  SET_INCLUDE_INOFFICAL_STATEMENTS,
 } from './constants';
 
 export function submitInvalid(valid) {
@@ -519,6 +521,12 @@ export function setMapSubject(subject) {
     subject,
   };
 }
+export function setMapIndicator(value) {
+  return {
+    type: SET_MAPINDICATOR,
+    value,
+  };
+}
 export function setIncludeActorMembers(value) {
   return {
     type: SET_INCLUDE_ACTOR_MEMBERS,
@@ -534,6 +542,12 @@ export function setIncludeTargetMembers(value) {
 export function setIncludeMembersForFiltering(value) {
   return {
     type: SET_INCLUDE_MEMBERS_FORFILTERS,
+    value,
+  };
+}
+export function setIncludeInofficialStatements(value) {
+  return {
+    type: SET_INCLUDE_INOFFICAL_STATEMENTS,
     value,
   };
 }

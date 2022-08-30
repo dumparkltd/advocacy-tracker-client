@@ -8,7 +8,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { Box, Text } from 'grommet';
 
 import {
   getTitleField,
@@ -16,15 +17,35 @@ import {
   getStatusFieldIf,
   getMetaField,
   getMarkdownField,
-  getActionConnectionField,
+  getReferenceField,
 } from 'utils/fields';
 // import { qe } from 'utils/quasi-equals';
 import { getEntityTitleTruncated } from 'utils/entities';
 import qe from 'utils/quasi-equals';
 
-import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
+import {
+  loadEntitiesIfNeeded,
+  updatePath,
+  closeEntity,
+  setSubject,
+  setIncludeActorMembers,
+  setIncludeInofficialStatements,
+} from 'containers/App/actions';
 
-import { ROUTES, ACTIONTYPES_CONFIG } from 'themes/config';
+import {
+  selectReady,
+  selectIsUserManager,
+  selectIsUserAdmin,
+  selectSessionUserId,
+  selectSubjectQuery,
+  selectIncludeActorMembers,
+  selectIncludeInofficialStatements,
+} from 'containers/App/selectors';
+
+import {
+  ROUTES,
+  ACTORTYPES,
+} from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
@@ -35,47 +56,21 @@ import ViewWrapper from 'components/EntityView/ViewWrapper';
 import ViewPanel from 'components/EntityView/ViewPanel';
 import ViewPanelInside from 'components/EntityView/ViewPanelInside';
 import FieldGroup from 'components/fields/FieldGroup';
-
-import {
-  selectReady,
-  selectIsUserManager,
-  selectIsUserAdmin,
-  selectTaxonomiesWithCategories,
-  selectActionConnections,
-  selectSessionUserId,
-} from 'containers/App/selectors';
+import SubjectButton from 'components/styled/SubjectButton';
+import SubjectButtonGroup from 'components/styled/SubjectButtonGroup';
 
 import appMessages from 'containers/App/messages';
+import CountryMap from './CountryMap';
+import Actors from './Actors';
+import Statements from './Statements';
 import messages from './messages';
 
 import {
   selectViewEntity,
-  selectActionsByType,
+  selectActorsByType,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
-
-const getActiontypeColumns = (typeid) => {
-  if (
-    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    return ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-      (col) => {
-        if (typeof col.showOnSingle !== 'undefined') {
-          return col.showOnSingle;
-        }
-        return true;
-      }
-    );
-  }
-  return [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: ['title'],
-  }];
-};
 
 export class IndicatorView extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
@@ -89,74 +84,33 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
     }
   }
 
-  getBodyMainFields = (
-    entity,
-    actionsByActiontype,
-    taxonomies,
-    actionConnections,
-    onEntityClick,
-  ) => {
-    const fields = [];
-
-    // own attributes
-    fields.push(
-      {
-        fields: [
-          getMarkdownField(entity, 'description', true),
-        ],
-      },
-    );
-
-    if (actionsByActiontype) {
-      const actionConnectionsLocal = [];
-      actionsByActiontype.forEach((actions, actiontypeid) => {
-        actionConnectionsLocal.push(
-          getActionConnectionField({
-            actions,
-            taxonomies,
-            onEntityClick,
-            connections: actionConnections,
-            typeid: actiontypeid,
-          }),
-        );
-      });
-      fields.push({
-        label: appMessages.nav.actions,
-        fields: actionConnectionsLocal,
-      });
-    }
-    return fields;
-  };
-
-  // getBodyAsideFields = (entity) => {
-  //   const fields = [];
-  //   const typeId = entity.getIn(['attributes', 'resourcetype_id']);
-  //   fields.push(
-  //     {
-  //       fields: [
-  //         checkResourceAttribute(typeId, 'publication_date') && getDateField(entity, 'publication_date'),
-  //         checkResourceAttribute(typeId, 'access_date') && getDateField(entity, 'access_date'),
-  //       ],
-  //     },
-  //   );
-  //   return fields;
-  // };
-
   render() {
-    const { intl } = this.context;
     const {
       viewEntity,
       dataReady,
       isManager,
       isAdmin,
       myId,
-      taxonomies,
-      actionsByActiontype,
-      actionConnections,
       onEntityClick,
       handleEdit,
       handleClose,
+      actorsByActortype,
+      intl,
+      onSetSubject,
+      subject,
+      onSetIncludeInofficial,
+      includeInofficial,
+      onSetIncludeActorMembers,
+      includeActorMembers,
     } = this.props;
+
+    const countries = actorsByActortype && actorsByActortype.get(parseInt(ACTORTYPES.COUNTRY, 10));
+    // view subject
+    let viewSubject = subject || 'statements';
+    const validViewSubjects = ['statements', 'actors'];
+    if (validViewSubjects.indexOf(viewSubject) === -1) {
+      viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
+    }
     let buttons = [];
     if (dataReady) {
       buttons = [
@@ -203,7 +157,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
           { viewEntity && dataReady && (
             <ViewWrapper>
               <ViewHeader
-                title={pageTitle}
+                title={intl.formatMessage(appMessages.entities.indicators.plural)}
                 buttons={buttons}
                 onClose={() => handleClose()}
                 onTypeClick={() => handleClose()}
@@ -214,6 +168,11 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                     <FieldGroup
                       group={{ // fieldGroup
                         fields: [
+                          getReferenceField(
+                            viewEntity,
+                            'code',
+                            isManager,
+                          ),
                           getTitleField(viewEntity),
                         ],
                       }}
@@ -252,27 +211,43 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                         ],
                       }}
                     />
-                    {actionsByActiontype && (
-                      <FieldGroup
-                        group={{
-                          label: appMessages.nav.actions,
-                          fields: actionsByActiontype.reduce(
-                            (memo, actions, actiontypeid) => ([
-                              ...memo,
-                              getActionConnectionField({
-                                actions,
-                                taxonomies,
-                                onEntityClick,
-                                connections: actionConnections,
-                                typeid: actiontypeid,
-                                columns: getActiontypeColumns(actiontypeid),
-                              }),
-                            ]),
-                            [],
-                          ),
-                        }}
+                    <Box pad={{ vertical: 'small' }}>
+                      <CountryMap
+                        countries={countries}
+                        indicatorId={viewEntity.get('id')}
+                        onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+                        includeInofficial={includeInofficial}
+                        onSetIncludeInofficial={onSetIncludeInofficial}
+                        includeActorMembers={includeActorMembers}
+                        onSetIncludeActorMembers={onSetIncludeActorMembers}
                       />
-                    )}
+                    </Box>
+                    <Box margin={{ vertical: 'large' }}>
+                      <SubjectButtonGroup margin={{ horizontal: 'medium' }}>
+                        <SubjectButton
+                          onClick={() => onSetSubject('statements')}
+                          active={viewSubject === 'statements'}
+                        >
+                          <Text size="large">Statements</Text>
+                        </SubjectButton>
+                        <SubjectButton
+                          onClick={() => onSetSubject('actors')}
+                          active={viewSubject === 'actors'}
+                        >
+                          <Text size="large">Countries & other actors</Text>
+                        </SubjectButton>
+                      </SubjectButtonGroup>
+                      {viewSubject === 'statements' && (
+                        <Statements
+                          viewEntity={viewEntity}
+                        />
+                      )}
+                      {viewSubject === 'actors' && (
+                        <Actors
+                          viewEntity={viewEntity}
+                        />
+                      )}
+                    </Box>
                   </Main>
                 </ViewPanelInside>
               </ViewPanel>
@@ -291,17 +266,18 @@ IndicatorView.propTypes = {
   handleEdit: PropTypes.func,
   handleClose: PropTypes.func,
   onEntityClick: PropTypes.func,
-  taxonomies: PropTypes.object,
-  actionConnections: PropTypes.object,
-  actionsByActiontype: PropTypes.object,
+  actorsByActortype: PropTypes.object,
   params: PropTypes.object,
   myId: PropTypes.string,
   isManager: PropTypes.bool,
   isAdmin: PropTypes.bool,
-};
-
-IndicatorView.contextTypes = {
-  intl: PropTypes.object.isRequired,
+  subject: PropTypes.string,
+  onSetSubject: PropTypes.func,
+  onSetIncludeInofficial: PropTypes.func,
+  includeInofficial: PropTypes.bool,
+  onSetIncludeActorMembers: PropTypes.func,
+  includeActorMembers: PropTypes.bool,
+  intl: intlShape,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -310,9 +286,10 @@ const mapStateToProps = (state, props) => ({
   myId: selectSessionUserId(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
-  taxonomies: selectTaxonomiesWithCategories(state),
-  actionsByActiontype: selectActionsByType(state, props.params.id),
-  actionConnections: selectActionConnections(state),
+  actorsByActortype: selectActorsByType(state, props.params.id),
+  subject: selectSubjectQuery(state),
+  includeInofficial: selectIncludeInofficialStatements(state),
+  includeActorMembers: selectIncludeActorMembers(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -329,7 +306,17 @@ function mapDispatchToProps(dispatch, props) {
     onEntityClick: (id, path) => {
       dispatch(updatePath(`${path}/${id}`));
     },
+    onSetSubject: (type) => {
+      dispatch(setSubject(type));
+    },
+    onSetIncludeInofficial: (value) => {
+      dispatch(setIncludeInofficialStatements(value));
+    },
+    onSetIncludeActorMembers: (active) => {
+      dispatch(setIncludeActorMembers(active));
+    },
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(IndicatorView);
+
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(IndicatorView));

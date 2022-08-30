@@ -20,8 +20,14 @@ import {
   prepareTaxonomiesMultipleTags,
 } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
+
 export const selectDomain = createSelector(
   (state) => state.get('categoryEdit'),
+  (substate) => substate
+);
+
+export const selectDomainPage = createSelector(
+  (state) => state.getIn(['categoryEdit', 'page']),
   (substate) => substate
 );
 

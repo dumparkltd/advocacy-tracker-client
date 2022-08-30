@@ -5,24 +5,22 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-// import { FormattedMessage } from 'react-intl';
+import { injectIntl, intlShape } from 'react-intl';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { reduce, groupBy } from 'lodash/collection';
+import { groupBy } from 'lodash/collection';
 import { Box } from 'grommet';
+import { FormClose } from 'grommet-icons';
 
-import appMessage from 'utils/app-message';
-import { lowerCase } from 'utils/string';
-
-import Icon from 'components/Icon';
 import Button from 'components/buttons/Button';
-import ButtonTagFilter from 'components/buttons/ButtonTagFilter';
+import ButtonTagFilterWrap from 'components/buttons/ButtonTagFilterWrap';
+import { getFilterLabel } from './utils';
 // import PrintOnly from 'components/styled/PrintOnly';
 
 // import messages from './messages';
 
-const Styled = styled((p) => <Box direction="row" align="end" justify="end" {...p} />)``;
+const Styled = styled((p) => <Box direction="row" align="start" justify="start" {...p} />)``;
 
 const Tags = styled((p) => <Box direction="row" {...p} />)``;
 
@@ -51,81 +49,54 @@ const ConnectionGroupLabel = styled.span`
   }
 `;
 
-export const getFilterLabel = (filter, intl, long) => {
-  // not used I think?
-  if (filter.message) {
-    console.log('USED AFTER ALL');
-    return filter.messagePrefix
-      ? `${filter.messagePrefix} ${lowerCase(appMessage(intl, filter.message))}`
-      : appMessage(intl, filter.message);
-  }
-  if (filter.labels) {
-    return reduce(filter.labels, (memo, label) => {
-      if (!label.label) return memo;
-      let labelValue = label.appMessage ? appMessage(intl, label.label) : label.label;
-      labelValue = label.postfix ? `${labelValue}${label.postfix}` : labelValue;
-      return `${memo}${label.lowerCase ? lowerCase(labelValue) : labelValue} `;
-    }, '').trim();
-  }
-  return long && filter.labelLong ? filter.labelLong : filter.label;
-};
-
-export class TagList extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  render() {
-    const { filters, long } = this.props;
-    const { intl } = this.context;
-    const hasFilters = filters.length > 0;
-    const groupedFilters = groupBy(filters, 'group');
-    return (
-      <Styled hidePrint={!hasFilters}>
-        {hasFilters && (
-          <Tags gap="xsmall">
-            {Object.keys(groupedFilters).map((group, i) => (
-              <Box key={i}>
-                <ConnectionGroupLabel>
-                  {group}
-                </ConnectionGroupLabel>
-                <Box direction="row">
-                  {groupedFilters[group].map((filter, j) => (
-                    <ButtonTagFilter
-                      key={j}
-                      onClick={filter.onClick}
-                      palette={filter.type || 'attributes'}
-                      paletteHover={`${filter.type || 'attributes'}Hover`}
-                      pIndex={parseInt(filter.id, 10) || 0}
-                      disabled={!filter.onClick}
-                    >
-                      {getFilterLabel(filter, intl, long)}
-                      { filter.onClick
-                      && <Icon name="removeSmall" text textRight hidePrint />
-                      }
-                    </ButtonTagFilter>
-                  ))}
-                </Box>
+function TagList({
+  filters,
+  long,
+  onClear,
+  intl,
+}) {
+  const hasFilters = filters.length > 0;
+  const groupedFilters = groupBy(filters, 'group');
+  return (
+    <Styled hidePrint={!hasFilters}>
+      {hasFilters && (
+        <Tags gap="xsmall">
+          {Object.keys(groupedFilters).map((group, i) => (
+            <Box key={i}>
+              <ConnectionGroupLabel>
+                {group}
+              </ConnectionGroupLabel>
+              <Box direction="row">
+                {groupedFilters[group].map((filter, j) => (
+                  <ButtonTagFilterWrap
+                    key={j}
+                    filter={filter}
+                    label={getFilterLabel(filter, intl, long)}
+                    labelLong={getFilterLabel(filter, intl, true)}
+                    long={long}
+                  />
+                ))}
               </Box>
-            ))}
-          </Tags>
-        )}
-        {hasFilters && filters.length > 1 && (
-          <Clear
-            onClick={this.props.onClear}
-          >
-            <Icon name="removeSmall" />
-          </Clear>
-        )}
-      </Styled>
-    );
-  }
+            </Box>
+          ))}
+        </Tags>
+      )}
+      {hasFilters && filters.length > 1 && (
+        <Clear
+          onClick={onClear}
+        >
+          <FormClose size="xsmall" />
+        </Clear>
+      )}
+    </Styled>
+  );
 }
 
 TagList.propTypes = {
   filters: PropTypes.array,
   onClear: PropTypes.func,
   long: PropTypes.bool,
+  intl: intlShape,
 };
 
-TagList.contextTypes = {
-  intl: PropTypes.object.isRequired,
-};
-
-export default TagList;
+export default injectIntl(TagList);

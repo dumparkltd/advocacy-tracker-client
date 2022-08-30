@@ -1,7 +1,16 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Box, Text } from 'grommet';
+import {
+  Box,
+  Text,
+  Button,
+  Drop,
+} from 'grommet';
 import styled from 'styled-components';
+
+import { ROUTES } from 'themes/config';
+
+import DropEntityList from './DropEntityList';
 
 const Value = styled.div`
   width: 30px !important;
@@ -14,6 +23,7 @@ const BarWrapper = styled.div`
   display: block;
   position: relative;
 `;
+
 const Bar = styled.div`
   width: ${({ value, maxvalue }) => value / maxvalue * 100}%;
   min-width: 1px;
@@ -26,35 +36,125 @@ const Bar = styled.div`
   top: 0;
 `;
 
-export function CellBodyPlain({
+const BarButton = styled((p) => <Button plain {...p} />)`
+  width: ${({ value, maxvalue }) => value / maxvalue * 100}%;
+  min-width: 1px;
+  height: 20px;
+  background-color: ${({ theme, subject }) => theme.global.colors[subject] || theme.global.colors.primary};
+  display: block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: ${({ issecondary, isHover }) => {
+    if (isHover) {
+      return issecondary ? 0.5 : 0.85;
+    }
+    return issecondary ? 0.6 : 1;
+  }};
+`;
+
+const LinkTT = styled(
+  React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
+)`
+  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
+  line-height: 12px;
+  padding: 0 4px;
+`;
+
+export function CellBodyBarChart({
   value,
   maxvalue,
   issecondary,
   subject,
+  rowConfig,
+  entityType,
+  onEntityClick,
 }) {
+  const infoRef = useRef(null);
+  const [info, showInfo] = useState(false);
+  const [hover, isHover] = useState(false);
   return (
     <Box>
       {value && (
-        <Box direction="row" gap="xsmall" flex={{ shrink: 0 }} align="center">
+        <Box direction="row" gap="none" flex={{ shrink: 0 }} align="center">
           <Value>
-            <Text size="small" weight={500} textAlign="end">
-              {value}
-            </Text>
+            {!rowConfig.tooltip && (
+              <Text size="small" weight={500} textAlign="end">
+                {value}
+              </Text>
+            )}
+            {rowConfig.tooltip && (
+              <LinkTT
+                onClick={() => showInfo(!info)}
+                onMouseOver={() => isHover(true)}
+                onMouseLeave={() => isHover(false)}
+                onFocus={() => isHover(true)}
+                onBlur={() => null}
+                ref={infoRef}
+              >
+                <Text size="small" weight={500} textAlign="end" wordBreak="keep-all">
+                  {value}
+                </Text>
+              </LinkTT>
+            )}
           </Value>
           <BarWrapper>
-            <Bar value={value} maxvalue={maxvalue} issecondary={issecondary} subject={subject} />
+            {!rowConfig.tooltip && (
+              <Bar value={value} maxvalue={maxvalue} issecondary={issecondary} subject={subject} />
+            )}
+            {rowConfig.tooltip && (
+              <BarButton
+                value={value}
+                maxvalue={maxvalue}
+                issecondary={issecondary}
+                subject={subject}
+                fill={false}
+                isHover={hover}
+                onClick={() => showInfo(true)}
+                onMouseOver={() => isHover(true)}
+                onMouseLeave={() => isHover(false)}
+                onFocus={() => isHover(true)}
+                onBlur={() => null}
+              />
+            )}
           </BarWrapper>
         </Box>
+      )}
+      {info && infoRef && rowConfig.tooltip && (
+        <Drop
+          target={infoRef.current}
+          onClickOutside={() => showInfo(false)}
+          align={{
+            bottom: 'top',
+            left: 'left',
+          }}
+          margin={{ bottom: 'xsmall' }}
+          background="white"
+          elevation="small"
+          stretch={false}
+        >
+          <DropEntityList
+            entityType={entityType}
+            tooltipConfig={rowConfig.tooltip}
+            onEntityClick={(id) => {
+              showInfo(false);
+              onEntityClick(id, entityType === 'actors' ? ROUTES.ACTOR : ROUTES.ACTION);
+            }}
+          />
+        </Drop>
       )}
     </Box>
   );
 }
 
-CellBodyPlain.propTypes = {
+CellBodyBarChart.propTypes = {
   value: PropTypes.number,
   maxvalue: PropTypes.number,
   issecondary: PropTypes.bool,
   subject: PropTypes.string,
+  entityType: PropTypes.string,
+  rowConfig: PropTypes.object,
+  onEntityClick: PropTypes.func,
 };
 
-export default CellBodyPlain;
+export default CellBodyBarChart;

@@ -5,12 +5,12 @@ import { Button } from 'grommet';
 export default styled((p) => <Button plain {...p} />)`
   vertical-align: top;
   text-align: center;
-  color:${({ theme, active }) => active ? theme.global.colors.brand : theme.global.colors['dark-3']};
+  color:${({ theme, active }) => active ? theme.global.colors.highlight : theme.global.colors['dark-3']};
   background-color: ${({ active }) => active ? 'transparent' : 'transparent'};
-  border-bottom: 4px solid ${({ theme, active }) => active ? theme.global.colors.brand : 'transparent'};
+  border-bottom: 4px solid ${({ theme, active }) => active ? theme.global.colors.highlight : 'transparent'};
   &:hover {
-    color:${({ theme, active }) => active ? theme.global.colors.brand : theme.global.colors.highlight};
-    border-bottom: 4px solid ${({ theme, active }) => active ? theme.global.colors.brand : 'transparent'};
+    color:${({ theme }) => theme.global.colors.highlight};
+    border-bottom: 4px solid ${({ theme, active }) => active ? theme.global.colors.highlight : 'transparent'};
   }
   height: ${(props) => props.theme.sizes.headerExplore.nav.heightMobile - 1}px;
   padding: 8px 0.5em;

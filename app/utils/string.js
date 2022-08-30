@@ -2,14 +2,7 @@ import { toLower as loCase, deburr } from 'lodash/string';
 import { reduce } from 'lodash/collection';
 import { TEXT_TRUNCATE } from 'themes/config';
 
-export const lowerCase = (str) => loCase(str)
-  .replace('\bun\b', 'UN')
-  .replace('\bhr\b', 'HR')
-  .replace('\bupr\b', 'UPR')
-  .replace('sdg', 'SDG')
-  .replace('sds', 'SDS')
-  .replace('\bsmart\b', 'SMART')
-  .replace('sustainable development goal', 'Sustainable Development Goal');
+export const lowerCase = (str) => loCase(str);
 
 export const getPathFromUrl = (url) => url.split(/[?#]/)[0];
 

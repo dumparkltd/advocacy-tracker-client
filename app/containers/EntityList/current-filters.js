@@ -98,6 +98,15 @@ export const currentFilters = (
         intl,
         isManager,
       ));
+      if (config.connections[connectionKey].connectionAttributeFilter) {
+        filterTags = filterTags.concat(getCurrentConnectionAttributeFilters(
+          connectionKey,
+          config.connections[connectionKey].connectionAttributeFilter,
+          locationQuery,
+          onTagClick,
+          intl,
+        ));
+      }
     });
   }
   if (config.attributes) {
@@ -276,38 +285,80 @@ const getCurrentConnectionFilters = (
 ) => {
   const tags = [];
   const {
-    query, path, groupByType, labels,
+    query,
+    path,
+    groupByType,
+    labels,
+    connectionAttributeFilter,
   } = option;
   if (locationQuery.get(query) && connections.get(path)) {
     const locationQueryValue = locationQuery.get(query);
     asList(locationQueryValue).forEach((queryValue) => {
-      let value;
+      let value = queryValue;
       let optionId;
+      let connectionAttributeQuery;
+      let connectedAttributes;
+      let connectionAttributeName;
       if (connections.get(path)) {
-        if (groupByType) {
-          [optionId, value] = queryValue.indexOf(':') > -1 ? queryValue.split(':') : [null, queryValue];
-        } else {
-          value = queryValue;
+        // check for connection attribute queries
+        if (connectionAttributeFilter && value.indexOf('>') > -1) {
+          let values;
+          [value, connectionAttributeQuery] = value.split('>');
+          [connectionAttributeName, values] = connectionAttributeQuery.split('=');
+          values = values.split('|');
+          if (connectionAttributeFilter && connectionAttributeFilter.options) {
+            connectedAttributes = Object.values(connectionAttributeFilter.options).filter(
+              (o) => values.indexOf(o.value.toString()) > -1
+            ).map(
+              (o) => {
+                let newQueryValue = value;
+                const newValues = values.filter(
+                  (v) => !qe(v, o.value)
+                );
+                if (newValues.length > 0) {
+                  newQueryValue = `${newQueryValue}>${connectionAttributeName}=${newValues.join('|')}`;
+                }
+                return ({
+                  ...o,
+                  label: intl.formatMessage(appMessages[connectionAttributeFilter.optionMessages][o.value]),
+                  attribute: connectionAttributeName,
+                  onClick: () => onClick({
+                    query,
+                    value: newQueryValue,
+                    prevValue: queryValue,
+                    replace: true,
+                  }),
+                });
+              }
+            ).sort(
+              (a, b) => a.order > b.order ? 1 : -1,
+            );
+          }
+        }
+        if (groupByType && queryValue.indexOf(':') > -1) {
+          [optionId, value] = queryValue.split(':');
         }
       }
-      if (value) {
-        const connection = connections.getIn([path, value]);
-        if (connection) {
-          const isCodePublic = checkCodeVisibility(connection, option.entityType, isManager);
-          tags.push({
-            label: getConnectionLabel(connection, value, !isCodePublic, labels, intl),
-            labelLong: getConnectionLabel(connection, value, true, labels, intl),
-            type: option.entityType,
-            group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
-            onClick: () => onClick({
-              value: queryValue,
-              query,
-              checked: false,
-            }),
-            groupId: connectionKey,
-            optionId,
-          });
-        }
+      const connection = connections.getIn([path, value]);
+      if (connection) {
+        const isCodePublic = checkCodeVisibility(connection, option.entityType, isManager);
+        tags.push({
+          label: getConnectionLabel(connection, value, !isCodePublic, labels, intl),
+          labelLong: getConnectionLabel(connection, value, true, labels, intl),
+          type: option.entityType,
+          group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
+          connectedAttributes,
+          connectionAttributeName,
+          query,
+          queryValue,
+          onClick: () => onClick({
+            value: queryValue,
+            query,
+            checked: false,
+          }),
+          groupId: connectionKey,
+          optionId,
+        });
       }
     });
   }
@@ -398,6 +449,7 @@ const getCurrentConnectionFilters = (
             ],
             group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
             type: option.entityType,
+            query: 'without',
             onClick: () => onClick({
               value: queryValue,
               query: 'without',
@@ -433,6 +485,7 @@ const getCurrentConnectionFilters = (
             ],
             group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
             type: option.entityType,
+            query: 'any',
             onClick: () => onClick({
               value: queryValue,
               query: 'any',
@@ -445,6 +498,47 @@ const getCurrentConnectionFilters = (
         }
       });
     }
+  }
+  return tags;
+};
+const getCurrentConnectionAttributeFilters = (
+  connectionKey,
+  connectionAttribute,
+  locationQuery,
+  onClick,
+  intl,
+) => {
+  const tags = [];
+  const locationQueryValue = locationQuery.get('xwhere');
+  if (locationQueryValue) {
+    asList(locationQueryValue).forEach((queryValue) => {
+      const [path, attValue] = queryValue.split('|');
+      const [att, value] = attValue.split(':');
+      // console.log(path, att, value)
+      if (att === connectionAttribute.attribute && path === connectionAttribute.path) {
+        const option = Object.values(connectionAttribute.options).find((o) => qe(value, o.value));
+        if (option) {
+          tags.push({
+            ...option,
+            label: truncateText(
+              intl.formatMessage(appMessages[connectionAttribute.optionMessages][value]),
+              TEXT_TRUNCATE.ATTRIBUTE_TAG,
+              false,
+            ),
+            type: 'connectionAttributes',
+            groupId: connectionAttribute.path,
+            attribute: connectionAttribute.attribute,
+            dot: option.color,
+            group: appMessage(intl, connectionAttribute.message),
+            onClick: () => onClick({
+              value: queryValue,
+              query: 'xwhere',
+              checked: false,
+            }),
+          });
+        }
+      }
+    });
   }
   return tags;
 };

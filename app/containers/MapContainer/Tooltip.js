@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import ButtonClose from 'components/buttons/ButtonClose';
-import { Box, Text } from 'grommet';
-import Icon from 'components/Icon';
-import A from 'components/styled/A';
+import { Box, Text, Button } from 'grommet';
+import { FormNext, FormClose } from 'grommet-icons';
+import { ROUTES } from 'themes/config';
+
+import asArray from 'utils/as-array';
 
 const Root = styled.div`
   position: absolute;
@@ -12,24 +13,15 @@ const Root = styled.div`
   left: 0;
   right: 0;
   z-index: 2501;
+  pointer-events: none;
   @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
-    bottom: auto;
     right: auto;
-    top: ${({ position }) => position ? position.y : 10}px;
-    right: ${({ position }) => position ? 'auto' : '10px'};
+    bottom: 0;
+    top: ${({ position }) => position ? position.y : 0}px;
+    right: ${({ position }) => position ? 'auto' : '0px'};
     left: ${({ position }) => position ? position.x : 'auto'};
   }
 `;
-
-// const BlockMouse = styled.div`
-//   position: absolute;
-//   top: -40px;
-//   left: ${({ dirLeft }) => (dirLeft ? '-60px' : '0px')};
-//   width: 60px;
-//   background: transparent];
-//   height: 60px;
-//   display: block;
-// `;
 
 // prettier-ignore
 const Anchor = styled.div``;
@@ -37,101 +29,123 @@ const Anchor = styled.div``;
 // eslint-ebable prefer-template
 // border-right-color: ${({ dirLeft }) => (!dirLeft ? 'white' : 'transparent')};
 
-const TTContentWrap = styled((p) => <Box pad={{ bottom: 'small' }} {...p} />)``;
-const ButtonWrap = styled.div`
-  margin-left: auto;
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-`;
+const ButtonWrap = styled((p) => <Box align="end" margin={{ top: 'xsmall' }} {...p} />)``;
 const Main = styled.div`
-  padding: 20px 10px 30px;
-  min-height: 100px;
-  box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.2);
+  pointer-events: all;
+  padding: 5px;
   display: block;
-  background: white;
   width: 100%;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  max-height: ${({ h }) => h}px;
   @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
-    max-height: 80vH;
     height: auto;
-    overflow: visible;
-    max-width: ${({ w }) => w}px;
-    min-width: 250px;
+    min-width: 290px;
+    max-width: 310px;
     pointer-events: all;
   }
 `;
-const CloseWrap = styled.div`
-  width: 30px;
-  height: 30px;
-  position: absolute;
-  right: 12px;
-  top: 10px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
-    right: -10px;
-    top: -10px;
-  }
-`;
+
 const TTTitle = styled.h4`
-margin: 0 0 5px;
+margin: 0;
 font-size: ${({ theme }) => theme.sizes.text.default};
 `;
-//
-// const TTContent = styled.div`
-//   font-size: ${({ theme }) => theme.sizes.text.small};
-// `;
-// const TTSectionTitle = styled.div`
-//   margin: 15px 0 3px;
-//   font-size: ${({ theme }) => theme.sizes.text.default};
-// `;
 
-// const CloseButton = styled.button`
-//   border-radius: 9999px;
-//   box-shadow: 0px 0px 12px 0px rgba(0, 0, 0, 0.2);
-//   background: black;
-// `;
+const CountryButton = styled((p) => <Button {...p} />)`
+  font-weight: 500;
+  font-size: 13px;
+  stroke: ${({ theme }) => theme.global.colors.a};
+  &:hover {
+    stroke: ${({ theme }) => theme.global.colors.aHover};
+  }
+`;
 
-const WIDTH = 300;
+const Feature = styled((p) => (
+  <Box
+    pad="small"
+    {...p}
+  />
+))`
+  min-height: 100px;
+  box-shadow: 0px 0px 6px 0px rgba(0, 0, 0, 0.2);
+  background: white;
+  &:first-child {
+    margin-top: 0px;
+  }
+`;
+
+const TTContentWrap = styled((p) => <Box pad={{ vertical: 'xsmall' }} {...p} />)`
+  border-top: 1px solid ${({ theme }) => theme.global.colors.border.light};
+`;
 
 const Tooltip = ({
   position,
   direction,
-  feature,
+  features,
   onClose,
+  mapRef,
   onFeatureClick,
+  isLocationData,
 }) => (
   <Root position={position}>
-    <Anchor dirLeft={direction && direction.x === 'left'} w={WIDTH} xy={{ x: 0, y: 0 }}>
+    <Anchor dirLeft={direction && direction.x === 'left'} xy={{ x: 0, y: 0 }}>
       <Main
         dirLeft={direction && direction.x === 'left'}
-        w={WIDTH}
+        h={mapRef && mapRef.current ? mapRef.current.clientHeight : 300}
       >
-        <CloseWrap>
-          <ButtonClose onClose={onClose} />
-        </CloseWrap>
-        <TTTitle>{feature.title}</TTTitle>
-        {feature.content && (
-          <TTContentWrap>
-            {feature.content}
-          </TTContentWrap>
-        )}
-        <ButtonWrap>
-          <A as="button" onClick={onFeatureClick}>
-            <Box direction="row" align="center" ggap="small">
-              <Text size="small">Country profile</Text>
-              <Icon name="arrowRight" size="1em" sizes={{ mobile: '1em' }} />
-            </Box>
-          </A>
-        </ButtonWrap>
+        <Box gap="xsmall">
+          {features.map((feature, i) => (
+            <Feature key={i}>
+              <Box direction="row" justify="between" align="center" margin={{ bottom: 'xsmall' }}>
+                <Box>
+                  <TTTitle>{feature.title}</TTTitle>
+                </Box>
+                <Button
+                  plain
+                  icon={<FormClose size="small" />}
+                  onClick={() => onClose(feature.id)}
+                />
+              </Box>
+              {feature.content && (
+                <Box>
+                  {asArray(feature.content).map(
+                    (c, j) => <TTContentWrap key={j}>{c}</TTContentWrap>
+                  )}
+                </Box>
+              )}
+              {onFeatureClick && feature.id && (
+                <ButtonWrap>
+                  <CountryButton
+                    as="a"
+                    plain
+                    href={`${ROUTES.ACTOR}/${feature.id}`}
+                    onClick={(evt) => {
+                      if (evt && evt.preventDefault) evt.preventDefault();
+                      if (evt && evt.stopPropagation) evt.stopPropagation();
+                      onFeatureClick(feature.id);
+                    }}
+                  >
+                    <Box direction="row" align="center">
+                      <Text size="small">{isLocationData ? 'Location details' : 'Country details'}</Text>
+                      <FormNext size="xsmall" style={{ stroke: 'inherit', fill: 'inherit' }} />
+                    </Box>
+                  </CountryButton>
+                </ButtonWrap>
+              )}
+            </Feature>
+          ))}
+        </Box>
       </Main>
     </Anchor>
   </Root>
 );
 
 Tooltip.propTypes = {
+  isLocationData: PropTypes.bool,
   position: PropTypes.object,
   direction: PropTypes.object, // x, y
-  feature: PropTypes.object,
+  mapRef: PropTypes.object,
+  features: PropTypes.array,
   onClose: PropTypes.func,
   onFeatureClick: PropTypes.func,
 };

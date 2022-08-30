@@ -13,15 +13,11 @@ import appMessage from 'utils/app-message';
 import ContainerWithSidebar from 'components/styled/Container/ContainerWithSidebar';
 import MultiSelectControl from 'components/forms/MultiSelectControl';
 
-import {
-  FILTER_FORM_MODEL,
-} from './constants';
-import {
-  setFilter,
-} from './actions';
+import { FILTER_FORM_MODEL } from './constants';
+import { setFilter } from './actions';
 
 const Styled = styled(ContainerWithSidebar)`
-  z-index: ${(props) => props.sidebarResponsiveLarge ? 99 : 101};
+  z-index: 101;
   background-color: rgba(0,0,0,0.2);
   @media (min-width: ${(props) => props.theme.breakpoints.large}) {
     z-index: 99;

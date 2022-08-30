@@ -6,7 +6,11 @@ import qe from 'utils/quasi-equals';
 import appMessage from 'utils/app-message';
 import { lowerCase } from 'utils/string';
 import appMessages from 'containers/App/messages';
-import { API, USER_ROLES } from 'themes/config';
+import {
+  API,
+  USER_ROLES,
+  ACTION_INDICATOR_SUPPORTLEVELS,
+} from 'themes/config';
 
 export const prepareHeader = ({
   columns,
@@ -21,13 +25,14 @@ export const prepareHeader = ({
 }) => columns.map(
   (col) => {
     let label;
+    const sortActive = sortBy === col.id;
     switch (col.type) {
       case 'main':
         return ({
           ...col,
           title,
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
           onSelect: onSelectAll,
           selectedState,
@@ -38,40 +43,40 @@ export const prepareHeader = ({
           title: col.unit
             ? `${intl.formatMessage(appMessages.attributes[col.attribute])} (${col.unit})`
             : intl.formatMessage(appMessages.attributes[col.attribute]),
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'date':
         return ({
           ...col,
           title: 'Date',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'desc',
           onSort,
         });
       case 'attribute':
         return ({
           ...col,
           title: intl.formatMessage(appMessages.attributes[col.attribute]),
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'userrole':
         return ({
           ...col,
           title: 'User role',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'targets':
         return ({
           ...col,
           title: 'Targets',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'actors':
@@ -79,40 +84,74 @@ export const prepareHeader = ({
         return ({
           ...col,
           title: 'Actors',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'viaGroups':
+        return ({
+          ...col,
+          title: 'As Member of',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'positionStatement':
+        return ({
+          ...col,
+          title: 'Statement',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'positionStatementAuthority':
+        return ({
+          ...col,
+          title: 'Level of authority',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'users':
         return ({
           ...col,
           title: 'Users (staff)',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'indicators':
         return ({
           ...col,
           title: 'Topics',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
+          info: {
+            type: 'key-categorical',
+            attribute: 'supportlevel_id',
+            options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+              .sort((a, b) => a.order < b.order ? -1 : 1)
+              .map((level) => ({
+                ...level,
+                label: intl.formatMessage(appMessages.supportlevels[level.value]),
+              })),
+          },
         });
       case 'associations':
         return ({
           ...col,
           title: col.title || 'Member of',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'members':
         return ({
           ...col,
           title: col.title || 'Members',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'actiontype':
@@ -121,8 +160,8 @@ export const prepareHeader = ({
           title: appMessages.entities[`actions_${col.actiontype_id}`]
             ? intl.formatMessage(appMessages.entities[`actions_${col.actiontype_id}`].pluralShort)
             : 'Actions',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'taxonomy':
@@ -131,8 +170,8 @@ export const prepareHeader = ({
           title: appMessages.entities.taxonomies[col.taxonomy_id]
             ? intl.formatMessage(appMessages.entities.taxonomies[col.taxonomy_id].shortSingle)
             : 'Categories',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'hasResources':
@@ -141,31 +180,46 @@ export const prepareHeader = ({
           title: appMessages.entities[`resources_${col.resourcetype_id}`]
             ? intl.formatMessage(appMessages.entities[`resources_${col.resourcetype_id}`].singleShort)
             : 'Resource',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'resourceActions':
       case 'indicatorActions':
-      case 'userActions':
-        return ({
-          ...col,
-          title: col.title || 'Activities',
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
-          onSort,
-        });
       case 'actorActions':
-        if (col.subject === 'actors') {
-          label = col.members ? 'Activities as member' : 'Activities';
-        } else {
+        if (col.subject !== 'actors') {
           label = col.members ? 'Targeted as member' : 'Targeted by';
+        } else {
+          label = col.members ? 'Activities as member' : 'Activities';
         }
         return ({
           ...col,
           title: label,
-          sortActive: sortBy === col.id,
-          sortOrder: sortOrder || 'asc',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'userActions':
+        label = 'Assigned to';
+        return ({
+          ...col,
+          title: label,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'supportlevel':
+        return ({
+          ...col,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'stackedBarActions':
+        return ({
+          ...col,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       default:
@@ -174,12 +228,32 @@ export const prepareHeader = ({
   }
 );
 
-const getRelatedEntities = (relatedIDs, connections) => {
+const getRelatedEntities = (
+  relatedIDs,
+  connections,
+  column,
+  connectionAttributeValues,
+  connectionAttributes,
+) => {
   if (relatedIDs && relatedIDs.size > 0) {
     return relatedIDs.reduce(
-      (memo, relatedID) => {
+      (memo, relatedID, entityId) => {
         if (connections.get(relatedID.toString())) {
-          return memo.set(relatedID, connections.get(relatedID.toString()));
+          let entityConnection = connections.get(relatedID.toString());
+          if (connectionAttributeValues) {
+            const myConnectionAttributeValues = connectionAttributeValues.get(entityId.toString());
+            entityConnection = connectionAttributes.reduce(
+              (memo2, attribute) => {
+                const value = myConnectionAttributeValues.get(attribute.attribute);
+                return memo2.set(
+                  attribute.optionAs,
+                  attribute.options[value],
+                );
+              },
+              entityConnection,
+            );
+          }
+          return memo.set(relatedID, entityConnection);
         }
         return memo;
       },
@@ -188,6 +262,8 @@ const getRelatedEntities = (relatedIDs, connections) => {
   }
   return null;
 };
+const getRelatedSortValue = (relatedEntities) => getRelatedValue(relatedEntities);
+
 const getRelatedValue = (relatedEntities, typeLabel) => {
   if (relatedEntities && relatedEntities.size > 0) {
     if (relatedEntities.size > 1) {
@@ -199,17 +275,12 @@ const getRelatedValue = (relatedEntities, typeLabel) => {
   }
   return null;
 };
-const getRelatedSortValue = (relatedEntities) => {
-  if (relatedEntities && relatedEntities.size > 0) {
-    if (relatedEntities.size > 1) {
-      return relatedEntities.size;
-    }
-    return relatedEntities.first().getIn(['attributes', 'title']);
-  }
-  return null;
-};
+const getSingleRelatedValueFromAttributes = (relatedEntity) => relatedEntity
+  ? relatedEntity.get('name') || relatedEntity.get('title')
+  : null;
 
-export const prepareEntities = ({
+
+export const prepareEntityRows = ({
   entities,
   columns,
   entityIdsSelected,
@@ -226,12 +297,14 @@ export const prepareEntities = ({
 }) => entities.reduce(
   (memoEntities, entity) => {
     const id = entity.get('id');
+    // console.log(connections && connections.toJS())
     const entityValues = columns.reduce(
       (memoEntity, col) => {
         const path = (config && config.clientPath) || entityPath;
         let relatedEntities;
         let relatedEntityIds;
         let temp;
+        let attribute;
         switch (col.type) {
           case 'main':
             return {
@@ -248,7 +321,7 @@ export const prepareEntities = ({
                 draft: entity.getIn(['attributes', 'draft']),
                 archived: entity.getIn(['attributes', 'is_archive']),
                 private: entity.getIn(['attributes', 'private']),
-                sortValue: entity.getIn(['attributes', col.sort]),
+                sortValue: entity.getIn(['attributes', col.sort || 'title']),
                 selected: entityIdsSelected && entityIdsSelected.includes(id),
                 href: url || `${path}/${id}`,
                 onClick: (evt) => {
@@ -291,8 +364,24 @@ export const prepareEntities = ({
                 sortValue: entity.getIn(['attributes', col.attribute]),
               },
             };
+          case 'actionsSimple':
+            attribute = col.actions || 'actions';
+            temp = entity.get(attribute) || (entity.get(`${attribute}ByType`) && entity.get(`${attribute}ByType`).flatten(true));
+            relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getRelatedValue(relatedEntities, col.label || 'actions'),
+                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
+                tooltip: relatedEntities && relatedEntities.size > 1
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
+                multiple: relatedEntities && relatedEntities.size > 1,
+                sortValue: getRelatedSortValue(relatedEntities),
+              },
+            };
           case 'targets':
-            temp = entity.get('targets') || (entity.get('targetsByType') && entity.get('targetsByType').flatten());
+            temp = entity.get('targets') || (entity.get('targetsByType') && entity.get('targetsByType').flatten(true));
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -322,21 +411,33 @@ export const prepareEntities = ({
             };
           case 'indicators':
             temp = entity.get('indicators');
-            relatedEntities = getRelatedEntities(temp, connections.get('indicators'), col);
+            relatedEntities = getRelatedEntities(
+              temp,
+              connections.get('indicators'),
+              col,
+              entity.get('indicatorConnections'),
+              [{
+                attribute: 'supportlevel_id',
+                options: ACTION_INDICATOR_SUPPORTLEVELS,
+                optionAs: 'supportlevel',
+              }],
+            );
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
                 value: getRelatedValue(relatedEntities, col.label || 'topics'),
                 single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
-                tooltip: relatedEntities,
+                tooltip: relatedEntities
+                  && relatedEntities.size > 1
+                  && relatedEntities.groupBy((t) => t.getIn(['supportlevel', 'value']) || '0'),
                 multiple: relatedEntities && relatedEntities.size > 1,
                 sortValue: getRelatedSortValue(relatedEntities),
               },
             };
           case 'actors':
           case 'userActors':
-            temp = entity.get('actors') || (entity.get('actorsByType') && entity.get('actorsByType').flatten());
+            temp = entity.get('actors') || (entity.get('actorsByType') && entity.get('actorsByType').flatten(true));
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -350,8 +451,22 @@ export const prepareEntities = ({
                 sortValue: getRelatedSortValue(relatedEntities),
               },
             };
+          case 'viaGroups':
+            relatedEntities = entity.getIn(['position', 'viaGroups']);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getRelatedValue(relatedEntities),
+                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
+                multiple: relatedEntities && relatedEntities.size > 1,
+                tooltip: relatedEntities && relatedEntities.size > 1
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
+                sortValue: getRelatedSortValue(relatedEntities),
+              },
+            };
           case 'members':
-            temp = entity.get('members') || (entity.get('membersByType') && entity.get('membersByType').flatten());
+            temp = entity.get('members') || (entity.get('membersByType') && entity.get('membersByType').flatten(true));
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -366,7 +481,7 @@ export const prepareEntities = ({
               },
             };
           case 'associations':
-            temp = entity.get('associations') || (entity.get('associationsByType') && entity.get('associationsByType').flatten());
+            temp = entity.get('associations') || (entity.get('associationsByType') && entity.get('associationsByType').flatten(true));
 
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
@@ -415,12 +530,18 @@ export const prepareEntities = ({
             };
           case 'actorActions':
             temp = entity.get(col.actions)
-              || (entity.get(`${col.actions}ByType`) && entity.get(`${col.actions}ByType`).flatten());
+              || (entity.get(`${col.actions}ByType`) && entity.get(`${col.actions}ByType`).flatten(true));
+            console.log('actorActions-entity', entity && entity.toJS());
+            console.log('actorActions-temp', temp && temp.toJS());
+            relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
+            console.log('actorActions-relatedEntities', relatedEntities && relatedEntities.toJS());
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
                 value: temp && temp.size,
+                tooltip: relatedEntities && relatedEntities.size > 0
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
               },
             };
           case 'userrole':
@@ -449,7 +570,7 @@ export const prepareEntities = ({
           case 'indicatorActions':
           case 'userActions':
             temp = entity.get('actions')
-              || (entity.get('actionsByType') && entity.get('actionsByType').flatten());
+              || (entity.get('actionsByType') && entity.get('actionsByType').flatten(true));
             relatedEntities = temp && getRelatedEntities(
               temp,
               connections.get(API.ACTIONS),
@@ -459,7 +580,7 @@ export const prepareEntities = ({
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: getRelatedValue(relatedEntities, 'actions'),
+                value: getRelatedValue(relatedEntities, col.type === 'indicatorActions' ? 'statements' : 'actions'),
                 single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
                 tooltip: relatedEntities && relatedEntities.size > 1
                   && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
@@ -475,12 +596,91 @@ export const prepareEntities = ({
                 .toList()
                 .toSet();
             }
+            relatedEntities = getRelatedEntities(relatedEntityIds.flatten(true), connections.get('measures'), col);
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
                 value: relatedEntityIds && relatedEntityIds.size > 0
                   ? relatedEntityIds.size
+                  : null,
+                tooltip: relatedEntities && relatedEntities.size > 0
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
+              },
+            };
+          case 'supportlevel':
+            if (entity.get('supportlevel')) {
+              temp = entity.get('supportlevel')
+                && entity.getIn(['supportlevel', col.actionId]);
+            }
+            if (entity.get('position')) {
+              temp = entity.get('position')
+                && entity.getIn(['position', 'supportlevel_id']);
+            }
+            if (!temp) {
+              return {
+                ...memoEntity,
+                [col.id]: {
+                  ...col,
+                },
+              };
+            }
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: intl.formatMessage(appMessages.supportlevels[temp]),
+                color: ACTION_INDICATOR_SUPPORTLEVELS[temp].color,
+              },
+            };
+          case 'positionStatement':
+            temp = entity.get('position') && entity.getIn(['position', 'measure']);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getSingleRelatedValueFromAttributes(temp),
+                single: temp,
+                // sortValue: getRelatedSortValue(temp),
+              },
+            };
+          case 'positionStatementAuthority':
+            temp = entity.get('position') && entity.getIn(['position', 'authority']);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getSingleRelatedValueFromAttributes(temp),
+                single: temp,
+                // sortValue: getRelatedSortValue(temp),
+              },
+            };
+          case 'stackedBarActions':
+            temp = entity.get(col.values);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                values: temp && temp.map(
+                  (value) => {
+                    if (value.actors) {
+                      relatedEntities = getRelatedEntities(value.actors, connections.get('actors'), col);
+                      if (relatedEntities && relatedEntities.size > 0) {
+                        return {
+                          ...value,
+                          tooltip: relatedEntities && relatedEntities.size > 0
+                            && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
+                        };
+                      }
+                    }
+                    return value;
+                  }
+                ).toJS(),
+                sortValue: temp
+                  ? temp.reduce(
+                    (sum, val) => (val.count || 0) + sum,
+                    0,
+                  )
                   : null,
               },
             };
@@ -552,6 +752,21 @@ export const getColumnMaxValues = (entities, columns) => entities.reduce(
     (maxValueMemo2, column) => {
       if (column.type === 'actorActions' || column.type === 'actiontype') {
         const val = entity[column.id].value;
+        return val
+          ? {
+            ...maxValueMemo2,
+            [column.id]: maxValueMemo2[column.id]
+              ? Math.max(maxValueMemo2[column.id], val)
+              : val,
+          }
+          : maxValueMemo2;
+      }
+      if (column.type === 'stackedBarActions') {
+        const { values } = entity[column.id];
+        const val = values && Object.values(values).reduce(
+          (memo, value) => (value.count || 0) + memo,
+          0,
+        );
         return val
           ? {
             ...maxValueMemo2,

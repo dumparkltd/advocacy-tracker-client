@@ -16,6 +16,8 @@ import {
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
+  MEMBERSHIPS,
+  ACTION_INDICATOR_SUPPORTLEVELS,
   // ACTIONTYPES,
 } from 'themes/config';
 import { CONTENT_LIST } from 'containers/App/constants';
@@ -26,7 +28,7 @@ import Content from 'components/styled/Content';
 import Loading from 'components/Loading';
 import EntityListViewOptions from 'components/EntityListViewOptions';
 import MapSubjectOptions from 'containers/MapContainer/MapInfoOptions/MapSubjectOptions';
-import MapMemberOption from 'containers/MapContainer/MapInfoOptions/MapMemberOption';
+import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 import EntityListTable from 'containers/EntityListTable';
 import ButtonPill from 'components/buttons/ButtonPill';
 
@@ -225,6 +227,30 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
           label: 'Include activities of groups (countries belong to)',
         };
+      } else if (mapSubjectClean === 'targets' && qe(viewType, ACTORTYPES.ORG)) {
+        memberOption = {
+          active: includeTargetMembers,
+          onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+          label: 'Include activities targeting groups (organisations belong to)',
+        };
+      } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.ORG)) {
+        memberOption = {
+          active: includeActorMembers,
+          onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+          label: 'Include activities of groups (organisations belong to)',
+        };
+      } else if (mapSubjectClean === 'targets' && qe(viewType, ACTORTYPES.CONTACT)) {
+        memberOption = {
+          active: includeTargetMembers,
+          onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+          label: 'Include activities targeting countries and orgs (contacts belong to)',
+        };
+      } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.CONTACT)) {
+        memberOption = {
+          active: includeActorMembers,
+          onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+          label: 'Include activities of countries and orgs (contacts belong to)',
+        };
       }
       if (mapSubjectClean === 'actors' || mapSubjectClean === 'targets') {
         entityActors = getActorsForEntities(
@@ -311,17 +337,19 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           },
         ];
       }
-      if (mapSubjectClean === 'targets' && qe(typeId, ACTORTYPES.COUNTRY)) {
+      const canBeMember = Object.keys(MEMBERSHIPS).indexOf(typeId) > -1
+        && MEMBERSHIPS[typeId].length > 0;
+      if (mapSubjectClean === 'targets' && canBeMember) {
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions and groups (countries belong to)',
+          label: 'Include activities targeting associated actors',
         };
-      } else if (mapSubjectClean === 'actors' && qe(typeId, ACTORTYPES.COUNTRY)) {
+      } else if (mapSubjectClean === 'actors' && canBeMember) {
         memberOption = {
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of groups (countries belong to)',
+          label: 'Include activities of associated actors',
         };
       }
       // RESOURCES ================================================================
@@ -345,12 +373,30 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {
           id: 'main',
           type: 'main',
-          sort: 'name',
+          sort: 'title',
           attributes: ['title'],
         },
         {
-          id: 'actions', // one row per type,
+          id: 'statements', // one row per type,
           type: 'indicatorActions', // one row per type,
+        },
+        {
+          id: 'support', // one row per type,
+          type: 'stackedBarActions', // one row per type,
+          values: 'supportlevels',
+          title: 'Support',
+          options: ACTION_INDICATOR_SUPPORTLEVELS,
+          info: {
+            type: 'key-categorical',
+            title: 'Support by number of countries',
+            attribute: 'supportlevel_id',
+            options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+              .sort((a, b) => a.order < b.order ? -1 : 1)
+              .map((level) => ({
+                ...level,
+                label: intl.formatMessage(appMessages.supportlevels[level.value]),
+              })),
+          },
         },
       ];
     } else if (config.types === 'users' && dataReady) {
@@ -379,7 +425,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {
           id: 'main',
           type: 'main',
-          sort: 'name',
+          sort: 'title',
           attributes: ['title', 'menu_title'],
         },
       ];
@@ -425,7 +471,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                       {mapSubject === 'actors'
                         && ACTIONTYPE_ACTORTYPES[typeId]
                         && ACTIONTYPE_ACTORTYPES[typeId].length > 1
-                        && ACTIONTYPE_ACTORTYPES[typeId].map(
+                        && ACTIONTYPE_ACTORTYPES[typeId].filter(
+                          (actortypeId) => entityActors.get(parseInt(actortypeId, 10))
+                        ).map(
                           (actortypeId) => (
                             <ButtonPill
                               key={actortypeId}
@@ -441,7 +489,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                       {mapSubject === 'targets'
                         && ACTIONTYPE_TARGETTYPES[typeId]
                         && ACTIONTYPE_TARGETTYPES[typeId].length > 1
-                        && ACTIONTYPE_TARGETTYPES[typeId].map(
+                        && ACTIONTYPE_TARGETTYPES[typeId].filter(
+                          (actortypeId) => entityActors.get(parseInt(actortypeId, 10))
+                        ).map(
                           (actortypeId) => (
                             <ButtonPill
                               key={actortypeId}
@@ -457,7 +507,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                     </Box>
                     {memberOption && (
                       <Box>
-                        <MapMemberOption option={memberOption} />
+                        <MapOption option={memberOption} type="member" />
                       </Box>
                     )}
                     {entityActors.get(parseInt(viewType, 10)) && (
@@ -561,7 +611,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                     hasSearch
                     columns={columns}
                     headerColumnsUtility={headerColumnsUtility}
-                    memberOption={memberOption && <MapMemberOption option={memberOption} />}
+                    memberOption={memberOption && <MapOption option={memberOption} type="member" />}
                     subjectOptions={subjectOptions && <MapSubjectOptions inList options={subjectOptions} />}
                     listUpdating={listUpdating}
                     entities={entities}

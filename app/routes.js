@@ -322,15 +322,13 @@ export default function createRoutes(store) {
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActionNew/reducer'),
-          import('containers/ActionNew/sagas'),
           import('containers/ActionNew'),
         ]);
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([reducer, sagas, component]) => {
+        importModules.then(([reducer, component]) => {
           injectReducer('actionNew', reducer.default);
-          injectSagas(sagas.default);
           renderRoute(component);
         });
 
@@ -436,15 +434,13 @@ export default function createRoutes(store) {
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActorNew/reducer'),
-          import('containers/ActorNew/sagas'),
           import('containers/ActorNew'),
         ]);
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([reducer, sagas, component]) => {
+        importModules.then(([reducer, component]) => {
           injectReducer('actorNew', reducer.default);
-          injectSagas(sagas.default);
           renderRoute(component);
         });
 
@@ -550,15 +546,13 @@ export default function createRoutes(store) {
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ResourceNew/reducer'),
-          import('containers/ResourceNew/sagas'),
           import('containers/ResourceNew'),
         ]);
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([reducer, sagas, component]) => {
+        importModules.then(([reducer, component]) => {
           injectReducer('resourceNew', reducer.default);
-          injectSagas(sagas.default);
           renderRoute(component);
         });
 
@@ -648,15 +642,13 @@ export default function createRoutes(store) {
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/IndicatorNew/reducer'),
-          import('containers/IndicatorNew/sagas'),
           import('containers/IndicatorNew'),
         ]);
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([reducer, sagas, component]) => {
+        importModules.then(([reducer, component]) => {
           injectReducer('indicatorNew', reducer.default);
-          injectSagas(sagas.default);
           renderRoute(component);
         });
 
@@ -730,15 +722,13 @@ export default function createRoutes(store) {
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/CategoryNew/reducer'),
-          import('containers/CategoryNew/sagas'),
           import('containers/CategoryNew'),
         ]);
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([reducer, sagas, component]) => {
+        importModules.then(([reducer, component]) => {
           injectReducer('categoryNew', reducer.default);
-          injectSagas(sagas.default);
           renderRoute(component);
         });
 
@@ -806,15 +796,13 @@ export default function createRoutes(store) {
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/PageNew/reducer'),
-          import('containers/PageNew/sagas'),
           import('containers/PageNew'),
         ]);
 
         const renderRoute = loadModule(cb);
 
-        importModules.then(([reducer, sagas, component]) => {
+        importModules.then(([reducer, component]) => {
           injectReducer('pageNew', reducer.default);
-          injectSagas(sagas.default);
           renderRoute(component);
         });
 

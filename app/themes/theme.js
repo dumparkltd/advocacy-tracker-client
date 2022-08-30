@@ -143,6 +143,8 @@ theme.palette = {
   usersHover: ['#023066'],
   attributesHover: [dark[2]],
   attributes: [dark[3]],
+  connectionAttributesHover: [dark[0]],
+  connectionAttributes: [dark[0]],
   rolesHover: [dark[2]],
   roles: [dark[3]],
 
@@ -473,6 +475,10 @@ theme.global = {
     background: '#f1f0f1',
     backgroundLight: '#fcfcfc',
     inactive: '#f1f0f1', // on light background (empowerment)
+    a: '#00728f',
+    aHover: '#08586c',
+    textLight: '#1c2121', // on light background (empowerment)
+    textSecondary: '#777b7e', // on light background (empowerment)
     text: {
       brand: '#000000',
       dark: '#FFFFFF', //  on dark background
@@ -481,6 +487,7 @@ theme.global = {
     },
     border: {
       light: '#CECED2',
+      lighter: '#f1f0f1',
       dark: '#FFFFFF',
     },
     private: '#DA1D52',
@@ -498,6 +505,13 @@ theme.global = {
     large: '48px',
     xlarge: '64px',
     xxlarge: '100px',
+  },
+};
+// also grommet but not global somehow
+theme.accordion = {
+  border: {
+    style: 'hidden',
+    color: 'transparent',
   },
 };
 theme.layer = {
