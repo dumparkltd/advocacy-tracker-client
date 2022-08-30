@@ -13,6 +13,7 @@ import CellBodyIndicators from './CellBodyIndicators';
 import CellBodyCategories from './CellBodyCategories';
 import CellBodyHasResource from './CellBodyHasResource';
 import CellBodyBarChart from './CellBodyBarChart';
+import CellBodyStackedBarChart from './CellBodyStackedBarChart';
 import CellHeaderMain from './CellHeaderMain';
 import CellHeaderPlain from './CellHeaderPlain';
 
@@ -29,8 +30,11 @@ const TableRow = styled.tr`
   height: 100%;
 `;
 const getColWidth = ({
-  col, count, colSpan = 1,
+  col, count, colSpan = 1, inSingleView,
 }) => {
+  if (inSingleView) {
+    return (100 / count) * colSpan;
+  }
   if (count === 1) {
     return 100;
   }
@@ -40,8 +44,11 @@ const getColWidth = ({
   if (count > 2) {
     return col.type === 'main' ? 35 : (65 / (count - 1)) * colSpan;
   }
+  // if (count === 4) {
+  //   return col.type === 'main' ? 30 : (70 / (count - 1)) * colSpan;
+  // }
   // if (count > 4) {
-  //   return col.type === 'main' ? 40 : (60 / (count - 1)) * colSpan;
+  //   return col.type === 'main' ? 25 : (75 / (count - 1)) * colSpan;
   // }
   return 0;
 };
@@ -105,9 +112,9 @@ export function EntitiesTable({
   headerColumnsUtility,
   memberOption,
   subjectOptions,
+  inSingleView,
 }) {
   const size = React.useContext(ResponsiveContext);
-
   return (
     <Box fill="horizontal">
       <Table>
@@ -125,6 +132,7 @@ export function EntitiesTable({
                       colSpan={col.span || 1}
                       first={i === 0}
                       last={i === headerColumns.length - 1}
+                      inSingleView={inSingleView}
                       utility
                     >
                       {col.type === 'options' && (
@@ -156,8 +164,9 @@ export function EntitiesTable({
                     count={headerColumns.length}
                     first={i === 0}
                     last={i === headerColumns.length - 1}
+                    inSingleView={inSingleView}
                   >
-                    <TableCellHeaderInner>
+                    <TableCellHeaderInner fill={false} flex={{ grow: 0 }} justify="start">
                       {col.type === 'main' && (
                         <CellHeaderMain
                           column={col}
@@ -185,6 +194,7 @@ export function EntitiesTable({
                   count={headerColumns.length}
                   first={i === 0}
                   last={i === headerColumns.length - 1}
+                  inSingleView={inSingleView}
                 >
                   <TableCellBodyInner>
                     {col.type === 'main' && (
@@ -194,43 +204,18 @@ export function EntitiesTable({
                         column={col}
                       />
                     )}
-                    {col.type === 'attribute' && (
+                    {(
+                      col.type === 'plain'
+                      || col.type === 'attribute'
+                      || col.type === 'amount'
+                      || col.type === 'userrole'
+                      || col.type === 'date'
+                      || col.type === 'supportlevel'
+                    ) && (
                       <CellBodyPlain
                         entity={entity[col.id]}
                         column={col}
-                      />
-                    )}
-                    {col.type === 'amount' && (
-                      <CellBodyPlain
-                        entity={entity[col.id]}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'userrole' && (
-                      <CellBodyPlain
-                        entity={entity[col.id]}
-                        column={col}
-                        primary
-                      />
-                    )}
-                    {col.type === 'date' && (
-                      <CellBodyPlain
-                        entity={entity[col.id]}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'actors' && (
-                      <CellBodyActors
-                        entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'targets' && (
-                      <CellBodyActors
-                        entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
-                        column={col}
+                        primary={col.type === 'userrole'}
                       />
                     )}
                     {col.type === 'users' && (
@@ -247,28 +232,25 @@ export function EntitiesTable({
                         column={col}
                       />
                     )}
-                    {col.type === 'members' && (
+                    {(
+                      col.type === 'actorsSimple'
+                      || col.type === 'actors'
+                      || col.type === 'targets'
+                      || col.type === 'members'
+                      || col.type === 'associations'
+                      || col.type === 'userActors'
+                      || col.type === 'viaGroups'
+                    ) && (
                       <CellBodyActors
                         entity={entity[col.id]}
                         onEntityClick={onEntityClick}
                         column={col}
                       />
                     )}
-                    {col.type === 'associations' && (
-                      <CellBodyActors
-                        entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'userActors' && (
-                      <CellBodyActors
-                        entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'taxonomy' && (
+                    {(
+                      col.type === 'taxonomy'
+                      || col.type === 'positionStatementAuthority'
+                    ) && (
                       <CellBodyCategories
                         entity={entity[col.id]}
                         column={col}
@@ -281,42 +263,44 @@ export function EntitiesTable({
                         column={col}
                       />
                     )}
-                    {col.type === 'resourceActions' && (
+                    {(
+                      col.type === 'actionsSimple'
+                      || col.type === 'resourceActions'
+                      || col.type === 'indicatorActions'
+                      || col.type === 'userActions'
+                      || col.type === 'positionStatement'
+                    ) && (
                       <CellBodyActions
                         entity={entity[col.id]}
                         column={col}
                         onEntityClick={onEntityClick}
                       />
                     )}
-                    {col.type === 'indicatorActions' && (
-                      <CellBodyActions
-                        entity={entity[col.id]}
-                        column={col}
-                        onEntityClick={onEntityClick}
-                      />
-                    )}
-                    {col.type === 'userActions' && (
-                      <CellBodyActions
-                        entity={entity[col.id]}
-                        column={col}
-                        onEntityClick={onEntityClick}
-                      />
-                    )}
-                    {col.type === 'actorActions' && (
-                      <CellBodyBarChart
-                        value={entity[col.id].value}
-                        maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
-                        issecondary={col.members}
-                        subject={col.subject}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'actiontype' && (
+                    {(
+                      col.type === 'actorActions'
+                      || col.type === 'actiontype'
+                    ) && (
                       <CellBodyBarChart
                         value={entity[col.id].value}
                         maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
                         subject={col.subject}
                         column={col}
+                        issecondary={col.type !== 'actiontype' && col.members}
+                        entityType="actions"
+                        onEntityClick={onEntityClick}
+                        rowConfig={entity[col.id]}
+                      />
+                    )}
+                    {col.type === 'stackedBarActions' && (
+                      <CellBodyStackedBarChart
+                        values={entity[col.id] && entity[col.id].values
+                          ? Object.values(entity[col.id].values)
+                          : null
+                        }
+                        maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
+                        column={col}
+                        entityType="actors"
+                        onEntityClick={onEntityClick}
                       />
                     )}
                   </TableCellBodyInner>
@@ -337,6 +321,7 @@ EntitiesTable.propTypes = {
   headerColumns: PropTypes.array,
   headerColumnsUtility: PropTypes.array,
   canEdit: PropTypes.bool,
+  inSingleView: PropTypes.bool,
   onEntityClick: PropTypes.func,
   memberOption: PropTypes.node,
   subjectOptions: PropTypes.node,

@@ -1,14 +1,13 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { injectIntl, intlShape } from 'react-intl';
 import {
   Box, Text, Button, Drop,
 } from 'grommet';
 import styled from 'styled-components';
 import { truncateText } from 'utils/string';
 
-import { ACTIONTYPES_CONFIG, ROUTES } from 'themes/config';
-import appMessages from 'containers/App/messages';
+import { ROUTES } from 'themes/config';
+import DropEntityList from './DropEntityList';
 
 const Link = styled((p) => <Button as="a" plain {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
@@ -30,25 +29,13 @@ const LabelTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />
   font-style: italic;
   line-height: 12px;
 `;
-const LinkInTT = styled((p) => <Button as="a" plain {...p} />)`
-  line-height: 13px;
-`;
-const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
-  line-height: 13px;
-`;
 
-const getActionLink = (actor) => `${ROUTES.ACTION}/${actor.get('id')}`;
-
-const getActionOnClick = (actor, onEntityClick) => (evt) => {
-  if (evt) evt.preventDefault();
-  onEntityClick(actor.get('id'), ROUTES.ACTION);
-};
+const getActionLink = (action) => `${ROUTES.ACTION}/${action.get('id')}`;
 
 export function CellBodyActions({
   entity,
   align = 'start',
   onEntityClick,
-  intl,
 }) {
   const buttonRef = useRef();
   const [showContent, setShowContent] = useState(false);
@@ -57,7 +44,10 @@ export function CellBodyActions({
       {entity.single && (
         <Link
           href={getActionLink(entity.single)}
-          onClick={getActionOnClick(entity.single, onEntityClick)}
+          onClick={(evt) => {
+            if (evt) evt.preventDefault();
+            onEntityClick(entity.single.get('id'), ROUTES.ACTION);
+          }}
           title={entity.value}
           alignSelf={align}
         >
@@ -71,7 +61,6 @@ export function CellBodyActions({
           ref={buttonRef}
           alignSelf={align}
           onClick={() => setShowContent(!showContent)}
-          active={showContent}
         >
           <LabelTT textAlign={align}>
             {entity.value}
@@ -93,61 +82,14 @@ export function CellBodyActions({
             horizontal: 'hidden',
           }}
         >
-          <Box
-            style={{ minWidth: '240px' }}
-            pad={{
-              horizontal: 'small',
-              vertical: 'medium',
+          <DropEntityList
+            entityType="actions"
+            tooltipConfig={entity.tooltip}
+            onEntityClick={(id) => {
+              setShowContent(false);
+              onEntityClick(id, ROUTES.ACTION);
             }}
-            gap="medium"
-            flex={{ shrink: 0 }}
-          >
-            {Object.values(ACTIONTYPES_CONFIG).sort(
-              (a, b) => a.order < b.order ? -1 : 1
-            ).map(
-              (type) => {
-                if (entity.tooltip.get(parseInt(type.id, 10))) {
-                  const count = entity.tooltip.get(parseInt(type.id, 10)).size;
-                  return (
-                    <Box key={type.id} flex={{ shrink: 0 }}>
-                      <Box border="bottom" flex={{ shrink: 0 }} margin={{ bottom: 'small' }}>
-                        <Text size="small" weight={500}>
-                          {`${count} ${intl.formatMessage(appMessages.entities[`actions_${type.id}`][count === 1 ? 'singleShort' : 'pluralShort'])}`}
-                        </Text>
-                      </Box>
-                      <Box flex={{ shrink: 0 }} gap="xsmall">
-                        {entity.tooltip.get(parseInt(type.id, 10))
-                          .toList()
-                          .sort(
-                            (a, b) => a.getIn(['attributes', 'title'])
-                              > b.getIn(['attributes', 'title'])
-                              ? 1
-                              : -1
-                          ).map(
-                            (actor) => (
-                              <Box key={actor.get('id')} flex={{ shrink: 0 }}>
-                                <LinkInTT
-                                  key={actor.get('id')}
-                                  href={getActionLink(actor)}
-                                  onClick={getActionOnClick(actor, onEntityClick)}
-                                  title={actor.getIn(['attributes', 'title'])}
-                                >
-                                  <LabelInTT>
-                                    {truncateText(actor.getIn(['attributes', 'title']), 30)}
-                                  </LabelInTT>
-                                </LinkInTT>
-                              </Box>
-                            )
-                          )
-                        }
-                      </Box>
-                    </Box>
-                  );
-                }
-                return null;
-              }
-            )}
-          </Box>
+          />
         </Drop>
       )}
     </Box>
@@ -158,8 +100,7 @@ CellBodyActions.propTypes = {
   entity: PropTypes.object,
   align: PropTypes.string,
   onEntityClick: PropTypes.func,
-  intl: intlShape,
 };
 
 
-export default injectIntl(CellBodyActions);
+export default CellBodyActions;

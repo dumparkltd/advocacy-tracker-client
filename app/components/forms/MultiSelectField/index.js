@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
+import { Map } from 'immutable';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import { lowerCase } from 'utils/string';
@@ -13,9 +14,9 @@ import Button from 'components/buttons/Button';
 import A from 'components/styled/A';
 
 import Icon from 'components/Icon';
-import ItemStatus from 'components/ItemStatus';
 
 import MultiSelectControl from '../MultiSelectControl';
+import MultiSelectActiveOption from './MultiSelectActiveOption';
 import messages from './messages';
 
 const MultiSelectWrapper = styled.div`
@@ -49,41 +50,7 @@ const MultiselectActiveOptions = styled.div`
 const MultiselectActiveOptionList = styled.div`
   position: relative;
 `;
-const MultiselectActiveOptionListItem = styled.div`
-  position: relative;
-  background-color: ${palette('mainListItem', 1)};
-  border-bottom: 1px solid ${palette('light', 1)};
-  padding: 6px 0 6px 8px;
-  font-size: 0.8em;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: 12px 0 12px 16px;
-    font-size: 1em;
-  }
-  @media print {
-    font-size: ${(props) => props.theme.sizes.print.default};
-  }
-`;
-const MultiselectActiveOptionRemove = styled(Button)`
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: block;
-  bottom: 0;
-  color: ${palette('link', 2)};
-  &:hover {
-    color: ${palette('linkHover', 2)};
-  }
-  padding: 0 8px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: 0 16px;
-  }
-`;
-const MultiselectActiveOption = styled.div`
-  padding-right: 30px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding-right: 50px;
-  }
-`;
+
 const MultiSelectDropdownIcon = styled.div`
   position: absolute;
   right: 0;
@@ -125,17 +92,6 @@ const MultiSelectWithoutLink = styled(A)`
   color: ${palette('text', 1)};
   &:hover {
     color: ${palette('link', 0)};
-  }
-`;
-
-const Reference = styled.div`
-  color: ${palette('text', 1)};
-  &:hover {
-    color: ${palette('text', 0)};
-  }
-  font-size: 0.85em;
-  @media print {
-    font-size: ${(props) => props.theme.sizes.print.smaller};
   }
 `;
 
@@ -183,13 +139,40 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
       : d)
   );
 
+  onMultiSelectItemConnectionAttributeChange =
+    ({ option, attribute, value }) => this.props.handleUpdate && this.props.handleUpdate(
+      this.props.fieldData.map(
+        (d) => {
+          if (option.get('value') === d.get('value')) {
+            if (d.get('association')) {
+              return d.setIn(['association', attribute.attribute], value);
+            }
+            return d.set('association', Map({ [attribute.attribute]: value }));
+          }
+          return d;
+        }
+      )
+    );
+
   getMultiSelectActiveOptions = (field, fieldData) => {
     // use form data if already loaded
     if (fieldData) {
-      return this.sortOptions(fieldData.filter((o) => o.get('checked')));
+      return this.sortOptions(
+        fieldData.map(
+          (option, index) => option.set('index', index)
+        ).filter(
+          (o) => o.get('checked')
+        )
+      );
     }
     // until then use initial options
-    return this.sortOptions(field.options.filter((o) => o.get('checked')));
+    return this.sortOptions(
+      field.options.map(
+        (option, index) => option.set('index', index)
+      ).filter(
+        (o) => o.get('checked')
+      )
+    );
   }
 
   getOptionSortValueMapper = (option) => {
@@ -204,35 +187,14 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
     (a, b) => getEntitySortComparator(a, b, 'asc')
   )
 
-  renderMultiselectActiveOption = (option, field, i) => (
-    <MultiselectActiveOptionListItem key={i}>
-      <MultiselectActiveOption>
-        {option.get('draft')
-          && <ItemStatus draft />
-        }
-        { option.get('reference')
-          && <Reference>{option.get('reference')}</Reference>
-        }
-        {option.get('label')}
-      </MultiselectActiveOption>
-      <MultiselectActiveOptionRemove
-        onClick={(evt) => {
-          if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-          this.onMultiSelectItemRemove(option, field);
-        }}
-      >
-        <Icon name="removeSmall" />
-      </MultiselectActiveOptionRemove>
-    </MultiselectActiveOptionListItem>
-  )
-
   render() {
     const { field, fieldData } = this.props;
     const { intl } = this.context;
     const { id, model, ...controlProps } = omit(field, NON_CONTROL_PROPS);
-
+    // console.log('field', field)
+    // console.log('fieldData', fieldData && fieldData.toJS())
     const options = this.getMultiSelectActiveOptions(field, fieldData);
-
+    // console.log('field options', options && options.toJS())
     return (
       <MultiSelectFieldWrapper>
         <MultiSelectDropdown
@@ -250,7 +212,15 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
           { options.size > 0
             ? (
               <MultiselectActiveOptionList>
-                {options.map((option, i) => this.renderMultiselectActiveOption(option, field, i))}
+                {options.map((option, i) => (
+                  <MultiSelectActiveOption
+                    key={i}
+                    option={option}
+                    field={field}
+                    onItemRemove={this.onMultiSelectItemRemove}
+                    onConnectionAttributeChange={this.onMultiSelectItemConnectionAttributeChange}
+                  />
+                ))}
               </MultiselectActiveOptionList>
             )
             : (

@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { Box, ResponsiveContext } from 'grommet';
+
+import { isMinSize } from 'utils/responsive';
 
 import {
   CONTENT_SINGLE, CONTENT_PAGE, CONTENT_MODAL,
@@ -20,7 +23,7 @@ const Styled = styled.div`
   }};
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: ${({ isModal, hasViewOptions }) => {
-    if (isModal) return '20px 0 20px 40px';
+    if (isModal) return '20px 0 20px 24px';
     if (hasViewOptions) return '0 0 1em';
     return '3em 0 1em';
   }};
@@ -33,7 +36,7 @@ const Styled = styled.div`
 // `;
 const TitleMedium = styled.h3`
   line-height: 1;
-  margin-top: 15px;
+  margin: 15px 0;
   display: inline-block;
 `;
 const ButtonWrap = styled.span`
@@ -45,38 +48,18 @@ const ButtonWrap = styled.span`
     display: none;
   }
 `;
-const Table = styled.span`
-  display: block;
+const TitleButtonWrap = styled((p) => <Box align="center" direction="row" {...p} />)`
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    display: table;
-    width: 100%;
     min-height: 62px;
+    width: 100%;
   }
 `;
-const TableCell = styled.span`
-  display: ${(props) => {
-    if (props.hiddenMobile) {
-      return 'none';
-    }
-    return 'block';
-  }};
-  clear: both;
-  display: table-cell;
-  vertical-align: middle;
-`;
 
-const TableCellInner = styled(TableCell)`
-  display: table-cell;
-  vertical-align: middle;
-`;
-
-const ButtonGroup = styled.div`
-  display: table;
-  float: right;
-  text-align: right;
+const ButtonGroup = styled((p) => <Box align="center" direction="row" {...p} />)`
+  text-align: left;
   margin-bottom: 10px;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    margin-bottom: 0px;
+    margin-bottom: -4px;
   }
 `;
 
@@ -86,100 +69,76 @@ const SubTitle = styled.p`
     display: none;
   }
 `;
-const TitleWrap = styled.div`
-  clear: both;
-`;
-const VisibleMobile = styled.span`
-  display: block;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    display: none;
-  }
-`;
+const TitleWrap = styled(Box)``;
 
-class ContentHeader extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  renderTitle = (type, title) => {
-    switch (type) {
-      case CONTENT_PAGE:
-      case CONTENT_MODAL:
-      case CONTENT_SINGLE:
-        return (
-          <SupTitle title={title} />
-        );
-      default:
-        return (<TitleMedium>{title}</TitleMedium>);
-    }
+const renderTitle = (type, title) => {
+  switch (type) {
+    case CONTENT_PAGE:
+    case CONTENT_MODAL:
+    case CONTENT_SINGLE:
+      return (
+        <SupTitle title={title} />
+      );
+    default:
+      return (<TitleMedium>{title}</TitleMedium>);
   }
+};
 
-  render() {
-    const {
-      type,
-      supTitle,
-      title,
-      buttons,
-      subTitle,
-      hasViewOptions,
-      info,
-    } = this.props;
-    return (
-      <Styled
-        hasBottomBorder={type === CONTENT_PAGE || type === CONTENT_MODAL}
-        isModal={type === CONTENT_MODAL}
-        hasViewOptions={hasViewOptions}
-      >
-        {buttons && (
-          <VisibleMobile>
-            <ButtonGroup>
-              {
-                buttons.map((button, i) => button && (
-                  <TableCellInner key={i}>
-                    <ButtonWrap>
-                      <ButtonFactory button={button} />
-                    </ButtonWrap>
-                  </TableCellInner>
-                ))
-              }
-            </ButtonGroup>
-          </VisibleMobile>
-        )}
-        <TitleWrap>
-          {supTitle && <SupTitle title={supTitle} />}
-          <Table>
+export function ContentHeader({
+  type,
+  supTitle,
+  title,
+  buttons,
+  subTitle,
+  hasViewOptions,
+  info,
+}) {
+  const size = React.useContext(ResponsiveContext);
+  return (
+    <Styled
+      hasBottomBorder={type === CONTENT_PAGE || type === CONTENT_MODAL}
+      isModal={type === CONTENT_MODAL}
+      hasViewOptions={hasViewOptions}
+    >
+      <TitleWrap fill="horizontal">
+        {supTitle && <SupTitle title={supTitle} />}
+        <TitleButtonWrap fill="horizontal" justify="between">
+          <Box align="center" direction="row">
             {title && (
-              <TableCell>
-                {this.renderTitle(type, title)}
-              </TableCell>
+              <Box>
+                {renderTitle(type, title)}
+              </Box>
             )}
             {info && (
-              <TableCell>
-                <ButtonGroup>
-                  <InfoOverlay
-                    title={info.title}
-                    content={info.content}
-                  />
-                </ButtonGroup>
-              </TableCell>
+              <InfoOverlay
+                title={info.title}
+                content={info.content}
+              />
             )}
-            {buttons && (
-              <TableCell hiddenMobile>
-                <ButtonGroup>
-                  {
-                    buttons.map((button, i) => (
-                      <TableCellInner key={i}>
-                        <ButtonWrap>
-                          <ButtonFactory button={button} />
-                        </ButtonWrap>
-                      </TableCellInner>
-                    ))
-                  }
-                </ButtonGroup>
-              </TableCell>
-            )}
-          </Table>
-          {subTitle && <SubTitle>{subTitle}</SubTitle>}
-        </TitleWrap>
-      </Styled>
-    );
-  }
+          </Box>
+          {buttons && isMinSize(size, 'medium') && (
+            <ButtonGroup>
+              {buttons.map((button, i) => (
+                <ButtonWrap key={i}>
+                  <ButtonFactory button={button} />
+                </ButtonWrap>
+              ))}
+            </ButtonGroup>
+          )}
+        </TitleButtonWrap>
+        {subTitle && <SubTitle>{subTitle}</SubTitle>}
+      </TitleWrap>
+      {buttons && !isMinSize(size, 'medium') && (
+        <ButtonGroup justify="end">
+          {buttons.map((button, i) => button && (
+            <ButtonWrap key={i}>
+              <ButtonFactory button={button} />
+            </ButtonWrap>
+          ))}
+        </ButtonGroup>
+      )}
+    </Styled>
+  );
 }
 
 ContentHeader.propTypes = {

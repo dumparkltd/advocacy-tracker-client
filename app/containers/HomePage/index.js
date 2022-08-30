@@ -66,6 +66,7 @@ const Title = styled.h1`
   margin: 5px 0 20px;
   color: ${({ theme }) => theme.global.colors.brand};
   font-family: ${(props) => props.theme.fonts.title};
+  font-weight: 400;
   font-size: ${({ theme }) => theme.text.xxlarge.size};
   line-height: ${({ theme }) => theme.text.xxlarge.size.height};
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {

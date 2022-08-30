@@ -11,6 +11,8 @@ export const DEPENDENCIES = [
   API.INDICATORS,
   API.TAXONOMIES,
   API.CATEGORIES,
+  API.ACTORS,
+  API.MEMBERSHIPS,
   API.ACTIONS,
   API.ACTION_INDICATORS,
   API.ACTION_CATEGORIES,
@@ -26,7 +28,7 @@ export const CONFIG = {
   clientPath: ROUTES.INDICATOR,
   views: {
     list: {
-      search: ['title', 'description'],
+      search: ['code', 'title', 'description'],
     },
   },
   connections: { // filter by associated entity

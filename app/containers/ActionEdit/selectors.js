@@ -26,7 +26,7 @@ import {
   selectActionResourcesGroupedByAction,
   selectResourcetypes,
   selectIndicators,
-  selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
   selectActionsCategorised,
   selectActionActionsGroupedBySubAction,
   selectActionActionsGroupedByTopAction,
@@ -37,6 +37,7 @@ import {
 
 import {
   entitiesSetAssociated,
+  entitiesSetAssociated_NEW,
   entitySetUser,
   prepareTaxonomiesAssociated,
   prepareTaxonomies,
@@ -46,6 +47,11 @@ import { DEPENDENCIES } from './constants';
 
 export const selectDomain = createSelector(
   (state) => state.get('actionEdit'),
+  (substate) => substate
+);
+
+export const selectDomainPage = createSelector(
+  (state) => state.getIn(['actionEdit', 'page']),
   (substate) => substate
 );
 
@@ -131,15 +137,15 @@ export const selectIndicatorOptions = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectViewEntity,
   selectIndicators,
-  selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
   (ready, action, indicators, associations) => {
     if (!action || !ready) return null;
     const actiontypeId = action.getIn(['attributes', 'measuretype_id']).toString();
     if (INDICATOR_ACTIONTYPES.indexOf(actiontypeId) > -1) {
-      return entitiesSetAssociated(
+      return entitiesSetAssociated_NEW(
         indicators,
-        associations,
-        action.get('id'),
+        associations.get(parseInt(action.get('id'), 10)),
+        'indicator_id',
       );
     }
     return null;

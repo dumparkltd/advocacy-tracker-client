@@ -4,14 +4,16 @@ import { palette } from 'styled-theme';
 import ButtonTagFilter from '../ButtonTagFilter';
 
 const ButtonTagFilterInverse = styled(ButtonTagFilter)`
-  color: ${(props) => palette(props.palette, props.pIndex || 0)};
-  background-color: ${palette('buttonInverse', 1)};
+  color: ${({ theme }) => theme.global.colors.text.light};
+  stroke: ${({ theme }) => theme.global.colors.text.light};
+  fill: ${({ theme }) => theme.global.colors.text.light};
+  background-color: ${({ theme }) => theme.global.colors.white};
   padding: 1px 6px;
-  border: 1px solid;
-  border-color: ${(props) => palette(props.palette, props.pIndex || 0)};
   &:hover {
-    color: ${(props) => palette(props.paletteHover, props.pIndex || 0)};
-    background-color: ${palette('buttonInverseHover', 1)};
+    color: ${({ theme }) => theme.global.colors.highlight};
+    stroke: ${({ theme }) => theme.global.colors.highlight};
+    fill: ${({ theme }) => theme.global.colors.highlight};
+    background-color: ${({ theme }) => theme.global.colors.white};
   }
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 1px 6px;
@@ -25,14 +27,10 @@ const ButtonTagFilterInverse = styled(ButtonTagFilter)`
     border-top: 1px solid;
     border-bottom: 1px solid;
     border-left: 7px solid;
-    border-color: ${(props) => palette(props.palette, props.pIndex || 0)};
+    border-color: ${({ theme }) => theme.global.colors.text.brand};
     padding: 0 4px;
     font-size: ${(props) => props.theme.sizes.print.smallest};
     line-height: 10pt;
-    &:hover {
-      color: ${palette('text', 1)};
-      background: transparent;
-    }
   }
 `;
 

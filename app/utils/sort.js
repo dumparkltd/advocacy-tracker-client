@@ -44,7 +44,7 @@ const getEntitySortValueMapper = (entity, sortBy, type) => {
   }
 };
 
-const prepSortTarget = (value) => {
+export const prepSortTarget = (value) => {
   // 1. replace symbols with white spaces
   const testValue = value.toString().replace(/[.,/|-]/g, ' ');
   // 2. split into chunks

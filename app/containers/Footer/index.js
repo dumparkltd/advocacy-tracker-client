@@ -3,7 +3,7 @@ import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import styled from 'styled-components';
 import { Box, Text, ResponsiveContext } from 'grommet';
 
-import { version } from 'themes/config';
+import { VERSION } from 'themes/config';
 import Container from 'components/styled/Container';
 import { isMinSize } from 'utils/responsive';
 
@@ -61,7 +61,7 @@ function Footer({
               {appTitle}
             </Text>
             <Text size="xsmall">
-              {`Version: ${version}`}
+              {`Version: ${VERSION}`}
             </Text>
           </Box>
           <Between direction={isMinSize(size, 'medium') ? 'row' : 'column'} />

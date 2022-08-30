@@ -111,30 +111,26 @@ function Option({
       secondary={secondary}
     >
       <CheckboxWrapper>
-        { isIndeterminate
-          && (
-            <IndeterminateCheckbox
-              id={optionId}
-              checked={checked}
-              onChange={(checkedState) => {
-                onCheckboxChange(checkedState, option);
-              }}
-            />
-          )
-        }
-        { !isIndeterminate
-          && (
-            <input
-              id={optionId}
-              type="checkbox"
-              checked={checked}
-              onChange={(evt) => {
-                evt.stopPropagation();
-                onCheckboxChange(evt.target.checked, option);
-              }}
-            />
-          )
-        }
+        {isIndeterminate && (
+          <IndeterminateCheckbox
+            id={optionId}
+            checked={checked}
+            onChange={(checkedState) => {
+              onCheckboxChange(checkedState, option);
+            }}
+          />
+        )}
+        {!isIndeterminate && (
+          <input
+            id={optionId}
+            type="checkbox"
+            checked={checked}
+            onChange={(evt) => {
+              evt.stopPropagation();
+              onCheckboxChange(evt.target.checked, option);
+            }}
+          />
+        )}
       </CheckboxWrapper>
       <OptionLabel
         htmlFor={optionId}
@@ -143,20 +139,12 @@ function Option({
         secondary={secondary}
       >
         <Label emphasis={emphasis}>
-          {reference
-            && <Id>{reference}</Id>
-          }
-          {reference
-            && <IdSpacer />
-          }
-          { optionLabel }
-          {isNew
-            && (
-              <New>
-                <FormattedMessage {...messages.new} />
-              </New>
-            )
-          }
+          {reference && <Id>{reference}</Id>}
+          {reference && <IdSpacer />}
+          {optionLabel}
+          {isNew && (
+            <New><FormattedMessage {...messages.new} /></New>
+          )}
         </Label>
       </OptionLabel>
       {optionInfo && (

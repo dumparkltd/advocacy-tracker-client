@@ -26,6 +26,7 @@ import {
   selectCategories,
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
   selectResources,
   selectIndicators,
   selectIncludeMembersForFiltering,
@@ -37,6 +38,7 @@ import {
   selectUserActionsGroupedByAction,
   selectUserQuery,
   selectIndicatorQuery,
+  selectConnectionAttributeQuery,
 } from 'containers/App/selectors';
 
 import {
@@ -45,6 +47,7 @@ import {
   filterEntitiesByMultipleConnections,
   filterEntitiesByCategories,
   // filterEntitiesByConnectedCategories,
+  filterEntitiesByConnectionAttributes,
   filterEntitiesWithoutAssociation,
   filterEntitiesWithAnyAssociation,
   entitiesSetCategoryIds,
@@ -208,6 +211,7 @@ const selectActionsWithConnections = createSelector(
   selectActionActorsAssociationsGroupedByAction,
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
+  selectActionIndicatorsGroupedByActionAttributes,
   selectUserActionsGroupedByAction,
   selectActionActionsGroupedByTopAction,
   selectActionActionsGroupedBySubAction,
@@ -224,6 +228,7 @@ const selectActionsWithConnections = createSelector(
     targetAssociationConnectionsGrouped,
     resourceAssociationsGrouped,
     indicatorAssociationsGrouped,
+    indicatorAssociationsFullGrouped,
     userAssociationsGrouped,
     parentConnectionsGrouped,
     childConnectionsGrouped,
@@ -350,6 +355,9 @@ const selectActionsWithConnections = createSelector(
           const entityIndicators = indicatorAssociationsGrouped.get(
             parseInt(entity.get('id'), 10)
           );
+          const entityIndicatorConnections = indicatorAssociationsFullGrouped.get(
+            parseInt(entity.get('id'), 10)
+          );
           const entityUsers = userAssociationsGrouped.get(
             parseInt(entity.get('id'), 10)
           );
@@ -409,6 +417,7 @@ const selectActionsWithConnections = createSelector(
             // directly connected resources
             .set('resources', entityResources)
             .set('indicators', entityIndicators)
+            .set('indicatorConnections', entityIndicatorConnections)
             .set('parents', entityParents)
             .set('parentsByType', entityParentsByType)
             .set('children', entityChildren)
@@ -479,11 +488,26 @@ const selectActionsByIndicators = createSelector(
   selectActionsByUsers,
   selectIndicatorQuery,
   (entities, query) => query
-    ? filterEntitiesByConnection(entities, query, 'indicators')
+    ? filterEntitiesByConnection(
+      entities,
+      query,
+      'indicators',
+      {
+        id: 'indicator_id',
+        path: 'indicatorConnections',
+      },
+    )
+    : entities
+);
+const selectActionsByConnectionAttributes = createSelector(
+  selectActionsByIndicators,
+  selectConnectionAttributeQuery,
+  (entities, query) => query
+    ? filterEntitiesByConnectionAttributes(entities, query)
     : entities
 );
 const selectActionsByResources = createSelector(
-  selectActionsByIndicators,
+  selectActionsByConnectionAttributes,
   selectResourceQuery,
   (entities, query) => query
     ? filterEntitiesByConnection(entities, query, 'resources')

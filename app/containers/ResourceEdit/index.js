@@ -51,14 +51,12 @@ import {
   selectSessionUserId,
 } from 'containers/App/selectors';
 
-import Messages from 'components/Messages';
-import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
-import EntityForm from 'containers/EntityForm';
+import FormWrapper from './FormWrapper';
 
 import {
-  selectDomain,
+  selectDomainPage,
   selectViewEntity,
   selectActionsByActiontype,
   selectConnectedTaxonomies,
@@ -187,12 +185,12 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     );
 
     if (actionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl(
-        actionsByActiontype,
-        connectedTaxonomies,
+      const actionConnections = renderActionsByActiontypeControl({
+        entitiesByActiontype: actionsByActiontype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-      );
+        contextIntl: intl,
+      });
       if (actionConnections) {
         groups.push(
           {
@@ -231,18 +229,26 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     const {
       viewEntity,
       dataReady,
-      viewDomain,
+      viewDomainPage,
       connectedTaxonomies,
       actionsByActiontype,
       onCreateOption,
       isAdmin,
       myId,
+      onErrorDismiss,
+      onServerErrorDismiss,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
+      handleDelete,
     } = this.props;
     const typeId = viewEntity && viewEntity.getIn(['attributes', 'resourcetype_id']);
 
     const {
-      saveSending, saveError, deleteSending, deleteError, submitValid,
-    } = viewDomain.get('page').toJS();
+      saveSending, saveError, deleteSending,
+    } = viewDomainPage.toJS();
 
     const type = intl.formatMessage(
       appMessages.entities[typeId ? `resources_${typeId}` : 'resources'].single
@@ -264,39 +270,15 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
             buttons={
               viewEntity && dataReady ? [{
                 type: 'cancel',
-                onClick: this.props.handleCancel,
+                onClick: handleCancel,
               },
               {
                 type: 'save',
                 disabled: saveSending,
-                onClick: () => this.props.handleSubmitRemote('resourceEdit.form.data'),
+                onClick: () => handleSubmitRemote('resourceEdit.form.data'),
               }] : null
             }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {deleteError
-            && <Messages type="error" messages={deleteError} />
-          }
-          {(saveSending || deleteSending || !dataReady)
-            && <Loading />
-          }
           {!viewEntity && dataReady && !saveError && !deleteSending
             && (
               <div>
@@ -304,21 +286,22 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
               </div>
             )
           }
-          {viewEntity && dataReady && !deleteSending
+          {viewEntity && !deleteSending
             && (
-              <EntityForm
+              <FormWrapper
                 model="resourceEdit.form.data"
-                formData={viewDomain.getIn(['form', 'data'])}
                 saving={saveSending}
-                handleSubmit={(formData) => this.props.handleSubmit(
+                handleSubmit={(formData) => handleSubmit(
                   formData,
                   actionsByActiontype,
                 )}
-                handleSubmitFail={this.props.handleSubmitFail}
-                handleCancel={this.props.handleCancel}
-                handleUpdate={this.props.handleUpdate}
-                handleDelete={isAdmin ? this.props.handleDelete : null}
-                fields={{
+                handleSubmitFail={handleSubmitFail}
+                handleCancel={handleCancel}
+                handleUpdate={handleUpdate}
+                handleDelete={isAdmin ? handleDelete : null}
+                onErrorDismiss={onErrorDismiss}
+                onServerErrorDismiss={onServerErrorDismiss}
+                fields={dataReady && {
                   header: {
                     main: this.getHeaderMainFields(viewEntity),
                     aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
@@ -339,9 +322,6 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
               />
             )
           }
-          { (saveSending || deleteSending)
-            && <Loading />
-          }
         </Content>
       </div>
     );
@@ -358,7 +338,7 @@ ResourceEdit.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func.isRequired,
-  viewDomain: PropTypes.object,
+  viewDomainPage: PropTypes.object,
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
@@ -376,7 +356,7 @@ ResourceEdit.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 const mapStateToProps = (state, props) => ({
-  viewDomain: selectDomain(state),
+  viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),

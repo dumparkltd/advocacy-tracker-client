@@ -14,7 +14,6 @@ class Icon extends React.PureComponent {
       sizes,
       palette,
       paletteIndex,
-      color,
       iconSize,
       text,
       textRight,
@@ -35,7 +34,6 @@ class Icon extends React.PureComponent {
           palette={palette}
           paletteIndex={paletteIndex}
           size={size || `${iSize}px`}
-          color={color}
           text={text}
           textLeft={textLeft}
           textRight={textRight}
@@ -59,7 +57,6 @@ Icon.propTypes = {
   paletteIndex: PropTypes.number,
   size: PropTypes.string,
   iconSize: PropTypes.number,
-  color: PropTypes.string,
   text: PropTypes.bool,
   textLeft: PropTypes.bool,
   textRight: PropTypes.bool,

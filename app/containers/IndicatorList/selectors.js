@@ -8,11 +8,12 @@ import {
   selectSortByQuery,
   selectSortOrderQuery,
   selectActions,
-  // selectResources,
+  selectActorsWithPositions,
   selectReady,
   selectActionCategoriesGroupedByAction,
   selectActionIndicatorsGroupedByIndicator,
   selectCategories,
+  selectActors,
 } from 'containers/App/selectors';
 
 import {
@@ -20,10 +21,13 @@ import {
   filterEntitiesWithoutAssociation,
   entitiesSetCategoryIds,
 } from 'utils/entities';
-// import { qe } from 'utils/quasi-equals';
 
 import { sortEntities, getSortOption } from 'utils/sort';
-import { API } from 'themes/config';
+import {
+  API,
+  ACTORTYPES,
+  ACTION_INDICATOR_SUPPORTLEVELS,
+} from 'themes/config';
 import { CONFIG, DEPENDENCIES } from './constants';
 
 export const selectConnections = createSelector(
@@ -31,11 +35,13 @@ export const selectConnections = createSelector(
   selectActions,
   selectActionCategoriesGroupedByAction,
   selectCategories,
+  selectActors,
   (
     ready,
     actions,
     actionAssociationsGrouped,
     categories,
+    actors,
   ) => {
     if (ready) {
       return new Map().set(
@@ -45,34 +51,72 @@ export const selectConnections = createSelector(
           actionAssociationsGrouped,
           categories,
         )
+      ).set(
+        API.ACTORS,
+        actors,
       );
     }
     return new Map();
   }
 );
 
-const selectIndicatorsWithActions = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
+const selectIndicatorsSearched = createSelector(
   (state, locationQuery) => selectEntitiesSearchQuery(state, {
     path: API.INDICATORS,
     searchAttributes: CONFIG.views.list.search || ['title'],
     locationQuery,
   }),
+  (indicators) => indicators,
+);
+
+const selectIndicatorsWithActions = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectIndicatorsSearched,
+  (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
   selectConnections,
   selectActionIndicatorsGroupedByIndicator, // as targets
   (
     ready,
     indicators,
+    countries,
     connections,
     indicatorAssociationsGrouped,
   ) => {
     if (ready) {
       return indicators.map(
-        (entity) => {
-          const indicatorActions = indicatorAssociationsGrouped.get(parseInt(entity.get('id'), 10));
-          // console.log(entityActorsByActortype && entityActorsByActortype.toJS());
+        (indicator) => {
+          const indicatorActions = indicatorAssociationsGrouped.get(parseInt(indicator.get('id'), 10));
+          // console.log('indicatorActions', entity.toJS(), indicatorActions && indicatorActions.toJS());
           // currently requires both for filtering & display
-          return entity.set(
+          const support = countries.reduce(
+            (levelsMemo, country) => {
+              const countrySupport = country
+                && country.getIn(['indicatorPositions', indicator.get('id')]);
+              if (countrySupport && countrySupport.size > 0) {
+                const latest = countrySupport.first();
+                const level = latest.get('supportlevel_id')
+                  ? latest.get('supportlevel_id').toString()
+                  : '0';
+                if (levelsMemo.get(level)) {
+                  return levelsMemo.setIn(
+                    [level, 'count'],
+                    levelsMemo.getIn([level, 'count'])
+                      ? levelsMemo.getIn([level, 'count']) + 1
+                      : 1,
+                  ).setIn(
+                    [level, 'actors'],
+                    levelsMemo.getIn([level, 'actors'])
+                      ? levelsMemo.getIn([level, 'actors']).set(country.get('id'), country.get('id'))
+                      : Map().set(country.get('id'), parseInt(country.get('id'), 10)),
+                  );
+                }
+                return levelsMemo;
+              }
+              return levelsMemo;
+            },
+            Map(ACTION_INDICATOR_SUPPORTLEVELS),
+          );
+          return indicator.set(
             'actions',
             indicatorActions
           ).set(
@@ -90,6 +134,9 @@ const selectIndicatorsWithActions = createSelector(
                 'measuretype_id',
               ])
             ).sortBy((val, key) => key),
+          ).set(
+            'supportlevels',
+            support,
           );
         }
       );

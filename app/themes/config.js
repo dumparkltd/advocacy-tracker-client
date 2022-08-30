@@ -8,19 +8,17 @@
  * Images: images are stored in 'themes/media' folder
  *
  */
-
+import { version } from '../../package.json';
 // General ********************
-export const NODE_ENV = sessionStorage.NODE_ENV || 'production';
+export const SERVER = (process && process.env && process.env.SERVER) || 'production';
+export const IS_DEV = SERVER !== 'production';
 
-const IS_DEV = true;
-export const version = '1.0';
+export const VERSION = `${version}${IS_DEV ? ' [DEV]' : ''}`;
 
 export const ENDPOINTS = {
-  API: (
-    NODE_ENV === 'production' && !IS_DEV
-      ? 'https://advocacy-tracker-api.herokuapp.com'
-      : 'https://advocacy-tracker-test.herokuapp.com'
-  ), // server API endpoint
+  API: IS_DEV // server API endpoint
+    ? 'https://advocacy-tracker-dev.herokuapp.com'
+    : 'https://advocacy-tracker-api.herokuapp.com',
   SIGN_IN: 'auth/sign_in',
   SIGN_OUT: 'auth/sign_out',
   PASSWORD: 'auth/password',
@@ -108,12 +106,57 @@ export const ACTORTYPES = {
   GROUP: '5',
 };
 
-export const ACTIONTYPE_DISCLAIMERS = [];
-
 export const RESOURCETYPES = {
   REF: '1',
   WEB: '2',
   DOC: '3',
+};
+
+export const ACTION_INDICATOR_SUPPORTLEVELS = {
+  // not assigned
+  0: {
+    value: '0',
+    default: true,
+    color: '#EDEFF0',
+    order: 5,
+  },
+  // strong
+  1: {
+    value: '1',
+    color: '#047C3E',
+    order: 1,
+  },
+  // quite positive
+  2: {
+    value: '2',
+    color: '#3ea667',
+    order: 2,
+  },
+  // on the fence
+  3: {
+    value: '3',
+    color: '#EFCFB1',
+    order: 3,
+  },
+  // rather sceptical
+  4: {
+    value: '4',
+    color: '#DA5C35',
+    order: 4,
+  },
+};
+
+export const OFFICIAL_STATEMENT_CATEGORY_ID = 56;
+export const AUTHORITY_TAXONOMY = 13;
+
+export const ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS = {
+  [ACTIONTYPES.EXPRESS]: [
+    ACTION_INDICATOR_SUPPORTLEVELS['0'],
+    ACTION_INDICATOR_SUPPORTLEVELS['1'],
+    ACTION_INDICATOR_SUPPORTLEVELS['2'],
+    ACTION_INDICATOR_SUPPORTLEVELS['3'],
+    ACTION_INDICATOR_SUPPORTLEVELS['4'],
+  ],
 };
 
 export const ACTIONTYPE_NAVGROUPS = {
@@ -174,7 +217,7 @@ export const ACTION_FIELDS = {
       connection: API.ACTION_CATEGORIES,
       groupby: {
         table: API.TAXONOMIES,
-        on: 'taxonomy_id',
+        on: '_id',
       },
     },
     actors: {
@@ -261,7 +304,7 @@ export const ACTOR_FIELDS = {
       connection: API.ACTOR_CATEGORIES,
       groupby: {
         table: API.TAXONOMIES,
-        on: 'taxonomy_id',
+        on: '_id',
       },
     },
     actions: {
@@ -463,6 +506,9 @@ export const INDICATOR_FIELDS = {
       required: true,
       type: 'text',
     },
+    code: {
+      type: 'text',
+    },
     description: {
       type: 'markdown',
     },
@@ -551,6 +597,9 @@ export const ACTIONTYPE_RESOURCETYPES = {
 export const ACTIONTYPE_ACTIONTYPES = {
   // top-actions - no sub-actions
   // [ACTIONTYPES.EVENT]: [],
+  [ACTIONTYPES.EVENT]: [
+    ACTIONTYPES.AP,
+  ],
   [ACTIONTYPES.OP]: [
     ACTIONTYPES.EVENT,
     ACTIONTYPES.AP,
@@ -639,11 +688,11 @@ export const ACTORTYPES_CONFIG = {
     id: ACTORTYPES.CONTACT,
     order: 5,
     columns: [
-      // {
-      //   id: 'taxonomy',
-      //   type: 'taxonomy',
-      //   taxonomy_id: 3, // role
-      // },
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 3, // role
+      },
       {
         id: 'associations', // one row per type,
         type: 'associations', // one row per type,
@@ -707,19 +756,23 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
+        id: 'date',
+        type: 'date',
+        sort: 'date',
+        sortOrder: 'desc',
+        sortDefault: true,
+        attribute: 'date_start',
+        primary: true,
+      },
+      {
         id: 'indicators',
         type: 'indicators',
         sort: 'title',
       },
       {
-        id: 'taxonomy',
-        type: 'taxonomy',
-        taxonomy_id: 6, // level of support
-      },
-      {
         id: 'taxonomy-13',
         type: 'taxonomy',
-        taxonomy_id: 13, // level of authority
+        taxonomy_id: AUTHORITY_TAXONOMY, // level of authority
       },
       {
         id: 'actors',
@@ -763,6 +816,15 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
+        id: 'date',
+        type: 'date',
+        sort: 'date',
+        sortOrder: 'desc',
+        sortDefault: true,
+        attribute: 'date_start',
+        primary: true,
+      },
+      {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 9, // event type
@@ -795,6 +857,15 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
+        id: 'date',
+        type: 'date',
+        sort: 'date',
+        sortOrder: 'desc',
+        sortDefault: true,
+        attribute: 'date_start',
+        primary: true,
+      },
+      {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 10, // event type
@@ -819,6 +890,15 @@ export const ACTIONTYPES_CONFIG = {
         type: 'main',
         sort: 'title',
         attributes: ['title'],
+      },
+      {
+        id: 'date',
+        type: 'date',
+        sort: 'date',
+        sortOrder: 'desc',
+        sortDefault: true,
+        attribute: 'date_start',
+        primary: true,
       },
       {
         id: 'taxonomy',
@@ -852,6 +932,15 @@ export const ACTIONTYPES_CONFIG = {
         attributes: ['title'],
       },
       {
+        id: 'date',
+        type: 'date',
+        sort: 'date',
+        sortOrder: 'desc',
+        sortDefault: true,
+        attribute: 'date_start',
+        primary: true,
+      },
+      {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 11, // status
@@ -880,6 +969,15 @@ export const ACTIONTYPES_CONFIG = {
         type: 'main',
         sort: 'title',
         attributes: ['title'],
+      },
+      {
+        id: 'date',
+        type: 'date',
+        sort: 'date',
+        sortOrder: 'desc',
+        sortDefault: true,
+        attribute: 'date_start',
+        primary: true,
       },
       {
         id: 'taxonomy',
@@ -963,6 +1061,8 @@ export const TEXT_TRUNCATE = {
   TYPE_SELECT: 24,
   GRACE: 2,
   META_TITLE: 20,
+  INDICATOR_SELECT: 30,
+  INDICATOR_SELECT_OPTION: 40,
 };
 
 export const COLUMN_WIDTHS = {
@@ -1031,7 +1131,7 @@ export const ARCHIVE_STATUSES = [
 export const DEFAULT_RESOURCETYPE = RESOURCETYPES.REF;
 export const DEFAULT_ACTIONTYPE = ACTIONTYPES.TASK;
 export const DEFAULT_ACTORTYPE = ACTORTYPES.COUNTRY;
-export const DEFAULT_TAXONOMY = '6';
+export const DEFAULT_TAXONOMY = '11';
 export const NO_PARENT_KEY = 'parentUndefined';
 
 export const MAP_OPTIONS = {

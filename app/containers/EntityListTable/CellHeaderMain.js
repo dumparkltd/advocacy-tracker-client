@@ -29,9 +29,11 @@ const SortButton = styled(ButtonFlatIconOnly)`
 
 
 export function CellHeaderMain({ column, canEdit }) {
-  const sortOrderOption = column.onSort && SORT_ORDER_OPTIONS.find((option) => column.sortOrder === option.value);
+  const sortOrderOption = column.onSort && SORT_ORDER_OPTIONS.find(
+    (option) => column.sortOrder === option.value
+  );
   return (
-    <Box direction="row" align="center" justify="start">
+    <Box direction="row" align="center" justify="start" flex={false}>
       {canEdit && (
         <Box>
           <Select>
@@ -43,27 +45,25 @@ export function CellHeaderMain({ column, canEdit }) {
           </Select>
         </Box>
       )}
-      <Box>
-        {canEdit && (
-          <Text as="label" htmlFor="select-all" weight={500} size="small">
-            {column.title}
-          </Text>
-        )}
-        {!canEdit && (
-          <Text weight={500} size="small">
-            {column.title}
-          </Text>
-        )}
-      </Box>
+      {canEdit && (
+        <Text as="label" htmlFor="select-all" weight={500} size="small" wordBreak="keep-all">
+          {column.title}
+        </Text>
+      )}
+      {!canEdit && (
+        <Text weight={500} size="small">
+          {column.title}
+        </Text>
+      )}
       {column.onSort && (
-        <Box pad={{ left: 'medium' }}>
+        <Box pad={{ left: 'xxsmall' }} flex={false}>
           <SortButton
             onClick={() => {
               if (column.sortActive) {
                 const nextSortOrderOption = SORT_ORDER_OPTIONS.find((option) => sortOrderOption.nextValue === option.value);
                 column.onSort(column.id || column.type, nextSortOrderOption.value);
               } else {
-                column.onSort(column.id || column.type, sortOrderOption.order);
+                column.onSort(column.id || column.type, sortOrderOption.value);
               }
             }}
           >

@@ -57,7 +57,7 @@ const Styled = styled.div`
   }
   background-color: #000;
   box-shadow: ${(props) => props.hasShadow ? '0px 0px 5px 0px rgba(0,0,0,0.5)' : 'none'};
-  z-index: 101;
+  z-index: 102;
   @media print {
     display: block;
     height: ${({ theme }) => theme.sizes.header.banner.height}px;
@@ -199,7 +199,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                     title={appTitle}
                   >
                     <LogoWrap>
-                      <Icon name="logo" />
+                      <Icon name="logo" size={isMinSize(size, 'medium') ? '72px' : '60px'} />
                     </LogoWrap>
                     <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
                       <BrandTitle>

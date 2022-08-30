@@ -7,7 +7,7 @@ import {
 } from 'redux-saga/effects';
 import { push, replace, goBack } from 'react-router-redux';
 import { reduce, keyBy } from 'lodash/collection';
-import { without } from 'lodash/array';
+// import { without } from 'lodash/array';
 
 import asArray from 'utils/as-array';
 import {
@@ -42,10 +42,12 @@ import {
   SET_VIEW,
   SET_SUBJECT,
   SET_MAPSUBJECT,
+  SET_MAPINDICATOR,
   OPEN_BOOKMARK,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
   SET_INCLUDE_MEMBERS_FORFILTERS,
+  SET_INCLUDE_INOFFICAL_STATEMENTS,
   PARAMS,
 } from 'containers/App/constants';
 
@@ -310,17 +312,37 @@ function stampPayload(payload, type) {
 function* createConnectionsSaga({
   entityId, path, updates, keyPair,
 }) {
-  // make sure to use new entity id for full payload
-  // we should have either the one (actor_id) or the other (measure_id)
-  const updatesUpdated = updates;
-  if (updatesUpdated.create) {
-    updatesUpdated.create = updatesUpdated.create.map((create) => ({
-      [keyPair[0]]: create[keyPair[0]] || entityId,
-      [keyPair[1]]: create[keyPair[1]] || entityId,
-    }));
+  if (updates.create) {
+    const create = updates.create.reduce(
+      (memo, createX) => {
+        // get attributes other than key pair
+        const attributes = Object.keys(createX).reduce(
+          (m, key) => {
+            if (keyPair.indexOf(key) > -1) {
+              return m;
+            }
+            return ({
+              ...m,
+              [key]: createX[key],
+            });
+          },
+          {},
+        );
+        // make sure to use new entity id for full payload
+        // we should have either the one (actor_id) or the other (measure_id)
+        return ([
+          ...memo,
+          {
+            [keyPair[0]]: createX[keyPair[0]] || entityId,
+            [keyPair[1]]: createX[keyPair[1]] || entityId,
+            ...attributes,
+          },
+        ]);
+      },
+      [],
+    );
+    yield call(saveConnectionsSaga, { data: { path, updates: { create } } });
   }
-
-  yield call(saveConnectionsSaga, { data: { path, updates: updatesUpdated } });
 }
 
 export function* saveEntitySaga({ data }, updateClient = true, multiple = false) {
@@ -707,6 +729,7 @@ export function* saveConnectionsSaga({ data }) {
   if (data.updates && (
     (data.updates.create && data.updates.create.length > 0)
     || (data.updates.delete && data.updates.delete.length > 0)
+    || (data.updates.update && data.updates.update.length > 0)
   )) {
     const dataTS = stampPayload(data);
     try {
@@ -731,19 +754,22 @@ const getNextQuery = (query, extend, location) => {
     ? location.get('query').toJS()
     : location.get('query').filter((val, key) => key === 'view').toJS();
   // and figure out new query
+  // console.log('query', query)
+  // console.log('queryPrevious', queryPrevious)
   return asArray(query).reduce((memo, param) => {
     const queryUpdated = memo;
     // if arg already set and not replacing
     if (queryUpdated[param.arg] && !param.replace) {
-      // if multipleAttributeValues are not allowed
+      const val = param.value && param.value.toString();
+      // check for connection attribute queries
       if (
-        param.value
-        && param.value.indexOf(':') > -1
+        val
+        && val.indexOf(':') > -1
         && typeof param.multipleAttributeValues !== 'undefined'
         && param.multipleAttributeValues === false
       ) {
         if (param.add) {
-          const [attribute] = param.value.split(':');
+          const [attribute] = val.split(':');
           const keepAttributeValues = queryPrevious[param.arg]
             ? asArray(queryPrevious[param.arg]).filter(
               (attVal) => {
@@ -756,37 +782,53 @@ const getNextQuery = (query, extend, location) => {
             ...keepAttributeValues,
             param.value,
           ];
-        } else if (param.remove && queryUpdated[param.arg]) {
+        } else if (param.remove) {
           queryUpdated[param.arg] = asArray(queryPrevious[param.arg]).filter(
             (attVal) => !qe(attVal, param.value)
           );
         }
-      // if multiple values set
-      } else if (Array.isArray(queryUpdated[param.arg])) {
+      } else {
+        queryUpdated[param.arg] = asArray(queryUpdated[param.arg]);
+        const isIncluded = !!param.value && !!queryUpdated[param.arg].find(
+          (qv) => qe(qv && qv.toString().split('>')[0], param.value.toString().split('>')[0])
+        );
+
         // add if not already present
-        if (param.add && queryUpdated[param.arg].indexOf(param.value.toString()) === -1) {
+        if (param.add && !isIncluded) {
           queryUpdated[param.arg].push(param.value);
         // remove if present
-        } else if (extend && param.remove && param.value && queryUpdated[param.arg].indexOf(param.value.toString()) > -1) {
-          queryUpdated[param.arg] = without(queryUpdated[param.arg], param.value.toString());
+        } else if (extend && param.remove && param.value && isIncluded) {
+          queryUpdated[param.arg] = queryUpdated[param.arg].filter(
+            (qv) => !qe(qv.toString().split('>')[0], param.value.toString().split('>')[0])
+          );
           // convert to single value if only one value left
           if (queryUpdated[param.arg].length === 1) {
             /* eslint-disable prefer-destructuring */
             queryUpdated[param.arg] = queryUpdated[param.arg][0];
             /* eslint-enable prefer-destructuring */
+          } else if (queryUpdated[param.arg].length === 0) {
+            delete queryUpdated[param.arg];
           }
         }
       // if single value set
       // add if not already present and convert to array
-      } else if (param.value && param.add && queryUpdated[param.arg] !== param.value.toString()) {
-        queryUpdated[param.arg] = [queryUpdated[param.arg], param.value];
-      // remove if present
-      } else if (extend && param.remove && (!param.value || (param.value && queryUpdated[param.arg] === param.value.toString()))) {
-        delete queryUpdated[param.arg];
       }
+      // if (extend && param.remove && (!param.value || (param.value && queryUpdated[param.arg] === param.value.toString()))) {
+      //   console.log('remove')
+      //   delete queryUpdated[param.arg];
+      // }
     // if set and removing
     } else if (queryUpdated[param.arg] && param.value && param.replace) {
-      queryUpdated[param.arg] = param.value;
+      // only replace the previous value if defined
+      if (param.prevValue && queryUpdated[param.arg]) {
+        queryUpdated[param.arg] = asArray(queryUpdated[param.arg]).map(
+          (argValue) => qe(argValue, param.prevValue)
+            ? param.value
+            : argValue
+        );
+      } else {
+        queryUpdated[param.arg] = param.value;
+      }
     } else if (queryUpdated[param.arg] && (param.remove || typeof param.value === 'undefined')) {
       delete queryUpdated[param.arg];
     // if not set or replacing with new value
@@ -873,6 +915,19 @@ export function* setMapSubjectSaga({ subject }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
+export function* setMapIndicatorSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'topic',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
 export function* setSubjectSaga({ subject }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
@@ -925,6 +980,19 @@ export function* setIncludeMembersForFilterSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
+export function* setIncludeInofficialStatementsSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'inofficial',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
 export function* openBookmarkSaga({ bookmark }) {
   const path = bookmark.getIn(['attributes', 'view', 'path']);
   const queryString = getNextQueryString(
@@ -952,7 +1020,6 @@ export function* dismissQueryMessagesSaga() {
 export function* updatePathSaga({ path, args }) {
   const relativePath = path.startsWith('/') ? path : `/${path}`;
   const location = yield select(selectLocation);
-
   let queryNext = {};
   if (args && (args.query || args.keepQuery)) {
     if (args.query) {
@@ -1023,9 +1090,11 @@ export default function* rootSaga() {
   yield takeEvery(SET_VIEW, setViewSaga);
   yield takeEvery(SET_SUBJECT, setSubjectSaga);
   yield takeEvery(SET_MAPSUBJECT, setMapSubjectSaga);
+  yield takeEvery(SET_MAPINDICATOR, setMapIndicatorSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_MEMBERS, setIncludeActorMembersSaga);
   yield takeEvery(SET_INCLUDE_TARGET_MEMBERS, setIncludeTargetMembersSaga);
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
+  yield takeEvery(SET_INCLUDE_INOFFICAL_STATEMENTS, setIncludeInofficialStatementsSaga);
   yield takeEvery(OPEN_BOOKMARK, openBookmarkSaga);
   yield takeEvery(DISMISS_QUERY_MESSAGES, dismissQueryMessagesSaga);
 
