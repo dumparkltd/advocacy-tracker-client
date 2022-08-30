@@ -92,6 +92,7 @@ export function ContentHeader({
   subTitle,
   hasViewOptions,
   info,
+  entityIdsSelected,
 }) {
   const size = React.useContext(ResponsiveContext);
   return (
@@ -120,7 +121,10 @@ export function ContentHeader({
             <ButtonGroup>
               {buttons.map((button, i) => (
                 <ButtonWrap key={i}>
-                  <ButtonFactory button={button} />
+                  <ButtonFactory
+                    button={button}
+                    args={{ ids: entityIdsSelected }}
+                  />
                 </ButtonWrap>
               ))}
             </ButtonGroup>
@@ -132,7 +136,10 @@ export function ContentHeader({
         <ButtonGroup justify="end">
           {buttons.map((button, i) => button && (
             <ButtonWrap key={i}>
-              <ButtonFactory button={button} />
+              <ButtonFactory
+                button={button}
+                args={{ ids: entityIdsSelected }}
+              />
             </ButtonWrap>
           ))}
         </ButtonGroup>
@@ -150,6 +157,7 @@ ContentHeader.propTypes = {
   supTitle: PropTypes.string,
   subTitle: PropTypes.string,
   info: PropTypes.object,
+  entityIdsSelected: PropTypes.object,
   type: PropTypes.string,
   hasViewOptions: PropTypes.bool,
 };

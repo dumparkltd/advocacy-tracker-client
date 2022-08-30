@@ -140,7 +140,8 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       intl,
       resourcetypes,
       allEntityCount,
-      headerOptions,
+      headerInfo,
+      listActions,
     } = this.props;
     const { viewType } = this.state;
     let type;
@@ -456,7 +457,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                   title={headerTitle}
                   subTitle={headerSubTitle}
                   hasViewOptions={viewOptions && viewOptions.length > 1}
-                  info={headerOptions && headerOptions.info}
+                  info={headerInfo}
+                  buttons={listActions}
+                  entityIdsSelected={entityIdsSelected}
                 />
                 {config.types === 'actiontypes' && (
                   <Box>
@@ -665,7 +668,8 @@ EntitiesListView.propTypes = {
   config: PropTypes.object,
   viewOptions: PropTypes.array,
   entityTitle: PropTypes.object, // single/plural
-  headerOptions: PropTypes.object, // single/plural
+  headerInfo: PropTypes.object,
+  listActions: PropTypes.array,
   intl: intlShape.isRequired,
   // primitive
   dataReady: PropTypes.bool,
