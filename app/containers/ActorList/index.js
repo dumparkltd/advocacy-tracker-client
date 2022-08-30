@@ -28,11 +28,11 @@ import {
 import { checkActionAttribute } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
-import { ROUTES } from 'themes/config';
+import { ROUTES, ACTORTYPES } from 'themes/config';
 
 import EntityList from 'containers/EntityList';
 
-import { CONFIG, DEPENDENCIES, ACTORTYPES } from './constants';
+import { CONFIG, DEPENDENCIES } from './constants';
 import {
   selectListActors,
   selectConnectedTaxonomies,
