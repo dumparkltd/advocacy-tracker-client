@@ -1127,6 +1127,11 @@ export const ARCHIVE_STATUSES = [
   { value: false, message: 'ui.archiveStatuses.current' },
   { value: true, message: 'ui.archiveStatuses.archived' },
 ];
+export const EMAIL_STATUSES = [
+  { value: 'valid', message: 'ui.emailStatuses.valid' },
+  { value: 'invalid', message: 'ui.emailStatuses.invalid' },
+  { value: 'empty', message: 'ui.emailStatuses.empty' },
+];
 
 export const DEFAULT_RESOURCETYPE = RESOURCETYPES.REF;
 export const DEFAULT_ACTIONTYPE = ACTIONTYPES.TASK;

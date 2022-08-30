@@ -2345,6 +2345,20 @@ export default defineMessages({
         defaultMessage: 'Completed',
       },
     },
+    emailStatuses: {
+      valid: {
+        id: 'app.containers.App.ui.emailStatuses.valid',
+        defaultMessage: 'Valid',
+      },
+      invalid: {
+        id: 'app.containers.App.ui.emailStatuses.invalid',
+        defaultMessage: 'Invalid',
+      },
+      empty: {
+        id: 'app.containers.App.ui.emailStatuses.empty',
+        defaultMessage: 'Missing',
+      },
+    },
     docPublishStatuses: {
       public: {
         id: 'app.containers.App.ui.docPublishStatuses.public',
