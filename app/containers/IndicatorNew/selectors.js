@@ -17,7 +17,15 @@ export const selectDomain = createSelector(
 );
 export const selectDomainPage = createSelector(
   (state) => state.getIn(['indicatorNew', 'page']),
-  (substate) => substate
+  (substate) => substate.get('page')
+    && substate.getIn(['page', 'saveSendingAll'])
+    ? substate.setIn(
+      ['page', 'isAnySending'],
+      substate.getIn(['page', 'saveSendingAll']).some(
+        (value) => value,
+      )
+    )
+    : substate
 );
 export const selectConnectedTaxonomies = createSelector(
   selectActionTaxonomies,

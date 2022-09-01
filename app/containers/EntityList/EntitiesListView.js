@@ -140,7 +140,8 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       intl,
       resourcetypes,
       allEntityCount,
-      headerOptions,
+      headerInfo,
+      listActions,
     } = this.props;
     const { viewType } = this.state;
     let type;
@@ -226,6 +227,30 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
           label: 'Include activities of groups (countries belong to)',
+        };
+      } else if (mapSubjectClean === 'targets' && qe(viewType, ACTORTYPES.ORG)) {
+        memberOption = {
+          active: includeTargetMembers,
+          onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+          label: 'Include activities targeting groups (organisations belong to)',
+        };
+      } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.ORG)) {
+        memberOption = {
+          active: includeActorMembers,
+          onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+          label: 'Include activities of groups (organisations belong to)',
+        };
+      } else if (mapSubjectClean === 'targets' && qe(viewType, ACTORTYPES.CONTACT)) {
+        memberOption = {
+          active: includeTargetMembers,
+          onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+          label: 'Include activities targeting countries and orgs (contacts belong to)',
+        };
+      } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.CONTACT)) {
+        memberOption = {
+          active: includeActorMembers,
+          onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+          label: 'Include activities of countries and orgs (contacts belong to)',
         };
       }
       if (mapSubjectClean === 'actors' || mapSubjectClean === 'targets') {
@@ -358,7 +383,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         },
         {
           id: 'support', // one row per type,
-          type: 'stackedBar', // one row per type,
+          type: 'stackedBarActions', // one row per type,
           values: 'supportlevels',
           title: 'Support',
           options: ACTION_INDICATOR_SUPPORTLEVELS,
@@ -432,7 +457,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                   title={headerTitle}
                   subTitle={headerSubTitle}
                   hasViewOptions={viewOptions && viewOptions.length > 1}
-                  info={headerOptions && headerOptions.info}
+                  info={headerInfo}
+                  buttons={listActions}
+                  entityIdsSelected={entityIdsSelected}
                 />
                 {config.types === 'actiontypes' && (
                   <Box>
@@ -641,7 +668,8 @@ EntitiesListView.propTypes = {
   config: PropTypes.object,
   viewOptions: PropTypes.array,
   entityTitle: PropTypes.object, // single/plural
-  headerOptions: PropTypes.object, // single/plural
+  headerInfo: PropTypes.object,
+  listActions: PropTypes.array,
   intl: intlShape.isRequired,
   // primitive
   dataReady: PropTypes.bool,

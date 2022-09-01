@@ -1,12 +1,11 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import {
-  Box,
-  Button,
-  Drop,
-  Text,
-} from 'grommet';
+import { Button, Drop } from 'grommet';
+
+import { ROUTES } from 'themes/config';
+import DropEntityList from './DropEntityList';
+
 const BarButton = styled(
   React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
 )`
@@ -23,22 +22,14 @@ const BarButton = styled(
     opacity: 0.85;
   }
 `;
-const DropContent = styled((p) => (
-  <Box
-    pad={{
-      horizontal: 'small',
-      vertical: 'xsmall',
-    }}
-    {...p}
-  />
-))`
-  max-width: 280px;
-`;
 export function CellBodyStackedBarChartBarOverlay({
   value,
   maxvalue,
   offset,
   count,
+  tooltipConfig,
+  onEntityClick,
+  entityType,
 }) {
   const infoRef = useRef(null);
   const [info, showInfo] = useState(false);
@@ -51,13 +42,9 @@ export function CellBodyStackedBarChartBarOverlay({
         maxvalue={maxvalue}
         bgColor={value.color}
         fill={false}
-        onMouseOver={() => showInfo(true)}
-        onMouseLeave={() => showInfo(false)}
-        onFocus={() => showInfo(true)}
-        onBlur={() => null}
         onClick={() => showInfo(true)}
       />
-      {info && infoRef && (
+      {info && infoRef && tooltipConfig && (
         <Drop
           target={infoRef.current}
           onClickOutside={() => showInfo(false)}
@@ -65,16 +52,19 @@ export function CellBodyStackedBarChartBarOverlay({
             bottom: 'top',
             left: 'left',
           }}
-          margin={{ horizontal: 'xsmall', vertical: 'xsmall' }}
+          margin={{ bottom: 'xsmall' }}
           background="white"
           elevation="small"
           stretch={false}
         >
-          <DropContent>
-            <Text size="small">
-              {count}
-            </Text>
-          </DropContent>
+          <DropEntityList
+            entityType={entityType}
+            tooltipConfig={tooltipConfig}
+            onEntityClick={(id) => {
+              showInfo(false);
+              onEntityClick(id, entityType === 'actors' ? ROUTES.ACTOR : ROUTES.ACTION);
+            }}
+          />
         </Drop>
       )}
     </>
@@ -86,6 +76,9 @@ CellBodyStackedBarChartBarOverlay.propTypes = {
   count: PropTypes.number,
   offset: PropTypes.number,
   maxvalue: PropTypes.number,
+  entityType: PropTypes.string,
+  tooltipConfig: PropTypes.object,
+  onEntityClick: PropTypes.func,
 };
 
 export default CellBodyStackedBarChartBarOverlay;

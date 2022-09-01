@@ -36,7 +36,7 @@ import EntityListFooter from './EntityListFooter';
 
 import { getPager } from './pagination';
 import {
-  prepareEntities,
+  prepareEntityRows,
   prepareHeader,
   getListHeaderLabel,
   getSelectedState,
@@ -146,7 +146,7 @@ export function EntityListTable({
   }
   const activeColumns = columns.filter((col) => !col.skip);
   // warning converting List to Array
-  const entityRows = prepareEntities({
+  const entityRows = prepareEntityRows({
     entities: searchedEntities,
     columns: activeColumns,
     config,

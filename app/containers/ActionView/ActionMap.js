@@ -41,8 +41,8 @@ const Styled = styled((p) => <Box {...p} />)`
   z-index: 0;
 `;
 const MapTitle = styled((p) => <Box margin={{ vertical: 'xsmall' }} {...p} />)``;
-const MapOptions = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)``;
-const MapWrapper = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)`
+const MapOptions = Box;
+const MapWrapper = styled((p) => <Box {...p} />)`
   position: relative;
   height: 400px;
   background: #F9F9FA;
@@ -136,7 +136,7 @@ export function ActionMap({
   let memberOption;
   let mapTitle;
   if (mapSubject === 'targets') {
-    mapTitle = 'Countries targeted by activity';
+    mapTitle = `${countryData ? countryData.length : 'No'} countries targeted by activity`;
     // note this should always be true!
     if (hasMemberOption && hasAssociations) {
       memberOption = {
@@ -147,7 +147,7 @@ export function ActionMap({
     }
   }
   if (mapSubject === 'actors') {
-    mapTitle = 'Countries responsible by activity';
+    mapTitle = `${countryData ? countryData.length : 'No'} countries responsible by activity`;
     if (hasMemberOption && hasAssociations) {
       memberOption = {
         active: includeActorMembers,

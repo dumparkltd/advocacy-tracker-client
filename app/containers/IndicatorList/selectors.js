@@ -13,6 +13,7 @@ import {
   selectActionCategoriesGroupedByAction,
   selectActionIndicatorsGroupedByIndicator,
   selectCategories,
+  selectActors,
 } from 'containers/App/selectors';
 
 import {
@@ -34,11 +35,13 @@ export const selectConnections = createSelector(
   selectActions,
   selectActionCategoriesGroupedByAction,
   selectCategories,
+  selectActors,
   (
     ready,
     actions,
     actionAssociationsGrouped,
     categories,
+    actors,
   ) => {
     if (ready) {
       return new Map().set(
@@ -48,6 +51,9 @@ export const selectConnections = createSelector(
           actionAssociationsGrouped,
           categories,
         )
+      ).set(
+        API.ACTORS,
+        actors,
       );
     }
     return new Map();
@@ -97,6 +103,11 @@ const selectIndicatorsWithActions = createSelector(
                     levelsMemo.getIn([level, 'count'])
                       ? levelsMemo.getIn([level, 'count']) + 1
                       : 1,
+                  ).setIn(
+                    [level, 'actors'],
+                    levelsMemo.getIn([level, 'actors'])
+                      ? levelsMemo.getIn([level, 'actors']).set(country.get('id'), country.get('id'))
+                      : Map().set(country.get('id'), parseInt(country.get('id'), 10)),
                   );
                 }
                 return levelsMemo;

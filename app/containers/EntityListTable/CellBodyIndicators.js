@@ -89,7 +89,6 @@ export function CellBodyIndicators({
           ref={buttonRef}
           alignSelf={align}
           onClick={() => setShowContent(!showContent)}
-          active={showContent}
         >
           <LabelTT textAlign={align}>
             {entity.value}

@@ -12,9 +12,7 @@ import { palette } from 'styled-theme';
 import {
   Box, Text, Button, ResponsiveContext,
 } from 'grommet';
-import {
-  Add, Edit, Multiple,
-} from 'grommet-icons';
+import { Add, Multiple } from 'grommet-icons';
 
 import { isEqual } from 'lodash/lang';
 import { truncateText } from 'utils/string';
@@ -297,7 +295,6 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       showFilters,
       showEditOptions,
       onHideEditOptions,
-      onShowEditOptions,
       canEdit,
       onSelectType,
       typeOptions,
@@ -588,7 +585,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     </Box>
                   </HeaderSection>
                 )}
-                {canEdit && isMinSize(size, 'small') && (
+                {isMinSize(size, 'small') && canEdit && managerActions && managerActions.length > 0 && (
                   <HeaderSection noBorder>
                     <Box
                       fill="vertical"
@@ -598,19 +595,6 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                       gap={isMinSize(size, 'medium') ? 'xsmall' : 'small'}
                       direction={isMinSize(size, 'medium') ? 'column' : 'row'}
                     >
-                      <ButtonOptions
-                        onClick={onShowEditOptions}
-                        label={(
-                          <Box direction="row" gap="small" align="center">
-                            <Box>
-                              <Edit color="dark-3" size={iconSize} />
-                            </Box>
-                            {isMinSize(size, 'medium') && (
-                              <Text color="dark-3" size="small">{intl.formatMessage(messages.listOptions.showEditOptions)}</Text>
-                            )}
-                          </Box>
-                        )}
-                      />
                       {managerActions && managerActions.map(
                         (action, i) => {
                           if (action.icon === 'add') {
@@ -763,7 +747,6 @@ EntityListHeader.propTypes = {
   showFilters: PropTypes.bool,
   showEditOptions: PropTypes.bool,
   onHideEditOptions: PropTypes.func,
-  onShowEditOptions: PropTypes.func,
   canEdit: PropTypes.bool,
   dataReady: PropTypes.bool,
   isManager: PropTypes.bool,

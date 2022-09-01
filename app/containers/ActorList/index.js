@@ -9,7 +9,16 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { Map, List, fromJS } from 'immutable';
+import styled from 'styled-components';
 
+import {
+  Box,
+  Button,
+  Layer,
+  Text,
+} from 'grommet';
+
+import { MailOption, FormClose } from 'grommet-icons';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectReady,
@@ -25,10 +34,12 @@ import {
 } from 'containers/App/selectors';
 
 import { checkActionAttribute } from 'utils/entities';
+import { qe } from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
-import { ROUTES } from 'themes/config';
+import { ROUTES, ACTORTYPES } from 'themes/config';
 
 import EntityList from 'containers/EntityList';
+import EmailHelper from './EmailHelper';
 
 import { CONFIG, DEPENDENCIES } from './constants';
 import {
@@ -39,9 +50,48 @@ import {
 
 import messages from './messages';
 
+const LayerWrap = styled((p) => (
+  <Box
+    background="white"
+    {...p}
+  />
+))`
+width: 800px;
+max-width: 100%;
+min-height: 200px;
+overflow-y: auto;
+`;
+const LayerHeader = styled((p) => (
+  <Box
+    direction="row"
+    pad={{ left: 'medium', right: 'small', vertical: 'small' }}
+    background="light-2"
+    align="center"
+    gap="small"
+    justify="between"
+    {...p}
+  />
+))``;
+
+const LayerContent = styled((p) => (
+  <Box
+    pad={{ horizontal: 'medium', vertical: 'medium' }}
+    background="white"
+    {...p}
+  />
+))``;
+
 export class ActorList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
+  constructor() {
+    super();
+    this.state = {
+      emailEntities: null,
+    };
+  }
+
   UNSAFE_componentWillMount() {
     this.props.loadEntitiesIfNeeded();
+    this.setState({ emailEntities: null });
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -49,6 +99,14 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
     if (!nextProps.dataReady) {
       this.props.loadEntitiesIfNeeded();
     }
+  }
+
+  onSetEmailEntities = (emailEntities) => {
+    this.setState({ emailEntities });
+  }
+
+  resetEmails = () => {
+    this.setState({ emailEntities: null });
   }
 
   prepareTypeOptions = (types, activeId) => {
@@ -122,6 +180,24 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
         isManager,
       });
     }
+    const listActions = [];
+    if (qe(typeId, ACTORTYPES.CONTACT)) {
+      // console.log(noGroupEmails)
+      listActions.push({
+        title: 'Email selected',
+        onClick: (args) => {
+          if (args && args.ids) {
+            const selectedEntities = entities.filter(
+              (entity) => args.ids.includes(entity.get('id'))
+            );
+            this.onSetEmailEntities(selectedEntities);
+          }
+        },
+        icon: <MailOption color="dark" size="xxsmall" />,
+        type: 'listOption',
+        isManager,
+      });
+    }
 
     return (
       <div>
@@ -154,7 +230,31 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
           onSelectType={onSelectType}
           typeId={typeId}
           showCode={checkActionAttribute(typeId, 'code', isManager)}
+          listActions={listActions}
         />
+        {this.state.emailEntities && (
+          <Layer
+            onEsc={this.resetEmails}
+            onClickOutside={this.resetEmails}
+            margin={{ top: 'large' }}
+            position="top"
+            animate={false}
+          >
+            <LayerWrap>
+              <LayerHeader flex={{ grow: 0, shrink: 0 }}>
+                <Box>
+                  <Text weight={600}>Email selected entities</Text>
+                </Box>
+                <Box flex={{ grow: 0 }}>
+                  <Button plain icon={<FormClose size="medium" />} onClick={() => this.resetEmails()} />
+                </Box>
+              </LayerHeader>
+              <LayerContent flex={{ grow: 1 }}>
+                <EmailHelper entities={this.state.emailEntities} />
+              </LayerContent>
+            </LayerWrap>
+          </Layer>
+        )}
       </div>
     );
   }

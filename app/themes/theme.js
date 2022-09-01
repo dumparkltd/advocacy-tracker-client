@@ -487,11 +487,13 @@ theme.global = {
     },
     border: {
       light: '#CECED2',
+      lighter: '#f1f0f1',
       dark: '#FFFFFF',
     },
     private: '#DA1D52',
     archived: '#00728F',
     draft: '#BCB9B8',
+    dark: '#1c2121',
   },
   edgeSize: {
     hair: '1px',
@@ -504,6 +506,13 @@ theme.global = {
     large: '48px',
     xlarge: '64px',
     xxlarge: '100px',
+  },
+};
+// also grommet but not global somehow
+theme.accordion = {
+  border: {
+    style: 'hidden',
+    color: 'transparent',
   },
 };
 theme.layer = {

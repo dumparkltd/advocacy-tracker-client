@@ -9,7 +9,7 @@ import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-
+import { Edit } from 'grommet-icons';
 import { Map, List, fromJS } from 'immutable';
 
 // import { getEntityReference } from 'utils/entities';
@@ -234,6 +234,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       handleEditSubmit,
       onCreateOption,
       allEntityCount,
+      listActions,
     } = this.props;
     // detect print to avoid expensive rendering
     const printing = !!(
@@ -300,6 +301,22 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         },
       ];
     }
+    const hasSelected = dataReady && canEdit && entityIdsSelected && entityIdsSelected.size > 0;
+    let allListActions;
+    if (hasSelected) {
+      allListActions = listActions || [];
+      allListActions = [
+        ...allListActions,
+        {
+          title: 'Edit selected',
+          onClick: (evt) => this.onShowEditOptions(evt),
+          icon: <Edit color="white" size="xxsmall" />,
+          type: 'listOption',
+          active: true,
+          isManager,
+        },
+      ];
+    }
     return (
       <div>
         {headerStyle === 'types' && !printing && (
@@ -339,7 +356,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             onShowFilters={this.onShowFilters}
             onHideFilters={this.onHideFilters}
             onHideEditOptions={this.onHideEditOptions}
-            onShowEditOptions={this.onShowEditOptions}
             onSelectType={(type) => {
               // reset selection
               onEntitySelectAll([]);
@@ -355,7 +371,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         )}
         {showList && (
           <EntitiesListView
-            headerOptions={headerOptions}
+            headerInfo={headerOptions.info}
+            listActions={allListActions}
             allEntityCount={allEntityCount}
             viewOptions={viewOptions}
             hasHeader={includeHeader}
@@ -381,10 +398,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             isAnalyst={hasUserRole[USER_ROLES.ANALYST.value]}
 
             onEntitySelect={(id, checked) => {
-              // show options when selected and not hidden
-              if (checked && this.state.visibleEditOptions !== false) {
-                this.onShowEditOptions();
-              }
               // reset when unchecking last selected item
               if (!checked && !this.state.visibleEditOptions && entityIdsSelected.size === 1) {
                 this.onResetEditOptions();
@@ -392,10 +405,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               onEntitySelect(id, checked);
             }}
             onEntitySelectAll={(ids) => {
-              // show options when selected and not hidden
-              if (this.state.visibleEditOptions !== false && ids && ids.length > 0) {
-                this.onShowEditOptions();
-              }
               // reset when unchecking last selected item
               if (!this.state.visibleEditOptions && (!ids || ids.length === 0)) {
                 this.onResetEditOptions();
@@ -569,6 +578,7 @@ EntityList.propTypes = {
   showCode: PropTypes.bool,
   includeMembers: PropTypes.bool,
   typeOptions: PropTypes.array,
+  listActions: PropTypes.array,
   onSelectType: PropTypes.func,
   onSetView: PropTypes.func,
   onSetFilterMemberOption: PropTypes.func,

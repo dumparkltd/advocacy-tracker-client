@@ -25,6 +25,7 @@ import {
   ACTIONTYPE_RESOURCETYPES,
   DEFAULT_ACTIONTYPE,
   DEFAULT_ACTORTYPE,
+  ACTORTYPES,
   ACTIONTYPES,
   ACTORTYPES_CONFIG,
   ACTIONTYPES_CONFIG,
@@ -1826,6 +1827,13 @@ export const selectActorsWithPositions = createSelector(
             actorStatementsAsMemberByGroup = actorMemberships.reduce(
               (memo, groupId) => {
                 if (groupActors.get(groupId.toString()) && actorActions && actorActions.get(groupId)) {
+                  // for contacts we should only include statements/positions from "groups" and not countries or orgs they may belong to
+                  if (
+                    qe(actor.getIn(['attributes', 'actortype_id']), ACTORTYPES.CONTACT)
+                    && !qe(groupActors.get(groupId.toString()).getIn(['attributes', 'actortype_id']), ACTORTYPES.GROUP)
+                  ) {
+                    return memo;
+                  }
                   return memo.set(
                     groupId,
                     actorActions
@@ -1875,7 +1883,7 @@ export const selectActorsWithPositions = createSelector(
                         )
                         : indicatorStatement;
                       const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
-                      const statementAuthority = authorityCategories.find(
+                      const statementAuthority = statementCategories && authorityCategories.find(
                         (cat, catId) => statementCategories.includes(parseInt(catId, 10))
                       );
                       if (statementAuthority) {
@@ -1935,8 +1943,8 @@ export const selectActorsWithPositions = createSelector(
           // combine direct and indirect statements
           if (actorStatementsAsMemberByGroup) {
             actorStatements = actorStatements
-              ? actorStatements.concat(actorStatementsAsMemberByGroup.flatten().toList()).toSet()
-              : actorStatementsAsMemberByGroup.flatten().toList().toSet();
+              ? actorStatements.concat(actorStatementsAsMemberByGroup.flatten(true).toList()).toSet()
+              : actorStatementsAsMemberByGroup.flatten(true).toList().toSet();
           }
           return actor
             .set('statements', actorStatements)

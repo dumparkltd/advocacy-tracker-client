@@ -4,6 +4,7 @@ import {
   PUBLISH_STATUSES,
   PRIVACY_STATUSES,
   ARCHIVE_STATUSES,
+  EMAIL_STATUSES,
   ROUTES,
   ACTORTYPES,
 } from 'themes/config';
@@ -156,6 +157,19 @@ export const CONFIG = {
         role: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
         default: false,
+      },
+      {
+        search: false,
+        message: 'attributes.email',
+        attribute: 'email',
+        options: EMAIL_STATUSES,
+        role: USER_ROLES.ADMIN.value,
+        filterUI: 'checkboxes',
+        default: false,
+        edit: false,
+        types: [
+          ACTORTYPES.CONTACT,
+        ],
       },
     ],
   },

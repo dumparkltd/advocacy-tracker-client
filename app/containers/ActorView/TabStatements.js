@@ -1,6 +1,6 @@
 /*
  *
- * Statements
+ * TabStatements
  *
  */
 
@@ -40,10 +40,10 @@ import FieldGroup from 'components/fields/FieldGroup';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
 const MapOptions = styled(
-  (p) => <Box margin={{ horizontal: 'medium', top: 'medium' }} {...p} />
+  (p) => <Box margin={{ top: 'medium', bottom: 'small' }} {...p} />
 )``;
 
-const getIndicatorColumns = (viewEntity, intl) => {
+const getIndicatorColumns = (viewEntity, hasMemberOption, intl) => {
   let columns = [
     {
       id: 'main',
@@ -66,10 +66,7 @@ const getIndicatorColumns = (viewEntity, intl) => {
       type: 'positionStatementAuthority',
     },
   ];
-  if (
-    MEMBERSHIPS[viewEntity.getIn(['attributes', 'actortype_id'])]
-    && MEMBERSHIPS[viewEntity.getIn(['attributes', 'actortype_id'])].length > 0
-  ) {
+  if (hasMemberOption) {
     columns = [
       ...columns,
       {
@@ -80,8 +77,10 @@ const getIndicatorColumns = (viewEntity, intl) => {
   }
   return columns;
 };
+const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
+  && MEMBERSHIPS[typeId].length > 0;
 
-export function Statements(props) {
+export function TabStatements(props) {
   const {
     indicators,
     actorsWithPositions,
@@ -94,7 +93,7 @@ export function Statements(props) {
     viewEntity,
   } = props;
   // console.log('statements', statements && statements.toJS());
-  // // console.log('actorsWithPositions', actorsWithPositions && actorsWithPositions.toJS());
+  // console.log('actorsWithPositions', actorssWithPositions && actorsWithPositions.toJS());
   // console.log('associationsByType', associationsByType && associationsByType.toJS());
   // console.log('includeInofficial', includeInofficial);
   // console.log('includeActorMembers', includeActorMembers);
@@ -128,22 +127,25 @@ export function Statements(props) {
     },
     Map()
   );
+  const typeId = viewEntity.getIn(['attributes', 'actortype_id']);
   const type = lowerCase(
     intl.formatMessage(
-      appMessages.entities[`actors_${viewEntity.getIn(['attributes', 'actortype_id'])}`].single
+      appMessages.entities[`actors_${typeId}`].single
     )
   );
   return (
     <div>
       <MapOptions>
-        <MapOption
-          option={{
-            active: includeActorMembers,
-            onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-            label: `Include statements of actors ${type} is a member of`,
-          }}
-          type="member"
-        />
+        {hasMemberOption(typeId) && (
+          <MapOption
+            option={{
+              active: includeActorMembers,
+              onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+              label: `Include statements of actors ${type} is a member of`,
+            }}
+            type="member"
+          />
+        )}
         <MapOption
           option={{
             active: !includeInofficial,
@@ -155,13 +157,14 @@ export function Statements(props) {
       </MapOptions>
       {indicators && (
         <FieldGroup
+          seamless
           group={{
             fields: [
               getIndicatorConnectionField({
                 indicators: indicatorsWithSupport,
                 onEntityClick,
                 skipLabel: true,
-                columns: getIndicatorColumns(viewEntity, intl),
+                columns: getIndicatorColumns(viewEntity, hasMemberOption(typeId), intl),
               }),
             ],
           }}
@@ -171,7 +174,7 @@ export function Statements(props) {
   );
 }
 
-Statements.propTypes = {
+TabStatements.propTypes = {
   viewEntity: PropTypes.instanceOf(Map),
   indicators: PropTypes.instanceOf(Map),
   actorsWithPositions: PropTypes.instanceOf(Map),
@@ -205,4 +208,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(Statements));
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(TabStatements));

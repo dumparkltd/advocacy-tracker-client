@@ -46,8 +46,14 @@ export const makeFilterGroups = ({
         config.attributes.options,
         (memo, option) => {
           if (
-            typeof option.role === 'undefined'
-            || (hasUserRole && hasUserRole[option.role])
+            (
+              typeof option.role === 'undefined'
+              || (hasUserRole && hasUserRole[option.role])
+            )
+            && (
+              typeof option.types === 'undefined'
+              || option.types.indexOf(typeId) > -1
+            )
           ) {
             const attributeFilterOptions = option.filterUI
               && option.filterUI === 'checkboxes'

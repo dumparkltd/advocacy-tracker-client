@@ -277,8 +277,7 @@ export function EntitiesTable({
                       />
                     )}
                     {(
-                      col.type === 'actionsBars'
-                      || col.type === 'actorActions'
+                      col.type === 'actorActions'
                       || col.type === 'actiontype'
                     ) && (
                       <CellBodyBarChart
@@ -287,9 +286,12 @@ export function EntitiesTable({
                         subject={col.subject}
                         column={col}
                         issecondary={col.type !== 'actiontype' && col.members}
+                        entityType="actions"
+                        onEntityClick={onEntityClick}
+                        rowConfig={entity[col.id]}
                       />
                     )}
-                    {col.type === 'stackedBar' && (
+                    {col.type === 'stackedBarActions' && (
                       <CellBodyStackedBarChart
                         values={entity[col.id] && entity[col.id].values
                           ? Object.values(entity[col.id].values)
@@ -297,6 +299,8 @@ export function EntitiesTable({
                         }
                         maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
                         column={col}
+                        entityType="actors"
+                        onEntityClick={onEntityClick}
                       />
                     )}
                   </TableCellBodyInner>

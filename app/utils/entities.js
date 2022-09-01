@@ -19,6 +19,7 @@ import asList from 'utils/as-list';
 import isNumber from 'utils/is-number';
 import appMessage from 'utils/app-message';
 import { qe } from 'utils/quasi-equals';
+import validateEmailFormat from 'components/forms/validators/validate-email-format';
 
 // check if entity has nested connection by id
 // - connectionAttributes: { path: 'indicatorConnections', id: 'indicator_id' }
@@ -293,14 +294,35 @@ export const filterEntitiesByMultipleConnections = (
   )
 );
 
+const fieldEmpty = (entity, attribute) => !entity.getIn(['attributes', attribute])
+  || qe(entity.getIn(['attributes', attribute]).trim(), '');
+
 // query is object not string!
 export const filterEntitiesByAttributes = (entities, query) => entities
   && entities.filter(
     (entity) => every(
       query,
-      (value, attribute) => attribute === 'id'
-        ? qe(entity.get('id'), value)
-        : qe(entity.getIn(['attributes', attribute]), value),
+      (value, attribute) => {
+        switch (attribute) {
+          case 'id':
+            return qe(entity.get('id'), value);
+          case 'email':
+            switch (value) {
+              case 'valid':
+                return !fieldEmpty(entity, attribute)
+                  && validateEmailFormat(entity.getIn(['attributes', 'email']));
+              case 'invalid':
+                return !fieldEmpty(entity, attribute)
+                  && !validateEmailFormat(entity.getIn(['attributes', 'email']));
+              case 'empty':
+                return fieldEmpty(entity, attribute);
+              default:
+                return qe(entity.getIn(['attributes', attribute]), value);
+            }
+          default:
+            return qe(entity.getIn(['attributes', attribute]), value);
+        }
+      },
     )
   );
 

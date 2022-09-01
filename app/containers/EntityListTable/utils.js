@@ -186,14 +186,21 @@ export const prepareHeader = ({
         });
       case 'resourceActions':
       case 'indicatorActions':
-      case 'userActions':
-      case 'actionsSimple':
       case 'actorActions':
         if (col.subject !== 'actors') {
           label = col.members ? 'Targeted as member' : 'Targeted by';
         } else {
           label = col.members ? 'Activities as member' : 'Activities';
         }
+        return ({
+          ...col,
+          title: label,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'userActions':
+        label = 'Assigned to';
         return ({
           ...col,
           title: label,
@@ -208,7 +215,7 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
-      case 'stackedBar':
+      case 'stackedBarActions':
         return ({
           ...col,
           sortActive,
@@ -273,7 +280,7 @@ const getSingleRelatedValueFromAttributes = (relatedEntity) => relatedEntity
   : null;
 
 
-export const prepareEntities = ({
+export const prepareEntityRows = ({
   entities,
   columns,
   entityIdsSelected,
@@ -290,7 +297,6 @@ export const prepareEntities = ({
 }) => entities.reduce(
   (memoEntities, entity) => {
     const id = entity.get('id');
-    // console.log(entity.toJS())
     // console.log(connections && connections.toJS())
     const entityValues = columns.reduce(
       (memoEntity, col) => {
@@ -360,7 +366,7 @@ export const prepareEntities = ({
             };
           case 'actionsSimple':
             attribute = col.actions || 'actions';
-            temp = entity.get(attribute) || (entity.get(`${attribute}ByType`) && entity.get(`${attribute}ByType`).flatten());
+            temp = entity.get(attribute) || (entity.get(`${attribute}ByType`) && entity.get(`${attribute}ByType`).flatten(true));
             relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
             return {
               ...memoEntity,
@@ -375,7 +381,7 @@ export const prepareEntities = ({
               },
             };
           case 'targets':
-            temp = entity.get('targets') || (entity.get('targetsByType') && entity.get('targetsByType').flatten());
+            temp = entity.get('targets') || (entity.get('targetsByType') && entity.get('targetsByType').flatten(true));
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -431,7 +437,7 @@ export const prepareEntities = ({
             };
           case 'actors':
           case 'userActors':
-            temp = entity.get('actors') || (entity.get('actorsByType') && entity.get('actorsByType').flatten());
+            temp = entity.get('actors') || (entity.get('actorsByType') && entity.get('actorsByType').flatten(true));
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -460,7 +466,7 @@ export const prepareEntities = ({
               },
             };
           case 'members':
-            temp = entity.get('members') || (entity.get('membersByType') && entity.get('membersByType').flatten());
+            temp = entity.get('members') || (entity.get('membersByType') && entity.get('membersByType').flatten(true));
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -475,7 +481,7 @@ export const prepareEntities = ({
               },
             };
           case 'associations':
-            temp = entity.get('associations') || (entity.get('associationsByType') && entity.get('associationsByType').flatten());
+            temp = entity.get('associations') || (entity.get('associationsByType') && entity.get('associationsByType').flatten(true));
 
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
@@ -524,12 +530,18 @@ export const prepareEntities = ({
             };
           case 'actorActions':
             temp = entity.get(col.actions)
-              || (entity.get(`${col.actions}ByType`) && entity.get(`${col.actions}ByType`).flatten());
+              || (entity.get(`${col.actions}ByType`) && entity.get(`${col.actions}ByType`).flatten(true));
+            console.log('actorActions-entity', entity && entity.toJS());
+            console.log('actorActions-temp', temp && temp.toJS());
+            relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
+            console.log('actorActions-relatedEntities', relatedEntities && relatedEntities.toJS());
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
                 value: temp && temp.size,
+                tooltip: relatedEntities && relatedEntities.size > 0
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
               },
             };
           case 'userrole':
@@ -558,7 +570,7 @@ export const prepareEntities = ({
           case 'indicatorActions':
           case 'userActions':
             temp = entity.get('actions')
-              || (entity.get('actionsByType') && entity.get('actionsByType').flatten());
+              || (entity.get('actionsByType') && entity.get('actionsByType').flatten(true));
             relatedEntities = temp && getRelatedEntities(
               temp,
               connections.get(API.ACTIONS),
@@ -584,6 +596,7 @@ export const prepareEntities = ({
                 .toList()
                 .toSet();
             }
+            relatedEntities = getRelatedEntities(relatedEntityIds.flatten(true), connections.get('measures'), col);
             return {
               ...memoEntity,
               [col.id]: {
@@ -591,6 +604,8 @@ export const prepareEntities = ({
                 value: relatedEntityIds && relatedEntityIds.size > 0
                   ? relatedEntityIds.size
                   : null,
+                tooltip: relatedEntities && relatedEntities.size > 0
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
               },
             };
           case 'supportlevel':
@@ -640,14 +655,29 @@ export const prepareEntities = ({
                 // sortValue: getRelatedSortValue(temp),
               },
             };
-          case 'stackedBar':
+          case 'stackedBarActions':
+            temp = entity.get(col.values);
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                values: entity.get(col.values) && entity.get(col.values).toJS(),
-                sortValue: entity.get(col.values)
-                  ? entity.get(col.values).reduce(
+                values: temp && temp.map(
+                  (value) => {
+                    if (value.actors) {
+                      relatedEntities = getRelatedEntities(value.actors, connections.get('actors'), col);
+                      if (relatedEntities && relatedEntities.size > 0) {
+                        return {
+                          ...value,
+                          tooltip: relatedEntities && relatedEntities.size > 0
+                            && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
+                        };
+                      }
+                    }
+                    return value;
+                  }
+                ).toJS(),
+                sortValue: temp
+                  ? temp.reduce(
                     (sum, val) => (val.count || 0) + sum,
                     0,
                   )
@@ -731,7 +761,7 @@ export const getColumnMaxValues = (entities, columns) => entities.reduce(
           }
           : maxValueMemo2;
       }
-      if (column.type === 'stackedBar') {
+      if (column.type === 'stackedBarActions') {
         const { values } = entity[column.id];
         const val = values && Object.values(values).reduce(
           (memo, value) => (value.count || 0) + memo,

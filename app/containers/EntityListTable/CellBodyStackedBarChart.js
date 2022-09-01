@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Box } from 'grommet';
 import styled from 'styled-components';
+import { fromJS } from 'immutable';
 import CellBodyStackedBarChartBarOverlay from './CellBodyStackedBarChartBarOverlay';
 
 const BarWrapper = styled.div`
@@ -14,6 +15,8 @@ const BarWrapper = styled.div`
 export function CellBodyStackedBarChart({
   values,
   maxvalue,
+  entityType,
+  onEntityClick,
 }) {
   let offset = 0;
   return (
@@ -32,6 +35,9 @@ export function CellBodyStackedBarChart({
                     count={count}
                     offset={offset - count}
                     maxvalue={maxvalue}
+                    tooltipConfig={value.tooltip && fromJS(value.tooltip)}
+                    onEntityClick={onEntityClick}
+                    entityType={entityType}
                   />
                 )
                 : null;
@@ -46,6 +52,8 @@ export function CellBodyStackedBarChart({
 CellBodyStackedBarChart.propTypes = {
   values: PropTypes.array,
   maxvalue: PropTypes.number,
+  entityType: PropTypes.string,
+  onEntityClick: PropTypes.func,
 };
 
 export default CellBodyStackedBarChart;

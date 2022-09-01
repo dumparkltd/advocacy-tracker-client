@@ -33,6 +33,8 @@ import {
   loadEntitiesIfNeeded,
   updatePath,
   openNewEntityModal,
+  submitInvalid,
+  saveErrorDismiss,
 } from './actions';
 
 import { DEPENDENCIES } from './constants';
@@ -189,30 +191,29 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
         <Main isHome={isHomeOrAuth}>
           {React.Children.toArray(children)}
         </Main>
-        {newEntityModal
-          && (
-            <ReactModal
-              isOpen
-              contentLabel={newEntityModal.get('path')}
-              onRequestClose={this.props.onCloseModal}
-              className="new-entity-modal"
-              overlayClassName="new-entity-modal-overlay"
-              style={{
-                overlay: { zIndex: 99999999 },
-              }}
-              appElement={document.getElementById('app')}
-            >
-              <EntityNew
-                path={newEntityModal.get('path')}
-                attributes={newEntityModal.get('attributes')}
-                connect={newEntityModal.get('connect')}
-                onSaveSuccess={this.props.onCloseModal}
-                onCancel={this.props.onCloseModal}
-                inModal
-              />
-            </ReactModal>
-          )
-        }
+        {newEntityModal && (
+          <ReactModal
+            isOpen
+            contentLabel={newEntityModal.get('path')}
+            onRequestClose={this.props.onCloseModal}
+            className="new-entity-modal"
+            overlayClassName="new-entity-modal-overlay"
+            style={{
+              overlay: { zIndex: 99999999 },
+            }}
+            appElement={document.getElementById('app')}
+          >
+            <EntityNew
+              path={newEntityModal.get('path')}
+              attributes={newEntityModal.get('attributes')}
+              connect={newEntityModal.get('connect')}
+              autoUser={newEntityModal.get('autoUser')}
+              onSaveSuccess={this.props.onCloseModal}
+              onCancel={this.props.onCloseModal}
+              inModal
+            />
+          </ReactModal>
+        )}
         <GlobalStyle />
       </div>
     );
@@ -262,6 +263,9 @@ export function mapDispatchToProps(dispatch) {
       dispatch(updatePath(path, args));
     },
     onCloseModal: () => {
+      // cleanup
+      dispatch(submitInvalid(true));
+      dispatch(saveErrorDismiss());
       dispatch(openNewEntityModal(null));
     },
   };
