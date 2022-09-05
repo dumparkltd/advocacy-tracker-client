@@ -144,7 +144,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     color: '#EBA58F',
     order: 4,
   },
-  // rather sceptical
+  // opponent
   5: {
     value: '5',
     color: '#DB5D37',

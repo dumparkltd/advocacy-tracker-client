@@ -37,6 +37,10 @@ export default defineMessages({
       id: 'app.containers.App.supportlevels.4',
       defaultMessage: '4 - Rather sceptical',
     },
+    5: {
+      id: 'app.containers.App.supportlevels.5',
+      defaultMessage: '5 - Opponent',
+    },
     99: {
       id: 'app.containers.App.supportlevels.99',
       defaultMessage: 'No statement on topic',
