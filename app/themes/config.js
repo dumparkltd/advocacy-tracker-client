@@ -141,8 +141,14 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
   // rather sceptical
   4: {
     value: '4',
-    color: '#DA5C35',
+    color: '#EBA58F',
     order: 4,
+  },
+  // rather sceptical
+  5: {
+    value: '5',
+    color: '#DB5D37',
+    order: 5,
   },
 };
 
