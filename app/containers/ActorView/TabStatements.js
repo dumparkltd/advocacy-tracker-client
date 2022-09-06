@@ -16,11 +16,12 @@ import styled from 'styled-components';
 
 import { lowerCase } from 'utils/string';
 
-import { MEMBERSHIPS } from 'themes/config';
+import { MEMBERSHIPS, ACTORTYPES } from 'themes/config';
 
 import {
   getIndicatorConnectionField,
 } from 'utils/fields';
+import { qe } from 'utils/quasi-equals';
 
 import {
   updatePath,
@@ -43,7 +44,11 @@ const MapOptions = styled(
   (p) => <Box margin={{ top: 'medium', bottom: 'small' }} {...p} />
 )``;
 
-const getIndicatorColumns = (viewEntity, hasMemberOption, intl) => {
+const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
+  && MEMBERSHIPS[typeId].length > 0
+  && !qe(typeId, ACTORTYPES.CONTACT);
+
+const getIndicatorColumns = (viewEntity, typeId, intl) => {
   let columns = [
     {
       id: 'main',
@@ -66,7 +71,7 @@ const getIndicatorColumns = (viewEntity, hasMemberOption, intl) => {
       type: 'positionStatementAuthority',
     },
   ];
-  if (hasMemberOption) {
+  if (hasMemberOption(typeId)) {
     columns = [
       ...columns,
       {
@@ -77,8 +82,7 @@ const getIndicatorColumns = (viewEntity, hasMemberOption, intl) => {
   }
   return columns;
 };
-const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
-  && MEMBERSHIPS[typeId].length > 0;
+
 
 export function TabStatements(props) {
   const {
@@ -164,7 +168,7 @@ export function TabStatements(props) {
                 indicators: indicatorsWithSupport,
                 onEntityClick,
                 skipLabel: true,
-                columns: getIndicatorColumns(viewEntity, hasMemberOption(typeId), intl),
+                columns: getIndicatorColumns(viewEntity, typeId, intl),
               }),
             ],
           }}
