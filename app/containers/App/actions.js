@@ -76,6 +76,7 @@ import {
   SET_INCLUDE_TARGET_MEMBERS,
   SET_INCLUDE_MEMBERS_FORFILTERS,
   SET_INCLUDE_INOFFICAL_STATEMENTS,
+  SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
 } from './constants';
 
 export function submitInvalid(valid) {
@@ -536,6 +537,12 @@ export function setIncludeActorMembers(value) {
 export function setIncludeTargetMembers(value) {
   return {
     type: SET_INCLUDE_TARGET_MEMBERS,
+    value,
+  };
+}
+export function setIncludeTargetChildrenOnMap(value) {
+  return {
+    type: SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
     value,
   };
 }

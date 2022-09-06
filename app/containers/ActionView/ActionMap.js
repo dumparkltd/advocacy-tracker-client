@@ -15,23 +15,28 @@ import * as topojson from 'topojson-client';
 
 import countriesTopo from 'data/ne_countries_10m_v5.topo.json';
 
-import { ACTORTYPES } from 'themes/config';
+import { ACTORTYPES, MAP_OPTIONS } from 'themes/config';
 
 import {
   selectActortypeActors,
   selectIncludeActorMembers,
   selectIncludeTargetMembers,
+  selectIncludeTargetChildrenOnMap,
 } from 'containers/App/selectors';
 
 import {
   setIncludeActorMembers,
   setIncludeTargetMembers,
+  setIncludeTargetChildrenOnMap,
 } from 'containers/App/actions';
 
 
 // import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
+
 // import { hasGroupActors } from 'utils/entities';
+import { scaleColorCount } from 'containers/MapContainer/utils';
+import MapKeySimple from 'containers/MapContainer/MapKeySimple';
 import MapContainer from 'containers/MapContainer/MapWrapper';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
@@ -47,7 +52,7 @@ const MapWrapper = styled((p) => <Box {...p} />)`
   height: 400px;
   background: #F9F9FA;
 `;
-
+const MAX_VALUE_COUNTRIES = 100;
 export function ActionMap({
   entities,
   mapSubject,
@@ -58,6 +63,10 @@ export function ActionMap({
   onActorClick,
   countries,
   hasMemberOption,
+  hasChildTargetOption,
+  includeTargetChildren,
+  onSetIncludeTargetChildren,
+  childActionsByActiontype,
   // typeId,
   // intl,
 }) {
@@ -98,6 +107,55 @@ export function ActionMap({
   ).map(
     (countryId) => countries.get(countryId.toString())
   );
+  const countriesChildTargets = hasChildTargetOption
+    && includeTargetChildren
+    && childActionsByActiontype
+    && childActionsByActiontype.reduce(
+      (memo, typeActions) => memo.concat(typeActions.reduce(
+        (memo2, childAction) => {
+          if (childAction.getIn(['targetsByType', ACTORTYPES.COUNTRY])) {
+            return memo2.concat(childAction.getIn(['targetsByType', ACTORTYPES.COUNTRY]).toList());
+          }
+          return memo2;
+        },
+        List(),
+      )),
+      List(),
+    ).toSet(
+    ).map(
+      (countryId) => countries.get(countryId.toString())
+    );
+  let mapKeyOptionMap = {
+    direct: {
+      label: `Direct ${mapSubject === 'actors' ? 'actors' : 'targets'}`,
+      colorValue: 100,
+      color: scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[mapSubject], false)(100),
+      order: 1,
+    },
+  };
+  if (hasMemberOption && hasAssociations) {
+    mapKeyOptionMap = {
+      ...mapKeyOptionMap,
+      via: {
+        label: `Members of ${mapSubject === 'actors' ? 'group actors' : 'targeted regions and groups'}`,
+        colorValue: mapSubject === 'actors' ? 50 : 70,
+        color: scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[mapSubject], false)(mapSubject === 'actors' ? 50 : 70),
+        order: 2,
+      },
+    };
+  }
+  if (hasChildTargetOption) {
+    mapKeyOptionMap = {
+      ...mapKeyOptionMap,
+      children: {
+        label: 'Targets of child activities',
+        colorValue: 40,
+        color: scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[mapSubject], false)(40),
+        order: 3,
+      },
+    };
+  }
+
   const countryData = countriesJSON.features.reduce(
     (memo, feature) => {
       const countryDirect = hasCountries && entities.get(parseInt(ACTORTYPES.COUNTRY, 10)).find(
@@ -106,9 +164,19 @@ export function ActionMap({
       const countryVia = !countryDirect && hasAssociations && countriesVia && countriesVia.find(
         (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3)
       );
-      const country = countryDirect || countryVia;
+      const countryChildTarget = !countryDirect && !countryVia && countriesChildTargets && countriesChildTargets.find(
+        (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3)
+      );
+      const country = countryDirect || countryVia || countryChildTarget;
 
       if (country) {
+        let styleOption = mapKeyOptionMap.direct;
+        if (countryVia) {
+          styleOption = mapKeyOptionMap.via;
+        } else if (countryChildTarget) {
+          styleOption = mapKeyOptionMap.children;
+        }
+        // console.log(feature)
         return [
           ...memo,
           {
@@ -120,10 +188,7 @@ export function ActionMap({
               title: country.getIn(['attributes', 'title']),
             },
             values: {
-              actions: 1,
-            },
-            style: {
-              fillOpacity: countryDirect ? 1 : 0.6,
+              actions: styleOption.colorValue,
             },
           },
         ];
@@ -156,7 +221,11 @@ export function ActionMap({
       };
     }
   }
-
+  const childrenOption = hasChildTargetOption && ({
+    active: includeTargetChildren,
+    onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
+    label: 'Include targets of child activities (excluding members of regions and groups targeted by children)',
+  });
   return (
     <Styled hasHeader noOverflow>
       <MapWrapper>
@@ -165,7 +234,7 @@ export function ActionMap({
           countryFeatures={countriesJSON.features}
           indicator="actions"
           onActorClick={(id) => onActorClick(id)}
-          maxValueCountries={1}
+          maxValueCountries={MAX_VALUE_COUNTRIES}
           includeSecondaryMembers={
             includeActorMembers
             || includeTargetMembers
@@ -176,7 +245,7 @@ export function ActionMap({
           mapId="ll-action-map"
         />
       </MapWrapper>
-      {(memberOption || mapTitle) && (
+      {(mapTitle || memberOption || childrenOption) && (
         <MapOptions>
           {mapTitle && (
             <MapTitle>
@@ -186,8 +255,17 @@ export function ActionMap({
           {memberOption && (
             <MapOption option={memberOption} type="member" />
           )}
+          {childrenOption && (
+            <MapOption option={childrenOption} type="children" />
+          )}
         </MapOptions>
       )}
+      <MapOptions>
+        <MapKeySimple
+          options={Object.values(mapKeyOptionMap)}
+          title="Countries"
+        />
+      </MapOptions>
     </Styled>
   );
 }
@@ -195,11 +273,15 @@ export function ActionMap({
 ActionMap.propTypes = {
   entities: PropTypes.instanceOf(Map), // actors by actortype for current action
   countries: PropTypes.instanceOf(Map), // all countries needed for indirect connections
+  childActionsByActiontype: PropTypes.instanceOf(Map), // all countries needed for indirect connections
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeTargetMembers: PropTypes.func,
+  onSetIncludeTargetChildren: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   includeTargetMembers: PropTypes.bool,
+  includeTargetChildren: PropTypes.bool,
   hasMemberOption: PropTypes.bool,
+  hasChildTargetOption: PropTypes.bool,
   onActorClick: PropTypes.func,
   mapSubject: PropTypes.string,
   // typeId: PropTypes.oneOfType([
@@ -212,11 +294,15 @@ const mapStateToProps = (state) => ({
   countries: selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
   includeActorMembers: selectIncludeActorMembers(state),
   includeTargetMembers: selectIncludeTargetMembers(state),
+  includeTargetChildren: selectIncludeTargetChildrenOnMap(state),
 });
 function mapDispatchToProps(dispatch) {
   return {
     onSetIncludeTargetMembers: (active) => {
       dispatch(setIncludeTargetMembers(active));
+    },
+    onSetIncludeTargetChildren: (active) => {
+      dispatch(setIncludeTargetChildrenOnMap(active));
     },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));

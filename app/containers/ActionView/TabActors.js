@@ -26,6 +26,8 @@ import {
 import FieldGroup from 'components/fields/FieldGroup';
 
 import {
+} from 'containers/App/actions';
+import {
   selectActorConnections,
 } from 'containers/App/selectors';
 
@@ -56,7 +58,13 @@ export function TabActors({
   const actortypesForSubject = viewSubject === 'actors'
     ? actorsByActortype
     : targetsByActortype;
-
+  const hasChildTargets = viewSubject === 'targets'
+    && hasChildren
+    && childActionsByActiontype
+    && childActionsByActiontype
+      .flatten(true)
+      .filter((action) => action.get('targetsByType'))
+      .size > 0;
   return (
     <>
       {(!actortypesForSubject || actortypesForSubject.size === 0) && (
@@ -79,7 +87,9 @@ export function TabActors({
           mapSubject={viewSubject}
           onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
           hasMemberOption={hasMemberOption}
+          hasChildTargetOption={hasChildTargets}
           typeId={typeId}
+          childActionsByActiontype={childActionsByActiontype}
         />
       )}
       <Box margin={{ vertical: 'medium' }}>
@@ -97,7 +107,7 @@ export function TabActors({
         {actortypesForSubject && (
           <TabActorsAccordion
             viewSubject={viewSubject}
-            hasChildTargets={hasChildren && viewSubject === 'targets'}
+            hasChildTargets={hasChildTargets}
             taxonomies={taxonomies}
             onEntityClick={onEntityClick}
             actorConnections={actorConnections}

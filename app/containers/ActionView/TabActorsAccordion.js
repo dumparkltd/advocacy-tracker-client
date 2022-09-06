@@ -72,12 +72,6 @@ export function TabActorsAccordion({
     setActive(defaultState);
   }, [viewSubject, hasChildTargets]);
 
-  const hasChildPanel = hasChildTargets
-    && childActionsByActiontype
-    && childActionsByActiontype
-      .flatten(true)
-      .filter((action) => action.get('targetsByType'))
-      .size > 0;
   return (
     <>
       <Box margin={{ vertical: 'medium' }}>
@@ -137,7 +131,7 @@ export function TabActorsAccordion({
                 />
               </Box>
             </AccordionPanel>
-            {hasChildPanel && (
+            {hasChildTargets && (
               <AccordionPanel
                 header={(
                   <AccordionHeader

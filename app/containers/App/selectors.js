@@ -454,6 +454,15 @@ export const selectIncludeTargetMembers = createSelector(
     return true; // default
   }
 );
+export const selectIncludeTargetChildrenOnMap = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('mtch')) {
+      return qe(locationQuery.get('mtch'), 1) || locationQuery.get('mtch') === 'true';
+    }
+    return true; // default
+  }
+);
 export const selectIncludeMembersForFiltering = createSelector(
   selectLocationQuery,
   (locationQuery) => {

@@ -48,6 +48,7 @@ import {
   SET_INCLUDE_TARGET_MEMBERS,
   SET_INCLUDE_MEMBERS_FORFILTERS,
   SET_INCLUDE_INOFFICAL_STATEMENTS,
+  SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
   PARAMS,
 } from 'containers/App/constants';
 
@@ -967,6 +968,19 @@ export function* setIncludeTargetMembersSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
+export function* setIncludeTargetChildrenOnMapSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'mtch',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
 export function* setIncludeMembersForFilterSaga({ value }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
@@ -1093,6 +1107,7 @@ export default function* rootSaga() {
   yield takeEvery(SET_MAPINDICATOR, setMapIndicatorSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_MEMBERS, setIncludeActorMembersSaga);
   yield takeEvery(SET_INCLUDE_TARGET_MEMBERS, setIncludeTargetMembersSaga);
+  yield takeEvery(SET_INCLUDE_TARGET_CHILDREN_ON_MAP, setIncludeTargetChildrenOnMapSaga);
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
   yield takeEvery(SET_INCLUDE_INOFFICAL_STATEMENTS, setIncludeInofficialStatementsSaga);
   yield takeEvery(OPEN_BOOKMARK, openBookmarkSaga);
