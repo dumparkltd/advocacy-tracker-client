@@ -243,7 +243,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
             <LayerWrap>
               <LayerHeader flex={{ grow: 0, shrink: 0 }}>
                 <Box>
-                  <Text weight={600}>Email selected entities</Text>
+                  <Text weight={600}>{`Email ${this.state.emailEntities.size} selected contacts`}</Text>
                 </Box>
                 <Box flex={{ grow: 0 }}>
                   <Button plain icon={<FormClose size="medium" />} onClick={() => this.resetEmails()} />
