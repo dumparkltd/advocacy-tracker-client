@@ -5,6 +5,7 @@ import {
   PUBLISH_STATUSES,
   PRIVACY_STATUSES,
   ARCHIVE_STATUSES,
+  NOTIFICATION_STATUSES,
   ACTIONTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
@@ -212,6 +213,15 @@ export const CONFIG = {
         message: 'attributes.is_archive',
         attribute: 'is_archive',
         options: ARCHIVE_STATUSES,
+        role: USER_ROLES.ADMIN.value,
+        filterUI: 'checkboxes',
+        default: false,
+      },
+      {
+        search: false,
+        message: 'attributes.notifications',
+        attribute: 'notifications',
+        options: NOTIFICATION_STATUSES,
         role: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
         default: false,

@@ -296,6 +296,7 @@ export function ActionView(props) {
                             entity: viewEntity,
                             attribute: 'is_archive',
                           }),
+                          isAdmin && getStatusField(viewEntity, 'notifications'),
                           getMetaField(viewEntity),
                         ],
                       }}

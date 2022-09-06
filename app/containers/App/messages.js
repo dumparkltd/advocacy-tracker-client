@@ -839,6 +839,10 @@ export default defineMessages({
       id: 'app.containers.App.attributes.private',
       defaultMessage: 'Confidentiality',
     },
+    notifications: {
+      id: 'app.containers.App.attributes.notifications',
+      defaultMessage: 'Email notifications',
+    },
     draft: {
       id: 'app.containers.App.attributes.draft',
       defaultMessage: 'Authoring status',
@@ -2337,6 +2341,16 @@ export default defineMessages({
       public: {
         id: 'app.containers.App.ui.privacyStatuses.public',
         defaultMessage: 'Not confidential',
+      },
+    },
+    notificationStatuses: {
+      enabled: {
+        id: 'app.containers.App.ui.notificationStatuses.enabled',
+        defaultMessage: 'Enabled',
+      },
+      disabled: {
+        id: 'app.containers.App.ui.notificationStatuses.disabled',
+        defaultMessage: 'Disabled',
       },
     },
     publishStatuses: {

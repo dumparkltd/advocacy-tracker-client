@@ -263,6 +263,11 @@ export const ACTION_FIELDS = {
       required: true,
       type: 'bool',
     },
+    notifications: {
+      defaultValue: true,
+      required: true,
+      type: 'bool',
+    },
     code: {
       optional: Object.values(ACTIONTYPES), // all types
       type: 'text',
@@ -1128,6 +1133,10 @@ export const PUBLISH_STATUSES = [
 export const PRIVACY_STATUSES = [
   { value: false, message: 'ui.privacyStatuses.public' },
   { value: true, message: 'ui.privacyStatuses.private' },
+];
+export const NOTIFICATION_STATUSES = [
+  { value: true, message: 'ui.notificationStatuses.enabled' },
+  { value: false, message: 'ui.notificationStatuses.disabled' },
 ];
 export const ARCHIVE_STATUSES = [
   { value: false, message: 'ui.archiveStatuses.current' },

@@ -320,6 +320,7 @@ export const prepareEntityRows = ({
                 ),
                 draft: entity.getIn(['attributes', 'draft']),
                 archived: entity.getIn(['attributes', 'is_archive']),
+                noNotifications: !entity.getIn(['attributes', 'notifications']),
                 private: entity.getIn(['attributes', 'private']),
                 sortValue: entity.getIn(['attributes', col.sort || 'title']),
                 selected: entityIdsSelected && entityIdsSelected.includes(id),

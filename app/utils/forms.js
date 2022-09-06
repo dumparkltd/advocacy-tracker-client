@@ -20,6 +20,7 @@ import {
   PUBLISH_STATUSES,
   PRIVACY_STATUSES,
   ARCHIVE_STATUSES,
+  NOTIFICATION_STATUSES,
   USER_ROLES,
   DATE_FORMAT,
   API,
@@ -658,6 +659,9 @@ export const getStatusField = (formatMessage, attribute = 'draft', options) => {
   }
   if (attribute === 'is_archive') {
     myOptions = ARCHIVE_STATUSES;
+  }
+  if (attribute === 'notifications') {
+    myOptions = NOTIFICATION_STATUSES;
   }
   return {
     id: 'status',

@@ -157,6 +157,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       fields: [
         getStatusField(intl.formatMessage),
         getStatusField(intl.formatMessage, 'private'),
+        getStatusField(intl.formatMessage, 'notifications'),
       ],
     });
     return groups;
