@@ -193,7 +193,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
           getStatusField(intl.formatMessage),
           (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
           isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
-          getMetaField(entity),
+          getMetaField(entity, true),
         ],
       },
     ]);

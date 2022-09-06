@@ -6,7 +6,12 @@ import { FormattedMessage } from 'react-intl';
 import appMessage from 'utils/app-message';
 import appMessages from 'containers/App/messages';
 
-import { PUBLISH_STATUSES, PRIVACY_STATUSES, ARCHIVE_STATUSES } from 'themes/config';
+import {
+  PUBLISH_STATUSES,
+  PRIVACY_STATUSES,
+  ARCHIVE_STATUSES,
+  NOTIFICATION_STATUSES,
+} from 'themes/config';
 
 import Label from 'components/fields/Label';
 import FieldWrapInline from 'components/fields/FieldWrapInline';
@@ -24,6 +29,8 @@ class StatusField extends React.PureComponent { // eslint-disable-line react/pre
       status = find(field.options || ARCHIVE_STATUSES, { value: field.value });
     } else if (attribute === 'private') {
       status = find(field.options || PRIVACY_STATUSES, { value: field.value });
+    } else if (attribute === 'notifications') {
+      status = find(field.options || NOTIFICATION_STATUSES, { value: field.value });
     }
 
     return (

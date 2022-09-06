@@ -139,11 +139,11 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       {
         fields: (roles && roles.size > 0) ? [
           getRoleFormField(intl.formatMessage, roles),
-          getMetaField(entity),
+          getMetaField(entity, true),
         ]
           : [
             getRoleField(entity),
-            getMetaField(entity),
+            getMetaField(entity, true),
           ],
       },
     ]);

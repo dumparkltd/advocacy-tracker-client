@@ -135,6 +135,7 @@ export function Activities(props) {
                   attributes: {
                     measuretype_id: viewActiontypeId,
                   },
+                  invalidateEntitiesOnSuccess: API.USERS,
                   connect: {
                     type: 'userActions',
                     create: [{

@@ -839,6 +839,10 @@ export default defineMessages({
       id: 'app.containers.App.attributes.private',
       defaultMessage: 'Confidentiality',
     },
+    notifications: {
+      id: 'app.containers.App.attributes.notifications',
+      defaultMessage: 'Email notifications',
+    },
     draft: {
       id: 'app.containers.App.attributes.draft',
       defaultMessage: 'Authoring status',
@@ -1005,6 +1009,10 @@ export default defineMessages({
       updated_at: {
         id: 'app.containers.App.attributes.meta.updated_at',
         defaultMessage: 'Last updated',
+      },
+      relationship_updated_at: {
+        id: 'app.containers.App.attributes.meta.relationship_updated_at',
+        defaultMessage: 'Connections last updated',
       },
       created_at: {
         id: 'app.containers.App.attributes.meta.created_at',
@@ -2337,6 +2345,16 @@ export default defineMessages({
       public: {
         id: 'app.containers.App.ui.privacyStatuses.public',
         defaultMessage: 'Not confidential',
+      },
+    },
+    notificationStatuses: {
+      enabled: {
+        id: 'app.containers.App.ui.notificationStatuses.enabled',
+        defaultMessage: 'Enabled',
+      },
+      disabled: {
+        id: 'app.containers.App.ui.notificationStatuses.disabled',
+        defaultMessage: 'Disabled',
       },
     },
     publishStatuses: {

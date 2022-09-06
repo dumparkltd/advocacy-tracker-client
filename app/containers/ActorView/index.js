@@ -123,6 +123,13 @@ export function ActorView(props) {
     // kick off loading of data
     onLoadData();
   }, []);
+  useEffect(() => {
+    // also kick off loading of data again once dataReady changes and becomes negative again
+    // required due to possible in-view creation of activities
+    if (!dataReady) {
+      onLoadData();
+    }
+  }, [dataReady]);
 
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'actortype_id']);
   const viewActortype = actortypes && actortypes.find((type) => qe(type.get('id'), typeId));
@@ -252,7 +259,7 @@ export function ActorView(props) {
                             entity: viewEntity,
                             attribute: 'is_archive',
                           }),
-                          getMetaField(viewEntity),
+                          getMetaField(viewEntity, true),
                         ],
                       }}
                       aside

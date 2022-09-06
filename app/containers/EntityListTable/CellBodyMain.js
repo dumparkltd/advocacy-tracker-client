@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 import { Box, Text, Button } from 'grommet';
 import PrintHide from 'components/styled/PrintHide';
 import styled from 'styled-components';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+
+import { lowerCase } from 'utils/string';
 
 import appMessages from 'containers/App/messages';
 
@@ -26,6 +28,7 @@ export function CellBodyMain({
   entity,
   // column,
   canEdit,
+  intl,
 }) {
   return (
     <Box direction="row" align="center" justify="start">
@@ -39,7 +42,7 @@ export function CellBodyMain({
         </Select>
       )}
       <Box gap="xxsmall">
-        {(entity.draft || entity.archived || entity.private) && (
+        {(entity.draft || entity.archived || entity.private || entity.noNotifications) && (
           <Box direction="row" gap="xsmall">
             {entity.private && (
               <Text color="private" size="xxxsmall">
@@ -49,6 +52,11 @@ export function CellBodyMain({
             {entity.archived && (
               <Text color="archived" size="xxxsmall">
                 <FormattedMessage {...appMessages.ui.archiveStatuses.archived} />
+              </Text>
+            )}
+            {entity.noNotifications && (
+              <Text color="notifications" size="xxxsmall">
+                {`Email ${lowerCase(intl.formatMessage(appMessages.ui.notificationStatuses.disabled))}`}
               </Text>
             )}
             {entity.draft && (
@@ -111,6 +119,7 @@ CellBodyMain.propTypes = {
   entity: PropTypes.object,
   // column: PropTypes.object,
   canEdit: PropTypes.bool,
+  intl: intlShape,
 };
 
-export default CellBodyMain;
+export default injectIntl(CellBodyMain);
