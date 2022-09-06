@@ -208,6 +208,15 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
+      case 'actionsSimple':
+        label = col.subject === 'actors' ? 'Actions' : 'Targets';
+        return ({
+          ...col,
+          title: label,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
       case 'supportlevel':
         return ({
           ...col,
