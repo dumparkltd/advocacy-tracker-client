@@ -1726,15 +1726,30 @@ const filterStatements = (
   statementId,
   includeInofficial,
   actionCategoriesByAction,
+  connectedCategoryQuery,
 ) => {
   if (!statements.get(statementId.toString())) {
     return false;
   }
-  if (includeInofficial) {
-    return true;
+  if (!includeInofficial) {
+    const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
+    return statementCategories && statementCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
   }
-  const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
-  return statementCategories && statementCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+  if (connectedCategoryQuery) {
+    return asList(connectedCategoryQuery).every(
+      (queryArg) => {
+        const [path, value] = queryArg
+          ? queryArg.split(':')
+          : [null, null];
+        if (path !== API.ACTIONS || !value) {
+          return true;
+        }
+        const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
+        return statementCategories && statementCategories.includes(parseInt(value, 10));
+      },
+    );
+  }
+  return true;
 };
 
 export const selectActorsWithPositions = createSelector(
@@ -1745,6 +1760,7 @@ export const selectActorsWithPositions = createSelector(
   // from query
   selectIncludeInofficialStatements,
   selectIncludeActorMembers,
+  selectConnectedCategoryQuery,
   // from state
   (state) => selectActors(state),
   (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
@@ -1760,6 +1776,7 @@ export const selectActorsWithPositions = createSelector(
     actortypeId,
     includeInofficialQuery,
     includeActorMembersQuery,
+    connectedCategoryQuery,
     actors,
     statements,
     authorityCategories,
@@ -1823,6 +1840,7 @@ export const selectActorsWithPositions = createSelector(
               statementId,
               includeInofficial,
               actionCategoriesByAction,
+              asList(connectedCategoryQuery),
             ))
             .toList();
         }

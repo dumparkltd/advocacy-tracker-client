@@ -7,6 +7,7 @@ import {
   selectActionQuery,
   selectSortByQuery,
   selectSortOrderQuery,
+  selectConnectedCategoryQuery,
   selectActions,
   selectActorsWithPositions,
   selectReady,
@@ -22,6 +23,8 @@ import {
   entitiesSetCategoryIds,
 } from 'utils/entities';
 
+import asList from 'utils/as-list';
+import qe from 'utils/quasi-equals';
 import { sortEntities, getSortOption } from 'utils/sort';
 import {
   API,
@@ -36,21 +39,38 @@ export const selectConnections = createSelector(
   selectActionCategoriesGroupedByAction,
   selectCategories,
   selectActors,
+  selectConnectedCategoryQuery,
   (
     ready,
     actions,
     actionAssociationsGrouped,
     categories,
     actors,
+    connectedCategoryQuery,
   ) => {
     if (ready) {
+      const actionsWithCategories = entitiesSetCategoryIds(
+        actions,
+        actionAssociationsGrouped,
+        categories,
+      );
       return new Map().set(
         API.ACTIONS,
-        entitiesSetCategoryIds(
-          actions,
-          actionAssociationsGrouped,
-          categories,
-        )
+        (connectedCategoryQuery)
+          ? actionsWithCategories.filter(
+            (action) => asList(connectedCategoryQuery).every(
+              (queryArg) => {
+                const [path, value] = queryArg.split(':');
+                if (path !== API.ACTIONS || !value) {
+                  return true;
+                }
+                return action.get('categories') && action.get('categories').find(
+                  (catId) => qe(catId, value),
+                );
+              },
+            )
+          )
+          : actionsWithCategories
       ).set(
         API.ACTORS,
         actors,
