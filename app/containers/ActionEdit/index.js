@@ -206,7 +206,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
         isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
         getStatusField(intl.formatMessage, 'notifications'),
-        getMetaField(entity),
+        getMetaField(entity, true),
       ],
     });
     return groups;

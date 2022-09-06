@@ -156,7 +156,7 @@ export const getRoleField = (entity) => ({
   options: Object.values(USER_ROLES),
 });
 
-export const getMetaField = (entity) => {
+export const getMetaField = (entity, includeRelationshipUpdatedAt) => {
   const fields = [];
   fields.push({
     label: appMessages.attributes.meta.created_at,
@@ -179,6 +179,14 @@ export const getMetaField = (entity) => {
     fields.push({
       label: appMessages.attributes.meta.updated_by_id,
       value: entity.getIn(['user', 'attributes', 'name']),
+    });
+  }
+  if (includeRelationshipUpdatedAt && entity.getIn(['attributes', 'relationship_updated_at'])) {
+    fields.push({
+      label: appMessages.attributes.meta.relationship_updated_at,
+      value: entity.getIn(['attributes', 'relationship_updated_at']),
+      date: true,
+      time: true,
     });
   }
   return {

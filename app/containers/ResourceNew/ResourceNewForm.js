@@ -216,6 +216,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
       handleUpdate,
       formDataPath,
       inModal,
+      invalidateEntitiesOnSuccess,
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
@@ -245,6 +246,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
             formData,
             resourcetype,
             actionsByActiontype,
+            invalidateEntitiesOnSuccess,
             // resourcetypeTaxonomies,
           )}
           handleSubmitFail={handleSubmitFail}
@@ -297,6 +299,7 @@ ResourceNew.propTypes = {
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
   inModal: PropTypes.bool,
+  invalidateEntitiesOnSuccess: PropTypes.string,
 };
 
 ResourceNew.contextTypes = {
@@ -349,6 +352,7 @@ function mapDispatchToProps(
       formData,
       resourcetype,
       actionsByActiontype,
+      invalidateEntitiesOnSuccess,
     ) => {
       let saveData = formData.setIn(
         ['attributes', 'resourcetype_id'],
@@ -402,6 +406,7 @@ function mapDispatchToProps(
           path: API.RESOURCES,
           entity: saveData.toJS(),
           redirect: !inModal ? ROUTES.RESOURCE : null,
+          invalidateEntitiesOnSuccess,
           onSuccess: inModal && onSaveSuccess
             ? () => {
               // cleanup

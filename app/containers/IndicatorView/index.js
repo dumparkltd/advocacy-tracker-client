@@ -192,7 +192,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                               entity: viewEntity,
                               attribute: 'is_archive',
                             }),
-                            getMetaField(viewEntity),
+                            getMetaField(viewEntity, true),
                           ],
                         }}
                         aside

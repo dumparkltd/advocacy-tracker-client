@@ -138,6 +138,7 @@ export function TabActivities(props) {
                   attributes: {
                     measuretype_id: viewActiontypeId,
                   },
+                  invalidateEntitiesOnSuccess: API.ACTIONS,
                   autoUser: true,
                   connect: {
                     type: 'subActions',

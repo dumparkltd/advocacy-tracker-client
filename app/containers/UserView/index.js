@@ -140,6 +140,13 @@ export function UserView({
     // kick off loading of data
     onLoadData();
   }, []);
+  useEffect(() => {
+    // also kick off loading of data again once dataReady changes and becomes negative again
+    // required due to possible in-view creation of activities
+    if (!dataReady) {
+      onLoadData();
+    }
+  }, [dataReady]);
 
   const pageTitle = intl.formatMessage(
     isManager ? messages.pageTitleBack : messages.pageTitle
@@ -222,7 +229,7 @@ export function UserView({
                       group={{
                         fields: [
                           getRoleField(user),
-                          getMetaField(user),
+                          getMetaField(user, true),
                         ],
                       }}
                       aside

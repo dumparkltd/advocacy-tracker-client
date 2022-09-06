@@ -326,6 +326,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       handleUpdate,
       formDataPath,
       inModal,
+      invalidateEntitiesOnSuccess,
     } = this.props;
 
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
@@ -361,6 +362,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
             membersByActortype,
             associationsByActortype,
             userOptions,
+            invalidateEntitiesOnSuccess,
           )}
           handleSubmitFail={handleSubmitFail}
           handleCancel={() => handleCancel(typeId)}
@@ -424,6 +426,7 @@ ActorNewForm.propTypes = {
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
   inModal: PropTypes.bool,
+  invalidateEntitiesOnSuccess: PropTypes.string,
   // autoUser: PropTypes.bool,
 };
 
@@ -493,6 +496,7 @@ function mapDispatchToProps(
       membersByActortype,
       associationsByActortype,
       userOptions,
+      invalidateEntitiesOnSuccess,
     ) => {
       let saveData = formData.setIn(
         ['attributes', 'actortype_id'],
@@ -649,6 +653,7 @@ function mapDispatchToProps(
           path: API.ACTORS,
           entity: saveData.toJS(),
           redirect: !inModal ? ROUTES.ACTOR : null,
+          invalidateEntitiesOnSuccess,
           onSuccess: inModal && onSaveSuccess
             ? () => {
               // cleanup

@@ -407,6 +407,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       formDataPath,
       inModal,
       modalConnect,
+      invalidateEntitiesOnSuccess,
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
@@ -485,6 +486,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             subActionsByActiontype,
             indicatorOptions,
             userOptions,
+            invalidateEntitiesOnSuccess,
           )}
           handleSubmitFail={handleSubmitFail}
           handleCancel={() => handleCancel(typeId)}
@@ -552,6 +554,7 @@ ActionNewForm.propTypes = {
   modalConnect: PropTypes.instanceOf(Map),
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
+  invalidateEntitiesOnSuccess: PropTypes.string,
   inModal: PropTypes.bool,
   // autoUser: PropTypes.bool,
 };
@@ -626,6 +629,7 @@ function mapDispatchToProps(
       subActionsByActiontype,
       indicatorOptions,
       userOptions,
+      invalidateEntitiesOnSuccess,
     ) => {
       let saveData = formData.setIn(['attributes', 'measuretype_id'], actiontype.get('id'));
       // actionCategories
@@ -803,6 +807,7 @@ function mapDispatchToProps(
           path: API.ACTIONS,
           entity: saveData.toJS(),
           redirect: !inModal ? ROUTES.ACTION : null,
+          invalidateEntitiesOnSuccess,
           onSuccess: inModal && onSaveSuccess
             ? () => {
               // cleanup

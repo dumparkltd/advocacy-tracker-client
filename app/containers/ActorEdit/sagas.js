@@ -14,6 +14,7 @@ export function* save({ data }) {
     path: API.ACTORS,
     entity: data,
     redirect: `${ROUTES.ACTOR}/${data.id}`,
+    invalidateEntitiesOnSuccess: API.ACTORS,
   }));
 }
 

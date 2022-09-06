@@ -179,6 +179,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
       typeId,
       formDataPath,
       inModal,
+      invalidateEntitiesOnSuccess,
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
@@ -213,7 +214,8 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
           viewDomain={viewDomain}
           handleSubmit={(formData) => handleSubmit(
             formData,
-            taxonomy
+            taxonomy,
+            invalidateEntitiesOnSuccess,
           )}
           handleSubmitFail={handleSubmitFail}
           handleCancel={() => handleCancel(typeId)}
@@ -261,6 +263,7 @@ CategoryNewForm.propTypes = {
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
   inModal: PropTypes.bool,
+  invalidateEntitiesOnSuccess: PropTypes.string,
 };
 
 CategoryNewForm.contextTypes = {
@@ -309,7 +312,7 @@ function mapDispatchToProps(
       dispatch(formActions.submit(model));
     },
     // handleSubmit: (formData, actions, actorsByActortype, taxonomy) => {
-    handleSubmit: (formData, taxonomy) => {
+    handleSubmit: (formData, taxonomy, invalidateEntitiesOnSuccess) => {
       let saveData = formData.setIn(['attributes', 'taxonomy_id'], taxonomy.get('id'));
       const formCategoryIds = getCheckedValuesFromOptions(formData.get('associatedCategory'));
       if (List.isList(formCategoryIds) && formCategoryIds.size) {
@@ -322,6 +325,7 @@ function mapDispatchToProps(
           path: API.CATEGORIES,
           entity: saveData.toJS(),
           redirect: !inModal ? ROUTES.CATEGORY : null,
+          invalidateEntitiesOnSuccess,
           onSuccess: inModal && onSaveSuccess
             ? () => {
               // cleanup

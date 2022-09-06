@@ -153,6 +153,13 @@ export function ActionView(props) {
     // kick off loading of data
     onLoadData();
   }, []);
+  useEffect(() => {
+    // also kick off loading of data again once dataReady changes and becomes negative again
+    // required due to possible in-view creation of child activities
+    if (!dataReady) {
+      onLoadData();
+    }
+  }, [dataReady]);
 
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
   // const viewActivitytype = activitytypes && activitytypes.find((type) => qe(type.get('id'), typeId));
@@ -297,7 +304,7 @@ export function ActionView(props) {
                             attribute: 'is_archive',
                           }),
                           isAdmin && getStatusField(viewEntity, 'notifications'),
-                          getMetaField(viewEntity),
+                          getMetaField(viewEntity, true),
                         ],
                       }}
                       aside
