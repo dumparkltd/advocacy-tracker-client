@@ -118,7 +118,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     value: '0',
     default: true,
     color: '#EDEFF0',
-    order: 5,
+    order: 100,
   },
   // strong
   1: {
@@ -162,6 +162,7 @@ export const ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS = {
     ACTION_INDICATOR_SUPPORTLEVELS['2'],
     ACTION_INDICATOR_SUPPORTLEVELS['3'],
     ACTION_INDICATOR_SUPPORTLEVELS['4'],
+    ACTION_INDICATOR_SUPPORTLEVELS['5'],
   ],
 };
 
