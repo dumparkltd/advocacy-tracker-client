@@ -1728,15 +1728,16 @@ const filterStatements = (
   actionCategoriesByAction,
   connectedCategoryQuery,
 ) => {
+  let pass = true;
   if (!statements.get(statementId.toString())) {
     return false;
   }
+  const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
   if (!includeInofficial) {
-    const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
-    return statementCategories && statementCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+    pass = statementCategories && statementCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
   }
-  if (connectedCategoryQuery) {
-    return asList(connectedCategoryQuery).every(
+  if (pass && connectedCategoryQuery) {
+    pass = asList(connectedCategoryQuery).every(
       (queryArg) => {
         const [path, value] = queryArg
           ? queryArg.split(':')
@@ -1744,12 +1745,11 @@ const filterStatements = (
         if (path !== API.ACTIONS || !value) {
           return true;
         }
-        const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
         return statementCategories && statementCategories.includes(parseInt(value, 10));
       },
     );
   }
-  return true;
+  return pass;
 };
 
 export const selectActorsWithPositions = createSelector(
