@@ -24,9 +24,9 @@ export const currentFilterArgs = (config, locationQuery) => {
   if (config.taxonomies && locationQuery.get(config.taxonomies.query)) {
     args = args.concat(config.taxonomies.query);
   }
-  // if (config.connectedTaxonomies && locationQuery.get(config.connectedTaxonomies.query)) {
-  //   args = args.concat(config.connectedTaxonomies.query);
-  // }
+  if (config.connectedTaxonomies && locationQuery.get(config.connectedTaxonomies.query)) {
+    args = args.concat(config.connectedTaxonomies.query);
+  }
   if (config.connections) {
     Object.keys(config.connections).forEach((connectionKey) => {
       const connectionConfig = config.connections[connectionKey];
@@ -51,10 +51,10 @@ export const currentFilters = (
     entities,
     taxonomies,
     connections,
+    connectedTaxonomies,
     locationQuery,
     onTagClick,
     errors,
-    // actortypes,
     intl,
     isManager,
   },
@@ -66,14 +66,7 @@ export const currentFilters = (
   if (errors && errors.size > 0) {
     filterTags.push(getErrorTag(errorLabel));
   }
-  // if (config.actortypes && actortypes && actortypes.size > 1) {
-  //   filterTags = filterTags.concat(getCurrentActortypeFilter(
-  //     config.actortypes,
-  //     actortypes,
-  //     locationQuery,
-  //     onTagClick
-  //   ));
-  // }
+
   if (config.taxonomies && taxonomies) {
     filterTags = filterTags.concat(getCurrentTaxonomyFilters(
       config.taxonomies,
@@ -118,6 +111,14 @@ export const currentFilters = (
       withoutLabel,
       anyLabel,
       intl,
+    ));
+  }
+  if (connectedTaxonomies && config.connectedTaxonomies) {
+    filterTags = filterTags.concat(getCurrentConnectedTaxonomyFilters(
+      config.connectedTaxonomies,
+      connectedTaxonomies,
+      locationQuery,
+      onTagClick
     ));
   }
   return filterTags;
@@ -616,6 +617,43 @@ const getCurrentAttributeFilters = (
           }
         });
       }
+    });
+  }
+  return tags;
+};
+
+
+const getCurrentConnectedTaxonomyFilters = (
+  taxonomyFilters,
+  taxonomies,
+  locationQuery,
+  onClick
+) => {
+  const tags = [];
+  if (locationQuery.get(taxonomyFilters.query)) {
+    const locationQueryValue = locationQuery.get(taxonomyFilters.query);
+    taxonomies.forEach((taxonomy) => {
+      asList(locationQueryValue).forEach((queryValue) => {
+        const [path, value] = queryValue.split(':');
+        if (path && value) {
+          if (taxonomy.getIn(['categories', value])) {
+            const category = taxonomy.getIn(['categories', value]);
+            tags.push({
+              label: getCategoryLabel(category),
+              type: 'taxonomies',
+              id: taxonomy.get('id'),
+              group: 'Statement categories',
+              groupId: 'connectedTaxonomies',
+              inverse: category.getIn(['attributes', 'draft']),
+              onClick: () => onClick({
+                value: queryValue,
+                query: taxonomyFilters.query,
+                checked: false,
+              }),
+            });
+          }
+        }
+      });
     });
   }
   return tags;

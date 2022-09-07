@@ -11,9 +11,9 @@ import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import { groupBy } from 'lodash/collection';
 import { Box } from 'grommet';
-import { FormClose } from 'grommet-icons';
-
-import Button from 'components/buttons/Button';
+// import { FormClose } from 'grommet-icons';
+//
+// import Button from 'components/buttons/Button';
 import ButtonTagFilterWrap from 'components/buttons/ButtonTagFilterWrap';
 import { getFilterLabel } from './utils';
 // import PrintOnly from 'components/styled/PrintOnly';
@@ -24,16 +24,16 @@ const Styled = styled((p) => <Box direction="row" align="start" justify="start" 
 
 const Tags = styled((p) => <Box direction="row" {...p} />)``;
 
-const Clear = styled(Button)`
-  background-color: ${palette('background', 4)};
-  padding: 1px 6px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: 1px 6px;
-  }
-  @media print {
-    display: none;
-  }
-`;
+// const Clear = styled(Button)`
+//   background-color: ${palette('background', 4)};
+//   padding: 1px 6px;
+//   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+//     padding: 1px 6px;
+//   }
+//   @media print {
+//     display: none;
+//   }
+// `;
 
 // const LabelPrint = styled(PrintOnly)`
 //   margin-top: 10px;
@@ -52,7 +52,7 @@ const ConnectionGroupLabel = styled.span`
 function TagList({
   filters,
   long,
-  onClear,
+  // onClear,
   intl,
 }) {
   const hasFilters = filters.length > 0;
@@ -81,20 +81,20 @@ function TagList({
           ))}
         </Tags>
       )}
-      {hasFilters && filters.length > 1 && (
-        <Clear
-          onClick={onClear}
-        >
-          <FormClose size="xsmall" />
-        </Clear>
-      )}
     </Styled>
   );
 }
+// {hasFilters && filters.length > 1 && (
+//   <Clear
+//   onClick={onClear}
+//   >
+//   <FormClose size="xsmall" />
+//   </Clear>
+// )}
 
 TagList.propTypes = {
   filters: PropTypes.array,
-  onClear: PropTypes.func,
+  // onClear: PropTypes.func,
   long: PropTypes.bool,
   intl: intlShape,
 };
