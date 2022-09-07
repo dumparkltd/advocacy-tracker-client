@@ -136,6 +136,8 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       onSetIncludeTargetMembers,
       includeActorMembers,
       includeTargetMembers,
+      includeInofficial,
+      onSetIncludeInofficial,
       actiontypes,
       intl,
       resourcetypes,
@@ -151,6 +153,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     let isActive;
     let subjectOptions = [];
     let memberOption;
+    let checkboxOptions;
     let entityActors;
     let entityUsers;
     let columns;
@@ -400,6 +403,20 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           },
         },
       ];
+      checkboxOptions = [
+        {
+          label: 'Include statements of groups (countries belong to)',
+          active: includeActorMembers,
+          onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+          type: 'members',
+        },
+        {
+          active: !includeInofficial,
+          onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
+          label: 'Only show "official" statements (Level of Authority)',
+          type: 'inoffical',
+        },
+      ];
     } else if (config.types === 'users' && dataReady) {
       columns = [
         {
@@ -441,7 +458,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     if (hasFilters) {
       headerSubTitle = `of ${allEntityCount} total`;
     }
-
     return (
       <ContainerWrapper headerStyle={headerStyle} ref={this.ScrollContainer}>
         {dataReady && viewOptions && viewOptions.length > 1 && (
@@ -461,10 +477,22 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                   buttons={listActions}
                   entityIdsSelected={entityIdsSelected}
                 />
-                {config.types === 'actiontypes' && (
+                {subjectOptions && (
                   <Box>
                     {subjectOptions && (
                       <MapSubjectOptions options={subjectOptions} />
+                    )}
+                  </Box>
+                )}
+                {checkboxOptions && (
+                  <Box>
+                    {checkboxOptions && checkboxOptions.map(
+                      (option, i) => (
+                        <MapOption
+                          key={i}
+                          option={option}
+                        />
+                      )
                     )}
                   </Box>
                 )}
@@ -670,6 +698,7 @@ EntitiesListView.propTypes = {
   entityTitle: PropTypes.object, // single/plural
   headerInfo: PropTypes.object,
   listActions: PropTypes.array,
+  checkboxOptions: PropTypes.array,
   intl: intlShape.isRequired,
   // primitive
   dataReady: PropTypes.bool,
@@ -677,6 +706,7 @@ EntitiesListView.propTypes = {
   isAnalyst: PropTypes.bool,
   includeActorMembers: PropTypes.bool,
   includeTargetMembers: PropTypes.bool,
+  includeInofficial: PropTypes.bool,
   listUpdating: PropTypes.bool,
   headerStyle: PropTypes.string,
   hasFilters: PropTypes.bool,
@@ -692,6 +722,7 @@ EntitiesListView.propTypes = {
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeTargetMembers: PropTypes.func,
+  onSetIncludeInofficial: PropTypes.func,
 };
 
 export default injectIntl(EntitiesListView);

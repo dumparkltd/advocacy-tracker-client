@@ -29,6 +29,7 @@ import {
   selectMapSubjectQuery,
   selectIncludeActorMembers,
   selectIncludeTargetMembers,
+  selectIncludeInofficialStatements,
 } from 'containers/App/selectors';
 
 import {
@@ -40,6 +41,7 @@ import {
   setMapSubject,
   setIncludeActorMembers,
   setIncludeTargetMembers,
+  setIncludeInofficialStatements,
 } from 'containers/App/actions';
 
 // import appMessages from 'containers/App/messages';
@@ -214,8 +216,10 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onSetMapSubject,
       onSetIncludeActorMembers,
       onSetIncludeTargetMembers,
+      onSetIncludeInofficial,
       includeActorMembers,
       includeTargetMembers,
+      includeInofficial,
       headerColumnsUtility,
       headerOptions,
       taxonomies,
@@ -266,6 +270,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         locationQuery,
         onTagClick,
         errors,
+        // actortypes,
         intl,
         isManager,
       },
@@ -422,8 +427,10 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             onSetMapSubject={onSetMapSubject}
             onSetIncludeActorMembers={onSetIncludeActorMembers}
             onSetIncludeTargetMembers={onSetIncludeTargetMembers}
+            onSetIncludeInofficial={onSetIncludeInofficial}
             includeActorMembers={includeActorMembers}
             includeTargetMembers={includeTargetMembers}
+            includeInofficial={includeInofficial}
           />
         )}
         {showMap && (
@@ -587,8 +594,10 @@ EntityList.propTypes = {
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeTargetMembers: PropTypes.func,
+  onSetIncludeInofficial: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   includeTargetMembers: PropTypes.bool,
+  includeInofficial: PropTypes.bool,
   allEntityCount: PropTypes.number,
 };
 
@@ -610,6 +619,7 @@ const mapStateToProps = (state) => ({
   mapSubject: selectMapSubjectQuery(state),
   includeActorMembers: selectIncludeActorMembers(state),
   includeTargetMembers: selectIncludeTargetMembers(state),
+  includeInofficial: selectIncludeInofficialStatements(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -671,6 +681,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));
+    },
+    onSetIncludeInofficial: (active) => {
+      dispatch(setIncludeInofficialStatements(active));
     },
     handleEditSubmit: (formData, activeEditOption, entityIdsSelected, errors, connections) => {
       dispatch(resetProgress());

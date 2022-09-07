@@ -12,15 +12,16 @@ export function MapOption({ option, type = 'option' }) {
   const {
     active, onClick, label, id = 0,
   } = option;
+  const optionType = option.type || type;
   return (
     <Styled>
       <input
-        id={`map-${type}-${id}`}
+        id={`map-${optionType}-${id}`}
         type="checkbox"
         checked={active}
         onChange={onClick}
       />
-      <Text as="label" htmlFor={`map-${type}-${id}`} size="xsmall">{label}</Text>
+      <Text as="label" htmlFor={`map-${optionType}-${id}`} size="xsmall">{label}</Text>
     </Styled>
   );
 }

@@ -270,6 +270,7 @@ export function EntityListTable({
     }),
     intl,
   });
+
   return (
     <div>
       {hasSearch && (
