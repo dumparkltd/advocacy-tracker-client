@@ -17,6 +17,7 @@ import {
   selectActors,
   selectActiontypeTaxonomies,
   selectEntities,
+  selectIncludeInofficialStatements,
 } from 'containers/App/selectors';
 
 import {
@@ -34,6 +35,7 @@ import {
   ACTORTYPES,
   ACTIONTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
+  OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
 import { CONFIG, DEPENDENCIES } from './constants';
 
@@ -44,6 +46,7 @@ export const selectConnections = createSelector(
   selectCategories,
   selectActors,
   selectConnectedCategoryQuery,
+  selectIncludeInofficialStatements,
   (
     ready,
     actions,
@@ -51,6 +54,7 @@ export const selectConnections = createSelector(
     categories,
     actors,
     connectedCategoryQuery,
+    includeInofficial,
   ) => {
     if (ready) {
       const actionsWithCategories = entitiesSetCategoryIds(
@@ -60,21 +64,29 @@ export const selectConnections = createSelector(
       );
       return new Map().set(
         API.ACTIONS,
-        (connectedCategoryQuery)
-          ? actionsWithCategories.filter(
-            (action) => asList(connectedCategoryQuery).every(
-              (queryArg) => {
-                const [path, value] = queryArg.split(':');
-                if (path !== API.ACTIONS || !value) {
-                  return true;
-                }
-                return action.get('categories') && action.get('categories').find(
-                  (catId) => qe(catId, value),
-                );
-              },
-            )
-          )
-          : actionsWithCategories
+        actionsWithCategories.filter(
+          (action) => {
+            const actionCategories = action.get('categories');
+            let pass = true;
+            if (!includeInofficial) {
+              pass = actionCategories && actionCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+            }
+            if (pass && connectedCategoryQuery) {
+              pass = asList(connectedCategoryQuery).every(
+                (queryArg) => {
+                  const [path, value] = queryArg.split(':');
+                  if (path !== API.ACTIONS || !value) {
+                    return true;
+                  }
+                  return actionCategories.find(
+                    (catId) => qe(catId, value),
+                  );
+                },
+              );
+            }
+            return pass;
+          }
+        )
       ).set(
         API.ACTORS,
         actors,

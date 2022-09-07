@@ -405,7 +405,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       ];
       checkboxOptions = [
         {
-          label: 'Include statements of groups (countries belong to)',
+          label: 'Consider statements of groups (countries belong to)',
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
           type: 'members',
@@ -413,7 +413,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {
           active: !includeInofficial,
           onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
-          label: 'Only show "official" statements (Level of Authority)',
+          label: 'Consider "official" statements only (Level of Authority)',
           type: 'inoffical',
         },
       ];
