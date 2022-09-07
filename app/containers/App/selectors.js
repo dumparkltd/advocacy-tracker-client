@@ -1870,6 +1870,7 @@ export const selectActorsWithPositions = createSelector(
                         statementId,
                         includeInofficial,
                         actionCategoriesByAction,
+                        asList(connectedCategoryQuery),
                       ))
                       .toList()
                   );
