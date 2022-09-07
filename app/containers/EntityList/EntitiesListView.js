@@ -477,7 +477,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                   buttons={listActions}
                   entityIdsSelected={entityIdsSelected}
                 />
-                {subjectOptions && (
+                {config.types === 'actiontypes' && subjectOptions && (
                   <Box>
                     {subjectOptions && (
                       <MapSubjectOptions options={subjectOptions} />
