@@ -15,12 +15,15 @@ import {
   selectActionIndicatorsGroupedByIndicator,
   selectCategories,
   selectActors,
+  selectActiontypeTaxonomies,
+  selectEntities,
 } from 'containers/App/selectors';
 
 import {
   filterEntitiesByConnection,
   filterEntitiesWithoutAssociation,
   entitiesSetCategoryIds,
+  getTaxonomyCategories,
 } from 'utils/entities';
 
 import asList from 'utils/as-list';
@@ -29,6 +32,7 @@ import { sortEntities, getSortOption } from 'utils/sort';
 import {
   API,
   ACTORTYPES,
+  ACTIONTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 import { CONFIG, DEPENDENCIES } from './constants';
@@ -199,6 +203,46 @@ export const selectListIndicators = createSelector(
       order || (sortOption ? sortOption.order : 'desc'),
       sort || (sortOption ? sortOption.attribute : 'id'),
       sortOption ? sortOption.type : 'string',
+    );
+  }
+);
+
+export const selectConnectedTaxonomies = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectConnections,
+  (state) => selectActiontypeTaxonomies(state, { type: ACTIONTYPES.EXPRESS }),
+  selectCategories,
+  (state) => selectEntities(state, API.ACTION_CATEGORIES),
+  (
+    ready,
+    connections,
+    taxonomies,
+    categories,
+    categoryMeasures,
+  ) => {
+    if (!ready) return Map();
+    const relationship = {
+      tags: 'tags_actions',
+      path: API.ACTIONS,
+      key: 'measure_id',
+      associations: categoryMeasures,
+    };
+    if (!connections.get(relationship.path)) {
+      return taxonomies;
+    }
+    const groupedAssociations = relationship.associations.groupBy(
+      (association) => association.getIn(['attributes', 'category_id'])
+    );
+    return taxonomies.map(
+      (taxonomy) => taxonomy.set(
+        'categories',
+        getTaxonomyCategories(
+          taxonomy,
+          categories,
+          relationship,
+          groupedAssociations,
+        )
+      )
     );
   }
 );

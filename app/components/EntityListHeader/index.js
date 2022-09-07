@@ -338,7 +338,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           attributes: intl.formatMessage(messages.filterGroupLabel.attributes),
           taxonomyGroup: intl.formatMessage(messages.filterGroupLabel.taxonomies),
           connections: (type) => getFilterConnectionsMsg(intl, type),
-          // connectedTaxonomies: intl.formatMessage(messages.filterGroupLabel.connectedTaxonomies),
+          connectedTaxonomies: intl.formatMessage(messages.filterGroupLabel.connectedTaxonomies),
           taxonomies: (taxId) => this.context.intl.formatMessage(appMessages.entities.taxonomies[taxId].plural),
         },
         includeMembers,

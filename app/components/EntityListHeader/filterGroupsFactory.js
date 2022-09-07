@@ -32,6 +32,7 @@ export const makeFilterGroups = ({
   currentFilters,
   locationQuery,
   includeMembers,
+  connectedTaxonomies,
 }) => {
   const filterGroups = {};
 
@@ -315,5 +316,35 @@ export const makeFilterGroups = ({
       }
     });
   }
+  // connectedTaxonomies option group
+  if (config.connectedTaxonomies && connectedTaxonomies) {
+    // first prepare taxonomy options
+    filterGroups.connectedTaxonomies = {
+      id: 'connectedTaxonomies', // filterGroupId
+      label: messages.connectedTaxonomies,
+      show: true,
+      options: connectedTaxonomies
+        .reduce(
+          (taxOptionsMemo, taxonomy) => {
+            if (
+              config.connectedTaxonomies.exclude
+              && taxonomy.getIn(['attributes', config.connectedTaxonomies.exclude])
+            ) {
+              return taxOptionsMemo;
+            }
+            return taxOptionsMemo.concat([
+              {
+                id: taxonomy.get('id'), // filterOptionId
+                label: messages.taxonomies(taxonomy.get('id')),
+                active: !!activeFilterOption && activeFilterOption.optionId === taxonomy.get('id'),
+                nested: taxonomy.getIn(['attributes', 'parent_id']),
+              },
+            ]);
+          },
+          [],
+        ),
+    };
+  }
+
   return filterGroups;
 };

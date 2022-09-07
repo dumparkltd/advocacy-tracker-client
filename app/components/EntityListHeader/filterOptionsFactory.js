@@ -16,6 +16,7 @@ import {
   getEntityParentId,
   checkActionAttribute,
   checkActorAttribute,
+  getConnectedCategories,
 } from 'utils/entities';
 
 import { makeTagFilterGroups } from 'utils/forms';
@@ -42,6 +43,16 @@ export const makeActiveFilterOptions = ({
         entities,
         config.taxonomies,
         taxonomies,
+        activeFilterOption.optionId,
+        locationQuery,
+        messages,
+        contextIntl,
+      );
+    case 'connectedTaxonomies':
+      return makeConnectedTaxonomyFilterOptions(
+        entities,
+        config,
+        connectedTaxonomies,
         activeFilterOption.optionId,
         locationQuery,
         messages,
@@ -952,4 +963,97 @@ export const makeAnyWithoutConnectionFilterOptions = (
     ];
   }
   return null;
+};
+
+export const makeConnectedTaxonomyFilterOptions = (
+  entities,
+  config,
+  connectedTaxonomies,
+  activeOptionId,
+  locationQuery,
+  messages,
+  contextIntl,
+) => {
+  const filterOptions = {
+    groupId: 'connectedTaxonomies',
+    search: config.connectedTaxonomies.search,
+    options: {},
+    multiple: true,
+    required: false,
+    selectAll: false,
+    groups: null,
+  };
+
+  const taxonomy = connectedTaxonomies.get(activeOptionId);
+  if (taxonomy) {
+    // figure out parent taxonomy for nested grouping
+    const parentId = getEntityParentId(taxonomy);
+    const parent = parentId && connectedTaxonomies.get(parentId);
+    if (parent) {
+      filterOptions.groups = parent.get('categories').map((cat) => getEntityTitle(cat));
+    }
+    filterOptions.title = `${messages.titlePrefix} ${lowerCase(getTaxTitle(parseInt(taxonomy.get('id'), 10), contextIntl))}`;
+    const { query } = config.connectedTaxonomies;
+    const locationQueryValue = locationQuery.get(query);
+    const connection = config.connectedTaxonomies;
+    if (entities.size === 0) {
+      if (locationQueryValue) {
+        asList(locationQueryValue).forEach((queryValue) => {
+          const locationQueryValueCategory = queryValue.split(':');
+          if (locationQueryValueCategory.length > 1) {
+            // for each connection
+            if (connection.path === locationQueryValueCategory[0]) {
+              const categoryId = parseInt(locationQueryValueCategory[1], 10);
+              if (taxonomy.getIn(['categories', categoryId])) {
+                const category = taxonomy.getIn(['categories', categoryId]);
+                filterOptions.options[categoryId] = {
+                  reference: getEntityReference(category, false),
+                  label: getEntityTitle(category),
+                  group: parent && getEntityParentId(category),
+                  showCount: true,
+                  value: `${connection.path}:${categoryId}`,
+                  count: 0,
+                  query,
+                  checked: true,
+                };
+              }
+            }
+          }
+        });
+      }
+    } else {
+      entities.forEach((entity) => {
+        // connection eg recommendations
+        // if entity has taxonomies
+        if (entity.get(connection.path)) { // action.recommendations stores recommendation_measures
+          // add categories from entities for taxonomy
+          const categories = getConnectedCategories(
+            entity.get(connection.path),
+            taxonomy.get('categories'),
+            connection.otherPath || connection.path,
+          );
+          categories.forEach((category) => {
+            // if category already added
+            if (filterOptions.options[category.get('id')]) {
+              filterOptions.options[category.get('id')].count += 1;
+            } else {
+              const value = `${connection.otherPath || connection.path}:${category.get('id')}`;
+              const label = getEntityTitle(category);
+              filterOptions.options[category.get('id')] = {
+                reference: getEntityReference(category, false),
+                group: parent && getEntityParentId(category),
+                label,
+                showCount: true,
+                value,
+                count: 1,
+                query,
+                checked: optionChecked(locationQueryValue, value),
+              };
+            }
+          });
+        }
+      });
+    }
+  }
+  return filterOptions;
 };

@@ -54,6 +54,7 @@ class EntityListSidebarGroups extends React.PureComponent { // eslint-disable-li
             (groupOptions && groupOptions.size > 0)
             || (groupOptionsGeneral && groupOptionsGeneral.size > 0)
           ) {
+            console.log(group && group.toJS());
             return (
               <Group key={groupId} expanded={this.props.expanded[groupId]}>
                 <EntityListSidebarGroupLabel

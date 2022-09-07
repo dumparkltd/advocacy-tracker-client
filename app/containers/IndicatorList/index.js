@@ -25,7 +25,11 @@ import { ROUTES } from 'themes/config';
 import EntityList from 'containers/EntityList';
 
 import { CONFIG, DEPENDENCIES } from './constants';
-import { selectConnections, selectListIndicators } from './selectors';
+import {
+  selectConnections,
+  selectListIndicators,
+  selectConnectedTaxonomies,
+} from './selectors';
 
 import messages from './messages';
 
@@ -48,7 +52,7 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
       entities,
       allEntities,
       connections,
-      // connectedTaxonomies,
+      connectedTaxonomies,
       location,
       isManager,
       isAnalyst,
@@ -98,9 +102,10 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
         />
         <EntityList
           entities={entities}
+          config={CONFIG}
           allEntityCount={allEntities && allEntities.size}
           connections={connections}
-          config={CONFIG}
+          connectedTaxonomies={connectedTaxonomies}
           headerOptions={headerOptions}
           dataReady={dataReady}
           entityTitle={{
@@ -123,6 +128,7 @@ IndicatorList.propTypes = {
   isManager: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   connections: PropTypes.instanceOf(Map),
+  connectedTaxonomies: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
   isAnalyst: PropTypes.bool,
@@ -141,6 +147,7 @@ const mapStateToProps = (state, props) => ({
   isAnalyst: selectIsUserAnalyst(state),
   actiontypes: selectActiontypesForIndicators(state),
   allEntities: selectIndicators(state),
+  connectedTaxonomies: selectConnectedTaxonomies(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

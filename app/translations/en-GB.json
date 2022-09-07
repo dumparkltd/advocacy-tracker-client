@@ -78,7 +78,7 @@
   "app.components.EntityListHeader.filterGroupLabel.taxonomies": "By category",
   "app.components.EntityListHeader.filterGroupLabel.taxonomiesBy": "By category ({actortype})",
   "app.components.EntityListHeader.filterGroupLabel.connections": "By connection",
-  "app.components.EntityListHeader.filterGroupLabel.connectedTaxonomies": "By linked category",
+  "app.components.EntityListHeader.filterGroupLabel.connectedTaxonomies": "Statements by category",
   "app.components.EntityListHeader.filterGroupLabel.connections-action-actors": "By actor",
   "app.components.EntityListHeader.filterGroupLabel.connections-action-targets": "By target",
   "app.components.EntityListHeader.filterGroupLabel.connections-actor-actions": "By activity",
