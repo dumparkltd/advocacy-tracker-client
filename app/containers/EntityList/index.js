@@ -29,6 +29,8 @@ import {
   selectMapSubjectQuery,
   selectIncludeActorMembers,
   selectIncludeTargetMembers,
+  selectIncludeActorChildren,
+  selectIncludeTargetChildren,
   selectIncludeInofficialStatements,
 } from 'containers/App/selectors';
 
@@ -41,6 +43,8 @@ import {
   setMapSubject,
   setIncludeActorMembers,
   setIncludeTargetMembers,
+  setIncludeActorChildren,
+  setIncludeTargetChildren,
   setIncludeInofficialStatements,
 } from 'containers/App/actions';
 
@@ -216,9 +220,13 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onSetMapSubject,
       onSetIncludeActorMembers,
       onSetIncludeTargetMembers,
+      onSetIncludeActorChildren,
+      onSetIncludeTargetChildren,
       onSetIncludeInofficial,
       includeActorMembers,
       includeTargetMembers,
+      includeActorChildren,
+      includeTargetChildren,
       includeInofficial,
       headerColumnsUtility,
       headerOptions,
@@ -427,9 +435,13 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             onSetMapSubject={onSetMapSubject}
             onSetIncludeActorMembers={onSetIncludeActorMembers}
             onSetIncludeTargetMembers={onSetIncludeTargetMembers}
+            onSetIncludeActorChildren={onSetIncludeActorChildren}
+            onSetIncludeTargetChildren={onSetIncludeTargetChildren}
             onSetIncludeInofficial={onSetIncludeInofficial}
             includeActorMembers={includeActorMembers}
             includeTargetMembers={includeTargetMembers}
+            includeActorChildren={includeActorChildren}
+            includeTargetChildren={includeTargetChildren}
             includeInofficial={includeInofficial}
           />
         )}
@@ -451,8 +463,12 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             onSetMapSubject={onSetMapSubject}
             onSetIncludeActorMembers={onSetIncludeActorMembers}
             onSetIncludeTargetMembers={onSetIncludeTargetMembers}
+            onSetIncludeActorChildren={onSetIncludeActorChildren}
+            onSetIncludeTargetChildren={onSetIncludeTargetChildren}
             includeActorMembers={includeActorMembers}
             includeTargetMembers={includeTargetMembers}
+            includeActorChildren={includeActorChildren}
+            includeTargetChildren={includeTargetChildren}
           />
         )}
         {hasList && dataReady && config.taxonomies && (
@@ -594,9 +610,13 @@ EntityList.propTypes = {
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeTargetMembers: PropTypes.func,
+  onSetIncludeActorChildren: PropTypes.func,
+  onSetIncludeTargetChildren: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   includeTargetMembers: PropTypes.bool,
+  includeActorChildren: PropTypes.bool,
+  includeTargetChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
   allEntityCount: PropTypes.number,
 };
@@ -619,6 +639,8 @@ const mapStateToProps = (state) => ({
   mapSubject: selectMapSubjectQuery(state),
   includeActorMembers: selectIncludeActorMembers(state),
   includeTargetMembers: selectIncludeTargetMembers(state),
+  includeActorChildren: selectIncludeActorChildren(state),
+  includeTargetChildren: selectIncludeTargetChildren(state),
   includeInofficial: selectIncludeInofficialStatements(state),
 });
 
@@ -681,6 +703,12 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));
+    },
+    onSetIncludeTargetChildren: (active) => {
+      dispatch(setIncludeTargetChildren(active));
+    },
+    onSetIncludeActorChildren: (active) => {
+      dispatch(setIncludeActorChildren(active));
     },
     onSetIncludeInofficial: (active) => {
       dispatch(setIncludeInofficialStatements(active));

@@ -303,6 +303,7 @@ export const prepareEntityRows = ({
   resources,
   intl,
   includeMembers,
+  includeChildren,
 }) => entities.reduce(
   (memoEntities, entity) => {
     const id = entity.get('id');
@@ -541,10 +542,7 @@ export const prepareEntityRows = ({
           case 'actorActions':
             temp = entity.get(col.actions)
               || (entity.get(`${col.actions}ByType`) && entity.get(`${col.actions}ByType`).flatten(true));
-            console.log('actorActions-entity', entity && entity.toJS());
-            console.log('actorActions-temp', temp && temp.toJS());
             relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
-            console.log('actorActions-relatedEntities', relatedEntities && relatedEntities.toJS());
             return {
               ...memoEntity,
               [col.id]: {
@@ -603,6 +601,12 @@ export const prepareEntityRows = ({
             if (includeMembers && entity.getIn([col.actionsMembers, parseInt(col.actiontype_id, 10)])) {
               relatedEntityIds = relatedEntityIds
                 .merge(entity.getIn([col.actionsMembers, parseInt(col.actiontype_id, 10)]))
+                .toList()
+                .toSet();
+            }
+            if (includeChildren && entity.getIn([col.actionsChildren, parseInt(col.actiontype_id, 10)])) {
+              relatedEntityIds = relatedEntityIds
+                .merge(entity.getIn([col.actionsChildren, parseInt(col.actiontype_id, 10)]))
                 .toList()
                 .toSet();
             }

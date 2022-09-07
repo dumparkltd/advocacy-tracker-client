@@ -238,6 +238,16 @@ const selectActorsWithActions = createSelector(
           }, Map());
           const actorActionsAsMemberByType = actorActionsAsMember && actionsByType(actorActionsAsMember, connections.get(API.ACTIONS));
 
+          // actions as parent of actor
+          const actorActionsAsParent = actorMembers && actorMembers.size > 0 && actorMembers.reduce((memo, memberId) => {
+            const memberActions = actionsAsActorGrouped.get(parseInt(memberId, 10));
+            if (memberActions) {
+              return memo.concat(memberActions);
+            }
+            return memo;
+          }, Map());
+          const actorActionsAsParentByType = actorActionsAsParent && actionsByType(actorActionsAsParent, connections.get(API.ACTIONS));
+
           // targeted by actions as member of group
           const targetActionsAsMember = actorAssociations && actorAssociations.size > 0 && actorAssociations.reduce((memo, associationId) => {
             const associationActionsAsTarget = actionsAsTargetGrouped.get(parseInt(associationId, 10));
@@ -247,16 +257,31 @@ const selectActorsWithActions = createSelector(
             return memo;
           }, Map());
           const targetActionsAsMemberByType = targetActionsAsMember && actionsByType(targetActionsAsMember, connections.get(API.ACTIONS));
+
+          // targeted by actions as parent of actor
+          const targetActionsAsParent = actorMembers && actorMembers.size > 0 && actorMembers.reduce((memo, memberId) => {
+            const memberActionsAsTarget = actionsAsTargetGrouped.get(parseInt(memberId, 10));
+            if (memberActionsAsTarget) {
+              return memo.concat(memberActionsAsTarget);
+            }
+            return memo;
+          }, Map());
+          const targetActionsAsParentByType = targetActionsAsParent && actionsByType(targetActionsAsParent, connections.get(API.ACTIONS));
           const actorUsers = userAssociationsGrouped.get(parseInt(actor.get('id'), 10));
+
           return actor
             .set('actions', actorActions)
             .set('actionsByType', actorActionsByType)
             .set('actionsAsMembers', actorActionsAsMember)
-            .set('actionsAsMembersByType', actorActionsAsMemberByType)
+            .set('actionsAsMemberByType', actorActionsAsMemberByType)
+            .set('actionsAsParent', actorActionsAsParent)
+            .set('actionsAsParentByType', actorActionsAsParentByType)
             .set('targetingActions', targetActions)
             .set('targetingActionsByType', targetingActionsByType)
             .set('targetingActionsAsMember', targetActionsAsMember)
             .set('targetingActionsAsMemberByType', targetActionsAsMemberByType)
+            .set('targetingActionsAsParent', targetActionsAsParent)
+            .set('targetingActionsAsParentByType', targetActionsAsParentByType)
             .set('members', actorMembers)
             .set('membersByType', actorMembersByType)
             .set('associations', actorAssociations)

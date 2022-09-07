@@ -109,6 +109,7 @@ export function EntityListTable({
   memberOption,
   subjectOptions,
   includeMembers,
+  includeChildren,
 }) {
   if (!columns) return null;
   const sortColumn = columns.find((c) => !!c.sortDefault);
@@ -162,6 +163,7 @@ export function EntityListTable({
     taxonomies,
     resources,
     includeMembers,
+    includeChildren,
   });
   const columnMaxValues = getColumnMaxValues(
     entityRows,
@@ -417,6 +419,7 @@ EntityListTable.propTypes = {
   memberOption: PropTypes.node,
   subjectOptions: PropTypes.node,
   includeMembers: PropTypes.bool,
+  includeChildren: PropTypes.bool,
 };
 
 const mapStateToProps = (state) => ({

@@ -463,6 +463,24 @@ export const selectIncludeTargetChildrenOnMap = createSelector(
     return true; // default
   }
 );
+export const selectIncludeActorChildren = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('ach')) {
+      return qe(locationQuery.get('ach'), 1) || locationQuery.get('ach') === 'true';
+    }
+    return true; // default
+  }
+);
+export const selectIncludeTargetChildren = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('tch')) {
+      return qe(locationQuery.get('tch'), 1) || locationQuery.get('tch') === 'true';
+    }
+    return true; // default
+  }
+);
 export const selectIncludeMembersForFiltering = createSelector(
   selectLocationQuery,
   (locationQuery) => {

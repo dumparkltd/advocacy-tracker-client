@@ -78,8 +78,11 @@ const getActivityColumns = (mapSubject, typeId) => {
         ? 'actionsByType'
         : 'targetingActionsByType',
       actionsMembers: mapSubject === 'actors'
-        ? 'actionsAsMembersByType'
+        ? 'actionsAsMemberByType'
         : 'targetingActionsAsMemberByType',
+      actionsChildren: mapSubject === 'actors'
+        ? 'actionsAsParentByType'
+        : 'targetingActionsAsParentByType',
     })
   );
 };
@@ -136,6 +139,10 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       onSetIncludeTargetMembers,
       includeActorMembers,
       includeTargetMembers,
+      onSetIncludeActorChildren,
+      onSetIncludeTargetChildren,
+      includeActorChildren,
+      includeTargetChildren,
       includeInofficial,
       onSetIncludeInofficial,
       actiontypes,
@@ -162,7 +169,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     let userEntityColumnTitle;
 
     // ACTIONS =================================================================
-
     if (config.types === 'actiontypes' && dataReady) {
       columns = ACTIONTYPES_CONFIG[typeId] && ACTIONTYPES_CONFIG[typeId].columns;
       type = actiontypes.find((at) => qe(at.get('id'), typeId));
@@ -219,42 +225,46 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           disabled: mapSubjectClean === 'users',
         },
       ];
-      if (mapSubjectClean === 'targets' && qe(viewType, ACTORTYPES.COUNTRY)) {
-        memberOption = {
-          active: includeTargetMembers,
-          onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions and groups',
-        };
-      } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.COUNTRY)) {
-        memberOption = {
-          active: includeActorMembers,
-          onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of groups',
-        };
-      } else if (mapSubjectClean === 'targets' && qe(viewType, ACTORTYPES.ORG)) {
-        memberOption = {
-          active: includeTargetMembers,
-          onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting groups',
-        };
-      } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.ORG)) {
-        memberOption = {
-          active: includeActorMembers,
-          onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of groups',
-        };
-      } else if (mapSubjectClean === 'targets' && qe(viewType, ACTORTYPES.CONTACT)) {
-        memberOption = {
-          active: includeTargetMembers,
-          onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting countries and organisations',
-        };
-      } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.CONTACT)) {
-        memberOption = {
-          active: includeActorMembers,
-          onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of countries and organisations',
-        };
+      if (mapSubjectClean === 'targets') {
+        if (qe(viewType, ACTORTYPES.COUNTRY)) {
+          memberOption = {
+            active: includeTargetMembers,
+            onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+            label: 'Include activities targeting regions and groups',
+          };
+        } else if (qe(viewType, ACTORTYPES.ORG)) {
+          memberOption = {
+            active: includeTargetMembers,
+            onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+            label: 'Include activities targeting groups',
+          };
+        } else if (qe(viewType, ACTORTYPES.CONTACT)) {
+          memberOption = {
+            active: includeTargetMembers,
+            onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+            label: 'Include activities targeting countries and organisations',
+          };
+        }
+      } else if (mapSubjectClean === 'actors') {
+        if (qe(viewType, ACTORTYPES.COUNTRY)) {
+          memberOption = {
+            active: includeActorMembers,
+            onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+            label: 'Include activities of groups',
+          };
+        } else if (qe(viewType, ACTORTYPES.ORG)) {
+          memberOption = {
+            active: includeActorMembers,
+            onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+            label: 'Include activities of groups',
+          };
+        } else if (qe(viewType, ACTORTYPES.CONTACT)) {
+          memberOption = {
+            active: includeActorMembers,
+            onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+            label: 'Include activities of countries and organisations',
+          };
+        }
       }
       if (mapSubjectClean === 'actors' || mapSubjectClean === 'targets') {
         entityActors = getActorsForEntities(
@@ -289,12 +299,12 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         mapSubjectClean = 'actors';
       }
       subjectOptions = [];
-      const actionColumns = getActivityColumns(
-        mapSubjectClean,
-        typeId,
-        includeActorMembers,
-        includeTargetMembers,
+      const canBeMember = Object.keys(MEMBERSHIPS).indexOf(typeId) > -1
+        && MEMBERSHIPS[typeId].length > 0;
+      const canHaveMembers = !canBeMember && Object.keys(MEMBERSHIPS).some(
+        (id) => MEMBERSHIPS[id].indexOf(typeId) > -1
       );
+      const actionColumns = getActivityColumns(mapSubjectClean, typeId);
       const typeColumns = ACTORTYPES_CONFIG[typeId].columns || [];
       columns = [
         {
@@ -341,21 +351,48 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           },
         ];
       }
-      const canBeMember = Object.keys(MEMBERSHIPS).indexOf(typeId) > -1
-        && MEMBERSHIPS[typeId].length > 0;
-      if (mapSubjectClean === 'targets' && canBeMember) {
-        memberOption = {
-          active: includeTargetMembers,
-          onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions and groups',
-        };
-      } else if (mapSubjectClean === 'actors' && canBeMember) {
-        memberOption = {
-          active: includeActorMembers,
-          onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of groups',
-        };
+
+      if (mapSubjectClean === 'targets') {
+        if (canBeMember) {
+          memberOption = {
+            active: includeTargetMembers,
+            onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+            label: 'Include activities targeting regions and groups',
+          };
+        } else if (canHaveMembers) {
+          if (qe(typeId, ACTORTYPES.REG)) {
+            memberOption = {
+              active: includeTargetChildren,
+              onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
+              label: 'Include activities targeting region members',
+            };
+          } else if (qe(typeId, ACTORTYPES.GROUP)) {
+            memberOption = {
+              active: includeTargetChildren,
+              onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
+              label: 'Include activities targeting group members',
+            };
+          }
+        }
+      } else if (mapSubjectClean === 'actors') {
+        if (canBeMember) {
+          memberOption = {
+            active: includeActorMembers,
+            onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+            label: 'Include activities of groups',
+          };
+        } else if (canHaveMembers) {
+          if (qe(typeId, ACTORTYPES.GROUP)) {
+            memberOption = {
+              active: includeActorChildren,
+              onClick: () => onSetIncludeActorChildren(includeActorChildren ? '0' : '1'),
+              label: 'Include activities of group members',
+            };
+          }
+        }
       }
+
+
       // RESOURCES ================================================================
       //
     } else if (config.types === 'resourcetypes' && dataReady) {
@@ -458,6 +495,10 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     if (hasFilters) {
       headerSubTitle = `of ${allEntityCount} total`;
     }
+
+    const showRelatedActorsForActions = !!entityActors;
+    const showRelatedUsersForActions = !!entityUsers;
+    const showEntities = !showRelatedActorsForActions && !showRelatedUsersForActions;
     return (
       <ContainerWrapper headerStyle={headerStyle} ref={this.ScrollContainer}>
         {dataReady && viewOptions && viewOptions.length > 1 && (
@@ -496,7 +537,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                     )}
                   </Box>
                 )}
-                {entityActors && (
+                {showRelatedActorsForActions && (
                   <Box>
                     <Box direction="row" gap="xsmall" margin={{ vertical: 'small' }} wrap>
                       {mapSubject === 'actors'
@@ -597,7 +638,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                     )}
                   </Box>
                 )}
-                {entityUsers && (
+                {showRelatedUsersForActions && (
                   <Box>
                     <EntityListTable
                       paginate
@@ -636,7 +677,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                     />
                   </Box>
                 )}
-                {!entityActors && !entityUsers && (
+                {showEntities && (
                   <EntityListTable
                     paginate
                     hasSearch
@@ -669,6 +710,10 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                     includeMembers={mapSubjectClean === 'actors'
                       ? includeActorMembers
                       : includeTargetMembers
+                    }
+                    includeChildren={mapSubjectClean === 'actors'
+                      ? includeActorChildren
+                      : includeTargetChildren
                     }
                   />
                 )}
@@ -706,6 +751,8 @@ EntitiesListView.propTypes = {
   isAnalyst: PropTypes.bool,
   includeActorMembers: PropTypes.bool,
   includeTargetMembers: PropTypes.bool,
+  includeActorChildren: PropTypes.bool,
+  includeTargetChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
   listUpdating: PropTypes.bool,
   headerStyle: PropTypes.string,
@@ -722,6 +769,8 @@ EntitiesListView.propTypes = {
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeTargetMembers: PropTypes.func,
+  onSetIncludeActorChildren: PropTypes.func,
+  onSetIncludeTargetChildren: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
 };
 

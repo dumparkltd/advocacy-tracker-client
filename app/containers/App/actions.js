@@ -74,6 +74,8 @@ import {
   SET_MAPINDICATOR,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
+  SET_INCLUDE_ACTOR_CHILDREN,
+  SET_INCLUDE_TARGET_CHILDREN,
   SET_INCLUDE_MEMBERS_FORFILTERS,
   SET_INCLUDE_INOFFICAL_STATEMENTS,
   SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
@@ -537,6 +539,18 @@ export function setIncludeActorMembers(value) {
 export function setIncludeTargetMembers(value) {
   return {
     type: SET_INCLUDE_TARGET_MEMBERS,
+    value,
+  };
+}
+export function setIncludeActorChildren(value) {
+  return {
+    type: SET_INCLUDE_ACTOR_CHILDREN,
+    value,
+  };
+}
+export function setIncludeTargetChildren(value) {
+  return {
+    type: SET_INCLUDE_TARGET_CHILDREN,
     value,
   };
 }

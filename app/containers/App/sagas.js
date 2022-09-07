@@ -46,6 +46,8 @@ import {
   OPEN_BOOKMARK,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
+  SET_INCLUDE_ACTOR_CHILDREN,
+  SET_INCLUDE_TARGET_CHILDREN,
   SET_INCLUDE_MEMBERS_FORFILTERS,
   SET_INCLUDE_INOFFICAL_STATEMENTS,
   SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
@@ -968,6 +970,32 @@ export function* setIncludeTargetMembersSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
+export function* setIncludeActorChildrenSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'ach',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
+export function* setIncludeTargetChildrenSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'tch',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
 export function* setIncludeTargetChildrenOnMapSaga({ value }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
@@ -1107,6 +1135,8 @@ export default function* rootSaga() {
   yield takeEvery(SET_MAPINDICATOR, setMapIndicatorSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_MEMBERS, setIncludeActorMembersSaga);
   yield takeEvery(SET_INCLUDE_TARGET_MEMBERS, setIncludeTargetMembersSaga);
+  yield takeEvery(SET_INCLUDE_ACTOR_CHILDREN, setIncludeActorChildrenSaga);
+  yield takeEvery(SET_INCLUDE_TARGET_CHILDREN, setIncludeTargetChildrenSaga);
   yield takeEvery(SET_INCLUDE_TARGET_CHILDREN_ON_MAP, setIncludeTargetChildrenOnMapSaga);
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
   yield takeEvery(SET_INCLUDE_INOFFICAL_STATEMENTS, setIncludeInofficialStatementsSaga);
