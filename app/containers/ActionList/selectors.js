@@ -215,7 +215,6 @@ const selectActionsWithConnections = createSelector(
   selectUserActionsGroupedByAction,
   selectActionActionsGroupedByTopAction,
   selectActionActionsGroupedBySubAction,
-  selectIncludeMembersForFiltering,
   (
     ready,
     entities,
@@ -232,7 +231,6 @@ const selectActionsWithConnections = createSelector(
     userAssociationsGrouped,
     parentConnectionsGrouped,
     childConnectionsGrouped,
-    includeMembers,
   ) => {
     // console.log(actorConnectionsGrouped && actorConnectionsGrouped.toJS())
     if (ready && (connections.get(API.ACTORS) || connections.get(API.RESOURCES))) {
@@ -269,9 +267,9 @@ const selectActionsWithConnections = createSelector(
               'actortype_id',
             ])
           ).sortBy((val, key) => key);
-          // actors as associations
-          const entityActorsAssociations = includeMembers && actorAssociationConnectionsGrouped.get(parseInt(entity.get('id'), 10));
-          const entityActorsAssociationsByActortype = includeMembers && entityActorsAssociations && entityActorsAssociations.filter(
+          // actors as parents
+          const entityActorsAssociations = actorAssociationConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          const entityActorsAssociationsByActortype = entityActorsAssociations && entityActorsAssociations.filter(
             (actorId) => connections.getIn([
               API.ACTORS,
               actorId.toString(),
@@ -335,9 +333,9 @@ const selectActionsWithConnections = createSelector(
               'resourcetype_id',
             ])
           ).sortBy((val, key) => key);
-          // targets as associations
-          const entityTargetsAssociations = includeMembers && targetAssociationConnectionsGrouped.get(parseInt(entity.get('id'), 10));
-          const entityTargetsAssociationsByActortype = includeMembers && entityTargetsAssociations && entityTargetsAssociations.filter(
+          // targets as parents
+          const entityTargetsAssociations = targetAssociationConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          const entityTargetsAssociationsByActortype = entityTargetsAssociations && entityTargetsAssociations.filter(
             (actorId) => connections.getIn([
               API.ACTORS,
               actorId.toString(),

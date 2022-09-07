@@ -1647,26 +1647,30 @@ export const selectActorActionsAssociationsGroupedByAction = createSelector(
 export const selectActionActorsMembersGroupedByAction = createSelector(
   selectActionActorsGroupedByAction,
   selectMembershipsGroupedByAssociation,
-  (actionActorsByAction, memberships) => actionActorsByAction && memberships && actionActorsByAction.map(
-    (actionActors) => actionActors.reduce((memo, actorId) => {
-      if (memberships.get(actorId)) {
-        return memo.concat(memberships.get(actorId));
-      }
-      return memo;
-    }, Map())
-  )
+  (actionActorsByAction, memberships) => actionActorsByAction
+    && memberships
+    && actionActorsByAction.map(
+      (actionActors) => actionActors.reduce((memo, actorId) => {
+        if (memberships.get(actorId)) {
+          return memo.concat(memberships.get(actorId));
+        }
+        return memo;
+      }, Map())
+    )
 );
 export const selectActionActorsAssociationsGroupedByAction = createSelector(
   selectActionActorsGroupedByAction,
   selectMembershipsGroupedByMember,
-  (actionActorsByAction, memberships) => actionActorsByAction && memberships && actionActorsByAction.map(
-    (actionActors) => actionActors.reduce((memo, actorId) => {
-      if (memberships.get(actorId)) {
-        return memo.concat(memberships.get(actorId));
-      }
-      return memo;
-    }, Map())
-  )
+  (actionActorsByAction, memberships) => actionActorsByAction
+    && memberships
+    && actionActorsByAction.map(
+      (actionActors) => actionActors.reduce((memo, actorId) => {
+        if (memberships.get(actorId)) {
+          return memo.concat(memberships.get(actorId));
+        }
+        return memo;
+      }, Map())
+    )
 );
 
 export const selectActionCategoriesGroupedByAction = createSelector(

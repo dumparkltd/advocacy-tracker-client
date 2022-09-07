@@ -188,9 +188,19 @@ export const prepareHeader = ({
       case 'indicatorActions':
       case 'actorActions':
         if (col.subject !== 'actors') {
-          label = col.members ? 'Targeted as member' : 'Targeted by';
+          label = 'Targeted by';
+          if (col.members) {
+            label = 'Targeted as member';
+          } else if (col.children) {
+            label = 'Targeted as parent';
+          }
         } else {
-          label = col.members ? 'Activities as member' : 'Activities';
+          label = 'Activities';
+          if (col.members) {
+            label = 'Activities as member';
+          } else if (col.children) {
+            label = 'Activities as parent';
+          }
         }
         return ({
           ...col,
@@ -315,6 +325,7 @@ export const prepareEntityRows = ({
         let relatedEntityIds;
         let temp;
         let attribute;
+        // console.log(col)
         switch (col.type) {
           case 'main':
             return {

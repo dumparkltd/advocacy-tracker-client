@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import { Box, ResponsiveContext } from 'grommet';
 import styled from 'styled-components';
 import { isMinSize } from 'utils/responsive';
+import { scaleColorCount } from 'containers/MapContainer/utils';
+
+import { MAP_OPTIONS } from 'themes/config';
 
 import CellBodyMain from './CellBodyMain';
 import CellBodyPlain from './CellBodyPlain';
@@ -101,6 +104,18 @@ const TableCellBody = styled.td`
 const TableCellBodyInner = styled((p) => <Box {...p} />)`
   padding: 6px 0;
 `;
+
+const MAX_VALUE_COUNTRIES = 100;
+
+const getColorForColumn = (col) => {
+  if (col.members) {
+    return scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[col.subject], false)(70);
+  }
+  if (col.children) {
+    return scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[col.subject], false)(40);
+  }
+  return scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[col.subject], false)(100);
+};
 
 export function EntitiesTable({
   entities,
@@ -285,7 +300,8 @@ export function EntitiesTable({
                         maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
                         subject={col.subject}
                         column={col}
-                        issecondary={col.type !== 'actiontype' && col.members}
+                        issecondary={col.type !== 'actiontype' && (col.members || col.children)}
+                        color={getColorForColumn(col)}
                         entityType="actions"
                         onEntityClick={onEntityClick}
                         rowConfig={entity[col.id]}
