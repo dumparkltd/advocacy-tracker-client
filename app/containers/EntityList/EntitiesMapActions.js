@@ -146,7 +146,7 @@ export function EntitiesMapActions({
       infoOptions = [{
         active: includeTargetMembers,
         onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-        label: 'Include activities targeting regions and groups (countries belong to)',
+        label: 'Include activities targeting regions and groups',
       }];
     }
   } else if (hasGroupActors(actortypes)) {
@@ -154,15 +154,15 @@ export function EntitiesMapActions({
       infoOptions = [{
         active: includeActorMembers,
         onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-        label: 'Include positions of groups (countries belong to)',
+        label: 'Include positions of groups',
       }];
     } else {
       infoOptions = [{
         active: includeActorMembers,
         onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
         label: isStatements
-          ? 'Include statements of groups (countries belong to)'
-          : 'Include activities of groups (countries belong to)',
+          ? 'Include statements of groups'
+          : 'Include activities of groups',
       }];
     }
   }

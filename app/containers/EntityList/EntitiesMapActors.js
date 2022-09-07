@@ -102,13 +102,13 @@ export function EntitiesMapActors({
       memberOption = {
         active: includeTargetMembers,
         onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-        label: 'Include activities targeting regions and groups (countries belong to)',
+        label: 'Include activities targeting regions and groups',
       };
     } else if (hasGroupActors(actortypes)) {
       memberOption = {
         active: includeActorMembers,
         onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-        label: 'Include activities of groups (countries belong to)',
+        label: 'Include activities of groups',
       };
     }
   } else if (hasActions && !hasByTarget) { // i.e. institutions
@@ -117,7 +117,7 @@ export function EntitiesMapActors({
     memberOption = {
       active: includeTargetMembers,
       onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-      label: 'Include activities targeting regions and groups (countries belong to)',
+      label: 'Include activities targeting regions and groups',
     };
   // } else if (!hasActions && hasByTarget) { // i.e. regions, classes
   //   mapSubjectClean = 'targets';
@@ -131,7 +131,7 @@ export function EntitiesMapActors({
     memberOption = {
       active: includeTargetMembers,
       onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-      label: 'Include activities targeting regions and groups (countries belong to)',
+      label: 'Include activities targeting regions and groups',
     };
   }
 

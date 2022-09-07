@@ -223,37 +223,37 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting regions and groups (countries belong to)',
+          label: 'Include activities targeting regions and groups',
         };
       } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.COUNTRY)) {
         memberOption = {
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of groups (countries belong to)',
+          label: 'Include activities of groups',
         };
       } else if (mapSubjectClean === 'targets' && qe(viewType, ACTORTYPES.ORG)) {
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting groups (organisations belong to)',
+          label: 'Include activities targeting groups',
         };
       } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.ORG)) {
         memberOption = {
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of groups (organisations belong to)',
+          label: 'Include activities of groups',
         };
       } else if (mapSubjectClean === 'targets' && qe(viewType, ACTORTYPES.CONTACT)) {
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting countries and orgs (contacts belong to)',
+          label: 'Include activities targeting countries and organisations',
         };
       } else if (mapSubjectClean === 'actors' && qe(viewType, ACTORTYPES.CONTACT)) {
         memberOption = {
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of countries and orgs (contacts belong to)',
+          label: 'Include activities of countries and organisations',
         };
       }
       if (mapSubjectClean === 'actors' || mapSubjectClean === 'targets') {
@@ -347,13 +347,13 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         memberOption = {
           active: includeTargetMembers,
           onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-          label: 'Include activities targeting associated actors',
+          label: 'Include activities targeting regions and groups',
         };
       } else if (mapSubjectClean === 'actors' && canBeMember) {
         memberOption = {
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          label: 'Include activities of associated actors',
+          label: 'Include activities of groups',
         };
       }
       // RESOURCES ================================================================
