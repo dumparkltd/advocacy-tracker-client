@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { Box, Text, Button } from 'grommet';
 import PrintHide from 'components/styled/PrintHide';
 import styled from 'styled-components';
-import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { injectIntl, intlShape } from 'react-intl';
 
-import { lowerCase } from 'utils/string';
+import { lowerCase, truncateText } from 'utils/string';
 
 import appMessages from 'containers/App/messages';
 
@@ -19,10 +19,10 @@ const Link = styled((p) => <Button as="a" plain {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 16px;
 `;
-const Label = styled((p) => <Text size="small" {...p} />)`
-  line-height: 16px;
-`;
+const Label = styled((p) => <Text size="small" {...p} />)``;
 
+const Meta = styled((p) => <Box {...p} />)``;
+const Gap = styled((p) => <Box pad={{ horizontal: 'xxsmall' }} {...p} />)``;
 
 export function CellBodyMain({
   entity,
@@ -30,6 +30,43 @@ export function CellBodyMain({
   canEdit,
   intl,
 }) {
+  const code = entity && entity.values && entity.values.code;
+  const meta = [];
+  if (code) {
+    meta.push({
+      text: code,
+      color: 'dark-5',
+      size: 'small',
+    });
+  }
+  if (entity.draft) {
+    meta.push({
+      text: intl.formatMessage(appMessages.ui.publishStatuses.draft),
+      color: 'draft',
+      size: 'xxsmall',
+    });
+  }
+  if (entity.private) {
+    meta.push({
+      text: intl.formatMessage(appMessages.ui.privacyStatuses.private),
+      color: 'private',
+      size: 'xxsmall',
+    });
+  }
+  if (entity.archived) {
+    meta.push({
+      text: intl.formatMessage(appMessages.ui.archiveStatuses.archived),
+      color: 'archived',
+      size: 'xxsmall',
+    });
+  }
+  if (entity.noNotifications) {
+    meta.push({
+      text: `Email ${lowerCase(intl.formatMessage(appMessages.ui.notificationStatuses.disabled))}`,
+      color: 'archived',
+      size: 'xxsmall',
+    });
+  }
   return (
     <Box direction="row" align="center" justify="start">
       {canEdit && (
@@ -41,29 +78,19 @@ export function CellBodyMain({
           />
         </Select>
       )}
-      <Box gap="xxsmall">
-        {(entity.draft || entity.archived || entity.private || entity.noNotifications) && (
-          <Box direction="row" gap="xsmall">
-            {entity.private && (
-              <Text color="private" size="xxxsmall">
-                <FormattedMessage {...appMessages.ui.privacyStatuses.private} />
-              </Text>
-            )}
-            {entity.archived && (
-              <Text color="archived" size="xxxsmall">
-                <FormattedMessage {...appMessages.ui.archiveStatuses.archived} />
-              </Text>
-            )}
-            {entity.noNotifications && (
-              <Text color="notifications" size="xxxsmall">
-                {`Email ${lowerCase(intl.formatMessage(appMessages.ui.notificationStatuses.disabled))}`}
-              </Text>
-            )}
-            {entity.draft && (
-              <Text color="draft" size="xxxsmall">
-                <FormattedMessage {...appMessages.ui.publishStatuses.draft} />
-              </Text>
-            )}
+      <Box gap="xsmall">
+        {meta.length > 0 && (
+          <Box direction="row" align="end">
+            {meta.map((item, i) => (
+              <Meta key={i} direction="row" align="end">
+                <Label color={item.color || 'dark-5'} size={item.size || 'xsmall'}>
+                  {item.text}
+                </Label>
+                {i + 1 < meta.length && (
+                  <Gap><Label color="draft" size="xxsmall">/</Label></Gap>
+                )}
+              </Meta>
+            ))}
           </Box>
         )}
         <Link
@@ -79,7 +106,7 @@ export function CellBodyMain({
               if (key === 'title' || key === 'name') {
                 return (
                   <Label size="small" key={key}>
-                    {entity.values[key]}
+                    {truncateText(entity.values[key], 45)}
                   </Label>
                 );
               }
@@ -92,18 +119,6 @@ export function CellBodyMain({
                   >
                     {`[${entity.values[key]}]`}
                   </Label>
-                );
-              }
-              if (key === 'code') {
-                return (
-                  <Box flex={{ shrink: 0 }} key={key}>
-                    <Label
-                      color="dark-5"
-                      size="small"
-                    >
-                      {`${entity.values[key]}`}
-                    </Label>
-                  </Box>
                 );
               }
               return null;
