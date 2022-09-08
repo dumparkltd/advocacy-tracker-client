@@ -455,7 +455,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           return (
             <Styled>
               <TheHeader align="center">
-                {config.types && typeOptions && (
+                {config.types && hasTypeOptions && (
                   <HeaderSection noBorder>
                     <ButtonFlatIconOnly onClick={() => onSelectType()}>
                       <Icon name="arrowLeft" size="2em" />
@@ -471,7 +471,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     )}
                   </Text>
                 )}
-                {config.types && typeOptions && isMinSize(size, 'large') && (
+                {config.types && hasTypeOptions && isMinSize(size, 'large') && (
                   <HeaderSectionType justify="start">
                     {config.types && (
                       <Label>
