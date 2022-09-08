@@ -208,7 +208,7 @@ export function MapInfoOptions({
             </Box>
           )}
           {activeOption.id === 'countries' && !activeOption.indicatorOptions && (
-            <Box>
+            <Box fill="horizontal">
               {activeOption.subjectOptions && (
                 <MapSubjectOptions options={activeOption.subjectOptions} />
               )}
