@@ -111,11 +111,19 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
 
   prepareTypeOptions = (types, activeId) => {
     const { intl } = this.context;
-    return types.toList().toJS().map((type) => ({
-      value: type.id,
-      label: intl.formatMessage(appMessages.actortypes[type.id]),
-      active: activeId === type.id,
-    }));
+    return types && types.sort(
+      (a, b) => a.get('id') > b.get('id') ? 1 : -1
+    ).reduce(
+      (memo, type) => [
+        ...memo,
+        {
+          value: type.get('id'),
+          label: intl.formatMessage(appMessages.actortypes[type.get('id')]),
+          active: activeId === type.get('id'),
+        },
+      ],
+      [],
+    );
   }
 
   render() {

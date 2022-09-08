@@ -531,24 +531,24 @@ export const INDICATOR_FIELDS = {
 export const ACTIONTYPE_ACTORTYPES = {
   // countries make expressions/statements
   [ACTIONTYPES.EXPRESS]: [
-    ACTORTYPES.GROUP,
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
     ACTORTYPES.ORG,
+    ACTORTYPES.GROUP,
   ],
   // events are attended by countries, contacts, orgs
   [ACTIONTYPES.EVENT]: [
-    ACTORTYPES.GROUP,
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
     ACTORTYPES.ORG,
+    ACTORTYPES.GROUP,
   ],
   // interactions with countries, contacts or organisations
   [ACTIONTYPES.INTERACTION]: [
-    ACTORTYPES.GROUP,
     ACTORTYPES.COUNTRY,
     ACTORTYPES.CONTACT,
     ACTORTYPES.ORG,
+    ACTORTYPES.GROUP,
   ],
   // // outreach plans are targeting countries & contacts
   // [ACTIONTYPES.OP]: [
@@ -584,10 +584,10 @@ export const ACTIONTYPE_TARGETTYPES = {
   // tasks target countries
   [ACTIONTYPES.TASK]: [
     ACTORTYPES.COUNTRY,
+    ACTORTYPES.ORG,
     ACTORTYPES.CONTACT,
     ACTORTYPES.REG,
     ACTORTYPES.GROUP,
-    ACTORTYPES.ORG,
   ],
 };
 
