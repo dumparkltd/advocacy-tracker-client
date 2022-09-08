@@ -34,6 +34,7 @@ import ButtonPill from 'components/buttons/ButtonPill';
 
 import ContentHeader from 'components/ContentHeader';
 import qe from 'utils/quasi-equals';
+import { lowerCase } from 'utils/string';
 import appMessages from 'containers/App/messages';
 
 import { getActorsForEntities, getUsersForEntities } from './utils';
@@ -260,6 +261,52 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         entityActors = entityActors && entityActors.groupBy(
           (actor) => actor.getIn(['attributes', 'actortype_id'])
         );
+        const typeLabel = lowerCase(intl.formatMessage(appMessages.actortypes[viewTypeClean]));
+        if (mapSubjectClean === 'targets') {
+          if (canBeMember) {
+            if (qe(viewTypeClean, ACTORTYPES.COUNTRY)) {
+              memberOption = {
+                active: includeTargetMembers,
+                onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+                label: `Show activities targeting regions & groups (${typeLabel} are member of)`,
+              };
+            } else if (qe(viewTypeClean, ACTORTYPES.ORG)) {
+              memberOption = {
+                active: includeTargetMembers,
+                onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+                label: `Show activities targeting groups (${typeLabel} are member of)`,
+              };
+            } else if (qe(viewTypeClean, ACTORTYPES.CONTACT)) {
+              memberOption = {
+                active: includeTargetMembers,
+                onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+                label: `Show activities targeting countries, organisations & groups (${typeLabel} are member of)`,
+              };
+            }
+          } else if (canHaveMembers) {
+            childOption = {
+              active: includeTargetChildren,
+              onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
+              label: `Show activities targeting members of ${typeLabel}`,
+            };
+          }
+        } else if (mapSubjectClean === 'actors') {
+          if (canBeMember) {
+            memberOption = {
+              active: includeActorMembers,
+              onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+              label: qe(viewTypeClean, ACTORTYPES.CONTACT)
+                ? `Show activities of countries, organisations & groups (${typeLabel} are member of)`
+                : `Show activities of groups (${typeLabel} are member of)`,
+            };
+          } else if (canHaveMembers) {
+            childOption = {
+              active: includeActorChildren,
+              onClick: () => onSetIncludeActorChildren(includeActorChildren ? '0' : '1'),
+              label: `Show activities of ${typeLabel} members`,
+            };
+          }
+        }
       } else if (mapSubjectClean === 'users') {
         entityUsers = getUsersForEntities(
           entities,
@@ -267,71 +314,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           'actions',
         );
         userEntityColumnTitle = intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural);
-      }
-      if (mapSubjectClean === 'targets') {
-        if (qe(viewTypeClean, ACTORTYPES.COUNTRY)) {
-          memberOption = {
-            active: includeTargetMembers,
-            onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-            label: 'Show activities targeting regions & groups (countries are member of)',
-          };
-        } else if (qe(viewTypeClean, ACTORTYPES.ORG)) {
-          memberOption = {
-            active: includeTargetMembers,
-            onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-            label: 'Show activities targeting groups (organisations are member of)',
-          };
-        } else if (qe(viewTypeClean, ACTORTYPES.CONTACT)) {
-          memberOption = {
-            active: includeTargetMembers,
-            onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-            label: 'Show activities targeting countries, organisations & groups (contacts are member of)',
-          };
-        } else if (qe(viewTypeClean, ACTORTYPES.GROUP)) {
-          childOption = {
-            active: includeTargetChildren,
-            onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
-            label: 'Show activities targeting group members',
-          };
-        } else if (qe(viewTypeClean, ACTORTYPES.REG)) {
-          childOption = {
-            active: includeTargetChildren,
-            onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
-            label: 'Show activities targeting region members',
-          };
-        }
-      } else if (mapSubjectClean === 'actors') {
-        if (qe(viewTypeClean, ACTORTYPES.COUNTRY)) {
-          memberOption = {
-            active: includeActorMembers,
-            onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-            label: 'Show activities of groups (countries are member of)',
-          };
-        } else if (qe(viewTypeClean, ACTORTYPES.ORG)) {
-          memberOption = {
-            active: includeActorMembers,
-            onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-            label: 'Show activities of groups (organisations are member of)',
-          };
-        } else if (qe(viewTypeClean, ACTORTYPES.CONTACT)) {
-          memberOption = {
-            active: includeActorMembers,
-            onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-            label: 'Show activities of countries & organisations (contacts are member of)',
-          };
-        } else if (qe(viewTypeClean, ACTORTYPES.GROUP)) {
-          childOption = {
-            active: includeActorChildren,
-            onClick: () => onSetIncludeActorChildren(includeActorChildren ? '0' : '1'),
-            label: 'Show activities of group members',
-          };
-        } else if (qe(viewTypeClean, ACTORTYPES.REG)) {
-          childOption = {
-            active: includeActorChildren,
-            onClick: () => onSetIncludeActorChildren(includeActorChildren ? '0' : '1'),
-            label: 'Show activities of region members',
-          };
-        }
       }
 
       // ACTORS ================================================================
@@ -406,20 +388,20 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           memberOption = {
             active: includeTargetMembers,
             onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-            label: 'Include activities targeting regions and groups',
+            label: `Show activities targeting ${lowerCase(intl.formatMessage(appMessages.actortypes[typeId]))}' regions & groups`,
           };
         } else if (canHaveMembers) {
           if (qe(typeId, ACTORTYPES.REG)) {
             childOption = {
               active: includeTargetChildren,
               onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
-              label: 'Include activities targeting region members',
+              label: 'Show activities targeting region members',
             };
           } else if (qe(typeId, ACTORTYPES.GROUP)) {
             childOption = {
               active: includeTargetChildren,
               onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
-              label: 'Include activities targeting group members',
+              label: 'Show activities targeting group members',
             };
           }
         }
@@ -428,7 +410,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           memberOption = {
             active: includeActorMembers,
             onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-            label: 'Include activities of groups',
+            label: `Include activities of ${lowerCase(intl.formatMessage(appMessages.actortypes[typeId]))}' groups`,
           };
         } else if (canHaveMembers) {
           if (qe(typeId, ACTORTYPES.GROUP)) {

@@ -102,7 +102,7 @@ export function EntitiesMapActors({
       memberOption = {
         active: includeTargetMembers,
         onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-        label: 'Include activities targeting regions and groups',
+        label: 'Include activities targeting regions & groups',
       };
     } else if (hasGroupActors(actortypes)) {
       memberOption = {
@@ -111,27 +111,20 @@ export function EntitiesMapActors({
         label: 'Include activities of groups',
       };
     }
-  } else if (hasActions && !hasByTarget) { // i.e. institutions
-    // showing targeted countries
-    mapSubjectClean = 'targets';
-    memberOption = {
-      active: includeTargetMembers,
-      onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-      label: 'Include activities targeting regions and groups',
-    };
-  // } else if (!hasActions && hasByTarget) { // i.e. regions, classes
+  // } else if (hasActions && !hasByTarget) { // i.e. institutions
+  //   // showing targeted countries
   //   mapSubjectClean = 'targets';
   //   memberOption = {
-  //     active: includeActorMembers,
-  //     onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-  //     label: 'Include activities of groups (countries belong to)',
+  //     active: includeTargetMembers,
+  //     onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+  //     label: 'Include activities targeting regions & groups',
   //   };
   } else { // i.e. groups
     mapSubjectClean = 'targets';
     memberOption = {
       active: includeTargetMembers,
       onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-      label: 'Include activities targeting regions and groups',
+      label: 'Include activities targeting regions & groups',
     };
   }
 
