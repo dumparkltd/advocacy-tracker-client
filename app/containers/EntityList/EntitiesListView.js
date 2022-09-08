@@ -230,16 +230,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         },
       ];
       if (mapSubjectClean === 'actors' || mapSubjectClean === 'targets') {
-        entityActors = getActorsForEntities({
-          actions: entities,
-          actors: connections && connections.get('actors'),
-          subject: mapSubjectClean,
-          includeIndirect: mapSubjectClean === 'actors' ? includeActorMembers : includeTargetMembers,
-          includeChildren: mapSubjectClean === 'actors' ? includeActorChildren : includeTargetChildren,
-        });
-        entityActors = entityActors && entityActors.groupBy(
-          (actor) => actor.getIn(['attributes', 'actortype_id'])
-        );
         if (mapSubjectClean === 'actors') {
           relatedActortypes = ACTIONTYPE_ACTORTYPES[typeId]
             && ACTIONTYPE_ACTORTYPES[typeId].length > 1
@@ -255,6 +245,21 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             ? viewTypeClean
             : relatedTargettypes[0];
         }
+        const canBeMember = Object.keys(MEMBERSHIPS).indexOf(viewTypeClean) > -1
+          && MEMBERSHIPS[viewTypeClean].length > 0;
+        const canHaveMembers = !canBeMember && Object.keys(MEMBERSHIPS).some(
+          (id) => MEMBERSHIPS[id].indexOf(viewTypeClean) > -1
+        );
+        entityActors = getActorsForEntities({
+          actions: entities,
+          actors: connections && connections.get('actors'),
+          subject: mapSubjectClean,
+          includeIndirect: canBeMember && (mapSubjectClean === 'actors' ? includeActorMembers : includeTargetMembers),
+          includeChildren: canHaveMembers && (mapSubjectClean === 'actors' ? includeActorChildren : includeTargetChildren),
+        });
+        entityActors = entityActors && entityActors.groupBy(
+          (actor) => actor.getIn(['attributes', 'actortype_id'])
+        );
       } else if (mapSubjectClean === 'users') {
         entityUsers = getUsersForEntities(
           entities,
