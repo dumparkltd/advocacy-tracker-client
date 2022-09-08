@@ -243,18 +243,14 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         if (mapSubjectClean === 'actors') {
           relatedActortypes = ACTIONTYPE_ACTORTYPES[typeId]
             && ACTIONTYPE_ACTORTYPES[typeId].length > 1
-            && ACTIONTYPE_ACTORTYPES[typeId].filter(
-              (actortypeId) => entityActors.get(parseInt(actortypeId, 10))
-            );
+            && ACTIONTYPE_ACTORTYPES[typeId];
           viewTypeClean = (viewTypeClean && relatedActortypes.indexOf(viewTypeClean) > -1)
             ? viewTypeClean
             : relatedActortypes[0];
         } else {
           relatedTargettypes = ACTIONTYPE_TARGETTYPES[typeId]
             && ACTIONTYPE_TARGETTYPES[typeId].length > 1
-            && ACTIONTYPE_TARGETTYPES[typeId].filter(
-              (actortypeId) => entityActors.get(parseInt(actortypeId, 10))
-            );
+            && ACTIONTYPE_TARGETTYPES[typeId];
           viewTypeClean = (viewTypeClean && relatedTargettypes.indexOf(viewTypeClean) > -1)
             ? viewTypeClean
             : relatedTargettypes[0];
