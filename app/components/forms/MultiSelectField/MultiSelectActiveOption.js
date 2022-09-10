@@ -77,15 +77,15 @@ export function MultiSelectActiveOption({
     <Styled>
       <Box direction="row" align="center" justify="between" pad={{ vertical: 'xsmall' }}>
         <TitleWrap>
-          {option.get('draft') && (
-            <Box><ItemStatus draft /></Box>
-          )}
           <Box direction="row" gap="small">
             {option.get('reference') && (
               <Box><Reference>{option.get('reference')}</Reference></Box>
             )}
-            <Box>{option.get('label')}</Box>
+            {option.get('draft') && (
+              <Box><ItemStatus draft /></Box>
+            )}
           </Box>
+          <Box>{option.get('label')}</Box>
         </TitleWrap>
         <Box>
           <Box>

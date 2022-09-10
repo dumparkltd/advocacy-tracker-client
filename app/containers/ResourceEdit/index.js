@@ -101,6 +101,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     const {
       viewEntity,
       actionsByActiontype,
+      isAdmin,
     } = props;
     return viewEntity
       ? Map({
@@ -110,7 +111,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
           FORM_INITIAL.get('attributes')
         ),
         associatedActionsByActiontype: actionsByActiontype
-          ? actionsByActiontype.map((actions) => entityOptions({ entities: actions }))
+          ? actionsByActiontype.map((actions) => entityOptions({ entities: actions, showCode: isAdmin }))
           : Map(),
       })
       : Map();
@@ -186,6 +187,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     );
 
     if (actionsByActiontype) {
+      console.log('renderActionsByActiontypeControl');
       const actionConnections = renderActionsByActiontypeControl({
         entitiesByActiontype: actionsByActiontype,
         taxonomies: connectedTaxonomies,

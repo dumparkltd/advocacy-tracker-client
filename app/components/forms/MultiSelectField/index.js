@@ -194,7 +194,6 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
     // console.log('field', field)
     // console.log('fieldData', fieldData && fieldData.toJS())
     const options = this.getMultiSelectActiveOptions(field, fieldData);
-    // console.log('field options', options && options.toJS())
     return (
       <MultiSelectFieldWrapper>
         <MultiSelectDropdown

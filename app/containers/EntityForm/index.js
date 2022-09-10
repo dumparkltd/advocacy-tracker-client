@@ -217,7 +217,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
   );
 
   renderFormField = (field, nested, closeMultiselectOnClickOutside, scrollContainer) => {
-    // field.controlType === 'date' && console.log('field', field)
     let formField;
     if (!field.controlType) {
       formField = this.renderComponent(field);

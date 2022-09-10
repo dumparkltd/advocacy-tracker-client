@@ -31,6 +31,7 @@ import {
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
+import { qe } from 'utils/quasi-equals';
 
 import {
   loadEntitiesIfNeeded,
@@ -49,7 +50,7 @@ import {
 } from 'containers/App/selectors';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES, USER_ROLES } from 'themes/config';
+import { ROUTES, USER_ROLES, ACTORTYPES } from 'themes/config';
 
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
@@ -106,6 +107,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       viewEntity,
       actorsByActortype,
       actionsByActiontype,
+      isAdmin,
     } = props;
 
     return Map({
@@ -117,10 +119,20 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       associatedTaxonomies: taxonomyOptions(taxonomies),
       associatedRole: getHighestUserRoleId(roles),
       associatedActorsByActortype: actorsByActortype
-        ? actorsByActortype.map((actors) => entityOptions({ entities: actors }))
+        ? actorsByActortype.map(
+          (actors, typeId) => entityOptions({
+            entities: actors,
+            showCode: isAdmin || qe(typeId, ACTORTYPES.COUNTRY),
+          })
+        )
         : Map(),
       associatedActionsByActiontype: actionsByActiontype
-        ? actionsByActiontype.map((actions) => entityOptions({ entities: actions }))
+        ? actionsByActiontype.map(
+          (actions) => entityOptions({
+            entities: actions,
+            showCode: isAdmin,
+          })
+        )
         : Map(),
     });
   }
