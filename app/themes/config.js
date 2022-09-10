@@ -791,29 +791,6 @@ export const ACTIONTYPES_CONFIG = {
         type: 'actors',
         sort: 'title',
       },
-      // {
-      //   id: 'users', // one row per type,
-      //   type: 'users', // one row per type,
-      // },
-      // {
-      //   id: 'taxonomy-12',
-      //   type: 'taxonomy',
-      //   taxonomy_id: 12, // commitment type
-      // },
-      // {
-      //   id: 'taxonomy-11',
-      //   type: 'taxonomy',
-      //   taxonomy_id: 11, // level of commitment: as link
-      // },
-      // {
-      //   id: 'date',
-      //   type: 'date',
-      //   sort: 'date_start',
-      //   sortOrder: 'asc',
-      //   attribute: 'date_start',
-      //   align: 'end',
-      //   primary: true,
-      // },
     ],
   },
   2: {
@@ -821,12 +798,6 @@ export const ACTIONTYPES_CONFIG = {
     order: 4,
     is_code_public: true,
     columns: [
-      {
-        id: 'main',
-        type: 'main',
-        sort: 'title',
-        attributes: ['title'],
-      },
       {
         id: 'date',
         type: 'date',
@@ -850,11 +821,6 @@ export const ACTIONTYPES_CONFIG = {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
       },
-      // {
-      //   id: 'taxonomy-3',
-      //   type: 'taxonomy',
-      //   taxonomy_id: 3, // LBS-protocol statuses: as link
-      // },
     ],
   },
   3: {
@@ -862,12 +828,6 @@ export const ACTIONTYPES_CONFIG = {
     order: 5,
     is_code_public: true,
     columns: [
-      {
-        id: 'main',
-        type: 'main',
-        sort: 'title',
-        attributes: ['title'],
-      },
       {
         id: 'date',
         type: 'date',
@@ -898,12 +858,6 @@ export const ACTIONTYPES_CONFIG = {
     order: 6,
     columns: [
       {
-        id: 'main',
-        type: 'main',
-        sort: 'title',
-        attributes: ['title'],
-      },
-      {
         id: 'date',
         type: 'date',
         sort: 'date',
@@ -926,23 +880,12 @@ export const ACTIONTYPES_CONFIG = {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
       },
-      // {
-      //   id: 'taxonomy',
-      //   type: 'taxonomy',
-      //   taxonomy_id: 4, // strategy types: as link
-      // },
     ],
   },
   5: {
     id: ACTIONTYPES.TASK,
     order: 1,
     columns: [
-      {
-        id: 'main',
-        type: 'main',
-        sort: 'title',
-        attributes: ['title'],
-      },
       {
         id: 'date',
         type: 'date',
@@ -976,12 +919,6 @@ export const ACTIONTYPES_CONFIG = {
     id: ACTIONTYPES.INTERACTION,
     order: 2,
     columns: [
-      {
-        id: 'main',
-        type: 'main',
-        sort: 'title',
-        attributes: ['title'],
-      },
       {
         id: 'date',
         type: 'date',

@@ -41,6 +41,7 @@ const getActiontypeColumns = (typeid, viewSubject, isAdmin) => {
     sort: 'title',
     attributes: isAdmin ? ['code', 'title'] : ['title'],
   }];
+
   if (
     ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
     && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
