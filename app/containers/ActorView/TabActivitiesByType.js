@@ -18,11 +18,9 @@ import { List, Map } from 'immutable';
 
 import { getActionConnectionField } from 'utils/fields';
 import { lowerCase } from 'utils/string';
+import { getActiontypeColumns } from 'utils/entities';
 
-import {
-  ACTIONTYPES_CONFIG,
-  API,
-} from 'themes/config';
+import { API } from 'themes/config';
 import FieldGroup from 'components/fields/FieldGroup';
 import AccordionHeader from 'components/AccordionHeader';
 
@@ -33,37 +31,6 @@ import {
   selectActionConnections,
 } from 'containers/App/selectors';
 import appMessages from 'containers/App/messages';
-
-const getActiontypeColumns = (typeid, viewSubject, isAdmin) => {
-  let columns = [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: isAdmin ? ['code', 'title'] : ['title'],
-  }];
-
-  if (
-    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    columns = [
-      ...columns,
-      ...ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-        (col) => {
-          if (typeof col.showOnSingle !== 'undefined') {
-            if (viewSubject && Array.isArray(col.showOnSingle)) {
-              return col.showOnSingle.indexOf(viewSubject) > -1;
-            }
-            return col.showOnSingle;
-          }
-          return true;
-        }
-      ),
-    ];
-  }
-  return columns;
-};
-
 
 const getTypeLabel = (
   typeId,
@@ -193,11 +160,11 @@ export function TabActivitiesByType(props) {
                     onEntityClick,
                     connections: actionConnections,
                     typeid: activeActiontypeId,
-                    columns: getActiontypeColumns(
-                      activeActiontypeId,
+                    columns: getActiontypeColumns({
+                      typeId: activeActiontypeId,
                       viewSubject,
                       isAdmin,
-                    ),
+                    }),
                     onCreateOption: () => onCreateOption({
                       path: API.ACTIONS,
                       attributes: {
@@ -245,11 +212,11 @@ export function TabActivitiesByType(props) {
                             onEntityClick,
                             connections: actionConnections,
                             typeid: activeActiontypeId,
-                            columns: getActiontypeColumns(
-                              activeActiontypeId,
+                            columns: getActiontypeColumns({
+                              typeId: activeActiontypeId,
                               viewSubject,
                               isAdmin,
-                            ),
+                            }),
                           }),
                         ],
                       }}
@@ -287,11 +254,11 @@ export function TabActivitiesByType(props) {
                             onEntityClick,
                             connections: actionConnections,
                             typeid: activeActiontypeId,
-                            columns: getActiontypeColumns(
-                              activeActiontypeId,
+                            columns: getActiontypeColumns({
+                              typeId: activeActiontypeId,
                               viewSubject,
                               isAdmin,
-                            ),
+                            }),
                           }),
                         ],
                       }}

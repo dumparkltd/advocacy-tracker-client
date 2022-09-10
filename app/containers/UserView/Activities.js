@@ -15,9 +15,9 @@ import {
   getActionConnectionField,
 } from 'utils/fields';
 import qe from 'utils/quasi-equals';
+import { getActiontypeColumns } from 'utils/entities';
 
 import {
-  ACTIONTYPES_CONFIG,
   USER_ACTIONTYPES,
   API,
 } from 'themes/config';
@@ -30,34 +30,6 @@ const TypeSelectBox = styled((p) => <Box {...p} />)``;
 const TypeButton = styled((p) => <ButtonPill {...p} />)`
   margin-bottom: 5px;
 `;
-// max-width: ${({ listItems }) => 100 / listItems}%;
-
-const getActiontypeColumns = (typeid, isAdmin) => {
-  let columns = [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: isAdmin ? ['code', 'title'] : ['title'],
-  }];
-  if (
-    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    const typeColumns = ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-      (col) => {
-        if (typeof col.showOnSingle !== 'undefined') {
-          return col.showOnSingle;
-        }
-        return col.id !== 'main';
-      }
-    );
-    columns = [
-      ...columns,
-      ...typeColumns,
-    ];
-  }
-  return columns;
-};
 
 export function Activities(props) {
   const {
@@ -138,7 +110,10 @@ export function Activities(props) {
                 onEntityClick,
                 connections: actionConnections,
                 typeid: viewActiontypeId,
-                columns: getActiontypeColumns(viewActiontypeId, isAdmin),
+                columns: getActiontypeColumns({
+                  typeId: viewActiontypeId,
+                  isAdmin,
+                }),
                 onCreateOption: () => onCreateOption({
                   path: API.ACTIONS,
                   attributes: {

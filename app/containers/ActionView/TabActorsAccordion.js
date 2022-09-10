@@ -16,37 +16,14 @@ import {
   getActorConnectionField,
 } from 'utils/fields';
 
-import { checkActorAttribute } from 'utils/entities';
+import { checkActorAttribute, getActortypeColumns } from 'utils/entities';
 import { lowerCase } from 'utils/string';
-
-import {
-  ACTORTYPES_CONFIG,
-} from 'themes/config';
 
 import FieldGroup from 'components/fields/FieldGroup';
 import AccordionHeader from 'components/AccordionHeader';
 
 import appMessages from 'containers/App/messages';
 import TabActorsAccordionChildTargets from './TabActorsAccordionChildTargets';
-
-const getActortypeColumns = (typeid, showCode) => {
-  let columns = [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: showCode ? ['code', 'title'] : ['title'],
-  }];
-  if (
-    ACTORTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    columns = [
-      ...columns,
-      ...ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns,
-    ];
-  }
-  return columns;
-};
 
 const getTypeLabel = (
   typeId,

@@ -21,7 +21,7 @@ import {
 } from 'utils/fields';
 
 import qe from 'utils/quasi-equals';
-import { getEntityTitle } from 'utils/entities';
+import { getEntityTitle, getActortypeColumns } from 'utils/entities';
 
 import {
   loadEntitiesIfNeeded,
@@ -36,7 +36,6 @@ import { CONTENT_SINGLE } from 'containers/App/constants';
 import {
   USER_ROLES,
   ROUTES,
-  ACTORTYPES_CONFIG,
   ACTORTYPES,
 } from 'themes/config';
 
@@ -88,32 +87,6 @@ const getHighestUserRoleId = (user) => user
     USER_ROLES.DEFAULT.value
   )
   : USER_ROLES.DEFAULT.value;
-
-const getActortypeColumns = (typeid, showCode) => {
-  let columns = [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: showCode ? ['code', 'title'] : ['title'],
-  }];
-  if (
-    ACTORTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    columns = [
-      ...columns,
-      ...ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-        (col) => {
-          if (typeof col.showOnSingle !== 'undefined') {
-            return col.showOnSingle;
-          }
-          return true;
-        }
-      ),
-    ];
-  }
-  return columns;
-};
 
 const VALID_SUBJECTS = ['uactivities', 'uactors'];
 
@@ -291,10 +264,10 @@ export function UserView({
                                   onEntityClick,
                                   connections: actorConnections,
                                   typeid,
-                                  columns: getActortypeColumns(
+                                  columns: getActortypeColumns({
                                     typeid,
-                                    isAdmin || qe(typeid, ACTORTYPES.COUNTRY),
-                                  ),
+                                    showCode: isAdmin || qe(typeid, ACTORTYPES.COUNTRY),
+                                  }),
                                 }),
                               ]),
                               [],

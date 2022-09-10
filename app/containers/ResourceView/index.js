@@ -21,11 +21,15 @@ import {
   getDateField,
 } from 'utils/fields';
 import { qe } from 'utils/quasi-equals';
-import { getEntityTitleTruncated, checkResourceAttribute } from 'utils/entities';
+import {
+  getEntityTitleTruncated,
+  checkResourceAttribute,
+  getActiontypeColumns,
+} from 'utils/entities';
 
 import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
 
-import { ROUTES, ACTIONTYPES_CONFIG } from 'themes/config';
+import { ROUTES } from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
@@ -50,32 +54,7 @@ import {
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
-const getActiontypeColumns = (typeid, isAdmin) => {
-  let columns = [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: isAdmin ? ['code', 'title'] : ['title'],
-  }];
-  if (
-    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    const typeColumns = ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-      (col) => {
-        if (typeof col.showOnSingle !== 'undefined') {
-          return col.showOnSingle;
-        }
-        return col.id !== 'main';
-      }
-    );
-    columns = [
-      ...columns,
-      ...typeColumns,
-    ];
-  }
-  return columns;
-};
+
 export class ResourceView extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
     this.props.loadEntitiesIfNeeded();
@@ -153,7 +132,10 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
             onEntityClick,
             connections: actionConnections,
             typeid: actiontypeid,
-            columns: getActiontypeColumns(actiontypeid, isAdmin),
+            columns: getActiontypeColumns({
+              typeId: actiontypeid,
+              isAdmin,
+            }),
           }),
         );
       });

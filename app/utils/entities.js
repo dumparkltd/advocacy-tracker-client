@@ -6,6 +6,8 @@ import {
   ACTOR_FIELDS,
   RESOURCE_FIELDS,
   INDICATOR_FIELDS,
+  ACTIONTYPES_CONFIG,
+  ACTORTYPES_CONFIG,
   API,
 } from 'themes/config';
 import { find, reduce, every } from 'lodash/collection';
@@ -1176,4 +1178,88 @@ export const setUserConnections = ({
   return user
     .set('actionsByType', entityActionsByActiontype)
     .set('actorsByType', entityActorsByActortype);
+};
+
+export const getActiontypeColumns = ({
+  typeId,
+  viewSubject,
+  isAdmin,
+  otherColumns,
+  skipTypeColumns,
+}) => {
+  let columns = [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: isAdmin ? ['code', 'title'] : ['title'],
+  }];
+
+  if (
+    !skipTypeColumns
+    && ACTIONTYPES_CONFIG[parseInt(typeId, 10)]
+    && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].columns
+  ) {
+    const typeColumns = ACTIONTYPES_CONFIG[parseInt(typeId, 10)].columns.filter(
+      (col) => {
+        if (typeof col.showOnSingle !== 'undefined') {
+          if (viewSubject && Array.isArray(col.showOnSingle)) {
+            return col.showOnSingle.indexOf(viewSubject) > -1;
+          }
+          return col.showOnSingle;
+        }
+        return true;
+      }
+    );
+    columns = [
+      ...columns,
+      ...typeColumns,
+    ];
+  }
+  // e.g. supportlevel
+  if (otherColumns) {
+    columns = [
+      ...columns,
+      ...otherColumns,
+    ];
+  }
+  return columns;
+};
+
+export const getActortypeColumns = ({
+  typeid,
+  showCode,
+  otherColumns,
+  skipTypeColumns,
+}) => {
+  let columns = [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: showCode ? ['code', 'title'] : ['title'],
+  }];
+  if (
+    !skipTypeColumns
+    && ACTORTYPES_CONFIG[parseInt(typeid, 10)]
+    && ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns
+  ) {
+    const typeColumns = ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
+      (col) => {
+        if (typeof col.showOnSingle !== 'undefined') {
+          return col.showOnSingle;
+        }
+        return true;
+      }
+    );
+    columns = [
+      ...columns,
+      ...typeColumns,
+    ];
+  }
+  if (otherColumns) {
+    columns = [
+      ...columns,
+      ...otherColumns,
+    ];
+  }
+  return columns;
 };

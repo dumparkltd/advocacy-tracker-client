@@ -16,11 +16,9 @@ import {
   getActionConnectionField,
 } from 'utils/fields';
 import qe from 'utils/quasi-equals';
+import { getActiontypeColumns } from 'utils/entities';
 
-import {
-  ACTIONTYPES_CONFIG,
-  API,
-} from 'themes/config';
+import { API } from 'themes/config';
 import FieldGroup from 'components/fields/FieldGroup';
 import ButtonPill from 'components/buttons/ButtonPill';
 
@@ -39,32 +37,6 @@ const TypeButton = styled((p) => <ButtonPill {...p} />)`
   margin-bottom: 5px;
 `;
 // max-width: ${({ listItems }) => 100 / listItems}%;
-
-const getActiontypeColumns = (typeid, showCode) => {
-  let columns = [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: showCode ? ['code', 'title'] : ['title'],
-  }];
-  if (
-    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    columns = [
-      ...columns,
-      ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-        (col) => {
-          if (typeof col.showOnSingle !== 'undefined') {
-            return col.showOnSingle;
-          }
-          return true;
-        }
-      ),
-    ];
-  }
-  return columns;
-};
 
 export function TabActivities(props) {
   const {
@@ -137,7 +109,10 @@ export function TabActivities(props) {
                 onEntityClick,
                 connections: actionConnections,
                 typeid: viewActiontypeId,
-                columns: getActiontypeColumns(viewActiontypeId, isAdmin),
+                columns: getActiontypeColumns({
+                  typeId: viewActiontypeId,
+                  isAdmin,
+                }),
                 onCreateOption: () => onCreateOption({
                   path: API.ACTIONS,
                   attributes: {
