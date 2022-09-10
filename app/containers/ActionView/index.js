@@ -96,12 +96,12 @@ import {
 
 import { DEPENDENCIES } from './constants';
 
-const getIndicatorColumns = (viewEntity, intl) => {
+const getIndicatorColumns = (viewEntity, intl, isAdmin) => {
   let columns = [{
     id: 'main',
     type: 'main',
     sort: 'title',
-    attributes: ['code', 'title'],
+    attributes: isAdmin ? ['code', 'title'] : ['title'],
   }];
   if (
     ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[viewEntity.getIn(['attributes', 'measuretype_id'])]
@@ -338,7 +338,7 @@ export function ActionView(props) {
                             onEntityClick,
                             // connections: indicatorConnections,
                             skipLabel: true,
-                            columns: getIndicatorColumns(viewEntity, intl),
+                            columns: getIndicatorColumns(viewEntity, intl, isAdmin),
                           }),
                         ],
                       }}
