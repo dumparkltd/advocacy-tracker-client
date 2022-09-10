@@ -189,11 +189,11 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
       groups.push({
         label: intl.formatMessage(appMessages.entities.taxonomies.parent),
         icon: 'categories',
-        fields: [renderParentCategoryControl(
-          parentOptions,
-          getEntityTitle(parentTaxonomy),
-          entity.getIn(['attributes', 'parent_id']),
-        )],
+        fields: [renderParentCategoryControl({
+          entities: parentOptions,
+          label: getEntityTitle(parentTaxonomy),
+          activeParentId: entity.getIn(['attributes', 'parent_id']),
+        })],
       });
     }
     return groups;

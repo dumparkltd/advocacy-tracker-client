@@ -245,12 +245,13 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       }
     }
     if (actionsAsTargetByActiontype) {
-      const actionConnections = renderActionsAsTargetByActiontypeControl(
-        actionsAsTargetByActiontype,
-        connectedTaxonomies,
+      const actionConnections = renderActionsAsTargetByActiontypeControl({
+        entitiesByActiontype: actionsAsTargetByActiontype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-      );
+        contextIntl: intl,
+        isAdmin,
+      });
       if (actionConnections) {
         groups.push(
           {
@@ -321,7 +322,9 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       { // fieldGroup
         label: intl.formatMessage(appMessages.entities.taxonomies.plural),
         icon: 'categories',
-        fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
+        fields: renderTaxonomyControl({
+          taxonomies, onCreateOption, intl,
+        }),
       },
     );
     if (associationsByActortype) {

@@ -440,12 +440,12 @@ export const renderActionsAsTargetByActiontypeControl = (
   : null;
 
 // actors grouped by actortype
-export const renderResourcesByResourcetypeControl = (
+export const renderResourcesByResourcetypeControl = ({
   entitiesByResourcetype,
   onCreateOption,
   contextIntl,
   isAdmin,
-) => entitiesByResourcetype
+}) => entitiesByResourcetype
   ? entitiesByResourcetype.reduce(
     (controls, entities, typeid) => controls.concat({
       id: `resources.${typeid}`,
@@ -468,17 +468,17 @@ export const renderResourcesByResourcetypeControl = (
   : null;
 
 // taxonomies with categories "embedded"
-export const renderTaxonomyControl = (
+export const renderTaxonomyControl = ({
   taxonomies,
   onCreateOption,
-  contextIntl,
-) => taxonomies
+  intl,
+}) => taxonomies
   ? taxonomies.toList().reduce(
     (controls, taxonomy) => controls.concat({
       id: taxonomy.get('id'),
       model: `.associatedTaxonomies.${taxonomy.get('id')}`,
       dataPath: ['associatedTaxonomies', taxonomy.get('id')],
-      label: getTaxTitle(parseInt(taxonomy.get('id'), 10), contextIntl),
+      label: getTaxTitle(parseInt(taxonomy.get('id'), 10), intl),
       controlType: 'multiselect',
       multiple: taxonomy.getIn(['attributes', 'allow_multiple']),
       options: entityOptions({
@@ -496,19 +496,19 @@ export const renderTaxonomyControl = (
   )
   : [];
 
-export const renderUserControl = (entities, label, activeUserId) => entities
-  ? {
-    id: 'users',
-    model: '.associatedUser',
-    dataPath: ['associatedUser'],
-    label,
-    controlType: 'multiselect',
-    multiple: false,
-    options: userOptions(entities, activeUserId),
-  }
-  : null;
+// export const renderUserControl = ({ entities, label, activeUserId }) => entities
+//   ? {
+//     id: 'users',
+//     model: '.associatedUser',
+//     dataPath: ['associatedUser'],
+//     label,
+//     controlType: 'multiselect',
+//     multiple: false,
+//     options: userOptions(entities, activeUserId),
+//   }
+//   : null;
 
-export const renderParentCategoryControl = (entities, label, activeParentId) => entities
+export const renderParentCategoryControl = ({ entities, label, activeParentId }) => entities
   ? {
     id: 'associatedCategory',
     model: '.associatedCategory',
@@ -519,17 +519,17 @@ export const renderParentCategoryControl = (entities, label, activeParentId) => 
     options: parentCategoryOptions(entities, activeParentId),
   }
   : null;
-export const renderParentActionControl = (entities, label, activeParentId) => entities
-  ? {
-    id: 'associatedParent',
-    model: '.associatedParent',
-    dataPath: ['associatedParent'],
-    label,
-    controlType: 'multiselect',
-    multiple: false,
-    options: parentActionOptions(entities, activeParentId),
-  }
-  : null;
+// export const renderParentActionControl = ({ entities, label, activeParentId }) => entities
+//   ? {
+//     id: 'associatedParent',
+//     model: '.associatedParent',
+//     dataPath: ['associatedParent'],
+//     label,
+//     controlType: 'multiselect',
+//     multiple: false,
+//     options: parentActionOptions(entities, activeParentId),
+//   }
+//   : null;
 
 const getAssociatedEntities = (entities) => entities
   ? entities.reduce(

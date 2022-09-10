@@ -289,11 +289,12 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       }
     }
     if (resourcesByResourcetype) {
-      const resourceConnections = renderResourcesByResourcetypeControl(
-        resourcesByResourcetype,
+      const resourceConnections = renderResourcesByResourcetypeControl({
+        entitiesByResourcetype: resourcesByResourcetype,
         onCreateOption,
-        intl,
-      );
+        contextIntl: intl,
+        isAdmin,
+      });
       if (resourceConnections) {
         groups.push(
           {
@@ -364,7 +365,9 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       { // fieldGroup
         label: intl.formatMessage(appMessages.entities.taxonomies.plural),
         icon: 'categories',
-        fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
+        fields: renderTaxonomyControl({
+          taxonomies, onCreateOption, intl,
+        }),
       },
     );
     if (topActionsByActiontype) {

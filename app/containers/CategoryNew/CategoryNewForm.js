@@ -124,10 +124,10 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
       groups.push({
         label: intl.formatMessage(appMessages.entities.taxonomies.parent),
         icon: 'categories',
-        fields: [renderParentCategoryControl(
-          parentOptions,
-          getEntityTitle(parentTaxonomy),
-        )],
+        fields: [renderParentCategoryControl({
+          entities: parentOptions,
+          label: getEntityTitle(parentTaxonomy),
+        })],
       });
     }
     return groups;
