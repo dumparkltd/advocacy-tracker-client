@@ -52,6 +52,7 @@ function EntityListSidebarOption({
           group: groupType || groupId,
           optionId: option.get('id'),
           path: option.get('path'),
+          invalidateEntitiesPaths: option.get('invalidateEntitiesPaths'),
           connection: option.get('connection'),
           key: option.get('key'),
           ownKey: option.get('ownKey'),

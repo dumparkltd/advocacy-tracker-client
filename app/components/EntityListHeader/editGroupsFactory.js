@@ -136,6 +136,7 @@ export const makeEditGroups = ({
                 label: option.label,
                 message: option.message,
                 path: option.connectPath,
+                invalidateEntitiesPaths: option.invalidateEntitiesPaths,
                 connection: option.entityType,
                 key: option.key,
                 ownKey: option.ownKey,
@@ -247,6 +248,7 @@ export const makeEditGroups = ({
                       ? option.messageByType.replace('{typeid}', type.get('id'))
                       : option.message,
                     path: option.connectPath,
+                    invalidateEntitiesPaths: option.invalidateEntitiesPaths,
                     connection: option.entityTypeAs || option.entityType,
                     key: option.key,
                     ownKey: option.ownKey,

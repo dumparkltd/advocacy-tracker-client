@@ -494,7 +494,11 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
       yield put(updatePath(data.redirect, { replace: true }));
     }
     if (updateClient && data.invalidateEntitiesOnSuccess) {
-      yield put(invalidateEntities(data.invalidateEntitiesOnSuccess));
+      yield all(
+        asArray(data.invalidateEntitiesOnSuccess).map(
+          (path) => put(invalidateEntities(path))
+        )
+      );
     }
   } catch (err) {
     err.response.json = yield err.response.json();
@@ -505,7 +509,7 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
   }
 }
 
-export function* saveMultipleEntitiesSaga({ path, data }) {
+export function* saveMultipleEntitiesSaga({ path, data, invalidateEntitiesPaths }) {
   const updateClient = data && data.length <= 20;
   yield all(data.map(
     (datum) => call(
@@ -515,7 +519,14 @@ export function* saveMultipleEntitiesSaga({ path, data }) {
       true, // multiple
     )
   ));
-  if (!updateClient) {
+  if (!updateClient && invalidateEntitiesPaths) {
+    yield all(
+      asArray(invalidateEntitiesPaths).map(
+        (item) => put(invalidateEntities(item))
+      )
+    );
+  }
+  if (!updateClient && path) {
     yield put(invalidateEntities(path));
   }
 }
@@ -544,7 +555,7 @@ export function* deleteEntitySaga({ data }, updateClient = true, multiple = fals
   }
 }
 
-export function* deleteMultipleEntitiesSaga({ path, data }) {
+export function* deleteMultipleEntitiesSaga({ path, data, invalidateEntitiesPaths }) {
   const updateClient = data && data.length <= 20;
   yield all(data.map(
     (datum) => call(
@@ -554,7 +565,14 @@ export function* deleteMultipleEntitiesSaga({ path, data }) {
       true, // multiple
     )
   ));
-  if (!updateClient) {
+  if (!updateClient && invalidateEntitiesPaths) {
+    yield all(
+      asArray(invalidateEntitiesPaths).map(
+        (item) => put(invalidateEntities(item))
+      )
+    );
+  }
+  if (!updateClient && path) {
     yield put(invalidateEntities(path));
   }
 }
@@ -700,7 +718,11 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
       }
     }
     if (updateClient && data.invalidateEntitiesOnSuccess) {
-      yield put(invalidateEntities(data.invalidateEntitiesOnSuccess));
+      yield all(
+        asArray(data.invalidateEntitiesOnSuccess).map(
+          (path) => put(invalidateEntities(path))
+        )
+      );
     }
   } catch (err) {
     if (err.response) {
@@ -713,7 +735,7 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
   }
 }
 
-export function* newMultipleEntitiesSaga({ path, data }) {
+export function* newMultipleEntitiesSaga({ path, data, invalidateEntitiesPaths }) {
   const updateClient = data && data.length <= 20;
   yield all(data.map(
     (datum) => call(
@@ -723,7 +745,15 @@ export function* newMultipleEntitiesSaga({ path, data }) {
       true, // multiple
     )
   ));
-  if (!updateClient) {
+
+  if (!updateClient && invalidateEntitiesPaths) {
+    yield all(
+      asArray(invalidateEntitiesPaths).map(
+        (item) => put(invalidateEntities(item))
+      )
+    );
+  }
+  if (!updateClient && path) {
     yield put(invalidateEntities(path));
   }
 }

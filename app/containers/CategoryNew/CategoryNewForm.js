@@ -263,7 +263,10 @@ CategoryNewForm.propTypes = {
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
   inModal: PropTypes.bool,
-  invalidateEntitiesOnSuccess: PropTypes.string,
+  invalidateEntitiesOnSuccess: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+  ]),
 };
 
 CategoryNewForm.contextTypes = {

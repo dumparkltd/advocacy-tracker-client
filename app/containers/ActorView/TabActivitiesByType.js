@@ -170,7 +170,7 @@ export function TabActivitiesByType(props) {
                       attributes: {
                         measuretype_id: activeActiontypeId,
                       },
-                      invalidateEntitiesOnSuccess: API.ACTORS,
+                      invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
                       autoUser: true,
                       connect: {
                         type: viewSubject === 'actors' ? 'actorActions' : 'actionActors',

@@ -394,7 +394,7 @@ const selectActionsWithConnections = createSelector(
           ).sortBy((val, key) => key);
 
           // indirect targets (via children, "targets of children")
-          const entityTargetsViaChildren = entityChildren.reduce(
+          const entityTargetsViaChildren = entityChildren && entityChildren.reduce(
             (memo, childId) => {
               const childTargets = targetConnectionsGrouped.get(parseInt(childId, 10));
               return childTargets

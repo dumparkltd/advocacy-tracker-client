@@ -2,21 +2,15 @@ import { takeLatest, put } from 'redux-saga/effects';
 
 import {
   saveEntity,
-  saveMultipleEntities,
   newEntity,
-  newMultipleEntities,
   deleteEntity,
-  deleteMultipleEntities,
   updateRouteQuery,
 } from 'containers/App/actions';
 
 import {
   SAVE,
-  SAVE_MULTIPLE,
   NEW_CONNECTION,
-  NEW_MULTIPLE_CONNECTIONS,
   DELETE_CONNECTION,
-  DELETE_MULTIPLE_CONNECTIONS,
   UPDATE_QUERY,
   UPDATE_GROUP,
   RESET_FILTERS,
@@ -75,15 +69,6 @@ export function* save({ data }) {
     redirect: false,
   }));
 }
-export function* saveMultiple({ path, data }) {
-  yield put(saveMultipleEntities(path, data));
-}
-export function* newMultiple({ path, data }) {
-  yield put(newMultipleEntities(path, data));
-}
-export function* deleteMultiple({ path, data }) {
-  yield put(deleteMultipleEntities(path, data));
-}
 
 export function* newConnection({ data }) {
   yield put(newEntity({
@@ -109,9 +94,6 @@ export default function* entityList() {
   yield takeLatest(RESET_FILTERS, resetFilters);
 
   yield takeLatest(SAVE, save);
-  yield takeLatest(SAVE_MULTIPLE, saveMultiple);
   yield takeLatest(NEW_CONNECTION, newConnection);
   yield takeLatest(DELETE_CONNECTION, deleteConnection);
-  yield takeLatest(NEW_MULTIPLE_CONNECTIONS, newMultiple);
-  yield takeLatest(DELETE_MULTIPLE_CONNECTIONS, deleteMultiple);
 }

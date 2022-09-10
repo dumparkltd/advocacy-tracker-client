@@ -39,6 +39,7 @@ export const CONFIG = {
       messageByType: 'entities.actions_{typeid}.plural',
       message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTIONS, API.RESOURCES],
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,
       connectPath: API.ACTION_RESOURCES, // filter by actor connection

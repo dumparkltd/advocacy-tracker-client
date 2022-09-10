@@ -439,7 +439,10 @@ ActorNewForm.propTypes = {
   formDataPath: PropTypes.string,
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
-  invalidateEntitiesOnSuccess: PropTypes.string,
+  invalidateEntitiesOnSuccess: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+  ]),
   // autoUser: PropTypes.bool,
 };
 

@@ -180,6 +180,7 @@ const makeGroupedConnectionEditOptions = (
   if (option) {
     editOptions.title = messages.title;
     editOptions.path = option.connectPath;
+    editOptions.invalidateEntitiesPaths = option.invalidateEntitiesPaths;
     editOptions.search = option.search;
     editOptions.multiple = !option.single;
     const connectionPath = option.path;
@@ -263,6 +264,7 @@ const makeConnectionEditOptions = (
   if (option) {
     editOptions.title = messages.title;
     editOptions.path = option.connectPath;
+    editOptions.invalidateEntitiesPaths = option.invalidateEntitiesPaths;
     editOptions.search = option.search;
     editOptions.multiple = !option.single;
 

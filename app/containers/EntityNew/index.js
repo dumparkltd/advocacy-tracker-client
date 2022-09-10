@@ -104,7 +104,10 @@ EntityNew.propTypes = {
   connect: PropTypes.object,
   viewDomain: PropTypes.object,
   onSaveSuccess: PropTypes.func,
-  invalidateEntitiesOnSuccess: PropTypes.string,
+  invalidateEntitiesOnSuccess: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+  ]),
   onCancel: PropTypes.func,
   autoUser: PropTypes.bool,
 };

@@ -568,7 +568,10 @@ ActionNewForm.propTypes = {
   modalConnect: PropTypes.instanceOf(Map),
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
-  invalidateEntitiesOnSuccess: PropTypes.string,
+  invalidateEntitiesOnSuccess: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+  ]),
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
   // autoUser: PropTypes.bool,

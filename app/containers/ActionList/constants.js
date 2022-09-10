@@ -84,6 +84,7 @@ export const CONFIG = {
       messageByType: 'entities.actors_{typeid}.plural',
       message: 'entities.actors.plural',
       path: API.ACTORS,
+      invalidateEntitiesPaths: [API.ACTORS, API.ACTIONS],
       entityType: 'actors',
       clientPath: ROUTES.ACTOR,
       connectPath: API.ACTOR_ACTIONS, // filter by actor connection
@@ -100,6 +101,7 @@ export const CONFIG = {
       messageByType: 'entities.actors_{typeid}.plural',
       message: 'entities.actors.plural',
       path: API.ACTORS,
+      invalidateEntitiesPaths: [API.ACTORS, API.ACTIONS],
       entityType: 'actors',
       entityTypeAs: 'targets',
       clientPath: ROUTES.ACTOR,
@@ -117,6 +119,7 @@ export const CONFIG = {
       messageByType: 'entities.actions_{typeid}.plural',
       message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTIONS],
       entityType: 'actions', // filter by actor connection
       entityTypeAs: 'parents', // filter by actor connection
       clientPath: ROUTES.ACTION,
@@ -132,6 +135,7 @@ export const CONFIG = {
       messageByType: 'entities.actions_{typeid}.plural',
       message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTIONS],
       entityType: 'actions', // filter by actor connection
       entityTypeAs: 'children', // filter by actor connection
       clientPath: ROUTES.ACTION,
@@ -146,6 +150,7 @@ export const CONFIG = {
       search: true,
       message: 'entities.indicators.plural',
       path: API.INDICATORS,
+      invalidateEntitiesPaths: [API.INDICATORS, API.ACTIONS],
       entityType: 'indicators',
       clientPath: ROUTES.INDICATOR,
       connectPath: API.ACTION_INDICATORS, // filter by actor connection
@@ -168,6 +173,7 @@ export const CONFIG = {
       messageByType: 'entities.resources_{typeid}.plural',
       message: 'entities.resources.plural',
       path: API.RESOURCES,
+      invalidateEntitiesPaths: [API.RESOURCES, API.ACTIONS],
       entityType: 'resources',
       clientPath: ROUTES.RESOURCE,
       connectPath: API.ACTION_RESOURCES, // filter by actor connection
@@ -182,6 +188,7 @@ export const CONFIG = {
       search: true,
       message: 'entities.users.plural',
       path: API.USERS,
+      invalidateEntitiesPaths: [API.ACTIONS, API.USERS],
       entityType: 'users',
       clientPath: ROUTES.USER,
       connectPath: API.USER_ACTIONS, // filter by actor connection

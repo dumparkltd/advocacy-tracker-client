@@ -46,6 +46,9 @@ import {
   setIncludeActorChildren,
   setIncludeTargetChildren,
   setIncludeInofficialStatements,
+  saveMultipleEntities,
+  newMultipleEntities,
+  deleteMultipleEntities,
 } from 'containers/App/actions';
 
 // import appMessages from 'containers/App/messages';
@@ -66,9 +69,9 @@ import messages from './messages';
 
 import {
   resetProgress,
-  saveMultiple,
-  newMultipleConnections,
-  deleteMultipleConnections,
+  // saveMultiple,
+  // newMultipleConnections,
+  // deleteMultipleConnections,
   selectEntity,
   selectMultipleEntities,
   updateQuery,
@@ -745,7 +748,7 @@ function mapDispatchToProps(dispatch, props) {
               });
             }
           });
-          dispatch(saveMultiple(
+          dispatch(saveMultipleEntities(
             props.config.serverPath,
             entities.filter(
               (entity) => entity.getIn(['attributes', activeEditOption.optionId]) !== newValue
@@ -904,15 +907,19 @@ function mapDispatchToProps(dispatch, props) {
 
         // associations
         if (updates.get('creates') && updates.get('creates').size > 0) {
-          dispatch(newMultipleConnections(
+          dispatch(newMultipleEntities(
             activeEditOption.path,
             updates.get('creates').toJS(),
+            activeEditOption.invalidateEntitiesPaths
+              && activeEditOption.invalidateEntitiesPaths.toJS(),
           ));
         }
         if (updates.get('deletes') && updates.get('deletes').size > 0) {
-          dispatch(deleteMultipleConnections(
+          dispatch(deleteMultipleEntities(
             activeEditOption.path,
             updates.get('deletes').toJS(),
+            activeEditOption.invalidateEntitiesPaths
+              && activeEditOption.invalidateEntitiesPaths.toJS(),
           ));
         }
       }

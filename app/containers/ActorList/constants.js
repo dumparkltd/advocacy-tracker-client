@@ -64,6 +64,7 @@ export const CONFIG = {
       messageByType: 'entities.actions_{typeid}.plural',
       message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTORS, API.ACTIONS],
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,
       connectPath: API.ACTOR_ACTIONS, // filter by actor connection
@@ -78,6 +79,7 @@ export const CONFIG = {
       messageByType: 'entities.actions_{typeid}.plural',
       message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTORS, API.ACTIONS],
       entityType: 'actions', // filter by actor connection
       entityTypeAs: 'targetingActions',
       clientPath: ROUTES.ACTION,
@@ -94,6 +96,7 @@ export const CONFIG = {
       messageByType: 'entities.actors_{typeid}.plural',
       message: 'entities.actors.plural',
       path: API.ACTORS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTORS],
       entityTypeAs: 'members', // filter by actor connection
       entityType: 'actors',
       clientPath: ROUTES.ACTOR,
@@ -109,6 +112,7 @@ export const CONFIG = {
       messageByType: 'entities.actors_{typeid}.plural',
       message: 'entities.actors.plural',
       path: API.ACTORS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTORS],
       entityType: 'actors',
       entityTypeAs: 'associations', // filter by actor connection
       clientPath: ROUTES.ACTOR,
@@ -123,6 +127,7 @@ export const CONFIG = {
       search: true,
       message: 'entities.users.plural',
       path: API.USERS,
+      invalidateEntitiesPaths: [API.USERS, API.ACTORS],
       entityType: 'users',
       clientPath: ROUTES.USER,
       connectPath: API.USER_ACTORS, // filter by actor connection

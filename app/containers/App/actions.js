@@ -235,11 +235,12 @@ export function deleteEntity(data) {
     data,
   };
 }
-export function deleteMultipleEntities(path, data) {
+export function deleteMultipleEntities(path, data, invalidateEntitiesPaths) {
   return {
     type: DELETE_MULTIPLE_ENTITIES,
     path,
     data,
+    invalidateEntitiesPaths,
   };
 }
 
@@ -250,11 +251,12 @@ export function saveEntity(data) {
     data,
   };
 }
-export function saveMultipleEntities(path, data) {
+export function saveMultipleEntities(path, data, invalidateEntitiesPaths) {
   return {
     type: SAVE_MULTIPLE_ENTITIES,
     path,
     data,
+    invalidateEntitiesPaths,
   };
 }
 
@@ -265,11 +267,12 @@ export function newEntity(data) {
     data,
   };
 }
-export function newMultipleEntities(path, data) {
+export function newMultipleEntities(path, data, invalidateEntitiesPaths) {
   return {
     type: NEW_MULTIPLE_ENTITIES,
     path,
     data,
+    invalidateEntitiesPaths,
   };
 }
 // server side
