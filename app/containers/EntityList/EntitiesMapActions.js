@@ -185,9 +185,7 @@ export function EntitiesMapActions({
       }]),
     });
 
-    indicatorOptions = indicators.sort(
-      (a, b) => parseInt(a.get('id'), 10) < parseInt(b.get('id'), 10) ? -1 : 1
-    ).reduce(
+    indicatorOptions = indicators.reduce(
       (memo, entity) => ([
         ...memo,
         {

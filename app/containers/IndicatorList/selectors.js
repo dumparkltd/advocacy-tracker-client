@@ -213,7 +213,7 @@ export const selectListIndicators = createSelector(
     return entities && sortEntities(
       entities,
       order || (sortOption ? sortOption.order : 'desc'),
-      sort || (sortOption ? sortOption.attribute : 'id'),
+      sort || (sortOption ? sortOption.attribute : 'title'),
       sortOption ? sortOption.type : 'string',
     );
   }

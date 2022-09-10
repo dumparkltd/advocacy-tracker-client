@@ -23,12 +23,13 @@ const Styled = styled.div`
   z-index: 50;
   bottom: 10px;
   width: 100%;
-  height: ${({ hasTabs }) => hasTabs ? 250 : 220}px;
+  height: ${({ hasTabs }) => hasTabs ? 260 : 220}px;
   left: 0;
-  max-width: 380px;
+  max-width: 320px;
   @media (min-width: 370px) {
+    max-width: 420px;
     left: 10px;
-    bottom: 50px;
+    bottom: 30px;
   }
 `;
 const IndicatorButton = styled((p) => <Button plain {...p} />)`
