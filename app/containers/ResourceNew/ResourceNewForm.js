@@ -165,7 +165,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
         entitiesByActiontype: actionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (actionConnections) {

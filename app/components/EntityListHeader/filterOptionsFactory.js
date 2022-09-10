@@ -31,7 +31,7 @@ export const makeActiveFilterOptions = ({
   connections,
   connectedTaxonomies,
   activeFilterOption,
-  contextIntl,
+  intl,
   messages,
   isAdmin,
   includeMembers,
@@ -46,7 +46,7 @@ export const makeActiveFilterOptions = ({
         activeFilterOption.optionId,
         locationQuery,
         messages,
-        contextIntl,
+        intl,
       );
     case 'connectedTaxonomies':
       return makeConnectedTaxonomyFilterOptions(
@@ -56,7 +56,7 @@ export const makeActiveFilterOptions = ({
         activeFilterOption.optionId,
         locationQuery,
         messages,
-        contextIntl,
+        intl,
       );
     case 'actors':
     case 'actions':
@@ -74,7 +74,7 @@ export const makeActiveFilterOptions = ({
         activeFilterOption.optionId,
         locationQuery,
         messages,
-        contextIntl,
+        intl,
         activeFilterOption.group,
         isAdmin,
         includeMembers,
@@ -90,7 +90,7 @@ export const makeActiveFilterOptions = ({
         activeFilterOption.optionId,
         locationQuery,
         messages,
-        contextIntl,
+        intl,
         activeFilterOption.group,
         isAdmin,
       );
@@ -108,7 +108,7 @@ export const makeAnyWithoutFilterOptions = ({
   config,
   locationQuery,
   activeFilterOption,
-  contextIntl,
+  intl,
   messages,
 }) => {
   // create filterOptions
@@ -126,7 +126,7 @@ export const makeAnyWithoutFilterOptions = ({
         config.connections,
         locationQuery,
         messages,
-        contextIntl,
+        intl,
         activeFilterOption.group,
       );
     default:
@@ -168,7 +168,7 @@ export const makeAttributeFilterOptions = ({
 };
 
 
-const getTaxTitle = (id, contextIntl) => contextIntl.formatMessage(appMessages.entities.taxonomies[id].single);
+const getTaxTitle = (id, intl) => intl.formatMessage(appMessages.entities.taxonomies[id].single);
 
 export const makeTaxonomyFilterOptions = (
   entities,
@@ -177,7 +177,7 @@ export const makeTaxonomyFilterOptions = (
   activeTaxId,
   locationQuery,
   messages,
-  contextIntl,
+  intl,
 ) => {
   const filterOptions = {
     groupId: 'taxonomies',
@@ -196,7 +196,7 @@ export const makeTaxonomyFilterOptions = (
     if (parent) {
       filterOptions.groups = parent.get('categories').map((cat) => getEntityTitle(cat));
     }
-    filterOptions.title = `${messages.titlePrefix} ${lowerCase(getTaxTitle(parseInt(taxonomy.get('id'), 10), contextIntl))}`;
+    filterOptions.title = `${messages.titlePrefix} ${lowerCase(getTaxTitle(parseInt(taxonomy.get('id'), 10), intl))}`;
     if (entities.size === 0) {
       if (locationQuery.get(config.query)) {
         const locationQueryValue = locationQuery.get(config.query);
@@ -227,7 +227,7 @@ export const makeTaxonomyFilterOptions = (
           if (isNumber(queryValue) && taxonomy.get('id') === queryValue) {
             const value = parseInt(queryValue, 10);
             filterOptions.options[value] = {
-              label: `${messages.without} ${lowerCase(getTaxTitle(parseInt(taxonomy.get('id'), 10), contextIntl))}`,
+              label: `${messages.without} ${lowerCase(getTaxTitle(parseInt(taxonomy.get('id'), 10), intl))}`,
               showCount: true,
               labelEmphasis: true,
               value,
@@ -273,7 +273,7 @@ export const makeTaxonomyFilterOptions = (
             filterOptions.options.without.count += 1;
           } else {
             filterOptions.options.without = {
-              label: `${messages.without} ${lowerCase(getTaxTitle(parseInt(taxonomy.get('id'), 10), contextIntl))}`,
+              label: `${messages.without} ${lowerCase(getTaxTitle(parseInt(taxonomy.get('id'), 10), intl))}`,
               showCount: true,
               labelEmphasis: true,
               value: taxonomy.get('id'),
@@ -313,7 +313,7 @@ const makeGroupedConnectionFilterOptions = (
   activeOptionId,
   locationQuery,
   messages,
-  contextIntl,
+  intl,
   group,
   isAdmin,
   includeMembers,
@@ -355,7 +355,7 @@ const makeGroupedConnectionFilterOptions = (
               const reference = showEntityReference && connection && getEntityReference(connection);
               filterOptions.options[value] = {
                 reference,
-                label: connection ? getEntityTitle(connection, option.labels, contextIntl) : upperFirst(value),
+                label: connection ? getEntityTitle(connection, option.labels, intl) : upperFirst(value),
                 info: connection.getIn(['attributes', 'description']),
                 showCount: true,
                 value: `${typeId}:${value}`,
@@ -422,7 +422,7 @@ const makeGroupedConnectionFilterOptions = (
               if (!filterOptions.options[connectedAttributeId]) {
                 const value = `${typeId}:${connectedAttributeId}`;
                 const reference = showEntityReference && getEntityReference(connection);
-                const label = getEntityTitle(connection, option.labels, contextIntl);
+                const label = getEntityTitle(connection, option.labels, intl);
                 filterOptions.options[connectedAttributeId] = {
                   reference,
                   label,
@@ -510,7 +510,7 @@ const makeGroupedConnectionFilterOptions = (
                 } else {
                   const value = `${typeId}:${connectedId}`;
                   const reference = showEntityReference && getEntityReference(connection);
-                  const label = getEntityTitle(connection, option.labels, contextIntl);
+                  const label = getEntityTitle(connection, option.labels, intl);
                   filterOptions.options[connectedId] = {
                     reference,
                     label,
@@ -543,7 +543,7 @@ const makeGroupedConnectionFilterOptions = (
                   } else {
                     const value = `${typeId}:${connectedId}`;
                     const reference = showEntityReference && getEntityReference(connection);
-                    const label = getEntityTitle(connection, option.labels, contextIntl);
+                    const label = getEntityTitle(connection, option.labels, intl);
                     filterOptions.options[connectedId] = {
                       reference,
                       label,
@@ -619,7 +619,7 @@ const makeGroupedConnectionFilterOptions = (
       }); // for each entities
     }
   }
-  filterOptions.tagFilterGroups = option && makeTagFilterGroups(connectedTaxonomies, contextIntl);
+  filterOptions.tagFilterGroups = option && makeTagFilterGroups(connectedTaxonomies, intl);
   return filterOptions;
 };
 const getConnectionAttributeFilterOptions = ({
@@ -627,7 +627,7 @@ const getConnectionAttributeFilterOptions = ({
   option,
   entities,
   messages,
-  contextIntl,
+  intl,
   locationQuery,
 }) => {
   const resultOptions = {
@@ -654,7 +654,7 @@ const getConnectionAttributeFilterOptions = ({
           if (attributeOption) {
             resultOptions.options[value] = {
               value: lqv,
-              label: contextIntl.formatMessage(appMessages[optionMessages][value]),
+              label: intl.formatMessage(appMessages[optionMessages][value]),
               query: 'xwhere',
               checked: true,
             };
@@ -680,7 +680,7 @@ const getConnectionAttributeFilterOptions = ({
             ...memo,
             [o.value]: {
               value: queryValue,
-              label: contextIntl.formatMessage(appMessages[optionMessages][o.value]),
+              label: intl.formatMessage(appMessages[optionMessages][o.value]),
               checked,
               query: 'xwhere',
             },
@@ -700,7 +700,7 @@ const getConnectionFilterOptions = ({
   entities,
   isAdmin,
   messages,
-  contextIntl,
+  intl,
   locationQuery,
   connections,
 }) => {
@@ -723,7 +723,7 @@ const getConnectionFilterOptions = ({
         const reference = showEntityReference && connection && getEntityReference(connection);
         resultOptions.options[value] = {
           reference,
-          label: connection ? getEntityTitle(connection, option.labels, contextIntl) : upperFirst(value),
+          label: connection ? getEntityTitle(connection, option.labels, intl) : upperFirst(value),
           info: connection && connection.getIn(['attributes', 'description']),
           showCount: true,
           value,
@@ -771,7 +771,7 @@ const getConnectionFilterOptions = ({
             } else {
               const value = connectedAttributeId;
               const reference = showEntityReference && getEntityReference(connection);
-              const label = getEntityTitle(connection, option.labels, contextIntl);
+              const label = getEntityTitle(connection, option.labels, intl);
               resultOptions.options[connectedAttributeId] = {
                 reference,
                 label,
@@ -820,7 +820,7 @@ const getConnectionFilterOptions = ({
               optionConnections = true;
               const value = connectedId;
               const reference = showEntityReference && getEntityReference(connection);
-              const label = getEntityTitle(connection, option.labels, contextIntl);
+              const label = getEntityTitle(connection, option.labels, intl);
               resultOptions.options[connectedId] = {
                 reference,
                 label,
@@ -870,7 +870,7 @@ const makeConnectionFilterOptions = (
   activeOptionId,
   locationQuery,
   messages,
-  contextIntl,
+  intl,
   group,
   isAdmin,
 ) => {
@@ -894,11 +894,11 @@ const makeConnectionFilterOptions = (
         entities,
         isAdmin,
         messages,
-        contextIntl,
+        intl,
         locationQuery,
         connections,
       });
-      filterOptions.tagFilterGroups = option && makeTagFilterGroups(connectedTaxonomies, contextIntl);
+      filterOptions.tagFilterGroups = option && makeTagFilterGroups(connectedTaxonomies, intl);
     } else if (
       option.connectionAttributeFilter
       && option.connectionAttributeFilter.path === activeOptionId
@@ -917,7 +917,7 @@ const makeConnectionFilterOptions = (
         option: option.connectionAttributeFilter,
         entities,
         messages,
-        contextIntl,
+        intl,
         locationQuery,
       });
     }
@@ -928,7 +928,7 @@ export const makeAnyWithoutConnectionFilterOptions = (
   config,
   locationQuery,
   messages,
-  contextIntl,
+  intl,
   group,
 ) => {
   // get the active option
@@ -941,7 +941,7 @@ export const makeAnyWithoutConnectionFilterOptions = (
     const withoutChecked = asList(locationQuery.get('without')).includes(entityType);
     const anyChecked = asList(locationQuery.get('any')).includes(entityType);
     const label = appMessages.nav[group]
-      ? contextIntl.formatMessage(appMessages.nav[group])
+      ? intl.formatMessage(appMessages.nav[group])
       : 'LABEL NOT FOUND';
     return [
       {
@@ -972,7 +972,7 @@ export const makeConnectedTaxonomyFilterOptions = (
   activeOptionId,
   locationQuery,
   messages,
-  contextIntl,
+  intl,
 ) => {
   const filterOptions = {
     groupId: 'connectedTaxonomies',
@@ -992,7 +992,7 @@ export const makeConnectedTaxonomyFilterOptions = (
     if (parent) {
       filterOptions.groups = parent.get('categories').map((cat) => getEntityTitle(cat));
     }
-    filterOptions.title = `${messages.titlePrefix} ${lowerCase(getTaxTitle(parseInt(taxonomy.get('id'), 10), contextIntl))}`;
+    filterOptions.title = `${messages.titlePrefix} ${lowerCase(getTaxTitle(parseInt(taxonomy.get('id'), 10), intl))}`;
     const { query } = config.connectedTaxonomies;
     const locationQueryValue = locationQuery.get(query);
     const connection = config.connectedTaxonomies;

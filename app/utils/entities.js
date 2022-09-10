@@ -727,11 +727,11 @@ export const usersByRole = (
   }
 );
 
-export const getEntityTitle = (entity, labels, contextIntl) => {
-  if (labels && contextIntl) {
+export const getEntityTitle = (entity, labels, intl) => {
+  if (labels && intl) {
     const label = find(labels, { value: parseInt(entity.get('id'), 10) });
     if (label && label.message) {
-      return appMessage(contextIntl, label.message);
+      return appMessage(intl, label.message);
     }
   }
   return entity.getIn(['attributes', 'title'])
@@ -740,9 +740,9 @@ export const getEntityTitle = (entity, labels, contextIntl) => {
 export const getEntityTitleTruncated = (
   entity,
   labels,
-  contextIntl,
+  intl,
 ) => truncateText(
-  getEntityTitle(entity, labels, contextIntl),
+  getEntityTitle(entity, labels, intl),
   TEXT_TRUNCATE.META_TITLE,
 );
 

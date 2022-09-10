@@ -277,7 +277,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       }
       const indicatorConnections = renderIndicatorControl({
         entities: indicatorOptions,
-        contextIntl: intl,
+        intl,
         connections: entityIndicatorConnections,
         connectionAttributes,
         isAdmin,
@@ -296,7 +296,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         entitiesByActortype: actorsByActortype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (actorConnections) {
@@ -313,7 +313,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         entitiesByActortype: targetsByActortype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (targetConnections) {
@@ -330,7 +330,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         entitiesByActiontype: subActionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         model: 'associatedSubActionsByActiontype',
         isAdmin,
       });
@@ -347,7 +347,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       const resourceConnections = renderResourcesByResourcetypeControl({
         entitiesByResourcetype: resourcesByResourcetype,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (resourceConnections) {
@@ -435,7 +435,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         entitiesByActiontype: topActionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         model: 'associatedTopActionsByActiontype',
         isAdmin,
       });

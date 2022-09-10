@@ -147,7 +147,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
         entitiesByActiontype: actionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
         connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
           ? [

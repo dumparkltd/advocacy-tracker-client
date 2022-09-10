@@ -353,7 +353,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
               activeFilterOption: {
                 group: groupId,
               },
-              contextIntl: intl,
+              intl,
               messages: {
                 titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
                 without: intl.formatMessage(messages.filterFormWithoutPrefix),
@@ -389,7 +389,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           // actiontypes,
           connectedTaxonomies,
           activeFilterOption: activeOption,
-          contextIntl: intl,
+          intl,
           typeId,
           isAdmin,
           messages: {
@@ -434,7 +434,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           connections,
           connectedTaxonomies,
           activeEditOption: activeOption,
-          contextIntl: intl,
+          intl,
           messages: {
             title: `${intl.formatMessage(messages.editFormTitlePrefix)} ${entitiesSelected.size} ${intl.formatMessage(messages.editFormTitlePostfix)}`,
           },

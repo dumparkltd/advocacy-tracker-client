@@ -190,7 +190,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
         entitiesByActiontype: actionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (actionConnections) {

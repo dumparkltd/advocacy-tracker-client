@@ -104,12 +104,12 @@ export const taxonomyOptions = (taxonomies) => taxonomies
   )
   : Map();
 
-const getTaxTitle = (id, contextIntl) => contextIntl ? contextIntl.formatMessage(appMessages.entities.taxonomies[id].single) : '';
+const getTaxTitle = (id, intl) => intl ? intl.formatMessage(appMessages.entities.taxonomies[id].single) : '';
 
 // turn taxonomies into multiselect options
-export const makeTagFilterGroups = (taxonomies, contextIntl) => taxonomies
+export const makeTagFilterGroups = (taxonomies, intl) => taxonomies
   && taxonomies.toList().map((taxonomy) => ({
-    title: getTaxTitle(parseInt(taxonomy.get('id'), 10), contextIntl),
+    title: getTaxTitle(parseInt(taxonomy.get('id'), 10), intl),
     palette: ['taxonomies', parseInt(taxonomy.get('id'), 10)],
     options: taxonomy.get('categories').map((category) => ({
       reference: getEntityReference(category, false),
@@ -124,14 +124,14 @@ export const makeTagFilterGroups = (taxonomies, contextIntl) => taxonomies
 //   entities,
 //   taxonomies,
 //   onCreateOption,
-//   contextIntl,
+//   intl,
 //   showCode,
 // ) => entities
 //   ? {
 //     id: 'actions',
 //     model: '.associatedActions',
 //     dataPath: ['associatedActions'],
-//     label: contextIntl.formatMessage(appMessages.entities.actions.plural),
+//     label: intl.formatMessage(appMessages.entities.actions.plural),
 //     controlType: 'multiselect',
 //     options: entityOptions({
 //       entities,
@@ -139,7 +139,7 @@ export const makeTagFilterGroups = (taxonomies, contextIntl) => taxonomies
 //     }),
 //     advanced: true,
 //     selectAll: true,
-//     tagFilterGroups: makeTagFilterGroups(taxonomies, contextIntl),
+//     tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
 //     onCreate: onCreateOption
 //       ? () => onCreateOption({ path: API.ACTIONS })
 //       : null,
@@ -148,7 +148,7 @@ export const makeTagFilterGroups = (taxonomies, contextIntl) => taxonomies
 export const renderIndicatorControl = ({
   entities,
   // onCreateOption,
-  contextIntl,
+  intl,
   connections,
   connectionAttributes,
   showCode,
@@ -157,7 +157,7 @@ export const renderIndicatorControl = ({
     id: 'indicators',
     model: '.associatedIndicators',
     dataPath: ['associatedIndicators'],
-    label: contextIntl.formatMessage(appMessages.entities.indicators.plural),
+    label: intl.formatMessage(appMessages.entities.indicators.plural),
     controlType: 'multiselect',
     options: entityOptions({
       entities,
@@ -175,13 +175,13 @@ export const renderIndicatorControl = ({
 export const renderUserMultiControl = (
   entities,
   onCreateOption,
-  contextIntl,
+  intl,
 ) => entities
   ? {
     id: 'users',
     model: '.associatedUsers',
     dataPath: ['associatedUsers'],
-    label: contextIntl.formatMessage(appMessages.entities.users.plural),
+    label: intl.formatMessage(appMessages.entities.users.plural),
     controlType: 'multiselect',
     options: entityOptions({
       entities,
@@ -198,14 +198,14 @@ export const renderUserMultiControl = (
 //   entities,
 //   taxonomies,
 //   onCreateOption,
-//   contextIntl,
+//   intl,
 //   showCode,
 // ) => entities
 //   ? {
 //     id: `actors.${actortypeId}`,
 //     model: `.associatedActorsByActortype.${actortypeId}`,
 //     dataPath: ['associatedActorsByActortype', actortypeId],
-//     label: contextIntl.formatMessage(appMessages.entities[`actors_${actortypeId}`].plural),
+//     label: intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].plural),
 //     controlType: 'multiselect',
 //     options: entityOptions({
 //       entities,
@@ -213,7 +213,7 @@ export const renderUserMultiControl = (
 //     }),
 //     advanced: true,
 //     selectAll: true,
-//     tagFilterGroups: makeTagFilterGroups(taxonomies, contextIntl),
+//     tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
 //     onCreate: onCreateOption
 //       ? () => onCreateOption({ path: API.ACTORS })
 //       : null,
@@ -225,7 +225,7 @@ export const renderActorsByActortypeControl = ({
   entitiesByActortype,
   taxonomies,
   onCreateOption,
-  contextIntl,
+  intl,
   isAdmin,
 }) => entitiesByActortype
   ? entitiesByActortype.reduce(
@@ -234,7 +234,7 @@ export const renderActorsByActortypeControl = ({
       typeId: typeid,
       model: `.associatedActorsByActortype.${typeid}`,
       dataPath: ['associatedActorsByActortype', typeid],
-      label: contextIntl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
+      label: intl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
       controlType: 'multiselect',
       options: entityOptions({
         entities,
@@ -242,7 +242,7 @@ export const renderActorsByActortypeControl = ({
       }),
       advanced: true,
       selectAll: true,
-      tagFilterGroups: makeTagFilterGroups(taxonomies, contextIntl),
+      tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
       onCreate: onCreateOption
         ? () => onCreateOption({
           path: API.ACTORS,
@@ -262,7 +262,7 @@ export const renderTargetsByActortypeControl = ({
   entitiesByActortype,
   taxonomies,
   onCreateOption,
-  contextIntl,
+  intl,
   isAdmin,
 }) => entitiesByActortype
   ? entitiesByActortype.reduce(
@@ -271,7 +271,7 @@ export const renderTargetsByActortypeControl = ({
       typeId: typeid,
       model: `.associatedTargetsByActortype.${typeid}`,
       dataPath: ['associatedTargetsByActortype', typeid],
-      label: contextIntl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
+      label: intl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
       controlType: 'multiselect',
       options: entityOptions({
         entities,
@@ -279,7 +279,7 @@ export const renderTargetsByActortypeControl = ({
       }),
       advanced: true,
       selectAll: true,
-      tagFilterGroups: makeTagFilterGroups(taxonomies, contextIntl),
+      tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
       onCreate: onCreateOption
         ? () => onCreateOption({
           path: API.ACTORS,
@@ -299,7 +299,7 @@ export const renderMembersByActortypeControl = ({
   entitiesByActortype,
   taxonomies,
   onCreateOption,
-  contextIntl,
+  intl,
   isAdmin,
 }) => entitiesByActortype
   ? entitiesByActortype.reduce(
@@ -308,7 +308,7 @@ export const renderMembersByActortypeControl = ({
       typeId: typeid,
       model: `.associatedMembersByActortype.${typeid}`,
       dataPath: ['associatedMembersByActortype', typeid],
-      label: contextIntl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
+      label: intl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
       controlType: 'multiselect',
       options: entityOptions({
         entities,
@@ -316,7 +316,7 @@ export const renderMembersByActortypeControl = ({
       }),
       advanced: true,
       selectAll: true,
-      tagFilterGroups: makeTagFilterGroups(taxonomies, contextIntl),
+      tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
       onCreate: onCreateOption
         ? () => onCreateOption({
           path: API.ACTORS,
@@ -335,7 +335,7 @@ export const renderAssociationsByActortypeControl = ({
   entitiesByActortype,
   taxonomies,
   onCreateOption,
-  contextIntl,
+  intl,
   isAdmin,
 }) => entitiesByActortype
   ? entitiesByActortype.reduce(
@@ -344,7 +344,7 @@ export const renderAssociationsByActortypeControl = ({
       typeId: typeid,
       model: `.associatedAssociationsByActortype.${typeid}`,
       dataPath: ['associatedAssociationsByActortype', typeid],
-      label: contextIntl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
+      label: intl.formatMessage(appMessages.entities[`actors_${typeid}`].plural),
       controlType: 'multiselect',
       options: entityOptions({
         entities,
@@ -352,7 +352,7 @@ export const renderAssociationsByActortypeControl = ({
       }),
       advanced: true,
       selectAll: true,
-      tagFilterGroups: makeTagFilterGroups(taxonomies, contextIntl),
+      tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
       onCreate: onCreateOption
         ? () => onCreateOption({
           path: API.ACTORS,
@@ -372,7 +372,7 @@ export const renderActionsByActiontypeControl = ({
   entitiesByActiontype,
   taxonomies,
   onCreateOption,
-  contextIntl,
+  intl,
   connectionAttributesForType,
   model = 'associatedActionsByActiontype',
   isAdmin,
@@ -383,13 +383,13 @@ export const renderActionsByActiontypeControl = ({
       typeId: typeid,
       model: `.${model}.${typeid}`,
       dataPath: [model, typeid],
-      label: contextIntl.formatMessage(appMessages.entities[`actions_${typeid}`].plural),
+      label: intl.formatMessage(appMessages.entities[`actions_${typeid}`].plural),
       controlType: 'multiselect',
       options: entityOptions({ entities, showCode: isAdmin }),
       advanced: true,
       selectAll: true,
       connectionAttributes: connectionAttributesForType && connectionAttributesForType(typeid),
-      tagFilterGroups: makeTagFilterGroups(taxonomies, contextIntl),
+      tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
       onCreate: onCreateOption
         ? () => onCreateOption({
           path: API.ACTIONS,
@@ -409,7 +409,7 @@ export const renderActionsAsTargetByActiontypeControl = (
   entitiesByActiontype,
   taxonomies,
   onCreateOption,
-  contextIntl,
+  intl,
   isAdmin,
 ) => entitiesByActiontype
   ? entitiesByActiontype.reduce(
@@ -418,12 +418,12 @@ export const renderActionsAsTargetByActiontypeControl = (
       typeId: typeid,
       model: `.associatedActionsAsTargetByActiontype.${typeid}`,
       dataPath: ['associatedActionsAsTargetByActiontype', typeid],
-      label: contextIntl.formatMessage(appMessages.entities[`actions_${typeid}`].plural),
+      label: intl.formatMessage(appMessages.entities[`actions_${typeid}`].plural),
       controlType: 'multiselect',
       options: entityOptions({ entities, showCode: isAdmin }),
       advanced: true,
       selectAll: true,
-      tagFilterGroups: makeTagFilterGroups(taxonomies, contextIntl),
+      tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
       onCreate: onCreateOption
         ? () => onCreateOption({
           path: API.ACTIONS,
@@ -443,7 +443,7 @@ export const renderActionsAsTargetByActiontypeControl = (
 export const renderResourcesByResourcetypeControl = ({
   entitiesByResourcetype,
   onCreateOption,
-  contextIntl,
+  intl,
   isAdmin,
 }) => entitiesByResourcetype
   ? entitiesByResourcetype.reduce(
@@ -451,7 +451,7 @@ export const renderResourcesByResourcetypeControl = ({
       id: `resources.${typeid}`,
       model: `.associatedResourcesByResourcetype.${typeid}`,
       dataPath: ['associatedResourcesByResourcetype', typeid],
-      label: contextIntl.formatMessage(appMessages.entities[`resources_${typeid}`].plural),
+      label: intl.formatMessage(appMessages.entities[`resources_${typeid}`].plural),
       controlType: 'multiselect',
       options: entityOptions({ entities, showCode: isAdmin }),
       advanced: true,

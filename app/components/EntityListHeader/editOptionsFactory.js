@@ -21,7 +21,7 @@ export const makeActiveEditOptions = ({
   connections,
   connectedTaxonomies,
   activeEditOption,
-  contextIntl,
+  intl,
   messages,
   isAdmin,
 }) => {
@@ -44,7 +44,7 @@ export const makeActiveEditOptions = ({
         connectedTaxonomies,
         activeEditOption.optionId,
         messages,
-        contextIntl,
+        intl,
         activeEditOption.group,
         isAdmin,
       );
@@ -58,7 +58,7 @@ export const makeActiveEditOptions = ({
         connectedTaxonomies,
         activeEditOption.optionId,
         messages,
-        contextIntl,
+        intl,
         activeEditOption.group,
         isAdmin,
       );
@@ -150,7 +150,7 @@ const makeGroupedConnectionEditOptions = (
   connectedTaxonomies,
   activeOptionId,
   messages,
-  contextIntl,
+  intl,
   group,
   isAdmin,
 ) => {
@@ -168,7 +168,7 @@ const makeGroupedConnectionEditOptions = (
     required: false,
     advanced: true,
     selectAll: true,
-    tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, contextIntl),
+    tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, intl),
   };
   const areActors = type === 'action-targets' // targets
     || type === 'action-actors' // active actors
@@ -233,7 +233,7 @@ const makeConnectionEditOptions = (
   connectedTaxonomies,
   activeOptionId,
   messages,
-  contextIntl,
+  intl,
   group,
   isAdmin,
 ) => {
@@ -251,7 +251,7 @@ const makeConnectionEditOptions = (
     required: false,
     advanced: true,
     selectAll: true,
-    tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, contextIntl),
+    tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, intl),
   };
   const areActors = type === 'action-targets' // targets
     || type === 'action-actors' // active actors
@@ -280,7 +280,7 @@ const makeConnectionEditOptions = (
         );
         editOptions.options[connection.get('id')] = {
           reference: hasCode && getEntityReference(connection),
-          label: getEntityTitle(connection, option.labels, contextIntl),
+          label: getEntityTitle(connection, option.labels, intl),
           value: connection.get('id'),
           checked: checkedState(count, entities.size),
           tags: connection.get('categories'),

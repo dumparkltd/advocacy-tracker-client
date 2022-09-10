@@ -198,7 +198,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
         entitiesByActiontype: actionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (actionConnections) {
@@ -215,7 +215,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
         entitiesByActiontype: actionsAsTargetByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (actionConnections) {
@@ -232,7 +232,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
         entitiesByActortype: membersByActortype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (memberConnections) {
@@ -296,7 +296,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
         entitiesByActortype: associationsByActortype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (associationConnections) {

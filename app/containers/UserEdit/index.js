@@ -164,7 +164,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
         entitiesByActortype: actorsByActortype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (actorConnections) {
@@ -181,7 +181,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
         entitiesByActiontype: actionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (actionConnections) {

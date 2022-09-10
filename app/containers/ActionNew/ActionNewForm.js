@@ -213,7 +213,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     if (indicatorOptions) {
       const indicatorConnections = renderIndicatorControl({
         entities: indicatorOptions,
-        contextIntl: intl,
+        intl,
         connectionAttributes: [{
           attribute: 'supportlevel_id',
           type: 'select',
@@ -241,7 +241,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         entitiesByActortype: actorsByActortype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (actorConnections) {
@@ -258,7 +258,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         entitiesByActortype: targetsByActortype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (targetConnections) {
@@ -275,7 +275,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         entitiesByActiontype: subActionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         model: 'associatedSubActionsByActiontype',
         isAdmin,
       });
@@ -292,7 +292,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       const resourceConnections = renderResourcesByResourcetypeControl({
         entitiesByResourcetype: resourcesByResourcetype,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (resourceConnections) {
@@ -375,7 +375,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         entitiesByActiontype: topActionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         model: 'associatedTopActionsByActiontype',
         isAdmin,
       });

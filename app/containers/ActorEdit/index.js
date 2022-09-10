@@ -232,7 +232,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         entitiesByActiontype: actionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (actionConnections) {
@@ -249,7 +249,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         entitiesByActiontype: actionsAsTargetByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (actionConnections) {
@@ -266,7 +266,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         entitiesByActortype: membersByActortype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (memberConnections) {
@@ -332,7 +332,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         entitiesByActortype: associationsByActortype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         isAdmin,
       });
       if (associationConnections) {
