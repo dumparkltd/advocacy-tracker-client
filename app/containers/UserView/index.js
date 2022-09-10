@@ -265,7 +265,7 @@ export function UserView({
                                   connections: actorConnections,
                                   typeid,
                                   columns: getActortypeColumns({
-                                    typeid,
+                                    typeId: typeid,
                                     showCode: isAdmin || qe(typeid, ACTORTYPES.COUNTRY),
                                   }),
                                 }),

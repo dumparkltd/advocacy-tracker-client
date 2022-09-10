@@ -65,10 +65,10 @@ export function TabActorsAccordion({
                     onEntityClick,
                     connections: actorConnections,
                     typeid,
-                    columns: getActortypeColumns(
-                      typeid,
-                      checkActorAttribute(typeid, 'code', isAdmin),
-                    ),
+                    columns: getActortypeColumns({
+                      typeId: typeid,
+                      showCode: checkActorAttribute(typeid, 'code', isAdmin),
+                    }),
                   }),
                 ]),
                 [],
@@ -103,7 +103,10 @@ export function TabActorsAccordion({
                           onEntityClick,
                           connections: actorConnections,
                           typeid,
-                          columns: getActortypeColumns(typeid),
+                          columns: getActortypeColumns({
+                            typeId: typeid,
+                            showCode: checkActorAttribute(typeid, 'code', isAdmin),
+                          }),
                         }),
                       ]),
                       [],
@@ -139,7 +142,10 @@ export function TabActorsAccordion({
                         taxonomies={taxonomies}
                         onEntityClick={onEntityClick}
                         actorConnections={actorConnections}
-                        getActortypeColumns={(actortypeid) => getActortypeColumns(actortypeid)}
+                        getActortypeColumns={(actortypeid) => getActortypeColumns({
+                          typeId: actortypeid,
+                          showCode: checkActorAttribute(actortypeid, 'code', isAdmin),
+                        })}
                         isAdmin={isAdmin}
                       />
                     );

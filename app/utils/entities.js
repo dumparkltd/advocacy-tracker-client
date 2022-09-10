@@ -1187,13 +1187,16 @@ export const getActiontypeColumns = ({
   otherColumns,
   skipTypeColumns,
   isSingle = true,
+  includeMain = true,
 }) => {
-  let columns = [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: isAdmin ? ['code', 'title'] : ['title'],
-  }];
+  let columns = includeMain
+    ? [{
+      id: 'main',
+      type: 'main',
+      sort: 'title',
+      attributes: isAdmin ? ['code', 'title'] : ['title'],
+    }]
+    : [];
 
   if (
     !skipTypeColumns
@@ -1227,7 +1230,7 @@ export const getActiontypeColumns = ({
 };
 
 export const getActortypeColumns = ({
-  typeid,
+  typeId,
   showCode,
   otherColumns,
   includeMain = true,
@@ -1244,10 +1247,10 @@ export const getActortypeColumns = ({
     : [];
   if (
     !skipTypeColumns
-    && ACTORTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns
+    && ACTORTYPES_CONFIG[parseInt(typeId, 10)]
+    && ACTORTYPES_CONFIG[parseInt(typeId, 10)].columns
   ) {
-    const typeColumns = ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
+    const typeColumns = ACTORTYPES_CONFIG[parseInt(typeId, 10)].columns.filter(
       (col) => {
         if (isSingle && typeof col.showOnSingle !== 'undefined') {
           return col.showOnSingle;

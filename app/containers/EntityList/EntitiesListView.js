@@ -34,7 +34,7 @@ import ButtonPill from 'components/buttons/ButtonPill';
 import ContentHeader from 'components/ContentHeader';
 import qe from 'utils/quasi-equals';
 import { lowerCase } from 'utils/string';
-import { getActiontypeColumns } from 'utils/entities';
+import { getActiontypeColumns, getActortypeColumns } from 'utils/entities';
 import appMessages from 'containers/App/messages';
 
 import { getActorsForEntities, getUsersForEntities } from './utils';
@@ -343,9 +343,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         mapSubjectClean,
         typeId,
       );
-      const typeColumns = getActiontypeColumns({
+      const typeColumns = getActortypeColumns({
         typeId,
-        isAdmin: showCode,
+        showCode,
         includeMain: false,
         isSingle: false,
       });
