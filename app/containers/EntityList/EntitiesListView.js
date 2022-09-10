@@ -15,7 +15,6 @@ import {
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPES_CONFIG,
-  ACTORTYPES_CONFIG,
   MEMBERSHIPS,
   ACTION_INDICATOR_SUPPORTLEVELS,
   // ACTIONTYPES,
@@ -35,11 +34,12 @@ import ButtonPill from 'components/buttons/ButtonPill';
 import ContentHeader from 'components/ContentHeader';
 import qe from 'utils/quasi-equals';
 import { lowerCase } from 'utils/string';
+import { getActiontypeColumns } from 'utils/entities';
 import appMessages from 'containers/App/messages';
 
 import { getActorsForEntities, getUsersForEntities } from './utils';
 
-const getActivityColumns = (mapSubject, typeId) => {
+const getOwnActivityColumns = (mapSubject, typeId) => {
   let actionTypeIds;
   if (mapSubject === 'actors') {
     actionTypeIds = Object.keys(ACTIONTYPE_ACTORTYPES).filter(
@@ -175,18 +175,11 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
 
     // ACTIONS =================================================================
     if (config.types === 'actiontypes' && dataReady) {
-      columns = [{
-        id: 'main',
-        type: 'main',
-        sort: 'title',
-        attributes: showCode ? ['code', 'title'] : ['title'],
-      }];
-      columns = [
-        ...columns,
-        ...ACTIONTYPES_CONFIG[typeId]
-          ? ACTIONTYPES_CONFIG[typeId].columns
-          : [],
-      ];
+      columns = getActiontypeColumns({
+        typeId,
+        showCode,
+        isSingle: false,
+      });
       type = actiontypes.find((at) => qe(at.get('id'), typeId));
       // hasByTarget = type.getIn(['attributes', 'has_target']);
       hasByActor = ACTIONTYPE_ACTORTYPES[typeId] && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
@@ -346,9 +339,16 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       const canHaveMembers = !canBeMember && Object.keys(MEMBERSHIPS).some(
         (id) => MEMBERSHIPS[id].indexOf(typeId) > -1
       );
-      const actionColumns = getActivityColumns(mapSubjectClean, typeId);
-      const typeColumns = ACTORTYPES_CONFIG[typeId].columns || [];
-
+      const actionColumns = getOwnActivityColumns(
+        mapSubjectClean,
+        typeId,
+      );
+      const typeColumns = getActiontypeColumns({
+        typeId,
+        isAdmin: showCode,
+        includeMain: false,
+        isSingle: false,
+      });
       columns = [
         {
           id: 'main',
@@ -359,6 +359,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         ...typeColumns,
         ...actionColumns,
       ];
+
       headerColumnsUtility = [
         {
           type: 'main',

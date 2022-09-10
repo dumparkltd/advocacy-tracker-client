@@ -206,7 +206,7 @@ const selectActionsWithConnections = createSelector(
   selectActorActionsGroupedByAction,
   selectActorActionsMembersGroupedByAction,
   selectActorActionsAssociationsGroupedByAction,
-  selectActionActorsGroupedByAction,
+  selectActionActorsGroupedByAction, // targetConnectionsGrouped
   selectActionActorsMembersGroupedByAction,
   selectActionActorsAssociationsGroupedByAction,
   selectActionResourcesGroupedByAction,
@@ -302,6 +302,7 @@ const selectActionsWithConnections = createSelector(
           ).sortBy((val, key) => key);
 
           // targets as members
+          // indirect targets (via groups "children of targets")
           const entityTargetsMembers = targetMemberConnectionsGrouped.get(parseInt(entity.get('id'), 10));
           // console.log('actorConnectionsGrouped', actorConnectionsGrouped && actorConnectionsGrouped.toJS())
           // console.log('targetConnectionsGrouped', targetConnectionsGrouped && targetConnectionsGrouped.toJS())
@@ -392,6 +393,21 @@ const selectActionsWithConnections = createSelector(
             ])
           ).sortBy((val, key) => key);
 
+          // indirect targets (via children, "targets of children")
+          const entityTargetsViaChildren = entityChildren.reduce(
+            (memo, childId) => {
+              const childTargets = targetConnectionsGrouped.get(parseInt(childId, 10));
+              return childTargets
+                ? childTargets.reduce(
+                  (memo2, childTarget, key) => memo2.includes(childTarget)
+                    ? memo2
+                    : memo2.set(key, childTarget),
+                  memo,
+                )
+                : memo;
+            },
+            Map(),
+          );
           // the activity
           return entity
             // directly connected actors
@@ -409,6 +425,7 @@ const selectActionsWithConnections = createSelector(
             // indirectly connected targets (via group, region, class)
             .set('targetsMembers', entityTargetsMembers)
             .set('targetsMembersByType', entityTargetsMembersByActortype)
+            .set('targetsViaChildren', entityTargetsViaChildren)
             // indirectly connected targets (group, region, class a directly connected actor belongs to)
             .set('targetsAssociations', entityTargetsAssociations)
             .set('targetsAssociationsByType', entityTargetsAssociationsByActortype)

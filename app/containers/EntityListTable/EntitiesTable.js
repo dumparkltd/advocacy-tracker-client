@@ -251,6 +251,7 @@ export function EntitiesTable({
                       col.type === 'actorsSimple'
                       || col.type === 'actors'
                       || col.type === 'targets'
+                      || col.type === 'targetsViaChildren'
                       || col.type === 'members'
                       || col.type === 'associations'
                       || col.type === 'userActors'
@@ -284,6 +285,8 @@ export function EntitiesTable({
                       || col.type === 'indicatorActions'
                       || col.type === 'userActions'
                       || col.type === 'positionStatement'
+                      || col.type === 'childActions'
+                      || col.type === 'parentActions'
                     ) && (
                       <CellBodyActions
                         entity={entity[col.id]}

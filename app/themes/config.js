@@ -843,9 +843,20 @@ export const ACTIONTYPES_CONFIG = {
         taxonomy_id: 10, // event type
       },
       {
+        id: 'childActions', // one row per type,
+        type: 'childActions', // one row per type,
+        showOnSingle: false,
+      },
+      {
         id: 'targets', // one row per type,
         type: 'targets', // one row per type,
         sort: 'title',
+      },
+      {
+        id: 'targetsViaChildren', // one row per type,
+        type: 'targetsViaChildren', // one row per type,
+        sort: 'title',
+        showOnSingle: false,
       },
       {
         id: 'users', // one row per type,
@@ -872,8 +883,18 @@ export const ACTIONTYPES_CONFIG = {
         taxonomy_id: 10, // event type
       },
       {
+        id: 'childActions', // one row per type,
+        type: 'childActions', // one row per type,
+        showOnSingle: false,
+      },
+      {
         id: 'targets',
         type: 'targets',
+        sort: 'title',
+      },
+      {
+        id: 'targetsViaChildren', // one row per type,
+        type: 'targetsViaChildren', // one row per type,
         sort: 'title',
       },
       {
@@ -904,6 +925,11 @@ export const ACTIONTYPES_CONFIG = {
         id: 'taxonomy-10',
         type: 'taxonomy',
         taxonomy_id: 10, // priority
+      },
+      {
+        id: 'parentActions', // one row per type,
+        type: 'parentActions', // one row per type,
+        showOnSingle: false,
       },
       {
         id: 'targets', // one row per type,
