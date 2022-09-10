@@ -187,7 +187,6 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     );
 
     if (actionsByActiontype) {
-      console.log('renderActionsByActiontypeControl');
       const actionConnections = renderActionsByActiontypeControl({
         entitiesByActiontype: actionsByActiontype,
         taxonomies: connectedTaxonomies,
