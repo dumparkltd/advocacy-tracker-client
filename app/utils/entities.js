@@ -5,6 +5,7 @@ import {
   ACTION_FIELDS,
   ACTOR_FIELDS,
   RESOURCE_FIELDS,
+  INDICATOR_FIELDS,
   API,
 } from 'themes/config';
 import { find, reduce, every } from 'lodash/collection';
@@ -855,11 +856,20 @@ export const getTaxonomyCategories = (
 };
 
 
-const checkAttribute = (typeId, att, attributes, isManager) => {
+const checkAttribute = ({
+  typeId,
+  att,
+  attributes,
+  isAdmin,
+}) => {
   if (typeId && attributes && attributes[att]) {
-    if (attributes[att].hideAnalyst
-      && attributes[att].hideAnalyst.indexOf(typeId.toString()) > -1
-      && !isManager
+    if (attributes[att].adminOnly && !isAdmin
+    ) {
+      return false;
+    }
+    if (attributes[att].adminOnlyForTypes
+      && attributes[att].adminOnlyForTypes.indexOf(typeId.toString()) > -1
+      && !isAdmin
     ) {
       return false;
     }
@@ -874,7 +884,7 @@ const checkAttribute = (typeId, att, attributes, isManager) => {
         : attributes[att].required;
     }
   } else if (!typeId && attributes && attributes[att]) {
-    if (attributes[att].hideAnalyst && !isManager) {
+    if (attributes[att].adminOnly && !isAdmin) {
       return false;
     }
     if (attributes[att].optional) {
@@ -887,7 +897,7 @@ const checkAttribute = (typeId, att, attributes, isManager) => {
   return false;
 };
 
-const checkRequired = (typeId, att, attributes) => {
+const checkRequired = ({ typeId, att, attributes }) => {
   if (typeId && attributes && attributes[att] && attributes[att].required) {
     return typeof attributes[att].required === 'boolean'
       ? attributes[att].required
@@ -895,54 +905,67 @@ const checkRequired = (typeId, att, attributes) => {
   }
   return false;
 };
-export const checkActionAttribute = (typeId, att, isManager) => ACTION_FIELDS
+export const checkActionAttribute = (typeId, att, isAdmin) => ACTION_FIELDS
   && ACTION_FIELDS.ATTRIBUTES
-  && checkAttribute(
+  && checkAttribute({
     typeId,
     att,
-    ACTION_FIELDS.ATTRIBUTES,
-    isManager,
-  );
+    attributes: ACTION_FIELDS.ATTRIBUTES,
+    isAdmin,
+  });
+export const checkIndicatorAttribute = (att, isAdmin) => INDICATOR_FIELDS
+  && INDICATOR_FIELDS.ATTRIBUTES
+  && checkAttribute({
+    att,
+    attributes: INDICATOR_FIELDS.ATTRIBUTES,
+    isAdmin,
+  });
 
 export const checkActionRequired = (typeId, att) => ACTION_FIELDS
   && ACTION_FIELDS.ATTRIBUTES
-  && checkRequired(
+  && checkRequired({
     typeId,
     att,
-    ACTION_FIELDS.ATTRIBUTES,
-  );
+    attributes: ACTION_FIELDS.ATTRIBUTES,
+  });
 
-export const checkActorAttribute = (typeId, att, isManager) => ACTOR_FIELDS
+export const checkActorAttribute = (typeId, att, isAdmin) => ACTOR_FIELDS
   && ACTOR_FIELDS.ATTRIBUTES
-  && checkAttribute(
+  && checkAttribute({
     typeId,
     att,
-    ACTOR_FIELDS.ATTRIBUTES,
-    isManager,
-  );
+    attributes: ACTOR_FIELDS.ATTRIBUTES,
+    isAdmin,
+  });
 
 export const checkActorRequired = (typeId, att) => ACTOR_FIELDS
   && ACTOR_FIELDS.ATTRIBUTES
-  && checkRequired(
+  && checkRequired({
     typeId,
     att,
-    ACTOR_FIELDS.ATTRIBUTES,
-  );
+    attributes: ACTOR_FIELDS.ATTRIBUTES,
+  });
+export const checkIndicatorRequired = (att) => INDICATOR_FIELDS
+  && INDICATOR_FIELDS.ATTRIBUTES
+  && checkRequired({
+    att,
+    attributes: INDICATOR_FIELDS.ATTRIBUTES,
+  });
 export const checkResourceAttribute = (typeId, att) => RESOURCE_FIELDS
   && RESOURCE_FIELDS.ATTRIBUTES
-  && checkAttribute(
+  && checkAttribute({
     typeId,
     att,
-    RESOURCE_FIELDS.ATTRIBUTES,
-  );
+    attributes: RESOURCE_FIELDS.ATTRIBUTES,
+  });
 
 export const checkResourceRequired = (typeId, att) => RESOURCE_FIELDS
   && RESOURCE_FIELDS.ATTRIBUTES
-  && checkRequired(
+  && checkRequired({
     typeId,
     att,
-    RESOURCE_FIELDS.ATTRIBUTES,
-  );
+    attributes: RESOURCE_FIELDS.ATTRIBUTES,
+  });
 
 export const hasGroupActors = (actortypesForActiontype) => actortypesForActiontype
   && actortypesForActiontype.some(

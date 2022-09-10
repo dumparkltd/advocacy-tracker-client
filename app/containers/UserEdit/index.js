@@ -45,6 +45,7 @@ import {
   selectReady,
   selectSessionUserHighestRoleId,
   selectIsUserManager,
+  selectIsUserAdmin,
 } from 'containers/App/selectors';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
@@ -116,10 +117,10 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       associatedTaxonomies: taxonomyOptions(taxonomies),
       associatedRole: getHighestUserRoleId(roles),
       associatedActorsByActortype: actorsByActortype
-        ? actorsByActortype.map((actors) => entityOptions(actors, true))
+        ? actorsByActortype.map((actors) => entityOptions({ entities: actors }))
         : Map(),
       associatedActionsByActiontype: actionsByActiontype
-        ? actionsByActiontype.map((actions) => entityOptions(actions, true))
+        ? actionsByActiontype.map((actions) => entityOptions({ entities: actions }))
         : Map(),
     });
   }
@@ -154,16 +155,18 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
     actionsByActiontype,
     connectedTaxonomies,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const groups = [];
     if (actorsByActortype) {
-      const actorConnections = renderActorsByActortypeControl(
-        actorsByActortype,
-        connectedTaxonomies,
+      const actorConnections = renderActorsByActortypeControl({
+        entitiesByActortype: actorsByActortype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-      );
+        contextIntl: intl,
+        isAdmin,
+      });
       if (actorConnections) {
         groups.push(
           {
@@ -179,6 +182,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
         taxonomies: connectedTaxonomies,
         onCreateOption,
         contextIntl: intl,
+        isAdmin,
       });
       if (actionConnections) {
         groups.push(
@@ -219,6 +223,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       onCreateOption,
       connectedTaxonomies,
       isManager,
+      isAdmin,
     } = this.props;
     const reference = this.props.params.id;
     const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
@@ -303,6 +308,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
                     actionsByActiontype,
                     connectedTaxonomies,
                     onCreateOption,
+                    isAdmin,
                   ),
                   // aside: this.getBodyAsideFields(),
                 },
@@ -330,6 +336,7 @@ UserEdit.propTypes = {
   viewDomain: PropTypes.object,
   viewEntity: PropTypes.object,
   roles: PropTypes.object,
+  isAdmin: PropTypes.bool,
   isManager: PropTypes.bool,
   dataReady: PropTypes.bool,
   sessionUserHighestRoleId: PropTypes.number,
@@ -356,6 +363,7 @@ const mapStateToProps = (state, props) => ({
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
   connectedTaxonomies: selectConnectedTaxonomies(state),
   isManager: selectIsUserManager(state),
+  isAdmin: selectIsUserAdmin(state),
 });
 
 function mapDispatchToProps(dispatch) {

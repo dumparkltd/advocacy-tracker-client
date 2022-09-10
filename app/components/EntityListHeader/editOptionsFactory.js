@@ -1,5 +1,7 @@
 import { find, forEach } from 'lodash/collection';
 
+import { ACTORTYPES } from 'themes/config';
+
 import {
   testEntityEntityAssociation,
   testEntityCategoryAssociation,
@@ -21,6 +23,7 @@ export const makeActiveEditOptions = ({
   activeEditOption,
   contextIntl,
   messages,
+  isAdmin,
 }) => {
   // create edit options
   switch (activeEditOption.group) {
@@ -43,6 +46,7 @@ export const makeActiveEditOptions = ({
         messages,
         contextIntl,
         activeEditOption.group,
+        isAdmin,
       );
     case 'users':
     case 'indicators':
@@ -56,6 +60,7 @@ export const makeActiveEditOptions = ({
         messages,
         contextIntl,
         activeEditOption.group,
+        isAdmin,
       );
     case 'attributes':
       return makeAttributeEditOptions(entities, config, activeEditOption, messages);
@@ -147,6 +152,7 @@ const makeGroupedConnectionEditOptions = (
   messages,
   contextIntl,
   group,
+  isAdmin,
 ) => {
   // const option = find(config.connections.options, (o) => o.path === activeEditOption.optionId);
   // get the active option
@@ -164,6 +170,13 @@ const makeGroupedConnectionEditOptions = (
     selectAll: true,
     tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, contextIntl),
   };
+  const areActors = type === 'action-targets' // targets
+    || type === 'action-actors' // active actors
+    || type === 'member-associations' // associations
+    || type === 'association-members' // members
+    || type === 'indicator-actions';
+
+  const hasCode = isAdmin || (areActors && qe(typeId, ACTORTYPES.COUNTRY));
   if (option) {
     editOptions.title = messages.title;
     editOptions.path = option.connectPath;
@@ -185,15 +198,7 @@ const makeGroupedConnectionEditOptions = (
         if (type === 'action-resources') {
           return qe(typeId, c.getIn(['attributes', 'resourcetype_id']));
         }
-        if (
-          type === 'action-targets' // targets
-          || type === 'action-actors' // active actors
-          || type === 'member-associations' // associations
-          || type === 'association-members' // members
-          || type === 'actor-users'
-          || type === 'action-users'
-          || type === 'indicator-actions'
-        ) {
+        if (areActors) {
           return qe(typeId, c.getIn(['attributes', 'actortype_id']));
         }
         return true;
@@ -208,7 +213,7 @@ const makeGroupedConnectionEditOptions = (
           0, // initial value
         );
         editOptions.options[connection.get('id')] = {
-          reference: getEntityReference(connection),
+          reference: hasCode && getEntityReference(connection),
           label: getEntityTitle(connection),
           description: connection.getIn(['attributes', 'description']),
           value: connection.get('id'),
@@ -230,11 +235,13 @@ const makeConnectionEditOptions = (
   messages,
   contextIntl,
   group,
+  isAdmin,
 ) => {
   // const option = find(config.connections.options, (o) => o.path === activeEditOption.optionId);
+  const typeId = activeOptionId;
   // get the active option
-  // const typeId = activeOptionId;
   const option = config[group];
+  const { type } = option;
   const editOptions = {
     groupId: group,
     search: true,
@@ -246,6 +253,13 @@ const makeConnectionEditOptions = (
     selectAll: true,
     tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, contextIntl),
   };
+  const areActors = type === 'action-targets' // targets
+    || type === 'action-actors' // active actors
+    || type === 'member-associations' // associations
+    || type === 'association-members' // members
+    || type === 'indicator-actions';
+
+  const hasCode = isAdmin || (areActors && qe(typeId, ACTORTYPES.COUNTRY));
   if (option) {
     editOptions.title = messages.title;
     editOptions.path = option.connectPath;
@@ -265,7 +279,7 @@ const makeConnectionEditOptions = (
           0, // initial value
         );
         editOptions.options[connection.get('id')] = {
-          reference: getEntityReference(connection),
+          reference: hasCode && getEntityReference(connection),
           label: getEntityTitle(connection, option.labels, contextIntl),
           value: connection.get('id'),
           checked: checkedState(count, entities.size),

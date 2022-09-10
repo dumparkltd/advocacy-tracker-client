@@ -13,6 +13,8 @@ import {
   getActorConnectionField,
 } from 'utils/fields';
 
+import qe from 'utils/quasi-equals';
+
 import {
   updatePath,
 } from 'containers/App/actions';
@@ -24,6 +26,7 @@ import {
 
 import {
   MEMBERSHIPS,
+  ACTORTYPES,
 } from 'themes/config';
 
 import FieldGroup from 'components/fields/FieldGroup';
@@ -34,12 +37,12 @@ import {
   selectActorsByType,
 } from './selectors';
 
-const getActortypeColumns = (typeid, viewEntity, intl) => {
+const getActortypeColumns = (typeid, viewEntity, intl, showCode) => {
   let columns = [{
     id: 'main',
     type: 'main',
     sort: 'title',
-    attributes: ['title'],
+    attributes: showCode ? ['code', 'title'] : ['title'],
   }];
   columns = [
     ...columns,
@@ -75,6 +78,7 @@ export function Actors({
   actorConnections,
   onEntityClick,
   actorsByActortype,
+  isAdmin,
   intl,
 }) {
   if (!actorsByActortype) {
@@ -96,6 +100,7 @@ export function Actors({
                 actortypeid,
                 viewEntity,
                 intl,
+                isAdmin || qe(actortypeid, ACTORTYPES.COUNTRY)
               ),
             }),
           ]),
@@ -112,6 +117,7 @@ Actors.propTypes = {
   taxonomies: PropTypes.object,
   actorConnections: PropTypes.object,
   actorsByActortype: PropTypes.object,
+  isAdmin: PropTypes.bool,
   intl: intlShape,
 };
 

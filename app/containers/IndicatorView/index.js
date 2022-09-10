@@ -171,7 +171,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                           getReferenceField(
                             viewEntity,
                             'code',
-                            isManager,
+                            isAdmin,
                           ),
                           getTitleField(viewEntity),
                         ],
@@ -245,6 +245,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                       {viewSubject === 'actors' && (
                         <Actors
                           viewEntity={viewEntity}
+                          isAdmin={isAdmin}
                         />
                       )}
                     </Box>

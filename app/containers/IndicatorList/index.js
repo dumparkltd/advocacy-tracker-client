@@ -10,11 +10,16 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { List, Map, fromJS } from 'immutable';
 
+import {
+  checkIndicatorAttribute,
+} from 'utils/entities';
+
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectReady,
   selectIsUserManager,
   selectIsUserAnalyst,
+  selectIsUserAdmin,
   selectActiontypesForIndicators,
   selectIndicators,
 } from 'containers/App/selectors';
@@ -54,6 +59,7 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
       connections,
       connectedTaxonomies,
       location,
+      isAdmin,
       isManager,
       isAnalyst,
       actiontypes,
@@ -114,6 +120,7 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
           }}
           locationQuery={fromJS(location.query)}
           actiontypes={actiontypes}
+          showCode={checkIndicatorAttribute('code', isAdmin)}
         />
       </div>
     );
@@ -131,6 +138,7 @@ IndicatorList.propTypes = {
   connectedTaxonomies: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
+  isAdmin: PropTypes.bool,
   isAnalyst: PropTypes.bool,
   allEntities: PropTypes.instanceOf(Map),
 };
@@ -145,6 +153,7 @@ const mapStateToProps = (state, props) => ({
   connections: selectConnections(state),
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
+  isAdmin: selectIsUserAdmin(state),
   actiontypes: selectActiontypesForIndicators(state),
   allEntities: selectIndicators(state),
   connectedTaxonomies: selectConnectedTaxonomies(state),

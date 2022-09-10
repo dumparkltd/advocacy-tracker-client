@@ -110,7 +110,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
           FORM_INITIAL.get('attributes')
         ),
         associatedActionsByActiontype: actionsByActiontype
-          ? actionsByActiontype.map((actions) => entityOptions(actions, true))
+          ? actionsByActiontype.map((actions) => entityOptions({ entities: actions }))
           : Map(),
       })
       : Map();
@@ -154,6 +154,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     connectedTaxonomies,
     actionsByActiontype,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'resourcetype_id']);
@@ -190,6 +191,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
         taxonomies: connectedTaxonomies,
         onCreateOption,
         contextIntl: intl,
+        isAdmin,
       });
       if (actionConnections) {
         groups.push(
@@ -312,6 +314,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
                       connectedTaxonomies,
                       actionsByActiontype,
                       onCreateOption,
+                      isAdmin,
                     ),
                     aside: this.getBodyAsideFields(
                       viewEntity

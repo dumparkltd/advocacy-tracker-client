@@ -271,6 +271,7 @@ export const ACTION_FIELDS = {
     },
     code: {
       optional: Object.values(ACTIONTYPES), // all types
+      adminOnly: true,
       type: 'text',
     },
     title: {
@@ -363,6 +364,10 @@ export const ACTOR_FIELDS = {
         ACTORTYPES.GROUP,
       ], // all types
       type: 'text',
+      adminOnlyForTypes: [
+        ACTORTYPES.ORG,
+        ACTORTYPES.GROUP,
+      ],
     },
     title: {
       required: [
@@ -520,6 +525,8 @@ export const INDICATOR_FIELDS = {
     },
     code: {
       type: 'text',
+      optional: true,
+      adminOnly: true,
     },
     description: {
       type: 'markdown',
@@ -759,14 +766,7 @@ export const ACTIONTYPES_CONFIG = {
   1: {
     id: ACTIONTYPES.EXPRESS,
     order: 3,
-    is_code_public: true,
     columns: [
-      {
-        id: 'main',
-        type: 'main',
-        sort: 'title',
-        attributes: ['title'],
-      },
       {
         id: 'date',
         type: 'date',

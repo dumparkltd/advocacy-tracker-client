@@ -33,7 +33,7 @@ export const makeActiveFilterOptions = ({
   activeFilterOption,
   contextIntl,
   messages,
-  isManager,
+  isAdmin,
   includeMembers,
 }) => {
   switch (activeFilterOption.group) {
@@ -76,7 +76,7 @@ export const makeActiveFilterOptions = ({
         messages,
         contextIntl,
         activeFilterOption.group,
-        isManager,
+        isAdmin,
         includeMembers,
       );
     case 'users':
@@ -92,7 +92,7 @@ export const makeActiveFilterOptions = ({
         messages,
         contextIntl,
         activeFilterOption.group,
-        isManager,
+        isAdmin,
       );
     case 'attributes':
       return makeAttributeFilterOptions({
@@ -290,12 +290,12 @@ export const makeTaxonomyFilterOptions = (
 };
 
 
-const getShowEntityReference = (entityType, typeId, isManager) => {
+const getShowEntityReference = (entityType, typeId, isAdmin) => {
   if (typeId && entityType === 'actions') {
-    return checkActionAttribute(typeId, 'code', isManager);
+    return checkActionAttribute(typeId, 'code', isAdmin);
   }
   if (typeId && entityType === 'actors') {
-    return checkActorAttribute(typeId, 'code', isManager);
+    return checkActorAttribute(typeId, 'code', isAdmin);
   }
   if (!typeId || entityType === 'indicators') {
     return false;
@@ -305,7 +305,7 @@ const getShowEntityReference = (entityType, typeId, isManager) => {
 //
 //
 //
-export const makeGroupedConnectionFilterOptions = (
+const makeGroupedConnectionFilterOptions = (
   entities,
   config,
   connections,
@@ -315,7 +315,7 @@ export const makeGroupedConnectionFilterOptions = (
   messages,
   contextIntl,
   group,
-  isManager,
+  isAdmin,
   includeMembers,
 ) => {
   const filterOptions = {
@@ -335,7 +335,7 @@ export const makeGroupedConnectionFilterOptions = (
   if (option) {
     // the option path
     const { query, path } = option;
-    const showEntityReference = getShowEntityReference(option.entityType, typeId, isManager);
+    const showEntityReference = getShowEntityReference(option.entityType, typeId, isAdmin);
     const entityType = option.entityTypeAs || option.entityType;
     filterOptions.messagePrefix = messages.titlePrefix;
     filterOptions.message = (typeId && option.message && option.message.indexOf('{typeid}') > -1)
@@ -698,7 +698,7 @@ const getConnectionFilterOptions = ({
   filterOptions,
   option,
   entities,
-  isManager,
+  isAdmin,
   messages,
   contextIntl,
   locationQuery,
@@ -711,7 +711,7 @@ const getConnectionFilterOptions = ({
     search: option.search,
   };
   const { query, path } = option;
-  const showEntityReference = getShowEntityReference(option.entityType, null, isManager);
+  const showEntityReference = getShowEntityReference(option.entityType, null, isAdmin);
   const entityType = option.entityTypeAs || option.entityType;
   let locationQueryValue = locationQuery.get(query);
   // if no entities found show any active options
@@ -862,7 +862,7 @@ const getConnectionFilterOptions = ({
   return resultOptions;
 };
 
-export const makeConnectionFilterOptions = (
+const makeConnectionFilterOptions = (
   entities,
   config,
   connections,
@@ -872,7 +872,7 @@ export const makeConnectionFilterOptions = (
   messages,
   contextIntl,
   group,
-  isManager,
+  isAdmin,
 ) => {
   let filterOptions = {};
   const option = config[group];
@@ -892,7 +892,7 @@ export const makeConnectionFilterOptions = (
           selectAll: false,
         },
         entities,
-        isManager,
+        isAdmin,
         messages,
         contextIntl,
         locationQuery,

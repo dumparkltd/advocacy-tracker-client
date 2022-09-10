@@ -20,6 +20,7 @@ import {
 import {
   selectTaxonomiesWithCategories,
   selectActionConnections,
+  selectIsUserAdmin,
 } from 'containers/App/selectors';
 
 import {
@@ -35,12 +36,12 @@ import {
   selectActionsByType,
 } from './selectors';
 
-const getActiontypeColumns = (typeid, viewEntity, intl) => {
+const getActiontypeColumns = (typeid, viewEntity, intl, isAdmin) => {
   let columns = [{
     id: 'main',
     type: 'main',
     sort: 'title',
-    attributes: ['title'],
+    attributes: isAdmin ? ['code', 'title'] : ['title'],
   }];
   if (
     ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
@@ -84,6 +85,7 @@ export function Statements({
   actionConnections,
   onEntityClick,
   intl,
+  isAdmin,
 }) {
   if (!actionsByActiontype) {
     return null;
@@ -104,6 +106,7 @@ export function Statements({
                 actiontypeid,
                 viewEntity,
                 intl,
+                isAdmin,
               ),
             }),
           ]),
@@ -121,12 +124,14 @@ Statements.propTypes = {
   actionConnections: PropTypes.object,
   actionsByActiontype: PropTypes.object,
   intl: intlShape,
+  isAdmin: PropTypes.bool,
 };
 
 const mapStateToProps = (state, { viewEntity }) => ({
   taxonomies: selectTaxonomiesWithCategories(state),
   actionsByActiontype: selectActionsByType(state, viewEntity.get('id')),
   actionConnections: selectActionConnections(state),
+  isAdmin: selectIsUserAdmin(state),
 });
 
 function mapDispatchToProps(dispatch) {

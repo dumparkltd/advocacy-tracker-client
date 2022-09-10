@@ -46,6 +46,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectResourcetype,
+  selectIsUserAdmin,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -132,6 +133,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
     connectedTaxonomies,
     actionsByActiontype,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const groups = [];
@@ -164,6 +166,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
         taxonomies: connectedTaxonomies,
         onCreateOption,
         contextIntl: intl,
+        isAdmin,
       });
       if (actionConnections) {
         groups.push(
@@ -217,6 +220,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
       formDataPath,
       inModal,
       invalidateEntitiesOnSuccess,
+      isAdmin,
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
@@ -266,6 +270,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
                 connectedTaxonomies,
                 actionsByActiontype,
                 inModal ? null : onCreateOption,
+                isAdmin,
               ),
               aside: this.getBodyAsideFields(
                 typeId,
@@ -299,6 +304,7 @@ ResourceNew.propTypes = {
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
   inModal: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   invalidateEntitiesOnSuccess: PropTypes.string,
 };
 
@@ -312,6 +318,7 @@ const mapStateToProps = (state, { typeId }) => ({
   connectedTaxonomies: selectConnectedTaxonomies(state),
   resourcetype: selectResourcetype(state, typeId),
   actionsByActiontype: selectActionsByActiontype(state, typeId),
+  isAdmin: selectIsUserAdmin(state),
 });
 
 function mapDispatchToProps(

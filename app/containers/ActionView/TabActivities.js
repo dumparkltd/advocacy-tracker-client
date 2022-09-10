@@ -40,26 +40,30 @@ const TypeButton = styled((p) => <ButtonPill {...p} />)`
 `;
 // max-width: ${({ listItems }) => 100 / listItems}%;
 
-const getActiontypeColumns = (typeid) => {
+const getActiontypeColumns = (typeid, showCode) => {
+  let columns = [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: showCode ? ['code', 'title'] : ['title'],
+  }];
   if (
     ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
     && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
   ) {
-    return ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-      (col) => {
-        if (typeof col.showOnSingle !== 'undefined') {
-          return col.showOnSingle;
+    columns = [
+      ...columns,
+      ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
+        (col) => {
+          if (typeof col.showOnSingle !== 'undefined') {
+            return col.showOnSingle;
+          }
+          return true;
         }
-        return true;
-      }
-    );
+      ),
+    ];
   }
-  return [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: ['title'],
-  }];
+  return columns;
 };
 
 export function TabActivities(props) {
@@ -74,6 +78,7 @@ export function TabActivities(props) {
     viewActiontypeId, // as set in URL
     actionsByActiontype,
     actiontypes,
+    isAdmin,
   } = props;
 
   const actiontypeIds = actiontypes && actiontypes.entrySeq().map(([id]) => id.toString());
@@ -132,7 +137,7 @@ export function TabActivities(props) {
                 onEntityClick,
                 connections: actionConnections,
                 typeid: viewActiontypeId,
-                columns: getActiontypeColumns(viewActiontypeId),
+                columns: getActiontypeColumns(viewActiontypeId, isAdmin),
                 onCreateOption: () => onCreateOption({
                   path: API.ACTIONS,
                   attributes: {
@@ -166,6 +171,7 @@ TabActivities.propTypes = {
   actionsByActiontype: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   onCreateOption: PropTypes.func,
+  isAdmin: PropTypes.bool,
 };
 
 const mapStateToProps = (state) => ({

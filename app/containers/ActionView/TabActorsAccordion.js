@@ -16,6 +16,7 @@ import {
   getActorConnectionField,
 } from 'utils/fields';
 
+import { checkActorAttribute } from 'utils/entities';
 import { lowerCase } from 'utils/string';
 
 import {
@@ -28,12 +29,12 @@ import AccordionHeader from 'components/AccordionHeader';
 import appMessages from 'containers/App/messages';
 import TabActorsAccordionChildTargets from './TabActorsAccordionChildTargets';
 
-const getActortypeColumns = (typeid) => {
+const getActortypeColumns = (typeid, showCode) => {
   let columns = [{
     id: 'main',
     type: 'main',
     sort: 'title',
-    attributes: ['code', 'title'],
+    attributes: showCode ? ['code', 'title'] : ['title'],
   }];
   if (
     ACTORTYPES_CONFIG[parseInt(typeid, 10)]
@@ -64,6 +65,7 @@ export function TabActorsAccordion({
   hasChildTargets,
   intl,
   viewSubject,
+  isAdmin,
 }) {
   const [actives, setActive] = useState(defaultState);
 
@@ -71,7 +73,6 @@ export function TabActorsAccordion({
   useEffect(() => {
     setActive(defaultState);
   }, [viewSubject, hasChildTargets]);
-
   return (
     <>
       <Box margin={{ vertical: 'medium' }}>
@@ -87,7 +88,10 @@ export function TabActorsAccordion({
                     onEntityClick,
                     connections: actorConnections,
                     typeid,
-                    columns: getActortypeColumns(typeid),
+                    columns: getActortypeColumns(
+                      typeid,
+                      checkActorAttribute(typeid, 'code', isAdmin),
+                    ),
                   }),
                 ]),
                 [],
@@ -159,6 +163,7 @@ export function TabActorsAccordion({
                         onEntityClick={onEntityClick}
                         actorConnections={actorConnections}
                         getActortypeColumns={(actortypeid) => getActortypeColumns(actortypeid)}
+                        isAdmin={isAdmin}
                       />
                     );
                   }
@@ -179,6 +184,7 @@ TabActorsAccordion.propTypes = {
   actorConnections: PropTypes.object,
   childActionsByActiontype: PropTypes.object,
   hasChildTargets: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   viewSubject: PropTypes.string,
   intl: intlShape,
 };

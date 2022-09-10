@@ -23,6 +23,10 @@ import {
 // import { qe } from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
+import {
+  checkIndicatorAttribute,
+  checkIndicatorRequired,
+} from 'utils/entities';
 // import { checkResourceAttribute, checkResourceRequired } from 'utils/entities';
 
 import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
@@ -48,6 +52,7 @@ import {
 import {
   selectReady,
   selectReadyForAuthCheck,
+  selectIsUserAdmin,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -87,14 +92,15 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
     }
   }
 
-  getHeaderMainFields = () => {
+  getHeaderMainFields = (isAdmin) => {
     const { intl } = this.context;
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          getCodeFormField(
+          checkIndicatorAttribute('code', isAdmin) && getCodeFormField(
             intl.formatMessage,
             'code',
+            checkIndicatorRequired('code'),
           ),
           getTitleFormField(
             intl.formatMessage,
@@ -123,6 +129,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
     connectedTaxonomies,
     actionsByActiontype,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const groups = [];
@@ -141,6 +148,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
         taxonomies: connectedTaxonomies,
         onCreateOption,
         contextIntl: intl,
+        isAdmin,
         connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
           ? [
             {
@@ -185,6 +193,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
       handleUpdate,
       formDataPath,
       inModal,
+      isAdmin,
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
@@ -222,7 +231,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
           scrollContainer={this.scrollContainer.current}
           fields={{ // isManager, taxonomies,
             header: {
-              main: this.getHeaderMainFields(),
+              main: this.getHeaderMainFields(isAdmin),
               aside: this.getHeaderAsideFields(),
             },
             body: {
@@ -230,6 +239,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
                 connectedTaxonomies,
                 actionsByActiontype,
                 inModal ? null : onCreateOption,
+                isAdmin,
               ),
             },
           }}
@@ -258,6 +268,7 @@ IndicatorNewForm.propTypes = {
   onServerErrorDismiss: PropTypes.func.isRequired,
   formDataPath: PropTypes.string,
   inModal: PropTypes.bool,
+  isAdmin: PropTypes.bool,
 };
 
 IndicatorNewForm.contextTypes = {
@@ -269,6 +280,7 @@ const mapStateToProps = (state) => ({
   authReady: selectReadyForAuthCheck(state),
   connectedTaxonomies: selectConnectedTaxonomies(state),
   actionsByActiontype: selectActionsByActiontype(state),
+  isAdmin: selectIsUserAdmin(state),
 });
 
 function mapDispatchToProps(

@@ -49,7 +49,7 @@ export const getIdField = (entity) => checkEmpty(entity.get('id')) && ({
   large: true,
   label: appMessages.attributes.id,
 });
-export const getReferenceField = (entity, att, isManager) => {
+export const getReferenceField = (entity, att, isAdmin) => {
   const value = att
     ? entity.getIn(['attributes', 'reference']) || entity.getIn(['attributes', att])
     : entity.getIn(['attributes', 'reference']);
@@ -59,7 +59,7 @@ export const getReferenceField = (entity, att, isManager) => {
       type: 'reference',
       value,
       large: true,
-      isManager,
+      isAdmin,
     });
   }
   return false;

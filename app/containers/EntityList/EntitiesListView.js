@@ -175,7 +175,18 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
 
     // ACTIONS =================================================================
     if (config.types === 'actiontypes' && dataReady) {
-      columns = ACTIONTYPES_CONFIG[typeId] && ACTIONTYPES_CONFIG[typeId].columns;
+      columns = [{
+        id: 'main',
+        type: 'main',
+        sort: 'title',
+        attributes: showCode ? ['code', 'title'] : ['title'],
+      }];
+      columns = [
+        ...columns,
+        ...ACTIONTYPES_CONFIG[typeId]
+          ? ACTIONTYPES_CONFIG[typeId].columns
+          : [],
+      ];
       type = actiontypes.find((at) => qe(at.get('id'), typeId));
       // hasByTarget = type.getIn(['attributes', 'has_target']);
       hasByActor = ACTIONTYPE_ACTORTYPES[typeId] && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
@@ -337,12 +348,13 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       );
       const actionColumns = getActivityColumns(mapSubjectClean, typeId);
       const typeColumns = ACTORTYPES_CONFIG[typeId].columns || [];
+
       columns = [
         {
           id: 'main',
           type: 'main',
           sort: 'title',
-          attributes: ['code', 'title'],
+          attributes: showCode ? ['code', 'title'] : ['title'],
         },
         ...typeColumns,
         ...actionColumns,
@@ -446,7 +458,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           id: 'main',
           type: 'main',
           sort: 'title',
-          attributes: ['title'],
+          attributes: showCode ? ['code', 'title'] : ['title'],
         },
         {
           id: 'statements', // one row per type,
@@ -530,6 +542,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     const showRelatedActorsForActions = !!entityActors;
     const showRelatedUsersForActions = !!entityUsers;
     const showEntities = !showRelatedActorsForActions && !showRelatedUsersForActions;
+
     return (
       <ContainerWrapper headerStyle={headerStyle} ref={this.ScrollContainer}>
         {dataReady && viewOptions && viewOptions.length > 1 && (
@@ -621,7 +634,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                             id: 'main',
                             type: 'main',
                             sort: 'title',
-                            attributes: ['code', 'title'],
+                            attributes: (showCode || qe(viewTypeClean, ACTORTYPES.COUNTRY))
+                              ? ['code', 'title']
+                              : ['title'],
                           },
                           {
                             id: 'actorActions',

@@ -16,6 +16,7 @@ import {
   selectActiontypeTaxonomiesWithCats,
   selectIsUserManager,
   selectIsUserAnalyst,
+  selectIsUserAdmin,
   selectActiontypes,
   // selectActortypes,
   selectActortypesForActiontype,
@@ -72,6 +73,7 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
       location,
       isManager,
       isAnalyst,
+      isAdmin,
       params, // { id: the action type }
       actiontypes,
       actortypes,
@@ -122,7 +124,6 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
         isManager,
       });
     }
-
     return (
       <div>
         <Helmet
@@ -152,7 +153,7 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
           typeOptions={this.prepareTypeOptions(actiontypes, typeId)}
           onSelectType={onSelectType}
           typeId={typeId}
-          showCode={checkActionAttribute(typeId, 'code', isManager)}
+          showCode={checkActionAttribute(typeId, 'code', isAdmin)}
         />
       </div>
     );
@@ -177,6 +178,7 @@ ActionList.propTypes = {
   allEntities: PropTypes.instanceOf(Map),
   location: PropTypes.object,
   isAnalyst: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   params: PropTypes.object,
 };
 
@@ -192,6 +194,7 @@ const mapStateToProps = (state, props) => ({
   connectedTaxonomies: selectConnectedTaxonomies(state),
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
+  isAdmin: selectIsUserAdmin(state),
   actiontypes: selectActiontypes(state),
   actortypes: selectActortypesForActiontype(state, { type: props.params.id }),
   targettypes: selectTargettypesForActiontype(state, { type: props.params.id }),

@@ -50,26 +50,31 @@ import {
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
-const getActiontypeColumns = (typeid) => {
+const getActiontypeColumns = (typeid, isAdmin) => {
+  let columns = [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: isAdmin ? ['code', 'title'] : ['title'],
+  }];
   if (
     ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
     && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
   ) {
-    return ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
+    const typeColumns = ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
       (col) => {
         if (typeof col.showOnSingle !== 'undefined') {
           return col.showOnSingle;
         }
-        return true;
+        return col.id !== 'main';
       }
     );
+    columns = [
+      ...columns,
+      ...typeColumns,
+    ];
   }
-  return [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: ['title'],
-  }];
+  return columns;
 };
 export class ResourceView extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
@@ -120,6 +125,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
     taxonomies,
     actionConnections,
     onEntityClick,
+    isAdmin,
   ) => {
     const fields = [];
     const typeId = entity.getIn(['attributes', 'resourcetype_id']);
@@ -147,7 +153,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
             onEntityClick,
             connections: actionConnections,
             typeid: actiontypeid,
-            columns: getActiontypeColumns(actiontypeid),
+            columns: getActiontypeColumns(actiontypeid, isAdmin),
           }),
         );
       });
@@ -262,6 +268,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
                       taxonomies,
                       actionConnections,
                       onEntityClick,
+                      isAdmin,
                     ),
                     aside: this.getBodyAsideFields(viewEntity),
                   },

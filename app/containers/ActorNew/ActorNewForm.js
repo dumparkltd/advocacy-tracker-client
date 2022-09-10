@@ -56,6 +56,7 @@ import {
   selectActortypeTaxonomiesWithCats,
   selectActortype,
   selectSessionUser,
+  selectIsUserAdmin,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -122,12 +123,12 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       : dataWithType;
   }
 
-  getHeaderMainFields = (typeId) => {
+  getHeaderMainFields = (typeId, isAdmin) => {
     const { intl } = this.context;
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          checkActorAttribute(typeId, 'code') && getCodeFormField(
+          checkActorAttribute(typeId, 'code', isAdmin) && getCodeFormField(
             intl.formatMessage,
             'code',
             checkActorRequired(typeId, 'code'),
@@ -174,6 +175,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
     actionsAsTargetByActiontype,
     membersByActortype,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const groups = [];
@@ -197,6 +199,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
         taxonomies: connectedTaxonomies,
         onCreateOption,
         contextIntl: intl,
+        isAdmin,
       });
       if (actionConnections) {
         groups.push(
@@ -224,12 +227,13 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       }
     }
     if (membersByActortype) {
-      const memberConnections = renderMembersByActortypeControl(
-        membersByActortype,
-        connectedTaxonomies,
+      const memberConnections = renderMembersByActortypeControl({
+        entitiesByActortype: membersByActortype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-      );
+        contextIntl: intl,
+        isAdmin,
+      });
       if (memberConnections) {
         groups.push(
           {
@@ -249,6 +253,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
     associationsByActortype,
     userOptions,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const groups = []; // fieldGroups
@@ -284,12 +289,13 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       },
     );
     if (associationsByActortype) {
-      const associationConnections = renderAssociationsByActortypeControl(
-        associationsByActortype,
-        connectedTaxonomies,
+      const associationConnections = renderAssociationsByActortypeControl({
+        entitiesByActortype: associationsByActortype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-      );
+        contextIntl: intl,
+        isAdmin,
+      });
       if (associationConnections) {
         groups.push(
           {
@@ -326,6 +332,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       handleUpdate,
       formDataPath,
       inModal,
+      isAdmin,
       invalidateEntitiesOnSuccess,
     } = this.props;
 
@@ -372,7 +379,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
           scrollContainer={this.scrollContainer.current}
           fields={{ // isManager, taxonomies,
             header: {
-              main: this.getHeaderMainFields(typeId),
+              main: this.getHeaderMainFields(typeId, isAdmin),
               aside: this.getHeaderAsideFields(),
             },
             body: {
@@ -383,6 +390,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
                 actionsAsTargetByActiontype,
                 membersByActortype,
                 inModal ? null : onCreateOption,
+                isAdmin,
               ),
               aside: this.getBodyAsideFields(
                 typeId,
@@ -391,6 +399,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
                 associationsByActortype,
                 userOptions,
                 inModal ? null : onCreateOption,
+                isAdmin,
               ),
             },
           }}
@@ -426,6 +435,7 @@ ActorNewForm.propTypes = {
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
   inModal: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   invalidateEntitiesOnSuccess: PropTypes.string,
   // autoUser: PropTypes.bool,
 };
@@ -452,6 +462,7 @@ const mapStateToProps = (state, { typeId, autoUser }) => ({
   associationsByActortype: selectAssociationsByActortype(state, typeId),
   userOptions: selectUserOptions(state, typeId),
   sessionUser: autoUser && selectSessionUser(state),
+  isAdmin: selectIsUserAdmin(state),
 });
 
 function mapDispatchToProps(

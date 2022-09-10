@@ -20,6 +20,7 @@ import {
   getActorConnectionField,
 } from 'utils/fields';
 
+import qe from 'utils/quasi-equals';
 import { getEntityTitle } from 'utils/entities';
 
 import {
@@ -32,7 +33,12 @@ import {
 } from 'containers/App/actions';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { USER_ROLES, ROUTES, ACTORTYPES_CONFIG } from 'themes/config';
+import {
+  USER_ROLES,
+  ROUTES,
+  ACTORTYPES_CONFIG,
+  ACTORTYPES,
+} from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
@@ -53,6 +59,7 @@ import {
   selectActionConnections,
   selectActorConnections,
   selectIsUserManager,
+  selectIsUserAdmin,
   selectSubjectQuery,
   selectActiontypeQuery,
   selectActortypes,
@@ -82,12 +89,12 @@ const getHighestUserRoleId = (user) => user
   )
   : USER_ROLES.DEFAULT.value;
 
-const getActortypeColumns = (typeid) => {
+const getActortypeColumns = (typeid, showCode) => {
   let columns = [{
     id: 'main',
     type: 'main',
     sort: 'title',
-    attributes: ['code', 'title'],
+    attributes: showCode ? ['code', 'title'] : ['title'],
   }];
   if (
     ACTORTYPES_CONFIG[parseInt(typeid, 10)]
@@ -135,6 +142,7 @@ export function UserView({
   viewActiontypeId,
   actiontypes,
   onCreateOption,
+  isAdmin,
 }) {
   useEffect(() => {
     // kick off loading of data
@@ -269,6 +277,7 @@ export function UserView({
                           viewActiontypeId={viewActiontypeId}
                           actionsByActiontype={actionsByActiontype}
                           actiontypes={actiontypes}
+                          isAdmin={isAdmin}
                         />
                       )}
                       {viewSubject === 'uactors' && actorsByActortype && (
@@ -282,7 +291,10 @@ export function UserView({
                                   onEntityClick,
                                   connections: actorConnections,
                                   typeid,
-                                  columns: getActortypeColumns(typeid),
+                                  columns: getActortypeColumns(
+                                    typeid,
+                                    isAdmin || qe(typeid, ACTORTYPES.COUNTRY),
+                                  ),
                                 }),
                               ]),
                               [],
@@ -343,6 +355,7 @@ UserView.propTypes = {
   onCreateOption: PropTypes.func,
   onSetActiontype: PropTypes.func,
   isManager: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   sessionUserId: PropTypes.string,
   viewActiontypeId: PropTypes.string,
   intl: intlShape,
@@ -352,6 +365,7 @@ UserView.propTypes = {
 
 const mapStateToProps = (state, props) => ({
   isManager: selectIsUserManager(state),
+  isAdmin: selectIsUserAdmin(state),
   sessionUserHighestRoleId: selectSessionUserHighestRoleId(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   sessionUserId: selectSessionUserId(state),

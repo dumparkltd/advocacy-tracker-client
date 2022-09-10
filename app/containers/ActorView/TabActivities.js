@@ -61,6 +61,7 @@ export function TabActivities(props) {
     intl,
     actionsViaMembersByActortype,
     actionsAsTargetViaMembersByActortype,
+    isAdmin,
   } = props;
 
   const viewActortypeId = viewEntity.getIn(['attributes', 'actortype_id']).toString();
@@ -209,6 +210,7 @@ export function TabActivities(props) {
         </TypeSelectBox>
       )}
       <TabActivitiesByType
+        isAdmin={isAdmin}
         viewEntity={viewEntity}
         viewSubject={viewSubject}
         taxonomies={taxonomies}
@@ -228,6 +230,7 @@ export function TabActivities(props) {
 TabActivities.propTypes = {
   viewEntity: PropTypes.instanceOf(Map),
   viewSubject: PropTypes.string,
+  isAdmin: PropTypes.bool,
   taxonomies: PropTypes.instanceOf(Map),
   onSetActiontype: PropTypes.func,
   onEntityClick: PropTypes.func,

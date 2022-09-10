@@ -50,6 +50,7 @@ export function TabActors({
   actorsByActortype,
   actorConnections,
   childActionsByActiontype,
+  isAdmin,
 }) {
   const hasMemberOption = !!typeId && !qe(typeId, ACTIONTYPES.NATL);
 
@@ -113,6 +114,7 @@ export function TabActors({
             actorConnections={actorConnections}
             actorsByType={actortypesForSubject}
             childActionsByActiontype={childActionsByActiontype}
+            isAdmin={isAdmin}
           />
         )}
       </Box>
@@ -131,6 +133,7 @@ TabActors.propTypes = {
   childActionsByActiontype: PropTypes.object,
   viewSubject: PropTypes.string,
   hasChildren: PropTypes.bool,
+  isAdmin: PropTypes.bool,
 };
 
 const mapStateToProps = (state, { viewEntity }) => ({

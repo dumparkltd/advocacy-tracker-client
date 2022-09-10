@@ -131,32 +131,32 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         ),
         associatedTaxonomies: taxonomyOptions(taxonomies),
         associatedActionsByActiontype: actionsByActiontype
-          ? actionsByActiontype.map((actions) => entityOptions(actions, true))
+          ? actionsByActiontype.map((actions) => entityOptions({ entities: actions }))
           : Map(),
         associatedActionsAsTargetByActiontype: actionsAsTargetByActiontype
-          ? actionsAsTargetByActiontype.map((actions) => entityOptions(actions, true))
+          ? actionsAsTargetByActiontype.map((actions) => entityOptions({ entities: actions }))
           : Map(),
         associatedMembersByActortype: membersByActortype
-          ? membersByActortype.map((actors) => entityOptions(actors, true))
+          ? membersByActortype.map((actors) => entityOptions({ entities: actors }))
           : Map(),
         associatedAssociationsByActortype: associationsByActortype
-          ? associationsByActortype.map((actors) => entityOptions(actors, true))
+          ? associationsByActortype.map((actors) => entityOptions({ entities: actors }))
           : Map(),
         associatedUsers: userOptions
-          ? entityOptions(userOptions, true)
+          ? entityOptions({ entities: userOptions })
           : Map(),
       })
       : Map();
   };
 
-  getHeaderMainFields = (entity) => {
+  getHeaderMainFields = (entity, isAdmin) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'actortype_id']);
     return (
       [ // fieldGroups
         { // fieldGroup
           fields: [
-            checkActorAttribute(typeId, 'code') && getCodeFormField(
+            checkActorAttribute(typeId, 'code', isAdmin) && getCodeFormField(
               intl.formatMessage,
               'code',
               checkActorRequired(typeId, 'code'),
@@ -205,7 +205,8 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
     actionsByActiontype,
     actionsAsTargetByActiontype,
     membersByActortype,
-    onCreateOption
+    onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'actortype_id']);
@@ -232,6 +233,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         taxonomies: connectedTaxonomies,
         onCreateOption,
         contextIntl: intl,
+        isAdmin,
       });
       if (actionConnections) {
         groups.push(
@@ -259,12 +261,13 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       }
     }
     if (membersByActortype) {
-      const memberConnections = renderMembersByActortypeControl(
-        membersByActortype,
-        connectedTaxonomies,
+      const memberConnections = renderMembersByActortypeControl({
+        entitiesByActortype: membersByActortype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-      );
+        contextIntl: intl,
+        isAdmin,
+      });
       if (memberConnections) {
         groups.push(
           {
@@ -284,6 +287,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
     associationsByActortype,
     userOptions,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'actortype_id']);
@@ -321,12 +325,13 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       },
     );
     if (associationsByActortype) {
-      const associationConnections = renderAssociationsByActortypeControl(
-        associationsByActortype,
-        connectedTaxonomies,
+      const associationConnections = renderAssociationsByActortypeControl({
+        entitiesByActortype: associationsByActortype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-      );
+        contextIntl: intl,
+        isAdmin,
+      });
       if (associationConnections) {
         groups.push(
           {
@@ -428,7 +433,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
                 onServerErrorDismiss={onServerErrorDismiss}
                 fields={dataReady && {
                   header: {
-                    main: this.getHeaderMainFields(viewEntity),
+                    main: this.getHeaderMainFields(viewEntity, isAdmin),
                     aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
                   },
                   body: {
@@ -439,6 +444,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
                       actionsAsTargetByActiontype,
                       membersByActortype,
                       onCreateOption,
+                      isAdmin,
                     ),
                     aside: this.getBodyAsideFields(
                       viewEntity,
@@ -447,6 +453,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
                       associationsByActortype,
                       userOptions,
                       onCreateOption,
+                      isAdmin,
                     ),
                   },
                 }}

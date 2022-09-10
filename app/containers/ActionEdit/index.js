@@ -148,38 +148,38 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         ),
         associatedTaxonomies: taxonomyOptions(taxonomies),
         associatedActorsByActortype: actorsByActortype
-          ? actorsByActortype.map((actors) => entityOptions(actors, true))
+          ? actorsByActortype.map((actors) => entityOptions({ entities: actors }))
           : Map(),
         associatedTargetsByActortype: targetsByActortype
-          ? targetsByActortype.map((targets) => entityOptions(targets, true))
+          ? targetsByActortype.map((targets) => entityOptions({ entities: targets }))
           : Map(),
         associatedResourcesByResourcetype: resourcesByResourcetype
-          ? resourcesByResourcetype.map((resources) => entityOptions(resources, true))
+          ? resourcesByResourcetype.map((resources) => entityOptions({ entities: resources }))
           : Map(),
         associatedIndicators: indicatorOptions
-          ? entityOptions(indicatorOptions, true)
+          ? entityOptions({ entities: indicatorOptions })
           : Map(),
         associatedTopActionsByActiontype: topActionsByActiontype
-          ? topActionsByActiontype.map((actions) => entityOptions(actions, true))
+          ? topActionsByActiontype.map((actions) => entityOptions({ entities: actions }))
           : Map(),
         associatedSubActionsByActiontype: subActionsByActiontype
-          ? subActionsByActiontype.map((actions) => entityOptions(actions, true))
+          ? subActionsByActiontype.map((actions) => entityOptions({ entities: actions }))
           : Map(),
         associatedUsers: userOptions
-          ? entityOptions(userOptions, true)
+          ? entityOptions({ entities: userOptions })
           : Map(),
       })
       : Map();
   }
 
-  getHeaderMainFields = (entity) => {
+  getHeaderMainFields = (entity, isAdmin) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'measuretype_id']);
     return (
       [ // fieldGroups
         { // fieldGroup
           fields: [
-            checkActionAttribute(typeId, 'code', true) && getCodeFormField(
+            checkActionAttribute(typeId, 'code', isAdmin) && getCodeFormField(
               intl.formatMessage,
               'code',
               checkActionRequired(typeId, 'code'),
@@ -222,6 +222,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     indicatorOptions,
     onCreateOption,
     entityIndicatorConnections,
+    isAdmin,
   }) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'measuretype_id']);
@@ -279,6 +280,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         contextIntl: intl,
         connections: entityIndicatorConnections,
         connectionAttributes,
+        isAdmin,
       });
       if (indicatorConnections) {
         groups.push(
@@ -290,12 +292,13 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       }
     }
     if (actorsByActortype) {
-      const actorConnections = renderActorsByActortypeControl(
-        actorsByActortype,
-        connectedTaxonomies,
+      const actorConnections = renderActorsByActortypeControl({
+        entitiesByActortype: actorsByActortype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-      );
+        contextIntl: intl,
+        isAdmin,
+      });
       if (actorConnections) {
         groups.push(
           {
@@ -306,12 +309,13 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       }
     }
     if (targetsByActortype) {
-      const targetConnections = renderTargetsByActortypeControl(
-        targetsByActortype,
-        connectedTaxonomies,
+      const targetConnections = renderTargetsByActortypeControl({
+        entitiesByActortype: targetsByActortype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
-        intl,
-      );
+        contextIntl: intl,
+        isAdmin,
+      });
       if (targetConnections) {
         groups.push(
           {
@@ -328,6 +332,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         onCreateOption,
         contextIntl: intl,
         model: 'associatedSubActionsByActiontype',
+        isAdmin,
       });
       if (actionConnections) {
         groups.push(
@@ -363,6 +368,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     topActionsByActiontype,
     userOptions,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'measuretype_id']);
@@ -428,6 +434,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         onCreateOption,
         contextIntl: intl,
         model: 'associatedTopActionsByActiontype',
+        isAdmin,
       });
       if (actionConnections) {
         groups.push(
@@ -536,7 +543,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                 onServerErrorDismiss={onServerErrorDismiss}
                 fields={dataReady && {
                   header: {
-                    main: this.getHeaderMainFields(viewEntity),
+                    main: this.getHeaderMainFields(viewEntity, isAdmin),
                     aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
                   },
                   body: {
@@ -550,6 +557,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       indicatorOptions,
                       onCreateOption,
                       entityIndicatorConnections,
+                      isAdmin,
                     }),
                     aside: this.getBodyAsideFields(
                       viewEntity,
@@ -558,6 +566,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       topActionsByActiontype,
                       userOptions,
                       onCreateOption,
+                      isAdmin,
                     ),
                   },
                 }}

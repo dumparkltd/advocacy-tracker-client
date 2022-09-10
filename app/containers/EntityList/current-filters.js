@@ -3,7 +3,7 @@ import { upperFirst } from 'lodash/string';
 
 import {
   TEXT_TRUNCATE,
-  ACTIONTYPES_CONFIG,
+  ACTORTYPES,
 } from 'themes/config';
 
 import { getCategoryShortTitle } from 'utils/entities';
@@ -56,7 +56,7 @@ export const currentFilters = (
     onTagClick,
     errors,
     intl,
-    isManager,
+    isAdmin,
   },
   withoutLabel,
   anyLabel,
@@ -89,7 +89,7 @@ export const currentFilters = (
         withoutLabel,
         anyLabel,
         intl,
-        isManager,
+        isAdmin,
       ));
       if (config.connections[connectionKey].connectionAttributeFilter) {
         filterTags = filterTags.concat(getCurrentConnectionAttributeFilters(
@@ -266,9 +266,8 @@ const checkCodeVisibility = (
   entityType,
   isManager,
 ) => {
-  if (!isManager && entityType === 'actions') {
-    const config = ACTIONTYPES_CONFIG[connection.getIn(['attributes', 'measuretype_id'])];
-    return !!config.is_code_public;
+  if (!isManager && entityType === 'actors') {
+    return qe(connection.getIn(['attributes', 'actortype_id']), ACTORTYPES.COUNTRY);
   }
   return true;
 };
@@ -282,7 +281,7 @@ const getCurrentConnectionFilters = (
   withoutLabel,
   anyLabel,
   intl,
-  isManager,
+  isAdmin,
 ) => {
   const tags = [];
   const {
@@ -342,7 +341,7 @@ const getCurrentConnectionFilters = (
       }
       const connection = connections.getIn([path, value]);
       if (connection) {
-        const isCodePublic = checkCodeVisibility(connection, option.entityType, isManager);
+        const isCodePublic = checkCodeVisibility(connection, option.entityType, isAdmin);
         tags.push({
           label: getConnectionLabel(connection, value, !isCodePublic, labels, intl),
           labelLong: getConnectionLabel(connection, value, true, labels, intl),

@@ -300,11 +300,11 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       typeOptions,
       dataReady,
       typeId,
-      isManager,
       onUpdateQuery,
       includeMembers,
       onSetFilterMemberOption,
       headerActions,
+      isAdmin,
     } = this.props;
     const { intl } = this.context;
     const { activeOption } = this.state;
@@ -391,7 +391,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           activeFilterOption: activeOption,
           contextIntl: intl,
           typeId,
-          isManager,
+          isAdmin,
           messages: {
             titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
             without: intl.formatMessage(messages.filterFormWithoutPrefix),
@@ -415,6 +415,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
         membertypes,
         associationtypes,
         typeId,
+        isAdmin,
         messages: {
           attributes: intl.formatMessage(messages.editGroupLabel.attributes),
           taxonomyGroup: intl.formatMessage(messages.editGroupLabel.taxonomies),
@@ -426,6 +427,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       });
       if (activeOption && connections) {
         formOptions = makeActiveEditOptions({
+          isAdmin,
           entities: entitiesSelected,
           config,
           taxonomies,
@@ -749,7 +751,7 @@ EntityListHeader.propTypes = {
   onHideEditOptions: PropTypes.func,
   canEdit: PropTypes.bool,
   dataReady: PropTypes.bool,
-  isManager: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   includeMembers: PropTypes.bool,
   typeOptions: PropTypes.array,
   onSelectType: PropTypes.func,

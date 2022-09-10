@@ -22,6 +22,10 @@ import {
   getConnectionUpdatesFromFormData,
 } from 'utils/forms';
 import { getMetaField } from 'utils/fields';
+import {
+  checkIndicatorAttribute,
+  checkIndicatorRequired,
+} from 'utils/entities';
 import qe from 'utils/quasi-equals';
 
 import { scrollToTop } from 'utils/scroll-to-component';
@@ -113,21 +117,22 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
           FORM_INITIAL.get('attributes')
         ),
         associatedActionsByActiontype: actionsByActiontype
-          ? actionsByActiontype.map((actions) => entityOptions(actions, true))
+          ? actionsByActiontype.map((actions) => entityOptions({ entities: actions }))
           : Map(),
       })
       : Map();
   };
 
-  getHeaderMainFields = () => {
+  getHeaderMainFields = (isAdmin) => {
     const { intl } = this.context;
     return (
       [ // fieldGroups
         { // fieldGroup
           fields: [
-            getCodeFormField(
+            checkIndicatorAttribute('code', isAdmin) && getCodeFormField(
               intl.formatMessage,
               'code',
+              checkIndicatorRequired('code'),
             ),
             getTitleFormField(
               intl.formatMessage,
@@ -160,6 +165,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
     connectedTaxonomies,
     actionsByActiontype,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const groups = [];
@@ -181,6 +187,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
         taxonomies: connectedTaxonomies,
         onCreateOption,
         contextIntl: intl,
+        isAdmin,
         connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
           ? [
             {
@@ -302,7 +309,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
                 onServerErrorDismiss={onServerErrorDismiss}
                 fields={dataReady && {
                   header: {
-                    main: this.getHeaderMainFields(viewEntity),
+                    main: this.getHeaderMainFields(isAdmin),
                     aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
                   },
                   body: {
@@ -311,6 +318,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
                       connectedTaxonomies,
                       actionsByActiontype,
                       onCreateOption,
+                      isAdmin,
                     ),
                     // aside: this.getBodyAsideFields(
                     //   viewEntity

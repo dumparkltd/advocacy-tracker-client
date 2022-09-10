@@ -25,6 +25,7 @@ import {
   selectActortypeTaxonomiesWithCats,
   selectIsUserManager,
   selectIsUserAnalyst,
+  selectIsUserAdmin,
   selectActortypes,
   selectActiontypesForActortype,
   selectActiontypesForTargettype,
@@ -33,7 +34,7 @@ import {
   selectActortypeActors,
 } from 'containers/App/selectors';
 
-import { checkActionAttribute } from 'utils/entities';
+import { checkActorAttribute } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
 import { ROUTES, ACTORTYPES } from 'themes/config';
@@ -136,6 +137,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
       connections,
       connectedTaxonomies,
       location,
+      isAdmin,
       isManager,
       isAnalyst,
       params, // { id: the action type }
@@ -237,7 +239,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
           typeOptions={this.prepareTypeOptions(actortypes, typeId)}
           onSelectType={onSelectType}
           typeId={typeId}
-          showCode={checkActionAttribute(typeId, 'code', isManager)}
+          showCode={checkActorAttribute(typeId, 'code', isAdmin)}
           listActions={listActions}
         />
         {this.state.emailEntities && (
@@ -275,6 +277,8 @@ ActorList.propTypes = {
   onSelectType: PropTypes.func,
   dataReady: PropTypes.bool,
   isManager: PropTypes.bool,
+  isAdmin: PropTypes.bool,
+  isAnalyst: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   allEntities: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
@@ -286,7 +290,6 @@ ActorList.propTypes = {
   membertypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
-  isAnalyst: PropTypes.bool,
   params: PropTypes.object,
 };
 
@@ -302,6 +305,7 @@ const mapStateToProps = (state, props) => ({
   connectedTaxonomies: selectConnectedTaxonomies(state),
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
+  isAdmin: selectIsUserAdmin(state),
   actiontypes: selectActiontypesForActortype(state, { type: props.params.id }),
   actiontypesForTarget: selectActiontypesForTargettype(state, { type: props.params.id }),
   membertypes: selectMembertypesForActortype(state, { type: props.params.id }),

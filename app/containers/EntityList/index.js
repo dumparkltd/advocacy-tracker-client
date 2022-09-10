@@ -267,6 +267,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       ? entityIdsSelected.filter((id) => entities.map((entity) => entity.get('id')).includes(id))
       : entityIdsSelected;
     const isManager = canEdit && hasUserRole[USER_ROLES.MANAGER.value];
+    const isAdmin = canEdit && hasUserRole[USER_ROLES.ADMIN.value];
 
     const filters = currentFilters(
       {
@@ -280,7 +281,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         errors,
         // actortypes,
         intl,
-        isManager,
+        isAdmin,
       },
       intl.formatMessage(messages.filterFormWithoutPrefix),
       intl.formatMessage(messages.filterFormAnyPrefix),
@@ -354,6 +355,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             locationQuery={locationQuery}
             canEdit={isManager && showList}
             isManager={isManager}
+            isAdmin={isAdmin}
             hasUserRole={hasUserRole}
             onCreateOption={onCreateOption}
             onUpdate={
@@ -408,6 +410,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
 
             dataReady={dataReady}
             isManager={isManager}
+            isAdmin={isAdmin}
             isAnalyst={hasUserRole[USER_ROLES.ANALYST.value]}
 
             onEntitySelect={(id, checked) => {

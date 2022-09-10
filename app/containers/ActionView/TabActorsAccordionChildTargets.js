@@ -15,7 +15,7 @@ import {
 } from 'utils/fields';
 
 import FieldGroup from 'components/fields/FieldGroup';
-
+import { checkActorAttribute } from 'utils/entities';
 import {
   selectChildTargetsByType,
 } from './selectors';
@@ -27,6 +27,7 @@ export function TabActorsAccordionChildTargets({
   onEntityClick,
   actorConnections,
   getActortypeColumns,
+  isAdmin,
 }) {
   return (
     <Box pad={{ top: 'medium', bottom: 'hair' }}>
@@ -45,6 +46,7 @@ export function TabActorsAccordionChildTargets({
                 typeid: actortypeid,
                 columns: getActortypeColumns(
                   actortypeid,
+                  checkActorAttribute(actortypeid, 'code', isAdmin)
                 ),
               }),
             ]),
@@ -64,6 +66,7 @@ TabActorsAccordionChildTargets.propTypes = {
   taxonomies: PropTypes.object,
   actorConnections: PropTypes.object,
   title: PropTypes.string,
+  isAdmin: PropTypes.bool,
 };
 
 const mapStateToProps = (state, { targetIds }) => ({

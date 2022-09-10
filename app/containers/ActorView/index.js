@@ -230,10 +230,10 @@ export function ActorView(props) {
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
-                        checkActorAttribute(typeId, 'code', isManager) && getReferenceField(
+                        checkActorAttribute(typeId, 'code', isAdmin) && getReferenceField(
                           viewEntity,
                           'code',
-                          isManager,
+                          isAdmin,
                         ),
                         checkActorAttribute(typeId, 'title') && getTitleField(viewEntity),
                         checkActorAttribute(typeId, 'prefix', isManager) && getInfoField(
@@ -319,6 +319,7 @@ export function ActorView(props) {
                     <SubjectTabWrapper>
                       {viewSubject === 'members' && hasMembers && (
                         <TabMembers
+                          isAdmin={isAdmin}
                           membersByType={membersByType}
                           onEntityClick={(id, path) => onEntityClick(id, path)}
                           taxonomies={taxonomies}
@@ -327,6 +328,7 @@ export function ActorView(props) {
                       )}
                       {viewSubject === 'topics' && hasStatements && (
                         <TabStatements
+                          isAdmin={isAdmin}
                           viewEntity={viewEntity}
                           onEntityClick={(id, path) => onEntityClick(id, path)}
                           statements={actionsByActiontype && actionsByActiontype.get(parseInt(ACTIONTYPES.EXPRESS, 10))}
@@ -335,6 +337,7 @@ export function ActorView(props) {
                       )}
                       {(viewSubject === 'actors' || viewSubject === 'targets') && (
                         <TabActivities
+                          isAdmin={isAdmin}
                           viewEntity={viewEntity}
                           onEntityClick={onEntityClick}
                           viewSubject={viewSubject}

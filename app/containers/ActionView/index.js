@@ -279,10 +279,10 @@ export function ActionView(props) {
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
-                        checkActionAttribute(typeId, 'code', isManager) && getReferenceField(
+                        checkActionAttribute(typeId, 'code', isAdmin) && getReferenceField(
                           viewEntity,
                           'code',
-                          isManager,
+                          isAdmin,
                         ),
                         checkActionAttribute(typeId, 'title') && getTitleField(viewEntity),
                       ],
@@ -374,6 +374,7 @@ export function ActionView(props) {
                     <SubjectTabWrapper>
                       {viewSubject === 'children' && (
                         <TabActivities
+                          isAdmin={isAdmin}
                           viewEntity={viewEntity}
                           taxonomies={taxonomies}
                           onEntityClick={onEntityClick}
@@ -384,6 +385,7 @@ export function ActionView(props) {
                       )}
                       {viewSubject !== 'children' && (
                         <TabActors
+                          isAdmin={isAdmin}
                           hasChildren={hasChildren}
                           childActionsByActiontype={subActionsByType}
                           viewEntity={viewEntity}

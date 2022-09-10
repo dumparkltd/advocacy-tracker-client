@@ -34,29 +34,33 @@ import {
 } from 'containers/App/selectors';
 import appMessages from 'containers/App/messages';
 
-const getActiontypeColumns = (typeid, viewSubject) => {
+const getActiontypeColumns = (typeid, viewSubject, isAdmin) => {
+  let columns = [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: isAdmin ? ['code', 'title'] : ['title'],
+  }];
   if (
     ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
     && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
   ) {
-    return ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-      (col) => {
-        if (typeof col.showOnSingle !== 'undefined') {
-          if (viewSubject && Array.isArray(col.showOnSingle)) {
-            return col.showOnSingle.indexOf(viewSubject) > -1;
+    columns = [
+      ...columns,
+      ...ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
+        (col) => {
+          if (typeof col.showOnSingle !== 'undefined') {
+            if (viewSubject && Array.isArray(col.showOnSingle)) {
+              return col.showOnSingle.indexOf(viewSubject) > -1;
+            }
+            return col.showOnSingle;
           }
-          return col.showOnSingle;
+          return true;
         }
-        return true;
-      }
-    );
+      ),
+    ];
   }
-  return [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: ['title'],
-  }];
+  return columns;
 };
 
 
@@ -83,6 +87,7 @@ export function TabActivitiesByType(props) {
     onEntityClick,
     intl,
     onCreateOption,
+    isAdmin,
   } = props;
   const [actives, setActive] = useState(defaultState);
 
@@ -187,7 +192,11 @@ export function TabActivitiesByType(props) {
                     onEntityClick,
                     connections: actionConnections,
                     typeid: activeActiontypeId,
-                    columns: getActiontypeColumns(activeActiontypeId, viewSubject),
+                    columns: getActiontypeColumns(
+                      activeActiontypeId,
+                      viewSubject,
+                      isAdmin,
+                    ),
                     onCreateOption: () => onCreateOption({
                       path: API.ACTIONS,
                       attributes: {
@@ -235,7 +244,11 @@ export function TabActivitiesByType(props) {
                             onEntityClick,
                             connections: actionConnections,
                             typeid: activeActiontypeId,
-                            columns: getActiontypeColumns(activeActiontypeId, viewSubject),
+                            columns: getActiontypeColumns(
+                              activeActiontypeId,
+                              viewSubject,
+                              isAdmin,
+                            ),
                           }),
                         ],
                       }}
@@ -273,7 +286,11 @@ export function TabActivitiesByType(props) {
                             onEntityClick,
                             connections: actionConnections,
                             typeid: activeActiontypeId,
-                            columns: getActiontypeColumns(activeActiontypeId, viewSubject),
+                            columns: getActiontypeColumns(
+                              activeActiontypeId,
+                              viewSubject,
+                              isAdmin,
+                            ),
                           }),
                         ],
                       }}
@@ -292,6 +309,7 @@ export function TabActivitiesByType(props) {
 TabActivitiesByType.propTypes = {
   viewEntity: PropTypes.instanceOf(Map),
   viewSubject: PropTypes.string,
+  isAdmin: PropTypes.bool,
   taxonomies: PropTypes.instanceOf(Map),
   actionConnections: PropTypes.instanceOf(Map),
   onEntityClick: PropTypes.func,
