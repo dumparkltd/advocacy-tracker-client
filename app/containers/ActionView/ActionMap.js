@@ -22,12 +22,14 @@ import {
   selectIncludeActorMembers,
   selectIncludeTargetMembers,
   selectIncludeTargetChildrenOnMap,
+  selectIncludeTargetChildrenMembersOnMap,
 } from 'containers/App/selectors';
 
 import {
   setIncludeActorMembers,
   setIncludeTargetMembers,
   setIncludeTargetChildrenOnMap,
+  setIncludeTargetChildrenMembersOnMap,
 } from 'containers/App/actions';
 
 
@@ -67,6 +69,8 @@ export function ActionMap({
   includeTargetChildren,
   onSetIncludeTargetChildren,
   childActionsByActiontype,
+  includeTargetChildrenMembers,
+  onSetIncludeTargetChildrenMembers,
   // typeId,
   // intl,
 }) {
@@ -113,10 +117,14 @@ export function ActionMap({
     && childActionsByActiontype.reduce(
       (memo, typeActions) => memo.concat(typeActions.reduce(
         (memo2, childAction) => {
+          let result = memo2;
           if (childAction.getIn(['targetsByType', ACTORTYPES.COUNTRY])) {
-            return memo2.concat(childAction.getIn(['targetsByType', ACTORTYPES.COUNTRY]).toList());
+            result = result.concat(childAction.getIn(['targetsByType', ACTORTYPES.COUNTRY]).toList());
           }
-          return memo2;
+          if (hasMemberOption && includeTargetChildrenMembers && childAction.getIn(['targetMembersByType', ACTORTYPES.COUNTRY])) {
+            result = result.concat(childAction.getIn(['targetMembersByType', ACTORTYPES.COUNTRY]).toList());
+          }
+          return result;
         },
         List(),
       )),
@@ -171,10 +179,19 @@ export function ActionMap({
 
       if (country) {
         let styleOption = mapKeyOptionMap.direct;
+        let content = mapSubject === 'actors'
+          ? 'As direct actor'
+          : 'As direct target';
         if (countryVia) {
           styleOption = mapKeyOptionMap.via;
+          content = mapSubject === 'actors'
+            ? 'As member of group actor'
+            : 'As member of target';
         } else if (countryChildTarget) {
           styleOption = mapKeyOptionMap.children;
+          content = mapSubject === 'actors'
+            ? 'As actor of child activity' //  should never happen
+            : 'As target of child activity';
         }
         // console.log(feature)
         return [
@@ -186,6 +203,7 @@ export function ActionMap({
             tooltip: {
               id: country.get('id'),
               title: country.getIn(['attributes', 'title']),
+              content: <Text size="small" style={{ fontStyle: 'italic' }}>{content}</Text>,
             },
             values: {
               actions: styleOption.colorValue,
@@ -224,7 +242,12 @@ export function ActionMap({
   const childrenOption = hasChildTargetOption && ({
     active: includeTargetChildren,
     onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
-    label: 'Include targets of child activities (excluding members of regions and groups targeted by children)',
+    label: 'Include targets of child activities',
+  });
+  const memberChildrenOption = hasChildTargetOption && hasMemberOption && ({
+    active: includeTargetChildrenMembers,
+    onClick: () => onSetIncludeTargetChildrenMembers(includeTargetChildrenMembers ? '0' : '1'),
+    label: 'Include members of targets of child activities',
   });
   return (
     <Styled hasHeader noOverflow>
@@ -233,7 +256,7 @@ export function ActionMap({
           countryData={countryData}
           countryFeatures={countriesJSON.features}
           indicator="actions"
-          onActorClick={(id) => onActorClick(id)}
+          onCountryClick={(id) => onActorClick(id)}
           maxValueCountries={MAX_VALUE_COUNTRIES}
           includeSecondaryMembers={
             includeActorMembers
@@ -245,27 +268,34 @@ export function ActionMap({
           mapId="ll-action-map"
         />
       </MapWrapper>
-      {(mapTitle || memberOption || childrenOption) && (
-        <MapOptions>
-          {mapTitle && (
-            <MapTitle>
-              <Text weight={600}>{mapTitle}</Text>
-            </MapTitle>
-          )}
+      {mapTitle && (
+        <Box>
+          <MapTitle>
+            <Text weight={600}>{mapTitle}</Text>
+          </MapTitle>
+        </Box>
+      )}
+      {(memberOption || childrenOption || memberChildrenOption) && (
+        <MapOptions gap="xxsmall">
           {memberOption && (
-            <MapOption option={memberOption} type="member" />
+            <MapOption option={memberOption} type="member" plain />
           )}
           {childrenOption && (
-            <MapOption option={childrenOption} type="children" />
+            <MapOption option={childrenOption} type="children" plain />
+          )}
+          {memberChildrenOption && (
+            <Box margin={{ left: 'medium' }}>
+              <MapOption option={memberChildrenOption} type="children-members" plain />
+            </Box>
           )}
         </MapOptions>
       )}
-      <MapOptions>
+      <Box>
         <MapKeySimple
           options={Object.values(mapKeyOptionMap)}
           title="Countries"
         />
-      </MapOptions>
+      </Box>
     </Styled>
   );
 }
@@ -277,17 +307,15 @@ ActionMap.propTypes = {
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeTargetMembers: PropTypes.func,
   onSetIncludeTargetChildren: PropTypes.func,
+  onSetIncludeTargetChildrenMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   includeTargetMembers: PropTypes.bool,
   includeTargetChildren: PropTypes.bool,
+  includeTargetChildrenMembers: PropTypes.bool,
   hasMemberOption: PropTypes.bool,
   hasChildTargetOption: PropTypes.bool,
   onActorClick: PropTypes.func,
   mapSubject: PropTypes.string,
-  // typeId: PropTypes.oneOfType([
-  //   PropTypes.string,
-  //   PropTypes.number,
-  // ]),
 };
 
 const mapStateToProps = (state) => ({
@@ -295,6 +323,7 @@ const mapStateToProps = (state) => ({
   includeActorMembers: selectIncludeActorMembers(state),
   includeTargetMembers: selectIncludeTargetMembers(state),
   includeTargetChildren: selectIncludeTargetChildrenOnMap(state),
+  includeTargetChildrenMembers: selectIncludeTargetChildrenMembersOnMap(state),
 });
 function mapDispatchToProps(dispatch) {
   return {
@@ -303,6 +332,9 @@ function mapDispatchToProps(dispatch) {
     },
     onSetIncludeTargetChildren: (active) => {
       dispatch(setIncludeTargetChildrenOnMap(active));
+    },
+    onSetIncludeTargetChildrenMembers: (active) => {
+      dispatch(setIncludeTargetChildrenMembersOnMap(active));
     },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));

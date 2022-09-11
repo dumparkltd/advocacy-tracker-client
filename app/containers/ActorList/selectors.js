@@ -15,7 +15,7 @@ import {
   selectActorActionsGroupedByActor,
   selectActionActorsGroupedByActor,
   selectMembershipsGroupedByMember,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectCategories,
   selectTargetingQuery,
   selectActionTaxonomies,
@@ -196,7 +196,7 @@ const selectActorsWithActions = createSelector(
   selectConnections,
   selectActorActionsGroupedByActor,
   selectActionActorsGroupedByActor, // as targets
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectMembershipsGroupedByMember,
   selectUserActorsGroupedByActor,
   (

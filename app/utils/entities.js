@@ -978,8 +978,8 @@ export const hasGroupActors = (actortypesForActiontype) => actortypesForActionty
 export const setActionConnections = ({
   action,
   actionConnections,
-  actorActions,
-  actionActors,
+  actorActions, // as active actor
+  actionActors, // as passive target of action
   actionResources,
   actionIndicators,
   actionIndicatorAttributes,

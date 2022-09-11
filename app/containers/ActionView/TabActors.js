@@ -25,11 +25,7 @@ import {
 
 import FieldGroup from 'components/fields/FieldGroup';
 
-import {
-} from 'containers/App/actions';
-import {
-  selectActorConnections,
-} from 'containers/App/selectors';
+import { selectActorConnections } from 'containers/App/selectors';
 
 import ActionMap from './ActionMap';
 import TabActorsAccordion from './TabActorsAccordion';

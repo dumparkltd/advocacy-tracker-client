@@ -463,6 +463,15 @@ export const selectIncludeTargetChildrenOnMap = createSelector(
     return true; // default
   }
 );
+export const selectIncludeTargetChildrenMembersOnMap = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('mtchm')) {
+      return qe(locationQuery.get('mtchm'), 1) || locationQuery.get('mtchm') === 'true';
+    }
+    return true; // default
+  }
+);
 export const selectIncludeActorChildren = createSelector(
   selectLocationQuery,
   (locationQuery) => {
@@ -1608,7 +1617,7 @@ export const selectMembershipsGroupedByMember = createSelector(
     ),
 );
 
-export const selectMembershipsGroupedByAssociation = createSelector(
+export const selectMembershipsGroupedByParent = createSelector(
   (state) => selectEntities(state, API.MEMBERSHIPS),
   (entities) => entities
     && entities.groupBy(
@@ -1622,7 +1631,7 @@ export const selectMembershipsGroupedByAssociation = createSelector(
 
 export const selectActorActionsMembersGroupedByAction = createSelector(
   selectActorActionsGroupedByAction,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   (entities, memberships) => entities && memberships && entities.map(
     (actors) => actors.reduce((memo, actorId) => {
       if (memberships.get(actorId)) {
@@ -1646,7 +1655,7 @@ export const selectActorActionsAssociationsGroupedByAction = createSelector(
 );
 export const selectActionActorsMembersGroupedByAction = createSelector(
   selectActionActorsGroupedByAction,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   (actionActorsByAction, memberships) => actionActorsByAction
     && memberships
     && actionActorsByAction.map(

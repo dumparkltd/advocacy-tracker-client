@@ -21,7 +21,7 @@ import {
   selectReady,
   selectActorsCategorised,
   selectMembershipsGroupedByMember,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectActortypes,
   selectUsers,
   selectUserActorsGroupedByActor,
@@ -182,7 +182,7 @@ export const selectMembersByActortype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectViewEntity,
   selectActorsCategorised,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectActortypes,
   (ready, viewActor, actors, associations, actortypes) => {
     if (!viewActor || !ready) return null;

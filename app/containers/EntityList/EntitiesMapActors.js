@@ -23,7 +23,7 @@ import {
   selectActortypeActors,
   selectActionActorsGroupedByAction,
   selectActorActionsGroupedByAction,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectMapIndicator,
 } from 'containers/App/selectors';
 
@@ -435,7 +435,7 @@ const mapStateToProps = (state) => ({
   actions: selectActions(state),
   actionActorsByAction: selectActionActorsGroupedByAction(state), // for figuring out targeted countries
   actorActionsByAction: selectActorActionsGroupedByAction(state), // for figuring out targeted countries
-  membershipsByAssociation: selectMembershipsGroupedByAssociation(state),
+  membershipsByAssociation: selectMembershipsGroupedByParent(state),
   mapIndicator: selectMapIndicator(state),
 });
 

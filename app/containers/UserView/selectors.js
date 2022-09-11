@@ -24,7 +24,7 @@ import {
   selectActorCategoriesGroupedByActor,
   selectActorActionsGroupedByActionAttributes,
   selectMembershipsGroupedByMember,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectUserActionsGroupedByAction,
   selectUserActorsGroupedByActor,
 } from 'containers/App/selectors';
@@ -89,7 +89,7 @@ export const selectActorsByType = createSelector(
   selectActionActorsGroupedByActor,
   selectActorActionsGroupedByActionAttributes,
   selectMembershipsGroupedByMember,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectActorCategoriesGroupedByActor,
   selectUserActorsGroupedByActor,
   selectCategories,

@@ -79,6 +79,7 @@ import {
   SET_INCLUDE_MEMBERS_FORFILTERS,
   SET_INCLUDE_INOFFICAL_STATEMENTS,
   SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
+  SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP,
 } from './constants';
 
 export function submitInvalid(valid) {
@@ -560,6 +561,12 @@ export function setIncludeTargetChildren(value) {
 export function setIncludeTargetChildrenOnMap(value) {
   return {
     type: SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
+    value,
+  };
+}
+export function setIncludeTargetChildrenMembersOnMap(value) {
+  return {
+    type: SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP,
     value,
   };
 }

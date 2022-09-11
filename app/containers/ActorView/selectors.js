@@ -24,7 +24,7 @@ import {
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
   selectMembershipsGroupedByMember,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectActionIndicatorsGroupedByActionAttributes,
   selectActors,
   selectActorCategoriesGroupedByActor,
@@ -239,7 +239,7 @@ export const selectActionsAsTargetByType = createSelector(
 // connected actors (members/associations)
 const selectMemberJoins = createSelector(
   (state, id) => id,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   (actorId, joinsByAssociation) => joinsByAssociation.get(
     parseInt(actorId, 10)
   )
@@ -267,7 +267,7 @@ export const selectMembersByType = createSelector(
   selectActorActionsGroupedByActor,
   selectActionActorsGroupedByActor,
   selectMembershipsGroupedByMember,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectActorCategoriesGroupedByActor,
   selectCategories,
   (

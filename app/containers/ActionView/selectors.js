@@ -28,7 +28,7 @@ import {
   selectResourceConnections,
   selectActionResourcesGroupedByResource,
   selectMembershipsGroupedByMember,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectActionIndicatorsGroupedByAction,
   selectIndicatorConnections,
   selectActionIndicatorsGroupedByIndicator,
@@ -170,6 +170,7 @@ export const selectSubActionsByActiontype = createSelector(
   selectActionCategoriesGroupedByAction,
   selectCategories,
   selectUserActionsGroupedByAction,
+  selectMembershipsGroupedByParent,
   (
     ready,
     actions,
@@ -179,18 +180,52 @@ export const selectSubActionsByActiontype = createSelector(
     actionCategories,
     categories,
     userActions,
+    memberships,
   ) => {
     if (!ready) return Map();
     return actions && actions
-      .map((action) => setActionConnections({
-        action,
-        actionConnections,
-        actorActions,
-        actionActors,
-        categories,
-        actionCategories,
-        users: userActions,
-      }))
+      .map(
+        (action) => {
+          let result = setActionConnections({
+            action,
+            actionConnections,
+            actorActions,
+            actionActors,
+            categories,
+            actionCategories,
+            users: userActions,
+          });
+          const actionId = parseInt(action.get('id'), 10);
+          const actionTargets = actionActors && actionActors.get(actionId);
+          if (actionTargets) {
+            const allTargetMembers = actionTargets && actionTargets.reduce(
+              (memo, target) => {
+                const targetMembers = memberships.get(target);
+                return targetMembers
+                  ? targetMembers.reduce(
+                    (memo2, member, key) => !memo2.includes(member)
+                      ? memo2.set(key, member)
+                      : memo2,
+                    memo,
+                  )
+                  : memo;
+              },
+              Map(),
+            );
+            const allTargetMembersByActortype = allTargetMembers
+              && actionConnections.get(API.ACTORS)
+              && allTargetMembers
+                .filter((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString()]))
+                .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
+                .sortBy((val, key) => key);
+            result = result.set(
+              'targetMembersByType',
+              allTargetMembersByActortype,
+            );
+          }
+          return result;
+        }
+      )
       .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
       .sortBy((val, key) => key);
   }
@@ -227,7 +262,7 @@ export const selectActorsByType = createSelector(
   selectActorActionsGroupedByActor,
   selectActionActorsGroupedByActor,
   selectMembershipsGroupedByMember,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectActorCategoriesGroupedByActor,
   selectUserActorsGroupedByActor,
   selectCategories,
@@ -301,7 +336,7 @@ export const selectTargetsByType = createSelector(
   selectActorActionsGroupedByActor,
   selectActionActorsGroupedByActor,
   selectMembershipsGroupedByMember,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectActorCategoriesGroupedByActor,
   selectUserActorsGroupedByActor,
   selectCategories,
@@ -507,7 +542,7 @@ export const selectChildTargetsByType = createSelector(
   selectActors,
   selectActorConnections,
   selectMembershipsGroupedByMember,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectActorCategoriesGroupedByActor,
   selectUserActorsGroupedByActor,
   selectCategories,
