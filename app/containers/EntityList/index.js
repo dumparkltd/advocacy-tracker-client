@@ -156,7 +156,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
   };
 
   onClearFilters = () => {
-    // TODO: broken
     this.props.onResetFilters(currentFilterArgs(
       this.props.config,
       this.props.locationQuery,
@@ -385,6 +384,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             includeMembers={includeMembers}
             onSetFilterMemberOption={onSetFilterMemberOption}
             headerActions={headerOptions && headerOptions.actions}
+            onClearFilters={this.onClearFilters}
           />
         )}
         {showList && (

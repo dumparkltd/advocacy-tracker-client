@@ -305,6 +305,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       onSetFilterMemberOption,
       headerActions,
       isAdmin,
+      onClearFilters,
     } = this.props;
     const { intl } = this.context;
     const { activeOption } = this.state;
@@ -532,6 +533,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     <EntityListSearch>
                       <TagList
                         filters={currentFilters}
+                        onClear={onClearFilters}
                       />
                     </EntityListSearch>
                   )}
@@ -756,6 +758,7 @@ EntityListHeader.propTypes = {
   typeOptions: PropTypes.array,
   onSelectType: PropTypes.func,
   onSetFilterMemberOption: PropTypes.func,
+  onClearFilters: PropTypes.func,
   typeId: PropTypes.string,
   headerActions: PropTypes.array,
 };
