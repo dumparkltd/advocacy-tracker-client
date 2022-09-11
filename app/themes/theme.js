@@ -490,6 +490,7 @@ theme.global = {
       lighter: '#f1f0f1',
       dark: '#FFFFFF',
     },
+    danger: '#DB5D37',
     private: '#DA1D52',
     archived: '#00728F',
     draft: '#BCB9B8',

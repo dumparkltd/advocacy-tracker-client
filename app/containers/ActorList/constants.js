@@ -32,6 +32,7 @@ export const CONFIG = {
   types: 'actortypes',
   serverPath: API.ACTORS,
   clientPath: ROUTES.ACTOR,
+  batchDelete: true,
   views: {
     list: {
       search: ['code', 'title', 'description'],

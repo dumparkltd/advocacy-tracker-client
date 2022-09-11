@@ -572,9 +572,10 @@ export function* deleteMultipleEntitiesSaga({ path, data, invalidateEntitiesPath
         (item) => put(invalidateEntities(item))
       )
     );
-  }
-  if (!updateClient && path) {
+  } else if (!updateClient && path) {
     yield put(invalidateEntities(path));
+  } else if (!path && !invalidateEntitiesPaths) {
+    yield put(invalidateEntities());
   }
 }
 

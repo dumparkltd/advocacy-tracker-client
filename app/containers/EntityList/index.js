@@ -9,13 +9,14 @@ import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
+import { Text } from 'grommet';
 import { Edit } from 'grommet-icons';
 import { Map, List, fromJS } from 'immutable';
 
 // import { getEntityReference } from 'utils/entities';
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
-
+import Icon from 'components/Icon';
 import EntityListHeader from 'components/EntityListHeader';
 import EntityListPrintKey from 'components/EntityListPrintKey';
 import PrintOnly from 'components/styled/PrintOnly';
@@ -110,6 +111,7 @@ const ProgressText = styled.div`
 const STATE_INITIAL = {
   visibleFilters: null,
   visibleEditOptions: null,
+  deleteConfirm: null,
 };
 
 export class EntityList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
@@ -127,6 +129,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     this.setState({
       visibleFilters: true,
       visibleEditOptions: null,
+      deleteConfirm: null,
     });
   };
 
@@ -140,6 +143,25 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     this.setState({
       visibleEditOptions: true,
       visibleFilters: null,
+      deleteConfirm: null,
+    });
+  };
+
+  onShowDeleteConfirm = (evt) => {
+    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+    this.setState({
+      visibleEditOptions: null,
+      visibleFilters: null,
+      deleteConfirm: true,
+    });
+  };
+
+  onHideDeleteConfirm = (evt) => {
+    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+    this.setState({
+      visibleEditOptions: null,
+      visibleFilters: null,
+      deleteConfirm: null,
     });
   };
 
@@ -249,6 +271,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onCreateOption,
       allEntityCount,
       listActions,
+      onEntitiesDelete,
     } = this.props;
     // detect print to avoid expensive rendering
     const printing = !!(
@@ -321,17 +344,54 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     let allListActions;
     if (hasSelected) {
       allListActions = listActions || [];
-      allListActions = [
-        ...allListActions,
-        {
-          title: 'Edit selected',
-          onClick: (evt) => this.onShowEditOptions(evt),
-          icon: <Edit color="white" size="xxsmall" />,
-          type: 'listOption',
-          active: true,
-          isManager,
-        },
-      ];
+      if (config.batchDelete && isAdmin) {
+        if (!this.state.deleteConfirm) {
+          allListActions = [
+            {
+              title: 'Delete selected',
+              onClick: (evt) => this.onShowDeleteConfirm(evt),
+              icon: <Icon name="trash" size="22px" />,
+              type: 'listOption',
+            },
+            ...allListActions,
+          ];
+        } else {
+          allListActions = [
+            {
+              title: 'Cancel',
+              onClick: (evt) => this.onHideDeleteConfirm(evt),
+              type: 'listOption',
+              warning: (
+                <Text size="small" color="danger">
+                  {`Really delete ${entityIdsSelected.size} selected? This action cannot be undone.`}
+                </Text>
+              ),
+            },
+            {
+              title: 'Confirm',
+              onClick: (evt) => {
+                this.onHideDeleteConfirm(evt);
+                onEntitiesDelete(config.serverPath, entityIdsSelected);
+                onEntitySelectAll([]);
+              },
+              type: 'listOption',
+            },
+          ];
+        }
+      }
+      if (!isAdmin || !this.state.deleteConfirm || !config.batchDelete) {
+        allListActions = [
+          ...allListActions,
+          {
+            title: 'Edit selected',
+            onClick: (evt) => this.onShowEditOptions(evt),
+            icon: <Edit color="white" size="xxsmall" />,
+            type: 'listOption',
+            active: true,
+            isManager,
+          },
+        ];
+      }
     }
     return (
       <div>
@@ -391,6 +451,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
           <EntitiesListView
             headerInfo={headerOptions.info}
             listActions={allListActions}
+            showEntitiesDelete={onEntitiesDelete}
             allEntityCount={allEntityCount}
             viewOptions={viewOptions}
             hasHeader={includeHeader}
@@ -421,6 +482,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               if (!checked && !this.state.visibleEditOptions && entityIdsSelected.size === 1) {
                 this.onResetEditOptions();
               }
+              this.onHideDeleteConfirm();
               onEntitySelect(id, checked);
             }}
             onEntitySelectAll={(ids) => {
@@ -428,6 +490,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               if (!this.state.visibleEditOptions && (!ids || ids.length === 0)) {
                 this.onResetEditOptions();
               }
+              this.onHideDeleteConfirm();
               onEntitySelectAll(ids);
             }}
             onEntityClick={(id, path) => onEntityClick(
@@ -625,6 +688,7 @@ EntityList.propTypes = {
   includeTargetChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
   allEntityCount: PropTypes.number,
+  onEntitiesDelete: PropTypes.func,
 };
 
 EntityList.contextTypes = {
@@ -718,6 +782,17 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetIncludeInofficial: (active) => {
       dispatch(setIncludeInofficialStatements(active));
+    },
+    onEntitiesDelete: (path, entityIdsSelected) => {
+      dispatch(deleteMultipleEntities({
+        data: entityIdsSelected.toJS().map(
+          (id) => ({
+            id,
+            path,
+            saveRef: id,
+          })
+        ),
+      }));
     },
     handleEditSubmit: (formData, activeEditOption, entityIdsSelected, errors, connections) => {
       dispatch(resetProgress());
@@ -915,12 +990,12 @@ function mapDispatchToProps(dispatch, props) {
           ));
         }
         if (updates.get('deletes') && updates.get('deletes').size > 0) {
-          dispatch(deleteMultipleEntities(
-            activeEditOption.path,
-            updates.get('deletes').toJS(),
-            activeEditOption.invalidateEntitiesPaths
+          dispatch(deleteMultipleEntities({
+            path: activeEditOption.path,
+            data: updates.get('deletes').toJS(),
+            invalidateEntitiesPaths: activeEditOption.invalidateEntitiesPaths
               && activeEditOption.invalidateEntitiesPaths.toJS(),
-          ));
+          }));
         }
       }
     },

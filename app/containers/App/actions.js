@@ -236,7 +236,7 @@ export function deleteEntity(data) {
     data,
   };
 }
-export function deleteMultipleEntities(path, data, invalidateEntitiesPaths) {
+export function deleteMultipleEntities({ path, data, invalidateEntitiesPaths }) {
   return {
     type: DELETE_MULTIPLE_ENTITIES,
     path,

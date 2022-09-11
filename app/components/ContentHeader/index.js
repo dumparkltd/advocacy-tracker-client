@@ -120,6 +120,7 @@ export function ContentHeader({
             <ButtonGroup>
               {buttons.map((button, i) => (
                 <ButtonWrap key={i}>
+                  {button.warning && <span style={{ marginRight: '8px' }}>{button.warning}</span>}
                   <ButtonFactory
                     button={button}
                     args={{ ids: entityIdsSelected }}

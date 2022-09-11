@@ -40,6 +40,7 @@ export const CONFIG = {
   serverPath: API.ACTIONS,
   clientPath: ROUTES.ACTION,
   hasMemberOption: true,
+  batchDelete: true,
   views: {
     list: {
       search: ['code', 'title', 'description'],

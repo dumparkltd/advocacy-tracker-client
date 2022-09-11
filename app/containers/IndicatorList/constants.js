@@ -27,6 +27,7 @@ export const CONFIG = {
   types: 'indicators',
   serverPath: API.INDICATORS,
   clientPath: ROUTES.INDICATOR,
+  batchDelete: true,
   views: {
     list: {
       search: ['code', 'title', 'description'],

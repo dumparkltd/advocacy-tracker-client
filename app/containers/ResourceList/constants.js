@@ -26,6 +26,7 @@ export const CONFIG = {
   types: 'resourcetypes',
   serverPath: API.RESOURCES,
   clientPath: ROUTES.RESOURCE,
+  batchDelete: true,
   views: {
     list: {
       search: ['title', 'description'],
