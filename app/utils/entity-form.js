@@ -14,8 +14,11 @@ export const hasNewError = (nextProps, props) => {
 };
 export const hasNewErrorNEW = (nextProps, props) => {
   const { viewDomainPage } = props;
-  const { viewDomainPage: nextPage } = nextProps;
-  return (!nextPage || !viewDomainPage) || (
+  const nextPage = nextProps.viewDomainPage;
+  if (!nextPage || !viewDomainPage) {
+    return false;
+  }
+  return (
     !nextPage.get('submitValid')
     && !!viewDomainPage.get('submitValid')
   ) || (
