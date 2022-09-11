@@ -18,6 +18,7 @@ const Label = styled.label`
   padding: 0 0.5em 0 0;
   vertical-align: middle;
   display: inline-block;
+  font-size: ${(props) => props.theme.text.small.size};
   @media print {
     font-size: ${(props) => props.theme.sizes.print.smaller};
   }

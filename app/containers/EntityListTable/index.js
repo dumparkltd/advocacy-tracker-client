@@ -3,11 +3,13 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
+import { Box } from 'grommet';
 import isNumber from 'utils/is-number';
 
 import {
   OrderedMap, Map, List, fromJS,
 } from 'immutable';
+import { PAGE_ITEM_OPTIONS } from 'themes/config';
 
 import {
   selectSortByQuery,
@@ -20,6 +22,8 @@ import {
   selectResources,
 } from 'containers/App/selectors';
 import { updateQuery } from 'containers/EntityList/actions';
+
+import SelectReset from 'components/SelectReset';
 import EntityListSearch from 'components/EntityListSearch';
 
 import ToggleAllItems from 'components/fields/ToggleAllItems';
@@ -54,14 +58,7 @@ const ListEntitiesMain = styled.div`
   padding-top: 0.5em;
 `;
 const ListEntitiesEmpty = styled.div``;
-const EntityListSearchWrapper = styled.div`
-  padding-top: 12px;
-  padding-bottom: 12px;
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
-    padding-top: 12px;
-    padding-bottom: 16px;
-  }
-`;
+
 const CONNECTIONMAX = 5;
 const PAGE_SIZE = 20;
 const PAGE_SIZE_MAX = 100;
@@ -90,14 +87,11 @@ export function EntityListTable({
   moreLess,
   onSort,
   onDismissError,
-  onPageSelect,
-  onPageItemsSelect,
   sortBy,
   sortOrder,
   pageItems,
   pageNo,
   intl,
-  onResetScroll,
   searchQuery = '',
   onSearch,
   hasSearch,
@@ -110,6 +104,8 @@ export function EntityListTable({
   subjectOptions,
   includeMembers,
   includeChildren,
+  onPageItemsSelect,
+  onPageSelect,
 }) {
   if (!columns) return null;
   const sortColumn = columns.find((c) => !!c.sortDefault);
@@ -272,17 +268,39 @@ export function EntityListTable({
     }),
     intl,
   });
-
   return (
     <div>
-      {hasSearch && (
-        <EntityListSearchWrapper>
-          <EntityListSearch
-            searchQuery={searchQuery}
-            onSearch={onSearch}
-          />
-        </EntityListSearchWrapper>
-      )}
+      <Box
+        direction="row"
+        align="center"
+        gap="medium"
+        pad={{ vertical: 'small' }}
+        justify={hasSearch ? 'start' : 'end'}
+      >
+        {hasSearch && (
+          <Box flex={{ shrink: 0, grow: 1 }}>
+            <EntityListSearch
+              searchQuery={searchQuery}
+              onSearch={onSearch}
+            />
+          </Box>
+        )}
+        <Box flex={{ shrink: 1, grow: 0 }}>
+          {entitiesOnPage.length > 0 && paginate && (
+            <SelectReset
+              value={pageItems === 'all' ? pageItems : pageSize.toString()}
+              label={intl && intl.formatMessage(appMessages.labels.perPage)}
+              index="page-select"
+              options={PAGE_ITEM_OPTIONS && PAGE_ITEM_OPTIONS.map((option) => ({
+                value: option.value.toString(),
+                label: option.value.toString(),
+              }))}
+              isReset={false}
+              onChange={onPageItemsSelect}
+            />
+          )}
+        </Box>
+      </Box>
       <EntitiesTable
         entities={entitiesOnPage}
         columns={activeColumns}
@@ -349,16 +367,9 @@ export function EntityListTable({
       </ListEntitiesMain>
       {entitiesOnPage.length > 0 && paginate && (
         <EntityListFooter
-          pageSize={pageItems === 'all' ? 'all' : pageSize}
           pager={pager}
-          onPageSelect={(page) => {
-            onResetScroll();
-            onPageSelect(page);
-          }}
-          onPageItemsSelect={(no) => {
-            onResetScroll();
-            onPageItemsSelect(no);
-          }}
+          pageSize={pageSize}
+          onPageSelect={onPageSelect}
         />
       )}
       {moreLess && searchedEntities.size > CONNECTIONMAX && (
@@ -400,7 +411,6 @@ EntityListTable.propTypes = {
   onEntitySelectAll: PropTypes.func,
   onSort: PropTypes.func,
   onDismissError: PropTypes.func,
-  onResetScroll: PropTypes.func,
   showCode: PropTypes.bool,
   inSingleView: PropTypes.bool,
   paginate: PropTypes.bool,
@@ -420,6 +430,7 @@ EntityListTable.propTypes = {
   subjectOptions: PropTypes.node,
   includeMembers: PropTypes.bool,
   includeChildren: PropTypes.bool,
+  pageItemSelectConfig: PropTypes.object,
 };
 
 const mapStateToProps = (state) => ({

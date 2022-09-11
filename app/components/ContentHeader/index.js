@@ -2,15 +2,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box, ResponsiveContext } from 'grommet';
-
+import { injectIntl, intlShape } from 'react-intl';
 import { isMinSize } from 'utils/responsive';
 
 import {
   CONTENT_SINGLE, CONTENT_PAGE, CONTENT_MODAL,
 } from 'containers/App/constants';
+import { PAGE_ITEM_OPTIONS } from 'themes/config';
+
+import appMessages from 'containers/App/messages';
 
 import SupTitle from 'components/SupTitle';
 import InfoOverlay from 'components/InfoOverlay';
+import SelectReset from 'components/SelectReset';
 // import Icon from 'components/Icon';
 
 import ButtonFactory from 'components/buttons/ButtonFactory';
@@ -84,6 +88,14 @@ const renderTitle = (type, title) => {
   }
 };
 
+const getPerPageOptions = (intl) => PAGE_ITEM_OPTIONS.map((option) => ({
+  value: option.value.toString(),
+  label: option.message
+    ? intl.formatMessage(option.message)
+    : option.value.toString(),
+}));
+
+
 export function ContentHeader({
   type,
   supTitle,
@@ -93,6 +105,9 @@ export function ContentHeader({
   hasViewOptions,
   info,
   entityIdsSelected,
+  pageSize,
+  intl,
+  onPageItemsSelect,
 }) {
   const size = React.useContext(ResponsiveContext);
   return (
@@ -144,6 +159,18 @@ export function ContentHeader({
           ))}
         </ButtonGroup>
       )}
+      {pageSize && onPageItemsSelect && (
+        <Box>
+          <SelectReset
+            value={pageSize.toString()}
+            label={intl && intl.formatMessage(appMessages.labels.perPage)}
+            index="page-select-above"
+            options={getPerPageOptions(intl)}
+            isReset={false}
+            onChange={onPageItemsSelect}
+          />
+        </Box>
+      )}
     </Styled>
   );
 }
@@ -160,6 +187,9 @@ ContentHeader.propTypes = {
   entityIdsSelected: PropTypes.object,
   type: PropTypes.string,
   hasViewOptions: PropTypes.bool,
+  pageSize: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+  onPageItemsSelect: PropTypes.func,
+  intl: intlShape,
 };
 
-export default ContentHeader;
+export default injectIntl(ContentHeader);
