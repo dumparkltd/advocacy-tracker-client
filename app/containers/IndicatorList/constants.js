@@ -5,7 +5,6 @@ import {
   PUBLISH_STATUSES,
   PRIVACY_STATUSES,
   ARCHIVE_STATUSES,
-  ACTIONTYPES,
 } from 'themes/config';
 
 export const DEPENDENCIES = [
@@ -80,12 +79,12 @@ export const CONFIG = {
       },
     ],
   },
-  connectedTaxonomies: { // filter by each category
-    query: 'catx',
-    search: true,
-    path: 'actions', // filter by action connection
-    typeId: ACTIONTYPES.EXPRESS,
-    otherPath: API.ACTIONS, // filter by action connection
-    key: 'measure_id',
-  },
+  // connectedTaxonomies: { // filter by each category
+  //   query: 'catx',
+  //   search: true,
+  //   path: 'actions', // filter by action connection
+  //   typeId: ACTIONTYPES.EXPRESS,
+  //   otherPath: API.ACTIONS, // filter by action connection
+  //   key: 'measure_id',
+  // },
 };
