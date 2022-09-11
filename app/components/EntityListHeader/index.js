@@ -265,6 +265,22 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     ];
   };
 
+  getFilterFormButtons = () => {
+    const { intl } = this.context;
+    return [
+      {
+        type: 'simple',
+        title: intl.formatMessage(appMessages.buttons.cancel),
+        onClick: this.onHideForm,
+      },
+      {
+        type: 'primary',
+        title: intl.formatMessage(appMessages.buttons.updateFilter),
+        submit: true,
+      },
+    ];
+  };
+
   resize = () => {
     // reset
     this.setState(STATE_INITIAL);
@@ -275,6 +291,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     const {
       config,
       onUpdate,
+      onUpdateFilters,
       hasUserRole,
       entities,
       locationQuery,
@@ -697,23 +714,22 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                   formOptions={formOptions}
                   buttons={showEditOptions
                     ? this.getFormButtons(activeOption)
-                    : null
+                    : this.getFilterFormButtons()
                   }
                   onCancel={this.onHideForm}
+                  showNew={showEditOptions}
                   showCancelButton={showFilters}
-                  onSelect={() => {
-                    if (showFilters) {
-                      this.onHideForm();
-                      // onHideFilters();
-                    }
-                  }}
                   onSubmit={showEditOptions
                     ? (associations) => {
                     // close and reset option panel
                       this.setState({ activeOption: null });
                       onUpdate(associations, activeOption);
                     }
-                    : null
+                    : (filterOptions) => {
+                      // close and reset option panel
+                      this.setState({ activeOption: null });
+                      onUpdateFilters(filterOptions && filterOptions.get('values'), activeOption);
+                    }
                   }
                 />
               )}
@@ -741,6 +757,7 @@ EntityListHeader.propTypes = {
   hasUserRole: PropTypes.object,
   config: PropTypes.object,
   onUpdate: PropTypes.func.isRequired,
+  onUpdateFilters: PropTypes.func.isRequired,
   onCreateOption: PropTypes.func.isRequired,
   listUpdating: PropTypes.bool,
   theme: PropTypes.object,

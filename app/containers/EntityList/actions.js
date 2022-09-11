@@ -19,6 +19,7 @@ import {
   DISMISS_ERROR,
   DISMISS_ALL_ERRORS,
   RESET_FILTERS,
+  SET_FILTERS,
 } from './constants';
 
 export function setClientPath(path) {
@@ -90,6 +91,12 @@ export function updateQuery(value) {
 export function resetFilters(values) {
   return {
     type: RESET_FILTERS,
+    values,
+  };
+}
+export function setFilters(values) {
+  return {
+    type: SET_FILTERS,
     values,
   };
 }

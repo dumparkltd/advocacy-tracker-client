@@ -80,6 +80,7 @@ import {
   dismissError,
   dismissAllErrors,
   resetFilters,
+  setFilters,
 } from './actions';
 
 import { currentFilters, currentFilterArgs } from './current-filters';
@@ -272,6 +273,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       allEntityCount,
       listActions,
       onEntitiesDelete,
+      onUpdateFilters,
     } = this.props;
     // detect print to avoid expensive rendering
     const printing = !!(
@@ -428,6 +430,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 viewDomain.get('errors'),
                 connections,
               )}
+            onUpdateFilters={onUpdateFilters}
             showFilters={this.state.visibleFilters}
             showEditOptions={isManager && showList && this.state.visibleEditOptions}
             onShowFilters={this.onShowFilters}
@@ -689,6 +692,7 @@ EntityList.propTypes = {
   includeInofficial: PropTypes.bool,
   allEntityCount: PropTypes.number,
   onEntitiesDelete: PropTypes.func,
+  onUpdateFilters: PropTypes.func,
 };
 
 EntityList.contextTypes = {
@@ -758,6 +762,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onUpdateQuery: (args) => {
       dispatch(updateRouteQuery(args));
+    },
+    onUpdateFilters: (values) => {
+      dispatch(setFilters(values));
     },
     onSetView: (view) => {
       dispatch(setView(view));

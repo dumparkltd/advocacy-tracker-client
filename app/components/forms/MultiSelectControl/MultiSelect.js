@@ -245,15 +245,20 @@ class MultiSelect extends React.Component {
       fixedOrder,
     }, // props
     { optionsInitial }, // state
+    showNew,
   ) => options.map((option) => {
-    const value = values.find((v) => option.get('value') === v.get('value'));// && option.get('query') === v.get('query'));
+    const value = values.find(
+      (v) => option.get('value') === v.get('value')
+        && option.get('query') === v.get('query')
+    );
+    // && option.get('query') === v.get('query'));
     // const optionInitial = optionsInitial.find(
     //   (oi) => oi.get('value') === option.get('value')
     // );
     // const isNew = !fixedOrder && !optionInitial;
     // const isIndeterminateInitial = threeState && this.isOptionIndeterminate(optionInitial);
     // const isCheckedIntitial = optionInitial.get('checked');
-    const isNew = !fixedOrder && !optionsInitial.includes(option);
+    const isNew = showNew && (!fixedOrder && !optionsInitial.includes(option));
     const isIndeterminateInitial = threeState && this.isOptionIndeterminate(option);
     const isCheckedIntitial = option.get('checked');
     const optionUpdated = option.withMutations(
@@ -352,7 +357,7 @@ class MultiSelect extends React.Component {
 
   // TODO intl
   render() {
-    let options = this.prepareOptions(this.props, this.state);
+    let options = this.prepareOptions(this.props, this.state, this.props.showNew);
 
     const optionsChangedToChecked = options.filter((option) => option.get('changedToChecked'));
     const optionsChangedToUnchecked = options.filter((option) => option.get('changedToUnchecked'));
@@ -360,7 +365,6 @@ class MultiSelect extends React.Component {
     const showChangeHint = this.props.advanced && hasChanges;
     options = this.filterOptions(options, this.props, this.state);
     const filteredOptionsSelected = options.filter((option) => option.get('checked') || this.isOptionIndeterminate(option));
-
     return (
       <div ref={this.setWrapperRef}>
         <Header
@@ -477,6 +481,7 @@ MultiSelect.propTypes = {
   closeOnClickOutside: PropTypes.bool,
   threeState: PropTypes.bool,
   fixedOrder: PropTypes.bool,
+  showNew: PropTypes.bool,
   panelId: PropTypes.string,
   tagFilterGroups: PropTypes.array,
   intl: intlShape.isRequired,

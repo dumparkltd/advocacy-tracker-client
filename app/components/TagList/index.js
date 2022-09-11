@@ -67,7 +67,7 @@ function TagList({
                       labelLong={getFilterLabel(filter, intl, true)}
                       long={long}
                     />
-                    {groupedFilters[group].length === (j + 1)
+                    {filters.length > 1 && groupedFilters[group].length === (j + 1)
                       && Object.keys(groupedFilters).length === i + 1
                       && (
                         <Box>
