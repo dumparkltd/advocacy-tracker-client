@@ -405,13 +405,13 @@ export const renderActionsByActiontypeControl = ({
   })
   : null;
 
-export const renderActionsAsTargetByActiontypeControl = (
+export const renderActionsAsTargetByActiontypeControl = ({
   entitiesByActiontype,
   taxonomies,
   onCreateOption,
   intl,
   isAdmin,
-) => entitiesByActiontype
+}) => entitiesByActiontype
   ? entitiesByActiontype.reduce(
     (controls, entities, typeid) => controls.concat({
       id: `actionsAsTarget.${typeid}`,
