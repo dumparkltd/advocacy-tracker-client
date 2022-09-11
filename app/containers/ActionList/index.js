@@ -22,7 +22,6 @@ import {
   selectActortypesForActiontype,
   selectTargettypesForActiontype,
   selectResourcetypesForActiontype,
-  selectActiontypeActions,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -34,6 +33,7 @@ import { ROUTES } from 'themes/config';
 import EntityList from 'containers/EntityList';
 import { CONFIG, DEPENDENCIES } from './constants';
 import {
+  selectActionsWithConnections,
   selectConnections,
   selectViewActions,
   selectConnectedTaxonomies,
@@ -134,6 +134,7 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
         />
         <EntityList
           entities={entities}
+          allEntities={allEntities.toList()}
           allEntityCount={allEntities && allEntities.size}
           taxonomies={taxonomies}
           connections={connections}
@@ -199,7 +200,7 @@ const mapStateToProps = (state, props) => ({
   actortypes: selectActortypesForActiontype(state, { type: props.params.id }),
   targettypes: selectTargettypesForActiontype(state, { type: props.params.id }),
   resourcetypes: selectResourcetypesForActiontype(state, { type: props.params.id }),
-  allEntities: selectActiontypeActions(state, { type: props.params.id }),
+  allEntities: selectActionsWithConnections(state, { type: props.params.id }),
 });
 function mapDispatchToProps(dispatch) {
   return {

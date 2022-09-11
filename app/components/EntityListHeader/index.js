@@ -294,6 +294,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       onUpdateFilters,
       hasUserRole,
       entities,
+      allEntities,
       locationQuery,
       taxonomies,
       connectedTaxonomies,
@@ -398,7 +399,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       // console.log(panelGroups);
       if (activeOption) {
         formOptions = makeActiveFilterOptions({
-          entities,
+          entities: allEntities,
           config,
           locationQuery,
           taxonomies,
@@ -674,7 +675,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
               </TheHeader>
               {showFilters && (
                 <EntityListSidebar
-                  hasEntities={entities && entities.size > 0}
+                  hasEntities={allEntities && allEntities.size > 0}
                   panelGroups={panelGroups}
                   onHideSidebar={onHideFilters}
                   onHideOptions={this.onHideForm}
@@ -742,6 +743,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
 }
 EntityListHeader.propTypes = {
   entities: PropTypes.instanceOf(List),
+  allEntities: PropTypes.instanceOf(List),
   entityIdsSelected: PropTypes.instanceOf(List),
   taxonomies: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),

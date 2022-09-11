@@ -286,10 +286,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     const success = viewDomain.get('success');
     const errors = viewDomain.get('errors').size > 0 ? this.mapErrors(viewDomain.get('errors')) : Map();
 
-    const entities = (dataReady && errors.size > 0)
-      ? this.filterByError(this.props.entities, errors)
-      : this.props.entities;
-
+    const { entities, allEntities } = this.props;
     const entityIdsSelectedFiltered = entityIdsSelected.size > 0 && entities
       ? entityIdsSelected.filter((id) => entities.map((entity) => entity.get('id')).includes(id))
       : entityIdsSelected;
@@ -299,7 +296,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     const filters = currentFilters(
       {
         config,
-        entities,
+        entities: allEntities,
         taxonomies: allTaxonomies,
         connections,
         connectedTaxonomies,
@@ -404,6 +401,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             currentFilters={filters}
             listUpdating={progress !== null && progress >= 0 && progress < 100}
             entities={entities}
+            allEntities={allEntities}
             entityIdsSelected={entityIdsSelected}
             taxonomies={taxonomies}
             actortypes={actortypes}
@@ -628,6 +626,7 @@ EntityList.defaultProps = {
 EntityList.propTypes = {
   // wrapper props
   entities: PropTypes.instanceOf(List).isRequired,
+  allEntities: PropTypes.instanceOf(List),
   taxonomies: PropTypes.instanceOf(Map),
   allTaxonomies: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),

@@ -35,19 +35,21 @@ export const makeActiveFilterOptions = ({
   messages,
   isAdmin,
   includeMembers,
+  // any = true,
 }) => {
   switch (activeFilterOption.group) {
   // create filterOptions
     case 'taxonomies':
-      return makeTaxonomyFilterOptions(
+      return makeTaxonomyFilterOptions({
         entities,
-        config.taxonomies,
+        config: config.taxonomies,
         taxonomies,
-        activeFilterOption.optionId,
+        activeTaxId: activeFilterOption.optionId,
         locationQuery,
         messages,
         intl,
-      );
+      //  any,
+      });
     case 'connectedTaxonomies':
       return makeConnectedTaxonomyFilterOptions(
         entities,
@@ -66,34 +68,36 @@ export const makeActiveFilterOptions = ({
     case 'resources':
     case 'parents':
     case 'children':
-      return makeGroupedConnectionFilterOptions(
+      return makeGroupedConnectionFilterOptions({
         entities,
-        config.connections,
+        config: config.connections,
         connections,
         connectedTaxonomies,
-        activeFilterOption.optionId,
+        activeOptionId: activeFilterOption.optionId,
         locationQuery,
         messages,
         intl,
-        activeFilterOption.group,
+        group: activeFilterOption.group,
         isAdmin,
         includeMembers,
-      );
+      //  any,
+      });
     case 'users':
     case 'indicators':
     case 'roles':
-      return makeConnectionFilterOptions(
+      return makeConnectionFilterOptions({
         entities,
-        config.connections,
+        config: config.connections,
         connections,
         connectedTaxonomies,
-        activeFilterOption.optionId,
+        activeOptionId: activeFilterOption.optionId,
         locationQuery,
         messages,
         intl,
-        activeFilterOption.group,
+        group: activeFilterOption.group,
         isAdmin,
-      );
+      //  any,
+      });
     case 'attributes':
       return makeAttributeFilterOptions({
         config: config.attributes,
@@ -170,7 +174,7 @@ export const makeAttributeFilterOptions = ({
 
 const getTaxTitle = (id, intl) => intl.formatMessage(appMessages.entities.taxonomies[id].single);
 
-export const makeTaxonomyFilterOptions = (
+export const makeTaxonomyFilterOptions = ({
   entities,
   config,
   taxonomies,
@@ -178,7 +182,8 @@ export const makeTaxonomyFilterOptions = (
   locationQuery,
   messages,
   intl,
-) => {
+//  any,
+}) => {
   const filterOptions = {
     groupId: 'taxonomies',
     search: config.search,
@@ -305,7 +310,7 @@ const getShowEntityReference = (entityType, typeId, isAdmin) => {
 //
 //
 //
-const makeGroupedConnectionFilterOptions = (
+const makeGroupedConnectionFilterOptions = ({
   entities,
   config,
   connections,
@@ -317,7 +322,8 @@ const makeGroupedConnectionFilterOptions = (
   group,
   isAdmin,
   includeMembers,
-) => {
+//  any,
+}) => {
   const filterOptions = {
     groupId: group,
     options: {},
@@ -862,7 +868,7 @@ const getConnectionFilterOptions = ({
   return resultOptions;
 };
 
-const makeConnectionFilterOptions = (
+const makeConnectionFilterOptions = ({
   entities,
   config,
   connections,
@@ -873,7 +879,8 @@ const makeConnectionFilterOptions = (
   intl,
   group,
   isAdmin,
-) => {
+//  any,
+}) => {
   let filterOptions = {};
   const option = config[group];
   // if option active

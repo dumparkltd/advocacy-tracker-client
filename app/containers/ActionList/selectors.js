@@ -199,7 +199,7 @@ const selectActionsWithCategories = createSelector(
 
 // nest connected actor ids
 // nest connected actor ids by actortype
-const selectActionsWithConnections = createSelector(
+export const selectActionsWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectActionsWithCategories,
   selectConnections,
@@ -485,9 +485,20 @@ const selectActionsByTargets = createSelector(
   (entities, query, includeMembers) => {
     if (query) {
       if (includeMembers) {
-        return filterEntitiesByMultipleConnections(entities, query, ['targets', 'targetsAssociations']);
+        return filterEntitiesByMultipleConnections(
+          entities,
+          query,
+          ['targets', 'targetsAssociations'],
+          true, // any
+        );
       }
-      return filterEntitiesByConnection(entities, query, 'targets');
+      return filterEntitiesByConnection(
+        entities,
+        query,
+        'targets',
+        null, // connectionAttribute
+        true, // any
+      );
     }
     return entities;
   }
