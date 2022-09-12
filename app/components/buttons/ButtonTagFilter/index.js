@@ -13,6 +13,7 @@ const ButtonTagFilter = styled(Button)`
   border-radius: 3px;
   font-size: 0.85em;
   box-shadow: 0px 0px 3px 0px rgba(0,0,0,0.3);
+  white-space: nowrap; 
   &:hover {
     color: ${({ theme }) => theme.global.colors.text.dark};
     stroke: ${({ theme }) => theme.global.colors.text.dark};

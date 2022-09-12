@@ -17,7 +17,14 @@ import Button from 'components/buttons/Button';
 import ButtonTagFilterWrap from 'components/buttons/ButtonTagFilterWrap';
 import { getFilterLabel } from './utils';
 
-const Styled = styled((p) => <Box direction="row" align="start" justify="start" {...p} />)``;
+const Styled = styled((p) => (
+  <Box
+    direction="row"
+    align="start"
+    justify="start"
+    {...p}
+  />
+))``;
 
 const Tags = styled((p) => <Box direction="row" {...p} />)``;
 
@@ -36,6 +43,7 @@ const ConnectionGroupLabel = styled.span`
   color: ${palette('text', 1)};
   font-size: ${(props) => props.theme.sizes && props.theme.sizes.text.smaller};
   padding-top: 2px;
+  white-space: nowrap;
   @media print {
     font-size: ${(props) => props.theme.sizes.print.smaller};
   }
@@ -54,13 +62,13 @@ function TagList({
       {hasFilters && (
         <Tags gap="xsmall" align="end">
           {Object.keys(groupedFilters).map((group, i) => (
-            <Box key={i}>
+            <Box key={i} flex={{ shrink: 0 }}>
               <ConnectionGroupLabel>
                 {group}
               </ConnectionGroupLabel>
-              <Box direction="row">
+              <Box direction="row" overflow="hidden" flex={{ shrink: 0 }}>
                 {groupedFilters[group].map((filter, j) => (
-                  <Box key={j} direction="row" align="center">
+                  <Box key={j} direction="row" align="center" flex={{ shrink: 0 }}>
                     <ButtonTagFilterWrap
                       filter={filter}
                       label={getFilterLabel(filter, intl, long)}

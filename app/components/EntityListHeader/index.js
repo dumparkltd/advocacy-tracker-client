@@ -83,7 +83,6 @@ const SelectType = styled(ButtonOld)`
     max-width: 100%;
   }
 `;
-const EntityListSearch = styled((p) => <Box justify="end" direction="row" gap="medium" {...p} />)``;
 
 const ButtonOptions = styled((p) => <Button plain {...p} />)`
   color: ${palette('buttonFlat', 1)};
@@ -544,14 +543,18 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     )}
                   </HeaderSectionType>
                 )}
-                <HeaderSection grow align="center" gap="medium" justify="start">
+                <HeaderSection
+                  grow
+                  align="center"
+                  gap="medium"
+                  justify="start"
+                  overflow={{ horizontal: 'auto' }}
+                >
                   {dataReady && isMinSize(size, 'large') && (
-                    <EntityListSearch>
-                      <TagList
-                        filters={currentFilters}
-                        onClear={onClearFilters}
-                      />
-                    </EntityListSearch>
+                    <TagList
+                      filters={currentFilters}
+                      onClear={onClearFilters}
+                    />
                   )}
                 </HeaderSection>
                 {dataReady && isMinSize(size, 'small') && (
