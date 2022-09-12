@@ -283,6 +283,56 @@ class MultiSelect extends React.Component {
       : optionUpdated;
   });
 
+  validateOptions = (options) => {
+    const withoutChecked = options.filter(
+      (option) => option.get('query') === 'without'
+    ).some(
+      (option) => option.get('checked')
+    );
+    const anyChecked = options.filter(
+      (option) => option.get('query') === 'any'
+    ).some(
+      (option) => option.get('checked')
+    );
+    const otherChecked = options.some(
+      (option) => option.get('query') !== 'without'
+        && option.get('query') !== 'any'
+        && option.get('checked')
+    );
+    return options.map(
+      (option) => {
+        if (option.get('query') === 'without') {
+          const disabled = !!otherChecked || !!anyChecked;
+          const uncheck = disabled && option.get('checked');
+          return option.withMutations(
+            (o) => o
+              .set('disabled', disabled)
+              .set('checked', uncheck ? false : o.get('checked'))
+              .set('changedToUnchecked', uncheck || o.get('changedToUnchecked'))
+          );
+        }
+        if (option.get('query') === 'any') {
+          const disabled = !!otherChecked || !!withoutChecked;
+          const uncheck = disabled && option.get('checked');
+          return option.withMutations(
+            (o) => o
+              .set('disabled', disabled)
+              .set('checked', uncheck ? false : o.get('checked'))
+              .set('changedToUnchecked', uncheck || o.get('changedToUnchecked'))
+          );
+        }
+        const disabled = !!anyChecked || !!withoutChecked;
+        const uncheck = disabled && option.get('checked');
+        return option.withMutations(
+          (o) => o
+            .set('disabled', disabled)
+            .set('checked', uncheck ? false : o.get('checked'))
+            .set('changedToUnchecked', uncheck || o.get('changedToUnchecked'))
+        );
+      }
+    );
+  };
+
   filterOptions = (
     options,
     { search, advanced, fixedOrder }, // props
@@ -358,6 +408,7 @@ class MultiSelect extends React.Component {
   // TODO intl
   render() {
     let options = this.prepareOptions(this.props, this.state, this.props.showNew);
+    options = this.validateOptions(options);
 
     const optionsChangedToChecked = options.filter((option) => option.get('changedToChecked'));
     const optionsChangedToUnchecked = options.filter((option) => option.get('changedToUnchecked'));
