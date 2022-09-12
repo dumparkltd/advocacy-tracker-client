@@ -38,11 +38,15 @@ export const makeFilterGroups = ({
 
   // attributes
   if (config.attributes) {
+    const groupCurrentFilters = currentFilters && currentFilters.filter(
+      (f) => qe(f.type, 'attributes')
+    );
     // first prepare taxonomy options
     filterGroups.attributes = {
       id: 'attributes', // filterGroupId
       label: messages.attributes,
       show: true,
+      optionsActiveCount: groupCurrentFilters ? groupCurrentFilters.length : 0,
       options: reduce(
         config.attributes.options,
         (memo, option) => {
@@ -80,11 +84,14 @@ export const makeFilterGroups = ({
   // taxonomy option group
   if (config.taxonomies && taxonomies) {
     // first prepare taxonomy options
+    const groupCurrentFilters = currentFilters && currentFilters.filter(
+      (f) => qe(f.groupId, 'taxonomies')
+    );
     filterGroups.taxonomies = {
       id: 'taxonomies', // filterGroupId
       label: messages.taxonomyGroup,
       show: true,
-      icon: 'categories',
+      optionsActiveCount: groupCurrentFilters ? groupCurrentFilters.length : 0,
       options:
         sortEntities(taxonomies, 'asc', 'priority')
           .reduce(
@@ -121,6 +128,9 @@ export const makeFilterGroups = ({
       return true;
     }).forEach((connectionKey) => {
       const option = config.connections[connectionKey];
+      const groupCurrentFilters = currentFilters && currentFilters.filter(
+        (f) => qe(f.groupId, connectionKey)
+      );
       if (!option.groupByType) {
         let validType = true;
         if (option.type === 'action-indicators') {
@@ -133,7 +143,6 @@ export const makeFilterGroups = ({
           validType = USER_ACTORTYPES.indexOf(typeId) > -1;
         }
         if (validType) {
-          // console.log(currentFilters)
           const optionCurrentFilters = currentFilters && currentFilters.filter(
             (f) => qe(f.groupId, connectionKey)
           );
@@ -141,6 +150,7 @@ export const makeFilterGroups = ({
             id: connectionKey, // filterGroupId
             label: messages.connections(option.type),
             show: true,
+            optionsActiveCount: groupCurrentFilters ? groupCurrentFilters.length : 0,
             options: [{
               id: option.type, // filterOptionId
               label: option.label,
@@ -244,6 +254,7 @@ export const makeFilterGroups = ({
           id: connectionKey, // filterGroupId
           label: messages.connections(option.type),
           show: true,
+          optionsActiveCount: groupCurrentFilters ? groupCurrentFilters.length : 0,
           includeAnyWithout: !!option.groupByType,
           options: types && types
             .filter((type) => {
