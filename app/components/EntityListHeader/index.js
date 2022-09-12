@@ -554,6 +554,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     <TagList
                       filters={currentFilters}
                       onClear={onClearFilters}
+                      groupDropdownThreshold={isMinSize(size, 'xlarge') ? 3 : 2}
                     />
                   )}
                 </HeaderSection>
