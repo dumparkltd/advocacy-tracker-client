@@ -47,13 +47,13 @@ import {
   submitInvalid,
   saveErrorDismiss,
   newEntity,
-  selectTaxonomiesWithCategories,
 } from 'containers/App/actions';
 
 import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
