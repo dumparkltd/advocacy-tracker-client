@@ -105,7 +105,7 @@ const selectIndicatorsSearched = createSelector(
   (indicators) => indicators,
 );
 
-const selectIndicatorsWithActions = createSelector(
+export const selectIndicatorsWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectIndicatorsSearched,
   (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
@@ -182,7 +182,7 @@ const selectIndicatorsWithActions = createSelector(
 );
 
 const selectIndicatorsWithout = createSelector(
-  selectIndicatorsWithActions,
+  selectIndicatorsWithConnections,
   selectCategories,
   selectWithoutQuery,
   (entities, categories, query) => query

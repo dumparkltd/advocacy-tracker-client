@@ -17,7 +17,6 @@ import {
   selectIsUserAnalyst,
   selectResourcetypes,
   selectActiontypesForResourcetype,
-  selectResourcetypeResources,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -30,6 +29,7 @@ import {
   selectListResources,
   // selectConnectedTaxonomies,
   selectConnections,
+  selectResourcesWithConnections,
 } from './selectors';
 
 import messages from './messages';
@@ -120,6 +120,7 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
         />
         <EntityList
           entities={entities}
+          allEntities={allEntities.toList()}
           allEntityCount={allEntities && allEntities.size}
           connections={connections}
           config={CONFIG}
@@ -173,7 +174,7 @@ const mapStateToProps = (state, props) => ({
   isAnalyst: selectIsUserAnalyst(state),
   actiontypes: selectActiontypesForResourcetype(state, { type: props.params.id }),
   resourcetypes: selectResourcetypes(state),
-  allEntities: selectResourcetypeResources(state, { type: props.params.id }),
+  allEntities: selectResourcesWithConnections(state, { type: props.params.id }),
 });
 
 function mapDispatchToProps(dispatch) {

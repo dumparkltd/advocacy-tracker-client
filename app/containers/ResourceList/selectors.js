@@ -93,7 +93,7 @@ export const selectConnections = createSelector(
 //   }
 // );
 
-const selectResourcesWithActions = createSelector(
+export const selectResourcesWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectResourcesWhereQuery,
   selectConnections,
@@ -137,7 +137,7 @@ const selectResourcesWithActions = createSelector(
 );
 
 const selectResourcesWithout = createSelector(
-  selectResourcesWithActions,
+  selectResourcesWithConnections,
   selectCategories,
   selectWithoutQuery,
   (entities, categories, query) => query

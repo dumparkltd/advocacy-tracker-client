@@ -32,7 +32,10 @@ import { USER_ROLES } from 'themes/config';
 import EntityList from 'containers/EntityList';
 
 import { CONFIG, DEPENDENCIES } from './constants';
-import { selectUsers } from './selectors';
+import {
+  selectUsers,
+  selectUsersWithConnections,
+} from './selectors';
 import messages from './messages';
 
 export class UserList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
@@ -58,6 +61,7 @@ export class UserList extends React.PureComponent { // eslint-disable-line react
       actiontypes,
       // isManager,
       isAnalyst,
+      allEntities,
     } = this.props;
     const type = 'users';
     const headerOptions = {
@@ -91,6 +95,7 @@ export class UserList extends React.PureComponent { // eslint-disable-line react
         {dataReady && (
           <EntityList
             entities={this.props.entities}
+            allEntities={allEntities.toList()}
             taxonomies={this.props.taxonomies}
             connections={this.props.connections}
             config={CONFIG}
@@ -117,6 +122,7 @@ UserList.propTypes = {
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
+  allEntities: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   location: PropTypes.object,
@@ -134,6 +140,7 @@ const mapStateToProps = (state, props) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   entities: selectUsers(state, fromJS(props.location.query)),
+  allEntities: selectUsersWithConnections(state),
   taxonomies: selectUserTaxonomies(state),
   connections: selectUserConnections(state),
   actiontypes: selectActiontypesForUsers(state),

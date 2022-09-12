@@ -31,7 +31,6 @@ import {
   selectActiontypesForTargettype,
   selectMembertypesForActortype,
   selectAssociationtypesForActortype,
-  selectActortypeActors,
 } from 'containers/App/selectors';
 
 import { checkActorAttribute } from 'utils/entities';
@@ -47,6 +46,7 @@ import {
   selectListActors,
   selectConnectedTaxonomies,
   selectConnections,
+  selectActorsWithConnections,
 } from './selectors';
 
 import messages from './messages';
@@ -220,6 +220,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
         <EntityList
           entities={entities}
           allEntityCount={allEntities && allEntities.size}
+          allEntities={allEntities.toList()}
           taxonomies={taxonomies}
           connections={connections}
           connectedTaxonomies={connectedTaxonomies}
@@ -311,7 +312,7 @@ const mapStateToProps = (state, props) => ({
   membertypes: selectMembertypesForActortype(state, { type: props.params.id }),
   associationtypes: selectAssociationtypesForActortype(state, { type: props.params.id }),
   actortypes: selectActortypes(state),
-  allEntities: selectActortypeActors(state, { type: props.params.id }),
+  allEntities: selectActorsWithConnections(state, { type: props.params.id }),
 });
 
 function mapDispatchToProps(dispatch) {

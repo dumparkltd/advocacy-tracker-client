@@ -190,7 +190,7 @@ const actorsByType = (actorActors, actors) => actorActors && actors && actorActo
   ])
 ).sortBy((val, key) => key);
 
-const selectActorsWithActions = createSelector(
+export const selectActorsWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectActorsWithCategories,
   selectConnections,
@@ -311,7 +311,7 @@ const selectActorsWithActions = createSelector(
 // );
 
 const selectActorsWithout = createSelector(
-  selectActorsWithActions,
+  selectActorsWithConnections,
   selectCategories,
   selectWithoutQuery,
   (entities, categories, query) => query
