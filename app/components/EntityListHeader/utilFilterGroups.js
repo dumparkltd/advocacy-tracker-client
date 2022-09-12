@@ -12,7 +12,7 @@ import {
   ACTIONTYPE_ACTIONTYPES,
 } from 'themes/config';
 
-import { makeAttributeFilterOptions } from './filterOptionsFactory';
+import { makeAttributeFilterOptions } from './utilFilterOptions';
 // figure out filter groups for filter panel
 export const makeFilterGroups = ({
   config,

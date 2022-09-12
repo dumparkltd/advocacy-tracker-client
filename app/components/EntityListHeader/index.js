@@ -33,13 +33,13 @@ import ButtonOld from 'components/buttons/Button';
 
 import EntityListSidebar from './EntityListSidebar';
 
-import { makeFilterGroups } from './filterGroupsFactory';
-import { makeEditGroups } from './editGroupsFactory';
+import { makeFilterGroups } from './utilFilterGroups';
+import { makeEditGroups } from './utilEditGroups';
 import {
   makeActiveFilterOptions,
   makeAnyWithoutFilterOptions,
-} from './filterOptionsFactory';
-import { makeActiveEditOptions } from './editOptionsFactory';
+} from './utilFilterOptions';
+import { makeActiveEditOptions } from './utilEditOptions';
 
 import messages from './messages';
 
