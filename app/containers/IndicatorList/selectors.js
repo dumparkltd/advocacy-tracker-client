@@ -15,8 +15,6 @@ import {
   selectActionIndicatorsGroupedByIndicator,
   selectCategories,
   selectActors,
-  selectActiontypeTaxonomies,
-  selectEntities,
   selectIncludeInofficialStatements,
 } from 'containers/App/selectors';
 
@@ -24,7 +22,6 @@ import {
   filterEntitiesByConnection,
   filterEntitiesWithoutAssociation,
   entitiesSetCategoryIds,
-  getTaxonomyCategories,
 } from 'utils/entities';
 
 import asList from 'utils/as-list';
@@ -33,7 +30,6 @@ import { sortEntities, getSortOption } from 'utils/sort';
 import {
   API,
   ACTORTYPES,
-  ACTIONTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
   OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
@@ -105,7 +101,7 @@ const selectIndicatorsSearched = createSelector(
   (indicators) => indicators,
 );
 
-const selectIndicatorsWithActions = createSelector(
+export const selectIndicatorsWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectIndicatorsSearched,
   (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
@@ -182,7 +178,7 @@ const selectIndicatorsWithActions = createSelector(
 );
 
 const selectIndicatorsWithout = createSelector(
-  selectIndicatorsWithActions,
+  selectIndicatorsWithConnections,
   selectCategories,
   selectWithoutQuery,
   (entities, categories, query) => query
@@ -215,46 +211,6 @@ export const selectListIndicators = createSelector(
       order || (sortOption ? sortOption.order : 'desc'),
       sort || (sortOption ? sortOption.attribute : 'title'),
       sortOption ? sortOption.type : 'string',
-    );
-  }
-);
-
-export const selectConnectedTaxonomies = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectConnections,
-  (state) => selectActiontypeTaxonomies(state, { type: ACTIONTYPES.EXPRESS }),
-  selectCategories,
-  (state) => selectEntities(state, API.ACTION_CATEGORIES),
-  (
-    ready,
-    connections,
-    taxonomies,
-    categories,
-    categoryMeasures,
-  ) => {
-    if (!ready) return Map();
-    const relationship = {
-      tags: 'tags_actions',
-      path: API.ACTIONS,
-      key: 'measure_id',
-      associations: categoryMeasures,
-    };
-    if (!connections.get(relationship.path)) {
-      return taxonomies;
-    }
-    const groupedAssociations = relationship.associations.groupBy(
-      (association) => association.getIn(['attributes', 'category_id'])
-    );
-    return taxonomies.map(
-      (taxonomy) => taxonomy.set(
-        'categories',
-        getTaxonomyCategories(
-          taxonomy,
-          categories,
-          relationship,
-          groupedAssociations,
-        )
-      )
     );
   }
 );

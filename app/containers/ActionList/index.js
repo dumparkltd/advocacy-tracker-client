@@ -18,11 +18,9 @@ import {
   selectIsUserAnalyst,
   selectIsUserAdmin,
   selectActiontypes,
-  // selectActortypes,
   selectActortypesForActiontype,
   selectTargettypesForActiontype,
   selectResourcetypesForActiontype,
-  selectActiontypeActions,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -34,9 +32,9 @@ import { ROUTES } from 'themes/config';
 import EntityList from 'containers/EntityList';
 import { CONFIG, DEPENDENCIES } from './constants';
 import {
+  selectActionsWithConnections,
   selectConnections,
   selectViewActions,
-  selectConnectedTaxonomies,
 } from './selectors';
 
 import messages from './messages';
@@ -69,7 +67,6 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
       allEntities,
       taxonomies,
       connections,
-      connectedTaxonomies,
       location,
       isManager,
       isAnalyst,
@@ -134,10 +131,10 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
         />
         <EntityList
           entities={entities}
+          allEntities={allEntities.toList()}
           allEntityCount={allEntities && allEntities.size}
           taxonomies={taxonomies}
           connections={connections}
-          connectedTaxonomies={connectedTaxonomies}
           config={CONFIG}
           headerOptions={headerOptions}
           dataReady={dataReady}
@@ -169,7 +166,6 @@ ActionList.propTypes = {
   isManager: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   taxonomies: PropTypes.instanceOf(Map),
-  connectedTaxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
@@ -191,7 +187,6 @@ const mapStateToProps = (state, props) => ({
   entities: selectViewActions(state, { type: props.params.id }), // type
   taxonomies: selectActiontypeTaxonomiesWithCats(state, { type: props.params.id }),
   connections: selectConnections(state),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
   isAdmin: selectIsUserAdmin(state),
@@ -199,7 +194,7 @@ const mapStateToProps = (state, props) => ({
   actortypes: selectActortypesForActiontype(state, { type: props.params.id }),
   targettypes: selectTargettypesForActiontype(state, { type: props.params.id }),
   resourcetypes: selectResourcetypesForActiontype(state, { type: props.params.id }),
-  allEntities: selectActiontypeActions(state, { type: props.params.id }),
+  allEntities: selectActionsWithConnections(state, { type: props.params.id }),
 });
 function mapDispatchToProps(dispatch) {
   return {

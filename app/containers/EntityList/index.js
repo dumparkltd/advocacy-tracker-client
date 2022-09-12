@@ -33,6 +33,7 @@ import {
   selectIncludeActorChildren,
   selectIncludeTargetChildren,
   selectIncludeInofficialStatements,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import {
@@ -80,6 +81,7 @@ import {
   dismissError,
   dismissAllErrors,
   resetFilters,
+  setFilters,
 } from './actions';
 
 import { currentFilters, currentFilterArgs } from './current-filters';
@@ -272,6 +274,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       allEntityCount,
       listActions,
       onEntitiesDelete,
+      onUpdateFilters,
     } = this.props;
     // detect print to avoid expensive rendering
     const printing = !!(
@@ -284,10 +287,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     const success = viewDomain.get('success');
     const errors = viewDomain.get('errors').size > 0 ? this.mapErrors(viewDomain.get('errors')) : Map();
 
-    const entities = (dataReady && errors.size > 0)
-      ? this.filterByError(this.props.entities, errors)
-      : this.props.entities;
-
+    const { entities, allEntities } = this.props;
     const entityIdsSelectedFiltered = entityIdsSelected.size > 0 && entities
       ? entityIdsSelected.filter((id) => entities.map((entity) => entity.get('id')).includes(id))
       : entityIdsSelected;
@@ -297,7 +297,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     const filters = currentFilters(
       {
         config,
-        entities,
+        entities: allEntities,
         taxonomies: allTaxonomies,
         connections,
         connectedTaxonomies,
@@ -402,6 +402,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             currentFilters={filters}
             listUpdating={progress !== null && progress >= 0 && progress < 100}
             entities={entities}
+            allEntities={allEntities}
             entityIdsSelected={entityIdsSelected}
             taxonomies={taxonomies}
             actortypes={actortypes}
@@ -428,6 +429,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 viewDomain.get('errors'),
                 connections,
               )}
+            onUpdateFilters={onUpdateFilters}
             showFilters={this.state.visibleFilters}
             showEditOptions={isManager && showList && this.state.visibleEditOptions}
             onShowFilters={this.onShowFilters}
@@ -625,6 +627,7 @@ EntityList.defaultProps = {
 EntityList.propTypes = {
   // wrapper props
   entities: PropTypes.instanceOf(List).isRequired,
+  allEntities: PropTypes.instanceOf(List),
   taxonomies: PropTypes.instanceOf(Map),
   allTaxonomies: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
@@ -689,6 +692,7 @@ EntityList.propTypes = {
   includeInofficial: PropTypes.bool,
   allEntityCount: PropTypes.number,
   onEntitiesDelete: PropTypes.func,
+  onUpdateFilters: PropTypes.func,
 };
 
 EntityList.contextTypes = {
@@ -712,6 +716,7 @@ const mapStateToProps = (state) => ({
   includeActorChildren: selectIncludeActorChildren(state),
   includeTargetChildren: selectIncludeTargetChildren(state),
   includeInofficial: selectIncludeInofficialStatements(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -758,6 +763,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onUpdateQuery: (args) => {
       dispatch(updateRouteQuery(args));
+    },
+    onUpdateFilters: (values) => {
+      dispatch(setFilters(values));
     },
     onSetView: (view) => {
       dispatch(setView(view));

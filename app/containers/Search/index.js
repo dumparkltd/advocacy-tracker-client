@@ -45,7 +45,6 @@ import {
   updateSortBy,
   updateSortOrder,
 } from './actions';
-// import { selectConnections, selectActions, selectConnectedTaxonomies } from './selectors';
 
 import messages from './messages';
 

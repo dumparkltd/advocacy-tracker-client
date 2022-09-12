@@ -1060,15 +1060,11 @@ export const selectTaxonomiesSorted = createSelector(
 export const selectTaxonomiesWithCategories = createSelector(
   selectTaxonomiesSorted,
   selectCategories,
-  (taxonomies, categories) => taxonomies.map((tax) => tax.set(
-    'categories',
-    categories.filter(
-      (cat) => qe(
-        cat.getIn(['attributes', 'taxonomy_id']),
-        tax.get('id')
-      )
-    )
-  ))
+  (taxonomies, categories) => prepareTaxonomies(
+    taxonomies,
+    categories,
+    false,
+  )
 );
 
 // all categories for a given taxonomy id

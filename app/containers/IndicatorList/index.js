@@ -21,7 +21,6 @@ import {
   selectIsUserAnalyst,
   selectIsUserAdmin,
   selectActiontypesForIndicators,
-  selectIndicators,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -33,7 +32,7 @@ import { CONFIG, DEPENDENCIES } from './constants';
 import {
   selectConnections,
   selectListIndicators,
-  selectConnectedTaxonomies,
+  selectIndicatorsWithConnections,
 } from './selectors';
 
 import messages from './messages';
@@ -57,7 +56,6 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
       entities,
       allEntities,
       connections,
-      connectedTaxonomies,
       location,
       isAdmin,
       isManager,
@@ -110,8 +108,8 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
           entities={entities}
           config={CONFIG}
           allEntityCount={allEntities && allEntities.size}
+          allEntities={allEntities.toList()}
           connections={connections}
-          connectedTaxonomies={connectedTaxonomies}
           headerOptions={headerOptions}
           dataReady={dataReady}
           entityTitle={{
@@ -135,7 +133,6 @@ IndicatorList.propTypes = {
   isManager: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   connections: PropTypes.instanceOf(Map),
-  connectedTaxonomies: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
   isAdmin: PropTypes.bool,
@@ -155,8 +152,7 @@ const mapStateToProps = (state, props) => ({
   isAnalyst: selectIsUserAnalyst(state),
   isAdmin: selectIsUserAdmin(state),
   actiontypes: selectActiontypesForIndicators(state),
-  allEntities: selectIndicators(state),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
+  allEntities: selectIndicatorsWithConnections(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

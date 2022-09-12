@@ -9,7 +9,6 @@ import createSagaMiddleware from 'redux-saga';
 import appSaga from 'containers/App/sagas';
 import entityListSaga from 'containers/EntityList/sagas';
 import entityListTableSaga from 'containers/EntityListTable/sagas';
-import entityListFormSaga from 'containers/EntityListForm/sagas';
 import createReducer from './reducers';
 
 const sagaMiddleware = createSagaMiddleware();
@@ -47,7 +46,6 @@ export default function configureStore(initialState = {}, history) {
   sagaMiddleware.run(appSaga);
   sagaMiddleware.run(entityListSaga);
   sagaMiddleware.run(entityListTableSaga);
-  sagaMiddleware.run(entityListFormSaga);
 
   store.runSaga = sagaMiddleware.run;
   store.asyncReducers = {}; // Async reducer registry

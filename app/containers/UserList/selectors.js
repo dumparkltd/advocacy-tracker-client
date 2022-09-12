@@ -70,7 +70,7 @@ export const selectConnections = createSelector(
   }
 );
 
-const selectUsersNested = createSelector(
+export const selectUsersWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   (state, locationQuery) => selectEntitiesSearchQuery(state, {
     path: API.USERS,
@@ -172,7 +172,7 @@ const selectUsersNested = createSelector(
   }
 );
 const selectUsersWithout = createSelector(
-  selectUsersNested,
+  selectUsersWithConnections,
   selectCategories,
   selectWithoutQuery,
   (entities, categories, query) => query

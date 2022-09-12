@@ -47,6 +47,7 @@ import {
   selectReadyForAuthCheck,
   selectResourcetype,
   selectIsUserAdmin,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -54,7 +55,6 @@ import ContentHeader from 'components/ContentHeader';
 import FormWrapper from './FormWrapper';
 
 import {
-  selectConnectedTaxonomies,
   selectActionsByActiontype,
 } from './selectors';
 
@@ -318,7 +318,7 @@ ResourceNew.contextTypes = {
 const mapStateToProps = (state, { typeId }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
   resourcetype: selectResourcetype(state, typeId),
   actionsByActiontype: selectActionsByActiontype(state, typeId),
   isAdmin: selectIsUserAdmin(state),

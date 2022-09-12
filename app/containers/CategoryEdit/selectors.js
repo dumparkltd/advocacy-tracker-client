@@ -5,7 +5,6 @@ import {
   selectEntities,
   selectActionsCategorised,
   selectActorsCategorised,
-  selectActortypeTaxonomies,
   selectTaxonomiesSorted,
   selectCategories,
   selectCategory,
@@ -17,7 +16,6 @@ import {
   prepareCategory,
   usersByRole,
   entitiesSetAssociatedCategory,
-  prepareTaxonomiesMultipleTags,
 } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
 
@@ -175,14 +173,4 @@ export const selectActorsByActortype = createSelector(
       (r) => r.getIn(['attributes', 'actortype_id']).toString()
     );
   }
-);
-
-export const selectConnectedTaxonomies = createSelector(
-  (state) => selectActortypeTaxonomies(state),
-  selectCategories,
-  (taxonomies, categories) => prepareTaxonomiesMultipleTags(
-    taxonomies,
-    categories,
-    ['tags_actions', 'tags_actors']
-  )
 );

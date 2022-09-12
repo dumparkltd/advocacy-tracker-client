@@ -203,14 +203,22 @@ export const filterEntitiesWithAnyAssociation = (
 export const filterEntitiesByCategories = (
   entities,
   query,
+  any = true,
 ) => entities
   && entities.filter(
-    (entity) => asList(query).every(
-      (categoryId) => testEntityCategoryAssociation(
-        entity,
-        parseInt(categoryId, 10),
+    (entity) => any
+      ? asList(query).some(
+        (categoryId) => testEntityCategoryAssociation(
+          entity,
+          parseInt(categoryId, 10),
+        )
       )
-    )
+      : asList(query).every(
+        (categoryId) => testEntityCategoryAssociation(
+          entity,
+          parseInt(categoryId, 10),
+        )
+      )
   );
 
 // filter entities by association with one or more categories
@@ -219,26 +227,78 @@ export const filterEntitiesByConnectedCategories = (
   entities,
   connections,
   query,
+  any = true,
 ) => entities && entities.filter(
   // consider replacing with .every()
-  (entity) => asList(query).every(
-    (queryArg) => {
-      const pathValue = queryArg.split(':');
-      const path = pathValue[0];
-      const connectionsForPath = connections.get(path);
-      return !connectionsForPath || connectionsForPath.some(
-        (connection) => testEntityEntityAssociation(
-          entity,
-          path,
-          connection.get('id'),
-        ) && testEntityCategoryAssociation(
-          connection,
-          pathValue[1],
-        )
-      );
-    },
-  )
+  (entity) => any
+    ? asList(query).some(
+      (queryArg) => {
+        const pathValue = queryArg.split(':');
+        const path = pathValue[0];
+        const connectionsForPath = connections.get(path);
+        return !connectionsForPath || connectionsForPath.some(
+          (connection) => testEntityEntityAssociation(
+            entity,
+            path,
+            connection.get('id'),
+          ) && testEntityCategoryAssociation(
+            connection,
+            pathValue[1],
+          )
+        );
+      },
+    )
+    : asList(query).every(
+      (queryArg) => {
+        const pathValue = queryArg.split(':');
+        const path = pathValue[0];
+        const connectionsForPath = connections.get(path);
+        return !connectionsForPath || connectionsForPath.some(
+          (connection) => testEntityEntityAssociation(
+            entity,
+            path,
+            connection.get('id'),
+          ) && testEntityCategoryAssociation(
+            connection,
+            pathValue[1],
+          )
+        );
+      },
+    )
 );
+
+const checkQuery = ({
+  queryValue,
+  path,
+  connectionAttribute,
+  entity,
+}) => {
+  let value = queryValue;
+  let connectionAttributeQuery;
+  // check for connection attribute queries
+  if (connectionAttribute && value.indexOf('>') > -1) {
+    [value, connectionAttributeQuery] = value.split('>');
+    const [attribute, values] = connectionAttributeQuery.split('=');
+    connectionAttributeQuery = {
+      attribute,
+      values: values.split('|'),
+    };
+  }
+  // check for type:id form
+  // sometimes related entity ids are stored as [type]:[id]
+  // ignore type
+  if (value.indexOf(':') > -1) {
+    [, value] = queryValue.split(':');
+  }
+  return entity.get(path)
+    && testEntityEntityAssociation(
+      entity,
+      path,
+      value,
+      connectionAttribute,
+      connectionAttributeQuery,
+    );
+};
 
 // filter entities by by association with one or more entities of specific connection type
 // assumes prior nesting of relationships
@@ -249,52 +309,51 @@ export const filterEntitiesByConnection = (
   query,
   path,
   connectionAttribute,
+  any = true, // bool
 ) => entities && entities.filter(
   // consider replacing with .every()
-  (entity) => asList(query).every(
-    (queryValue) => {
-      let value = queryValue;
-      let connectionAttributeQuery;
-      // check for connection attribute queries
-      if (value.indexOf('>') > -1) {
-        [value, connectionAttributeQuery] = value.split('>');
-        const [attribute, values] = connectionAttributeQuery.split('=');
-        connectionAttributeQuery = {
-          attribute,
-          values: values.split('|'),
-        };
-      }
-      // check for type:id form
-      // sometimes related entity ids are stored as [type]:[id]
-      // ignore type
-      if (value.indexOf(':') > -1) {
-        [, value] = queryValue.split(':');
-      }
-      return entity.get(path)
-        && testEntityEntityAssociation(
-          entity,
-          path,
-          value,
-          connectionAttribute,
-          connectionAttributeQuery,
-        );
-    },
-  )
+  (entity) => any
+    ? asList(query).some(
+      (queryValue) => checkQuery({
+        entity,
+        queryValue,
+        path,
+        connectionAttribute,
+      })
+    )
+    : asList(query).every(
+      (queryValue) => checkQuery({
+        entity,
+        queryValue,
+        path,
+        connectionAttribute,
+      })
+    )
 );
 export const filterEntitiesByMultipleConnections = (
   entities,
   query,
   paths,
+  any = true,
 ) => entities && entities.filter(
   // consider replacing with .every()
-  (entity) => asList(query).every(
-    (queryArg) => {
-      const [, value] = queryArg.split(':');
-      return paths.some(
-        (path) => entity.get(path) && testEntityEntityAssociation(entity, path, value)
-      );
-    },
-  )
+  (entity) => any
+    ? asList(query).some(
+      (queryArg) => {
+        const [, value] = queryArg.split(':');
+        return paths.some(
+          (path) => entity.get(path) && testEntityEntityAssociation(entity, path, value)
+        );
+      },
+    )
+    : asList(query).every(
+      (queryArg) => {
+        const [, value] = queryArg.split(':');
+        return paths.some(
+          (path) => entity.get(path) && testEntityEntityAssociation(entity, path, value)
+        );
+      },
+    )
 );
 
 const fieldEmpty = (entity, attribute) => !entity.getIn(['attributes', attribute])

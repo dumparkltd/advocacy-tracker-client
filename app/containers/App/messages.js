@@ -531,6 +531,10 @@ export default defineMessages({
       id: 'app.containers.App.buttons.assign',
       defaultMessage: 'Update',
     },
+    updateFilter: {
+      id: 'app.containers.App.buttons.updateFilter',
+      defaultMessage: 'Apply filters',
+    },
     previous: {
       id: 'app.containers.App.buttons.previous',
       defaultMessage: 'Previous',

@@ -8,15 +8,12 @@ import {
 import { qe } from 'utils/quasi-equals';
 
 import {
-  selectCategories,
   selectActiontypes,
-  selectActionTaxonomies,
   selectActionsCategorised,
   selectActorsCategorised,
   selectActortypes,
   selectUsers,
 } from 'containers/App/selectors';
-import { prepareTaxonomies } from 'utils/entities';
 
 export const selectDomain = createSelector(
   (state) => state.get('actorNew'),
@@ -29,16 +26,6 @@ export const selectDomain = createSelector(
       )
     )
     : substate
-);
-
-export const selectConnectedTaxonomies = createSelector(
-  selectActionTaxonomies,
-  selectCategories,
-  (taxonomies, categories) => prepareTaxonomies(
-    taxonomies,
-    categories,
-    false,
-  )
 );
 
 export const selectActionsByActiontype = createSelector(

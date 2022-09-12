@@ -41,6 +41,9 @@ export const currentFilterArgs = (config, locationQuery) => {
   if (locationQuery.get('without')) {
     args = args.concat('without');
   }
+  if (locationQuery.get('any')) {
+    args = args.concat('any');
+  }
   return args;
 };
 

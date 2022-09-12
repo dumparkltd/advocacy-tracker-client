@@ -22,3 +22,4 @@ export const PATH_CHANGE = 'impactoss/EntityList/PATH_CHANGE';
 export const DISMISS_ERROR = 'impactoss/EntityList/DISMISS_ERROR';
 export const DISMISS_ALL_ERRORS = 'impactoss/EntityList/DISMISS_ALL_ERRORS';
 export const RESET_FILTERS = 'impactoss/EntityList/RESET_FILTERS';
+export const SET_FILTERS = 'impactoss/EntityList/SET_FILTERS';

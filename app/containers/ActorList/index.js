@@ -31,7 +31,6 @@ import {
   selectActiontypesForTargettype,
   selectMembertypesForActortype,
   selectAssociationtypesForActortype,
-  selectActortypeActors,
 } from 'containers/App/selectors';
 
 import { checkActorAttribute } from 'utils/entities';
@@ -45,8 +44,8 @@ import EmailHelper from './EmailHelper';
 import { CONFIG, DEPENDENCIES } from './constants';
 import {
   selectListActors,
-  selectConnectedTaxonomies,
   selectConnections,
+  selectActorsWithConnections,
 } from './selectors';
 
 import messages from './messages';
@@ -135,7 +134,6 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
       allEntities,
       taxonomies,
       connections,
-      connectedTaxonomies,
       location,
       isAdmin,
       isManager,
@@ -220,9 +218,9 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
         <EntityList
           entities={entities}
           allEntityCount={allEntities && allEntities.size}
+          allEntities={allEntities.toList()}
           taxonomies={taxonomies}
           connections={connections}
-          connectedTaxonomies={connectedTaxonomies}
           config={CONFIG}
           headerOptions={headerOptions}
           dataReady={dataReady}
@@ -282,7 +280,6 @@ ActorList.propTypes = {
   entities: PropTypes.instanceOf(List).isRequired,
   allEntities: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
-  connectedTaxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
@@ -302,7 +299,6 @@ const mapStateToProps = (state, props) => ({
   entities: selectListActors(state, { type: props.params.id }),
   taxonomies: selectActortypeTaxonomiesWithCats(state, { type: props.params.id }),
   connections: selectConnections(state),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
   isAdmin: selectIsUserAdmin(state),
@@ -311,7 +307,7 @@ const mapStateToProps = (state, props) => ({
   membertypes: selectMembertypesForActortype(state, { type: props.params.id }),
   associationtypes: selectAssociationtypesForActortype(state, { type: props.params.id }),
   actortypes: selectActortypes(state),
-  allEntities: selectActortypeActors(state, { type: props.params.id }),
+  allEntities: selectActorsWithConnections(state, { type: props.params.id }),
 });
 
 function mapDispatchToProps(dispatch) {

@@ -33,13 +33,13 @@ import ButtonOld from 'components/buttons/Button';
 
 import EntityListSidebar from './EntityListSidebar';
 
-import { makeFilterGroups } from './filterGroupsFactory';
-import { makeEditGroups } from './editGroupsFactory';
+import { makeFilterGroups } from './utilFilterGroups';
+import { makeEditGroups } from './utilEditGroups';
 import {
   makeActiveFilterOptions,
   makeAnyWithoutFilterOptions,
-} from './filterOptionsFactory';
-import { makeActiveEditOptions } from './editOptionsFactory';
+} from './utilFilterOptions';
+import { makeActiveEditOptions } from './utilEditOptions';
 
 import messages from './messages';
 
@@ -83,7 +83,6 @@ const SelectType = styled(ButtonOld)`
     max-width: 100%;
   }
 `;
-const EntityListSearch = styled((p) => <Box justify="end" direction="row" gap="medium" {...p} />)``;
 
 const ButtonOptions = styled((p) => <Button plain {...p} />)`
   color: ${palette('buttonFlat', 1)};
@@ -265,6 +264,22 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     ];
   };
 
+  getFilterFormButtons = () => {
+    const { intl } = this.context;
+    return [
+      {
+        type: 'simple',
+        title: intl.formatMessage(appMessages.buttons.cancel),
+        onClick: this.onHideForm,
+      },
+      {
+        type: 'primary',
+        title: intl.formatMessage(appMessages.buttons.updateFilter),
+        submit: true,
+      },
+    ];
+  };
+
   resize = () => {
     // reset
     this.setState(STATE_INITIAL);
@@ -275,8 +290,10 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     const {
       config,
       onUpdate,
+      onUpdateFilters,
       hasUserRole,
       entities,
+      allEntities,
       locationQuery,
       taxonomies,
       connectedTaxonomies,
@@ -377,11 +394,9 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
         },
         {},
       );
-      // console.log(currentFilters);
-      // console.log(panelGroups);
       if (activeOption) {
         formOptions = makeActiveFilterOptions({
-          entities,
+          entities: allEntities,
           config,
           locationQuery,
           taxonomies,
@@ -528,14 +543,19 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     )}
                   </HeaderSectionType>
                 )}
-                <HeaderSection grow align="center" gap="medium" justify="start">
+                <HeaderSection
+                  grow
+                  align="center"
+                  gap="medium"
+                  justify="start"
+                  overflow={{ horizontal: 'auto' }}
+                >
                   {dataReady && isMinSize(size, 'large') && (
-                    <EntityListSearch>
-                      <TagList
-                        filters={currentFilters}
-                        onClear={onClearFilters}
-                      />
-                    </EntityListSearch>
+                    <TagList
+                      filters={currentFilters}
+                      onClear={onClearFilters}
+                      groupDropdownThreshold={isMinSize(size, 'xlarge') ? 3 : 2}
+                    />
                   )}
                 </HeaderSection>
                 {dataReady && isMinSize(size, 'small') && (
@@ -657,7 +677,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
               </TheHeader>
               {showFilters && (
                 <EntityListSidebar
-                  hasEntities={entities && entities.size > 0}
+                  hasEntities={allEntities && allEntities.size > 0}
                   panelGroups={panelGroups}
                   onHideSidebar={onHideFilters}
                   onHideOptions={this.onHideForm}
@@ -697,23 +717,22 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                   formOptions={formOptions}
                   buttons={showEditOptions
                     ? this.getFormButtons(activeOption)
-                    : null
+                    : this.getFilterFormButtons()
                   }
                   onCancel={this.onHideForm}
+                  showNew={showEditOptions}
                   showCancelButton={showFilters}
-                  onSelect={() => {
-                    if (showFilters) {
-                      this.onHideForm();
-                      // onHideFilters();
-                    }
-                  }}
                   onSubmit={showEditOptions
                     ? (associations) => {
                     // close and reset option panel
                       this.setState({ activeOption: null });
                       onUpdate(associations, activeOption);
                     }
-                    : null
+                    : (filterOptions) => {
+                      // close and reset option panel
+                      this.setState({ activeOption: null });
+                      onUpdateFilters(filterOptions && filterOptions.get('values'), activeOption);
+                    }
                   }
                 />
               )}
@@ -726,6 +745,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
 }
 EntityListHeader.propTypes = {
   entities: PropTypes.instanceOf(List),
+  allEntities: PropTypes.instanceOf(List),
   entityIdsSelected: PropTypes.instanceOf(List),
   taxonomies: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
@@ -741,6 +761,7 @@ EntityListHeader.propTypes = {
   hasUserRole: PropTypes.object,
   config: PropTypes.object,
   onUpdate: PropTypes.func.isRequired,
+  onUpdateFilters: PropTypes.func.isRequired,
   onCreateOption: PropTypes.func.isRequired,
   listUpdating: PropTypes.bool,
   theme: PropTypes.object,

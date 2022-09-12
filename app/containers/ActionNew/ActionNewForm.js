@@ -62,6 +62,7 @@ import {
   selectActiontype,
   selectSessionUser,
   selectIsUserAdmin,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -73,7 +74,6 @@ import FormWrapper from './FormWrapper';
 import {
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
-  selectConnectedTaxonomies,
   selectActorsByActortype,
   selectTargetsByActortype,
   selectResourcesByResourcetype,
@@ -592,7 +592,7 @@ const mapStateToProps = (state, { typeId, autoUser }) => ({
       includeParents: false,
     },
   ),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
   actiontype: selectActiontype(state, typeId),
   actorsByActortype: selectActorsByActortype(state, typeId),
   targetsByActortype: selectTargetsByActortype(state, typeId),

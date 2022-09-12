@@ -3,13 +3,9 @@ import { INDICATOR_ACTIONTYPES } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
 import {
-  selectCategories,
   selectActiontypes,
-  selectActionTaxonomies,
   selectActionsCategorised,
 } from 'containers/App/selectors';
-
-import { prepareTaxonomies } from 'utils/entities';
 
 export const selectDomain = createSelector(
   (state) => state.get('indicatorNew'),
@@ -26,15 +22,6 @@ export const selectDomainPage = createSelector(
       )
     )
     : substate
-);
-export const selectConnectedTaxonomies = createSelector(
-  selectActionTaxonomies,
-  selectCategories,
-  (taxonomies, categories) => prepareTaxonomies(
-    taxonomies,
-    categories,
-    false,
-  )
 );
 
 export const selectActionsByActiontype = createSelector(

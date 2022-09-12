@@ -14,6 +14,7 @@ import {
   UPDATE_QUERY,
   UPDATE_GROUP,
   RESET_FILTERS,
+  SET_FILTERS,
 } from './constants';
 
 export function* updateQuery({ value }) {
@@ -24,6 +25,23 @@ export function* updateQuery({ value }) {
     replace: val.get('replace'),
     add: val.get('checked'),
     remove: !val.get('checked'),
+  })).toJS();
+  yield params.push({
+    arg: 'page',
+    value: '',
+    replace: true,
+    remove: true,
+  });
+  yield put(updateRouteQuery(params));
+}
+
+export function* updateQueryMultiple({ values }) {
+  const params = values.map((value) => ({
+    arg: value.get('query'),
+    value: value.get('value') || 1,
+    replace: value.get('replace'),
+    add: value.get('checked'),
+    remove: !value.get('checked'),
   })).toJS();
   yield params.push({
     arg: 'page',
@@ -92,6 +110,7 @@ export default function* entityList() {
   yield takeLatest(UPDATE_QUERY, updateQuery);
   yield takeLatest(UPDATE_GROUP, updateGroup);
   yield takeLatest(RESET_FILTERS, resetFilters);
+  yield takeLatest(SET_FILTERS, updateQueryMultiple);
 
   yield takeLatest(SAVE, save);
   yield takeLatest(NEW_CONNECTION, newConnection);

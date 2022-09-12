@@ -14,7 +14,6 @@ import {
   selectEntity,
   selectEntities,
   selectActorsCategorised,
-  selectActorTaxonomies,
   selectActortypes,
   selectActorActionsGroupedByAction,
   selectActionActorsGroupedByAction,
@@ -40,7 +39,6 @@ import {
   entitiesSetAssociated_NEW,
   entitySetUser,
   prepareTaxonomiesAssociated,
-  prepareTaxonomies,
 } from 'utils/entities';
 
 import { DEPENDENCIES } from './constants';
@@ -193,16 +191,6 @@ export const selectTaxonomyOptions = createSelector(
     }
     return null;
   }
-);
-
-export const selectConnectedTaxonomies = createSelector(
-  selectActorTaxonomies,
-  selectCategories,
-  (taxonomies, categories) => prepareTaxonomies(
-    taxonomies,
-    categories,
-    false,
-  )
 );
 
 export const selectActorsByActortype = createSelector(
