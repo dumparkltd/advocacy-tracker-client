@@ -18,7 +18,6 @@ import {
   selectIsUserAnalyst,
   selectIsUserAdmin,
   selectActiontypes,
-  // selectActortypes,
   selectActortypesForActiontype,
   selectTargettypesForActiontype,
   selectResourcetypesForActiontype,
@@ -36,7 +35,6 @@ import {
   selectActionsWithConnections,
   selectConnections,
   selectViewActions,
-  selectConnectedTaxonomies,
 } from './selectors';
 
 import messages from './messages';
@@ -69,7 +67,6 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
       allEntities,
       taxonomies,
       connections,
-      connectedTaxonomies,
       location,
       isManager,
       isAnalyst,
@@ -138,7 +135,6 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
           allEntityCount={allEntities && allEntities.size}
           taxonomies={taxonomies}
           connections={connections}
-          connectedTaxonomies={connectedTaxonomies}
           config={CONFIG}
           headerOptions={headerOptions}
           dataReady={dataReady}
@@ -170,7 +166,6 @@ ActionList.propTypes = {
   isManager: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   taxonomies: PropTypes.instanceOf(Map),
-  connectedTaxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
@@ -192,7 +187,6 @@ const mapStateToProps = (state, props) => ({
   entities: selectViewActions(state, { type: props.params.id }), // type
   taxonomies: selectActiontypeTaxonomiesWithCats(state, { type: props.params.id }),
   connections: selectConnections(state),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
   isAdmin: selectIsUserAdmin(state),

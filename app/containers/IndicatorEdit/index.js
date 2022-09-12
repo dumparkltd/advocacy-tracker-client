@@ -56,6 +56,7 @@ import {
   selectReadyForAuthCheck,
   selectIsUserAdmin,
   selectSessionUserId,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -66,7 +67,6 @@ import {
   selectDomainPage,
   selectViewEntity,
   selectActionsByActiontype,
-  selectConnectedTaxonomies,
 } from './selectors';
 
 import messages from './messages';
@@ -369,7 +369,7 @@ const mapStateToProps = (state, props) => ({
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
   myId: selectSessionUserId(state),
 });
 

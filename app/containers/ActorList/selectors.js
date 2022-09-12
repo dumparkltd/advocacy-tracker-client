@@ -1,7 +1,6 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
 import {
-  selectEntities,
   selectActorsWhereQuery,
   selectWithoutQuery,
   selectAnyQuery,
@@ -18,7 +17,6 @@ import {
   selectMembershipsGroupedByParent,
   selectCategories,
   selectTargetingQuery,
-  selectActionTaxonomies,
   selectMemberQuery,
   selectAssociationQuery,
   selectUserQuery,
@@ -32,7 +30,6 @@ import {
   filterEntitiesWithoutAssociation,
   filterEntitiesWithAnyAssociation,
   entitiesSetCategoryIds,
-  getTaxonomyCategories,
 } from 'utils/entities';
 // import { qe } from 'utils/quasi-equals';
 
@@ -79,61 +76,6 @@ export const selectConnections = createSelector(
       );
     }
     return new Map();
-  }
-);
-
-// export const selectConnectedTaxonomies = createSelector(
-//   (state) => selectActiontypeTaxonomies(state),
-//   selectCategories,
-//   (taxonomies, categories) => prepareTaxonomiesMultipleTags(
-//     taxonomies,
-//     categories,
-//     ['tags_actions'],
-//   )
-// );
-
-
-export const selectConnectedTaxonomies = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectConnections,
-  selectActionTaxonomies,
-  selectCategories,
-  (state) => selectEntities(state, API.ACTION_CATEGORIES),
-  (
-    ready,
-    connections,
-    taxonomies,
-    categories,
-    actionCategories,
-  ) => {
-    if (!ready) return Map();
-    const relationship = {
-      tags: 'tags_actions',
-      path: 'actions',
-      key: 'measure_id',
-      associations: actionCategories,
-    };
-
-    const groupedAssociations = relationship.associations.filter(
-      (association) => association.getIn(['attributes', relationship.key])
-        && connections.getIn([
-          relationship.path,
-          association.getIn(['attributes', relationship.key]).toString(),
-        ])
-    ).groupBy(
-      (association) => association.getIn(['attributes', 'category_id'])
-    );
-    return taxonomies.map(
-      (taxonomy) => taxonomy.set(
-        'categories',
-        getTaxonomyCategories(
-          taxonomy,
-          categories,
-          relationship,
-          groupedAssociations,
-        )
-      )
-    );
   }
 );
 

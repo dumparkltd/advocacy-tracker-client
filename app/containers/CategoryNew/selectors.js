@@ -4,7 +4,6 @@ import { List } from 'immutable';
 import {
   selectEntity,
   selectEntities,
-  selectActortypeTaxonomies,
   selectTaxonomy,
   selectTaxonomies,
   selectCategories,
@@ -16,7 +15,6 @@ import { USER_ROLES, API } from 'themes/config';
 
 import {
   usersByRole,
-  prepareTaxonomiesMultipleTags,
 } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
 
@@ -88,15 +86,15 @@ export const selectUsers = createSelector(
   )
 );
 
-export const selectConnectedTaxonomies = createSelector(
-  (state) => selectActortypeTaxonomies(state),
-  selectCategories,
-  (taxonomies, categories) => prepareTaxonomiesMultipleTags(
-    taxonomies,
-    categories,
-    ['tags_actions', 'tags_actors'],
-  )
-);
+// export const selectConnectedTaxonomies = createSelector(
+//   (state) => selectActortypeTaxonomies(state),
+//   selectCategories,
+//   (taxonomies, categories) => prepareTaxonomiesMultipleTags(
+//     taxonomies,
+//     categories,
+//     ['tags_actions', 'tags_actors'],
+//   )
+// );
 const selectIsParentTaxonomy = createSelector(
   (state, id) => selectEntity(state, { path: API.TAXONOMIES, id }),
   selectTaxonomies,

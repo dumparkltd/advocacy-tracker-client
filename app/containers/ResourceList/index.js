@@ -27,7 +27,6 @@ import EntityList from 'containers/EntityList';
 import { CONFIG, DEPENDENCIES } from './constants';
 import {
   selectListResources,
-  // selectConnectedTaxonomies,
   selectConnections,
   selectResourcesWithConnections,
 } from './selectors';
@@ -151,7 +150,6 @@ ResourceList.propTypes = {
   isManager: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   // taxonomies: PropTypes.instanceOf(Map),
-  // connectedTaxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
@@ -169,7 +167,6 @@ const mapStateToProps = (state, props) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   entities: selectListResources(state, { type: props.params.id }),
   connections: selectConnections(state),
-  // connectedTaxonomies: selectConnectedTaxonomies(state),
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
   actiontypes: selectActiontypesForResourcetype(state, { type: props.params.id }),

@@ -44,7 +44,6 @@ import EmailHelper from './EmailHelper';
 import { CONFIG, DEPENDENCIES } from './constants';
 import {
   selectListActors,
-  selectConnectedTaxonomies,
   selectConnections,
   selectActorsWithConnections,
 } from './selectors';
@@ -135,7 +134,6 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
       allEntities,
       taxonomies,
       connections,
-      connectedTaxonomies,
       location,
       isAdmin,
       isManager,
@@ -223,7 +221,6 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
           allEntities={allEntities.toList()}
           taxonomies={taxonomies}
           connections={connections}
-          connectedTaxonomies={connectedTaxonomies}
           config={CONFIG}
           headerOptions={headerOptions}
           dataReady={dataReady}
@@ -283,7 +280,6 @@ ActorList.propTypes = {
   entities: PropTypes.instanceOf(List).isRequired,
   allEntities: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
-  connectedTaxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
@@ -303,7 +299,6 @@ const mapStateToProps = (state, props) => ({
   entities: selectListActors(state, { type: props.params.id }),
   taxonomies: selectActortypeTaxonomiesWithCats(state, { type: props.params.id }),
   connections: selectConnections(state),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
   isManager: selectIsUserManager(state),
   isAnalyst: selectIsUserAnalyst(state),
   isAdmin: selectIsUserAdmin(state),

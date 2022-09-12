@@ -47,6 +47,7 @@ import {
   selectSessionUserHighestRoleId,
   selectIsUserManager,
   selectIsUserAdmin,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
@@ -65,7 +66,6 @@ import {
   selectViewEntity,
   selectRoles,
   selectActionsByActiontype,
-  selectConnectedTaxonomies,
   selectActorsByActortype,
 } from './selectors';
 
@@ -373,7 +373,7 @@ const mapStateToProps = (state, props) => ({
   roles: selectRoles(state, props.params.id),
   actorsByActortype: selectActorsByActortype(state, props.params.id),
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
   isManager: selectIsUserManager(state),
   isAdmin: selectIsUserAdmin(state),
 });

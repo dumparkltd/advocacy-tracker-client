@@ -59,6 +59,7 @@ import {
   selectReadyForAuthCheck,
   selectIsUserAdmin,
   selectSessionUserId,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -71,7 +72,6 @@ import {
   selectTaxonomyOptions,
   selectActionsByActiontype,
   selectActionsAsTargetByActiontype,
-  selectConnectedTaxonomies,
   selectMembersByActortype,
   selectAssociationsByActortype,
   selectUserOptions,
@@ -513,7 +513,7 @@ const mapStateToProps = (state, props) => ({
   actionsAsTargetByActiontype: selectActionsAsTargetByActiontype(state, props.params.id),
   membersByActortype: selectMembersByActortype(state, props.params.id),
   associationsByActortype: selectAssociationsByActortype(state, props.params.id),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
   userOptions: selectUserOptions(state, props.params.id),
   myId: selectSessionUserId(state),
 });

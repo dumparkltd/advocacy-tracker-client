@@ -47,6 +47,7 @@ import {
   submitInvalid,
   saveErrorDismiss,
   newEntity,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/actions';
 
 import {
@@ -60,7 +61,6 @@ import ContentHeader from 'components/ContentHeader';
 
 import FormWrapper from './FormWrapper';
 import {
-  selectConnectedTaxonomies,
   selectActionsByActiontype,
 } from './selectors';
 
@@ -278,7 +278,7 @@ IndicatorNewForm.contextTypes = {
 const mapStateToProps = (state) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
   actionsByActiontype: selectActionsByActiontype(state),
   isAdmin: selectIsUserAdmin(state),
 });

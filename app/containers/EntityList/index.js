@@ -33,6 +33,7 @@ import {
   selectIncludeActorChildren,
   selectIncludeTargetChildren,
   selectIncludeInofficialStatements,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import {
@@ -715,6 +716,7 @@ const mapStateToProps = (state) => ({
   includeActorChildren: selectIncludeActorChildren(state),
   includeTargetChildren: selectIncludeTargetChildren(state),
   includeInofficial: selectIncludeInofficialStatements(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

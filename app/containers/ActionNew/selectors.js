@@ -10,19 +10,15 @@ import {
 import { qe } from 'utils/quasi-equals';
 
 import {
-  selectCategories,
   selectActortypes,
   selectActions,
   selectActiontypes,
-  selectActorTaxonomies,
   selectActorsCategorised,
   selectIndicators,
   selectResources,
   selectResourcetypes,
   selectUsers,
 } from 'containers/App/selectors';
-
-import { prepareTaxonomies } from 'utils/entities';
 
 export const selectDomain = createSelector(
   (state) => state.get('actionNew'),
@@ -46,16 +42,6 @@ export const selectIndicatorOptions = createSelector(
     }
     return null;
   }
-);
-
-export const selectConnectedTaxonomies = createSelector(
-  selectActorTaxonomies,
-  selectCategories,
-  (taxonomies, categories) => prepareTaxonomies(
-    taxonomies,
-    categories,
-    false,
-  )
 );
 
 export const selectActorsByActortype = createSelector(
