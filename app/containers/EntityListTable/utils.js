@@ -216,7 +216,7 @@ export const prepareHeader = ({
       case 'resourceActions':
       case 'indicatorActions':
       case 'actorActions':
-        if (col.subject !== 'actors') {
+        if (col.subject === 'targets') {
           label = 'Targeted by';
           if (col.members) {
             label = 'Targeted as member';
