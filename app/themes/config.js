@@ -1138,6 +1138,8 @@ export const MAP_OPTIONS = {
   GRADIENT: {
     actors: ['#fafa6e', '#72d07d', '#009a8a', '#006076', '#052b43'],
     targets: ['#fafa6e', '#faad4a', '#dd654b', '#a52752', '#59004d'],
+    // actors: ['#F9E453', '#81DD90', '#029481', '#035E93', '#043465'],
+    // targets: ['#F9E453', '#FAAB4B', '#DD654A', '#BF0071', '#720369'],
   },
   NO_DATA_COLOR: '#EDEFF0',
   DEFAULT_STYLE: {
