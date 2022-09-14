@@ -4,6 +4,7 @@
     "dev": "advocacy-tracker-test",
     "test": "advocacy-tracker-test",
     "prod": "advocacy-tracker",
-    "production": "advocacy-tracker"
+    "production": "advocacy-tracker",
+    "test-pdb": "advocacy-tracker-test-pdb"
   }
 }
