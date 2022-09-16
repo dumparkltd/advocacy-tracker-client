@@ -122,7 +122,8 @@ export const testEntityAssociation = (entity, associatedPath, includeMembers) =>
     return true;
   }
   if (includeMembers) {
-    return entity.get(`${associatedPath}Associations`) && entity.get(`${associatedPath}Associations`).size > 0;
+    const memberAssociations = entity.get(`${associatedPath}Associations`);
+    return memberAssociations && memberAssociations.size > 0;
   }
   return false;
 };

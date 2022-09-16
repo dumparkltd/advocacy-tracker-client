@@ -19,7 +19,7 @@ import {
 import { CircleInformation, CircleQuestion, FormClose } from 'grommet-icons';
 const DropContent = styled(({ dropBackground, ...p }) => (
   <Box
-    pad="small"
+    pad="xxsmall"
     background={dropBackground}
     {...p}
   />
@@ -71,7 +71,7 @@ function InfoOverlay({
   content,
   tooltip,
   title,
-  padButton,
+  padButton = null,
   colorButton,
   icon,
   markdown,
@@ -85,7 +85,7 @@ function InfoOverlay({
       <Box
         as={inline ? 'span' : 'div'}
         fill={false}
-        pad={inline ? null : (padButton || { horizontal: 'small' })}
+        pad={padButton || (inline ? null : { horizontal: 'small' })}
         ref={infoRef}
         flex={inline ? false : { grow: 0, shrink: 0 }}
         style={inline ? { width: 'auto', display: 'inline-block' } : null}
@@ -93,7 +93,7 @@ function InfoOverlay({
         <Button
           plain
           icon={
-            icon === 'question'
+            (tooltip || icon === 'question')
               ? (
                 <CircleQuestion
                   color={colorButton || (dark ? 'light-5' : 'dark-5')}
@@ -109,7 +109,7 @@ function InfoOverlay({
           }
           fill={false}
           onMouseOver={() => tooltip && showInfo(true)}
-          onMouseLeave={() => tooltip && showInfo(false)}
+          onMouseLeave={() => tooltip && showInfo(true)}
           onFocus={() => tooltip && showInfo(true)}
           onBlur={() => null}
           onClick={() => !tooltip && showInfo(!info)}

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { Box, Text } from 'grommet';
+import InfoOverlay from 'components/InfoOverlay';
 
 const Styled = styled((p) => <Box direction="row" align="center" gap="small" {...p} />)`
   padding: ${({ plain }) => plain ? 0 : 5}px 0;
@@ -14,7 +15,7 @@ export function MapOption({
   plain,
 }) {
   const {
-    active, onClick, label, id = 0,
+    active, onClick, label, id = 0, info,
   } = option;
   const optionType = option.type || type;
   return (
@@ -25,7 +26,31 @@ export function MapOption({
         checked={active}
         onChange={onClick}
       />
-      <Text as="label" htmlFor={`map-${optionType}-${id}`} size="xsmall">{label}</Text>
+      <Text as="label" htmlFor={`map-${optionType}-${id}`} size="xsmall">
+        {label}
+        {info && (
+          <InfoOverlay
+            content={(
+              <Box
+                pad="small"
+                margin="xsmall"
+                background="white"
+                elevation="small"
+                overflow={{
+                  vertical: 'auto',
+                  horizontal: 'hidden',
+                }}
+              >
+                <Text size="small">{info}</Text>
+              </Box>
+            )}
+            inline
+            padButton={{ horizontal: 'xsmall' }}
+            tooltip
+            icon="question"
+          />
+        )}
+      </Text>
     </Styled>
   );
 }

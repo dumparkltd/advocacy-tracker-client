@@ -690,7 +690,8 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     ? {
                       key: 'filter-member-option',
                       active: !!includeMembers,
-                      label: 'Include members when filtering by region or group',
+                      label: 'Also consider members when filtering by region or group',
+                      info: 'When enabled and when filtering by region or group, the list will also include activities associated with any members of those regions or groups',
                       onClick: () => {
                         this.onHideForm();
                         onSetFilterMemberOption(!includeMembers);

@@ -58,11 +58,9 @@ export function CellHeaderInfoOverlay({ info }) {
               </Text>
             </Box>
           )}
-          <Box gap="small">
-            <Text size="small" weight={500}>
-              {info.text}
-            </Text>
-          </Box>
+          <Text size="small" weight={500}>
+            {info.text}
+          </Text>
         </Box>
       )}
     </>
