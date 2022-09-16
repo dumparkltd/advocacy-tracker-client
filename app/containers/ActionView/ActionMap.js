@@ -244,7 +244,7 @@ export function ActionMap({
     onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
     label: 'Include targets of child activities',
   });
-  const memberChildrenOption = hasChildTargetOption && hasMemberOption && ({
+  const memberChildrenOption = hasChildTargetOption && hasMemberOption && includeTargetChildren && ({
     active: includeTargetChildrenMembers,
     onClick: () => onSetIncludeTargetChildrenMembers(includeTargetChildrenMembers ? '0' : '1'),
     label: 'Include members of targets of child activities',
