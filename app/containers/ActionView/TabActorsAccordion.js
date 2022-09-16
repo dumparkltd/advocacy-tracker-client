@@ -31,7 +31,7 @@ const getTypeLabel = (
   intl,
 ) => lowerCase(intl.formatMessage(appMessages.entities[`actions_${typeId}`][count === 1 ? 'single' : 'plural']));
 
-const defaultState = [0];
+const defaultState = [];
 
 export function TabActorsAccordion({
   taxonomies,
@@ -50,6 +50,13 @@ export function TabActorsAccordion({
   useEffect(() => {
     setActive(defaultState);
   }, [viewSubject, hasChildTargets]);
+
+  useEffect(() => {
+    if (actorsByType) {
+      setActive([0]);
+    }
+  }, [actorsByType]);
+
   return (
     <>
       <Box margin={{ vertical: 'medium' }}>
@@ -76,45 +83,47 @@ export function TabActorsAccordion({
             }}
           />
         )}
-        {hasChildTargets && actorsByType && (
+        {(hasChildTargets || actorsByType) && (
           <Accordion
             activeIndex={actives}
             onActive={(newActive) => setActive(newActive)}
             multiple
             animate={false}
           >
-            <AccordionPanel
-              header={(
-                <AccordionHeader
-                  title="Direct targets"
-                  open={actives.includes(0)}
-                />
-              )}
-            >
-              <Box pad={{ vertical: 'small' }}>
-                <FieldGroup
-                  seamless
-                  group={{
-                    fields: actorsByType.reduce(
-                      (memo, actors, typeid) => memo.concat([
-                        getActorConnectionField({
-                          actors,
-                          taxonomies,
-                          onEntityClick,
-                          connections: actorConnections,
-                          typeid,
-                          columns: getActortypeColumns({
-                            typeId: typeid,
-                            showCode: checkActorAttribute(typeid, 'code', isAdmin),
+            {actorsByType && (
+              <AccordionPanel
+                header={(
+                  <AccordionHeader
+                    title="Direct targets"
+                    open={actives.includes(0)}
+                  />
+                )}
+              >
+                <Box pad={{ vertical: 'small' }}>
+                  <FieldGroup
+                    seamless
+                    group={{
+                      fields: actorsByType.reduce(
+                        (memo, actors, typeid) => memo.concat([
+                          getActorConnectionField({
+                            actors,
+                            taxonomies,
+                            onEntityClick,
+                            connections: actorConnections,
+                            typeid,
+                            columns: getActortypeColumns({
+                              typeId: typeid,
+                              showCode: checkActorAttribute(typeid, 'code', isAdmin),
+                            }),
                           }),
-                        }),
-                      ]),
-                      [],
-                    ),
-                  }}
-                />
-              </Box>
-            </AccordionPanel>
+                        ]),
+                        [],
+                      ),
+                    }}
+                  />
+                </Box>
+              </AccordionPanel>
+            )}
             {hasChildTargets && (
               <AccordionPanel
                 header={(

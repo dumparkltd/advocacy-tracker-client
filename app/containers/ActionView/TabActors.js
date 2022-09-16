@@ -62,9 +62,15 @@ export function TabActors({
       .flatten(true)
       .filter((action) => action.get('targetsByType'))
       .size > 0;
+
+  const hasActivities = (
+    actortypesForSubject && actortypesForSubject.size > 0
+  ) || (
+    childActionsByActiontype && childActionsByActiontype.size > 0
+  );
   return (
     <>
-      {(!actortypesForSubject || actortypesForSubject.size === 0) && (
+      {!hasActivities && (
         <Box margin={{ top: 'small', horizontal: 'medium', bottom: 'large' }}>
           {viewSubject === 'actors' && (
             <Text>
@@ -78,7 +84,7 @@ export function TabActors({
           )}
         </Box>
       )}
-      {actortypesForSubject && hasMap && (
+      {hasActivities && hasMap && (
         <ActionMap
           entities={actortypesForSubject}
           mapSubject={viewSubject}
@@ -101,7 +107,7 @@ export function TabActors({
             }}
           />
         )}
-        {actortypesForSubject && (
+        {hasActivities && (
           <TabActorsAccordion
             viewSubject={viewSubject}
             hasChildTargets={hasChildTargets}

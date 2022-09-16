@@ -80,37 +80,51 @@ export function ActionMap({
     countriesTopo,
     Object.values(countriesTopo.objects)[0],
   );
-  const hasCountries = entities.get(parseInt(ACTORTYPES.COUNTRY, 10));
-  const hasAssociations = mapSubject === 'actors'
-    ? !!entities.get(parseInt(ACTORTYPES.GROUP, 10))
-    : !!(entities.get(parseInt(ACTORTYPES.GROUP, 10)) || entities.get(parseInt(ACTORTYPES.REG, 10)) || entities.get(parseInt(ACTORTYPES.CLASS, 10)));
-  if (!hasCountries && !hasAssociations) return null;
+  const hasDirectActors = entities && entities.size > 0;
+  const hasDirectCountries = hasDirectActors
+    && entities.get(parseInt(ACTORTYPES.COUNTRY, 10))
+    && entities.get(parseInt(ACTORTYPES.COUNTRY, 10)).size > 0;
+
+  let hasAssociations = false;
+  if (hasDirectCountries) {
+    hasAssociations = mapSubject === 'actors'
+      ? !!entities.get(parseInt(ACTORTYPES.GROUP, 10))
+      : !!(
+        entities.get(parseInt(ACTORTYPES.GROUP, 10))
+        || entities.get(parseInt(ACTORTYPES.REG, 10))
+        || entities.get(parseInt(ACTORTYPES.CLASS, 10))
+      );
+  }
+  // if (!hasCountries && !hasAssociations) return null;
   const includeMembers = mapSubject === 'actors'
     ? includeActorMembers
     : includeTargetMembers;
 
-  const countriesVia = hasMemberOption && includeMembers && hasAssociations && entities.reduce(
-    (memo, typeActors, actortypeId) => {
-      // skip non group types
-      // TODO check actortypes db object
-      if (qe(actortypeId, ACTORTYPES.COUNTRY) || qe(actortypeId, ACTORTYPES.ORG)) {
-        return memo;
-      }
-      return memo.concat(typeActors.reduce(
-        (memo2, association) => {
-          if (association.getIn(['membersByType', ACTORTYPES.COUNTRY])) {
-            return memo2.concat(association.getIn(['membersByType', ACTORTYPES.COUNTRY]).toList());
-          }
-          return memo2;
-        },
-        List(),
-      ));
-    },
-    List(),
-  ).toSet(
-  ).map(
-    (countryId) => countries.get(countryId.toString())
-  );
+  const countriesVia = hasMemberOption
+    && includeMembers
+    && hasDirectActors
+    && entities.reduce(
+      (memo, typeActors, actortypeId) => {
+        // skip non group types
+        // TODO check actortypes db object
+        if (qe(actortypeId, ACTORTYPES.COUNTRY) || qe(actortypeId, ACTORTYPES.ORG)) {
+          return memo;
+        }
+        return memo.concat(typeActors.reduce(
+          (memo2, association) => {
+            if (association.getIn(['membersByType', ACTORTYPES.COUNTRY])) {
+              return memo2.concat(association.getIn(['membersByType', ACTORTYPES.COUNTRY]).toList());
+            }
+            return memo2;
+          },
+          List(),
+        ));
+      },
+      List(),
+    ).toSet(
+    ).map(
+      (countryId) => countries.get(countryId.toString())
+    );
   const countriesChildTargets = hasChildTargetOption
     && includeTargetChildren
     && childActionsByActiontype
@@ -133,14 +147,18 @@ export function ActionMap({
     ).map(
       (countryId) => countries.get(countryId.toString())
     );
-  let mapKeyOptionMap = {
-    direct: {
-      label: `Direct ${mapSubject === 'actors' ? 'actors' : 'targets'}`,
-      colorValue: 100,
-      color: scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[mapSubject], false)(100),
-      order: 1,
-    },
-  };
+  let mapKeyOptionMap = {};
+  if (hasDirectActors) {
+    mapKeyOptionMap = {
+      ...mapKeyOptionMap,
+      direct: {
+        label: `Direct ${mapSubject === 'actors' ? 'actors' : 'targets'}`,
+        colorValue: 100,
+        color: scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[mapSubject], false)(100),
+        order: 1,
+      },
+    };
+  }
   if (hasMemberOption && hasAssociations) {
     mapKeyOptionMap = {
       ...mapKeyOptionMap,
@@ -166,15 +184,21 @@ export function ActionMap({
 
   const countryData = countriesJSON.features.reduce(
     (memo, feature) => {
-      const countryDirect = hasCountries && entities.get(parseInt(ACTORTYPES.COUNTRY, 10)).find(
-        (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3)
-      );
-      const countryVia = !countryDirect && hasAssociations && countriesVia && countriesVia.find(
-        (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3)
-      );
-      const countryChildTarget = !countryDirect && !countryVia && countriesChildTargets && countriesChildTargets.find(
-        (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3)
-      );
+      const countryDirect = hasDirectCountries
+        && entities.get(parseInt(ACTORTYPES.COUNTRY, 10)).find(
+          (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3)
+        );
+      const countryVia = !countryDirect
+        && countriesVia
+        && countriesVia.find(
+          (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3)
+        );
+      const countryChildTarget = !countryDirect
+        && !countryVia
+        && countriesChildTargets
+        && countriesChildTargets.find(
+          (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3)
+        );
       const country = countryDirect || countryVia || countryChildTarget;
 
       if (country) {
@@ -220,7 +244,7 @@ export function ActionMap({
   let mapTitle;
   if (mapSubject === 'targets') {
     mapTitle = `${countryData ? countryData.length : 'No'} countries targeted by activity`;
-    // note this should always be true!
+    // note this should be true unless no direct targets present
     if (hasMemberOption && hasAssociations) {
       memberOption = {
         active: includeTargetMembers,
