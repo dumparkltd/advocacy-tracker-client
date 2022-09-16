@@ -93,7 +93,7 @@ export function TabActorsAccordion({
             }}
           />
         )}
-        {(hasChildTargets || actorsByType) && (
+        {hasChildTargets && (
           <Accordion
             activeIndex={actives}
             onActive={(newActive) => setActive(newActive)}
