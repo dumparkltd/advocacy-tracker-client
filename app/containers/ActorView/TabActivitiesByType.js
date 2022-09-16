@@ -20,9 +20,10 @@ import { getActionConnectionField } from 'utils/fields';
 import { lowerCase } from 'utils/string';
 import { getActiontypeColumns } from 'utils/entities';
 
-import { API } from 'themes/config';
+import { API, ROUTES } from 'themes/config';
 import FieldGroup from 'components/fields/FieldGroup';
 import AccordionHeader from 'components/AccordionHeader';
+import A from 'components/styled/A';
 
 import {
   openNewEntityModal,
@@ -37,6 +38,14 @@ const getTypeLabel = (
   count,
   intl,
 ) => lowerCase(intl.formatMessage(appMessages.entities[`actions_${typeId}`][count === 1 ? 'single' : 'plural']));
+
+const getActorLink = (entity) => `${ROUTES.ACTOR}/${entity.get('id')}`;
+
+const getActorOnClick = (entity, onEntityClick) => (evt) => {
+  if (evt) evt.preventDefault();
+  onEntityClick(entity.get('id'), ROUTES.ACTOR);
+};
+
 
 const defaultState = [0];
 
@@ -246,7 +255,19 @@ export function TabActivitiesByType(props) {
                     <FieldGroup
                       seamless
                       group={{
-                        title: `From member: "${actor.getIn(['attributes', 'title'])}" (${actortypeLabel})`,
+                        title: (
+                          <div>
+                            {`From member ${actortypeLabel}: `}
+                            <A
+                              weight={600}
+                              href={getActorLink(actor)}
+                              onClick={getActorOnClick(actor, onEntityClick)}
+                              title={actor.getIn(['attributes', 'title'])}
+                            >
+                              {actor.getIn(['attributes', 'title'])}
+                            </A>
+                          </div>
+                        ),
                         fields: [
                           getActionConnectionField({
                             actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),

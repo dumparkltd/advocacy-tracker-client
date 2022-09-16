@@ -21,8 +21,10 @@ import { lowerCase } from 'utils/string';
 
 import FieldGroup from 'components/fields/FieldGroup';
 import AccordionHeader from 'components/AccordionHeader';
+import A from 'components/styled/A';
 
 import appMessages from 'containers/App/messages';
+import { ROUTES } from 'themes/config';
 import TabActorsAccordionChildTargets from './TabActorsAccordionChildTargets';
 
 const getTypeLabel = (
@@ -30,6 +32,14 @@ const getTypeLabel = (
   count,
   intl,
 ) => lowerCase(intl.formatMessage(appMessages.entities[`actions_${typeId}`][count === 1 ? 'single' : 'plural']));
+
+const getActionLink = (entity) => `${ROUTES.ACTION}/${entity.get('id')}`;
+
+const getActionOnClick = (entity, onEntityClick) => (evt) => {
+  if (evt) evt.preventDefault();
+  onEntityClick(entity.get('id'), ROUTES.ACTION);
+};
+
 
 const defaultState = [];
 
@@ -147,7 +157,19 @@ export function TabActorsAccordion({
                       <TabActorsAccordionChildTargets
                         key={childId}
                         targetIds={actorIdsByType.flatten(true)}
-                        title={`As parent of ${actiontypeLabel}: "${childAction.getIn(['attributes', 'title'])}"`}
+                        title={(
+                          <div>
+                            {`As parent of ${actiontypeLabel}: `}
+                            <A
+                              weight={600}
+                              href={getActionLink(childAction)}
+                              onClick={getActionOnClick(childAction, onEntityClick)}
+                              title={childAction.getIn(['attributes', 'title'])}
+                            >
+                              {childAction.getIn(['attributes', 'title'])}
+                            </A>
+                          </div>
+                        )}
                         taxonomies={taxonomies}
                         onEntityClick={onEntityClick}
                         actorConnections={actorConnections}

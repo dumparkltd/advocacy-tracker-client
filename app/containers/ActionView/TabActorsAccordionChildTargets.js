@@ -60,7 +60,10 @@ TabActorsAccordionChildTargets.propTypes = {
   getActortypeColumns: PropTypes.func,
   taxonomies: PropTypes.object,
   actorConnections: PropTypes.object,
-  title: PropTypes.string,
+  title: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.node,
+  ]),
 };
 
 const mapStateToProps = (state, { targetIds }) => ({
