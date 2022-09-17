@@ -109,7 +109,7 @@ function InfoOverlay({
           }
           fill={false}
           onMouseOver={() => tooltip && showInfo(true)}
-          onMouseLeave={() => tooltip && showInfo(true)}
+          onMouseLeave={() => tooltip && showInfo(false)}
           onFocus={() => tooltip && showInfo(true)}
           onBlur={() => null}
           onClick={() => !tooltip && showInfo(!info)}

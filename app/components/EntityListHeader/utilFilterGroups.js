@@ -12,6 +12,8 @@ import {
   ACTIONTYPE_ACTIONTYPES,
 } from 'themes/config';
 
+import appMessage from 'utils/app-message';
+
 import { makeAttributeFilterOptions } from './utilFilterOptions';
 // figure out filter groups for filter panel
 export const makeFilterGroups = ({
@@ -305,16 +307,26 @@ export const makeFilterGroups = ({
               const optionCurrentFilters = currentFilters && currentFilters.filter(
                 (f) => qe(f.optionId, id) && qe(f.groupId, connectionKey)
               );
+              let { label } = option;
+              if (intl) {
+                const msg = (option.messageByType
+                  && option.messageByType.indexOf('{typeid}') > -1
+                )
+                  ? option.messageByType.replace('{typeid}', type.get('id'))
+                  : option.message;
+                label = appMessage(intl, msg);
+              }
+              if (type.get('viaMember')) {
+                label = `${label} (via members only)`;
+              }
               return memo.concat({
                 id, // filterOptionId
-                label: option.label,
+                label,
+                disabled: type.get('viaMember') && !includeMembers,
                 info: typeAbout
                   && appMessages[typeAbout]
                   && appMessages[typeAbout][type.get('id')]
                   && intl.formatMessage(appMessages[typeAbout][type.get('id')]),
-                message: (option.messageByType && option.messageByType.indexOf('{typeid}') > -1)
-                  ? option.messageByType.replace('{typeid}', type.get('id'))
-                  : option.message,
                 color: option.entityType,
                 active: !!activeFilterOption
                   && activeFilterOption.group === connectionKey

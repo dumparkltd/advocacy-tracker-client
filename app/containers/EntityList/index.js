@@ -228,6 +228,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       connections,
       onTagClick,
       actortypes,
+      parentActortypes,
       actiontypes,
       targettypes,
       resourcetypes,
@@ -406,6 +407,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             entityIdsSelected={entityIdsSelected}
             taxonomies={taxonomies}
             actortypes={actortypes}
+            parentActortypes={parentActortypes}
             resourcetypes={resourcetypes}
             actiontypes={actiontypes}
             targettypes={targettypes}
@@ -631,6 +633,7 @@ EntityList.propTypes = {
   taxonomies: PropTypes.instanceOf(Map),
   allTaxonomies: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
+  parentActortypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   targettypes: PropTypes.instanceOf(Map),

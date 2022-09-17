@@ -92,7 +92,7 @@ export const CONFIG = {
       key: 'actor_id',
       ownKey: 'measure_id',
       groupByType: true,
-      typeFilter: 'is_active',
+      // typeFilter: 'is_active',
     },
     // filter by associated target
     targets: {

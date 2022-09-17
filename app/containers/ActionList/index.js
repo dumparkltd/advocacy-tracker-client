@@ -19,6 +19,7 @@ import {
   selectIsUserAdmin,
   selectActiontypes,
   selectActortypesForActiontype,
+  selectParentActortypesForActiontype,
   selectTargettypesForActiontype,
   selectResourcetypesForActiontype,
 } from 'containers/App/selectors';
@@ -74,6 +75,7 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
       params, // { id: the action type }
       actiontypes,
       actortypes,
+      parentActortypes,
       targettypes,
       resourcetypes,
       onSelectType,
@@ -144,6 +146,7 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
           }}
           locationQuery={fromJS(location.query)}
           actortypes={actortypes}
+          parentActortypes={parentActortypes}
           actiontypes={actiontypes}
           targettypes={targettypes}
           resourcetypes={resourcetypes}
@@ -168,6 +171,7 @@ ActionList.propTypes = {
   taxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
+  parentActortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   targettypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
@@ -192,6 +196,7 @@ const mapStateToProps = (state, props) => ({
   isAdmin: selectIsUserAdmin(state),
   actiontypes: selectActiontypes(state),
   actortypes: selectActortypesForActiontype(state, { type: props.params.id }),
+  parentActortypes: selectParentActortypesForActiontype(state, { type: props.params.id }),
   targettypes: selectTargettypesForActiontype(state, { type: props.params.id }),
   resourcetypes: selectResourcetypesForActiontype(state, { type: props.params.id }),
   allEntities: selectActionsWithConnections(state, { type: props.params.id }),

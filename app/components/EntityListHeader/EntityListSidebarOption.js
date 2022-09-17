@@ -35,6 +35,7 @@ const StyledButton = styled((p) => <Button plain fill="horizontal" focusIndicato
   padding: 0.25em 8px;
   padding-left: 2px;
   text-align: left;
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'}
 `;
 
 function EntityListSidebarOption({
@@ -43,22 +44,26 @@ function EntityListSidebarOption({
   let label = option.get('message')
     ? appMessage(intl, option.get('message'))
     : option.get('label');
-  label = option.get('memberType') ? `${label} (via members)` : label;
+  label = option.get('memberType') ? `${label} (via members only)` : label;
   return (
-    <Styled active={option.get('active')}>
+    <Styled active={option.get('active')} disabled={option.get('disabled')}>
       <StyledButton
+        disabled={option.get('disabled')}
         plain
-        onClick={() => onShowForm({
-          group: groupType || groupId,
-          optionId: option.get('id'),
-          path: option.get('path'),
-          invalidateEntitiesPaths: option.get('invalidateEntitiesPaths'),
-          connection: option.get('connection'),
-          key: option.get('key'),
-          ownKey: option.get('ownKey'),
-          active: option.get('active'),
-          create: option.get('create') && option.get('create').toJS(),
-        })}
+        onClick={
+          () => !option.get('disabled')
+           && onShowForm({
+             group: groupType || groupId,
+             optionId: option.get('id'),
+             path: option.get('path'),
+             invalidateEntitiesPaths: option.get('invalidateEntitiesPaths'),
+             connection: option.get('connection'),
+             key: option.get('key'),
+             ownKey: option.get('ownKey'),
+             active: option.get('active'),
+             create: option.get('create') && option.get('create').toJS(),
+           })
+        }
         title={intl.formatMessage(
           option.get('active') ? messages.groupOptionSelect.hide : messages.groupOptionSelect.show
         )}
