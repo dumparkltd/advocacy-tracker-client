@@ -690,6 +690,10 @@ export const ACTORTYPES_CONFIG = {
     order: 1,
     columns: [
       {
+        id: 'associations', // one row per type,
+        type: 'associations', // one row per type,
+      },
+      {
         id: 'members', // one row per type,
         type: 'members', // one row per type,
       },
@@ -707,6 +711,10 @@ export const ACTORTYPES_CONFIG = {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 2, // sector
+      },
+      {
+        id: 'associations', // one row per type,
+        type: 'associations', // one row per type,
       },
       {
         id: 'members', // one row per type,
