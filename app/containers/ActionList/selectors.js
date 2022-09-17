@@ -166,7 +166,7 @@ export const selectActionsWithConnections = createSelector(
     if (ready && (connections.get(API.ACTORS) || connections.get(API.RESOURCES))) {
       return entities.map(
         (entity) => {
-          // actors
+          // direct actors
           const entityActors = actorConnectionsGrouped.get(parseInt(entity.get('id'), 10));
           const entityActorsByActortype = entityActors && entityActors.filter(
             (actorId) => connections.getIn([
@@ -183,7 +183,10 @@ export const selectActionsWithConnections = createSelector(
           ).sortBy((val, key) => key);
 
           // actors as members
-          const entityActorsMembers = actorMemberConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          let entityActorsMembers = actorMemberConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          if (entityActorsMembers) {
+            entityActorsMembers = entityActorsMembers.toSet().toMap();
+          }
           const entityActorsMembersByActortype = entityActorsMembers && entityActorsMembers.filter(
             (actorId) => connections.getIn([
               API.ACTORS,
@@ -198,7 +201,10 @@ export const selectActionsWithConnections = createSelector(
             ])
           ).sortBy((val, key) => key);
           // actors as parents
-          const entityActorsAssociations = actorAssociationConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          let entityActorsAssociations = actorAssociationConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          if (entityActorsAssociations) {
+            entityActorsAssociations = entityActorsAssociations.toSet().toMap();
+          }
           const entityActorsAssociationsByActortype = entityActorsAssociations && entityActorsAssociations.filter(
             (actorId) => connections.getIn([
               API.ACTORS,
@@ -213,7 +219,7 @@ export const selectActionsWithConnections = createSelector(
             ])
           ).sortBy((val, key) => key);
 
-          // targets
+          // direct targets
           const entityTargets = targetConnectionsGrouped.get(parseInt(entity.get('id'), 10));
           const entityTargetsByActortype = entityTargets && entityTargets.filter(
             (actorId) => connections.getIn([
@@ -231,7 +237,7 @@ export const selectActionsWithConnections = createSelector(
 
           // targets as members
           // indirect targets (as parents of targets)
-          const entityTargetsMembers = targetMemberConnectionsGrouped
+          let entityTargetsMembers = targetMemberConnectionsGrouped
             && targetMemberConnectionsGrouped
               .get(parseInt(entity.get('id'), 10))
             && targetMemberConnectionsGrouped
@@ -250,6 +256,9 @@ export const selectActionsWithConnections = createSelector(
                   ACTORTYPES.REG,
                 )
               );
+          if (entityTargetsMembers) {
+            entityTargetsMembers = entityTargetsMembers.toSet().toMap();
+          }
           const entityTargetsMembersByActortype = entityTargetsMembers && entityTargetsMembers.groupBy(
             (actorId) => connections.getIn([
               API.ACTORS,
@@ -261,7 +270,7 @@ export const selectActionsWithConnections = createSelector(
 
           // targets as parents
           // indirect targets (as children of targets)
-          const entityTargetsAssociations = targetAssociationConnectionsGrouped
+          let entityTargetsAssociations = targetAssociationConnectionsGrouped
             && targetAssociationConnectionsGrouped
               .get(parseInt(entity.get('id'), 10))
             && targetAssociationConnectionsGrouped
@@ -280,6 +289,9 @@ export const selectActionsWithConnections = createSelector(
                   ACTORTYPES.REG,
                 )
               );
+          if (entityTargetsAssociations) {
+            entityTargetsAssociations = entityTargetsAssociations.toSet().toMap();
+          }
           const entityTargetsAssociationsByActortype = entityTargetsAssociations && entityTargetsAssociations.groupBy(
             (actorId) => connections.getIn([
               API.ACTORS,
