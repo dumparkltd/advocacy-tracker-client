@@ -306,6 +306,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       targettypes,
       actiontypesForTarget,
       membertypes,
+      parentAssociationtypes,
       associationtypes,
       currentFilters,
       onShowFilters,
@@ -335,19 +336,25 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     let panelGroups = null;
 
     let formOptions = null;
+    const hasMemberOption = (config.hasMemberOption && config.hasMemberOption.indexOf(typeId) > -1);
+
     if (dataReady && showFilters) {
       panelGroups = makeFilterGroups({
         config,
         taxonomies,
         connectedTaxonomies,
         hasUserRole,
-        actortypes: (actortypes && parentActortypes) ? actortypes.merge(parentActortypes) : actortypes,
+        actortypes: (hasMemberOption && actortypes && parentActortypes)
+          ? actortypes.merge(parentActortypes)
+          : actortypes,
         resourcetypes,
         actiontypes,
         targettypes,
         actiontypesForTarget,
         membertypes,
-        associationtypes,
+        associationtypes: (hasMemberOption && associationtypes && parentAssociationtypes)
+          ? associationtypes.merge(parentAssociationtypes)
+          : associationtypes,
         activeFilterOption: activeOption,
         currentFilters,
         typeId,
@@ -687,7 +694,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     this.onHideForm();
                     onUpdateQuery(args);
                   }}
-                  memberOption={config.hasMemberOption
+                  memberOption={hasMemberOption
                     ? {
                       key: 'filter-member-option',
                       active: !!includeMembers,
@@ -756,6 +763,7 @@ EntityListHeader.propTypes = {
   actiontypes: PropTypes.instanceOf(Map),
   targettypes: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
+  parentAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
   actiontypesForTarget: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),

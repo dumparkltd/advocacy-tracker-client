@@ -269,6 +269,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onResetProgress,
       actiontypesForTarget,
       membertypes,
+      parentAssociationtypes,
       associationtypes,
       handleEditSubmit,
       onCreateOption,
@@ -413,6 +414,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             targettypes={targettypes}
             actiontypesForTarget={actiontypesForTarget}
             membertypes={membertypes}
+            parentAssociationtypes={parentAssociationtypes}
             connections={connections}
             associationtypes={associationtypes}
             connectedTaxonomies={connectedTaxonomies}
@@ -639,6 +641,7 @@ EntityList.propTypes = {
   targettypes: PropTypes.instanceOf(Map),
   actiontypesForTarget: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
+  parentAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   connectedTaxonomies: PropTypes.instanceOf(Map),

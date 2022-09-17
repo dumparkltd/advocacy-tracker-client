@@ -31,6 +31,7 @@ import {
   selectActiontypesForTargettype,
   selectMembertypesForActortype,
   selectAssociationtypesForActortype,
+  selectParentAssociationtypesForActortype,
 } from 'containers/App/selectors';
 
 import { checkActorAttribute } from 'utils/entities';
@@ -143,6 +144,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
       actortypes,
       actiontypesForTarget,
       membertypes,
+      parentAssociationtypes,
       associationtypes,
       onSelectType,
     } = this.props;
@@ -233,6 +235,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
           actiontypes={actiontypes}
           actiontypesForTarget={actiontypesForTarget}
           membertypes={membertypes}
+          parentAssociationtypes={parentAssociationtypes}
           associationtypes={associationtypes}
           typeOptions={this.prepareTypeOptions(actortypes, typeId)}
           onSelectType={onSelectType}
@@ -285,6 +288,7 @@ ActorList.propTypes = {
   actiontypes: PropTypes.instanceOf(Map),
   actiontypesForTarget: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
+  parentAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
   params: PropTypes.object,
@@ -305,6 +309,7 @@ const mapStateToProps = (state, props) => ({
   actiontypes: selectActiontypesForActortype(state, { type: props.params.id }),
   actiontypesForTarget: selectActiontypesForTargettype(state, { type: props.params.id }),
   membertypes: selectMembertypesForActortype(state, { type: props.params.id }),
+  parentAssociationtypes: selectParentAssociationtypesForActortype(state, { type: props.params.id }),
   associationtypes: selectAssociationtypesForActortype(state, { type: props.params.id }),
   actortypes: selectActortypes(state),
   allEntities: selectActorsWithConnections(state, { type: props.params.id }),

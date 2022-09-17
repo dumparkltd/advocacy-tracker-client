@@ -39,7 +39,14 @@ export const CONFIG = {
   types: 'actiontypes',
   serverPath: API.ACTIONS,
   clientPath: ROUTES.ACTION,
-  hasMemberOption: true,
+  hasMemberOption: [
+    ACTIONTYPES.EXPRESS,
+    ACTIONTYPES.TASK,
+    ACTIONTYPES.INTERACTION,
+    ACTIONTYPES.EVENT,
+    ACTIONTYPES.OP,
+    ACTIONTYPES.AP,
+  ],
   batchDelete: true,
   views: {
     list: {

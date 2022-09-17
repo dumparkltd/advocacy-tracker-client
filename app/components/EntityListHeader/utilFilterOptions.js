@@ -533,8 +533,16 @@ const makeGroupedConnectionFilterOptions = ({
               }
             });
           }
-          if (includeMembers) {
-            const entityMemberConnections = entity.getIn([`${entityType}AssociationsByType`, parseInt(typeId, 10)]);
+          if (
+            includeMembers
+            && (
+              option.type === 'action-actors'
+              || option.type === 'member-associations'
+            )
+          ) {
+            const entityMemberConnections = option.type === 'action-actors'
+              ? entity.getIn([`${entityType}AssociationsByType`, parseInt(typeId, 10)])
+              : entity.getIn(['associationsAssociationsByType', parseInt(typeId, 10)]);
             // if entity has connected entities
             if (entityMemberConnections) {
               // add connected entities if not present otherwise increase count

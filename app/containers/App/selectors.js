@@ -751,6 +751,7 @@ export const selectMembertypesForActortype = createSelector(
     );
   }
 );
+
 export const selectAssociationtypesForActortype = createSelector(
   (state, { type }) => type,
   selectActortypes,
@@ -759,6 +760,39 @@ export const selectAssociationtypesForActortype = createSelector(
     const validActortypeIds = MEMBERSHIPS[typeId];
     return actortypes.filter(
       (type) => validActortypeIds && validActortypeIds.indexOf(type.get('id')) > -1
+    );
+  }
+);
+
+export const selectParentAssociationtypesForActortype = createSelector(
+  selectAssociationtypesForActortype,
+  selectActortypes,
+  (directActortypes, actortypes) => {
+    if (!directActortypes) return null;
+    const directActortypeIds = directActortypes.map((type) => type.get('id')).toList().toArray();
+    const parentActortypeIds = directActortypeIds.reduce(
+      (memo, actortypeId) => {
+        const parentIds = MEMBERSHIPS[actortypeId].filter(
+          (parentId) => memo.indexOf(parentId) === -1 && directActortypeIds.indexOf(parentId) === -1
+        );
+        return [
+          ...memo,
+          ...parentIds,
+        ];
+      },
+      [],
+    );
+    return actortypes.filter(
+      (actortype) => {
+        const id = actortype.get('id');
+        const isDirect = directActortypeIds.indexOf(id) > -1;
+        if (isDirect) {
+          return false;
+        }
+        return isDirect ? false : parentActortypeIds.indexOf(id) > -1;
+      }
+    ).map(
+      (type) => type.set('viaMember', true)
     );
   }
 );
@@ -1644,6 +1678,17 @@ export const selectMembershipsGroupedByMember = createSelector(
         (entity) => entity.getIn(['attributes', 'memberof_id'])
       )
     ),
+);
+export const selectMembershipParentsGroupedByMember = createSelector(
+  selectMembershipsGroupedByMember,
+  (memberships) => memberships && memberships.map(
+    (actors) => actors.reduce((memo, actorId) => {
+      if (memberships.get(actorId)) {
+        return memo.concat(memberships.get(actorId));
+      }
+      return memo;
+    }, Map()),
+  ),
 );
 
 export const selectMembershipsGroupedByParent = createSelector(

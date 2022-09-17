@@ -33,6 +33,9 @@ export const CONFIG = {
   serverPath: API.ACTORS,
   clientPath: ROUTES.ACTOR,
   batchDelete: true,
+  hasMemberOption: [
+    ACTORTYPES.CONTACT,
+  ],
   views: {
     list: {
       search: ['code', 'title', 'description'],
