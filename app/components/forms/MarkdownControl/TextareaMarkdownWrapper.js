@@ -144,13 +144,21 @@ function TextareaMarkdownWrapper(props) {
                     </p>
                     <p>
                       <Text size="small">
-                        You can either directly type markdown code or use one of the format buttons above the text area to insert it, either by
-                        <ul>
-                          <li>first clicking one of the buttons and then replace the generated placeholder text, or</li>
-                          <li>first select some existing text and then apply a format using one the buttons.</li>
-                        </ul>
+                        You can either directly type markdown code or use one of the format buttons above the text area to insert it, by either
                       </Text>
                     </p>
+                    <ul>
+                      <li>
+                        <Text size="small">
+                          first clicking one of the buttons and then replace the generated placeholder text, or
+                        </Text>
+                      </li>
+                      <li>
+                        <Text size="small">
+                          first select some existing text and then apply a format using one the buttons.
+                        </Text>
+                      </li>
+                    </ul>
                     <p>
                       <Text size="small">
                         {'You can learn more about '}
