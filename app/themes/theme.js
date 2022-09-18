@@ -479,7 +479,9 @@ theme.global = {
     aHover: '#08586c',
     textLight: '#1c2121', // on light background (empowerment)
     textSecondary: '#777b7e', // on light background (empowerment)
+    hint: '#687271',
     text: {
+      hint: '#687271',
       brand: '#000000',
       dark: '#FFFFFF', //  on dark background
       light: '#1c2121', // on light background (empowerment)

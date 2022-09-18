@@ -61,6 +61,7 @@ function TaxonomyField({ field, intl }) {
                 content={value.info}
                 padButton="none"
                 colorButton="dark-5"
+                markdown
               />
             )}
           </Box>
