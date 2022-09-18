@@ -20,6 +20,18 @@ const Markdown = styled(ReactMarkdown)`
   }
 `;
 
+const RenderLink = ({ href, children }) => {
+  if (!href.startsWith('http')) {
+    return href;
+  }
+  return <a href={href} rel="nofollow noreferrer noopener" target="_blank">{children}</a>;
+};
+
+RenderLink.propTypes = {
+  href: PropTypes.string,
+  children: PropTypes.node,
+};
+
 // TODO also render HTML if not markdown
 class MarkdownField extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   render() {
@@ -33,7 +45,11 @@ class MarkdownField extends React.PureComponent { // eslint-disable-line react/p
             </Label>
           )
         }
-        <Markdown source={field.value} className="react-markdown" />
+        <Markdown
+          source={field.value}
+          linkTarget="_blank"
+          className="react-markdown"
+        />
       </FieldWrap>
     );
   }
