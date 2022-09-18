@@ -152,7 +152,10 @@ function InfoOverlay({
             </LayerHeader>
             <LayerContent flex={{ grow: 1 }}>
               <div>
-                <Markdown source={content} className="react-markdown" linkTarget="_blank" />
+                {markdown && (
+                  <Markdown source={content} className="react-markdown" linkTarget="_blank" />
+                )}
+                {!markdown && content}
               </div>
             </LayerContent>
           </LayerWrap>
