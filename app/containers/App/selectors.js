@@ -223,6 +223,20 @@ export const selectRedirectOnAuthSuccessPath = createSelector(
     }
   }
 );
+export const selectRedirectOnAuthSuccessSearch = createSelector(
+  getRoute,
+  (routeState) => {
+    try {
+      return routeState.getIn([
+        'locationBeforeTransitions',
+        'query',
+        PARAMS.REDIRECT_ON_AUTH_SUCCESS_QUERY,
+      ]);
+    } catch (error) {
+      return null;
+    }
+  }
+);
 
 export const selectQueryMessages = createSelector(
   getRoute,

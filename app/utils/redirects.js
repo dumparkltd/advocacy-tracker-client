@@ -9,13 +9,12 @@ import {
 
 import checkStore from './checkStore';
 
-export function replaceIfNotSignedIn(redirectOnAuthSuccess, replace, info = PARAMS.NOT_SIGNED_IN, replacePath) {
-  console.log('replacePath', replacePath);
-  console.log('redirectOnAuthSuccess', redirectOnAuthSuccess);
-  console.log('info', info);
+export function replaceIfNotSignedIn(location, replace, info = PARAMS.NOT_SIGNED_IN, replacePath) {
+  const redirectOnAuthSuccess = location.pathname;
+  const redirectOnAuthSuccessSearch = location.search;
   return replacePath
     ? replace(replacePath)
-    : replace({ pathname: ROUTES.LOGIN, query: { redirectOnAuthSuccess, info } });
+    : replace({ pathname: ROUTES.LOGIN, query: { redirectOnAuthSuccess, info, redirectOnAuthSuccessSearch } });
 }
 
 export function replaceUnauthorised(replace, replacePath) {
@@ -46,18 +45,16 @@ function redirectIfSignedIn(store, replacePath) {
 
 function redirectIfNotSignedIn(store, info = PARAMS.NOT_SIGNED_IN) {
   return (nextState, replace) => {
-    console.log('nextState', nextState);
     if (!selectIsSignedIn(store.getState())) {
-      replaceIfNotSignedIn(nextState.location.pathname, replace, info);
+      replaceIfNotSignedIn(nextState.location, replace, info);
     }
   };
 }
 
 function redirectIfNotPermitted(store, roleRequired, replacePath) {
   return (nextState, replace) => {
-    console.log('nextState', nextState);
     if (!selectIsSignedIn(store.getState())) {
-      replaceIfNotSignedIn(nextState.location.pathname, replace, PARAMS.NOT_SIGNED_IN, replacePath);
+      replaceIfNotSignedIn(nextState.location, replace, PARAMS.NOT_SIGNED_IN, replacePath);
     } else if (selectReadyForAuthCheck(store.getState()) && !hasRoleRequired(selectSessionUserRoles(store.getState()), roleRequired)) {
       replaceUnauthorised(replace, replacePath);
     }
