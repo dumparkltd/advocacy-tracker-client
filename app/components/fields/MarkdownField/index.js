@@ -34,7 +34,6 @@ RenderLink.propTypes = {
 
 // TODO also render HTML if not markdown
 function MarkdownField({ field }) {
-  console.log('field', field);
   return (
     <FieldWrap>
       {field.label
