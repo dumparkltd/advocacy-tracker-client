@@ -158,6 +158,8 @@ export const getRoleField = (entity) => ({
 
 export const getMetaField = (entity, includeRelationshipUpdatedAt) => {
   const fields = [];
+
+  // creation
   fields.push({
     label: appMessages.attributes.meta.created_at,
     value: entity.getIn(['attributes', 'created_at']),
@@ -169,25 +171,46 @@ export const getMetaField = (entity, includeRelationshipUpdatedAt) => {
       value: entity.getIn(['creator', 'attributes', 'name']),
     });
   }
-  fields.push({
-    label: appMessages.attributes.meta.updated_at,
-    value: entity.getIn(['attributes', 'updated_at']),
-    date: true,
-    time: true,
-  });
-  if (entity.get('user') && entity.getIn(['user', 'attributes', 'name'])) {
+  // updated
+  const updated = entity.getIn(['attributes', 'updated_at']);
+  const updatedRelationship = entity.getIn(['attributes', 'relationship_updated_at']);
+  const hasUpdated = updated && updated.trim() !== '';
+  const hasUpdatedRelationship = updatedRelationship && updatedRelationship.trim() !== '';
+  const updatedEarlier = new Date(updatedRelationship) < new Date(updated);
+  if (
+    hasUpdated
+    && (
+      !hasUpdatedRelationship
+      || updatedEarlier
+      || !includeRelationshipUpdatedAt
+    )
+  ) {
     fields.push({
-      label: appMessages.attributes.meta.updated_by_id,
-      value: entity.getIn(['user', 'attributes', 'name']),
+      label: appMessages.attributes.meta.updated_at,
+      value: entity.getIn(['attributes', 'updated_at']),
+      date: true,
+      time: true,
     });
-  }
-  if (includeRelationshipUpdatedAt && entity.getIn(['attributes', 'relationship_updated_at'])) {
+    if (entity.get('user') && entity.getIn(['user', 'attributes', 'name'])) {
+      fields.push({
+        label: appMessages.attributes.meta.updated_by_id,
+        value: entity.getIn(['user', 'attributes', 'name']),
+      });
+    }
+  } else if (includeRelationshipUpdatedAt && hasUpdatedRelationship) {
+    // updated connections
     fields.push({
-      label: appMessages.attributes.meta.relationship_updated_at,
+      label: appMessages.attributes.meta.updated_at,
       value: entity.getIn(['attributes', 'relationship_updated_at']),
       date: true,
       time: true,
     });
+    if (entity.get('userRelationship') && entity.getIn(['userRelationship', 'attributes', 'name'])) {
+      fields.push({
+        label: appMessages.attributes.meta.updated_by_id,
+        value: entity.getIn(['userRelationship', 'attributes', 'name']),
+      });
+    }
   }
   return {
     controlType: 'info',

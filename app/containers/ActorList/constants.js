@@ -50,6 +50,7 @@ export const CONFIG = {
     connectPath: API.ACTOR_CATEGORIES,
     key: 'category_id',
     ownKey: 'actor_id',
+    invalidateEntitiesPaths: [API.CATEGORIES, API.ACTORS],
     // defaultGroupAttribute: 'groups_actors_default', // used when no actortype is set
     // // TODO better store in database join table actortype_taxonomies
     // defaultGroupsByActortype: {

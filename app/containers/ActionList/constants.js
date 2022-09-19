@@ -69,6 +69,7 @@ export const CONFIG = {
     connectPath: API.ACTION_CATEGORIES,
     key: 'category_id',
     ownKey: 'measure_id',
+    invalidateEntitiesPaths: [API.CATEGORIES, API.ACTIONS],
     // defaultGroupAttribute: 'groups_actions_default',
   },
   // connectedTaxonomies: { // filter by each category
