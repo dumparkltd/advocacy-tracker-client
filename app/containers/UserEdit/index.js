@@ -45,7 +45,7 @@ import {
 import {
   selectReady,
   selectSessionUserHighestRoleId,
-  selectIsUserManager,
+  selectIsUserMember,
   selectIsUserAdmin,
   selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
@@ -234,7 +234,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       actionsByActiontype,
       onCreateOption,
       connectedTaxonomies,
-      isManager,
+      isMember,
       isAdmin,
     } = this.props;
     const reference = this.props.params.id;
@@ -315,7 +315,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
                   aside: this.getHeaderAsideFields(viewEntity, editableRoles),
                 },
                 body: {
-                  main: isManager && this.getBodyMainFields(
+                  main: isMember && this.getBodyMainFields(
                     actorsByActortype,
                     actionsByActiontype,
                     connectedTaxonomies,
@@ -349,7 +349,7 @@ UserEdit.propTypes = {
   viewEntity: PropTypes.object,
   roles: PropTypes.object,
   isAdmin: PropTypes.bool,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   dataReady: PropTypes.bool,
   sessionUserHighestRoleId: PropTypes.number,
   params: PropTypes.object,
@@ -374,7 +374,7 @@ const mapStateToProps = (state, props) => ({
   actorsByActortype: selectActorsByActortype(state, props.params.id),
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
   isAdmin: selectIsUserAdmin(state),
 });
 

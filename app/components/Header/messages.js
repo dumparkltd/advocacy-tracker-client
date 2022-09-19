@@ -14,8 +14,4 @@ export default defineMessages({
     id: 'app.components.Header.user',
     defaultMessage: 'User profile',
   },
-  userLoading: {
-    id: 'app.components.Header.userLoading',
-    defaultMessage: 'Signing in...',
-  },
 });

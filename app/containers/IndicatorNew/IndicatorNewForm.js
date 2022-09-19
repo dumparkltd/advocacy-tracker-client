@@ -229,7 +229,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={{ // isManager, taxonomies,
+          fields={{ // isMember, taxonomies,
             header: {
               main: this.getHeaderMainFields(isAdmin),
               aside: this.getHeaderAsideFields(),
@@ -301,7 +301,7 @@ function mapDispatchToProps(
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
     onErrorDismiss: () => {
       dispatch(submitInvalid(true));

@@ -13,10 +13,11 @@ import {
   Box,
   Button,
   Drop,
-  Layer,
-  Text,
 } from 'grommet';
-import { CircleInformation, CircleQuestion, FormClose } from 'grommet-icons';
+import { CircleInformation, CircleQuestion } from 'grommet-icons';
+
+import Overlay from './Overlay';
+
 const DropContent = styled(({ dropBackground, ...p }) => (
   <Box
     pad="xxsmall"
@@ -26,35 +27,6 @@ const DropContent = styled(({ dropBackground, ...p }) => (
 ))`
   max-width: 280px;
 `;
-const LayerWrap = styled((p) => (
-  <Box
-    background="white"
-    {...p}
-  />
-))`
-min-width: 320px;
-min-height: 200px;
-overflow-y: auto;
-`;
-const LayerHeader = styled((p) => (
-  <Box
-    direction="row"
-    pad={{ left: 'medium', right: 'small', vertical: 'small' }}
-    background="light-2"
-    align="center"
-    gap="small"
-    justify="between"
-    {...p}
-  />
-))``;
-
-const LayerContent = styled((p) => (
-  <Box
-    pad={{ horizontal: 'medium', vertical: 'medium' }}
-    background="white"
-    {...p}
-  />
-))``;
 
 const Markdown = styled(ReactMarkdown)`
   font-size: ${(props) => props.theme.sizes.text.markdownMobile};
@@ -132,34 +104,12 @@ function InfoOverlay({
         </Drop>
       )}
       {info && !tooltip && (
-        <Layer
-          onEsc={() => showInfo(false)}
-          onClickOutside={() => showInfo(false)}
-          margin={{ top: 'large' }}
-          position="top"
-          animate={false}
-        >
-          <LayerWrap>
-            <LayerHeader flex={{ grow: 0, shrink: 0 }}>
-              <Box>
-                {title && (
-                  <Text weight={600}>{title}</Text>
-                )}
-              </Box>
-              <Box flex={{ grow: 0 }}>
-                <Button plain icon={<FormClose size="medium" />} onClick={() => showInfo(false)} />
-              </Box>
-            </LayerHeader>
-            <LayerContent flex={{ grow: 1 }}>
-              <div>
-                {markdown && (
-                  <Markdown source={content} className="react-markdown" linkTarget="_blank" />
-                )}
-                {!markdown && content}
-              </div>
-            </LayerContent>
-          </LayerWrap>
-        </Layer>
+        <Overlay
+          onClose={() => showInfo(false)}
+          title={title}
+          markdown={markdown}
+          content={content}
+        />
       )}
     </>
   );

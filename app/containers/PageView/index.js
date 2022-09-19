@@ -31,8 +31,8 @@ import EntityView from 'components/EntityView';
 import {
   selectReady,
   selectIsUserAdmin,
-  selectIsUserAnalyst,
-  selectIsUserManager,
+  selectIsUserVisitor,
+  selectIsUserMember,
   selectSessionUserId,
 } from 'containers/App/selectors';
 
@@ -86,10 +86,10 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
     fields: [getMarkdownField(entity, 'content', false)],
   }]);
 
-  getFields = (entity, isManager, isAdmin, isMine) => ({
+  getFields = (entity, isMember, isAdmin, isMine) => ({
     body: {
       main: this.getBodyMainFields(entity),
-      aside: isManager
+      aside: isMember
         ? this.getBodyAsideFields(entity, isAdmin, isMine)
         : null,
     },
@@ -102,8 +102,8 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
       page,
       dataReady,
       isAdmin,
-      isAnalyst,
-      isManager,
+      isVisitor,
+      isMember,
       myId,
     } = this.props;
     const buttons = [];
@@ -132,7 +132,7 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
           ]}
         />
         <Styled className={`content-${CONTENT_PAGE}`}>
-          <ViewContainer isNarrow={!isAnalyst}>
+          <ViewContainer isNarrow={!isVisitor}>
             <ContentHeader
               title={page ? page.getIn(['attributes', 'title']) : ''}
               type={CONTENT_PAGE}
@@ -151,7 +151,7 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
             { page && dataReady
               && (
                 <EntityView
-                  fields={this.getFields(page, isManager, isAdmin, isMine)}
+                  fields={this.getFields(page, isMember, isAdmin, isMine)}
                   seamless
                 />
               )
@@ -171,8 +171,8 @@ PageView.propTypes = {
   page: PropTypes.object,
   dataReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
-  isAnalyst: PropTypes.bool,
-  isManager: PropTypes.bool,
+  isVisitor: PropTypes.bool,
+  isMember: PropTypes.bool,
   params: PropTypes.object,
   myId: PropTypes.string,
 };
@@ -184,8 +184,8 @@ PageView.contextTypes = {
 
 const mapStateToProps = (state, props) => ({
   isAdmin: selectIsUserAdmin(state),
-  isManager: selectIsUserManager(state),
-  isAnalyst: selectIsUserAnalyst(state),
+  isMember: selectIsUserMember(state),
+  isVisitor: selectIsUserVisitor(state),
   myId: selectSessionUserId(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   page: selectViewEntity(state, props.params.id),

@@ -644,7 +644,7 @@ function mapDispatchToProps(dispatch, props) {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
     initialiseForm: (model, formData) => {
       dispatch(formActions.reset(model));

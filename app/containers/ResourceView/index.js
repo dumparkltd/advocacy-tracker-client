@@ -37,7 +37,7 @@ import EntityView from 'components/EntityView';
 
 import {
   selectReady,
-  selectIsUserManager,
+  selectIsUserMember,
   selectTaxonomiesWithCategories,
   selectActionConnections,
   selectIsUserAdmin,
@@ -166,7 +166,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
     const {
       viewEntity,
       dataReady,
-      isManager,
+      isMember,
       taxonomies,
       actionsByActiontype,
       actionConnections,
@@ -189,7 +189,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
           icon: 'print',
         },
       ];
-      if (isManager) {
+      if (isMember) {
         buttons = [
           ...buttons,
           {
@@ -241,7 +241,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
                 fields={{
                   header: {
                     main: this.getHeaderMainFields(viewEntity),
-                    aside: isManager && this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
+                    aside: isMember && this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
                   },
                   body: {
                     main: this.getBodyMainFields(
@@ -276,7 +276,7 @@ ResourceView.propTypes = {
   actionConnections: PropTypes.object,
   actionsByActiontype: PropTypes.object,
   params: PropTypes.object,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
   myId: PropTypes.string,
 };
@@ -286,7 +286,7 @@ ResourceView.contextTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   taxonomies: selectTaxonomiesWithCategories(state),

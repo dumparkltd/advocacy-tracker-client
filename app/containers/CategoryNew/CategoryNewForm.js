@@ -223,7 +223,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={{ // isManager, taxonomies,
+          fields={{ // isMember, taxonomies,
             header: {
               main: this.getHeaderMainFields(),
               aside: this.getHeaderAsideFields(
@@ -300,7 +300,7 @@ function mapDispatchToProps(
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
     onErrorDismiss: () => {
       dispatch(submitInvalid(true));

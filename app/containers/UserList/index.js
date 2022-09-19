@@ -22,8 +22,8 @@ import {
   selectUserTaxonomies,
   selectActiontypesForUsers,
   selectActortypesForUsers,
-  // selectIsUserManager,
-  selectIsUserAnalyst,
+  // selectIsUserMember,
+  selectIsUserVisitor,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -59,8 +59,8 @@ export class UserList extends React.PureComponent { // eslint-disable-line react
       dataReady,
       actortypes,
       actiontypes,
-      // isManager,
-      isAnalyst,
+      // isMember,
+      isVisitor,
       allEntities,
     } = this.props;
     const type = 'users';
@@ -68,7 +68,7 @@ export class UserList extends React.PureComponent { // eslint-disable-line react
       supTitle: intl.formatMessage(messages.pageTitle),
       actions: [],
     };
-    if (isAnalyst) {
+    if (isVisitor) {
       headerOptions.actions.push({
         type: 'bookmarker',
         title: intl.formatMessage(appMessages.entities[type].plural),
@@ -128,8 +128,8 @@ UserList.propTypes = {
   location: PropTypes.object,
   actiontypes: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
-  // isManager: PropTypes.bool,
-  isAnalyst: PropTypes.bool,
+  // isMember: PropTypes.bool,
+  isVisitor: PropTypes.bool,
 };
 
 UserList.contextTypes = {
@@ -145,8 +145,8 @@ const mapStateToProps = (state, props) => ({
   connections: selectUserConnections(state),
   actiontypes: selectActiontypesForUsers(state),
   actortypes: selectActortypesForUsers(state),
-  // isManager: selectIsUserManager(state),
-  isAnalyst: selectIsUserAnalyst(state),
+  // isMember: selectIsUserMember(state),
+  isVisitor: selectIsUserVisitor(state),
 });
 function mapDispatchToProps(dispatch) {
   return {
@@ -154,7 +154,7 @@ function mapDispatchToProps(dispatch) {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
   };
 }

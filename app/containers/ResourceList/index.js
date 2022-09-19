@@ -13,8 +13,8 @@ import { Map, List, fromJS } from 'immutable';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectReady,
-  selectIsUserManager,
-  selectIsUserAnalyst,
+  selectIsUserMember,
+  selectIsUserVisitor,
   selectResourcetypes,
   selectActiontypesForResourcetype,
 } from 'containers/App/selectors';
@@ -62,8 +62,8 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
       connections,
       // connectedTaxonomies,
       location,
-      isManager,
-      isAnalyst,
+      isMember,
+      isVisitor,
       params, // { id: the action type }
       actiontypes,
       resourcetypes,
@@ -76,7 +76,7 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
       supTitle: intl.formatMessage(messages.pageTitle),
       actions: [],
     };
-    if (isAnalyst) {
+    if (isVisitor) {
       headerOptions.actions.push({
         type: 'bookmarker',
         title: intl.formatMessage(appMessages.entities[type].plural),
@@ -91,20 +91,20 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
         icon: 'print',
       });
     }
-    if (isManager) {
+    if (isMember) {
       headerOptions.actions.push({
         type: 'text',
         title: 'Create new',
         onClick: () => this.props.handleNew(typeId),
         icon: 'add',
-        isManager,
+        isMember,
       });
       headerOptions.actions.push({
         type: 'text',
         title: intl.formatMessage(appMessages.buttons.import),
         onClick: () => this.props.handleImport(),
         icon: 'import',
-        isManager,
+        isMember,
       });
     }
 
@@ -147,14 +147,14 @@ ResourceList.propTypes = {
   handleImport: PropTypes.func,
   onSelectType: PropTypes.func,
   dataReady: PropTypes.bool,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   // taxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
-  isAnalyst: PropTypes.bool,
+  isVisitor: PropTypes.bool,
   params: PropTypes.object,
   allEntities: PropTypes.instanceOf(Map),
 };
@@ -167,8 +167,8 @@ const mapStateToProps = (state, props) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   entities: selectListResources(state, { type: props.params.id }),
   connections: selectConnections(state),
-  isManager: selectIsUserManager(state),
-  isAnalyst: selectIsUserAnalyst(state),
+  isMember: selectIsUserMember(state),
+  isVisitor: selectIsUserVisitor(state),
   actiontypes: selectActiontypesForResourcetype(state, { type: props.params.id }),
   resourcetypes: selectResourcetypes(state),
   allEntities: selectResourcesWithConnections(state, { type: props.params.id }),

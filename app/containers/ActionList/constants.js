@@ -212,7 +212,7 @@ export const CONFIG = {
         message: 'attributes.draft',
         attribute: 'draft',
         options: PUBLISH_STATUSES,
-        role: USER_ROLES.MANAGER.value,
+        role: USER_ROLES.MEMBER.value,
         filterUI: 'checkboxes',
       },
       {
@@ -220,7 +220,7 @@ export const CONFIG = {
         message: 'attributes.private',
         attribute: 'private',
         options: PRIVACY_STATUSES,
-        role: USER_ROLES.MANAGER.value,
+        role: USER_ROLES.MEMBER.value,
         roleEdit: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
       },

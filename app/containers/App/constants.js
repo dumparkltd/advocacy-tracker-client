@@ -121,6 +121,7 @@ export const SORT_ORDER_OPTIONS = [
 export const PARAMS = {
   GROUP_RESET: '0',
   REDIRECT_ON_AUTH_SUCCESS: 'redirectOnAuthSuccess',
+  REDIRECT_ON_AUTH_SUCCESS_QUERY: 'redirectOnAuthSuccessSearch',
   RECOVER_SUCCESS: 'recoverSuccess',
   ALREADY_SIGNED_IN: 'alreadySignedIn',
   NOT_SIGNED_IN: 'notSignedIn',

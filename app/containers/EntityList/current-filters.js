@@ -267,9 +267,9 @@ const getCurrentTaxonomyFilters = (
 const checkCodeVisibility = (
   connection,
   entityType,
-  isManager,
+  isMember,
 ) => {
-  if (!isManager && entityType === 'actors') {
+  if (!isMember && entityType === 'actors') {
     return qe(connection.getIn(['attributes', 'actortype_id']), ACTORTYPES.COUNTRY);
   }
   return true;

@@ -138,27 +138,27 @@ export const selectIsUserAdmin = createSelector(
   (userRoles) => userRoles.includes(USER_ROLES.ADMIN.value)
 );
 
-export const selectIsUserManager = createSelector(
+export const selectIsUserMember = createSelector(
   selectSessionUserRoles,
-  (userRoles) => userRoles.includes(USER_ROLES.MANAGER.value)
+  (userRoles) => userRoles.includes(USER_ROLES.MEMBER.value)
     || userRoles.includes(USER_ROLES.ADMIN.value)
 );
 
-export const selectIsUserAnalyst = createSelector(
+export const selectIsUserVisitor = createSelector(
   selectSessionUserRoles,
-  (userRoles) => userRoles.includes(USER_ROLES.ANALYST.value)
-    || userRoles.includes(USER_ROLES.MANAGER.value)
+  (userRoles) => userRoles.includes(USER_ROLES.VISITOR.value)
+    || userRoles.includes(USER_ROLES.MEMBER.value)
     || userRoles.includes(USER_ROLES.ADMIN.value)
 );
 
 export const selectHasUserRole = createSelector(
   selectIsUserAdmin,
-  selectIsUserManager,
-  selectIsUserAnalyst,
-  (isAdmin, isManager, isAnalyst) => ({
+  selectIsUserMember,
+  selectIsUserVisitor,
+  (isAdmin, isMember, isVisitor) => ({
     [USER_ROLES.ADMIN.value]: isAdmin,
-    [USER_ROLES.MANAGER.value]: isManager,
-    [USER_ROLES.ANALYST.value]: isAnalyst,
+    [USER_ROLES.MEMBER.value]: isMember,
+    [USER_ROLES.VISITOR.value]: isVisitor,
   })
 );
 
@@ -168,11 +168,11 @@ export const selectSessionUserHighestRoleId = createSelector(
     if (userRoles.includes(USER_ROLES.ADMIN.value)) {
       return USER_ROLES.ADMIN.value;
     }
-    if (userRoles.includes(USER_ROLES.MANAGER.value)) {
-      return USER_ROLES.MANAGER.value;
+    if (userRoles.includes(USER_ROLES.MEMBER.value)) {
+      return USER_ROLES.MEMBER.value;
     }
-    if (userRoles.includes(USER_ROLES.ANALYST.value)) {
-      return USER_ROLES.ANALYST.value;
+    if (userRoles.includes(USER_ROLES.VISITOR.value)) {
+      return USER_ROLES.VISITOR.value;
     }
     return USER_ROLES.DEFAULT.value;
   }
@@ -217,6 +217,20 @@ export const selectRedirectOnAuthSuccessPath = createSelector(
         'locationBeforeTransitions',
         'query',
         PARAMS.REDIRECT_ON_AUTH_SUCCESS,
+      ]);
+    } catch (error) {
+      return null;
+    }
+  }
+);
+export const selectRedirectOnAuthSuccessSearch = createSelector(
+  getRoute,
+  (routeState) => {
+    try {
+      return routeState.getIn([
+        'locationBeforeTransitions',
+        'query',
+        PARAMS.REDIRECT_ON_AUTH_SUCCESS_QUERY,
       ]);
     } catch (error) {
       return null;
@@ -921,8 +935,8 @@ export const selectActiontypeActions = createSelector(
 //   selectActortypeQuery,
 //   selectActortypeActors,
 //   (state) => selectEntities(state, API.ACTOR_ACTIONS), // active
-//   selectIsUserManager,
-//   (entities, actortype, actors, actorActions, isManager) => {
+//   selectIsUserMember,
+//   (entities, actortype, actors, actorActions, isMember) => {
 //     if (entities && actors && actorActions) {
 //       if (actortype && actortype !== 'all') {
 //         return entities.filter(
@@ -935,7 +949,7 @@ export const selectActiontypeActions = createSelector(
 //             ).map(
 //               (rm) => rm.getIn(['attributes', 'actor_id'])
 //             );
-//             return (isManager && actorIds.size === 0) || actorIds.some(
+//             return (isMember && actorIds.size === 0) || actorIds.some(
 //               (id) => !!actors.find(
 //                 (actor) => qe(actor.get('id'), id)
 //               )

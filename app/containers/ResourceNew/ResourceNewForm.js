@@ -259,7 +259,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={{ // isManager, taxonomies,
+          fields={{ // isMember, taxonomies,
             header: {
               main: this.getHeaderMainFields(typeId),
               aside: this.getHeaderAsideFields(),
@@ -344,7 +344,7 @@ function mapDispatchToProps(
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
     onErrorDismiss: () => {
       dispatch(submitInvalid(true));

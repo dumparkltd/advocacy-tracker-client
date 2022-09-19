@@ -146,7 +146,7 @@ export default function createRoutes(store) {
     }, {
       path: ROUTES.USERS,
       name: 'userList',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/UserList'),
@@ -241,7 +241,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.ACTIONS}${ROUTES.IMPORT}`,
       name: 'actionImport',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActionImport/reducer'),
@@ -262,7 +262,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.ACTOR_ACTIONS}${ROUTES.IMPORT}${ROUTES.ID}`,
       name: 'actorActionsImport',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActorActionsImport/reducer'),
@@ -284,7 +284,7 @@ export default function createRoutes(store) {
       // ROUTES.ID: actiontype, ROUTES.VIEW: map, list or stats
       path: `${ROUTES.ACTIONS}${ROUTES.ID}`,
       name: 'actionListForType',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActionList'),
@@ -301,7 +301,7 @@ export default function createRoutes(store) {
     }, {
       path: ROUTES.ACTIONS,
       name: 'actiontypes',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActionsOverview'),
@@ -318,7 +318,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.ACTIONS}${ROUTES.ID}${ROUTES.NEW}`, // the type id
       name: 'actionNew',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActionNew/reducer'),
@@ -337,7 +337,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.ACTION}${ROUTES.ID}`,
       name: 'actionView',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActionView'),
@@ -354,7 +354,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.ACTION}${ROUTES.EDIT}${ROUTES.ID}`,
       name: 'actionEdit',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActionEdit/reducer'),
@@ -375,7 +375,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.ACTORS}`,
       name: 'actortypes',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActorsOverview'),
@@ -392,7 +392,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.ACTORS}${ROUTES.IMPORT}`,
       name: 'actorImport',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActorImport/reducer'),
@@ -413,7 +413,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.ACTORS}${ROUTES.ID}`,
       name: 'actorListForType',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActorList'),
@@ -430,7 +430,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.ACTORS}${ROUTES.ID}${ROUTES.NEW}`, // the type id
       name: 'actorNew',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActorNew/reducer'),
@@ -449,7 +449,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.ACTOR}${ROUTES.ID}`,
       name: 'actorView',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActorView'),
@@ -466,7 +466,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.ACTOR}${ROUTES.EDIT}${ROUTES.ID}`,
       name: 'actorEdit',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ActorEdit/reducer'),
@@ -487,7 +487,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.RESOURCES}${ROUTES.IMPORT}`,
       name: 'resourceImport',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ResourceImport/reducer'),
@@ -508,7 +508,7 @@ export default function createRoutes(store) {
     }, {
       path: ROUTES.RESOURCES,
       name: 'resources',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ResourcesOverview'),
@@ -525,7 +525,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.RESOURCES}${ROUTES.ID}`,
       name: 'resourceListForType',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ResourceList'),
@@ -542,7 +542,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.RESOURCES}${ROUTES.ID}${ROUTES.NEW}`, // the type id
       name: 'resourceNew',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ResourceNew/reducer'),
@@ -561,7 +561,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.RESOURCE}${ROUTES.ID}`,
       name: 'resourceView',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ResourceView'),
@@ -578,7 +578,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.RESOURCE}${ROUTES.EDIT}${ROUTES.ID}`,
       name: 'resourceEdit',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/ResourceEdit/reducer'),
@@ -599,7 +599,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.INDICATORS}${ROUTES.IMPORT}`,
       name: 'indicatorImport',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/IndicatorImport/reducer'),
@@ -621,7 +621,7 @@ export default function createRoutes(store) {
       // ROUTES.ID: actiontype, ROUTES.VIEW: map, list or stats
       path: ROUTES.INDICATORS,
       name: 'indicators',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/IndicatorList'),
@@ -638,7 +638,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.INDICATORS}${ROUTES.NEW}`, // no type id
       name: 'indicatorNew',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/IndicatorNew/reducer'),
@@ -657,7 +657,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.INDICATOR}${ROUTES.ID}`,
       name: 'indicatorView',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/IndicatorView'),
@@ -674,7 +674,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.INDICATOR}${ROUTES.EDIT}${ROUTES.ID}`,
       name: 'indicatorEdit',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/IndicatorEdit/reducer'),
@@ -699,7 +699,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.TAXONOMIES}${ROUTES.ID}`, // the taxonomy id
       name: 'categoryList',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value, ROUTES.ACTIONS),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value, ROUTES.ACTIONS),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/CategoryList/sagas'),
@@ -718,7 +718,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.TAXONOMIES}${ROUTES.ID}${ROUTES.NEW}`, // the taxonomy id
       name: 'categoryNew',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/CategoryNew/reducer'),
@@ -737,7 +737,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.CATEGORY}${ROUTES.ID}`,
       name: 'categoryView',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/CategoryView'),
@@ -754,7 +754,7 @@ export default function createRoutes(store) {
     }, {
       path: `${ROUTES.CATEGORY}${ROUTES.EDIT}${ROUTES.ID}`,
       name: 'categoryEdit',
-      onEnter: redirectIfNotPermitted(USER_ROLES.MANAGER.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/CategoryEdit/reducer'),
@@ -775,7 +775,7 @@ export default function createRoutes(store) {
     }, {
       path: ROUTES.PAGES,
       name: 'pageList',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/PageList'),
@@ -810,7 +810,7 @@ export default function createRoutes(store) {
       },
     }, {
       path: `${ROUTES.PAGES}${ROUTES.ID}`,
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       name: 'pageView',
       getComponent(nextState, cb) {
         const importModules = Promise.all([
@@ -849,7 +849,7 @@ export default function createRoutes(store) {
     }, {
       path: ROUTES.SEARCH,
       name: 'search',
-      onEnter: redirectIfNotPermitted(USER_ROLES.ANALYST.value),
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/Search/sagas'),

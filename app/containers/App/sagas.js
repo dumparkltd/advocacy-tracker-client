@@ -93,6 +93,7 @@ import {
   selectCurrentPathname,
   selectPreviousPathname,
   selectRedirectOnAuthSuccessPath,
+  selectRedirectOnAuthSuccessSearch,
   selectRequestedAt,
   selectIsSignedIn,
   selectLocation,
@@ -252,8 +253,9 @@ export function* recoverSaga(payload) {
 
 export function* authChangeSaga() {
   const redirectPathname = yield select(selectRedirectOnAuthSuccessPath);
+  const redirectQuery = yield select(selectRedirectOnAuthSuccessSearch);
   if (redirectPathname) {
-    yield put(updatePath(redirectPathname, { replace: true }));
+    yield put(updatePath(redirectPathname, { replace: true, search: redirectQuery }));
   } else {
     // forward to home
     yield put(updatePath('/', { replace: true }));
@@ -1108,22 +1110,31 @@ export function* updatePathSaga({ path, args }) {
   const relativePath = path.startsWith('/') ? path : `/${path}`;
   const location = yield select(selectLocation);
   let queryNext = {};
-  if (args && (args.query || args.keepQuery)) {
-    if (args.query) {
-      queryNext = getNextQuery(args.query, args.extend, location);
-    }
-    if (args.keepQuery) {
-      queryNext = location.get('query').toJS();
+  let queryNextString = '';
+  if (args) {
+    // if query set as search string
+    if (args.search) {
+      queryNextString = args.search;
+    } else {
+      if (args.query || args.keepQuery) {
+        if (args.query) {
+          queryNext = getNextQuery(args.query, args.extend, location);
+        }
+        if (args.keepQuery) {
+          queryNext = location.get('query').toJS();
+        }
+      }
+      // convert to string
+      queryNextString = `?${getNextQueryString(queryNext)}`;
     }
   } else {
     // always keep "specific filters"
     queryNext = location.get('query').filter(
       (val, key) => KEEP_FILTERS.indexOf(key) > -1
     ).toJS();
+    queryNextString = `?${getNextQueryString(queryNext)}`;
   }
-  // convert to string
-  const queryNextString = getNextQueryString(queryNext);
-  const nextPath = `${relativePath}?${queryNextString}`;
+  const nextPath = `${relativePath}${queryNextString}`;
   if (args && args.replace) {
     yield put(replace(nextPath));
   } else {

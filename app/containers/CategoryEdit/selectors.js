@@ -124,7 +124,7 @@ export const selectUsers = createSelector(
   (entities, associations) => usersByRole(
     entities,
     associations,
-    USER_ROLES.MANAGER.value,
+    USER_ROLES.MEMBER.value,
   )
 );
 

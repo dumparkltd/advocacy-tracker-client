@@ -65,7 +65,7 @@ import SubjectTabWrapper from 'components/styled/SubjectTabWrapper';
 
 import {
   selectReady,
-  selectIsUserManager,
+  selectIsUserMember,
   selectIsUserAdmin,
   selectSessionUserId,
   selectTaxonomiesWithCategories,
@@ -98,7 +98,7 @@ export function ActorView(props) {
     intl,
     viewEntity,
     dataReady,
-    isManager,
+    isMember,
     onLoadData,
     params,
     handleEdit,
@@ -145,7 +145,7 @@ export function ActorView(props) {
         icon: 'print',
       },
     ];
-    if (isManager) {
+    if (isMember) {
       buttons = [
         ...buttons,
         {
@@ -226,7 +226,7 @@ export function ActorView(props) {
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isManager}>
+                <Main hasAside={isMember}>
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
@@ -236,7 +236,7 @@ export function ActorView(props) {
                           isAdmin,
                         ),
                         checkActorAttribute(typeId, 'title') && getTitleField(viewEntity),
-                        checkActorAttribute(typeId, 'prefix', isManager) && getInfoField(
+                        checkActorAttribute(typeId, 'prefix', isMember) && getInfoField(
                           'prefix',
                           viewEntity.getIn(['attributes', 'prefix']),
                         ),
@@ -245,7 +245,7 @@ export function ActorView(props) {
                     }}
                   />
                 </Main>
-                {isManager && (
+                {isMember && (
                   <Aside>
                     <FieldGroup
                       group={{
@@ -430,7 +430,7 @@ ActorView.propTypes = {
   membersByType: PropTypes.instanceOf(Map),
   associationsByType: PropTypes.instanceOf(Map),
   params: PropTypes.object,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   intl: intlShape.isRequired,
   subject: PropTypes.string,
   viewActiontypeId: PropTypes.string,
@@ -446,7 +446,7 @@ ActorView.propTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   viewTaxonomies: selectViewTaxonomies(state, props.params.id),

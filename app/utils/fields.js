@@ -88,19 +88,19 @@ export const getEntityLinkField = (
 });
 
 export const getTitleField = (
-  entity, isManager, attribute = 'title', label
+  entity, isMember, attribute = 'title', label
 ) => checkEmpty(entity.getIn(['attributes', attribute])) && ({
   type: 'title',
   value: entity.getIn(['attributes', attribute]),
-  isManager,
+  isMember,
   label,
 });
 export const getTitleTextField = (
-  entity, isManager, attribute = 'title', label
+  entity, isMember, attribute = 'title', label
 ) => checkEmpty(entity.getIn(['attributes', attribute])) && ({
   type: 'titleText',
   value: entity.getIn(['attributes', attribute]),
-  isManager,
+  isMember,
   label,
 });
 export const getStatusField = (
