@@ -546,13 +546,12 @@ export const entitySetSingle = (
     )
   );
 
-export const entitySetUser = (entity, users) => entity
-  && entitySetSingle(
-    entitySetSingle(entity, users, 'creator', 'created_by_id'),
-    users,
-    'user',
-    'updated_by_id',
-  );
+export const entitySetUser = (entity, users) => {
+  let result = entitySetSingle(entity, users, 'creator', 'created_by_id');
+  result = entitySetSingle(result, users, 'user', 'updated_by_id');
+  return entitySetSingle(result, users, 'userRelationship', 'relationship_updated_by_id');
+  // return result;
+};
 
 export const entitySetSingles = (entity, singles) => entity
   && singles.reduce(

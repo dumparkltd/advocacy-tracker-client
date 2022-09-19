@@ -1018,6 +1018,10 @@ export default defineMessages({
         id: 'app.containers.App.attributes.meta.relationship_updated_at',
         defaultMessage: 'Connections last updated',
       },
+      relationship_updated_by_id: {
+        id: 'app.containers.App.attributes.meta.relationship_updated_by_id',
+        defaultMessage: 'Connections updated by',
+      },
       created_at: {
         id: 'app.containers.App.attributes.meta.created_at',
         defaultMessage: 'Created',

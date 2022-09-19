@@ -86,6 +86,7 @@ export const makeEditGroups = ({
                 id: taxonomy.get('id'), // filterOptionId
                 label: messages.taxonomies(taxonomy.get('id')),
                 path: config.taxonomies.connectPath,
+                invalidateEntitiesPaths: config.taxonomies.invalidateEntitiesPaths,
                 key: config.taxonomies.key,
                 ownKey: config.taxonomies.ownKey,
                 active: !!activeEditOption
