@@ -10,10 +10,14 @@ import { connect } from 'react-redux';
 import { Helmet } from 'react-helmet';
 import ReactModal from 'react-modal';
 import GlobalStyle from 'global-styles';
-
 import styled from 'styled-components';
+import { Box, Text } from 'grommet';
+
 import Header from 'components/Header';
+import Overlay from 'components/InfoOverlay/Overlay';
 import EntityNew from 'containers/EntityNew';
+
+import { getAuthValues } from 'utils/api-request';
 
 import { sortEntities } from 'utils/sort';
 import { ROUTES, API } from 'themes/config';
@@ -26,6 +30,7 @@ import {
   selectReady,
   selectEntitiesWhere,
   selectNewEntityModal,
+  selectIsAuthenticating,
 } from './selectors';
 
 import {
@@ -150,8 +155,8 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       newEntityModal,
       user,
       children,
+      isUserAuthenticating,
     } = this.props;
-
     const { intl } = this.context;
     const title = intl.formatMessage(messages.app.title);
     const isHome = location.pathname === '/';
@@ -160,6 +165,11 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       || location.pathname.startsWith(ROUTES.LOGOUT)
       || location.pathname.startsWith(ROUTES.UNAUTHORISED);
     const isHomeOrAuth = isHome || isAuth;
+    let authUID;
+    if (isUserAuthenticating) {
+      const authValues = getAuthValues();
+      authUID = authValues && authValues.uid;
+    }
     return (
       <div id="app">
         <Helmet titleTemplate={`%s - ${title}`} defaultTitle={title} />
@@ -217,6 +227,29 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             />
           </ReactModal>
         )}
+        {isUserAuthenticating && !isAuth && (
+          <Overlay
+            title={intl.formatMessage(messages.labels.userLoading)}
+            content={(
+              <Box gap="medium">
+                {authUID && (
+                  <Text>
+                    {`Welcome back ${authUID}!`}
+                  </Text>
+                )}
+                {!authUID && (
+                  <Text>
+                    {'Welcome back!'}
+                  </Text>
+                )}
+                <Text size="small">
+                  {'Attempting to sign you back in...'}
+                </Text>
+              </Box>
+            )}
+            loading
+          />
+        )}
         <GlobalStyle />
       </div>
     );
@@ -226,6 +259,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
 App.propTypes = {
   children: PropTypes.node,
   isUserSignedIn: PropTypes.bool,
+  isUserAuthenticating: PropTypes.bool,
   isMember: PropTypes.bool,
   isVisitor: PropTypes.bool,
   user: PropTypes.object,
@@ -246,6 +280,7 @@ const mapStateToProps = (state) => ({
   isMember: selectIsUserMember(state),
   isVisitor: selectIsUserVisitor(state),
   isUserSignedIn: selectIsSignedIn(state),
+  isUserAuthenticating: selectIsAuthenticating(state),
   user: selectSessionUserAttributes(state),
   pages: selectEntitiesWhere(state, {
     path: API.PAGES,

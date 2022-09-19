@@ -13,7 +13,6 @@ import ScreenReaderOnly from 'components/styled/ScreenReaderOnly';
 
 import Brand from './Brand';
 import LogoWrap from './LogoWrap';
-import messages from './messages';
 
 // const Claim = styled((p) => <Text {...p} />)`
 //   font-family: ${(props) => props.theme.fonts.title};
@@ -174,7 +173,13 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
 
   render() {
     const {
-      isAuth, navItems, search, isSignedIn, user, currentPath, isVisitor,
+      isAuth,
+      navItems,
+      search,
+      isSignedIn,
+      user,
+      currentPath,
+      isVisitor,
     } = this.props;
     const { intl } = this.context;
     const appTitle = `${intl.formatMessage(appMessages.app.title)} - ${intl.formatMessage(appMessages.app.claim)}`;
@@ -346,11 +351,6 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                           wide={wide}
                         >
                           Profile
-                        </LinkAccount>
-                      )}
-                      {isSignedIn && !user && wide && (
-                        <LinkAccount wide>
-                          <FormattedMessage {...messages.userLoading} />
                         </LinkAccount>
                       )}
                       {isSignedIn && (

@@ -575,6 +575,10 @@ export default defineMessages({
         defaultMessage: 'Not met',
       },
     },
+    userLoading: {
+      id: 'app.containers.App.labels.userLoading',
+      defaultMessage: 'Signing in...',
+    },
   },
   fields: {
     connectionsGrouped: {
