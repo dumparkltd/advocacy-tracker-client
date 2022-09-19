@@ -484,7 +484,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
 
     const { saveSending, saveError, deleteSending } = viewDomainPage.toJS();
 
-    const type = typeId
+    const typeLabel = typeId
       ? intl.formatMessage(appMessages.entities[`actions_${typeId}`].single)
       : intl.formatMessage(appMessages.entities.actions.single);
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
@@ -492,14 +492,14 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     return (
       <div>
         <Helmet
-          title={`${intl.formatMessage(messages.pageTitle, { type })}`}
+          title={`${intl.formatMessage(messages.pageTitle, { type: typeLabel })}`}
           meta={[
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
         <Content ref={this.scrollContainer}>
           <ContentHeader
-            title={intl.formatMessage(messages.pageTitle, { type })}
+            title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
             type={CONTENT_SINGLE}
             buttons={
               viewEntity && dataReady
@@ -541,7 +541,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={handleCancel}
                 handleUpdate={handleUpdate}
-                handleDelete={isAdmin ? handleDelete : null}
+                handleDelete={isAdmin ? () => handleDelete(typeId) : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
                 fields={dataReady && {
@@ -844,11 +844,11 @@ function mapDispatchToProps(dispatch, props) {
     handleUpdate: (formData) => {
       dispatch(updateEntityForm(formData));
     },
-    handleDelete: () => {
+    handleDelete: (typeId) => {
       dispatch(deleteEntity({
         path: API.ACTIONS,
         id: props.params.id,
-        redirect: ROUTES.ACTIONS,
+        redirect: `${ROUTES.ACTIONS}/${typeId}`,
       }));
     },
     onCreateOption: (args) => {

@@ -378,7 +378,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       saveSending, saveError, deleteSending,
     } = viewDomainPage.toJS();
 
-    const type = intl.formatMessage(
+    const typeLabel = intl.formatMessage(
       appMessages.entities[typeId ? `actors_${typeId}` : 'actors'].single
     );
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
@@ -386,14 +386,14 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
     return (
       <div>
         <Helmet
-          title={`${intl.formatMessage(messages.pageTitle, { type })}`}
+          title={`${intl.formatMessage(messages.pageTitle, { type: typeLabel })}`}
           meta={[
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
         <Content ref={this.scrollContainer}>
           <ContentHeader
-            title={intl.formatMessage(messages.pageTitle, { type })}
+            title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
             type={CONTENT_SINGLE}
             buttons={
               viewEntity && dataReady ? [{
@@ -431,7 +431,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={handleCancel}
                 handleUpdate={handleUpdate}
-                handleDelete={isAdmin ? handleDelete : null}
+                handleDelete={isAdmin ? () => handleDelete(typeId) : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
                 fields={dataReady && {
@@ -685,11 +685,11 @@ function mapDispatchToProps(dispatch, props) {
     handleUpdate: (formData) => {
       dispatch(updateEntityForm(formData));
     },
-    handleDelete: () => {
+    handleDelete: (typeId) => {
       dispatch(deleteEntity({
         path: API.ACTORS,
         id: props.params.id,
-        redirect: ROUTES.ACTORS,
+        redirect: `${ROUTES.ACTORS}/${typeId}`,
       }));
     },
     onCreateOption: (args) => {
