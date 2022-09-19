@@ -239,7 +239,7 @@ export default function createRoutes(store) {
         importModules.catch(errorLoading);
       },
     }, {
-      path: `${ROUTES.ACTIONS}${ROUTES.IMPORT}`,
+      path: `${ROUTES.ACTIONS}${ROUTES.ID}${ROUTES.IMPORT}`,
       name: 'actionImport',
       onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
@@ -390,7 +390,7 @@ export default function createRoutes(store) {
         importModules.catch(errorLoading);
       },
     }, {
-      path: `${ROUTES.ACTORS}${ROUTES.IMPORT}`,
+      path: `${ROUTES.ACTORS}${ROUTES.ID}${ROUTES.IMPORT}`,
       name: 'actorImport',
       onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {
@@ -485,7 +485,7 @@ export default function createRoutes(store) {
         importModules.catch(errorLoading);
       },
     }, {
-      path: `${ROUTES.RESOURCES}${ROUTES.IMPORT}`,
+      path: `${ROUTES.RESOURCES}${ROUTES.ID}${ROUTES.IMPORT}`,
       name: 'resourceImport',
       onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
       getComponent(nextState, cb) {

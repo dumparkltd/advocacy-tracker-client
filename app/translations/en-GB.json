@@ -100,7 +100,7 @@
   "app.components.ImportFileSelectControl.import.plural": "Import {total} rows",
   "app.components.ImportFileSelectControl.selectFile": "Select File",
   "app.components.ImportFileSelectControl.fileSelectError": "Error parsing file. Please make sure to use the correct format only.",
-  "app.components.ImportEntitiesForm.title": "Batch import",
+  "app.components.ImportEntitiesForm.title": "Batch import {type}",
   "app.components.ImportEntitiesForm.introduction": "Import multiple items from a CSV file.",
   "app.components.ImportEntitiesForm.hintTitle": "Please note:",
   "app.components.ImportEntitiesForm.templateHint": "For required and available fields and field types please ",

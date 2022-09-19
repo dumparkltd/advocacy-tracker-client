@@ -185,7 +185,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
       });
       headerOptions.actions.push({
         title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(),
+        onClick: () => this.props.handleImport(typeId),
         icon: 'import',
         isMember,
       });
@@ -323,8 +323,8 @@ function mapDispatchToProps(dispatch) {
     handleNew: (typeId) => {
       dispatch(updatePath(`${ROUTES.ACTORS}/${typeId}${ROUTES.NEW}`, { replace: true }));
     },
-    handleImport: () => {
-      dispatch(updatePath(`${ROUTES.ACTORS}${ROUTES.IMPORT}`));
+    handleImport: (typeId) => {
+      dispatch(updatePath(`${ROUTES.ACTORS}/${typeId}${ROUTES.IMPORT}`));
     },
     onSelectType: (typeId) => {
       dispatch(updatePath(

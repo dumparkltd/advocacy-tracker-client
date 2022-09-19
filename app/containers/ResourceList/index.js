@@ -102,7 +102,7 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
       headerOptions.actions.push({
         type: 'text',
         title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(),
+        onClick: () => this.props.handleImport(typeId),
         icon: 'import',
         isMember,
       });
@@ -182,8 +182,8 @@ function mapDispatchToProps(dispatch) {
     handleNew: (typeId) => {
       dispatch(updatePath(`${ROUTES.RESOURCES}/${typeId}${ROUTES.NEW}`, { replace: true }));
     },
-    handleImport: () => {
-      dispatch(updatePath(`${ROUTES.RESOURCES}${ROUTES.IMPORT}`));
+    handleImport: (typeId) => {
+      dispatch(updatePath(`${ROUTES.RESOURCES}/${typeId}${ROUTES.IMPORT}`));
     },
     onSelectType: (typeId) => {
       dispatch(updatePath(
