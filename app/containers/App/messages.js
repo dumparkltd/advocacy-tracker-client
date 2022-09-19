@@ -2303,6 +2303,10 @@ export default defineMessages({
       id: 'app.containers.App.messages.notSignedIn',
       defaultMessage: 'Please sign in or register first to access this page',
     },
+    validateTokenFailed: {
+      id: 'app.containers.App.messages.validateTokenFailed',
+      defaultMessage: 'Please sign in again',
+    },
     alreadySignedIn: {
       id: 'app.containers.App.messages.alreadySignedIn',
       defaultMessage: 'Welcome back!',

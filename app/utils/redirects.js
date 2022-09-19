@@ -22,7 +22,7 @@ export function replaceUnauthorised(replace, replacePath) {
 }
 
 export function replaceAlreadySignedIn(replace, info = PARAMS.ALREADY_SIGNED_IN) {
-  return replace({ pathname: '/', query: { info } });
+  return replace({ pathname: ROUTES.ACTIONS, query: { info } });
 }
 
 export function hasRoleRequired(roleIds, roleRequired) {

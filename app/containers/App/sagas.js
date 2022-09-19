@@ -33,6 +33,7 @@ import {
   SAVE_CONNECTIONS,
   UPDATE_ROUTE_QUERY,
   AUTHENTICATE_FORWARD,
+  AUTHENTICATE_ERROR,
   UPDATE_PATH,
   RECOVER_PASSWORD,
   CLOSE_ENTITY,
@@ -269,7 +270,6 @@ export function* logoutSaga() {
     yield put(logoutSuccess());
     yield put(updatePath(ROUTES.LOGIN, { replace: true }));
   } catch (err) {
-    yield call(clearAuthValues);
     yield put(authenticateError(err));
   }
 }
@@ -281,7 +281,6 @@ export function* validateTokenSaga() {
       [KEYS.CLIENT]: client,
       [KEYS.ACCESS_TOKEN]: accessToken,
     } = yield getAuthValues();
-
     if (uid && client && accessToken) {
       yield put(authenticateSending());
       const response = yield call(
@@ -294,18 +293,69 @@ export function* validateTokenSaga() {
         }
       );
       if (!response.success) {
+        const location = yield select(selectLocation);
+        const redirectOnAuthSuccess = location.get('pathname');
+        const redirectOnAuthSuccessSearch = location.get('search');
         yield call(clearAuthValues);
         yield put(invalidateEntities());
+        // forward to home
+        yield put(updatePath(
+          ROUTES.LOGIN,
+          {
+            replace: true,
+            query: [
+              {
+                arg: 'info',
+                value: PARAMS.VALIDATE_TOKEN_FAILED,
+              },
+              {
+                arg: 'redirectOnAuthSuccess',
+                value: redirectOnAuthSuccess,
+              },
+              {
+                arg: 'redirectOnAuthSuccessSearch',
+                value: redirectOnAuthSuccessSearch,
+              },
+            ],
+          },
+        ));
       }
       yield put(authenticateSuccess(response.data)); // need to store currentUserData
     }
   } catch (err) {
-    yield call(clearAuthValues);
     err.response.json = yield err.response.json();
     yield put(authenticateError(err));
   }
 }
 
+export function* authenticateErrorSaga() {
+  const location = yield select(selectLocation);
+  const redirectOnAuthSuccess = location.get('pathname');
+  const redirectOnAuthSuccessSearch = location.get('search');
+  yield call(clearAuthValues);
+  yield put(invalidateEntities());
+  // forward to home
+  yield put(updatePath(
+    ROUTES.LOGIN,
+    {
+      replace: true,
+      query: [
+        {
+          arg: 'info',
+          value: PARAMS.VALIDATE_TOKEN_FAILED,
+        },
+        {
+          arg: 'redirectOnAuthSuccess',
+          value: redirectOnAuthSuccess,
+        },
+        {
+          arg: 'redirectOnAuthSuccessSearch',
+          value: redirectOnAuthSuccessSearch,
+        },
+      ],
+    },
+  ));
+}
 
 function stampPayload(payload, type) {
   return Object.assign(payload, {
@@ -796,7 +846,7 @@ const getNextQuery = (query, extend, location) => {
   return asArray(query).reduce((memo, param) => {
     const queryUpdated = memo;
     // if arg already set and not replacing
-    if (queryUpdated[param.arg] && !param.replace) {
+    if (queryUpdated[param.arg] && typeof param.replace !== 'undefined' && !param.replace) {
       const val = param.value && param.value.toString();
       // check for connection attribute queries
       if (
@@ -1116,13 +1166,10 @@ export function* updatePathSaga({ path, args }) {
     if (args.search) {
       queryNextString = args.search;
     } else {
-      if (args.query || args.keepQuery) {
-        if (args.query) {
-          queryNext = getNextQuery(args.query, args.extend, location);
-        }
-        if (args.keepQuery) {
-          queryNext = location.get('query').toJS();
-        }
+      if (args.query) {
+        queryNext = getNextQuery(args.query, args.extend, location);
+      } else if (args.keepQuery) {
+        queryNext = location.get('query').toJS();
       }
       // convert to string
       queryNextString = `?${getNextQueryString(queryNext)}`;
@@ -1168,6 +1215,7 @@ export default function* rootSaga() {
   yield takeLatest(VALIDATE_TOKEN, validateTokenSaga);
 
   yield takeLatest(AUTHENTICATE, authenticateSaga);
+  yield takeLatest(AUTHENTICATE_ERROR, authenticateErrorSaga);
   yield takeLatest(RECOVER_PASSWORD, recoverSaga);
   yield takeLatest(LOGOUT, logoutSaga);
   yield takeLatest(AUTHENTICATE_FORWARD, authChangeSaga);

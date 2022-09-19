@@ -125,6 +125,7 @@ export const PARAMS = {
   RECOVER_SUCCESS: 'recoverSuccess',
   ALREADY_SIGNED_IN: 'alreadySignedIn',
   NOT_SIGNED_IN: 'notSignedIn',
+  VALIDATE_TOKEN_FAILED: 'validateTokenFailed',
 };
 
 export const VIEWPORTS = {
