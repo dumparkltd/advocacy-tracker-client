@@ -20,8 +20,8 @@ import { ROUTES, API } from 'themes/config';
 
 import {
   selectIsSignedIn,
-  selectIsUserManager,
-  selectIsUserAnalyst,
+  selectIsUserMember,
+  selectIsUserVisitor,
   selectSessionUserAttributes,
   selectReady,
   selectEntitiesWhere,
@@ -93,13 +93,13 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     .toArray();
 
   prepareMainMenuItems = (
-    isManager,
-    isAnalyst,
+    isMember,
+    isVisitor,
     currentPath,
   ) => {
     const { intl } = this.context;
     let navItems = [];
-    if (isAnalyst) {
+    if (isVisitor) {
       navItems = navItems.concat([
         {
           path: ROUTES.INDICATORS,
@@ -113,7 +113,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
         },
       ]);
     }
-    if (isManager) {
+    if (isMember) {
       navItems = navItems.concat([
         {
           path: ROUTES.USERS,
@@ -144,8 +144,8 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       pages,
       onPageLink,
       isUserSignedIn,
-      isManager,
-      isAnalyst,
+      isMember,
+      isVisitor,
       location,
       newEntityModal,
       user,
@@ -166,12 +166,12 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
         {!isHome && (
           <Header
             isSignedIn={isUserSignedIn}
-            isAnalyst={isAnalyst}
+            isVisitor={isVisitor}
             user={user}
             pages={pages && this.preparePageMenuPages(pages, location.pathname)}
             navItems={this.prepareMainMenuItems(
-              isUserSignedIn && isManager,
-              isUserSignedIn && isAnalyst,
+              isUserSignedIn && isMember,
+              isUserSignedIn && isVisitor,
               location.pathname,
             )}
             search={!isUserSignedIn
@@ -226,8 +226,8 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
 App.propTypes = {
   children: PropTypes.node,
   isUserSignedIn: PropTypes.bool,
-  isManager: PropTypes.bool,
-  isAnalyst: PropTypes.bool,
+  isMember: PropTypes.bool,
+  isVisitor: PropTypes.bool,
   user: PropTypes.object,
   pages: PropTypes.object,
   validateToken: PropTypes.func,
@@ -243,8 +243,8 @@ App.contextTypes = {
 
 const mapStateToProps = (state) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
-  isManager: selectIsUserManager(state),
-  isAnalyst: selectIsUserAnalyst(state),
+  isMember: selectIsUserMember(state),
+  isVisitor: selectIsUserVisitor(state),
   isUserSignedIn: selectIsSignedIn(state),
   user: selectSessionUserAttributes(state),
   pages: selectEntitiesWhere(state, {

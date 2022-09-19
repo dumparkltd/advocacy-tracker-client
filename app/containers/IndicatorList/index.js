@@ -17,8 +17,8 @@ import {
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectReady,
-  selectIsUserManager,
-  selectIsUserAnalyst,
+  selectIsUserMember,
+  selectIsUserVisitor,
   selectIsUserAdmin,
   selectActiontypesForIndicators,
 } from 'containers/App/selectors';
@@ -58,8 +58,8 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
       connections,
       location,
       isAdmin,
-      isManager,
-      isAnalyst,
+      isMember,
+      isVisitor,
       actiontypes,
     } = this.props;
     const type = 'indicators';
@@ -67,7 +67,7 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
       supTitle: intl.formatMessage(messages.pageTitle),
       actions: [],
     };
-    if (isAnalyst) {
+    if (isVisitor) {
       headerOptions.actions.push({
         type: 'bookmarker',
         title: intl.formatMessage(appMessages.entities[type].plural),
@@ -82,18 +82,18 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
         icon: 'print',
       });
     }
-    if (isManager) {
+    if (isMember) {
       headerOptions.actions.push({
         title: 'Create new',
         onClick: () => this.props.handleNew(),
         icon: 'add',
-        isManager,
+        isMember,
       });
       headerOptions.actions.push({
         title: intl.formatMessage(appMessages.buttons.import),
         onClick: () => this.props.handleImport(),
         icon: 'import',
-        isManager,
+        isMember,
       });
     }
     return (
@@ -130,13 +130,13 @@ IndicatorList.propTypes = {
   handleNew: PropTypes.func,
   handleImport: PropTypes.func,
   dataReady: PropTypes.bool,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   connections: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
   isAdmin: PropTypes.bool,
-  isAnalyst: PropTypes.bool,
+  isVisitor: PropTypes.bool,
   allEntities: PropTypes.instanceOf(Map),
 };
 
@@ -148,8 +148,8 @@ const mapStateToProps = (state, props) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   entities: selectListIndicators(state, fromJS(props.location.query)),
   connections: selectConnections(state),
-  isManager: selectIsUserManager(state),
-  isAnalyst: selectIsUserAnalyst(state),
+  isMember: selectIsUserMember(state),
+  isVisitor: selectIsUserVisitor(state),
   isAdmin: selectIsUserAdmin(state),
   actiontypes: selectActiontypesForIndicators(state),
   allEntities: selectIndicatorsWithConnections(state),

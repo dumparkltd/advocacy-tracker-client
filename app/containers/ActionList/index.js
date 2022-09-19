@@ -14,8 +14,8 @@ import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectReady,
   selectActiontypeTaxonomiesWithCats,
-  selectIsUserManager,
-  selectIsUserAnalyst,
+  selectIsUserMember,
+  selectIsUserVisitor,
   selectIsUserAdmin,
   selectActiontypes,
   selectActortypesForActiontype,
@@ -69,8 +69,8 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
       taxonomies,
       connections,
       location,
-      isManager,
-      isAnalyst,
+      isMember,
+      isVisitor,
       isAdmin,
       params, // { id: the action type }
       actiontypes,
@@ -94,7 +94,7 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
         }
         : null,
     };
-    if (isAnalyst) {
+    if (isVisitor) {
       headerOptions.actions.push({
         type: 'bookmarker',
         title: intl.formatMessage(appMessages.entities[type].plural),
@@ -109,18 +109,18 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
         icon: 'print',
       });
     }
-    if (isManager) {
+    if (isMember) {
       headerOptions.actions.push({
         title: 'Create new',
         onClick: () => this.props.handleNew(typeId),
         icon: 'add',
-        isManager,
+        isMember,
       });
       headerOptions.actions.push({
         title: intl.formatMessage(appMessages.buttons.import),
         onClick: () => this.props.handleImport(),
         icon: 'import',
-        isManager,
+        isMember,
       });
     }
     return (
@@ -166,7 +166,7 @@ ActionList.propTypes = {
   handleImport: PropTypes.func,
   onSelectType: PropTypes.func,
   dataReady: PropTypes.bool,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   taxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
@@ -177,7 +177,7 @@ ActionList.propTypes = {
   resourcetypes: PropTypes.instanceOf(Map),
   allEntities: PropTypes.instanceOf(Map),
   location: PropTypes.object,
-  isAnalyst: PropTypes.bool,
+  isVisitor: PropTypes.bool,
   isAdmin: PropTypes.bool,
   params: PropTypes.object,
 };
@@ -191,8 +191,8 @@ const mapStateToProps = (state, props) => ({
   entities: selectViewActions(state, { type: props.params.id }), // type
   taxonomies: selectActiontypeTaxonomiesWithCats(state, { type: props.params.id }),
   connections: selectConnections(state),
-  isManager: selectIsUserManager(state),
-  isAnalyst: selectIsUserAnalyst(state),
+  isMember: selectIsUserMember(state),
+  isVisitor: selectIsUserVisitor(state),
   isAdmin: selectIsUserAdmin(state),
   actiontypes: selectActiontypes(state),
   actortypes: selectActortypesForActiontype(state, { type: props.params.id }),

@@ -13,7 +13,7 @@ import { Map, List, fromJS } from 'immutable';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectReady,
-  selectIsUserManager,
+  selectIsUserMember,
   selectPages,
 } from 'containers/App/selectors';
 import appMessages from 'containers/App/messages';
@@ -41,7 +41,7 @@ export class PageList extends React.PureComponent { // eslint-disable-line react
     const { intl } = this.context;
     const {
       dataReady,
-      isManager,
+      isMember,
       location,
       allEntities,
     } = this.props;
@@ -57,12 +57,12 @@ export class PageList extends React.PureComponent { // eslint-disable-line react
         icon: 'print',
       });
     }
-    if (isManager) {
+    if (isMember) {
       headerOptions.actions.push({
         title: 'Create new',
         onClick: () => this.props.handleNew(),
         icon: 'add',
-        isManager,
+        isMember,
       });
     }
     return (
@@ -97,7 +97,7 @@ PageList.propTypes = {
   entities: PropTypes.instanceOf(List).isRequired,
   allEntities: PropTypes.instanceOf(Map),
   location: PropTypes.object,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
 };
 
 PageList.contextTypes = {
@@ -107,7 +107,7 @@ PageList.contextTypes = {
 const mapStateToProps = (state, props) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   entities: selectListPages(state, fromJS(props.location.query)),
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
   allEntities: selectPages(state),
 });
 function mapDispatchToProps(dispatch) {

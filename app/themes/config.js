@@ -1107,8 +1107,8 @@ export const SERVER_ERRORS = {
 // user roles
 export const USER_ROLES = {
   ADMIN: { value: 1, message: 'ui.userRoles.admin' },
-  MANAGER: { value: 2, message: 'ui.userRoles.manager' },
-  ANALYST: { value: 3, message: 'ui.userRoles.analyst' },
+  MEMBER: { value: 2, message: 'ui.userRoles.member' },
+  VISITOR: { value: 3, message: 'ui.userRoles.visitor' },
   DEFAULT: { value: 9999, message: 'ui.userRoles.default' }, // note: client side only - no role assigned on server
 };
 // Entity publish statuses

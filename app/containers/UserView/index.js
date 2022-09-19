@@ -57,7 +57,7 @@ import {
   selectSessionUserHighestRoleId,
   selectActionConnections,
   selectActorConnections,
-  selectIsUserManager,
+  selectIsUserMember,
   selectIsUserAdmin,
   selectSubjectQuery,
   selectActiontypeQuery,
@@ -102,7 +102,7 @@ export function UserView({
   actorsByActortype,
   actorConnections,
   onEntityClick,
-  isManager,
+  isMember,
   handleEditPassword,
   sessionUserId,
   handleEdit,
@@ -130,7 +130,7 @@ export function UserView({
   }, [dataReady]);
 
   const pageTitle = intl.formatMessage(
-    isManager ? messages.pageTitleBack : messages.pageTitle
+    isMember ? messages.pageTitleBack : messages.pageTitle
   );
   const metaTitle = user
     ? `${pageTitle}: ${getEntityTitle(user)}`
@@ -191,20 +191,20 @@ export function UserView({
               type={CONTENT_SINGLE}
               buttons={buttons}
               onClose={() => handleClose()}
-              onTypeClick={isManager ? () => handleTypeClick() : null}
+              onTypeClick={isMember ? () => handleTypeClick() : null}
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isManager}>
+                <Main hasAside={isMember}>
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
-                        getTitleField(user, isManager, 'name', appMessages.attributes.name),
+                        getTitleField(user, isMember, 'name', appMessages.attributes.name),
                       ],
                     }}
                   />
                 </Main>
-                {isManager && (
+                {isMember && (
                   <Aside>
                     <FieldGroup
                       group={{
@@ -222,7 +222,7 @@ export function UserView({
             <ViewPanel>
               <ViewPanelInside>
                 <Main hasAside bottom>
-                  {isManager && (
+                  {isMember && (
                     <Box>
                       <SubjectButtonGroup>
                         <SubjectButton
@@ -287,7 +287,7 @@ export function UserView({
                     }}
                     aside
                   />
-                  {isManager && (
+                  {isMember && (
                     <FieldGroup
                       group={{
                         fields: [
@@ -327,7 +327,7 @@ UserView.propTypes = {
   onEntityClick: PropTypes.func,
   onCreateOption: PropTypes.func,
   onSetActiontype: PropTypes.func,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
   sessionUserId: PropTypes.string,
   viewActiontypeId: PropTypes.string,
@@ -337,7 +337,7 @@ UserView.propTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
   isAdmin: selectIsUserAdmin(state),
   sessionUserHighestRoleId: selectSessionUserHighestRoleId(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),

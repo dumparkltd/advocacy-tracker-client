@@ -380,7 +380,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={{ // isManager, taxonomies,
+          fields={{ // isMember, taxonomies,
             header: {
               main: this.getHeaderMainFields(typeId, isAdmin),
               aside: this.getHeaderAsideFields(),
@@ -491,7 +491,7 @@ function mapDispatchToProps(
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
     onErrorDismiss: () => {
       dispatch(submitInvalid(true));

@@ -2322,12 +2322,12 @@ export default defineMessages({
         id: 'app.containers.App.ui.userRoles.admin',
         defaultMessage: 'Administrator',
       },
-      manager: {
-        id: 'app.containers.App.ui.userRoles.manager',
-        defaultMessage: 'Manager',
+      member: {
+        id: 'app.containers.App.ui.userRoles.member',
+        defaultMessage: 'Member',
       },
-      analyst: {
-        id: 'app.containers.App.ui.userRoles.analyst',
+      visitor: {
+        id: 'app.containers.App.ui.userRoles.visitor',
         defaultMessage: 'Staff',
       },
       default: {

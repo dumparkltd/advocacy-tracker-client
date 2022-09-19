@@ -115,8 +115,8 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       config,
       entityTitle,
       dataReady,
-      isManager,
-      isAnalyst,
+      isMember,
+      isVisitor,
       taxonomies,
       connections,
       connectedTaxonomies,
@@ -757,8 +757,8 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                     entityTitle={entityTitle}
 
                     dataReady={dataReady}
-                    canEdit={isManager}
-                    isAnalyst={isAnalyst}
+                    canEdit={isMember}
+                    isVisitor={isVisitor}
 
                     onEntitySelect={onEntitySelect}
                     onEntitySelectAll={onEntitySelectAll}
@@ -807,8 +807,8 @@ EntitiesListView.propTypes = {
   intl: intlShape.isRequired,
   // primitive
   dataReady: PropTypes.bool,
-  isManager: PropTypes.bool,
-  isAnalyst: PropTypes.bool,
+  isMember: PropTypes.bool,
+  isVisitor: PropTypes.bool,
   includeActorMembers: PropTypes.bool,
   includeTargetMembers: PropTypes.bool,
   includeActorChildren: PropTypes.bool,

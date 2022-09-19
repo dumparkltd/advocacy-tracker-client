@@ -293,7 +293,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     const entityIdsSelectedFiltered = entityIdsSelected.size > 0 && entities
       ? entityIdsSelected.filter((id) => entities.map((entity) => entity.get('id')).includes(id))
       : entityIdsSelected;
-    const isManager = canEdit && hasUserRole[USER_ROLES.MANAGER.value];
+    const isMember = canEdit && hasUserRole[USER_ROLES.MEMBER.value];
     const isAdmin = canEdit && hasUserRole[USER_ROLES.ADMIN.value];
 
     const filters = currentFilters(
@@ -390,7 +390,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             icon: <Edit color="white" size="xxsmall" />,
             type: 'listOption',
             active: true,
-            isManager,
+            isMember,
           },
         ];
       }
@@ -420,8 +420,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             connectedTaxonomies={connectedTaxonomies}
             config={config}
             locationQuery={locationQuery}
-            canEdit={isManager && showList}
-            isManager={isManager}
+            canEdit={isMember && showList}
+            isMember={isMember}
             isAdmin={isAdmin}
             hasUserRole={hasUserRole}
             onCreateOption={onCreateOption}
@@ -435,7 +435,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               )}
             onUpdateFilters={onUpdateFilters}
             showFilters={this.state.visibleFilters}
-            showEditOptions={isManager && showList && this.state.visibleEditOptions}
+            showEditOptions={isMember && showList && this.state.visibleEditOptions}
             onShowFilters={this.onShowFilters}
             onHideFilters={this.onHideFilters}
             onHideEditOptions={this.onHideEditOptions}
@@ -479,9 +479,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             entityTitle={entityTitle}
 
             dataReady={dataReady}
-            isManager={isManager}
+            isMember={isMember}
             isAdmin={isAdmin}
-            isAnalyst={hasUserRole[USER_ROLES.ANALYST.value]}
+            isVisitor={hasUserRole[USER_ROLES.VISITOR.value]}
 
             onEntitySelect={(id, checked) => {
               // reset when unchecking last selected item
@@ -556,7 +556,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             />
           </PrintOnly>
         )}
-        {isManager && (progress !== null && progress < 100) && (
+        {isMember && (progress !== null && progress < 100) && (
           <Progress>
             <ProgressText>
               <FormattedMessage
@@ -576,7 +576,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             />
           </Progress>
         )}
-        {isManager && (viewDomain.get('errors').size > 0 && progress >= 100) && (
+        {isMember && (viewDomain.get('errors').size > 0 && progress >= 100) && (
           <Progress error>
             <Messages
               type="error"
@@ -597,7 +597,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             />
           </Progress>
         )}
-        {isManager && (viewDomain.get('errors').size === 0 && progress >= 100) && (
+        {isMember && (viewDomain.get('errors').size === 0 && progress >= 100) && (
           <Progress error>
             <Messages
               type="success"
@@ -654,7 +654,7 @@ EntityList.propTypes = {
   entityIcon: PropTypes.func,
   // selector props
   activePanel: PropTypes.string,
-  hasUserRole: PropTypes.object, // { 1: isAdmin, 2: isManager, 3: isAnalyst}
+  hasUserRole: PropTypes.object, // { 1: isAdmin, 2: isMember, 3: isVisitor}
   entityIdsSelected: PropTypes.object,
   viewDomain: PropTypes.object,
   progress: PropTypes.number,

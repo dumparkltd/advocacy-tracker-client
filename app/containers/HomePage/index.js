@@ -17,7 +17,7 @@ import Container from 'components/styled/Container';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectIsSigningIn,
-  selectIsUserAnalyst,
+  selectIsUserVisitor,
   selectIsSignedIn,
 } from 'containers/App/selectors';
 
@@ -153,7 +153,7 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
   render() {
     const { intl } = this.context;
     const {
-      onPageLink, isUserSigningIn, isUserSignedIn, isUserAnalyst,
+      onPageLink, isUserSigningIn, isUserSignedIn, isUserVisitor,
     } = this.props;
     return (
       <Styled>
@@ -197,7 +197,7 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
                     </Grid>
                   </Row>
                 )}
-                {!isUserSigningIn && isUserSignedIn && isUserAnalyst && (
+                {!isUserSigningIn && isUserSignedIn && isUserVisitor && (
                   <Row>
                     <GridSpace lg={1 / 6} sm={1 / 8} />
                     <Grid lg={1} sm={1} xs={1}>
@@ -218,7 +218,7 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
                     </Grid>
                   </Row>
                 )}
-                {!isUserSigningIn && isUserSignedIn && !isUserAnalyst && (
+                {!isUserSigningIn && isUserSignedIn && !isUserVisitor && (
                   <Row>
                     <GridSpace lg={1 / 6} sm={1 / 8} />
                     <Intro hint source={intl.formatMessage(messages.noRoleAssigned)} />
@@ -264,7 +264,7 @@ HomePage.propTypes = {
   theme: PropTypes.object.isRequired,
   isUserSigningIn: PropTypes.bool,
   isUserSignedIn: PropTypes.bool,
-  isUserAnalyst: PropTypes.bool,
+  isUserVisitor: PropTypes.bool,
   dataReady: PropTypes.bool,
 };
 
@@ -275,7 +275,7 @@ HomePage.contextTypes = {
 const mapStateToProps = (state) => ({
   isUserSigningIn: selectIsSigningIn(state),
   isUserSignedIn: selectIsSignedIn(state),
-  isUserAnalyst: selectIsUserAnalyst(state),
+  isUserVisitor: selectIsUserVisitor(state),
 });
 
 function mapDispatchToProps(dispatch) {

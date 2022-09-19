@@ -67,7 +67,7 @@ import SubjectTabWrapper from 'components/styled/SubjectTabWrapper';
 
 import {
   selectReady,
-  selectIsUserManager,
+  selectIsUserMember,
   selectIsUserAdmin,
   selectResourceConnections,
   selectTaxonomiesWithCategories,
@@ -124,7 +124,7 @@ export function ActionView(props) {
   const {
     viewEntity,
     dataReady,
-    isManager,
+    isMember,
     taxonomies,
     viewTaxonomies,
     resourcesByResourcetype,
@@ -175,7 +175,7 @@ export function ActionView(props) {
         icon: 'print',
       },
     ];
-    if (isManager) {
+    if (isMember) {
       buttons = [
         ...buttons,
         {
@@ -275,7 +275,7 @@ export function ActionView(props) {
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isManager}>
+                <Main hasAside={isMember}>
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
@@ -289,7 +289,7 @@ export function ActionView(props) {
                     }}
                   />
                 </Main>
-                {isManager && (
+                {isMember && (
                   <Aside>
                     <FieldGroup
                       group={{
@@ -537,7 +537,7 @@ ActionView.propTypes = {
   handleEdit: PropTypes.func,
   handleClose: PropTypes.func,
   onEntityClick: PropTypes.func,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
   myId: PropTypes.string,
   viewTaxonomies: PropTypes.object,
@@ -560,7 +560,7 @@ ActionView.propTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   viewTaxonomies: selectViewTaxonomies(state, props.params.id),

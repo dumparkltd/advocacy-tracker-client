@@ -16,7 +16,7 @@ import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectTaxonomiesSorted,
   selectReady,
-  selectIsUserManager,
+  selectIsUserMember,
   selectActortypes,
   selectActiontypes,
 } from 'containers/App/selectors';
@@ -102,7 +102,7 @@ export class CategoryList extends React.PureComponent { // eslint-disable-line r
       categoryGroups,
       userOnlyCategoryGroups,
       dataReady,
-      isManager,
+      isMember,
       onPageLink,
       onTaxonomyLink,
       actortypes,
@@ -119,7 +119,7 @@ export class CategoryList extends React.PureComponent { // eslint-disable-line r
         title: 'Print',
         icon: 'print',
       });
-      if (isManager && typeof reference !== 'undefined') {
+      if (isMember && typeof reference !== 'undefined') {
         buttons.push({
           type: 'add',
           title: [
@@ -134,7 +134,7 @@ export class CategoryList extends React.PureComponent { // eslint-disable-line r
       }
     }
 
-    const hasUserCategories = isManager
+    const hasUserCategories = isMember
       && dataReady
       && userOnlyCategoryGroups
       && userOnlyCategoryGroups.reduce((memo, group) => memo || (group.get('categories') && group.get('categories').size > 0),
@@ -233,7 +233,7 @@ CategoryList.propTypes = {
   categoryGroups: PropTypes.object,
   userOnlyCategoryGroups: PropTypes.object,
   dataReady: PropTypes.bool,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   location: PropTypes.object,
   actortypes: PropTypes.object,
   actiontypes: PropTypes.object,
@@ -246,7 +246,7 @@ CategoryList.contextTypes = {
 const mapStateToProps = (state, props) => ({
   actortypes: selectActortypes(state),
   actiontypes: selectActiontypes(state),
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   taxonomies: selectTaxonomiesSorted(state),
   taxonomy: selectTaxonomy(state, { id: props.params.id }),

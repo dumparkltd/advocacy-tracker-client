@@ -177,7 +177,7 @@ function mapDispatchToProps(dispatch) {
       dispatch(formActions.load(model, formData));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
     handleSubmit: (formData) => {
       if (formData.get('import') !== null) {
