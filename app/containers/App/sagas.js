@@ -254,7 +254,6 @@ export function* recoverSaga(payload) {
 export function* authChangeSaga() {
   const redirectPathname = yield select(selectRedirectOnAuthSuccessPath);
   const redirectQuery = yield select(selectRedirectOnAuthSuccessSearch);
-  console.log(redirectQuery);
   if (redirectPathname) {
     yield put(updatePath(redirectPathname, { replace: true, search: redirectQuery }));
   } else {
