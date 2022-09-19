@@ -256,17 +256,14 @@ export const ACTION_FIELDS = {
     },
     private: {
       defaultValue: false,
-      required: true,
       type: 'bool',
     },
     is_archive: {
       defaultValue: false,
-      required: true,
       type: 'bool',
     },
     notifications: {
       defaultValue: true,
-      required: true,
       type: 'bool',
     },
     code: {

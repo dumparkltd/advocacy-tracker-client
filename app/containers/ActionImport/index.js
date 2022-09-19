@@ -43,6 +43,8 @@ import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
 import ImportEntitiesForm from 'components/forms/ImportEntitiesForm';
 
+import appMessages from 'containers/App/messages';
+
 import {
   selectErrors,
   selectProgress,
@@ -76,10 +78,14 @@ export class ActionImport extends React.PureComponent { // eslint-disable-line r
 
   render() {
     const { intl } = this.context;
+    const typeId = this.props.params.id;
+    const typeLabel = typeId
+      ? intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural)
+      : intl.formatMessage(appMessages.entities.actions.plural);
     return (
       <div>
         <Helmet
-          title={`${intl.formatMessage(messages.pageTitle)}`}
+          title={intl.formatMessage(messages.pageTitle)}
           meta={[
             {
               name: 'description',
@@ -98,6 +104,7 @@ export class ActionImport extends React.PureComponent { // eslint-disable-line r
             }]}
           />
           <ImportEntitiesForm
+            typeLabel={typeLabel}
             model="actionImport.form.data"
             fieldModel="import"
             formData={this.props.formData}
@@ -149,6 +156,7 @@ ActionImport.propTypes = {
   progress: PropTypes.number,
   errors: PropTypes.object,
   success: PropTypes.object,
+  params: PropTypes.object,
 };
 
 ActionImport.contextTypes = {
@@ -168,7 +176,7 @@ const mapStateToProps = (state) => ({
   authReady: selectReadyForAuthCheck(state),
 });
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch, { params }) {
   return {
     loadEntitiesIfNeeded: () => {
       dispatch(loadEntitiesIfNeeded(API.USER_ROLES));
@@ -215,7 +223,7 @@ function mapDispatchToProps(dispatch) {
       }
     },
     handleCancel: () => {
-      dispatch(updatePath(ROUTES.ACTIONS));
+      dispatch(updatePath(`${ROUTES.ACTIONS}/${params ? params.id : ''}`));
     },
     handleReset: () => {
       dispatch(resetProgress());

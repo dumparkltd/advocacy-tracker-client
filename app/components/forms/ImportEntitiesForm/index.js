@@ -6,11 +6,13 @@ import { Form } from 'react-redux-form/immutable';
 import CsvDownloader from 'react-csv-downloader';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
+import { Text } from 'grommet';
 
 import { omit } from 'lodash/object';
 import { map } from 'lodash/collection';
 
 import asArray from 'utils/as-array';
+import { lowerCase } from 'utils/string';
 
 import A from 'components/styled/A';
 import Field from 'components/fields/Field';
@@ -62,7 +64,7 @@ const DocumentWrapEdit = styled(DocumentWrap)`
   padding: 1em 0.75em;
 `;
 
-const FormTitle = styled.h2`
+const FormTitle = styled.h3`
   padding-top: 0;
   margin-top: 0;
 `;
@@ -126,6 +128,7 @@ export class ImportEntitiesForm extends React.PureComponent { // eslint-disable-
       progress,
       errors,
       success,
+      typeLabel = '',
     } = this.props;
     const { intl } = this.context;
     const field = {
@@ -144,35 +147,47 @@ export class ImportEntitiesForm extends React.PureComponent { // eslint-disable-
               <Main bottom>
                 <FieldGroupWrapper>
                   <FormTitle>
-                    <FormattedMessage {...messages.title} />
+                    <FormattedMessage {...messages.title} values={{ type: lowerCase(typeLabel) }} />
                   </FormTitle>
                   <Intro>
-                    <FormattedMessage {...messages.introduction} />
+                    <Text size="medium">
+                      <FormattedMessage {...messages.introduction} />
+                    </Text>
                   </Intro>
                   <Hint>
                     <HintTitle>
-                      <FormattedMessage {...messages.hintTitle} />
+                      <Text size="medium">
+                        <FormattedMessage {...messages.hintTitle} />
+                      </Text>
                     </HintTitle>
                     <HintList>
                       <li>
-                        <FormattedMessage {...messages.templateHint} />
+                        <Text size="medium">
+                          <FormattedMessage {...messages.templateHint} />
+                        </Text>
                         <CsvDownload>
                           <CsvDownloader
                             datas={asArray(template.data)}
                             filename={template.filename}
                           >
                             <NoteLink href="/" onClick={(evt) => evt.preventDefault()}>
-                              <FormattedMessage {...messages.templateHintDownloadLink} />
+                              <Text size="medium">
+                                <FormattedMessage {...messages.templateHintDownloadLink} />
+                              </Text>
                             </NoteLink>
                           </CsvDownloader>
                         </CsvDownload>
                       </li>
                       <li>
-                        <FormattedMessage {...messages.formatHint} />
+                        <Text size="medium">
+                          <FormattedMessage {...messages.formatHint} />
+                        </Text>
                         { messages.formatHintLink && messages.formatHintLink !== ''
                           && (
                             <A href={intl.formatMessage(messages.formatHintLink)} target="_blank">
-                              {intl.formatMessage(messages.formatHintLinkAnchor)}
+                              <Text size="medium">
+                                {intl.formatMessage(messages.formatHintLinkAnchor)}
+                              </Text>
                             </A>
                           )
                         }
@@ -313,6 +328,7 @@ ImportEntitiesForm.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   model: PropTypes.string,
   fieldModel: PropTypes.string,
+  typeLabel: PropTypes.string,
   formData: PropTypes.object,
   progress: PropTypes.number,
   errors: PropTypes.object,
