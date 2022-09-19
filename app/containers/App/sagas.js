@@ -520,13 +520,13 @@ export function* saveMultipleEntitiesSaga({ path, data, invalidateEntitiesPaths 
       true, // multiple
     )
   ));
-  if (updateClient && invalidateEntitiesPaths) {
+  if (invalidateEntitiesPaths) {
     yield all(
       asArray(invalidateEntitiesPaths).map(
         (item) => put(invalidateEntities(item))
       )
     );
-  } else if (updateClient && path) {
+  } else if (path) {
     yield put(invalidateEntities(path));
   }
 }
@@ -565,13 +565,13 @@ export function* deleteMultipleEntitiesSaga({ path, data, invalidateEntitiesPath
       true, // multiple
     )
   ));
-  if (updateClient && invalidateEntitiesPaths) {
+  if (invalidateEntitiesPaths) {
     yield all(
       asArray(invalidateEntitiesPaths).map(
         (item) => put(invalidateEntities(item))
       )
     );
-  } else if (updateClient && path) {
+  } else if (path) {
     yield put(invalidateEntities(path));
   } else if (!path && !invalidateEntitiesPaths) {
     yield put(invalidateEntities());
@@ -747,15 +747,16 @@ export function* newMultipleEntitiesSaga({ path, data, invalidateEntitiesPaths }
     )
   ));
 
-  if (!updateClient && invalidateEntitiesPaths) {
+  if (invalidateEntitiesPaths) {
     yield all(
       asArray(invalidateEntitiesPaths).map(
         (item) => put(invalidateEntities(item))
       )
     );
-  }
-  if (!updateClient && path) {
+  } else if (path) {
     yield put(invalidateEntities(path));
+  } else if (!path && !invalidateEntitiesPaths) {
+    yield put(invalidateEntities());
   }
 }
 
