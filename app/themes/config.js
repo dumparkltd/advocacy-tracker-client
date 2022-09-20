@@ -1141,10 +1141,8 @@ export const NO_PARENT_KEY = 'parentUndefined';
 export const MAP_OPTIONS = {
   RANGE: ['#CAE0F7', '#164571'],
   GRADIENT: {
-    actors: ['#fafa6e', '#72d07d', '#009a8a', '#006076', '#052b43'],
-    targets: ['#fafa6e', '#faad4a', '#dd654b', '#a52752', '#59004d'],
-    // actors: ['#F9E453', '#81DD90', '#029481', '#035E93', '#043465'],
-    // targets: ['#F9E453', '#FAAB4B', '#DD654A', '#BF0071', '#720369'],
+    actors: ['#FAFA6E', '#81DD90', '#029481', '#035E93', '#043465'],
+    targets: ['#FAFA6E', '#FAAB4B', '#DD654A', '#BF0071', '#59004d'],
   },
   NO_DATA_COLOR: '#EDEFF0',
   DEFAULT_STYLE: {
