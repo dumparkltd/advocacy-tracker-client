@@ -146,7 +146,7 @@ export function EntitiesMapActions({
       infoOptions = [{
         active: includeTargetMembers,
         onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-        label: 'Include activities targeting regions and groups (countries belong to)',
+        label: 'Include activities targeting regions & groups (countries are member of)',
       }];
     }
   } else if (hasGroupActors(actortypes)) {
@@ -154,15 +154,15 @@ export function EntitiesMapActions({
       infoOptions = [{
         active: includeActorMembers,
         onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-        label: 'Include positions of groups (countries belong to)',
+        label: 'Include positions of groups (countries are member of)',
       }];
     } else {
       infoOptions = [{
         active: includeActorMembers,
         onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
         label: isStatements
-          ? 'Include statements of groups (countries belong to)'
-          : 'Include activities of groups (countries belong to)',
+          ? 'Include statements of groups (countries are member of)'
+          : 'Include activities of groups (countries are member of)',
       }];
     }
   }
@@ -185,9 +185,7 @@ export function EntitiesMapActions({
       }]),
     });
 
-    indicatorOptions = indicators.sort(
-      (a, b) => parseInt(a.get('id'), 10) < parseInt(b.get('id'), 10) ? -1 : 1
-    ).reduce(
+    indicatorOptions = indicators.reduce(
       (memo, entity) => ([
         ...memo,
         {

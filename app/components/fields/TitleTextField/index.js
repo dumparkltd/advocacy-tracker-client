@@ -13,7 +13,7 @@ class TitleField extends React.PureComponent { // eslint-disable-line react/pref
     const { field } = this.props;
     return (
       <FieldWrap>
-        {field.isManager
+        {field.isMember
           && (
             <Label>
               <FormattedMessage {...(field.label || appMessages.attributes.title)} />

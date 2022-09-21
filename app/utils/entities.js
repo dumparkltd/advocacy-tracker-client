@@ -5,6 +5,9 @@ import {
   ACTION_FIELDS,
   ACTOR_FIELDS,
   RESOURCE_FIELDS,
+  INDICATOR_FIELDS,
+  ACTIONTYPES_CONFIG,
+  ACTORTYPES_CONFIG,
   API,
 } from 'themes/config';
 import { find, reduce, every } from 'lodash/collection';
@@ -119,7 +122,8 @@ export const testEntityAssociation = (entity, associatedPath, includeMembers) =>
     return true;
   }
   if (includeMembers) {
-    return entity.get(`${associatedPath}Associations`) && entity.get(`${associatedPath}Associations`).size > 0;
+    const memberAssociations = entity.get(`${associatedPath}Associations`);
+    return memberAssociations && memberAssociations.size > 0;
   }
   return false;
 };
@@ -200,14 +204,22 @@ export const filterEntitiesWithAnyAssociation = (
 export const filterEntitiesByCategories = (
   entities,
   query,
+  any = true,
 ) => entities
   && entities.filter(
-    (entity) => asList(query).every(
-      (categoryId) => testEntityCategoryAssociation(
-        entity,
-        parseInt(categoryId, 10),
+    (entity) => any
+      ? asList(query).some(
+        (categoryId) => testEntityCategoryAssociation(
+          entity,
+          parseInt(categoryId, 10),
+        )
       )
-    )
+      : asList(query).every(
+        (categoryId) => testEntityCategoryAssociation(
+          entity,
+          parseInt(categoryId, 10),
+        )
+      )
   );
 
 // filter entities by association with one or more categories
@@ -216,26 +228,78 @@ export const filterEntitiesByConnectedCategories = (
   entities,
   connections,
   query,
+  any = true,
 ) => entities && entities.filter(
   // consider replacing with .every()
-  (entity) => asList(query).every(
-    (queryArg) => {
-      const pathValue = queryArg.split(':');
-      const path = pathValue[0];
-      const connectionsForPath = connections.get(path);
-      return !connectionsForPath || connectionsForPath.some(
-        (connection) => testEntityEntityAssociation(
-          entity,
-          path,
-          connection.get('id'),
-        ) && testEntityCategoryAssociation(
-          connection,
-          pathValue[1],
-        )
-      );
-    },
-  )
+  (entity) => any
+    ? asList(query).some(
+      (queryArg) => {
+        const pathValue = queryArg.split(':');
+        const path = pathValue[0];
+        const connectionsForPath = connections.get(path);
+        return !connectionsForPath || connectionsForPath.some(
+          (connection) => testEntityEntityAssociation(
+            entity,
+            path,
+            connection.get('id'),
+          ) && testEntityCategoryAssociation(
+            connection,
+            pathValue[1],
+          )
+        );
+      },
+    )
+    : asList(query).every(
+      (queryArg) => {
+        const pathValue = queryArg.split(':');
+        const path = pathValue[0];
+        const connectionsForPath = connections.get(path);
+        return !connectionsForPath || connectionsForPath.some(
+          (connection) => testEntityEntityAssociation(
+            entity,
+            path,
+            connection.get('id'),
+          ) && testEntityCategoryAssociation(
+            connection,
+            pathValue[1],
+          )
+        );
+      },
+    )
 );
+
+const checkQuery = ({
+  queryValue,
+  path,
+  connectionAttribute,
+  entity,
+}) => {
+  let value = queryValue;
+  let connectionAttributeQuery;
+  // check for connection attribute queries
+  if (connectionAttribute && value.indexOf('>') > -1) {
+    [value, connectionAttributeQuery] = value.split('>');
+    const [attribute, values] = connectionAttributeQuery.split('=');
+    connectionAttributeQuery = {
+      attribute,
+      values: values.split('|'),
+    };
+  }
+  // check for type:id form
+  // sometimes related entity ids are stored as [type]:[id]
+  // ignore type
+  if (value.indexOf(':') > -1) {
+    [, value] = queryValue.split(':');
+  }
+  return entity.get(path)
+    && testEntityEntityAssociation(
+      entity,
+      path,
+      value,
+      connectionAttribute,
+      connectionAttributeQuery,
+    );
+};
 
 // filter entities by by association with one or more entities of specific connection type
 // assumes prior nesting of relationships
@@ -246,52 +310,51 @@ export const filterEntitiesByConnection = (
   query,
   path,
   connectionAttribute,
+  any = true, // bool
 ) => entities && entities.filter(
   // consider replacing with .every()
-  (entity) => asList(query).every(
-    (queryValue) => {
-      let value = queryValue;
-      let connectionAttributeQuery;
-      // check for connection attribute queries
-      if (value.indexOf('>') > -1) {
-        [value, connectionAttributeQuery] = value.split('>');
-        const [attribute, values] = connectionAttributeQuery.split('=');
-        connectionAttributeQuery = {
-          attribute,
-          values: values.split('|'),
-        };
-      }
-      // check for type:id form
-      // sometimes related entity ids are stored as [type]:[id]
-      // ignore type
-      if (value.indexOf(':') > -1) {
-        [, value] = queryValue.split(':');
-      }
-      return entity.get(path)
-        && testEntityEntityAssociation(
-          entity,
-          path,
-          value,
-          connectionAttribute,
-          connectionAttributeQuery,
-        );
-    },
-  )
+  (entity) => any
+    ? asList(query).some(
+      (queryValue) => checkQuery({
+        entity,
+        queryValue,
+        path,
+        connectionAttribute,
+      })
+    )
+    : asList(query).every(
+      (queryValue) => checkQuery({
+        entity,
+        queryValue,
+        path,
+        connectionAttribute,
+      })
+    )
 );
 export const filterEntitiesByMultipleConnections = (
   entities,
   query,
   paths,
+  any = true,
 ) => entities && entities.filter(
   // consider replacing with .every()
-  (entity) => asList(query).every(
-    (queryArg) => {
-      const [, value] = queryArg.split(':');
-      return paths.some(
-        (path) => entity.get(path) && testEntityEntityAssociation(entity, path, value)
-      );
-    },
-  )
+  (entity) => any
+    ? asList(query).some(
+      (queryArg) => {
+        const [, value] = queryArg.split(':');
+        return paths.some(
+          (path) => entity.get(path) && testEntityEntityAssociation(entity, path, value)
+        );
+      },
+    )
+    : asList(query).every(
+      (queryArg) => {
+        const [, value] = queryArg.split(':');
+        return paths.some(
+          (path) => entity.get(path) && testEntityEntityAssociation(entity, path, value)
+        );
+      },
+    )
 );
 
 const fieldEmpty = (entity, attribute) => !entity.getIn(['attributes', attribute])
@@ -483,13 +546,12 @@ export const entitySetSingle = (
     )
   );
 
-export const entitySetUser = (entity, users) => entity
-  && entitySetSingle(
-    entitySetSingle(entity, users, 'creator', 'created_by_id'),
-    users,
-    'user',
-    'updated_by_id',
-  );
+export const entitySetUser = (entity, users) => {
+  let result = entitySetSingle(entity, users, 'creator', 'created_by_id');
+  result = entitySetSingle(result, users, 'user', 'updated_by_id');
+  return entitySetSingle(result, users, 'userRelationship', 'relationship_updated_by_id');
+  // return result;
+};
 
 export const entitySetSingles = (entity, singles) => entity
   && singles.reduce(
@@ -726,11 +788,11 @@ export const usersByRole = (
   }
 );
 
-export const getEntityTitle = (entity, labels, contextIntl) => {
-  if (labels && contextIntl) {
+export const getEntityTitle = (entity, labels, intl) => {
+  if (labels && intl) {
     const label = find(labels, { value: parseInt(entity.get('id'), 10) });
     if (label && label.message) {
-      return appMessage(contextIntl, label.message);
+      return appMessage(intl, label.message);
     }
   }
   return entity.getIn(['attributes', 'title'])
@@ -739,9 +801,9 @@ export const getEntityTitle = (entity, labels, contextIntl) => {
 export const getEntityTitleTruncated = (
   entity,
   labels,
-  contextIntl,
+  intl,
 ) => truncateText(
-  getEntityTitle(entity, labels, contextIntl),
+  getEntityTitle(entity, labels, intl),
   TEXT_TRUNCATE.META_TITLE,
 );
 
@@ -855,11 +917,22 @@ export const getTaxonomyCategories = (
 };
 
 
-const checkAttribute = (typeId, att, attributes, isManager) => {
+export const checkAttribute = ({
+  typeId,
+  att,
+  attributes,
+  isAdmin,
+}) => {
   if (typeId && attributes && attributes[att]) {
-    if (attributes[att].hideAnalyst
-      && attributes[att].hideAnalyst.indexOf(typeId.toString()) > -1
-      && !isManager
+    if (
+      attributes[att].adminOnly
+      && !isAdmin
+    ) {
+      return false;
+    }
+    if (attributes[att].adminOnlyForTypes
+      && attributes[att].adminOnlyForTypes.indexOf(typeId.toString()) > -1
+      && !isAdmin
     ) {
       return false;
     }
@@ -874,7 +947,7 @@ const checkAttribute = (typeId, att, attributes, isManager) => {
         : attributes[att].required;
     }
   } else if (!typeId && attributes && attributes[att]) {
-    if (attributes[att].hideAnalyst && !isManager) {
+    if (attributes[att].adminOnly && !isAdmin) {
       return false;
     }
     if (attributes[att].optional) {
@@ -887,7 +960,7 @@ const checkAttribute = (typeId, att, attributes, isManager) => {
   return false;
 };
 
-const checkRequired = (typeId, att, attributes) => {
+const checkRequired = ({ typeId, att, attributes }) => {
   if (typeId && attributes && attributes[att] && attributes[att].required) {
     return typeof attributes[att].required === 'boolean'
       ? attributes[att].required
@@ -895,54 +968,67 @@ const checkRequired = (typeId, att, attributes) => {
   }
   return false;
 };
-export const checkActionAttribute = (typeId, att, isManager) => ACTION_FIELDS
+export const checkActionAttribute = (typeId, att, isAdmin) => ACTION_FIELDS
   && ACTION_FIELDS.ATTRIBUTES
-  && checkAttribute(
+  && checkAttribute({
     typeId,
     att,
-    ACTION_FIELDS.ATTRIBUTES,
-    isManager,
-  );
+    attributes: ACTION_FIELDS.ATTRIBUTES,
+    isAdmin,
+  });
+export const checkIndicatorAttribute = (att, isAdmin) => INDICATOR_FIELDS
+  && INDICATOR_FIELDS.ATTRIBUTES
+  && checkAttribute({
+    att,
+    attributes: INDICATOR_FIELDS.ATTRIBUTES,
+    isAdmin,
+  });
 
 export const checkActionRequired = (typeId, att) => ACTION_FIELDS
   && ACTION_FIELDS.ATTRIBUTES
-  && checkRequired(
+  && checkRequired({
     typeId,
     att,
-    ACTION_FIELDS.ATTRIBUTES,
-  );
+    attributes: ACTION_FIELDS.ATTRIBUTES,
+  });
 
-export const checkActorAttribute = (typeId, att, isManager) => ACTOR_FIELDS
+export const checkActorAttribute = (typeId, att, isAdmin) => ACTOR_FIELDS
   && ACTOR_FIELDS.ATTRIBUTES
-  && checkAttribute(
+  && checkAttribute({
     typeId,
     att,
-    ACTOR_FIELDS.ATTRIBUTES,
-    isManager,
-  );
+    attributes: ACTOR_FIELDS.ATTRIBUTES,
+    isAdmin,
+  });
 
 export const checkActorRequired = (typeId, att) => ACTOR_FIELDS
   && ACTOR_FIELDS.ATTRIBUTES
-  && checkRequired(
+  && checkRequired({
     typeId,
     att,
-    ACTOR_FIELDS.ATTRIBUTES,
-  );
+    attributes: ACTOR_FIELDS.ATTRIBUTES,
+  });
+export const checkIndicatorRequired = (att) => INDICATOR_FIELDS
+  && INDICATOR_FIELDS.ATTRIBUTES
+  && checkRequired({
+    att,
+    attributes: INDICATOR_FIELDS.ATTRIBUTES,
+  });
 export const checkResourceAttribute = (typeId, att) => RESOURCE_FIELDS
   && RESOURCE_FIELDS.ATTRIBUTES
-  && checkAttribute(
+  && checkAttribute({
     typeId,
     att,
-    RESOURCE_FIELDS.ATTRIBUTES,
-  );
+    attributes: RESOURCE_FIELDS.ATTRIBUTES,
+  });
 
 export const checkResourceRequired = (typeId, att) => RESOURCE_FIELDS
   && RESOURCE_FIELDS.ATTRIBUTES
-  && checkRequired(
+  && checkRequired({
     typeId,
     att,
-    RESOURCE_FIELDS.ATTRIBUTES,
-  );
+    attributes: RESOURCE_FIELDS.ATTRIBUTES,
+  });
 
 export const hasGroupActors = (actortypesForActiontype) => actortypesForActiontype
   && actortypesForActiontype.some(
@@ -953,8 +1039,8 @@ export const hasGroupActors = (actortypesForActiontype) => actortypesForActionty
 export const setActionConnections = ({
   action,
   actionConnections,
-  actorActions,
-  actionActors,
+  actorActions, // as active actor
+  actionActors, // as passive target of action
   actionResources,
   actionIndicators,
   actionIndicatorAttributes,
@@ -1153,4 +1239,96 @@ export const setUserConnections = ({
   return user
     .set('actionsByType', entityActionsByActiontype)
     .set('actorsByType', entityActorsByActortype);
+};
+
+export const getActiontypeColumns = ({
+  typeId,
+  viewSubject,
+  isAdmin,
+  otherColumns,
+  skipTypeColumns,
+  isSingle = true,
+  includeMain = true,
+}) => {
+  let columns = includeMain
+    ? [{
+      id: 'main',
+      type: 'main',
+      sort: 'title',
+      attributes: isAdmin ? ['code', 'title'] : ['title'],
+    }]
+    : [];
+
+  if (
+    !skipTypeColumns
+    && ACTIONTYPES_CONFIG[parseInt(typeId, 10)]
+    && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].columns
+  ) {
+    const typeColumns = ACTIONTYPES_CONFIG[parseInt(typeId, 10)].columns.filter(
+      (col) => {
+        if (isSingle && typeof col.showOnSingle !== 'undefined') {
+          if (viewSubject && Array.isArray(col.showOnSingle)) {
+            return col.showOnSingle.indexOf(viewSubject) > -1;
+          }
+          return col.showOnSingle;
+        }
+        return true;
+      }
+    );
+    columns = [
+      ...columns,
+      ...typeColumns,
+    ];
+  }
+  // e.g. supportlevel
+  if (otherColumns) {
+    columns = [
+      ...columns,
+      ...otherColumns,
+    ];
+  }
+  return columns;
+};
+
+export const getActortypeColumns = ({
+  typeId,
+  showCode,
+  otherColumns,
+  includeMain = true,
+  skipTypeColumns,
+  isSingle = true,
+}) => {
+  let columns = includeMain
+    ? [{
+      id: 'main',
+      type: 'main',
+      sort: 'title',
+      attributes: showCode ? ['code', 'title'] : ['title'],
+    }]
+    : [];
+  if (
+    !skipTypeColumns
+    && ACTORTYPES_CONFIG[parseInt(typeId, 10)]
+    && ACTORTYPES_CONFIG[parseInt(typeId, 10)].columns
+  ) {
+    const typeColumns = ACTORTYPES_CONFIG[parseInt(typeId, 10)].columns.filter(
+      (col) => {
+        if (isSingle && typeof col.showOnSingle !== 'undefined') {
+          return col.showOnSingle;
+        }
+        return true;
+      }
+    );
+    columns = [
+      ...columns,
+      ...typeColumns,
+    ];
+  }
+  if (otherColumns) {
+    columns = [
+      ...columns,
+      ...otherColumns,
+    ];
+  }
+  return columns;
 };

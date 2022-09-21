@@ -86,6 +86,7 @@ export const CONFIG = {
       connectPath: API.USER_ROLES, // filter by actor connection
       single: true,
       labels: Object.values(USER_ROLES),
+      adminOnly: true,
     },
   },
 };

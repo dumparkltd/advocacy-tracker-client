@@ -49,6 +49,7 @@ import {
   selectReadyForAuthCheck,
   selectIsUserAdmin,
   selectSessionUserId,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -59,7 +60,6 @@ import {
   selectDomainPage,
   selectViewEntity,
   selectActionsByActiontype,
-  selectConnectedTaxonomies,
 } from './selectors';
 
 import messages from './messages';
@@ -101,6 +101,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     const {
       viewEntity,
       actionsByActiontype,
+      isAdmin,
     } = props;
     return viewEntity
       ? Map({
@@ -110,7 +111,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
           FORM_INITIAL.get('attributes')
         ),
         associatedActionsByActiontype: actionsByActiontype
-          ? actionsByActiontype.map((actions) => entityOptions(actions, true))
+          ? actionsByActiontype.map((actions) => entityOptions({ entities: actions, showCode: isAdmin }))
           : Map(),
       })
       : Map();
@@ -154,6 +155,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     connectedTaxonomies,
     actionsByActiontype,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const typeId = entity.getIn(['attributes', 'resourcetype_id']);
@@ -189,7 +191,8 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
         entitiesByActiontype: actionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
+        isAdmin,
       });
       if (actionConnections) {
         groups.push(
@@ -250,7 +253,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
       saveSending, saveError, deleteSending,
     } = viewDomainPage.toJS();
 
-    const type = intl.formatMessage(
+    const typeLabel = intl.formatMessage(
       appMessages.entities[typeId ? `resources_${typeId}` : 'resources'].single
     );
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
@@ -258,14 +261,14 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     return (
       <div>
         <Helmet
-          title={`${intl.formatMessage(messages.pageTitle, { type })}`}
+          title={`${intl.formatMessage(messages.pageTitle, { type: typeLabel })}`}
           meta={[
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
         <Content ref={this.scrollContainer}>
           <ContentHeader
-            title={intl.formatMessage(messages.pageTitle, { type })}
+            title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
             type={CONTENT_SINGLE}
             buttons={
               viewEntity && dataReady ? [{
@@ -298,7 +301,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={handleCancel}
                 handleUpdate={handleUpdate}
-                handleDelete={isAdmin ? handleDelete : null}
+                handleDelete={isAdmin ? () => handleDelete(typeId) : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
                 fields={dataReady && {
@@ -312,6 +315,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
                       connectedTaxonomies,
                       actionsByActiontype,
                       onCreateOption,
+                      isAdmin,
                     ),
                     aside: this.getBodyAsideFields(
                       viewEntity
@@ -362,7 +366,7 @@ const mapStateToProps = (state, props) => ({
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
   myId: selectSessionUserId(state),
 });
 
@@ -372,7 +376,7 @@ function mapDispatchToProps(dispatch, props) {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
     initialiseForm: (model, formData) => {
       dispatch(formActions.reset(model));
@@ -430,11 +434,11 @@ function mapDispatchToProps(dispatch, props) {
     handleUpdate: (formData) => {
       dispatch(updateEntityForm(formData));
     },
-    handleDelete: () => {
+    handleDelete: (typeId) => {
       dispatch(deleteEntity({
         path: API.RESOURCES,
         id: props.params.id,
-        redirect: ROUTES.RESOURCES,
+        redirect: `${ROUTES.RESOURCES}/${typeId}`,
       }));
     },
     onCreateOption: (args) => {

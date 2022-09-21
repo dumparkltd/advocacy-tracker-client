@@ -61,6 +61,8 @@ import {
   selectActiontypeTaxonomiesWithCats,
   selectActiontype,
   selectSessionUser,
+  selectIsUserAdmin,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -72,7 +74,6 @@ import FormWrapper from './FormWrapper';
 import {
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
-  selectConnectedTaxonomies,
   selectActorsByActortype,
   selectTargetsByActortype,
   selectResourcesByResourcetype,
@@ -129,12 +130,12 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       : dataWithType;
   }
 
-  getHeaderMainFields = (typeId) => {
+  getHeaderMainFields = (typeId, isAdmin) => {
     const { intl } = this.context;
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          checkActionAttribute(typeId, 'code') && getCodeFormField(
+          checkActionAttribute(typeId, 'code', isAdmin) && getCodeFormField(
             intl.formatMessage,
             'code',
             checkActionRequired(typeId, 'code'),
@@ -157,6 +158,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       fields: [
         getStatusField(intl.formatMessage),
         getStatusField(intl.formatMessage, 'private'),
+        getStatusField(intl.formatMessage, 'notifications'),
       ],
     });
     return groups;
@@ -171,6 +173,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     subActionsByActiontype,
     indicatorOptions,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     // if (!type) return [];
@@ -210,10 +213,11 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     if (indicatorOptions) {
       const indicatorConnections = renderIndicatorControl({
         entities: indicatorOptions,
-        contextIntl: intl,
+        intl,
         connectionAttributes: [{
           attribute: 'supportlevel_id',
           type: 'select',
+          showCode: isAdmin,
           options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId].map(
             (level) => ({
               label: intl.formatMessage(appMessages.supportlevels[level.value]),
@@ -233,12 +237,13 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     }
 
     if (actorsByActortype) {
-      const actorConnections = renderActorsByActortypeControl(
-        actorsByActortype,
-        connectedTaxonomies,
+      const actorConnections = renderActorsByActortypeControl({
+        entitiesByActortype: actorsByActortype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
         intl,
-      );
+        isAdmin,
+      });
       if (actorConnections) {
         groups.push(
           {
@@ -249,12 +254,13 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       }
     }
     if (targetsByActortype) {
-      const targetConnections = renderTargetsByActortypeControl(
-        targetsByActortype,
-        connectedTaxonomies,
+      const targetConnections = renderTargetsByActortypeControl({
+        entitiesByActortype: targetsByActortype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
         intl,
-      );
+        isAdmin,
+      });
       if (targetConnections) {
         groups.push(
           {
@@ -269,8 +275,9 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         entitiesByActiontype: subActionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         model: 'associatedSubActionsByActiontype',
+        isAdmin,
       });
       if (actionConnections) {
         groups.push(
@@ -282,11 +289,12 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       }
     }
     if (resourcesByResourcetype) {
-      const resourceConnections = renderResourcesByResourcetypeControl(
-        resourcesByResourcetype,
+      const resourceConnections = renderResourcesByResourcetypeControl({
+        entitiesByResourcetype: resourcesByResourcetype,
         onCreateOption,
         intl,
-      );
+        isAdmin,
+      });
       if (resourceConnections) {
         groups.push(
           {
@@ -306,6 +314,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     topActionsByActiontype,
     userOptions,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     // const typeId = type.get('id');
@@ -356,7 +365,9 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       { // fieldGroup
         label: intl.formatMessage(appMessages.entities.taxonomies.plural),
         icon: 'categories',
-        fields: renderTaxonomyControl(taxonomies, onCreateOption, intl),
+        fields: renderTaxonomyControl({
+          taxonomies, onCreateOption, intl,
+        }),
       },
     );
     if (topActionsByActiontype) {
@@ -364,8 +375,9 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         entitiesByActiontype: topActionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
         model: 'associatedTopActionsByActiontype',
+        isAdmin,
       });
       if (actionConnections) {
         groups.push(
@@ -406,6 +418,8 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       formDataPath,
       inModal,
       modalConnect,
+      invalidateEntitiesOnSuccess,
+      isAdmin,
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
@@ -448,7 +462,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           .get('create')
           .find((item) => item.keySeq().includes('user_id'))
           .get('user_id');
-        const user = userId && userOptions.get(userId);
+        const user = userId && userOptions && userOptions.get(userId);
         subTitle = user && `For ${lowerCase(intl.formatMessage(appMessages.entities.users.single))}: ${getEntityTitle(user)}`;
       }
     }
@@ -484,6 +498,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             subActionsByActiontype,
             indicatorOptions,
             userOptions,
+            invalidateEntitiesOnSuccess,
           )}
           handleSubmitFail={handleSubmitFail}
           handleCancel={() => handleCancel(typeId)}
@@ -493,7 +508,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           scrollContainer={this.scrollContainer.current}
           fields={{
             header: {
-              main: this.getHeaderMainFields(typeId),
+              main: this.getHeaderMainFields(typeId, isAdmin),
               aside: this.getHeaderAsideFields(),
             },
             body: {
@@ -506,6 +521,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
                 subActionsByActiontype,
                 indicatorOptions,
                 inModal ? null : onCreateOption,
+                isAdmin
               ),
               aside: this.getBodyAsideFields(
                 typeId,
@@ -514,6 +530,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
                 topActionsByActiontype,
                 userOptions,
                 inModal ? null : onCreateOption,
+                isAdmin,
               ),
             },
           }}
@@ -551,7 +568,12 @@ ActionNewForm.propTypes = {
   modalConnect: PropTypes.instanceOf(Map),
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
+  invalidateEntitiesOnSuccess: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+  ]),
   inModal: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   // autoUser: PropTypes.bool,
 };
 
@@ -560,6 +582,7 @@ ActionNewForm.contextTypes = {
 };
 
 const mapStateToProps = (state, { typeId, autoUser }) => ({
+  isAdmin: selectIsUserAdmin(state),
   authReady: selectReadyForAuthCheck(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   taxonomies: selectActiontypeTaxonomiesWithCats(
@@ -569,7 +592,7 @@ const mapStateToProps = (state, { typeId, autoUser }) => ({
       includeParents: false,
     },
   ),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
   actiontype: selectActiontype(state, typeId),
   actorsByActortype: selectActorsByActortype(state, typeId),
   targetsByActortype: selectTargetsByActortype(state, typeId),
@@ -601,7 +624,7 @@ function mapDispatchToProps(
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
     onErrorDismiss: () => {
       dispatch(submitInvalid(true));
@@ -625,6 +648,7 @@ function mapDispatchToProps(
       subActionsByActiontype,
       indicatorOptions,
       userOptions,
+      invalidateEntitiesOnSuccess,
     ) => {
       let saveData = formData.setIn(['attributes', 'measuretype_id'], actiontype.get('id'));
       // actionCategories
@@ -802,6 +826,7 @@ function mapDispatchToProps(
           path: API.ACTIONS,
           entity: saveData.toJS(),
           redirect: !inModal ? ROUTES.ACTION : null,
+          invalidateEntitiesOnSuccess,
           onSuccess: inModal && onSaveSuccess
             ? () => {
               // cleanup

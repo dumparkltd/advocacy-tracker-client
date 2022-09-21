@@ -15,7 +15,6 @@ import {
 } from 'utils/fields';
 
 import FieldGroup from 'components/fields/FieldGroup';
-
 import {
   selectChildTargetsByType,
 } from './selectors';
@@ -43,9 +42,7 @@ export function TabActorsAccordionChildTargets({
                 onEntityClick,
                 connections: actorConnections,
                 typeid: actortypeid,
-                columns: getActortypeColumns(
-                  actortypeid,
-                ),
+                columns: getActortypeColumns(actortypeid),
               }),
             ]),
             [],
@@ -63,7 +60,10 @@ TabActorsAccordionChildTargets.propTypes = {
   getActortypeColumns: PropTypes.func,
   taxonomies: PropTypes.object,
   actorConnections: PropTypes.object,
-  title: PropTypes.string,
+  title: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.node,
+  ]),
 };
 
 const mapStateToProps = (state, { targetIds }) => ({

@@ -7,6 +7,7 @@ import {
   selectActionQuery,
   selectSortByQuery,
   selectSortOrderQuery,
+  selectConnectedCategoryQuery,
   selectActions,
   selectActorsWithPositions,
   selectReady,
@@ -14,6 +15,7 @@ import {
   selectActionIndicatorsGroupedByIndicator,
   selectCategories,
   selectActors,
+  selectIncludeInofficialStatements,
 } from 'containers/App/selectors';
 
 import {
@@ -22,11 +24,14 @@ import {
   entitiesSetCategoryIds,
 } from 'utils/entities';
 
+import asList from 'utils/as-list';
+import qe from 'utils/quasi-equals';
 import { sortEntities, getSortOption } from 'utils/sort';
 import {
   API,
   ACTORTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
+  OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
 import { CONFIG, DEPENDENCIES } from './constants';
 
@@ -36,20 +41,47 @@ export const selectConnections = createSelector(
   selectActionCategoriesGroupedByAction,
   selectCategories,
   selectActors,
+  selectConnectedCategoryQuery,
+  selectIncludeInofficialStatements,
   (
     ready,
     actions,
     actionAssociationsGrouped,
     categories,
     actors,
+    connectedCategoryQuery,
+    includeInofficial,
   ) => {
     if (ready) {
+      const actionsWithCategories = entitiesSetCategoryIds(
+        actions,
+        actionAssociationsGrouped,
+        categories,
+      );
       return new Map().set(
         API.ACTIONS,
-        entitiesSetCategoryIds(
-          actions,
-          actionAssociationsGrouped,
-          categories,
+        actionsWithCategories.filter(
+          (action) => {
+            const actionCategories = action.get('categories');
+            let pass = true;
+            if (!includeInofficial) {
+              pass = actionCategories && actionCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+            }
+            if (pass && connectedCategoryQuery) {
+              pass = asList(connectedCategoryQuery).every(
+                (queryArg) => {
+                  const [path, value] = queryArg.split(':');
+                  if (path !== API.ACTIONS || !value) {
+                    return true;
+                  }
+                  return actionCategories.find(
+                    (catId) => qe(catId, value),
+                  );
+                },
+              );
+            }
+            return pass;
+          }
         )
       ).set(
         API.ACTORS,
@@ -69,7 +101,7 @@ const selectIndicatorsSearched = createSelector(
   (indicators) => indicators,
 );
 
-const selectIndicatorsWithActions = createSelector(
+export const selectIndicatorsWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectIndicatorsSearched,
   (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
@@ -146,7 +178,7 @@ const selectIndicatorsWithActions = createSelector(
 );
 
 const selectIndicatorsWithout = createSelector(
-  selectIndicatorsWithActions,
+  selectIndicatorsWithConnections,
   selectCategories,
   selectWithoutQuery,
   (entities, categories, query) => query
@@ -177,7 +209,7 @@ export const selectListIndicators = createSelector(
     return entities && sortEntities(
       entities,
       order || (sortOption ? sortOption.order : 'desc'),
-      sort || (sortOption ? sortOption.attribute : 'id'),
+      sort || (sortOption ? sortOption.attribute : 'title'),
       sortOption ? sortOption.type : 'string',
     );
   }

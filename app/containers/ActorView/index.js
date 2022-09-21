@@ -65,7 +65,7 @@ import SubjectTabWrapper from 'components/styled/SubjectTabWrapper';
 
 import {
   selectReady,
-  selectIsUserManager,
+  selectIsUserMember,
   selectIsUserAdmin,
   selectSessionUserId,
   selectTaxonomiesWithCategories,
@@ -98,7 +98,7 @@ export function ActorView(props) {
     intl,
     viewEntity,
     dataReady,
-    isManager,
+    isMember,
     onLoadData,
     params,
     handleEdit,
@@ -123,6 +123,13 @@ export function ActorView(props) {
     // kick off loading of data
     onLoadData();
   }, []);
+  useEffect(() => {
+    // also kick off loading of data again once dataReady changes and becomes negative again
+    // required due to possible in-view creation of activities
+    if (!dataReady) {
+      onLoadData();
+    }
+  }, [dataReady]);
 
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'actortype_id']);
   const viewActortype = actortypes && actortypes.find((type) => qe(type.get('id'), typeId));
@@ -138,7 +145,7 @@ export function ActorView(props) {
         icon: 'print',
       },
     ];
-    if (isManager) {
+    if (isMember) {
       buttons = [
         ...buttons,
         {
@@ -219,17 +226,17 @@ export function ActorView(props) {
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isManager}>
+                <Main hasAside={isMember}>
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
-                        checkActorAttribute(typeId, 'code', isManager) && getReferenceField(
+                        checkActorAttribute(typeId, 'code', isAdmin) && getReferenceField(
                           viewEntity,
                           'code',
-                          isManager,
+                          isAdmin,
                         ),
                         checkActorAttribute(typeId, 'title') && getTitleField(viewEntity),
-                        checkActorAttribute(typeId, 'prefix', isManager) && getInfoField(
+                        checkActorAttribute(typeId, 'prefix', isMember) && getInfoField(
                           'prefix',
                           viewEntity.getIn(['attributes', 'prefix']),
                         ),
@@ -238,7 +245,7 @@ export function ActorView(props) {
                     }}
                   />
                 </Main>
-                {isManager && (
+                {isMember && (
                   <Aside>
                     <FieldGroup
                       group={{
@@ -252,7 +259,7 @@ export function ActorView(props) {
                             entity: viewEntity,
                             attribute: 'is_archive',
                           }),
-                          getMetaField(viewEntity),
+                          getMetaField(viewEntity, true),
                         ],
                       }}
                       aside
@@ -312,6 +319,7 @@ export function ActorView(props) {
                     <SubjectTabWrapper>
                       {viewSubject === 'members' && hasMembers && (
                         <TabMembers
+                          isAdmin={isAdmin}
                           membersByType={membersByType}
                           onEntityClick={(id, path) => onEntityClick(id, path)}
                           taxonomies={taxonomies}
@@ -320,6 +328,7 @@ export function ActorView(props) {
                       )}
                       {viewSubject === 'topics' && hasStatements && (
                         <TabStatements
+                          isAdmin={isAdmin}
                           viewEntity={viewEntity}
                           onEntityClick={(id, path) => onEntityClick(id, path)}
                           statements={actionsByActiontype && actionsByActiontype.get(parseInt(ACTIONTYPES.EXPRESS, 10))}
@@ -328,6 +337,7 @@ export function ActorView(props) {
                       )}
                       {(viewSubject === 'actors' || viewSubject === 'targets') && (
                         <TabActivities
+                          isAdmin={isAdmin}
                           viewEntity={viewEntity}
                           onEntityClick={onEntityClick}
                           viewSubject={viewSubject}
@@ -420,7 +430,7 @@ ActorView.propTypes = {
   membersByType: PropTypes.instanceOf(Map),
   associationsByType: PropTypes.instanceOf(Map),
   params: PropTypes.object,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   intl: intlShape.isRequired,
   subject: PropTypes.string,
   viewActiontypeId: PropTypes.string,
@@ -436,7 +446,7 @@ ActorView.propTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   viewTaxonomies: selectViewTaxonomies(state, props.params.id),

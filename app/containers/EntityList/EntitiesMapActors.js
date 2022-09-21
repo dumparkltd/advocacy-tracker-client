@@ -23,7 +23,7 @@ import {
   selectActortypeActors,
   selectActionActorsGroupedByAction,
   selectActorActionsGroupedByAction,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectMapIndicator,
 } from 'containers/App/selectors';
 
@@ -102,36 +102,29 @@ export function EntitiesMapActors({
       memberOption = {
         active: includeTargetMembers,
         onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-        label: 'Include activities targeting regions and groups (countries belong to)',
+        label: 'Include activities targeting regions & groups',
       };
     } else if (hasGroupActors(actortypes)) {
       memberOption = {
         active: includeActorMembers,
         onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-        label: 'Include activities of groups (countries belong to)',
+        label: 'Include activities of groups',
       };
     }
-  } else if (hasActions && !hasByTarget) { // i.e. institutions
-    // showing targeted countries
-    mapSubjectClean = 'targets';
-    memberOption = {
-      active: includeTargetMembers,
-      onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-      label: 'Include activities targeting regions and groups (countries belong to)',
-    };
-  // } else if (!hasActions && hasByTarget) { // i.e. regions, classes
+  // } else if (hasActions && !hasByTarget) { // i.e. institutions
+  //   // showing targeted countries
   //   mapSubjectClean = 'targets';
   //   memberOption = {
-  //     active: includeActorMembers,
-  //     onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-  //     label: 'Include activities of groups (countries belong to)',
+  //     active: includeTargetMembers,
+  //     onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+  //     label: 'Include activities targeting regions & groups',
   //   };
   } else { // i.e. groups
     mapSubjectClean = 'targets';
     memberOption = {
       active: includeTargetMembers,
       onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-      label: 'Include activities targeting regions and groups (countries belong to)',
+      label: 'Include activities targeting regions & groups',
     };
   }
 
@@ -442,7 +435,7 @@ const mapStateToProps = (state) => ({
   actions: selectActions(state),
   actionActorsByAction: selectActionActorsGroupedByAction(state), // for figuring out targeted countries
   actorActionsByAction: selectActorActionsGroupedByAction(state), // for figuring out targeted countries
-  membershipsByAssociation: selectMembershipsGroupedByAssociation(state),
+  membershipsByAssociation: selectMembershipsGroupedByParent(state),
   mapIndicator: selectMapIndicator(state),
 });
 

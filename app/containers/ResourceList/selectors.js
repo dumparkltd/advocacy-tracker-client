@@ -49,51 +49,7 @@ export const selectConnections = createSelector(
   }
 );
 
-// export const selectConnectedTaxonomies = createSelector(
-//   (state) => selectReady(state, { path: DEPENDENCIES }),
-//   selectConnections,
-//   selectActionTaxonomies,
-//   selectCategories,
-//   (state) => selectEntities(state, API.ACTION_CATEGORIES),
-//   (
-//     ready,
-//     connections,
-//     taxonomies,
-//     categories,
-//     actionCategories,
-//   ) => {
-//     if (!ready) return Map();
-//     const relationship = {
-//       tags: 'tags_actions',
-//       path: 'actions',
-//       key: 'measure_id',
-//       associations: actionCategories,
-//     };
-//
-//     const groupedAssociations = relationship.associations.filter(
-//       (association) => association.getIn(['attributes', relationship.key])
-//         && connections.getIn([
-//           relationship.path,
-//           association.getIn(['attributes', relationship.key]).toString(),
-//         ])
-//     ).groupBy(
-//       (association) => association.getIn(['attributes', 'category_id'])
-//     );
-//     return taxonomies.map(
-//       (taxonomy) => taxonomy.set(
-//         'categories',
-//         getTaxonomyCategories(
-//           taxonomy,
-//           categories,
-//           relationship,
-//           groupedAssociations,
-//         )
-//       )
-//     );
-//   }
-// );
-
-const selectResourcesWithActions = createSelector(
+export const selectResourcesWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectResourcesWhereQuery,
   selectConnections,
@@ -137,7 +93,7 @@ const selectResourcesWithActions = createSelector(
 );
 
 const selectResourcesWithout = createSelector(
-  selectResourcesWithActions,
+  selectResourcesWithConnections,
   selectCategories,
   selectWithoutQuery,
   (entities, categories, query) => query

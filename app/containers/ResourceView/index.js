@@ -21,11 +21,15 @@ import {
   getDateField,
 } from 'utils/fields';
 import { qe } from 'utils/quasi-equals';
-import { getEntityTitleTruncated, checkResourceAttribute } from 'utils/entities';
+import {
+  getEntityTitleTruncated,
+  checkResourceAttribute,
+  getActiontypeColumns,
+} from 'utils/entities';
 
 import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
 
-import { ROUTES, ACTIONTYPES_CONFIG } from 'themes/config';
+import { ROUTES } from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
@@ -33,7 +37,7 @@ import EntityView from 'components/EntityView';
 
 import {
   selectReady,
-  selectIsUserManager,
+  selectIsUserMember,
   selectTaxonomiesWithCategories,
   selectActionConnections,
   selectIsUserAdmin,
@@ -50,27 +54,7 @@ import {
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
-const getActiontypeColumns = (typeid) => {
-  if (
-    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    return ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-      (col) => {
-        if (typeof col.showOnSingle !== 'undefined') {
-          return col.showOnSingle;
-        }
-        return true;
-      }
-    );
-  }
-  return [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: ['title'],
-  }];
-};
+
 export class ResourceView extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
     this.props.loadEntitiesIfNeeded();
@@ -120,6 +104,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
     taxonomies,
     actionConnections,
     onEntityClick,
+    isAdmin,
   ) => {
     const fields = [];
     const typeId = entity.getIn(['attributes', 'resourcetype_id']);
@@ -147,7 +132,10 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
             onEntityClick,
             connections: actionConnections,
             typeid: actiontypeid,
-            columns: getActiontypeColumns(actiontypeid),
+            columns: getActiontypeColumns({
+              typeId: actiontypeid,
+              isAdmin,
+            }),
           }),
         );
       });
@@ -178,7 +166,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
     const {
       viewEntity,
       dataReady,
-      isManager,
+      isMember,
       taxonomies,
       actionsByActiontype,
       actionConnections,
@@ -201,7 +189,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
           icon: 'print',
         },
       ];
-      if (isManager) {
+      if (isMember) {
         buttons = [
           ...buttons,
           {
@@ -253,7 +241,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
                 fields={{
                   header: {
                     main: this.getHeaderMainFields(viewEntity),
-                    aside: isManager && this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
+                    aside: isMember && this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
                   },
                   body: {
                     main: this.getBodyMainFields(
@@ -262,6 +250,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
                       taxonomies,
                       actionConnections,
                       onEntityClick,
+                      isAdmin,
                     ),
                     aside: this.getBodyAsideFields(viewEntity),
                   },
@@ -287,7 +276,7 @@ ResourceView.propTypes = {
   actionConnections: PropTypes.object,
   actionsByActiontype: PropTypes.object,
   params: PropTypes.object,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
   myId: PropTypes.string,
 };
@@ -297,7 +286,7 @@ ResourceView.contextTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   taxonomies: selectTaxonomiesWithCategories(state),

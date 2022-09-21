@@ -9,13 +9,14 @@ import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
+import { Text } from 'grommet';
 import { Edit } from 'grommet-icons';
 import { Map, List, fromJS } from 'immutable';
 
 // import { getEntityReference } from 'utils/entities';
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
-
+import Icon from 'components/Icon';
 import EntityListHeader from 'components/EntityListHeader';
 import EntityListPrintKey from 'components/EntityListPrintKey';
 import PrintOnly from 'components/styled/PrintOnly';
@@ -29,6 +30,10 @@ import {
   selectMapSubjectQuery,
   selectIncludeActorMembers,
   selectIncludeTargetMembers,
+  selectIncludeActorChildren,
+  selectIncludeTargetChildren,
+  selectIncludeInofficialStatements,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import {
@@ -40,6 +45,12 @@ import {
   setMapSubject,
   setIncludeActorMembers,
   setIncludeTargetMembers,
+  setIncludeActorChildren,
+  setIncludeTargetChildren,
+  setIncludeInofficialStatements,
+  saveMultipleEntities,
+  newMultipleEntities,
+  deleteMultipleEntities,
 } from 'containers/App/actions';
 
 // import appMessages from 'containers/App/messages';
@@ -60,9 +71,9 @@ import messages from './messages';
 
 import {
   resetProgress,
-  saveMultiple,
-  newMultipleConnections,
-  deleteMultipleConnections,
+  // saveMultiple,
+  // newMultipleConnections,
+  // deleteMultipleConnections,
   selectEntity,
   selectMultipleEntities,
   updateQuery,
@@ -70,6 +81,7 @@ import {
   dismissError,
   dismissAllErrors,
   resetFilters,
+  setFilters,
 } from './actions';
 
 import { currentFilters, currentFilterArgs } from './current-filters';
@@ -101,6 +113,7 @@ const ProgressText = styled.div`
 const STATE_INITIAL = {
   visibleFilters: null,
   visibleEditOptions: null,
+  deleteConfirm: null,
 };
 
 export class EntityList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
@@ -118,6 +131,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     this.setState({
       visibleFilters: true,
       visibleEditOptions: null,
+      deleteConfirm: null,
     });
   };
 
@@ -131,6 +145,25 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     this.setState({
       visibleEditOptions: true,
       visibleFilters: null,
+      deleteConfirm: null,
+    });
+  };
+
+  onShowDeleteConfirm = (evt) => {
+    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+    this.setState({
+      visibleEditOptions: null,
+      visibleFilters: null,
+      deleteConfirm: true,
+    });
+  };
+
+  onHideDeleteConfirm = (evt) => {
+    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+    this.setState({
+      visibleEditOptions: null,
+      visibleFilters: null,
+      deleteConfirm: null,
     });
   };
 
@@ -147,7 +180,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
   };
 
   onClearFilters = () => {
-    // TODO: broken
     this.props.onResetFilters(currentFilterArgs(
       this.props.config,
       this.props.locationQuery,
@@ -196,6 +228,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       connections,
       onTagClick,
       actortypes,
+      parentActortypes,
       actiontypes,
       targettypes,
       resourcetypes,
@@ -214,8 +247,14 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onSetMapSubject,
       onSetIncludeActorMembers,
       onSetIncludeTargetMembers,
+      onSetIncludeActorChildren,
+      onSetIncludeTargetChildren,
+      onSetIncludeInofficial,
       includeActorMembers,
       includeTargetMembers,
+      includeActorChildren,
+      includeTargetChildren,
+      includeInofficial,
       headerColumnsUtility,
       headerOptions,
       taxonomies,
@@ -230,11 +269,14 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onResetProgress,
       actiontypesForTarget,
       membertypes,
+      parentAssociationtypes,
       associationtypes,
       handleEditSubmit,
       onCreateOption,
       allEntityCount,
       listActions,
+      onEntitiesDelete,
+      onUpdateFilters,
     } = this.props;
     // detect print to avoid expensive rendering
     const printing = !!(
@@ -247,27 +289,26 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     const success = viewDomain.get('success');
     const errors = viewDomain.get('errors').size > 0 ? this.mapErrors(viewDomain.get('errors')) : Map();
 
-    const entities = (dataReady && errors.size > 0)
-      ? this.filterByError(this.props.entities, errors)
-      : this.props.entities;
-
+    const { entities, allEntities } = this.props;
     const entityIdsSelectedFiltered = entityIdsSelected.size > 0 && entities
       ? entityIdsSelected.filter((id) => entities.map((entity) => entity.get('id')).includes(id))
       : entityIdsSelected;
-    const isManager = canEdit && hasUserRole[USER_ROLES.MANAGER.value];
+    const isMember = canEdit && hasUserRole[USER_ROLES.MEMBER.value];
+    const isAdmin = canEdit && hasUserRole[USER_ROLES.ADMIN.value];
 
     const filters = currentFilters(
       {
         config,
-        entities,
+        entities: allEntities,
         taxonomies: allTaxonomies,
         connections,
+        connectedTaxonomies,
         locationQuery,
         onTagClick,
         errors,
         // actortypes,
         intl,
-        isManager,
+        isAdmin,
       },
       intl.formatMessage(messages.filterFormWithoutPrefix),
       intl.formatMessage(messages.filterFormAnyPrefix),
@@ -305,17 +346,54 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     let allListActions;
     if (hasSelected) {
       allListActions = listActions || [];
-      allListActions = [
-        ...allListActions,
-        {
-          title: 'Edit selected',
-          onClick: (evt) => this.onShowEditOptions(evt),
-          icon: <Edit color="white" size="xxsmall" />,
-          type: 'listOption',
-          active: true,
-          isManager,
-        },
-      ];
+      if (config.batchDelete && isAdmin) {
+        if (!this.state.deleteConfirm) {
+          allListActions = [
+            {
+              title: 'Delete selected',
+              onClick: (evt) => this.onShowDeleteConfirm(evt),
+              icon: <Icon name="trash" size="22px" />,
+              type: 'listOption',
+            },
+            ...allListActions,
+          ];
+        } else {
+          allListActions = [
+            {
+              title: 'Cancel',
+              onClick: (evt) => this.onHideDeleteConfirm(evt),
+              type: 'listOption',
+              warning: (
+                <Text size="small" color="danger">
+                  {`Really delete ${entityIdsSelected.size} selected? This action cannot be undone.`}
+                </Text>
+              ),
+            },
+            {
+              title: 'Confirm',
+              onClick: (evt) => {
+                this.onHideDeleteConfirm(evt);
+                onEntitiesDelete(config.serverPath, entityIdsSelected);
+                onEntitySelectAll([]);
+              },
+              type: 'listOption',
+            },
+          ];
+        }
+      }
+      if (!isAdmin || !this.state.deleteConfirm || !config.batchDelete) {
+        allListActions = [
+          ...allListActions,
+          {
+            title: 'Edit selected',
+            onClick: (evt) => this.onShowEditOptions(evt),
+            icon: <Edit color="white" size="xxsmall" />,
+            type: 'listOption',
+            active: true,
+            isMember,
+          },
+        ];
+      }
     }
     return (
       <div>
@@ -326,21 +404,25 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             currentFilters={filters}
             listUpdating={progress !== null && progress >= 0 && progress < 100}
             entities={entities}
+            allEntities={allEntities}
             entityIdsSelected={entityIdsSelected}
             taxonomies={taxonomies}
             actortypes={actortypes}
+            parentActortypes={parentActortypes}
             resourcetypes={resourcetypes}
             actiontypes={actiontypes}
             targettypes={targettypes}
             actiontypesForTarget={actiontypesForTarget}
             membertypes={membertypes}
+            parentAssociationtypes={parentAssociationtypes}
             connections={connections}
             associationtypes={associationtypes}
             connectedTaxonomies={connectedTaxonomies}
             config={config}
             locationQuery={locationQuery}
-            canEdit={isManager && showList}
-            isManager={isManager}
+            canEdit={isMember && showList}
+            isMember={isMember}
+            isAdmin={isAdmin}
             hasUserRole={hasUserRole}
             onCreateOption={onCreateOption}
             onUpdate={
@@ -351,8 +433,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 viewDomain.get('errors'),
                 connections,
               )}
+            onUpdateFilters={onUpdateFilters}
             showFilters={this.state.visibleFilters}
-            showEditOptions={isManager && showList && this.state.visibleEditOptions}
+            showEditOptions={isMember && showList && this.state.visibleEditOptions}
             onShowFilters={this.onShowFilters}
             onHideFilters={this.onHideFilters}
             onHideEditOptions={this.onHideEditOptions}
@@ -367,12 +450,14 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             includeMembers={includeMembers}
             onSetFilterMemberOption={onSetFilterMemberOption}
             headerActions={headerOptions && headerOptions.actions}
+            onClearFilters={this.onClearFilters}
           />
         )}
         {showList && (
           <EntitiesListView
             headerInfo={headerOptions.info}
             listActions={allListActions}
+            showEntitiesDelete={onEntitiesDelete}
             allEntityCount={allEntityCount}
             viewOptions={viewOptions}
             hasHeader={includeHeader}
@@ -394,14 +479,16 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             entityTitle={entityTitle}
 
             dataReady={dataReady}
-            isManager={isManager}
-            isAnalyst={hasUserRole[USER_ROLES.ANALYST.value]}
+            isMember={isMember}
+            isAdmin={isAdmin}
+            isVisitor={hasUserRole[USER_ROLES.VISITOR.value]}
 
             onEntitySelect={(id, checked) => {
               // reset when unchecking last selected item
               if (!checked && !this.state.visibleEditOptions && entityIdsSelected.size === 1) {
                 this.onResetEditOptions();
               }
+              this.onHideDeleteConfirm();
               onEntitySelect(id, checked);
             }}
             onEntitySelectAll={(ids) => {
@@ -409,6 +496,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               if (!this.state.visibleEditOptions && (!ids || ids.length === 0)) {
                 this.onResetEditOptions();
               }
+              this.onHideDeleteConfirm();
               onEntitySelectAll(ids);
             }}
             onEntityClick={(id, path) => onEntityClick(
@@ -422,8 +510,14 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             onSetMapSubject={onSetMapSubject}
             onSetIncludeActorMembers={onSetIncludeActorMembers}
             onSetIncludeTargetMembers={onSetIncludeTargetMembers}
+            onSetIncludeActorChildren={onSetIncludeActorChildren}
+            onSetIncludeTargetChildren={onSetIncludeTargetChildren}
+            onSetIncludeInofficial={onSetIncludeInofficial}
             includeActorMembers={includeActorMembers}
             includeTargetMembers={includeTargetMembers}
+            includeActorChildren={includeActorChildren}
+            includeTargetChildren={includeTargetChildren}
+            includeInofficial={includeInofficial}
           />
         )}
         {showMap && (
@@ -444,8 +538,12 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             onSetMapSubject={onSetMapSubject}
             onSetIncludeActorMembers={onSetIncludeActorMembers}
             onSetIncludeTargetMembers={onSetIncludeTargetMembers}
+            onSetIncludeActorChildren={onSetIncludeActorChildren}
+            onSetIncludeTargetChildren={onSetIncludeTargetChildren}
             includeActorMembers={includeActorMembers}
             includeTargetMembers={includeTargetMembers}
+            includeActorChildren={includeActorChildren}
+            includeTargetChildren={includeTargetChildren}
           />
         )}
         {hasList && dataReady && config.taxonomies && (
@@ -458,7 +556,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             />
           </PrintOnly>
         )}
-        {isManager && (progress !== null && progress < 100) && (
+        {isMember && (progress !== null && progress < 100) && (
           <Progress>
             <ProgressText>
               <FormattedMessage
@@ -478,7 +576,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             />
           </Progress>
         )}
-        {isManager && (viewDomain.get('errors').size > 0 && progress >= 100) && (
+        {isMember && (viewDomain.get('errors').size > 0 && progress >= 100) && (
           <Progress error>
             <Messages
               type="error"
@@ -499,7 +597,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             />
           </Progress>
         )}
-        {isManager && (viewDomain.get('errors').size === 0 && progress >= 100) && (
+        {isMember && (viewDomain.get('errors').size === 0 && progress >= 100) && (
           <Progress error>
             <Messages
               type="success"
@@ -533,14 +631,17 @@ EntityList.defaultProps = {
 EntityList.propTypes = {
   // wrapper props
   entities: PropTypes.instanceOf(List).isRequired,
+  allEntities: PropTypes.instanceOf(List),
   taxonomies: PropTypes.instanceOf(Map),
   allTaxonomies: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
+  parentActortypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   targettypes: PropTypes.instanceOf(Map),
   actiontypesForTarget: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
+  parentAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   connectedTaxonomies: PropTypes.instanceOf(Map),
@@ -553,7 +654,7 @@ EntityList.propTypes = {
   entityIcon: PropTypes.func,
   // selector props
   activePanel: PropTypes.string,
-  hasUserRole: PropTypes.object, // { 1: isAdmin, 2: isManager, 3: isAnalyst}
+  hasUserRole: PropTypes.object, // { 1: isAdmin, 2: isMember, 3: isVisitor}
   entityIdsSelected: PropTypes.object,
   viewDomain: PropTypes.object,
   progress: PropTypes.number,
@@ -587,9 +688,17 @@ EntityList.propTypes = {
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeTargetMembers: PropTypes.func,
+  onSetIncludeActorChildren: PropTypes.func,
+  onSetIncludeTargetChildren: PropTypes.func,
+  onSetIncludeInofficial: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   includeTargetMembers: PropTypes.bool,
+  includeActorChildren: PropTypes.bool,
+  includeTargetChildren: PropTypes.bool,
+  includeInofficial: PropTypes.bool,
   allEntityCount: PropTypes.number,
+  onEntitiesDelete: PropTypes.func,
+  onUpdateFilters: PropTypes.func,
 };
 
 EntityList.contextTypes = {
@@ -610,6 +719,10 @@ const mapStateToProps = (state) => ({
   mapSubject: selectMapSubjectQuery(state),
   includeActorMembers: selectIncludeActorMembers(state),
   includeTargetMembers: selectIncludeTargetMembers(state),
+  includeActorChildren: selectIncludeActorChildren(state),
+  includeTargetChildren: selectIncludeTargetChildren(state),
+  includeInofficial: selectIncludeInofficialStatements(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -657,6 +770,9 @@ function mapDispatchToProps(dispatch, props) {
     onUpdateQuery: (args) => {
       dispatch(updateRouteQuery(args));
     },
+    onUpdateFilters: (values) => {
+      dispatch(setFilters(values));
+    },
     onSetView: (view) => {
       dispatch(setView(view));
     },
@@ -671,6 +787,26 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));
+    },
+    onSetIncludeTargetChildren: (active) => {
+      dispatch(setIncludeTargetChildren(active));
+    },
+    onSetIncludeActorChildren: (active) => {
+      dispatch(setIncludeActorChildren(active));
+    },
+    onSetIncludeInofficial: (active) => {
+      dispatch(setIncludeInofficialStatements(active));
+    },
+    onEntitiesDelete: (path, entityIdsSelected) => {
+      dispatch(deleteMultipleEntities({
+        data: entityIdsSelected.toJS().map(
+          (id) => ({
+            id,
+            path,
+            saveRef: id,
+          })
+        ),
+      }));
     },
     handleEditSubmit: (formData, activeEditOption, entityIdsSelected, errors, connections) => {
       dispatch(resetProgress());
@@ -701,7 +837,7 @@ function mapDispatchToProps(dispatch, props) {
               });
             }
           });
-          dispatch(saveMultiple(
+          dispatch(saveMultipleEntities(
             props.config.serverPath,
             entities.filter(
               (entity) => entity.getIn(['attributes', activeEditOption.optionId]) !== newValue
@@ -748,6 +884,8 @@ function mapDispatchToProps(dispatch, props) {
               case ('resources'):
               case ('indicators'):
               case ('roles'):
+              case ('children'):
+              case ('users'):
                 existingAssignments = entity.get(activeEditOption.connection);
                 break;
               default:
@@ -858,16 +996,20 @@ function mapDispatchToProps(dispatch, props) {
 
         // associations
         if (updates.get('creates') && updates.get('creates').size > 0) {
-          dispatch(newMultipleConnections(
+          dispatch(newMultipleEntities(
             activeEditOption.path,
             updates.get('creates').toJS(),
+            activeEditOption.invalidateEntitiesPaths
+              && activeEditOption.invalidateEntitiesPaths.toJS(),
           ));
         }
         if (updates.get('deletes') && updates.get('deletes').size > 0) {
-          dispatch(deleteMultipleConnections(
-            activeEditOption.path,
-            updates.get('deletes').toJS(),
-          ));
+          dispatch(deleteMultipleEntities({
+            path: activeEditOption.path,
+            data: updates.get('deletes').toJS(),
+            invalidateEntitiesPaths: activeEditOption.invalidateEntitiesPaths
+              && activeEditOption.invalidateEntitiesPaths.toJS(),
+          }));
         }
       }
     },

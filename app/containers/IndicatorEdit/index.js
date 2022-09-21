@@ -22,6 +22,10 @@ import {
   getConnectionUpdatesFromFormData,
 } from 'utils/forms';
 import { getMetaField } from 'utils/fields';
+import {
+  checkIndicatorAttribute,
+  checkIndicatorRequired,
+} from 'utils/entities';
 import qe from 'utils/quasi-equals';
 
 import { scrollToTop } from 'utils/scroll-to-component';
@@ -52,6 +56,7 @@ import {
   selectReadyForAuthCheck,
   selectIsUserAdmin,
   selectSessionUserId,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -62,7 +67,6 @@ import {
   selectDomainPage,
   selectViewEntity,
   selectActionsByActiontype,
-  selectConnectedTaxonomies,
 } from './selectors';
 
 import messages from './messages';
@@ -113,21 +117,22 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
           FORM_INITIAL.get('attributes')
         ),
         associatedActionsByActiontype: actionsByActiontype
-          ? actionsByActiontype.map((actions) => entityOptions(actions, true))
+          ? actionsByActiontype.map((actions) => entityOptions({ entities: actions }))
           : Map(),
       })
       : Map();
   };
 
-  getHeaderMainFields = () => {
+  getHeaderMainFields = (isAdmin) => {
     const { intl } = this.context;
     return (
       [ // fieldGroups
         { // fieldGroup
           fields: [
-            getCodeFormField(
+            checkIndicatorAttribute('code', isAdmin) && getCodeFormField(
               intl.formatMessage,
               'code',
+              checkIndicatorRequired('code'),
             ),
             getTitleFormField(
               intl.formatMessage,
@@ -149,7 +154,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
           getStatusField(intl.formatMessage),
           (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
           isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
-          getMetaField(entity),
+          getMetaField(entity, true),
         ],
       },
     ]);
@@ -160,6 +165,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
     connectedTaxonomies,
     actionsByActiontype,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const groups = [];
@@ -180,7 +186,8 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
         entitiesByActiontype: actionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
+        isAdmin,
         connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
           ? [
             {
@@ -302,7 +309,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
                 onServerErrorDismiss={onServerErrorDismiss}
                 fields={dataReady && {
                   header: {
-                    main: this.getHeaderMainFields(viewEntity),
+                    main: this.getHeaderMainFields(isAdmin),
                     aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
                   },
                   body: {
@@ -311,6 +318,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
                       connectedTaxonomies,
                       actionsByActiontype,
                       onCreateOption,
+                      isAdmin,
                     ),
                     // aside: this.getBodyAsideFields(
                     //   viewEntity
@@ -361,7 +369,7 @@ const mapStateToProps = (state, props) => ({
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
   myId: selectSessionUserId(state),
 });
 
@@ -371,7 +379,7 @@ function mapDispatchToProps(dispatch, props) {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
     initialiseForm: (model, formData) => {
       dispatch(formActions.reset(model));

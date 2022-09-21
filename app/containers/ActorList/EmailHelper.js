@@ -11,6 +11,7 @@ import { List } from 'immutable';
 import styled from 'styled-components';
 import { Box, Text, TextArea } from 'grommet';
 
+import A from 'components/styled/A';
 import validateEmailFormat from 'components/forms/validators/validate-email-format';
 
 // import appMessages from 'containers/App/messages';
@@ -29,13 +30,15 @@ const BoxStats = styled((p) => <Box direction="row" gap="xsmall" {...p} />)``;
 const StyledTextArea = styled((p) => (
   <TextArea size="small" readOnly {...p} />
 ))`
-  min-height: 300px;
+  min-height: 220px;
   line-height: 18px;
   font-weight: 300;
-  margin-top: 20px;
 `;
 
 const handleFocus = (event) => event && event.target.select();
+
+const MAILTO_MAX_LENGTH = 1800;
+// see https://stackoverflow.com/questions/13317429/mailto-max-length-of-each-internet-browsers
 
 export function EmailHelper({
   entities,
@@ -58,60 +61,85 @@ export function EmailHelper({
     (entity) => !entity.getIn(['attributes', 'email'])
       || entity.getIn(['attributes', 'email']) === ''
   );
+  const allValid = valid && entities && valid.size === entities.size;
+  const validListMailTo = valid && valid.size > 0 && valid.map(
+    (entity) => entity.getIn(['attributes', 'email'])
+  ).toArray().join(',');
+  const validListTextbox = valid && valid.size > 0 && valid.map(
+    (entity) => entity.getIn(['attributes', 'email'])
+  ).toArray().join('\n');
   return (
-    <Box gap="xsmall">
-      <BoxStats>
-        <TextStats>
-          No. of contacts selected:
-        </TextStats>
-        <TextStats>
-          {entities.size}
-        </TextStats>
-      </BoxStats>
-      <BoxStats>
-        <TextStats>
-          No. of contacts with a valid email address:
-        </TextStats>
-        <TextStats>
-          {valid.size}
-        </TextStats>
-      </BoxStats>
+    <Box gap="xsmall" margin={{ bottom: 'medium' }}>
+      {valid && valid.size > 0 && (
+        <Box margin={{ top: 'small', bottom: 'medium' }}>
+          <TextHeading>
+            {allValid && (
+              `Email all ${valid.size} selected contacts `
+            )}
+            {!allValid && (
+              `Email ${valid.size} contacts with valid email addresses (of ${entities.size} selected) `
+            )}
+          </TextHeading>
+          <Box>
+            <ul>
+              <li>
+                <TextStats>
+                  {'Email client: '}
+                  <A
+                    title="Email selected contacts in email client"
+                    target="_blank"
+                    href={`mailto:${validListMailTo}`}
+                    style={{ fontWeight: 600 }}
+                  >
+                    click here to open list in email client
+                  </A>
+                </TextStats>
+              </li>
+              <li>
+                <TextStats>
+                  Copy & paste: select and copy list from the text box below
+                </TextStats>
+              </li>
+            </ul>
+          </Box>
+          {validListMailTo.length > MAILTO_MAX_LENGTH && (
+            <Box margin={{ bottom: 'small' }}>
+              <TextNote>
+                {` Warning: for some email clients your recipient list of ${validListMailTo.length} characters may exceed their maximum number of possible characters`}
+              </TextNote>
+            </Box>
+          )}
+          <StyledTextArea
+            onFocus={handleFocus}
+            defaultValue={validListTextbox}
+          />
+        </Box>
+      )}
       {invalid && invalid.size > 0 && (
         <BoxStats>
-          <TextStats>
+          <TextHeading>
             No. of contacts with an invalid email address:
-          </TextStats>
-          <TextStats>
+          </TextHeading>
+          <TextHeading>
             {invalid.size}
-          </TextStats>
+          </TextHeading>
         </BoxStats>
       )}
       {empty && empty.size > 0 && (
         <BoxStats>
-          <TextStats>
-            No. of contacts without an email address:
-          </TextStats>
-          <TextStats>
+          <TextHeading>
+            No. of selected contacts without an email address stored:
+          </TextHeading>
+          <TextHeading>
             {empty.size}
-          </TextStats>
+          </TextHeading>
         </BoxStats>
       )}
       {((empty && empty.size > 0) || (invalid && invalid.size > 0)) && (
-        <TextNote>
-          You can use the filter options to identify contacts without or invalid email addresses
-        </TextNote>
-      )}
-      {valid && valid.size > 0 && (
-        <Box margin={{ top: 'medium' }}>
-          <TextHeading>
-            {`Select and copy email address of ${valid.size} contacts`}
-          </TextHeading>
-          <StyledTextArea
-            onFocus={handleFocus}
-            defaultValue={valid.map(
-              (entity) => entity.getIn(['attributes', 'email'])
-            ).toArray().join('\n')}
-          />
+        <Box margin={{ top: 'small' }}>
+          <TextNote>
+            You can use the filter options to identify contacts without or invalid email addresses
+          </TextNote>
         </Box>
       )}
     </Box>

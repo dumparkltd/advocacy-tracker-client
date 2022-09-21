@@ -3,7 +3,7 @@ import { upperFirst } from 'lodash/string';
 
 import {
   TEXT_TRUNCATE,
-  ACTIONTYPES_CONFIG,
+  ACTORTYPES,
 } from 'themes/config';
 
 import { getCategoryShortTitle } from 'utils/entities';
@@ -24,9 +24,9 @@ export const currentFilterArgs = (config, locationQuery) => {
   if (config.taxonomies && locationQuery.get(config.taxonomies.query)) {
     args = args.concat(config.taxonomies.query);
   }
-  // if (config.connectedTaxonomies && locationQuery.get(config.connectedTaxonomies.query)) {
-  //   args = args.concat(config.connectedTaxonomies.query);
-  // }
+  if (config.connectedTaxonomies && locationQuery.get(config.connectedTaxonomies.query)) {
+    args = args.concat(config.connectedTaxonomies.query);
+  }
   if (config.connections) {
     Object.keys(config.connections).forEach((connectionKey) => {
       const connectionConfig = config.connections[connectionKey];
@@ -41,6 +41,9 @@ export const currentFilterArgs = (config, locationQuery) => {
   if (locationQuery.get('without')) {
     args = args.concat('without');
   }
+  if (locationQuery.get('any')) {
+    args = args.concat('any');
+  }
   return args;
 };
 
@@ -51,12 +54,12 @@ export const currentFilters = (
     entities,
     taxonomies,
     connections,
+    connectedTaxonomies,
     locationQuery,
     onTagClick,
     errors,
-    // actortypes,
     intl,
-    isManager,
+    isAdmin,
   },
   withoutLabel,
   anyLabel,
@@ -66,14 +69,7 @@ export const currentFilters = (
   if (errors && errors.size > 0) {
     filterTags.push(getErrorTag(errorLabel));
   }
-  // if (config.actortypes && actortypes && actortypes.size > 1) {
-  //   filterTags = filterTags.concat(getCurrentActortypeFilter(
-  //     config.actortypes,
-  //     actortypes,
-  //     locationQuery,
-  //     onTagClick
-  //   ));
-  // }
+
   if (config.taxonomies && taxonomies) {
     filterTags = filterTags.concat(getCurrentTaxonomyFilters(
       config.taxonomies,
@@ -96,7 +92,7 @@ export const currentFilters = (
         withoutLabel,
         anyLabel,
         intl,
-        isManager,
+        isAdmin,
       ));
       if (config.connections[connectionKey].connectionAttributeFilter) {
         filterTags = filterTags.concat(getCurrentConnectionAttributeFilters(
@@ -118,6 +114,14 @@ export const currentFilters = (
       withoutLabel,
       anyLabel,
       intl,
+    ));
+  }
+  if (connectedTaxonomies && config.connectedTaxonomies) {
+    filterTags = filterTags.concat(getCurrentConnectedTaxonomyFilters(
+      config.connectedTaxonomies,
+      connectedTaxonomies,
+      locationQuery,
+      onTagClick
     ));
   }
   return filterTags;
@@ -263,11 +267,10 @@ const getCurrentTaxonomyFilters = (
 const checkCodeVisibility = (
   connection,
   entityType,
-  isManager,
+  isMember,
 ) => {
-  if (!isManager && entityType === 'actions') {
-    const config = ACTIONTYPES_CONFIG[connection.getIn(['attributes', 'measuretype_id'])];
-    return !!config.is_code_public;
+  if (!isMember && entityType === 'actors') {
+    return qe(connection.getIn(['attributes', 'actortype_id']), ACTORTYPES.COUNTRY);
   }
   return true;
 };
@@ -281,7 +284,7 @@ const getCurrentConnectionFilters = (
   withoutLabel,
   anyLabel,
   intl,
-  isManager,
+  isAdmin,
 ) => {
   const tags = [];
   const {
@@ -341,7 +344,7 @@ const getCurrentConnectionFilters = (
       }
       const connection = connections.getIn([path, value]);
       if (connection) {
-        const isCodePublic = checkCodeVisibility(connection, option.entityType, isManager);
+        const isCodePublic = checkCodeVisibility(connection, option.entityType, isAdmin);
         tags.push({
           label: getConnectionLabel(connection, value, !isCodePublic, labels, intl),
           labelLong: getConnectionLabel(connection, value, true, labels, intl),
@@ -616,6 +619,43 @@ const getCurrentAttributeFilters = (
           }
         });
       }
+    });
+  }
+  return tags;
+};
+
+
+const getCurrentConnectedTaxonomyFilters = (
+  taxonomyFilters,
+  taxonomies,
+  locationQuery,
+  onClick
+) => {
+  const tags = [];
+  if (locationQuery.get(taxonomyFilters.query)) {
+    const locationQueryValue = locationQuery.get(taxonomyFilters.query);
+    taxonomies.forEach((taxonomy) => {
+      asList(locationQueryValue).forEach((queryValue) => {
+        const [path, value] = queryValue.split(':');
+        if (path && value) {
+          if (taxonomy.getIn(['categories', value])) {
+            const category = taxonomy.getIn(['categories', value]);
+            tags.push({
+              label: getCategoryLabel(category),
+              type: 'taxonomies',
+              id: taxonomy.get('id'),
+              group: 'Statement categories',
+              groupId: 'connectedTaxonomies',
+              inverse: category.getIn(['attributes', 'draft']),
+              onClick: () => onClick({
+                value: queryValue,
+                query: taxonomyFilters.query,
+                checked: false,
+              }),
+            });
+          }
+        }
+      });
     });
   }
   return tags;

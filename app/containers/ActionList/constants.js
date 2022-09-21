@@ -5,6 +5,7 @@ import {
   PUBLISH_STATUSES,
   PRIVACY_STATUSES,
   ARCHIVE_STATUSES,
+  NOTIFICATION_STATUSES,
   ACTIONTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
@@ -38,7 +39,15 @@ export const CONFIG = {
   types: 'actiontypes',
   serverPath: API.ACTIONS,
   clientPath: ROUTES.ACTION,
-  hasMemberOption: true,
+  hasMemberOption: [
+    ACTIONTYPES.EXPRESS,
+    ACTIONTYPES.TASK,
+    ACTIONTYPES.INTERACTION,
+    ACTIONTYPES.EVENT,
+    ACTIONTYPES.OP,
+    ACTIONTYPES.AP,
+  ],
+  batchDelete: true,
   views: {
     list: {
       search: ['code', 'title', 'description'],
@@ -60,6 +69,7 @@ export const CONFIG = {
     connectPath: API.ACTION_CATEGORIES,
     key: 'category_id',
     ownKey: 'measure_id',
+    invalidateEntitiesPaths: [API.CATEGORIES, API.ACTIONS],
     // defaultGroupAttribute: 'groups_actions_default',
   },
   // connectedTaxonomies: { // filter by each category
@@ -83,13 +93,14 @@ export const CONFIG = {
       messageByType: 'entities.actors_{typeid}.plural',
       message: 'entities.actors.plural',
       path: API.ACTORS,
+      invalidateEntitiesPaths: [API.ACTORS, API.ACTIONS],
       entityType: 'actors',
       clientPath: ROUTES.ACTOR,
       connectPath: API.ACTOR_ACTIONS, // filter by actor connection
       key: 'actor_id',
       ownKey: 'measure_id',
       groupByType: true,
-      typeFilter: 'is_active',
+      // typeFilter: 'is_active',
     },
     // filter by associated target
     targets: {
@@ -99,6 +110,7 @@ export const CONFIG = {
       messageByType: 'entities.actors_{typeid}.plural',
       message: 'entities.actors.plural',
       path: API.ACTORS,
+      invalidateEntitiesPaths: [API.ACTORS, API.ACTIONS],
       entityType: 'actors',
       entityTypeAs: 'targets',
       clientPath: ROUTES.ACTOR,
@@ -116,6 +128,7 @@ export const CONFIG = {
       messageByType: 'entities.actions_{typeid}.plural',
       message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTIONS],
       entityType: 'actions', // filter by actor connection
       entityTypeAs: 'parents', // filter by actor connection
       clientPath: ROUTES.ACTION,
@@ -131,6 +144,7 @@ export const CONFIG = {
       messageByType: 'entities.actions_{typeid}.plural',
       message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTIONS],
       entityType: 'actions', // filter by actor connection
       entityTypeAs: 'children', // filter by actor connection
       clientPath: ROUTES.ACTION,
@@ -145,6 +159,7 @@ export const CONFIG = {
       search: true,
       message: 'entities.indicators.plural',
       path: API.INDICATORS,
+      invalidateEntitiesPaths: [API.INDICATORS, API.ACTIONS],
       entityType: 'indicators',
       clientPath: ROUTES.INDICATOR,
       connectPath: API.ACTION_INDICATORS, // filter by actor connection
@@ -167,6 +182,7 @@ export const CONFIG = {
       messageByType: 'entities.resources_{typeid}.plural',
       message: 'entities.resources.plural',
       path: API.RESOURCES,
+      invalidateEntitiesPaths: [API.RESOURCES, API.ACTIONS],
       entityType: 'resources',
       clientPath: ROUTES.RESOURCE,
       connectPath: API.ACTION_RESOURCES, // filter by actor connection
@@ -181,6 +197,7 @@ export const CONFIG = {
       search: true,
       message: 'entities.users.plural',
       path: API.USERS,
+      invalidateEntitiesPaths: [API.ACTIONS, API.USERS],
       entityType: 'users',
       clientPath: ROUTES.USER,
       connectPath: API.USER_ACTIONS, // filter by actor connection
@@ -195,7 +212,7 @@ export const CONFIG = {
         message: 'attributes.draft',
         attribute: 'draft',
         options: PUBLISH_STATUSES,
-        role: USER_ROLES.MANAGER.value,
+        role: USER_ROLES.MEMBER.value,
         filterUI: 'checkboxes',
       },
       {
@@ -203,7 +220,7 @@ export const CONFIG = {
         message: 'attributes.private',
         attribute: 'private',
         options: PRIVACY_STATUSES,
-        role: USER_ROLES.MANAGER.value,
+        role: USER_ROLES.MEMBER.value,
         roleEdit: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
       },
@@ -212,6 +229,15 @@ export const CONFIG = {
         message: 'attributes.is_archive',
         attribute: 'is_archive',
         options: ARCHIVE_STATUSES,
+        role: USER_ROLES.ADMIN.value,
+        filterUI: 'checkboxes',
+        default: false,
+      },
+      {
+        search: false,
+        message: 'attributes.notifications',
+        attribute: 'notifications',
+        options: NOTIFICATION_STATUSES,
         role: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
         default: false,

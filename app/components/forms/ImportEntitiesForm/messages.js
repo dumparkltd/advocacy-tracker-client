@@ -7,7 +7,7 @@ import { defineMessages } from 'react-intl';
 export default defineMessages({
   title: {
     id: 'app.components.ImportEntitiesForm.title',
-    defaultMessage: 'Batch import',
+    defaultMessage: 'Batch import {type}',
   },
   introduction: {
     id: 'app.components.ImportEntitiesForm.introduction',

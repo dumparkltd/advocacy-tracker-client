@@ -14,14 +14,14 @@ import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectReady,
   selectActiontypeTaxonomiesWithCats,
-  selectIsUserManager,
-  selectIsUserAnalyst,
+  selectIsUserMember,
+  selectIsUserVisitor,
+  selectIsUserAdmin,
   selectActiontypes,
-  // selectActortypes,
   selectActortypesForActiontype,
+  selectParentActortypesForActiontype,
   selectTargettypesForActiontype,
   selectResourcetypesForActiontype,
-  selectActiontypeActions,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -33,9 +33,9 @@ import { ROUTES } from 'themes/config';
 import EntityList from 'containers/EntityList';
 import { CONFIG, DEPENDENCIES } from './constants';
 import {
+  selectActionsWithConnections,
   selectConnections,
   selectViewActions,
-  selectConnectedTaxonomies,
 } from './selectors';
 
 import messages from './messages';
@@ -68,13 +68,14 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
       allEntities,
       taxonomies,
       connections,
-      connectedTaxonomies,
       location,
-      isManager,
-      isAnalyst,
+      isMember,
+      isVisitor,
+      isAdmin,
       params, // { id: the action type }
       actiontypes,
       actortypes,
+      parentActortypes,
       targettypes,
       resourcetypes,
       onSelectType,
@@ -93,7 +94,7 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
         }
         : null,
     };
-    if (isAnalyst) {
+    if (isVisitor) {
       headerOptions.actions.push({
         type: 'bookmarker',
         title: intl.formatMessage(appMessages.entities[type].plural),
@@ -108,21 +109,20 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
         icon: 'print',
       });
     }
-    if (isManager) {
+    if (isMember) {
       headerOptions.actions.push({
         title: 'Create new',
         onClick: () => this.props.handleNew(typeId),
         icon: 'add',
-        isManager,
+        isMember,
       });
       headerOptions.actions.push({
         title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(),
+        onClick: () => this.props.handleImport(typeId),
         icon: 'import',
-        isManager,
+        isMember,
       });
     }
-
     return (
       <div>
         <Helmet
@@ -133,10 +133,10 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
         />
         <EntityList
           entities={entities}
+          allEntities={allEntities.toList()}
           allEntityCount={allEntities && allEntities.size}
           taxonomies={taxonomies}
           connections={connections}
-          connectedTaxonomies={connectedTaxonomies}
           config={CONFIG}
           headerOptions={headerOptions}
           dataReady={dataReady}
@@ -146,13 +146,14 @@ export class ActionList extends React.PureComponent { // eslint-disable-line rea
           }}
           locationQuery={fromJS(location.query)}
           actortypes={actortypes}
+          parentActortypes={parentActortypes}
           actiontypes={actiontypes}
           targettypes={targettypes}
           resourcetypes={resourcetypes}
           typeOptions={this.prepareTypeOptions(actiontypes, typeId)}
           onSelectType={onSelectType}
           typeId={typeId}
-          showCode={checkActionAttribute(typeId, 'code', isManager)}
+          showCode={checkActionAttribute(typeId, 'code', isAdmin)}
         />
       </div>
     );
@@ -165,18 +166,19 @@ ActionList.propTypes = {
   handleImport: PropTypes.func,
   onSelectType: PropTypes.func,
   dataReady: PropTypes.bool,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   taxonomies: PropTypes.instanceOf(Map),
-  connectedTaxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
+  parentActortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   targettypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   allEntities: PropTypes.instanceOf(Map),
   location: PropTypes.object,
-  isAnalyst: PropTypes.bool,
+  isVisitor: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   params: PropTypes.object,
 };
 
@@ -189,14 +191,15 @@ const mapStateToProps = (state, props) => ({
   entities: selectViewActions(state, { type: props.params.id }), // type
   taxonomies: selectActiontypeTaxonomiesWithCats(state, { type: props.params.id }),
   connections: selectConnections(state),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
-  isManager: selectIsUserManager(state),
-  isAnalyst: selectIsUserAnalyst(state),
+  isMember: selectIsUserMember(state),
+  isVisitor: selectIsUserVisitor(state),
+  isAdmin: selectIsUserAdmin(state),
   actiontypes: selectActiontypes(state),
   actortypes: selectActortypesForActiontype(state, { type: props.params.id }),
+  parentActortypes: selectParentActortypesForActiontype(state, { type: props.params.id }),
   targettypes: selectTargettypesForActiontype(state, { type: props.params.id }),
   resourcetypes: selectResourcetypesForActiontype(state, { type: props.params.id }),
-  allEntities: selectActiontypeActions(state, { type: props.params.id }),
+  allEntities: selectActionsWithConnections(state, { type: props.params.id }),
 });
 function mapDispatchToProps(dispatch) {
   return {
@@ -206,8 +209,8 @@ function mapDispatchToProps(dispatch) {
     handleNew: (typeId) => {
       dispatch(updatePath(`${ROUTES.ACTIONS}/${typeId}${ROUTES.NEW}`, { replace: true }));
     },
-    handleImport: () => {
-      dispatch(updatePath(`${ROUTES.ACTIONS}${ROUTES.IMPORT}`));
+    handleImport: (typeId) => {
+      dispatch(updatePath(`${ROUTES.ACTIONS}/${typeId}${ROUTES.IMPORT}`));
     },
     onSelectType: (typeId) => {
       dispatch(updatePath(

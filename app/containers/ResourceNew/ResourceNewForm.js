@@ -46,6 +46,8 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectResourcetype,
+  selectIsUserAdmin,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -53,7 +55,6 @@ import ContentHeader from 'components/ContentHeader';
 import FormWrapper from './FormWrapper';
 
 import {
-  selectConnectedTaxonomies,
   selectActionsByActiontype,
 } from './selectors';
 
@@ -132,6 +133,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
     connectedTaxonomies,
     actionsByActiontype,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const groups = [];
@@ -163,7 +165,8 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
         entitiesByActiontype: actionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
+        isAdmin,
       });
       if (actionConnections) {
         groups.push(
@@ -216,6 +219,8 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
       handleUpdate,
       formDataPath,
       inModal,
+      invalidateEntitiesOnSuccess,
+      isAdmin,
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
@@ -245,6 +250,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
             formData,
             resourcetype,
             actionsByActiontype,
+            invalidateEntitiesOnSuccess,
             // resourcetypeTaxonomies,
           )}
           handleSubmitFail={handleSubmitFail}
@@ -253,7 +259,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={{ // isManager, taxonomies,
+          fields={{ // isMember, taxonomies,
             header: {
               main: this.getHeaderMainFields(typeId),
               aside: this.getHeaderAsideFields(),
@@ -264,6 +270,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
                 connectedTaxonomies,
                 actionsByActiontype,
                 inModal ? null : onCreateOption,
+                isAdmin,
               ),
               aside: this.getBodyAsideFields(
                 typeId,
@@ -297,6 +304,11 @@ ResourceNew.propTypes = {
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
   inModal: PropTypes.bool,
+  isAdmin: PropTypes.bool,
+  invalidateEntitiesOnSuccess: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+  ]),
 };
 
 ResourceNew.contextTypes = {
@@ -306,9 +318,10 @@ ResourceNew.contextTypes = {
 const mapStateToProps = (state, { typeId }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
   resourcetype: selectResourcetype(state, typeId),
   actionsByActiontype: selectActionsByActiontype(state, typeId),
+  isAdmin: selectIsUserAdmin(state),
 });
 
 function mapDispatchToProps(
@@ -331,7 +344,7 @@ function mapDispatchToProps(
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
     onErrorDismiss: () => {
       dispatch(submitInvalid(true));
@@ -349,6 +362,7 @@ function mapDispatchToProps(
       formData,
       resourcetype,
       actionsByActiontype,
+      invalidateEntitiesOnSuccess,
     ) => {
       let saveData = formData.setIn(
         ['attributes', 'resourcetype_id'],
@@ -402,6 +416,7 @@ function mapDispatchToProps(
           path: API.RESOURCES,
           entity: saveData.toJS(),
           redirect: !inModal ? ROUTES.RESOURCE : null,
+          invalidateEntitiesOnSuccess,
           onSuccess: inModal && onSaveSuccess
             ? () => {
               // cleanup

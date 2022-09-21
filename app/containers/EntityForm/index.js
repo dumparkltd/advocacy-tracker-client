@@ -217,7 +217,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
   );
 
   renderFormField = (field, nested, closeMultiselectOnClickOutside, scrollContainer) => {
-    // field.controlType === 'date' && console.log('field', field)
     let formField;
     if (!field.controlType) {
       formField = this.renderComponent(field);
@@ -245,7 +244,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       <FormFieldWrap nested={nested}>
         { field.label && field.controlType !== 'multiselect' && field.controlType !== 'info'
           && (
-            <FieldLabel htmlFor={field.id} inline={field.controlType === 'checkbox'}>
+            <FieldLabel htmlFor={field.id} inline={field.controlType === 'checkbox' || field.controlType === 'markdown'}>
               { field.controlType === 'checkbox' && formField }
               { field.label }
               { field.validators && field.validators.required

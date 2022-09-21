@@ -13,6 +13,9 @@ import {
   getActorConnectionField,
 } from 'utils/fields';
 
+import qe from 'utils/quasi-equals';
+import { getActortypeColumns } from 'utils/entities';
+
 import {
   updatePath,
 } from 'containers/App/actions';
@@ -24,6 +27,7 @@ import {
 
 import {
   MEMBERSHIPS,
+  ACTORTYPES,
 } from 'themes/config';
 
 import FieldGroup from 'components/fields/FieldGroup';
@@ -34,29 +38,22 @@ import {
   selectActorsByType,
 } from './selectors';
 
-const getActortypeColumns = (typeid, viewEntity, intl) => {
+const getOwnActortypeColumns = ({
+  typeid, intl,
+}) => {
   let columns = [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: ['title'],
+    id: 'supportlevel_id',
+    type: 'supportlevel',
+    title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+  },
+  {
+    id: 'positionStatement',
+    type: 'positionStatement',
+  },
+  {
+    id: 'authority',
+    type: 'positionStatementAuthority',
   }];
-  columns = [
-    ...columns,
-    {
-      id: 'supportlevel_id',
-      type: 'supportlevel',
-      title: intl.formatMessage(appMessages.attributes.supportlevel_id),
-    },
-    {
-      id: 'positionStatement',
-      type: 'positionStatement',
-    },
-    {
-      id: 'authority',
-      type: 'positionStatementAuthority',
-    },
-  ];
   if (MEMBERSHIPS[typeid] && MEMBERSHIPS[typeid].length > 0) {
     columns = [
       ...columns,
@@ -70,11 +67,11 @@ const getActortypeColumns = (typeid, viewEntity, intl) => {
 };
 
 export function Actors({
-  viewEntity,
   taxonomies,
   actorConnections,
   onEntityClick,
   actorsByActortype,
+  isAdmin,
   intl,
 }) {
   if (!actorsByActortype) {
@@ -92,11 +89,15 @@ export function Actors({
               onEntityClick,
               connections: actorConnections,
               typeid: actortypeid,
-              columns: getActortypeColumns(
-                actortypeid,
-                viewEntity,
-                intl,
-              ),
+              columns: getActortypeColumns({
+                typeId: actortypeid,
+                showCode: isAdmin || qe(actortypeid, ACTORTYPES.COUNTRY),
+                skipTypeColumns: true,
+                otherColumns: getOwnActortypeColumns({
+                  typeId: actortypeid,
+                  intl,
+                }),
+              }),
             }),
           ]),
           [],
@@ -107,11 +108,11 @@ export function Actors({
 }
 
 Actors.propTypes = {
-  viewEntity: PropTypes.object,
   onEntityClick: PropTypes.func,
   taxonomies: PropTypes.object,
   actorConnections: PropTypes.object,
   actorsByActortype: PropTypes.object,
+  isAdmin: PropTypes.bool,
   intl: intlShape,
 };
 
@@ -119,7 +120,6 @@ const mapStateToProps = (state, { viewEntity }) => ({
   taxonomies: selectTaxonomiesWithCategories(state),
   actorConnections: selectActorConnections(state),
   actorsByActortype: selectActorsByType(state, viewEntity.get('id')),
-
 });
 
 function mapDispatchToProps(dispatch) {

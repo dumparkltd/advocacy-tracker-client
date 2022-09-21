@@ -1,5 +1,7 @@
 import { find, forEach } from 'lodash/collection';
 
+import { ACTORTYPES } from 'themes/config';
+
 import {
   testEntityEntityAssociation,
   testEntityCategoryAssociation,
@@ -19,8 +21,9 @@ export const makeActiveEditOptions = ({
   connections,
   connectedTaxonomies,
   activeEditOption,
-  contextIntl,
+  intl,
   messages,
+  isAdmin,
 }) => {
   // create edit options
   switch (activeEditOption.group) {
@@ -41,8 +44,9 @@ export const makeActiveEditOptions = ({
         connectedTaxonomies,
         activeEditOption.optionId,
         messages,
-        contextIntl,
+        intl,
         activeEditOption.group,
+        isAdmin,
       );
     case 'users':
     case 'indicators':
@@ -54,8 +58,9 @@ export const makeActiveEditOptions = ({
         connectedTaxonomies,
         activeEditOption.optionId,
         messages,
-        contextIntl,
+        intl,
         activeEditOption.group,
+        isAdmin,
       );
     case 'attributes':
       return makeAttributeEditOptions(entities, config, activeEditOption, messages);
@@ -145,8 +150,9 @@ const makeGroupedConnectionEditOptions = (
   connectedTaxonomies,
   activeOptionId,
   messages,
-  contextIntl,
+  intl,
   group,
+  isAdmin,
 ) => {
   // const option = find(config.connections.options, (o) => o.path === activeEditOption.optionId);
   // get the active option
@@ -162,11 +168,19 @@ const makeGroupedConnectionEditOptions = (
     required: false,
     advanced: true,
     selectAll: true,
-    tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, contextIntl),
+    tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, intl),
   };
+  const areActors = type === 'action-targets' // targets
+    || type === 'action-actors' // active actors
+    || type === 'member-associations' // associations
+    || type === 'association-members' // members
+    || type === 'indicator-actions';
+
+  const hasCode = isAdmin || (areActors && qe(typeId, ACTORTYPES.COUNTRY));
   if (option) {
     editOptions.title = messages.title;
     editOptions.path = option.connectPath;
+    editOptions.invalidateEntitiesPaths = option.invalidateEntitiesPaths;
     editOptions.search = option.search;
     editOptions.multiple = !option.single;
     const connectionPath = option.path;
@@ -185,15 +199,7 @@ const makeGroupedConnectionEditOptions = (
         if (type === 'action-resources') {
           return qe(typeId, c.getIn(['attributes', 'resourcetype_id']));
         }
-        if (
-          type === 'action-targets' // targets
-          || type === 'action-actors' // active actors
-          || type === 'member-associations' // associations
-          || type === 'association-members' // members
-          || type === 'actor-users'
-          || type === 'action-users'
-          || type === 'indicator-actions'
-        ) {
+        if (areActors) {
           return qe(typeId, c.getIn(['attributes', 'actortype_id']));
         }
         return true;
@@ -208,7 +214,7 @@ const makeGroupedConnectionEditOptions = (
           0, // initial value
         );
         editOptions.options[connection.get('id')] = {
-          reference: getEntityReference(connection),
+          reference: hasCode && getEntityReference(connection),
           label: getEntityTitle(connection),
           description: connection.getIn(['attributes', 'description']),
           value: connection.get('id'),
@@ -228,13 +234,15 @@ const makeConnectionEditOptions = (
   connectedTaxonomies,
   activeOptionId,
   messages,
-  contextIntl,
+  intl,
   group,
+  isAdmin,
 ) => {
   // const option = find(config.connections.options, (o) => o.path === activeEditOption.optionId);
+  const typeId = activeOptionId;
   // get the active option
-  // const typeId = activeOptionId;
   const option = config[group];
+  const { type } = option;
   const editOptions = {
     groupId: group,
     search: true,
@@ -244,11 +252,19 @@ const makeConnectionEditOptions = (
     required: false,
     advanced: true,
     selectAll: true,
-    tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, contextIntl),
+    tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, intl),
   };
+  const areActors = type === 'action-targets' // targets
+    || type === 'action-actors' // active actors
+    || type === 'member-associations' // associations
+    || type === 'association-members' // members
+    || type === 'indicator-actions';
+
+  const hasCode = isAdmin || (areActors && qe(typeId, ACTORTYPES.COUNTRY));
   if (option) {
     editOptions.title = messages.title;
     editOptions.path = option.connectPath;
+    editOptions.invalidateEntitiesPaths = option.invalidateEntitiesPaths;
     editOptions.search = option.search;
     editOptions.multiple = !option.single;
 
@@ -265,8 +281,8 @@ const makeConnectionEditOptions = (
           0, // initial value
         );
         editOptions.options[connection.get('id')] = {
-          reference: getEntityReference(connection),
-          label: getEntityTitle(connection, option.labels, contextIntl),
+          reference: hasCode && getEntityReference(connection),
+          label: getEntityTitle(connection, option.labels, intl),
           value: connection.get('id'),
           checked: checkedState(count, entities.size),
           tags: connection.get('categories'),

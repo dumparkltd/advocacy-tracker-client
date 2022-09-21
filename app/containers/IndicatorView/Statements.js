@@ -12,6 +12,7 @@ import { injectIntl, intlShape } from 'react-intl';
 import {
   getActionConnectionField,
 } from 'utils/fields';
+import { getActiontypeColumns } from 'utils/entities';
 
 import {
   updatePath,
@@ -20,10 +21,10 @@ import {
 import {
   selectTaxonomiesWithCategories,
   selectActionConnections,
+  selectIsUserAdmin,
 } from 'containers/App/selectors';
 
 import {
-  ACTIONTYPES_CONFIG,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
@@ -35,46 +36,22 @@ import {
   selectActionsByType,
 } from './selectors';
 
-const getActiontypeColumns = (typeid, viewEntity, intl) => {
-  let columns = [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: ['title'],
-  }];
-  if (
-    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    const typeColumns = ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-      (col) => {
-        if (typeof col.showOnSingle !== 'undefined') {
-          return col.showOnSingle;
-        }
-        return col.id !== 'main';
-      }
-    );
-    columns = [
-      ...columns,
-      ...typeColumns,
-    ];
-  }
+const getOtherActiontypeColumns = (typeid, actionId, intl) => {
   // supportlevel
   if (
     ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeid]
     && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeid].length > 0
   ) {
-    columns = [
-      ...columns,
+    return [
       {
         id: 'supportlevel_id',
         type: 'supportlevel',
-        actionId: viewEntity.get('id'),
+        actionId,
         title: intl.formatMessage(appMessages.attributes.supportlevel_id),
       },
     ];
   }
-  return columns;
+  return [];
 };
 
 export function Statements({
@@ -84,6 +61,7 @@ export function Statements({
   actionConnections,
   onEntityClick,
   intl,
+  isAdmin,
 }) {
   if (!actionsByActiontype) {
     return null;
@@ -100,11 +78,16 @@ export function Statements({
               onEntityClick,
               connections: actionConnections,
               typeid: actiontypeid,
-              columns: getActiontypeColumns(
-                actiontypeid,
-                viewEntity,
-                intl,
-              ),
+              columns: getActiontypeColumns({
+                typeId: actiontypeid,
+                isAdmin,
+                otherColumns: getOtherActiontypeColumns(
+                  actiontypeid,
+                  viewEntity.get('id'),
+                  intl,
+                  isAdmin,
+                ),
+              }),
             }),
           ]),
           [],
@@ -121,12 +104,14 @@ Statements.propTypes = {
   actionConnections: PropTypes.object,
   actionsByActiontype: PropTypes.object,
   intl: intlShape,
+  isAdmin: PropTypes.bool,
 };
 
 const mapStateToProps = (state, { viewEntity }) => ({
   taxonomies: selectTaxonomiesWithCategories(state),
   actionsByActiontype: selectActionsByType(state, viewEntity.get('id')),
   actionConnections: selectActionConnections(state),
+  isAdmin: selectIsUserAdmin(state),
 });
 
 function mapDispatchToProps(dispatch) {

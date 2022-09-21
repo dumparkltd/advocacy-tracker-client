@@ -21,7 +21,7 @@ import {
   selectReady,
   selectActorsCategorised,
   selectMembershipsGroupedByMember,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectActortypes,
   selectUsers,
   selectUserActorsGroupedByActor,
@@ -31,7 +31,6 @@ import {
   entitySetUser,
   entitiesSetAssociated,
   prepareTaxonomiesAssociated,
-  prepareTaxonomies,
 } from 'utils/entities';
 
 import { DEPENDENCIES } from './constants';
@@ -94,16 +93,6 @@ export const selectTaxonomyOptions = createSelector(
     }
     return null;
   }
-);
-
-export const selectConnectedTaxonomies = createSelector(
-  selectTaxonomiesSorted,
-  selectCategories,
-  (taxonomies, categories) => prepareTaxonomies(
-    taxonomies,
-    categories,
-    false,
-  )
 );
 
 export const selectActionsByActiontype = createSelector(
@@ -182,7 +171,7 @@ export const selectMembersByActortype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectViewEntity,
   selectActorsCategorised,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   selectActortypes,
   (ready, viewActor, actors, associations, actortypes) => {
     if (!viewActor || !ready) return null;

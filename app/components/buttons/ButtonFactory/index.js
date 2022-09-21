@@ -33,7 +33,7 @@ class ButtonFactory extends React.PureComponent { // eslint-disable-line react/p
                 <Text>{button.title}</Text>
               </Box>
             )}
-            {!button.icon && button.title}
+            {!button.icon && <Text>{button.title}</Text>}
           </ButtonDefault>
         );
       case 'secondary':
@@ -44,7 +44,7 @@ class ButtonFactory extends React.PureComponent { // eslint-disable-line react/p
             disabled={button.disabled}
             inactive={!button.active}
           >
-            {button.title}
+            <Text>{button.title}</Text>
           </ButtonSecondary>
         );
       case 'formPrimary':

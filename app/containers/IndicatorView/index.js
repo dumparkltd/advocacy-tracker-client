@@ -34,7 +34,7 @@ import {
 
 import {
   selectReady,
-  selectIsUserManager,
+  selectIsUserMember,
   selectIsUserAdmin,
   selectSessionUserId,
   selectSubjectQuery,
@@ -88,7 +88,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
     const {
       viewEntity,
       dataReady,
-      isManager,
+      isMember,
       isAdmin,
       myId,
       onEntityClick,
@@ -122,7 +122,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
           icon: 'print',
         },
       ];
-      if (isManager) {
+      if (isMember) {
         buttons = [
           ...buttons,
           {
@@ -164,21 +164,21 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
               />
               <ViewPanel>
                 <ViewPanelInside>
-                  <Main hasAside={isManager}>
+                  <Main hasAside={isMember}>
                     <FieldGroup
                       group={{ // fieldGroup
                         fields: [
                           getReferenceField(
                             viewEntity,
                             'code',
-                            isManager,
+                            isAdmin,
                           ),
                           getTitleField(viewEntity),
                         ],
                       }}
                     />
                   </Main>
-                  {isManager && (
+                  {isMember && (
                     <Aside>
                       <FieldGroup
                         group={{
@@ -192,7 +192,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                               entity: viewEntity,
                               attribute: 'is_archive',
                             }),
-                            getMetaField(viewEntity),
+                            getMetaField(viewEntity, true),
                           ],
                         }}
                         aside
@@ -245,6 +245,7 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                       {viewSubject === 'actors' && (
                         <Actors
                           viewEntity={viewEntity}
+                          isAdmin={isAdmin}
                         />
                       )}
                     </Box>
@@ -269,7 +270,7 @@ IndicatorView.propTypes = {
   actorsByActortype: PropTypes.object,
   params: PropTypes.object,
   myId: PropTypes.string,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
   subject: PropTypes.string,
   onSetSubject: PropTypes.func,
@@ -281,7 +282,7 @@ IndicatorView.propTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
   isAdmin: selectIsUserAdmin(state),
   myId: selectSessionUserId(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),

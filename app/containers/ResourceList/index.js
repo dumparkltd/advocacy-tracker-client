@@ -13,11 +13,10 @@ import { Map, List, fromJS } from 'immutable';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectReady,
-  selectIsUserManager,
-  selectIsUserAnalyst,
+  selectIsUserMember,
+  selectIsUserVisitor,
   selectResourcetypes,
   selectActiontypesForResourcetype,
-  selectResourcetypeResources,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -28,8 +27,8 @@ import EntityList from 'containers/EntityList';
 import { CONFIG, DEPENDENCIES } from './constants';
 import {
   selectListResources,
-  // selectConnectedTaxonomies,
   selectConnections,
+  selectResourcesWithConnections,
 } from './selectors';
 
 import messages from './messages';
@@ -63,8 +62,8 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
       connections,
       // connectedTaxonomies,
       location,
-      isManager,
-      isAnalyst,
+      isMember,
+      isVisitor,
       params, // { id: the action type }
       actiontypes,
       resourcetypes,
@@ -77,7 +76,7 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
       supTitle: intl.formatMessage(messages.pageTitle),
       actions: [],
     };
-    if (isAnalyst) {
+    if (isVisitor) {
       headerOptions.actions.push({
         type: 'bookmarker',
         title: intl.formatMessage(appMessages.entities[type].plural),
@@ -92,20 +91,20 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
         icon: 'print',
       });
     }
-    if (isManager) {
+    if (isMember) {
       headerOptions.actions.push({
         type: 'text',
         title: 'Create new',
         onClick: () => this.props.handleNew(typeId),
         icon: 'add',
-        isManager,
+        isMember,
       });
       headerOptions.actions.push({
         type: 'text',
         title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(),
+        onClick: () => this.props.handleImport(typeId),
         icon: 'import',
-        isManager,
+        isMember,
       });
     }
 
@@ -120,6 +119,7 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
         />
         <EntityList
           entities={entities}
+          allEntities={allEntities.toList()}
           allEntityCount={allEntities && allEntities.size}
           connections={connections}
           config={CONFIG}
@@ -147,15 +147,14 @@ ResourceList.propTypes = {
   handleImport: PropTypes.func,
   onSelectType: PropTypes.func,
   dataReady: PropTypes.bool,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   // taxonomies: PropTypes.instanceOf(Map),
-  // connectedTaxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
-  isAnalyst: PropTypes.bool,
+  isVisitor: PropTypes.bool,
   params: PropTypes.object,
   allEntities: PropTypes.instanceOf(Map),
 };
@@ -168,12 +167,11 @@ const mapStateToProps = (state, props) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   entities: selectListResources(state, { type: props.params.id }),
   connections: selectConnections(state),
-  // connectedTaxonomies: selectConnectedTaxonomies(state),
-  isManager: selectIsUserManager(state),
-  isAnalyst: selectIsUserAnalyst(state),
+  isMember: selectIsUserMember(state),
+  isVisitor: selectIsUserVisitor(state),
   actiontypes: selectActiontypesForResourcetype(state, { type: props.params.id }),
   resourcetypes: selectResourcetypes(state),
-  allEntities: selectResourcetypeResources(state, { type: props.params.id }),
+  allEntities: selectResourcesWithConnections(state, { type: props.params.id }),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -184,8 +182,8 @@ function mapDispatchToProps(dispatch) {
     handleNew: (typeId) => {
       dispatch(updatePath(`${ROUTES.RESOURCES}/${typeId}${ROUTES.NEW}`, { replace: true }));
     },
-    handleImport: () => {
-      dispatch(updatePath(`${ROUTES.RESOURCES}${ROUTES.IMPORT}`));
+    handleImport: (typeId) => {
+      dispatch(updatePath(`${ROUTES.RESOURCES}/${typeId}${ROUTES.IMPORT}`));
     },
     onSelectType: (typeId) => {
       dispatch(updatePath(

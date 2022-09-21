@@ -20,13 +20,13 @@ export const getOptionSortCheckedValueMapper = (option) => {
     return -2;
   }
   if (option.get('query') === 'any') {
-    return -1;
+    return -4;
   }
   if (
     option.get('query') === 'without'
     || (typeof option.get('value') === 'string' && option.get('value').slice(-5) === ':null')
   ) {
-    return 0;
+    return -5;
   }
   return 1;
 };

@@ -122,9 +122,9 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
           (oldVal, newVal) => oldVal === null ? newVal : oldVal,
           FORM_INITIAL.get('attributes')
         ),
-        associatedActions: actions && entityOptions(actions, true),
+        associatedActions: actions && entityOptions({ entities: actions }),
         associatedActorsByActortype: actorsByActortype
-          ? actorsByActortype.map((actors) => entityOptions(actors, true))
+          ? actorsByActortype.map((actors) => entityOptions({ entities: actors }))
           : Map(),
         associatedUser: userOptions(users, viewEntity.getIn(['attributes', 'manager_id'])),
         associatedCategory: parentCategoryOptions(parentOptions, viewEntity.getIn(['attributes', 'parent_id'])),
@@ -189,46 +189,13 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
       groups.push({
         label: intl.formatMessage(appMessages.entities.taxonomies.parent),
         icon: 'categories',
-        fields: [renderParentCategoryControl(
-          parentOptions,
-          getEntityTitle(parentTaxonomy),
-          entity.getIn(['attributes', 'parent_id']),
-        )],
+        fields: [renderParentCategoryControl({
+          entities: parentOptions,
+          label: getEntityTitle(parentTaxonomy),
+          activeParentId: entity.getIn(['attributes', 'parent_id']),
+        })],
       });
     }
-    // if (!userOnly) {
-    //   if (entity.getIn(['taxonomy', 'attributes', 'tags_actions']) && actions) {
-    //     fields.push(
-    //       {
-    //         label: intl.formatMessage(appMessages.nav.actionsSuper),
-    //         icon: 'actions',
-    //         fields: [
-    //           renderActionControl(actions, connectedTaxonomies, onCreateOption, intl),
-    //         ],
-    //       },
-    //     );
-    //   }
-    //   if (
-    //     entity.getIn(['taxonomy', 'attributes', 'tags_actors'])
-    //     && actorsByActortype
-    //   ) {
-    //     const actorConnections = renderActorsByActortypeControl(
-    //       actorsByActortype,
-    //       connectedTaxonomies,
-    //       onCreateOption,
-    //       intl,
-    //     );
-    //     if (actorConnections) {
-    //       fields.push(
-    //         {
-    //           label: intl.formatMessage(appMessages.nav.actorsSuper),
-    //           icon: 'actors',
-    //           fields: actorConnections,
-    //         },
-    //       );
-    //     }
-    //   }
-    // }
     return groups;
   };
 
@@ -429,7 +396,7 @@ function mapDispatchToProps(dispatch, props) {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
     initialiseForm: (model, formData) => {
       dispatch(formActions.reset(model));

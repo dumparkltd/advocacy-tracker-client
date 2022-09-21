@@ -1,29 +1,36 @@
 import { Map, List } from 'immutable';
 
 // work out actors for entities and store activites both direct as well as indirect
-export const getActorsForEntities = (
+export const getActorsForEntities = ({
   actions,
   actors,
   subject = 'actors',
   includeIndirect = true,
-) => {
+  includeChildren = true,
+}) => {
   const actionAtt = subject === 'actors'
     ? 'actors'
     : 'targets';
   const actionAttMembers = subject === 'actors'
     ? 'actorsMembers'
     : 'targetsMembers';
+  const actionAttParents = subject === 'actors'
+    ? 'actorsAssociations'
+    : 'targetsAssociations';
   const actorAtt = subject === 'actors'
     ? 'actions'
     : 'targetingActions';
   const actorAttMembers = subject === 'actors'
     ? 'actionsMembers'
     : 'targetingActionsAsMember';
+  const actorAttChildren = subject === 'actors'
+    ? 'actionsAsParent'
+    : 'targetingActionsAsParent';
   return actions && actions.reduce(
     (memo, action) => {
       const actionId = parseInt(action.get('id'), 10);
       const actionActors = action.get(actionAtt);
-      const memoDirect = actionActors
+      let result = actionActors
         ? actionActors.reduce(
           (memo2, actorId) => {
             const sActorId = actorId.toString();
@@ -43,6 +50,14 @@ export const getActorsForEntities = (
                   .setIn([sActorId, actorAtt], List().push(actionId))
                   .setIn([sActorId, actorAttMembers], memo2.getIn([sActorId, actorAttMembers]).delete(actionId));
               }
+              if (includeChildren
+                && memo2.getIn([sActorId, actorAttChildren])
+                && memo2.getIn([sActorId, actorAttChildren]).includes(actionId)
+              ) {
+                return memo2
+                  .setIn([sActorId, actorAtt], List().push(actionId))
+                  .setIn([sActorId, actorAttChildren], memo2.getIn([sActorId, actorAttChildren]).delete(actionId));
+              }
               return memo2.setIn([sActorId, actorAtt], List().push(actionId));
             }
             const actor = actors.get(sActorId);
@@ -55,7 +70,7 @@ export const getActorsForEntities = (
         : memo;
       if (includeIndirect) {
         const actionActorsAsMember = action.get(actionAttMembers);
-        return actionActorsAsMember
+        result = actionActorsAsMember
           ? actionActorsAsMember.reduce(
             (memo2, actorId) => {
               const sActorId = actorId.toString();
@@ -84,11 +99,46 @@ export const getActorsForEntities = (
               }
               return memo2;
             },
-            memoDirect,
+            result,
           )
-          : memoDirect;
+          : result;
       }
-      return memoDirect;
+      if (includeChildren) {
+        const actionActorsAsParent = action.get(actionAttParents);
+        result = actionActorsAsParent
+          ? actionActorsAsParent.reduce(
+            (memo2, actorId) => {
+              const sActorId = actorId.toString();
+              // makes sure not already included in direct or indirect action
+              if (
+                !memo2.getIn([sActorId, actorAtt])
+                || !memo2.getIn([sActorId, actorAtt]).includes(actionId)
+              ) {
+                // if already present, add action id
+                if (memo2.get(sActorId)) {
+                  if (memo2.getIn([sActorId, actorAttChildren])) {
+                    if (!memo2.getIn([sActorId, actorAttChildren]).includes(actionId)) {
+                      return memo2.setIn(
+                        [sActorId, actorAttChildren],
+                        memo2.getIn([sActorId, actorAttChildren]).push(actionId),
+                      );
+                    }
+                    return memo2;
+                  }
+                  return memo2.setIn([sActorId, actorAttChildren], List().push(actionId));
+                }
+                const actor = actors.get(sActorId);
+                return actor
+                  ? memo2.set(sActorId, actor.set(actorAttChildren, List().push(actionId)))
+                  : memo2;
+              }
+              return memo2;
+            },
+            result,
+          )
+          : result;
+      }
+      return result;
     },
     Map(),
   ).toList();

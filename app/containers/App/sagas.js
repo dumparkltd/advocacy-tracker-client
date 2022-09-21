@@ -33,6 +33,7 @@ import {
   SAVE_CONNECTIONS,
   UPDATE_ROUTE_QUERY,
   AUTHENTICATE_FORWARD,
+  AUTHENTICATE_ERROR,
   UPDATE_PATH,
   RECOVER_PASSWORD,
   CLOSE_ENTITY,
@@ -46,8 +47,12 @@ import {
   OPEN_BOOKMARK,
   SET_INCLUDE_ACTOR_MEMBERS,
   SET_INCLUDE_TARGET_MEMBERS,
+  SET_INCLUDE_ACTOR_CHILDREN,
+  SET_INCLUDE_TARGET_CHILDREN,
   SET_INCLUDE_MEMBERS_FORFILTERS,
   SET_INCLUDE_INOFFICAL_STATEMENTS,
+  SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
+  SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP,
   PARAMS,
 } from 'containers/App/constants';
 
@@ -89,6 +94,7 @@ import {
   selectCurrentPathname,
   selectPreviousPathname,
   selectRedirectOnAuthSuccessPath,
+  selectRedirectOnAuthSuccessSearch,
   selectRequestedAt,
   selectIsSignedIn,
   selectLocation,
@@ -248,8 +254,9 @@ export function* recoverSaga(payload) {
 
 export function* authChangeSaga() {
   const redirectPathname = yield select(selectRedirectOnAuthSuccessPath);
+  const redirectQuery = yield select(selectRedirectOnAuthSuccessSearch);
   if (redirectPathname) {
-    yield put(updatePath(redirectPathname, { replace: true }));
+    yield put(updatePath(redirectPathname, { replace: true, search: redirectQuery }));
   } else {
     // forward to home
     yield put(updatePath('/', { replace: true }));
@@ -263,7 +270,6 @@ export function* logoutSaga() {
     yield put(logoutSuccess());
     yield put(updatePath(ROUTES.LOGIN, { replace: true }));
   } catch (err) {
-    yield call(clearAuthValues);
     yield put(authenticateError(err));
   }
 }
@@ -275,7 +281,6 @@ export function* validateTokenSaga() {
       [KEYS.CLIENT]: client,
       [KEYS.ACCESS_TOKEN]: accessToken,
     } = yield getAuthValues();
-
     if (uid && client && accessToken) {
       yield put(authenticateSending());
       const response = yield call(
@@ -288,18 +293,69 @@ export function* validateTokenSaga() {
         }
       );
       if (!response.success) {
+        const location = yield select(selectLocation);
+        const redirectOnAuthSuccess = location.get('pathname');
+        const redirectOnAuthSuccessSearch = location.get('search');
         yield call(clearAuthValues);
         yield put(invalidateEntities());
+        // forward to home
+        yield put(updatePath(
+          ROUTES.LOGIN,
+          {
+            replace: true,
+            query: [
+              {
+                arg: 'info',
+                value: PARAMS.VALIDATE_TOKEN_FAILED,
+              },
+              {
+                arg: 'redirectOnAuthSuccess',
+                value: redirectOnAuthSuccess,
+              },
+              {
+                arg: 'redirectOnAuthSuccessSearch',
+                value: redirectOnAuthSuccessSearch,
+              },
+            ],
+          },
+        ));
       }
       yield put(authenticateSuccess(response.data)); // need to store currentUserData
     }
   } catch (err) {
-    yield call(clearAuthValues);
     err.response.json = yield err.response.json();
     yield put(authenticateError(err));
   }
 }
 
+export function* authenticateErrorSaga() {
+  const location = yield select(selectLocation);
+  const redirectOnAuthSuccess = location.get('pathname');
+  const redirectOnAuthSuccessSearch = location.get('search');
+  yield call(clearAuthValues);
+  yield put(invalidateEntities());
+  // forward to home
+  yield put(updatePath(
+    ROUTES.LOGIN,
+    {
+      replace: true,
+      query: [
+        {
+          arg: 'info',
+          value: PARAMS.VALIDATE_TOKEN_FAILED,
+        },
+        {
+          arg: 'redirectOnAuthSuccess',
+          value: redirectOnAuthSuccess,
+        },
+        {
+          arg: 'redirectOnAuthSuccessSearch',
+          value: redirectOnAuthSuccessSearch,
+        },
+      ],
+    },
+  ));
+}
 
 function stampPayload(payload, type) {
   return Object.assign(payload, {
@@ -491,7 +547,11 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
       yield put(updatePath(data.redirect, { replace: true }));
     }
     if (updateClient && data.invalidateEntitiesOnSuccess) {
-      yield put(invalidateEntities(data.invalidateEntitiesOnSuccess));
+      yield all(
+        asArray(data.invalidateEntitiesOnSuccess).map(
+          (path) => put(invalidateEntities(path))
+        )
+      );
     }
   } catch (err) {
     err.response.json = yield err.response.json();
@@ -502,7 +562,7 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
   }
 }
 
-export function* saveMultipleEntitiesSaga({ path, data }) {
+export function* saveMultipleEntitiesSaga({ path, data, invalidateEntitiesPaths }) {
   const updateClient = data && data.length <= 20;
   yield all(data.map(
     (datum) => call(
@@ -512,7 +572,13 @@ export function* saveMultipleEntitiesSaga({ path, data }) {
       true, // multiple
     )
   ));
-  if (!updateClient) {
+  if (invalidateEntitiesPaths) {
+    yield all(
+      asArray(invalidateEntitiesPaths).map(
+        (item) => put(invalidateEntities(item))
+      )
+    );
+  } else if (path) {
     yield put(invalidateEntities(path));
   }
 }
@@ -541,7 +607,7 @@ export function* deleteEntitySaga({ data }, updateClient = true, multiple = fals
   }
 }
 
-export function* deleteMultipleEntitiesSaga({ path, data }) {
+export function* deleteMultipleEntitiesSaga({ path, data, invalidateEntitiesPaths }) {
   const updateClient = data && data.length <= 20;
   yield all(data.map(
     (datum) => call(
@@ -551,8 +617,16 @@ export function* deleteMultipleEntitiesSaga({ path, data }) {
       true, // multiple
     )
   ));
-  if (!updateClient) {
+  if (invalidateEntitiesPaths) {
+    yield all(
+      asArray(invalidateEntitiesPaths).map(
+        (item) => put(invalidateEntities(item))
+      )
+    );
+  } else if (path) {
     yield put(invalidateEntities(path));
+  } else if (!path && !invalidateEntitiesPaths) {
+    yield put(invalidateEntities());
   }
 }
 
@@ -697,7 +771,11 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
       }
     }
     if (updateClient && data.invalidateEntitiesOnSuccess) {
-      yield put(invalidateEntities(data.invalidateEntitiesOnSuccess));
+      yield all(
+        asArray(data.invalidateEntitiesOnSuccess).map(
+          (path) => put(invalidateEntities(path))
+        )
+      );
     }
   } catch (err) {
     if (err.response) {
@@ -710,7 +788,7 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
   }
 }
 
-export function* newMultipleEntitiesSaga({ path, data }) {
+export function* newMultipleEntitiesSaga({ path, data, invalidateEntitiesPaths }) {
   const updateClient = data && data.length <= 20;
   yield all(data.map(
     (datum) => call(
@@ -720,8 +798,17 @@ export function* newMultipleEntitiesSaga({ path, data }) {
       true, // multiple
     )
   ));
-  if (!updateClient) {
+
+  if (invalidateEntitiesPaths) {
+    yield all(
+      asArray(invalidateEntitiesPaths).map(
+        (item) => put(invalidateEntities(item))
+      )
+    );
+  } else if (path) {
     yield put(invalidateEntities(path));
+  } else if (!path && !invalidateEntitiesPaths) {
+    yield put(invalidateEntities());
   }
 }
 
@@ -759,7 +846,7 @@ const getNextQuery = (query, extend, location) => {
   return asArray(query).reduce((memo, param) => {
     const queryUpdated = memo;
     // if arg already set and not replacing
-    if (queryUpdated[param.arg] && !param.replace) {
+    if (queryUpdated[param.arg] && (typeof param.replace === 'undefined' || !param.replace)) {
       const val = param.value && param.value.toString();
       // check for connection attribute queries
       if (
@@ -830,7 +917,14 @@ const getNextQuery = (query, extend, location) => {
         queryUpdated[param.arg] = param.value;
       }
     } else if (queryUpdated[param.arg] && (param.remove || typeof param.value === 'undefined')) {
-      delete queryUpdated[param.arg];
+      // make sure we remove the right values
+      if (param.value && (param.arg === 'without' || param.arg === 'any' || param.arg === 'cat')) {
+        if (qe(queryUpdated[param.arg], param.value)) {
+          delete queryUpdated[param.arg];
+        }
+      } else {
+        delete queryUpdated[param.arg];
+      }
     // if not set or replacing with new value
     } else if (typeof param.value !== 'undefined' && !param.remove) {
       queryUpdated[param.arg] = param.value;
@@ -967,6 +1061,58 @@ export function* setIncludeTargetMembersSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
+export function* setIncludeActorChildrenSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'ach',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
+export function* setIncludeTargetChildrenSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'tch',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
+export function* setIncludeTargetChildrenOnMapSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'mtch',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
+export function* setIncludeTargetChildrenMembersOnMapSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'mtchm',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
 export function* setIncludeMembersForFilterSaga({ value }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
@@ -1021,22 +1167,28 @@ export function* updatePathSaga({ path, args }) {
   const relativePath = path.startsWith('/') ? path : `/${path}`;
   const location = yield select(selectLocation);
   let queryNext = {};
-  if (args && (args.query || args.keepQuery)) {
-    if (args.query) {
-      queryNext = getNextQuery(args.query, args.extend, location);
-    }
-    if (args.keepQuery) {
-      queryNext = location.get('query').toJS();
+  let queryNextString = '';
+  if (args) {
+    // if query set as search string
+    if (args.search) {
+      queryNextString = args.search;
+    } else {
+      if (args.query) {
+        queryNext = getNextQuery(args.query, args.extend, location);
+      } else if (args.keepQuery) {
+        queryNext = location.get('query').toJS();
+      }
+      // convert to string
+      queryNextString = `?${getNextQueryString(queryNext)}`;
     }
   } else {
     // always keep "specific filters"
     queryNext = location.get('query').filter(
       (val, key) => KEEP_FILTERS.indexOf(key) > -1
     ).toJS();
+    queryNextString = `?${getNextQueryString(queryNext)}`;
   }
-  // convert to string
-  const queryNextString = getNextQueryString(queryNext);
-  const nextPath = `${relativePath}?${queryNextString}`;
+  const nextPath = `${relativePath}${queryNextString}`;
   if (args && args.replace) {
     yield put(replace(nextPath));
   } else {
@@ -1070,6 +1222,7 @@ export default function* rootSaga() {
   yield takeLatest(VALIDATE_TOKEN, validateTokenSaga);
 
   yield takeLatest(AUTHENTICATE, authenticateSaga);
+  yield takeLatest(AUTHENTICATE_ERROR, authenticateErrorSaga);
   yield takeLatest(RECOVER_PASSWORD, recoverSaga);
   yield takeLatest(LOGOUT, logoutSaga);
   yield takeLatest(AUTHENTICATE_FORWARD, authChangeSaga);
@@ -1093,6 +1246,10 @@ export default function* rootSaga() {
   yield takeEvery(SET_MAPINDICATOR, setMapIndicatorSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_MEMBERS, setIncludeActorMembersSaga);
   yield takeEvery(SET_INCLUDE_TARGET_MEMBERS, setIncludeTargetMembersSaga);
+  yield takeEvery(SET_INCLUDE_ACTOR_CHILDREN, setIncludeActorChildrenSaga);
+  yield takeEvery(SET_INCLUDE_TARGET_CHILDREN, setIncludeTargetChildrenSaga);
+  yield takeEvery(SET_INCLUDE_TARGET_CHILDREN_ON_MAP, setIncludeTargetChildrenOnMapSaga);
+  yield takeEvery(SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP, setIncludeTargetChildrenMembersOnMapSaga);
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
   yield takeEvery(SET_INCLUDE_INOFFICAL_STATEMENTS, setIncludeInofficialStatementsSaga);
   yield takeEvery(OPEN_BOOKMARK, openBookmarkSaga);

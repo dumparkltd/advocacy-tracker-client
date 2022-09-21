@@ -37,6 +37,10 @@ export default defineMessages({
       id: 'app.containers.App.supportlevels.4',
       defaultMessage: '4 - Rather sceptical',
     },
+    5: {
+      id: 'app.containers.App.supportlevels.5',
+      defaultMessage: '5 - Opponent',
+    },
     99: {
       id: 'app.containers.App.supportlevels.99',
       defaultMessage: 'No statement on topic',
@@ -527,6 +531,10 @@ export default defineMessages({
       id: 'app.containers.App.buttons.assign',
       defaultMessage: 'Update',
     },
+    updateFilter: {
+      id: 'app.containers.App.buttons.updateFilter',
+      defaultMessage: 'Apply filters',
+    },
     previous: {
       id: 'app.containers.App.buttons.previous',
       defaultMessage: 'Previous',
@@ -566,6 +574,10 @@ export default defineMessages({
         id: 'app.containers.App.labels.smart.notMet',
         defaultMessage: 'Not met',
       },
+    },
+    userLoading: {
+      id: 'app.containers.App.labels.userLoading',
+      defaultMessage: 'Signing in...',
     },
   },
   fields: {
@@ -835,6 +847,10 @@ export default defineMessages({
       id: 'app.containers.App.attributes.private',
       defaultMessage: 'Confidentiality',
     },
+    notifications: {
+      id: 'app.containers.App.attributes.notifications',
+      defaultMessage: 'Email notifications',
+    },
     draft: {
       id: 'app.containers.App.attributes.draft',
       defaultMessage: 'Authoring status',
@@ -1001,6 +1017,14 @@ export default defineMessages({
       updated_at: {
         id: 'app.containers.App.attributes.meta.updated_at',
         defaultMessage: 'Last updated',
+      },
+      relationship_updated_at: {
+        id: 'app.containers.App.attributes.meta.relationship_updated_at',
+        defaultMessage: 'Connections last updated',
+      },
+      relationship_updated_by_id: {
+        id: 'app.containers.App.attributes.meta.relationship_updated_by_id',
+        defaultMessage: 'Connections updated by',
       },
       created_at: {
         id: 'app.containers.App.attributes.meta.created_at',
@@ -2279,6 +2303,10 @@ export default defineMessages({
       id: 'app.containers.App.messages.notSignedIn',
       defaultMessage: 'Please sign in or register first to access this page',
     },
+    validateTokenFailed: {
+      id: 'app.containers.App.messages.validateTokenFailed',
+      defaultMessage: 'Please sign in again',
+    },
     alreadySignedIn: {
       id: 'app.containers.App.messages.alreadySignedIn',
       defaultMessage: 'Welcome back!',
@@ -2302,12 +2330,12 @@ export default defineMessages({
         id: 'app.containers.App.ui.userRoles.admin',
         defaultMessage: 'Administrator',
       },
-      manager: {
-        id: 'app.containers.App.ui.userRoles.manager',
-        defaultMessage: 'Manager',
+      member: {
+        id: 'app.containers.App.ui.userRoles.member',
+        defaultMessage: 'Member',
       },
-      analyst: {
-        id: 'app.containers.App.ui.userRoles.analyst',
+      visitor: {
+        id: 'app.containers.App.ui.userRoles.visitor',
         defaultMessage: 'Staff',
       },
       default: {
@@ -2333,6 +2361,16 @@ export default defineMessages({
       public: {
         id: 'app.containers.App.ui.privacyStatuses.public',
         defaultMessage: 'Not confidential',
+      },
+    },
+    notificationStatuses: {
+      enabled: {
+        id: 'app.containers.App.ui.notificationStatuses.enabled',
+        defaultMessage: 'Enabled',
+      },
+      disabled: {
+        id: 'app.containers.App.ui.notificationStatuses.disabled',
+        defaultMessage: 'Disabled',
       },
     },
     publishStatuses: {

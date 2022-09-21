@@ -25,9 +25,7 @@ import {
 
 import FieldGroup from 'components/fields/FieldGroup';
 
-import {
-  selectActorConnections,
-} from 'containers/App/selectors';
+import { selectActorConnections } from 'containers/App/selectors';
 
 import ActionMap from './ActionMap';
 import TabActorsAccordion from './TabActorsAccordion';
@@ -48,6 +46,7 @@ export function TabActors({
   actorsByActortype,
   actorConnections,
   childActionsByActiontype,
+  isAdmin,
 }) {
   const hasMemberOption = !!typeId && !qe(typeId, ACTIONTYPES.NATL);
 
@@ -56,10 +55,28 @@ export function TabActors({
   const actortypesForSubject = viewSubject === 'actors'
     ? actorsByActortype
     : targetsByActortype;
+  const hasChildTargets = viewSubject === 'targets'
+    && hasChildren
+    && childActionsByActiontype
+    && childActionsByActiontype
+      .flatten(true)
+      .filter((action) => action.get('targetsByType'))
+      .size > 0;
+  const hasChildActors = viewSubject === 'actors'
+    && hasChildren
+    && childActionsByActiontype
+    && childActionsByActiontype
+      .flatten(true)
+      .filter((action) => action.get('actorsByType'))
+      .size > 0;
+
+  const hasActivities = (actortypesForSubject && actortypesForSubject.size > 0)
+    || hasChildTargets
+    || hasChildActors;
 
   return (
     <>
-      {(!actortypesForSubject || actortypesForSubject.size === 0) && (
+      {!hasActivities && (
         <Box margin={{ top: 'small', horizontal: 'medium', bottom: 'large' }}>
           {viewSubject === 'actors' && (
             <Text>
@@ -73,13 +90,15 @@ export function TabActors({
           )}
         </Box>
       )}
-      {actortypesForSubject && hasMap && (
+      {hasActivities && hasMap && (
         <ActionMap
           entities={actortypesForSubject}
           mapSubject={viewSubject}
           onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
           hasMemberOption={hasMemberOption}
+          hasChildTargetOption={hasChildTargets}
           typeId={typeId}
+          childActionsByActiontype={childActionsByActiontype}
         />
       )}
       <Box margin={{ vertical: 'medium' }}>
@@ -94,15 +113,16 @@ export function TabActors({
             }}
           />
         )}
-        {actortypesForSubject && (
+        {hasActivities && (
           <TabActorsAccordion
             viewSubject={viewSubject}
-            hasChildTargets={hasChildren && viewSubject === 'targets'}
+            hasChildTargets={hasChildTargets}
             taxonomies={taxonomies}
             onEntityClick={onEntityClick}
             actorConnections={actorConnections}
             actorsByType={actortypesForSubject}
             childActionsByActiontype={childActionsByActiontype}
+            isAdmin={isAdmin}
           />
         )}
       </Box>
@@ -121,6 +141,7 @@ TabActors.propTypes = {
   childActionsByActiontype: PropTypes.object,
   viewSubject: PropTypes.string,
   hasChildren: PropTypes.bool,
+  isAdmin: PropTypes.bool,
 };
 
 const mapStateToProps = (state, { viewEntity }) => ({

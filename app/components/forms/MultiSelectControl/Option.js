@@ -40,12 +40,10 @@ const CheckboxWrapper = styled((p) => (
 
 const OptionLabel = styled((p) => <Box pad={{ vertical: 'small', right: 'xsmall' }} fill as="label" {...p} />)`
   vertical-align: middle;
-  cursor: pointer;
-  border-right: ${(props) => (props.changedToChecked || props.changedToUnchecked)
-    ? '0.5em solid'
-    : 'none'
-};
-  border-right-color: ${palette('buttonDefault', 1)};
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
+  opacity: ${({ disabled }) => disabled ? 0.6 : 1};
+  border-right: 0.5em solid;
+  border-right-color: ${(props) => (props.changedToChecked || props.changedToUnchecked) ? palette('buttonDefault', 1) : 'transparent'};
 `;
 
 // font-weight: ${(props) => props.bold ? 500 : 'normal'};
@@ -93,6 +91,7 @@ function Option({
   const isNew = option.get('isNew');
   // const draft = option.get('draft');
   const checked = option.get('checked');
+  const disabled = option.get('disabled');
   const isIndeterminate = option.get('isIndeterminate');
 
   let optionLabel;
@@ -113,6 +112,7 @@ function Option({
       <CheckboxWrapper>
         {isIndeterminate && (
           <IndeterminateCheckbox
+            disabled={disabled}
             id={optionId}
             checked={checked}
             onChange={(checkedState) => {
@@ -123,6 +123,7 @@ function Option({
         {!isIndeterminate && (
           <input
             id={optionId}
+            disabled={disabled}
             type="checkbox"
             checked={checked}
             onChange={(evt) => {
@@ -137,22 +138,26 @@ function Option({
         changedToChecked={option.get('changedToChecked')}
         changedToUnchecked={option.get('changedToUnchecked')}
         secondary={secondary}
+        disabled={disabled}
       >
-        <Label emphasis={emphasis}>
-          {reference && <Id>{reference}</Id>}
-          {reference && <IdSpacer />}
-          {optionLabel}
-          {isNew && (
-            <New><FormattedMessage {...messages.new} /></New>
+        <Box direction="row" justify="between">
+          <Label emphasis={emphasis}>
+            {reference && <Id>{reference}</Id>}
+            {reference && <IdSpacer />}
+            {optionLabel}
+            {isNew && (
+              <New><FormattedMessage {...messages.new} /></New>
+            )}
+          </Label>
+          {optionInfo && (
+            <InfoOverlay
+              title={optionLabel}
+              content={optionInfo}
+              markdown
+            />
           )}
-        </Label>
+        </Box>
       </OptionLabel>
-      {optionInfo && (
-        <InfoOverlay
-          title={optionLabel}
-          content={optionInfo}
-        />
-      )}
     </Styled>
   );
 }

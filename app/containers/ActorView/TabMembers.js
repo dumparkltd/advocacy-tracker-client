@@ -40,6 +40,7 @@ export function TabMembers(props) {
     membersByType,
     taxonomies,
     actorConnections,
+    isAdmin,
   } = props;
   const countriesJSON = topojson.feature(
     countriesTopo,
@@ -152,7 +153,7 @@ export function TabMembers(props) {
                       id: 'main',
                       type: 'main',
                       sort: 'title',
-                      attributes: ['code', 'title'],
+                      attributes: isAdmin ? ['code', 'title'] : ['title'],
                     },
                     {
                       id: 'actorActions',
@@ -180,6 +181,7 @@ export function TabMembers(props) {
 
 TabMembers.propTypes = {
   onEntityClick: PropTypes.func,
+  isAdmin: PropTypes.bool,
   membersByType: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
   actorConnections: PropTypes.instanceOf(Map),

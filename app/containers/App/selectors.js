@@ -138,27 +138,27 @@ export const selectIsUserAdmin = createSelector(
   (userRoles) => userRoles.includes(USER_ROLES.ADMIN.value)
 );
 
-export const selectIsUserManager = createSelector(
+export const selectIsUserMember = createSelector(
   selectSessionUserRoles,
-  (userRoles) => userRoles.includes(USER_ROLES.MANAGER.value)
+  (userRoles) => userRoles.includes(USER_ROLES.MEMBER.value)
     || userRoles.includes(USER_ROLES.ADMIN.value)
 );
 
-export const selectIsUserAnalyst = createSelector(
+export const selectIsUserVisitor = createSelector(
   selectSessionUserRoles,
-  (userRoles) => userRoles.includes(USER_ROLES.ANALYST.value)
-    || userRoles.includes(USER_ROLES.MANAGER.value)
+  (userRoles) => userRoles.includes(USER_ROLES.VISITOR.value)
+    || userRoles.includes(USER_ROLES.MEMBER.value)
     || userRoles.includes(USER_ROLES.ADMIN.value)
 );
 
 export const selectHasUserRole = createSelector(
   selectIsUserAdmin,
-  selectIsUserManager,
-  selectIsUserAnalyst,
-  (isAdmin, isManager, isAnalyst) => ({
+  selectIsUserMember,
+  selectIsUserVisitor,
+  (isAdmin, isMember, isVisitor) => ({
     [USER_ROLES.ADMIN.value]: isAdmin,
-    [USER_ROLES.MANAGER.value]: isManager,
-    [USER_ROLES.ANALYST.value]: isAnalyst,
+    [USER_ROLES.MEMBER.value]: isMember,
+    [USER_ROLES.VISITOR.value]: isVisitor,
   })
 );
 
@@ -168,11 +168,11 @@ export const selectSessionUserHighestRoleId = createSelector(
     if (userRoles.includes(USER_ROLES.ADMIN.value)) {
       return USER_ROLES.ADMIN.value;
     }
-    if (userRoles.includes(USER_ROLES.MANAGER.value)) {
-      return USER_ROLES.MANAGER.value;
+    if (userRoles.includes(USER_ROLES.MEMBER.value)) {
+      return USER_ROLES.MEMBER.value;
     }
-    if (userRoles.includes(USER_ROLES.ANALYST.value)) {
-      return USER_ROLES.ANALYST.value;
+    if (userRoles.includes(USER_ROLES.VISITOR.value)) {
+      return USER_ROLES.VISITOR.value;
     }
     return USER_ROLES.DEFAULT.value;
   }
@@ -217,6 +217,20 @@ export const selectRedirectOnAuthSuccessPath = createSelector(
         'locationBeforeTransitions',
         'query',
         PARAMS.REDIRECT_ON_AUTH_SUCCESS,
+      ]);
+    } catch (error) {
+      return null;
+    }
+  }
+);
+export const selectRedirectOnAuthSuccessSearch = createSelector(
+  getRoute,
+  (routeState) => {
+    try {
+      return routeState.getIn([
+        'locationBeforeTransitions',
+        'query',
+        PARAMS.REDIRECT_ON_AUTH_SUCCESS_QUERY,
       ]);
     } catch (error) {
       return null;
@@ -454,6 +468,42 @@ export const selectIncludeTargetMembers = createSelector(
     return true; // default
   }
 );
+export const selectIncludeTargetChildrenOnMap = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('mtch')) {
+      return qe(locationQuery.get('mtch'), 1) || locationQuery.get('mtch') === 'true';
+    }
+    return true; // default
+  }
+);
+export const selectIncludeTargetChildrenMembersOnMap = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('mtchm')) {
+      return qe(locationQuery.get('mtchm'), 1) || locationQuery.get('mtchm') === 'true';
+    }
+    return true; // default
+  }
+);
+export const selectIncludeActorChildren = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('ach')) {
+      return qe(locationQuery.get('ach'), 1) || locationQuery.get('ach') === 'true';
+    }
+    return true; // default
+  }
+);
+export const selectIncludeTargetChildren = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('tch')) {
+      return qe(locationQuery.get('tch'), 1) || locationQuery.get('tch') === 'true';
+    }
+    return true; // default
+  }
+);
 export const selectIncludeMembersForFiltering = createSelector(
   selectLocationQuery,
   (locationQuery) => {
@@ -535,7 +585,7 @@ export const selectResource = createSelector(
 );
 export const selectIndicators = createSelector(
   (state) => selectEntities(state, API.INDICATORS),
-  (entities) => sortEntities(entities, 'desc', 'id', null, false)
+  (entities) => sortEntities(entities, 'asc', 'title', null, false)
 );
 export const selectIndicator = createSelector(
   (state, id) => selectEntity(state, { id, path: API.INDICATOR }),
@@ -586,6 +636,39 @@ export const selectActortypesForActiontype = createSelector(
     const validActortypeIds = ACTIONTYPE_ACTORTYPES[typeId];
     return actortypes.filter(
       (type) => validActortypeIds && validActortypeIds.indexOf(type.get('id')) > -1
+    );
+  }
+);
+export const selectParentActortypesForActiontype = createSelector(
+  selectActortypesForActiontype,
+  selectActortypes,
+  // selectIncludeMembersForFiltering,
+  (directActortypes, actortypes) => {
+    if (!directActortypes) return null;
+    const directActortypeIds = directActortypes.map((type) => type.get('id')).toList().toArray();
+    const parentActortypeIds = directActortypeIds.reduce(
+      (memo, actortypeId) => {
+        const parentIds = MEMBERSHIPS[actortypeId].filter(
+          (parentId) => memo.indexOf(parentId) === -1 && directActortypeIds.indexOf(parentId) === -1
+        );
+        return [
+          ...memo,
+          ...parentIds,
+        ];
+      },
+      [],
+    );
+    return actortypes.filter(
+      (actortype) => {
+        const id = actortype.get('id');
+        const isDirect = directActortypeIds.indexOf(id) > -1;
+        if (isDirect) {
+          return false;
+        }
+        return isDirect ? false : parentActortypeIds.indexOf(id) > -1;
+      }
+    ).map(
+      (type) => type.set('viaMember', true)
     );
   }
 );
@@ -682,6 +765,7 @@ export const selectMembertypesForActortype = createSelector(
     );
   }
 );
+
 export const selectAssociationtypesForActortype = createSelector(
   (state, { type }) => type,
   selectActortypes,
@@ -690,6 +774,39 @@ export const selectAssociationtypesForActortype = createSelector(
     const validActortypeIds = MEMBERSHIPS[typeId];
     return actortypes.filter(
       (type) => validActortypeIds && validActortypeIds.indexOf(type.get('id')) > -1
+    );
+  }
+);
+
+export const selectParentAssociationtypesForActortype = createSelector(
+  selectAssociationtypesForActortype,
+  selectActortypes,
+  (directActortypes, actortypes) => {
+    if (!directActortypes) return null;
+    const directActortypeIds = directActortypes.map((type) => type.get('id')).toList().toArray();
+    const parentActortypeIds = directActortypeIds.reduce(
+      (memo, actortypeId) => {
+        const parentIds = MEMBERSHIPS[actortypeId].filter(
+          (parentId) => memo.indexOf(parentId) === -1 && directActortypeIds.indexOf(parentId) === -1
+        );
+        return [
+          ...memo,
+          ...parentIds,
+        ];
+      },
+      [],
+    );
+    return actortypes.filter(
+      (actortype) => {
+        const id = actortype.get('id');
+        const isDirect = directActortypeIds.indexOf(id) > -1;
+        if (isDirect) {
+          return false;
+        }
+        return isDirect ? false : parentActortypeIds.indexOf(id) > -1;
+      }
+    ).map(
+      (type) => type.set('viaMember', true)
     );
   }
 );
@@ -818,8 +935,8 @@ export const selectActiontypeActions = createSelector(
 //   selectActortypeQuery,
 //   selectActortypeActors,
 //   (state) => selectEntities(state, API.ACTOR_ACTIONS), // active
-//   selectIsUserManager,
-//   (entities, actortype, actors, actorActions, isManager) => {
+//   selectIsUserMember,
+//   (entities, actortype, actors, actorActions, isMember) => {
 //     if (entities && actors && actorActions) {
 //       if (actortype && actortype !== 'all') {
 //         return entities.filter(
@@ -832,7 +949,7 @@ export const selectActiontypeActions = createSelector(
 //             ).map(
 //               (rm) => rm.getIn(['attributes', 'actor_id'])
 //             );
-//             return (isManager && actorIds.size === 0) || actorIds.some(
+//             return (isMember && actorIds.size === 0) || actorIds.some(
 //               (id) => !!actors.find(
 //                 (actor) => qe(actor.get('id'), id)
 //               )
@@ -1024,15 +1141,11 @@ export const selectTaxonomiesSorted = createSelector(
 export const selectTaxonomiesWithCategories = createSelector(
   selectTaxonomiesSorted,
   selectCategories,
-  (taxonomies, categories) => taxonomies.map((tax) => tax.set(
-    'categories',
-    categories.filter(
-      (cat) => qe(
-        cat.getIn(['attributes', 'taxonomy_id']),
-        tax.get('id')
-      )
-    )
-  ))
+  (taxonomies, categories) => prepareTaxonomies(
+    taxonomies,
+    categories,
+    false,
+  )
 );
 
 // all categories for a given taxonomy id
@@ -1580,8 +1693,19 @@ export const selectMembershipsGroupedByMember = createSelector(
       )
     ),
 );
+export const selectMembershipParentsGroupedByMember = createSelector(
+  selectMembershipsGroupedByMember,
+  (memberships) => memberships && memberships.map(
+    (actors) => actors.reduce((memo, actorId) => {
+      if (memberships.get(actorId)) {
+        return memo.concat(memberships.get(actorId));
+      }
+      return memo;
+    }, Map()),
+  ),
+);
 
-export const selectMembershipsGroupedByAssociation = createSelector(
+export const selectMembershipsGroupedByParent = createSelector(
   (state) => selectEntities(state, API.MEMBERSHIPS),
   (entities) => entities
     && entities.groupBy(
@@ -1595,7 +1719,7 @@ export const selectMembershipsGroupedByAssociation = createSelector(
 
 export const selectActorActionsMembersGroupedByAction = createSelector(
   selectActorActionsGroupedByAction,
-  selectMembershipsGroupedByAssociation,
+  selectMembershipsGroupedByParent,
   (entities, memberships) => entities && memberships && entities.map(
     (actors) => actors.reduce((memo, actorId) => {
       if (memberships.get(actorId)) {
@@ -1619,27 +1743,31 @@ export const selectActorActionsAssociationsGroupedByAction = createSelector(
 );
 export const selectActionActorsMembersGroupedByAction = createSelector(
   selectActionActorsGroupedByAction,
-  selectMembershipsGroupedByAssociation,
-  (actionActorsByAction, memberships) => actionActorsByAction && memberships && actionActorsByAction.map(
-    (actionActors) => actionActors.reduce((memo, actorId) => {
-      if (memberships.get(actorId)) {
-        return memo.concat(memberships.get(actorId));
-      }
-      return memo;
-    }, Map())
-  )
+  selectMembershipsGroupedByParent,
+  (actionActorsByAction, memberships) => actionActorsByAction
+    && memberships
+    && actionActorsByAction.map(
+      (actionActors) => actionActors.reduce((memo, actorId) => {
+        if (memberships.get(actorId)) {
+          return memo.concat(memberships.get(actorId));
+        }
+        return memo;
+      }, Map())
+    )
 );
 export const selectActionActorsAssociationsGroupedByAction = createSelector(
   selectActionActorsGroupedByAction,
   selectMembershipsGroupedByMember,
-  (actionActorsByAction, memberships) => actionActorsByAction && memberships && actionActorsByAction.map(
-    (actionActors) => actionActors.reduce((memo, actorId) => {
-      if (memberships.get(actorId)) {
-        return memo.concat(memberships.get(actorId));
-      }
-      return memo;
-    }, Map())
-  )
+  (actionActorsByAction, memberships) => actionActorsByAction
+    && memberships
+    && actionActorsByAction.map(
+      (actionActors) => actionActors.reduce((memo, actorId) => {
+        if (memberships.get(actorId)) {
+          return memo.concat(memberships.get(actorId));
+        }
+        return memo;
+      }, Map())
+    )
 );
 
 export const selectActionCategoriesGroupedByAction = createSelector(
@@ -1717,15 +1845,30 @@ const filterStatements = (
   statementId,
   includeInofficial,
   actionCategoriesByAction,
+  connectedCategoryQuery,
 ) => {
+  let pass = true;
   if (!statements.get(statementId.toString())) {
     return false;
   }
-  if (includeInofficial) {
-    return true;
-  }
   const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
-  return statementCategories && statementCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+  if (!includeInofficial) {
+    pass = statementCategories && statementCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+  }
+  if (pass && connectedCategoryQuery) {
+    pass = asList(connectedCategoryQuery).every(
+      (queryArg) => {
+        const [path, value] = queryArg
+          ? queryArg.split(':')
+          : [null, null];
+        if (path !== API.ACTIONS || !value) {
+          return true;
+        }
+        return statementCategories && statementCategories.includes(parseInt(value, 10));
+      },
+    );
+  }
+  return pass;
 };
 
 export const selectActorsWithPositions = createSelector(
@@ -1736,6 +1879,7 @@ export const selectActorsWithPositions = createSelector(
   // from query
   selectIncludeInofficialStatements,
   selectIncludeActorMembers,
+  selectConnectedCategoryQuery,
   // from state
   (state) => selectActors(state),
   (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
@@ -1751,6 +1895,7 @@ export const selectActorsWithPositions = createSelector(
     actortypeId,
     includeInofficialQuery,
     includeActorMembersQuery,
+    connectedCategoryQuery,
     actors,
     statements,
     authorityCategories,
@@ -1814,6 +1959,7 @@ export const selectActorsWithPositions = createSelector(
               statementId,
               includeInofficial,
               actionCategoriesByAction,
+              asList(connectedCategoryQuery),
             ))
             .toList();
         }
@@ -1843,6 +1989,7 @@ export const selectActorsWithPositions = createSelector(
                         statementId,
                         includeInofficial,
                         actionCategoriesByAction,
+                        asList(connectedCategoryQuery),
                       ))
                       .toList()
                   );

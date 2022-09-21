@@ -8,15 +8,12 @@ import {
   selectActionsCategorised,
   selectActiontypes,
   selectActionResourcesGroupedByResource,
-  selectCategories,
-  selectTaxonomiesSorted,
   selectReady,
 } from 'containers/App/selectors';
 
 import {
   entitySetUser,
   entitiesSetAssociated,
-  prepareTaxonomies,
 } from 'utils/entities';
 
 import { DEPENDENCIES } from './constants';
@@ -35,16 +32,6 @@ export const selectViewEntity = createSelector(
   (state, id) => selectEntity(state, { path: API.RESOURCES, id }),
   (state) => selectEntities(state, API.USERS),
   (entity, users) => entitySetUser(entity, users)
-);
-
-export const selectConnectedTaxonomies = createSelector(
-  selectTaxonomiesSorted,
-  selectCategories,
-  (taxonomies, categories) => prepareTaxonomies(
-    taxonomies,
-    categories,
-    false,
-  )
 );
 
 export const selectActionsByActiontype = createSelector(

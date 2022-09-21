@@ -20,7 +20,6 @@ import {
   entitySetUser,
   prepareTaxonomiesAssociated,
   entitiesSetAssociated,
-  prepareTaxonomies,
 } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
 
@@ -67,17 +66,6 @@ export const selectTaxonomies = createSelector(
     id,
   )
 );
-
-export const selectConnectedTaxonomies = createSelector(
-  selectTaxonomiesSorted,
-  selectCategories,
-  (taxonomies, categories) => prepareTaxonomies(
-    taxonomies,
-    categories,
-    false,
-  )
-);
-
 
 export const selectRoles = createSelector(
   (state, id) => id,

@@ -12,7 +12,9 @@ import {
   ACTIONTYPE_ACTIONTYPES,
 } from 'themes/config';
 
-import { makeAttributeFilterOptions } from './filterOptionsFactory';
+import appMessage from 'utils/app-message';
+
+import { makeAttributeFilterOptions } from './utilFilterOptions';
 // figure out filter groups for filter panel
 export const makeFilterGroups = ({
   config,
@@ -32,16 +34,21 @@ export const makeFilterGroups = ({
   currentFilters,
   locationQuery,
   includeMembers,
+  connectedTaxonomies,
 }) => {
   const filterGroups = {};
 
   // attributes
   if (config.attributes) {
+    const groupCurrentFilters = currentFilters && currentFilters.filter(
+      (f) => qe(f.type, 'attributes')
+    );
     // first prepare taxonomy options
     filterGroups.attributes = {
       id: 'attributes', // filterGroupId
       label: messages.attributes,
       show: true,
+      optionsActiveCount: groupCurrentFilters ? groupCurrentFilters.length : 0,
       options: reduce(
         config.attributes.options,
         (memo, option) => {
@@ -79,11 +86,14 @@ export const makeFilterGroups = ({
   // taxonomy option group
   if (config.taxonomies && taxonomies) {
     // first prepare taxonomy options
+    const groupCurrentFilters = currentFilters && currentFilters.filter(
+      (f) => qe(f.groupId, 'taxonomies')
+    );
     filterGroups.taxonomies = {
       id: 'taxonomies', // filterGroupId
       label: messages.taxonomyGroup,
       show: true,
-      icon: 'categories',
+      optionsActiveCount: groupCurrentFilters ? groupCurrentFilters.length : 0,
       options:
         sortEntities(taxonomies, 'asc', 'priority')
           .reduce(
@@ -120,6 +130,9 @@ export const makeFilterGroups = ({
       return true;
     }).forEach((connectionKey) => {
       const option = config.connections[connectionKey];
+      const groupCurrentFilters = currentFilters && currentFilters.filter(
+        (f) => qe(f.groupId, connectionKey)
+      );
       if (!option.groupByType) {
         let validType = true;
         if (option.type === 'action-indicators') {
@@ -132,7 +145,6 @@ export const makeFilterGroups = ({
           validType = USER_ACTORTYPES.indexOf(typeId) > -1;
         }
         if (validType) {
-          // console.log(currentFilters)
           const optionCurrentFilters = currentFilters && currentFilters.filter(
             (f) => qe(f.groupId, connectionKey)
           );
@@ -140,6 +152,7 @@ export const makeFilterGroups = ({
             id: connectionKey, // filterGroupId
             label: messages.connections(option.type),
             show: true,
+            optionsActiveCount: groupCurrentFilters ? groupCurrentFilters.length : 0,
             options: [{
               id: option.type, // filterOptionId
               label: option.label,
@@ -243,6 +256,7 @@ export const makeFilterGroups = ({
           id: connectionKey, // filterGroupId
           label: messages.connections(option.type),
           show: true,
+          optionsActiveCount: groupCurrentFilters ? groupCurrentFilters.length : 0,
           includeAnyWithout: !!option.groupByType,
           options: types && types
             .filter((type) => {
@@ -293,16 +307,26 @@ export const makeFilterGroups = ({
               const optionCurrentFilters = currentFilters && currentFilters.filter(
                 (f) => qe(f.optionId, id) && qe(f.groupId, connectionKey)
               );
+              let { label } = option;
+              if (intl) {
+                const msg = (option.messageByType
+                  && option.messageByType.indexOf('{typeid}') > -1
+                )
+                  ? option.messageByType.replace('{typeid}', type.get('id'))
+                  : option.message;
+                label = appMessage(intl, msg);
+              }
+              if (type.get('viaMember')) {
+                label = `${label} (via members only)`;
+              }
               return memo.concat({
                 id, // filterOptionId
-                label: option.label,
+                label,
+                disabled: type.get('viaMember') && !includeMembers,
                 info: typeAbout
                   && appMessages[typeAbout]
                   && appMessages[typeAbout][type.get('id')]
                   && intl.formatMessage(appMessages[typeAbout][type.get('id')]),
-                message: (option.messageByType && option.messageByType.indexOf('{typeid}') > -1)
-                  ? option.messageByType.replace('{typeid}', type.get('id'))
-                  : option.message,
                 color: option.entityType,
                 active: !!activeFilterOption
                   && activeFilterOption.group === connectionKey
@@ -315,5 +339,35 @@ export const makeFilterGroups = ({
       }
     });
   }
+  // connectedTaxonomies option group
+  if (config.connectedTaxonomies && connectedTaxonomies) {
+    // first prepare taxonomy options
+    filterGroups.connectedTaxonomies = {
+      id: 'connectedTaxonomies', // filterGroupId
+      label: messages.connectedTaxonomies,
+      show: true,
+      options: connectedTaxonomies
+        .reduce(
+          (taxOptionsMemo, taxonomy) => {
+            if (
+              config.connectedTaxonomies.exclude
+              && taxonomy.getIn(['attributes', config.connectedTaxonomies.exclude])
+            ) {
+              return taxOptionsMemo;
+            }
+            return taxOptionsMemo.concat([
+              {
+                id: taxonomy.get('id'), // filterOptionId
+                label: messages.taxonomies(taxonomy.get('id')),
+                active: !!activeFilterOption && activeFilterOption.optionId === taxonomy.get('id'),
+                nested: taxonomy.getIn(['attributes', 'parent_id']),
+              },
+            ]);
+          },
+          [],
+        ),
+    };
+  }
+
   return filterGroups;
 };

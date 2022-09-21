@@ -22,11 +22,7 @@ import qe from 'utils/quasi-equals';
 // import { hasGroupActors } from 'utils/entities';
 import MapContainer from 'containers/MapContainer/MapWrapper';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
-
-// import messages from './messages';
-import Dot from 'components/styled/Dot';
-
-const LabelWrap = styled((p) => <Box direction="row" gap="xsmall" align="center" {...p} />)``;
+import MapKeySimple from 'containers/MapContainer/MapKeySimple';
 
 const Styled = styled((p) => <Box {...p} />)`
   z-index: 0;
@@ -139,15 +135,11 @@ export function CountryMap({
         && countryData.filter(
           (country) => qe(country.positionId, option.value)
         ).length,
+      label: intl.formatMessage(appMessages.supportlevels[option.value]),
     })
   );
   return (
     <Styled hasHeader noOverflow>
-      <MapOptions>
-        <MapTitle>
-          <Text weight={600}>UN Member States’ level of support</Text>
-        </MapTitle>
-      </MapOptions>
       <MapWrapper>
         <MapContainer
           countryData={countryData}
@@ -159,6 +151,9 @@ export function CountryMap({
         />
       </MapWrapper>
       <MapOptions>
+        <MapTitle>
+          <Text weight={600}>UN Member States’ level of support</Text>
+        </MapTitle>
         <MapOption
           option={{
             active: includeActorMembers,
@@ -175,26 +170,12 @@ export function CountryMap({
           }}
           type="official"
         />
-        <Box pad={{ vertical: 'small' }} gap="xsmall">
-          <Text weight={600} size="small">Number of UN Member States by level of support</Text>
-          <Box style={{ maxWidth: '300px' }}>
-            {options.map(
-              (option) => (
-                <LabelWrap key={option.value} direction="row" fill="horizontal">
-                  <Dot color={option.color} />
-                  <Box direction="row" justify="between" gap="xsmall" fill="horizontal">
-                    <Text size="small">
-                      {`${intl.formatMessage(appMessages.supportlevels[option.value])}: `}
-                    </Text>
-                    <Text size="small" weight={600}>
-                      {option.count || 0}
-                    </Text>
-                  </Box>
-                </LabelWrap>
-              )
-            )}
-          </Box>
-        </Box>
+      </MapOptions>
+      <MapOptions>
+        <MapKeySimple
+          options={options}
+          title="States by level of support"
+        />
       </MapOptions>
     </Styled>
   );

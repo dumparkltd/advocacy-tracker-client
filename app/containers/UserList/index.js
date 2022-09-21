@@ -22,8 +22,8 @@ import {
   selectUserTaxonomies,
   selectActiontypesForUsers,
   selectActortypesForUsers,
-  // selectIsUserManager,
-  selectIsUserAnalyst,
+  // selectIsUserMember,
+  selectIsUserVisitor,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -32,7 +32,10 @@ import { USER_ROLES } from 'themes/config';
 import EntityList from 'containers/EntityList';
 
 import { CONFIG, DEPENDENCIES } from './constants';
-import { selectUsers } from './selectors';
+import {
+  selectUsers,
+  selectUsersWithConnections,
+} from './selectors';
 import messages from './messages';
 
 export class UserList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
@@ -56,15 +59,16 @@ export class UserList extends React.PureComponent { // eslint-disable-line react
       dataReady,
       actortypes,
       actiontypes,
-      // isManager,
-      isAnalyst,
+      // isMember,
+      isVisitor,
+      allEntities,
     } = this.props;
     const type = 'users';
     const headerOptions = {
       supTitle: intl.formatMessage(messages.pageTitle),
       actions: [],
     };
-    if (isAnalyst) {
+    if (isVisitor) {
       headerOptions.actions.push({
         type: 'bookmarker',
         title: intl.formatMessage(appMessages.entities[type].plural),
@@ -91,6 +95,7 @@ export class UserList extends React.PureComponent { // eslint-disable-line react
         {dataReady && (
           <EntityList
             entities={this.props.entities}
+            allEntities={allEntities.toList()}
             taxonomies={this.props.taxonomies}
             connections={this.props.connections}
             config={CONFIG}
@@ -117,13 +122,14 @@ UserList.propTypes = {
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
+  allEntities: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   location: PropTypes.object,
   actiontypes: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
-  // isManager: PropTypes.bool,
-  isAnalyst: PropTypes.bool,
+  // isMember: PropTypes.bool,
+  isVisitor: PropTypes.bool,
 };
 
 UserList.contextTypes = {
@@ -134,12 +140,13 @@ const mapStateToProps = (state, props) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   entities: selectUsers(state, fromJS(props.location.query)),
+  allEntities: selectUsersWithConnections(state),
   taxonomies: selectUserTaxonomies(state),
   connections: selectUserConnections(state),
   actiontypes: selectActiontypesForUsers(state),
   actortypes: selectActortypesForUsers(state),
-  // isManager: selectIsUserManager(state),
-  isAnalyst: selectIsUserAnalyst(state),
+  // isMember: selectIsUserMember(state),
+  isVisitor: selectIsUserVisitor(state),
 });
 function mapDispatchToProps(dispatch) {
   return {
@@ -147,7 +154,7 @@ function mapDispatchToProps(dispatch) {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MANAGER.value));
+      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
   };
 }

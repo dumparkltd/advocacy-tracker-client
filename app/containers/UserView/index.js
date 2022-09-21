@@ -20,7 +20,8 @@ import {
   getActorConnectionField,
 } from 'utils/fields';
 
-import { getEntityTitle } from 'utils/entities';
+import qe from 'utils/quasi-equals';
+import { getEntityTitle, getActortypeColumns } from 'utils/entities';
 
 import {
   loadEntitiesIfNeeded,
@@ -32,7 +33,11 @@ import {
 } from 'containers/App/actions';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { USER_ROLES, ROUTES, ACTORTYPES_CONFIG } from 'themes/config';
+import {
+  USER_ROLES,
+  ROUTES,
+  ACTORTYPES,
+} from 'themes/config';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
@@ -52,7 +57,8 @@ import {
   selectSessionUserHighestRoleId,
   selectActionConnections,
   selectActorConnections,
-  selectIsUserManager,
+  selectIsUserMember,
+  selectIsUserAdmin,
   selectSubjectQuery,
   selectActiontypeQuery,
   selectActortypes,
@@ -82,32 +88,6 @@ const getHighestUserRoleId = (user) => user
   )
   : USER_ROLES.DEFAULT.value;
 
-const getActortypeColumns = (typeid) => {
-  let columns = [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: ['code', 'title'],
-  }];
-  if (
-    ACTORTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    columns = [
-      ...columns,
-      ...ACTORTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-        (col) => {
-          if (typeof col.showOnSingle !== 'undefined') {
-            return col.showOnSingle;
-          }
-          return true;
-        }
-      ),
-    ];
-  }
-  return columns;
-};
-
 const VALID_SUBJECTS = ['uactivities', 'uactors'];
 
 export function UserView({
@@ -122,7 +102,7 @@ export function UserView({
   actorsByActortype,
   actorConnections,
   onEntityClick,
-  isManager,
+  isMember,
   handleEditPassword,
   sessionUserId,
   handleEdit,
@@ -135,14 +115,22 @@ export function UserView({
   viewActiontypeId,
   actiontypes,
   onCreateOption,
+  isAdmin,
 }) {
   useEffect(() => {
     // kick off loading of data
     onLoadData();
   }, []);
+  useEffect(() => {
+    // also kick off loading of data again once dataReady changes and becomes negative again
+    // required due to possible in-view creation of activities
+    if (!dataReady) {
+      onLoadData();
+    }
+  }, [dataReady]);
 
   const pageTitle = intl.formatMessage(
-    isManager ? messages.pageTitleBack : messages.pageTitle
+    isMember ? messages.pageTitleBack : messages.pageTitle
   );
   const metaTitle = user
     ? `${pageTitle}: ${getEntityTitle(user)}`
@@ -203,26 +191,26 @@ export function UserView({
               type={CONTENT_SINGLE}
               buttons={buttons}
               onClose={() => handleClose()}
-              onTypeClick={isManager ? () => handleTypeClick() : null}
+              onTypeClick={isMember ? () => handleTypeClick() : null}
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isManager}>
+                <Main hasAside={isMember}>
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
-                        getTitleField(user, isManager, 'name', appMessages.attributes.name),
+                        getTitleField(user, isMember, 'name', appMessages.attributes.name),
                       ],
                     }}
                   />
                 </Main>
-                {isManager && (
+                {isMember && (
                   <Aside>
                     <FieldGroup
                       group={{
                         fields: [
                           getRoleField(user),
-                          getMetaField(user),
+                          getMetaField(user, true),
                         ],
                       }}
                       aside
@@ -234,7 +222,7 @@ export function UserView({
             <ViewPanel>
               <ViewPanelInside>
                 <Main hasAside bottom>
-                  {isManager && (
+                  {isMember && (
                     <Box>
                       <SubjectButtonGroup>
                         <SubjectButton
@@ -262,6 +250,7 @@ export function UserView({
                           viewActiontypeId={viewActiontypeId}
                           actionsByActiontype={actionsByActiontype}
                           actiontypes={actiontypes}
+                          isAdmin={isAdmin}
                         />
                       )}
                       {viewSubject === 'uactors' && actorsByActortype && (
@@ -275,7 +264,10 @@ export function UserView({
                                   onEntityClick,
                                   connections: actorConnections,
                                   typeid,
-                                  columns: getActortypeColumns(typeid),
+                                  columns: getActortypeColumns({
+                                    typeId: typeid,
+                                    showCode: isAdmin || qe(typeid, ACTORTYPES.COUNTRY),
+                                  }),
                                 }),
                               ]),
                               [],
@@ -295,7 +287,7 @@ export function UserView({
                     }}
                     aside
                   />
-                  {isManager && (
+                  {isMember && (
                     <FieldGroup
                       group={{
                         fields: [
@@ -335,7 +327,8 @@ UserView.propTypes = {
   onEntityClick: PropTypes.func,
   onCreateOption: PropTypes.func,
   onSetActiontype: PropTypes.func,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   sessionUserId: PropTypes.string,
   viewActiontypeId: PropTypes.string,
   intl: intlShape,
@@ -344,7 +337,8 @@ UserView.propTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
+  isAdmin: selectIsUserAdmin(state),
   sessionUserHighestRoleId: selectSessionUserHighestRoleId(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   sessionUserId: selectSessionUserId(state),

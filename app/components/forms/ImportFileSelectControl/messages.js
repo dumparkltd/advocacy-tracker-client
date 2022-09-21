@@ -14,6 +14,10 @@ export default defineMessages({
       id: 'app.components.ImportFileSelectControl.import.plural',
       defaultMessage: 'Import {total} rows',
     },
+    relationships: {
+      id: 'app.components.ImportFileSelectControl.import.relationships',
+      defaultMessage: 'with {total} connections overall',
+    },
   },
   selectFile: {
     id: 'app.components.ImportFileSelectControl.selectFile',

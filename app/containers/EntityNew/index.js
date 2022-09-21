@@ -29,6 +29,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
       viewDomain,
       onSaveSuccess,
       onCancel,
+      invalidateEntitiesOnSuccess,
     } = this.props;
 
     if (path === API.ACTIONS) {
@@ -39,6 +40,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           modalConnect={connect}
           viewDomain={viewDomain}
           onSaveSuccess={onSaveSuccess}
+          invalidateEntitiesOnSuccess={invalidateEntitiesOnSuccess}
           onCancel={onCancel}
           formDataPath="entityNew.form.data"
           typeId={attributes.get('measuretype_id')}
@@ -54,6 +56,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           modalConnect={connect}
           viewDomain={viewDomain}
           onSaveSuccess={onSaveSuccess}
+          invalidateEntitiesOnSuccess={invalidateEntitiesOnSuccess}
           onCancel={onCancel}
           formDataPath="entityNew.form.data"
           typeId={attributes.get('actortype_id')}
@@ -69,6 +72,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           modalConnect={connect}
           viewDomain={viewDomain}
           onSaveSuccess={onSaveSuccess}
+          invalidateEntitiesOnSuccess={invalidateEntitiesOnSuccess}
           onCancel={onCancel}
           formDataPath="entityNew.form.data"
           typeId={attributes.get('taxonomy_id')}
@@ -83,6 +87,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
           modalConnect={connect}
           viewDomain={viewDomain}
           onSaveSuccess={onSaveSuccess}
+          invalidateEntitiesOnSuccess={invalidateEntitiesOnSuccess}
           onCancel={onCancel}
           formDataPath="entityNew.form.data"
           typeId={attributes.get('resourcetype_id')}
@@ -99,6 +104,10 @@ EntityNew.propTypes = {
   connect: PropTypes.object,
   viewDomain: PropTypes.object,
   onSaveSuccess: PropTypes.func,
+  invalidateEntitiesOnSuccess: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.array,
+  ]),
   onCancel: PropTypes.func,
   autoUser: PropTypes.bool,
 };

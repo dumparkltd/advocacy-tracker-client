@@ -79,6 +79,19 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
+      case 'targetsViaChildren':
+        return ({
+          ...col,
+          title: 'Indirect targets',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+          info: {
+            type: 'text',
+            title: 'Indirect targets',
+            text: 'From child activities, e.g tasks',
+          },
+        });
       case 'actors':
       case 'userActors':
         return ({
@@ -154,6 +167,22 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
+      case 'childActions':
+        return ({
+          ...col,
+          title: col.title || 'Child activities',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'parentActions':
+        return ({
+          ...col,
+          title: col.title || 'Parent activities',
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
       case 'actiontype':
         return ({
           ...col,
@@ -187,10 +216,20 @@ export const prepareHeader = ({
       case 'resourceActions':
       case 'indicatorActions':
       case 'actorActions':
-        if (col.subject !== 'actors') {
-          label = col.members ? 'Targeted as member' : 'Targeted by';
+        if (col.subject === 'targets') {
+          label = 'Targeted by';
+          if (col.members) {
+            label = 'Targeted as member';
+          } else if (col.children) {
+            label = 'Targeted as parent';
+          }
         } else {
-          label = col.members ? 'Activities as member' : 'Activities';
+          label = 'Activities';
+          if (col.members) {
+            label = 'Activities as member';
+          } else if (col.children) {
+            label = 'Activities as parent';
+          }
         }
         return ({
           ...col,
@@ -201,6 +240,15 @@ export const prepareHeader = ({
         });
       case 'userActions':
         label = 'Assigned to';
+        return ({
+          ...col,
+          title: label,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'actionsSimple':
+        label = col.subject === 'actors' ? 'Actions' : 'Targets';
         return ({
           ...col,
           title: label,
@@ -294,6 +342,7 @@ export const prepareEntityRows = ({
   resources,
   intl,
   includeMembers,
+  includeChildren,
 }) => entities.reduce(
   (memoEntities, entity) => {
     const id = entity.get('id');
@@ -305,6 +354,7 @@ export const prepareEntityRows = ({
         let relatedEntityIds;
         let temp;
         let attribute;
+        // console.log(col)
         switch (col.type) {
           case 'main':
             return {
@@ -320,6 +370,7 @@ export const prepareEntityRows = ({
                 ),
                 draft: entity.getIn(['attributes', 'draft']),
                 archived: entity.getIn(['attributes', 'is_archive']),
+                noNotifications: entity.getIn(['attributes', 'notifications']) === false,
                 private: entity.getIn(['attributes', 'private']),
                 sortValue: entity.getIn(['attributes', col.sort || 'title']),
                 selected: entityIdsSelected && entityIdsSelected.includes(id),
@@ -382,6 +433,21 @@ export const prepareEntityRows = ({
             };
           case 'targets':
             temp = entity.get('targets') || (entity.get('targetsByType') && entity.get('targetsByType').flatten(true));
+            relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getRelatedValue(relatedEntities, col.label || 'targets'),
+                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
+                tooltip: relatedEntities && relatedEntities.size > 1
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
+                multiple: relatedEntities && relatedEntities.size > 1,
+                sortValue: getRelatedSortValue(relatedEntities),
+              },
+            };
+          case 'targetsViaChildren':
+            temp = entity.get('targetsViaChildren');
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -496,6 +562,36 @@ export const prepareEntityRows = ({
                 sortValue: getRelatedSortValue(relatedEntities),
               },
             };
+          case 'childActions':
+            temp = entity.get('children') || (entity.get('childrenByType') && entity.get('childrenByType').flatten(true));
+            relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getRelatedValue(relatedEntities, 'children'),
+                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
+                tooltip: relatedEntities && relatedEntities.size > 1
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
+                multiple: relatedEntities && relatedEntities.size > 1,
+                sortValue: getRelatedSortValue(relatedEntities),
+              },
+            };
+          case 'parentActions':
+            temp = entity.get('parents') || (entity.get('parentsByType') && entity.get('parentsByType').flatten(true));
+            relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                value: getRelatedValue(relatedEntities, 'parents'),
+                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
+                tooltip: relatedEntities && relatedEntities.size > 1
+                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
+                multiple: relatedEntities && relatedEntities.size > 1,
+                sortValue: getRelatedSortValue(relatedEntities),
+              },
+            };
           case 'taxonomy':
             // console.log(entity && entity.toJS())
             relatedEntities = taxonomies.get(col.taxonomy_id.toString())
@@ -531,10 +627,7 @@ export const prepareEntityRows = ({
           case 'actorActions':
             temp = entity.get(col.actions)
               || (entity.get(`${col.actions}ByType`) && entity.get(`${col.actions}ByType`).flatten(true));
-            console.log('actorActions-entity', entity && entity.toJS());
-            console.log('actorActions-temp', temp && temp.toJS());
             relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
-            console.log('actorActions-relatedEntities', relatedEntities && relatedEntities.toJS());
             return {
               ...memoEntity,
               [col.id]: {
@@ -593,6 +686,12 @@ export const prepareEntityRows = ({
             if (includeMembers && entity.getIn([col.actionsMembers, parseInt(col.actiontype_id, 10)])) {
               relatedEntityIds = relatedEntityIds
                 .merge(entity.getIn([col.actionsMembers, parseInt(col.actiontype_id, 10)]))
+                .toList()
+                .toSet();
+            }
+            if (includeChildren && entity.getIn([col.actionsChildren, parseInt(col.actiontype_id, 10)])) {
+              relatedEntityIds = relatedEntityIds
+                .merge(entity.getIn([col.actionsChildren, parseInt(col.actiontype_id, 10)]))
                 .toList()
                 .toSet();
             }

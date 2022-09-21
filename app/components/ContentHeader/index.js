@@ -2,7 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box, ResponsiveContext } from 'grommet';
-
 import { isMinSize } from 'utils/responsive';
 
 import {
@@ -114,6 +113,7 @@ export function ContentHeader({
               <InfoOverlay
                 title={info.title}
                 content={info.content}
+                markdown
               />
             )}
           </Box>
@@ -121,6 +121,7 @@ export function ContentHeader({
             <ButtonGroup>
               {buttons.map((button, i) => (
                 <ButtonWrap key={i}>
+                  {button.warning && <span style={{ marginRight: '8px' }}>{button.warning}</span>}
                   <ButtonFactory
                     button={button}
                     args={{ ids: entityIdsSelected }}

@@ -6,6 +6,10 @@ import { palette } from 'styled-theme';
 import FileReaderInput from 'react-file-reader-input';
 import Baby from 'babyparse';
 
+import { Text } from 'grommet';
+
+import { countRelationshipsFromRows } from 'utils/import';
+
 import Icon from 'components/Icon';
 import ButtonSubmit from 'components/buttons/ButtonSubmit';
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
@@ -117,8 +121,9 @@ class SelectFile extends React.PureComponent { // eslint-disable-line react/pref
   }
 
   render() {
-    // console.log(this.props.value)
+    const rows = this.props.value && this.props.value.rows;
     const { intl } = this.context;
+    const relCount = rows && countRelationshipsFromRows(rows);
     return (
       <Styled>
         { (this.state.errors.length > 0)
@@ -142,12 +147,38 @@ class SelectFile extends React.PureComponent { // eslint-disable-line react/pref
                 </Remove>
               </DocumentWrapEdit>
               <ImportButton type="submit" primary>
-                { this.props.value.rows.length === 1
-                && <FormattedMessage {...messages.import.single} values={{ total: this.props.value.rows.length }} />
-                }
-                { this.props.value.rows.length !== 1
-                && <FormattedMessage {...messages.import.plural} values={{ total: this.props.value.rows.length }} />
-                }
+                <div style={{ position: 'relative' }}>
+                  {rows.length === 1 && (
+                    <FormattedMessage
+                      {...messages.import.single}
+                      values={{
+                        total: rows.length,
+                      }}
+                    />
+                  )}
+                  {rows.length !== 1 && (
+                    <FormattedMessage
+                      {...messages.import.plural}
+                      values={{
+                        total: rows.length,
+                      }}
+                    />
+                  )}
+                  {relCount && relCount > 0 && (
+                    <div style={{ position: 'relative' }}>
+                      <div style={{ position: 'absolute', top: '-7px' }}>
+                        <Text size="xxsmall" weight={400} style={{ textTransform: 'none', letterSpacing: 0, opacity: 0.85 }}>
+                          <FormattedMessage
+                            {...messages.import.relationships}
+                            values={{
+                              total: relCount,
+                            }}
+                          />
+                        </Text>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </ImportButton>
             </div>
           )

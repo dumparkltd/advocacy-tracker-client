@@ -16,6 +16,7 @@ export const DEPENDENCIES = [
   API.ACTIONS,
   API.ACTION_INDICATORS,
   API.ACTION_CATEGORIES,
+  API.ACTIONTYPE_TAXONOMIES,
   API.ACTOR_ACTIONS,
   API.ACTIONTYPES,
   API.USERS,
@@ -26,6 +27,7 @@ export const CONFIG = {
   types: 'indicators',
   serverPath: API.INDICATORS,
   clientPath: ROUTES.INDICATOR,
+  batchDelete: true,
   views: {
     list: {
       search: ['code', 'title', 'description'],
@@ -39,6 +41,7 @@ export const CONFIG = {
       messageByType: 'entities.actions_{typeid}.plural',
       message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTIONS, API.INDICATORS],
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,
       connectPath: API.ACTION_INDICATORS, // filter by actor connection
@@ -54,7 +57,7 @@ export const CONFIG = {
         message: 'attributes.draft',
         attribute: 'draft',
         options: PUBLISH_STATUSES,
-        role: USER_ROLES.MANAGER.value,
+        role: USER_ROLES.MEMBER.value,
         filterUI: 'checkboxes',
       },
       {
@@ -62,7 +65,7 @@ export const CONFIG = {
         message: 'attributes.private',
         attribute: 'private',
         options: PRIVACY_STATUSES,
-        role: USER_ROLES.MANAGER.value,
+        role: USER_ROLES.MEMBER.value,
         roleEdit: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
       },
@@ -77,4 +80,12 @@ export const CONFIG = {
       },
     ],
   },
+  // connectedTaxonomies: { // filter by each category
+  //   query: 'catx',
+  //   search: true,
+  //   path: 'actions', // filter by action connection
+  //   typeId: ACTIONTYPES.EXPRESS,
+  //   otherPath: API.ACTIONS, // filter by action connection
+  //   key: 'measure_id',
+  // },
 };

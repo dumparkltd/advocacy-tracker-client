@@ -47,7 +47,7 @@ import EntityView from 'components/EntityView';
 
 import {
   selectReady,
-  selectIsUserManager,
+  selectIsUserMember,
   selectActorConnections,
   selectActionConnections,
   selectTaxonomiesWithCategories,
@@ -83,27 +83,27 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
     }
   }
 
-  getHeaderMainFields = (entity, isManager) => {
+  getHeaderMainFields = (entity, isMember) => {
     const groups = [];
     groups.push(
       { // fieldGroup
         fields: [
-          // getReferenceField(entity, isManager),
-          getTitleField(entity, isManager),
-          getCategoryShortTitleField(entity, isManager),
+          // getReferenceField(entity, isMember),
+          getTitleField(entity, isMember),
+          getCategoryShortTitleField(entity, isMember),
         ],
       },
     );
     return groups;
   };
 
-  getHeaderAsideFields = (entity, isManager, isAdmin, isMine) => {
+  getHeaderAsideFields = (entity, isMember, isAdmin, isMine) => {
     const { intl } = this.context;
-    const groups = isManager
+    const groups = isMember
       ? [
         {
           fields: [
-            isManager && getStatusField(entity),
+            isMember && getStatusField(entity),
             (isAdmin || isMine) && getStatusFieldIf({
               entity,
               attribute: 'private',
@@ -226,7 +226,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
     return fields;
   };
 
-  getBodyAsideFields = (entity, isManager, childTaxonomies, parentTaxonomy) => {
+  getBodyAsideFields = (entity, isMember, childTaxonomies, parentTaxonomy) => {
     const groups = [];
     // include parent link
     if (entity.get('category') && parentTaxonomy) {
@@ -263,7 +263,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
         ],
       });
     }
-    if (isManager && !!entity.getIn(['taxonomy', 'attributes', 'has_manager'])) {
+    if (isMember && !!entity.getIn(['taxonomy', 'attributes', 'has_manager'])) {
       groups.push({
         type: 'dark',
         fields: [getManagerField(
@@ -287,7 +287,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
     const {
       viewEntity,
       dataReady,
-      isManager,
+      isMember,
       parentTaxonomy,
       childTaxonomies,
       actionsByActiontype,
@@ -315,7 +315,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
           icon: 'print',
         },
       ];
-      if (isManager) {
+      if (isMember) {
         buttons = [
           ...buttons,
           {
@@ -372,14 +372,14 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
                   title: pageTitle,
                   onClose: handleClose,
                   buttons,
-                  onTypeClick: viewEntity && isManager
+                  onTypeClick: viewEntity && isMember
                     ? () => handleTypeClick(viewEntity.getIn(['taxonomy', 'id']))
                     : null,
                 }}
                 fields={{
                   header: {
-                    main: this.getHeaderMainFields(viewEntity, isManager),
-                    aside: this.getHeaderAsideFields(viewEntity, isManager, isAdmin, isMine),
+                    main: this.getHeaderMainFields(viewEntity, isMember),
+                    aside: this.getHeaderAsideFields(viewEntity, isMember, isAdmin, isMine),
                   },
                   body: {
                     main: this.getBodyMainFields(
@@ -395,7 +395,7 @@ export class CategoryView extends React.PureComponent { // eslint-disable-line r
                     ),
                     aside: this.getBodyAsideFields(
                       viewEntity,
-                      isManager,
+                      isMember,
                       childTaxonomies,
                       parentTaxonomy,
                     ),
@@ -419,7 +419,7 @@ CategoryView.propTypes = {
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
   params: PropTypes.object,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   parentTaxonomy: PropTypes.object,
   actorsByActortype: PropTypes.object,
   actionsByActiontype: PropTypes.object,
@@ -438,7 +438,7 @@ CategoryView.contextTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   taxonomies: selectTaxonomiesWithCategories(state),

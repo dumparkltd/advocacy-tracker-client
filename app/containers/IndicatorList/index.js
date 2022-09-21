@@ -10,13 +10,17 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { List, Map, fromJS } from 'immutable';
 
+import {
+  checkIndicatorAttribute,
+} from 'utils/entities';
+
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectReady,
-  selectIsUserManager,
-  selectIsUserAnalyst,
+  selectIsUserMember,
+  selectIsUserVisitor,
+  selectIsUserAdmin,
   selectActiontypesForIndicators,
-  selectIndicators,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -25,7 +29,11 @@ import { ROUTES } from 'themes/config';
 import EntityList from 'containers/EntityList';
 
 import { CONFIG, DEPENDENCIES } from './constants';
-import { selectConnections, selectListIndicators } from './selectors';
+import {
+  selectConnections,
+  selectListIndicators,
+  selectIndicatorsWithConnections,
+} from './selectors';
 
 import messages from './messages';
 
@@ -48,10 +56,10 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
       entities,
       allEntities,
       connections,
-      // connectedTaxonomies,
       location,
-      isManager,
-      isAnalyst,
+      isAdmin,
+      isMember,
+      isVisitor,
       actiontypes,
     } = this.props;
     const type = 'indicators';
@@ -59,7 +67,7 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
       supTitle: intl.formatMessage(messages.pageTitle),
       actions: [],
     };
-    if (isAnalyst) {
+    if (isVisitor) {
       headerOptions.actions.push({
         type: 'bookmarker',
         title: intl.formatMessage(appMessages.entities[type].plural),
@@ -74,18 +82,18 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
         icon: 'print',
       });
     }
-    if (isManager) {
+    if (isMember) {
       headerOptions.actions.push({
         title: 'Create new',
         onClick: () => this.props.handleNew(),
         icon: 'add',
-        isManager,
+        isMember,
       });
       headerOptions.actions.push({
         title: intl.formatMessage(appMessages.buttons.import),
         onClick: () => this.props.handleImport(),
         icon: 'import',
-        isManager,
+        isMember,
       });
     }
     return (
@@ -98,9 +106,10 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
         />
         <EntityList
           entities={entities}
-          allEntityCount={allEntities && allEntities.size}
-          connections={connections}
           config={CONFIG}
+          allEntityCount={allEntities && allEntities.size}
+          allEntities={allEntities.toList()}
+          connections={connections}
           headerOptions={headerOptions}
           dataReady={dataReady}
           entityTitle={{
@@ -109,6 +118,7 @@ export class IndicatorList extends React.PureComponent { // eslint-disable-line 
           }}
           locationQuery={fromJS(location.query)}
           actiontypes={actiontypes}
+          showCode={checkIndicatorAttribute('code', isAdmin)}
         />
       </div>
     );
@@ -120,12 +130,13 @@ IndicatorList.propTypes = {
   handleNew: PropTypes.func,
   handleImport: PropTypes.func,
   dataReady: PropTypes.bool,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   connections: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
-  isAnalyst: PropTypes.bool,
+  isAdmin: PropTypes.bool,
+  isVisitor: PropTypes.bool,
   allEntities: PropTypes.instanceOf(Map),
 };
 
@@ -137,10 +148,11 @@ const mapStateToProps = (state, props) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   entities: selectListIndicators(state, fromJS(props.location.query)),
   connections: selectConnections(state),
-  isManager: selectIsUserManager(state),
-  isAnalyst: selectIsUserAnalyst(state),
+  isMember: selectIsUserMember(state),
+  isVisitor: selectIsUserVisitor(state),
+  isAdmin: selectIsUserAdmin(state),
   actiontypes: selectActiontypesForIndicators(state),
-  allEntities: selectIndicators(state),
+  allEntities: selectIndicatorsWithConnections(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

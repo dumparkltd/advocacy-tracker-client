@@ -40,17 +40,12 @@ const BarButton = styled((p) => <Button plain {...p} />)`
   width: ${({ value, maxvalue }) => value / maxvalue * 100}%;
   min-width: 1px;
   height: 20px;
-  background-color: ${({ theme, subject }) => theme.global.colors[subject] || theme.global.colors.primary};
+  background-color: ${({ theme, color }) => color || theme.global.colors.primary};
   display: block;
   position: absolute;
   left: 0;
   top: 0;
-  opacity: ${({ issecondary, isHover }) => {
-    if (isHover) {
-      return issecondary ? 0.5 : 0.85;
-    }
-    return issecondary ? 0.6 : 1;
-  }};
+  opacity: ${({ isHover }) => isHover ? 0.85 : 1};
 `;
 
 const LinkTT = styled(
@@ -69,6 +64,7 @@ export function CellBodyBarChart({
   rowConfig,
   entityType,
   onEntityClick,
+  color,
 }) {
   const infoRef = useRef(null);
   const [info, showInfo] = useState(false);
@@ -107,6 +103,7 @@ export function CellBodyBarChart({
                 value={value}
                 maxvalue={maxvalue}
                 issecondary={issecondary}
+                color={color}
                 subject={subject}
                 fill={false}
                 isHover={hover}
@@ -153,6 +150,7 @@ CellBodyBarChart.propTypes = {
   issecondary: PropTypes.bool,
   subject: PropTypes.string,
   entityType: PropTypes.string,
+  color: PropTypes.string,
   rowConfig: PropTypes.object,
   onEntityClick: PropTypes.func,
 };

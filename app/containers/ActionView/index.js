@@ -67,7 +67,7 @@ import SubjectTabWrapper from 'components/styled/SubjectTabWrapper';
 
 import {
   selectReady,
-  selectIsUserManager,
+  selectIsUserMember,
   selectIsUserAdmin,
   selectResourceConnections,
   selectTaxonomiesWithCategories,
@@ -96,12 +96,12 @@ import {
 
 import { DEPENDENCIES } from './constants';
 
-const getIndicatorColumns = (viewEntity, intl) => {
+const getIndicatorColumns = (viewEntity, intl, isAdmin) => {
   let columns = [{
     id: 'main',
     type: 'main',
     sort: 'title',
-    attributes: ['code', 'title'],
+    attributes: isAdmin ? ['code', 'title'] : ['title'],
   }];
   if (
     ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[viewEntity.getIn(['attributes', 'measuretype_id'])]
@@ -124,7 +124,7 @@ export function ActionView(props) {
   const {
     viewEntity,
     dataReady,
-    isManager,
+    isMember,
     taxonomies,
     viewTaxonomies,
     resourcesByResourcetype,
@@ -153,6 +153,13 @@ export function ActionView(props) {
     // kick off loading of data
     onLoadData();
   }, []);
+  useEffect(() => {
+    // also kick off loading of data again once dataReady changes and becomes negative again
+    // required due to possible in-view creation of child activities
+    if (!dataReady) {
+      onLoadData();
+    }
+  }, [dataReady]);
 
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
   // const viewActivitytype = activitytypes && activitytypes.find((type) => qe(type.get('id'), typeId));
@@ -168,7 +175,7 @@ export function ActionView(props) {
         icon: 'print',
       },
     ];
-    if (isManager) {
+    if (isMember) {
       buttons = [
         ...buttons,
         {
@@ -268,21 +275,21 @@ export function ActionView(props) {
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isManager}>
+                <Main hasAside={isMember}>
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
-                        checkActionAttribute(typeId, 'code', isManager) && getReferenceField(
+                        checkActionAttribute(typeId, 'code', isAdmin) && getReferenceField(
                           viewEntity,
                           'code',
-                          isManager,
+                          isAdmin,
                         ),
                         checkActionAttribute(typeId, 'title') && getTitleField(viewEntity),
                       ],
                     }}
                   />
                 </Main>
-                {isManager && (
+                {isMember && (
                   <Aside>
                     <FieldGroup
                       group={{
@@ -296,7 +303,8 @@ export function ActionView(props) {
                             entity: viewEntity,
                             attribute: 'is_archive',
                           }),
-                          getMetaField(viewEntity),
+                          isAdmin && getStatusField(viewEntity, 'notifications'),
+                          getMetaField(viewEntity, true),
                         ],
                       }}
                       aside
@@ -330,7 +338,7 @@ export function ActionView(props) {
                             onEntityClick,
                             // connections: indicatorConnections,
                             skipLabel: true,
-                            columns: getIndicatorColumns(viewEntity, intl),
+                            columns: getIndicatorColumns(viewEntity, intl, isAdmin),
                           }),
                         ],
                       }}
@@ -366,6 +374,7 @@ export function ActionView(props) {
                     <SubjectTabWrapper>
                       {viewSubject === 'children' && (
                         <TabActivities
+                          isAdmin={isAdmin}
                           viewEntity={viewEntity}
                           taxonomies={taxonomies}
                           onEntityClick={onEntityClick}
@@ -376,6 +385,7 @@ export function ActionView(props) {
                       )}
                       {viewSubject !== 'children' && (
                         <TabActors
+                          isAdmin={isAdmin}
                           hasChildren={hasChildren}
                           childActionsByActiontype={subActionsByType}
                           viewEntity={viewEntity}
@@ -527,7 +537,7 @@ ActionView.propTypes = {
   handleEdit: PropTypes.func,
   handleClose: PropTypes.func,
   onEntityClick: PropTypes.func,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
   myId: PropTypes.string,
   viewTaxonomies: PropTypes.object,
@@ -550,7 +560,7 @@ ActionView.propTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  isManager: selectIsUserManager(state),
+  isMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   viewTaxonomies: selectViewTaxonomies(state, props.params.id),

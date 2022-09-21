@@ -33,13 +33,13 @@ import ButtonOld from 'components/buttons/Button';
 
 import EntityListSidebar from './EntityListSidebar';
 
-import { makeFilterGroups } from './filterGroupsFactory';
-import { makeEditGroups } from './editGroupsFactory';
+import { makeFilterGroups } from './utilFilterGroups';
+import { makeEditGroups } from './utilEditGroups';
 import {
   makeActiveFilterOptions,
   makeAnyWithoutFilterOptions,
-} from './filterOptionsFactory';
-import { makeActiveEditOptions } from './editOptionsFactory';
+} from './utilFilterOptions';
+import { makeActiveEditOptions } from './utilEditOptions';
 
 import messages from './messages';
 
@@ -83,7 +83,6 @@ const SelectType = styled(ButtonOld)`
     max-width: 100%;
   }
 `;
-const EntityListSearch = styled((p) => <Box justify="end" direction="row" gap="medium" {...p} />)``;
 
 const ButtonOptions = styled((p) => <Button plain {...p} />)`
   color: ${palette('buttonFlat', 1)};
@@ -265,6 +264,22 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     ];
   };
 
+  getFilterFormButtons = () => {
+    const { intl } = this.context;
+    return [
+      {
+        type: 'simple',
+        title: intl.formatMessage(appMessages.buttons.cancel),
+        onClick: this.onHideForm,
+      },
+      {
+        type: 'primary',
+        title: intl.formatMessage(appMessages.buttons.updateFilter),
+        submit: true,
+      },
+    ];
+  };
+
   resize = () => {
     // reset
     this.setState(STATE_INITIAL);
@@ -275,19 +290,23 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     const {
       config,
       onUpdate,
+      onUpdateFilters,
       hasUserRole,
       entities,
+      allEntities,
       locationQuery,
       taxonomies,
       connectedTaxonomies,
       connections,
       entityIdsSelected,
       actortypes,
+      parentActortypes,
       actiontypes,
       resourcetypes,
       targettypes,
       actiontypesForTarget,
       membertypes,
+      parentAssociationtypes,
       associationtypes,
       currentFilters,
       onShowFilters,
@@ -300,11 +319,12 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       typeOptions,
       dataReady,
       typeId,
-      isManager,
       onUpdateQuery,
       includeMembers,
       onSetFilterMemberOption,
       headerActions,
+      isAdmin,
+      onClearFilters,
     } = this.props;
     const { intl } = this.context;
     const { activeOption } = this.state;
@@ -316,19 +336,25 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     let panelGroups = null;
 
     let formOptions = null;
+    const hasMemberOption = (config.hasMemberOption && config.hasMemberOption.indexOf(typeId) > -1);
+
     if (dataReady && showFilters) {
       panelGroups = makeFilterGroups({
         config,
         taxonomies,
         connectedTaxonomies,
         hasUserRole,
-        actortypes,
+        actortypes: (hasMemberOption && actortypes && parentActortypes)
+          ? actortypes.merge(parentActortypes)
+          : actortypes,
         resourcetypes,
         actiontypes,
         targettypes,
         actiontypesForTarget,
         membertypes,
-        associationtypes,
+        associationtypes: (hasMemberOption && associationtypes && parentAssociationtypes)
+          ? associationtypes.merge(parentAssociationtypes)
+          : associationtypes,
         activeFilterOption: activeOption,
         currentFilters,
         typeId,
@@ -338,7 +364,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           attributes: intl.formatMessage(messages.filterGroupLabel.attributes),
           taxonomyGroup: intl.formatMessage(messages.filterGroupLabel.taxonomies),
           connections: (type) => getFilterConnectionsMsg(intl, type),
-          // connectedTaxonomies: intl.formatMessage(messages.filterGroupLabel.connectedTaxonomies),
+          connectedTaxonomies: intl.formatMessage(messages.filterGroupLabel.connectedTaxonomies),
           taxonomies: (taxId) => this.context.intl.formatMessage(appMessages.entities.taxonomies[taxId].plural),
         },
         includeMembers,
@@ -353,7 +379,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
               activeFilterOption: {
                 group: groupId,
               },
-              contextIntl: intl,
+              intl,
               messages: {
                 titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
                 without: intl.formatMessage(messages.filterFormWithoutPrefix),
@@ -376,11 +402,9 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
         },
         {},
       );
-      // console.log(currentFilters);
-      // console.log(panelGroups);
       if (activeOption) {
         formOptions = makeActiveFilterOptions({
-          entities,
+          entities: allEntities,
           config,
           locationQuery,
           taxonomies,
@@ -389,9 +413,9 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           // actiontypes,
           connectedTaxonomies,
           activeFilterOption: activeOption,
-          contextIntl: intl,
+          intl,
           typeId,
-          isManager,
+          isAdmin,
           messages: {
             titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
             without: intl.formatMessage(messages.filterFormWithoutPrefix),
@@ -415,6 +439,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
         membertypes,
         associationtypes,
         typeId,
+        isAdmin,
         messages: {
           attributes: intl.formatMessage(messages.editGroupLabel.attributes),
           taxonomyGroup: intl.formatMessage(messages.editGroupLabel.taxonomies),
@@ -426,13 +451,14 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       });
       if (activeOption && connections) {
         formOptions = makeActiveEditOptions({
+          isAdmin,
           entities: entitiesSelected,
           config,
           taxonomies,
           connections,
           connectedTaxonomies,
           activeEditOption: activeOption,
-          contextIntl: intl,
+          intl,
           messages: {
             title: `${intl.formatMessage(messages.editFormTitlePrefix)} ${entitiesSelected.size} ${intl.formatMessage(messages.editFormTitlePostfix)}`,
           },
@@ -443,10 +469,10 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     const currentTypeOption = hasTypeOptions && typeOptions.find((option) => option.active);
 
     const managerActions = canEdit && headerActions && headerActions.filter(
-      (action) => action.isManager
+      (action) => action.isMember
     );
     const normalActions = headerActions && headerActions.filter(
-      (action) => !action.isManager
+      (action) => !action.isMember
     );
     return (
       <ResponsiveContext.Consumer>
@@ -455,7 +481,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           return (
             <Styled>
               <TheHeader align="center">
-                {config.types && typeOptions && (
+                {config.types && hasTypeOptions && (
                   <HeaderSection noBorder>
                     <ButtonFlatIconOnly onClick={() => onSelectType()}>
                       <Icon name="arrowLeft" size="2em" />
@@ -471,7 +497,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     )}
                   </Text>
                 )}
-                {config.types && typeOptions && isMinSize(size, 'large') && (
+                {config.types && hasTypeOptions && isMinSize(size, 'large') && (
                   <HeaderSectionType justify="start">
                     {config.types && (
                       <Label>
@@ -525,13 +551,19 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     )}
                   </HeaderSectionType>
                 )}
-                <HeaderSection grow align="center" gap="medium" justify="start">
+                <HeaderSection
+                  grow
+                  align="center"
+                  gap="medium"
+                  justify="start"
+                  overflow={{ horizontal: 'auto' }}
+                >
                   {dataReady && isMinSize(size, 'large') && (
-                    <EntityListSearch>
-                      <TagList
-                        filters={currentFilters}
-                      />
-                    </EntityListSearch>
+                    <TagList
+                      filters={currentFilters}
+                      onClear={onClearFilters}
+                      groupDropdownThreshold={isMinSize(size, 'xlarge') ? 3 : 2}
+                    />
                   )}
                 </HeaderSection>
                 {dataReady && isMinSize(size, 'small') && (
@@ -653,7 +685,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
               </TheHeader>
               {showFilters && (
                 <EntityListSidebar
-                  hasEntities={entities && entities.size > 0}
+                  hasEntities={allEntities && allEntities.size > 0}
                   panelGroups={panelGroups}
                   onHideSidebar={onHideFilters}
                   onHideOptions={this.onHideForm}
@@ -662,11 +694,12 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     this.onHideForm();
                     onUpdateQuery(args);
                   }}
-                  memberOption={config.hasMemberOption
+                  memberOption={hasMemberOption
                     ? {
                       key: 'filter-member-option',
                       active: !!includeMembers,
-                      label: 'Include members when filtering by region or group',
+                      label: 'Also consider members when filtering by region or group',
+                      info: 'When enabled and when filtering by region or group, the list will also include activities associated with any members of those regions or groups',
                       onClick: () => {
                         this.onHideForm();
                         onSetFilterMemberOption(!includeMembers);
@@ -693,23 +726,22 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                   formOptions={formOptions}
                   buttons={showEditOptions
                     ? this.getFormButtons(activeOption)
-                    : null
+                    : this.getFilterFormButtons()
                   }
                   onCancel={this.onHideForm}
+                  showNew={showEditOptions}
                   showCancelButton={showFilters}
-                  onSelect={() => {
-                    if (showFilters) {
-                      this.onHideForm();
-                      // onHideFilters();
-                    }
-                  }}
                   onSubmit={showEditOptions
                     ? (associations) => {
                     // close and reset option panel
                       this.setState({ activeOption: null });
                       onUpdate(associations, activeOption);
                     }
-                    : null
+                    : (filterOptions) => {
+                      // close and reset option panel
+                      this.setState({ activeOption: null });
+                      onUpdateFilters(filterOptions && filterOptions.get('values'), activeOption);
+                    }
                   }
                 />
               )}
@@ -722,13 +754,16 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
 }
 EntityListHeader.propTypes = {
   entities: PropTypes.instanceOf(List),
+  allEntities: PropTypes.instanceOf(List),
   entityIdsSelected: PropTypes.instanceOf(List),
   taxonomies: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
+  parentActortypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   targettypes: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
+  parentAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
   actiontypesForTarget: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
@@ -737,6 +772,7 @@ EntityListHeader.propTypes = {
   hasUserRole: PropTypes.object,
   config: PropTypes.object,
   onUpdate: PropTypes.func.isRequired,
+  onUpdateFilters: PropTypes.func.isRequired,
   onCreateOption: PropTypes.func.isRequired,
   listUpdating: PropTypes.bool,
   theme: PropTypes.object,
@@ -749,11 +785,12 @@ EntityListHeader.propTypes = {
   onHideEditOptions: PropTypes.func,
   canEdit: PropTypes.bool,
   dataReady: PropTypes.bool,
-  isManager: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   includeMembers: PropTypes.bool,
   typeOptions: PropTypes.array,
   onSelectType: PropTypes.func,
   onSetFilterMemberOption: PropTypes.func,
+  onClearFilters: PropTypes.func,
   typeId: PropTypes.string,
   headerActions: PropTypes.array,
 };

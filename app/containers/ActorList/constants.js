@@ -32,6 +32,10 @@ export const CONFIG = {
   types: 'actortypes',
   serverPath: API.ACTORS,
   clientPath: ROUTES.ACTOR,
+  batchDelete: true,
+  hasMemberOption: [
+    ACTORTYPES.CONTACT,
+  ],
   views: {
     list: {
       search: ['code', 'title', 'description'],
@@ -46,6 +50,7 @@ export const CONFIG = {
     connectPath: API.ACTOR_CATEGORIES,
     key: 'category_id',
     ownKey: 'actor_id',
+    invalidateEntitiesPaths: [API.CATEGORIES, API.ACTORS],
     // defaultGroupAttribute: 'groups_actors_default', // used when no actortype is set
     // // TODO better store in database join table actortype_taxonomies
     // defaultGroupsByActortype: {
@@ -64,6 +69,7 @@ export const CONFIG = {
       messageByType: 'entities.actions_{typeid}.plural',
       message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTORS, API.ACTIONS],
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,
       connectPath: API.ACTOR_ACTIONS, // filter by actor connection
@@ -78,6 +84,7 @@ export const CONFIG = {
       messageByType: 'entities.actions_{typeid}.plural',
       message: 'entities.actions.plural',
       path: API.ACTIONS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTORS, API.ACTIONS],
       entityType: 'actions', // filter by actor connection
       entityTypeAs: 'targetingActions',
       clientPath: ROUTES.ACTION,
@@ -94,6 +101,7 @@ export const CONFIG = {
       messageByType: 'entities.actors_{typeid}.plural',
       message: 'entities.actors.plural',
       path: API.ACTORS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTORS],
       entityTypeAs: 'members', // filter by actor connection
       entityType: 'actors',
       clientPath: ROUTES.ACTOR,
@@ -109,6 +117,7 @@ export const CONFIG = {
       messageByType: 'entities.actors_{typeid}.plural',
       message: 'entities.actors.plural',
       path: API.ACTORS, // filter by actor connection
+      invalidateEntitiesPaths: [API.ACTORS],
       entityType: 'actors',
       entityTypeAs: 'associations', // filter by actor connection
       clientPath: ROUTES.ACTOR,
@@ -123,6 +132,7 @@ export const CONFIG = {
       search: true,
       message: 'entities.users.plural',
       path: API.USERS,
+      invalidateEntitiesPaths: [API.USERS, API.ACTORS],
       entityType: 'users',
       clientPath: ROUTES.USER,
       connectPath: API.USER_ACTORS, // filter by actor connection
@@ -137,7 +147,7 @@ export const CONFIG = {
         message: 'attributes.draft',
         attribute: 'draft',
         options: PUBLISH_STATUSES,
-        role: USER_ROLES.MANAGER.value,
+        role: USER_ROLES.MEMBER.value,
         filterUI: 'checkboxes',
       },
       {
@@ -145,7 +155,7 @@ export const CONFIG = {
         message: 'attributes.private',
         attribute: 'private',
         options: PRIVACY_STATUSES,
-        role: USER_ROLES.MANAGER.value,
+        role: USER_ROLES.MEMBER.value,
         roleEdit: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
       },

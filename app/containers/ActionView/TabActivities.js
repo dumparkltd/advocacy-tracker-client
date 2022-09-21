@@ -16,11 +16,9 @@ import {
   getActionConnectionField,
 } from 'utils/fields';
 import qe from 'utils/quasi-equals';
+import { getActiontypeColumns } from 'utils/entities';
 
-import {
-  ACTIONTYPES_CONFIG,
-  API,
-} from 'themes/config';
+import { API } from 'themes/config';
 import FieldGroup from 'components/fields/FieldGroup';
 import ButtonPill from 'components/buttons/ButtonPill';
 
@@ -40,28 +38,6 @@ const TypeButton = styled((p) => <ButtonPill {...p} />)`
 `;
 // max-width: ${({ listItems }) => 100 / listItems}%;
 
-const getActiontypeColumns = (typeid) => {
-  if (
-    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    return ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-      (col) => {
-        if (typeof col.showOnSingle !== 'undefined') {
-          return col.showOnSingle;
-        }
-        return true;
-      }
-    );
-  }
-  return [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: ['title'],
-  }];
-};
-
 export function TabActivities(props) {
   const {
     viewEntity, // current entity
@@ -74,6 +50,7 @@ export function TabActivities(props) {
     viewActiontypeId, // as set in URL
     actionsByActiontype,
     actiontypes,
+    isAdmin,
   } = props;
 
   const actiontypeIds = actiontypes && actiontypes.entrySeq().map(([id]) => id.toString());
@@ -132,12 +109,16 @@ export function TabActivities(props) {
                 onEntityClick,
                 connections: actionConnections,
                 typeid: viewActiontypeId,
-                columns: getActiontypeColumns(viewActiontypeId),
+                columns: getActiontypeColumns({
+                  typeId: viewActiontypeId,
+                  isAdmin,
+                }),
                 onCreateOption: () => onCreateOption({
                   path: API.ACTIONS,
                   attributes: {
                     measuretype_id: viewActiontypeId,
                   },
+                  invalidateEntitiesOnSuccess: API.ACTIONS,
                   autoUser: true,
                   connect: {
                     type: 'subActions',
@@ -165,6 +146,7 @@ TabActivities.propTypes = {
   actionsByActiontype: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   onCreateOption: PropTypes.func,
+  isAdmin: PropTypes.bool,
 };
 
 const mapStateToProps = (state) => ({

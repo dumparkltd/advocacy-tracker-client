@@ -23,17 +23,18 @@ import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import {
   selectReady,
   selectActortypeTaxonomiesWithCats,
-  selectIsUserManager,
-  selectIsUserAnalyst,
+  selectIsUserMember,
+  selectIsUserVisitor,
+  selectIsUserAdmin,
   selectActortypes,
   selectActiontypesForActortype,
   selectActiontypesForTargettype,
   selectMembertypesForActortype,
   selectAssociationtypesForActortype,
-  selectActortypeActors,
+  selectParentAssociationtypesForActortype,
 } from 'containers/App/selectors';
 
-import { checkActionAttribute } from 'utils/entities';
+import { checkActorAttribute } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
 import { ROUTES, ACTORTYPES } from 'themes/config';
@@ -44,8 +45,8 @@ import EmailHelper from './EmailHelper';
 import { CONFIG, DEPENDENCIES } from './constants';
 import {
   selectListActors,
-  selectConnectedTaxonomies,
   selectConnections,
+  selectActorsWithConnections,
 } from './selectors';
 
 import messages from './messages';
@@ -111,11 +112,19 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
 
   prepareTypeOptions = (types, activeId) => {
     const { intl } = this.context;
-    return types.toList().toJS().map((type) => ({
-      value: type.id,
-      label: intl.formatMessage(appMessages.actortypes[type.id]),
-      active: activeId === type.id,
-    }));
+    return types && types.sort(
+      (a, b) => a.get('id') > b.get('id') ? 1 : -1
+    ).reduce(
+      (memo, type) => [
+        ...memo,
+        {
+          value: type.get('id'),
+          label: intl.formatMessage(appMessages.actortypes[type.get('id')]),
+          active: activeId === type.get('id'),
+        },
+      ],
+      [],
+    );
   }
 
   render() {
@@ -126,15 +135,16 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
       allEntities,
       taxonomies,
       connections,
-      connectedTaxonomies,
       location,
-      isManager,
-      isAnalyst,
+      isAdmin,
+      isMember,
+      isVisitor,
       params, // { id: the action type }
       actiontypes,
       actortypes,
       actiontypesForTarget,
       membertypes,
+      parentAssociationtypes,
       associationtypes,
       onSelectType,
     } = this.props;
@@ -151,7 +161,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
         }
         : null,
     };
-    if (isAnalyst) {
+    if (isVisitor) {
       headerOptions.actions.push({
         type: 'bookmarker',
         title: intl.formatMessage(appMessages.entities[type].plural),
@@ -166,18 +176,18 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
         icon: 'print',
       });
     }
-    if (isManager) {
+    if (isMember) {
       headerOptions.actions.push({
         title: 'Create new',
         onClick: () => this.props.handleNew(typeId),
         icon: 'add',
-        isManager,
+        isMember,
       });
       headerOptions.actions.push({
         title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(),
+        onClick: () => this.props.handleImport(typeId),
         icon: 'import',
-        isManager,
+        isMember,
       });
     }
     const listActions = [];
@@ -195,7 +205,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
         },
         icon: <MailOption color="dark" size="xxsmall" />,
         type: 'listOption',
-        isManager,
+        isMember,
       });
     }
 
@@ -210,9 +220,9 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
         <EntityList
           entities={entities}
           allEntityCount={allEntities && allEntities.size}
+          allEntities={allEntities.toList()}
           taxonomies={taxonomies}
           connections={connections}
-          connectedTaxonomies={connectedTaxonomies}
           config={CONFIG}
           headerOptions={headerOptions}
           dataReady={dataReady}
@@ -225,11 +235,12 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
           actiontypes={actiontypes}
           actiontypesForTarget={actiontypesForTarget}
           membertypes={membertypes}
+          parentAssociationtypes={parentAssociationtypes}
           associationtypes={associationtypes}
           typeOptions={this.prepareTypeOptions(actortypes, typeId)}
           onSelectType={onSelectType}
           typeId={typeId}
-          showCode={checkActionAttribute(typeId, 'code', isManager)}
+          showCode={checkActorAttribute(typeId, 'code', isAdmin)}
           listActions={listActions}
         />
         {this.state.emailEntities && (
@@ -243,7 +254,7 @@ export class ActorList extends React.PureComponent { // eslint-disable-line reac
             <LayerWrap>
               <LayerHeader flex={{ grow: 0, shrink: 0 }}>
                 <Box>
-                  <Text weight={600}>Email selected entities</Text>
+                  <Text weight={600}>{`Email ${this.state.emailEntities.size} selected contacts`}</Text>
                 </Box>
                 <Box flex={{ grow: 0 }}>
                   <Button plain icon={<FormClose size="medium" />} onClick={() => this.resetEmails()} />
@@ -266,19 +277,20 @@ ActorList.propTypes = {
   handleImport: PropTypes.func,
   onSelectType: PropTypes.func,
   dataReady: PropTypes.bool,
-  isManager: PropTypes.bool,
+  isMember: PropTypes.bool,
+  isAdmin: PropTypes.bool,
+  isVisitor: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   allEntities: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
-  connectedTaxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   actiontypesForTarget: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
+  parentAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
-  isAnalyst: PropTypes.bool,
   params: PropTypes.object,
 };
 
@@ -291,15 +303,16 @@ const mapStateToProps = (state, props) => ({
   entities: selectListActors(state, { type: props.params.id }),
   taxonomies: selectActortypeTaxonomiesWithCats(state, { type: props.params.id }),
   connections: selectConnections(state),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
-  isManager: selectIsUserManager(state),
-  isAnalyst: selectIsUserAnalyst(state),
+  isMember: selectIsUserMember(state),
+  isVisitor: selectIsUserVisitor(state),
+  isAdmin: selectIsUserAdmin(state),
   actiontypes: selectActiontypesForActortype(state, { type: props.params.id }),
   actiontypesForTarget: selectActiontypesForTargettype(state, { type: props.params.id }),
   membertypes: selectMembertypesForActortype(state, { type: props.params.id }),
+  parentAssociationtypes: selectParentAssociationtypesForActortype(state, { type: props.params.id }),
   associationtypes: selectAssociationtypesForActortype(state, { type: props.params.id }),
   actortypes: selectActortypes(state),
-  allEntities: selectActortypeActors(state, { type: props.params.id }),
+  allEntities: selectActorsWithConnections(state, { type: props.params.id }),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -310,8 +323,8 @@ function mapDispatchToProps(dispatch) {
     handleNew: (typeId) => {
       dispatch(updatePath(`${ROUTES.ACTORS}/${typeId}${ROUTES.NEW}`, { replace: true }));
     },
-    handleImport: () => {
-      dispatch(updatePath(`${ROUTES.ACTORS}${ROUTES.IMPORT}`));
+    handleImport: (typeId) => {
+      dispatch(updatePath(`${ROUTES.ACTORS}/${typeId}${ROUTES.IMPORT}`));
     },
     onSelectType: (typeId) => {
       dispatch(updatePath(

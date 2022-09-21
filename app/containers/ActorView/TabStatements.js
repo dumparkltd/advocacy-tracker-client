@@ -16,11 +16,12 @@ import styled from 'styled-components';
 
 import { lowerCase } from 'utils/string';
 
-import { MEMBERSHIPS } from 'themes/config';
+import { MEMBERSHIPS, ACTORTYPES } from 'themes/config';
 
 import {
   getIndicatorConnectionField,
 } from 'utils/fields';
+import { qe } from 'utils/quasi-equals';
 
 import {
   updatePath,
@@ -34,6 +35,7 @@ import {
   selectActorsWithPositions,
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
+  selectIsUserAdmin,
 } from 'containers/App/selectors';
 
 import FieldGroup from 'components/fields/FieldGroup';
@@ -43,13 +45,17 @@ const MapOptions = styled(
   (p) => <Box margin={{ top: 'medium', bottom: 'small' }} {...p} />
 )``;
 
-const getIndicatorColumns = (viewEntity, hasMemberOption, intl) => {
+const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
+  && MEMBERSHIPS[typeId].length > 0
+  && !qe(typeId, ACTORTYPES.CONTACT);
+
+const getIndicatorColumns = (viewEntity, typeId, intl, isAdmin) => {
   let columns = [
     {
       id: 'main',
       type: 'main',
       sort: 'title',
-      attributes: ['code', 'title'],
+      attributes: isAdmin ? ['code', 'title'] : ['title'],
     },
     {
       id: 'positionStatement',
@@ -66,7 +72,7 @@ const getIndicatorColumns = (viewEntity, hasMemberOption, intl) => {
       type: 'positionStatementAuthority',
     },
   ];
-  if (hasMemberOption) {
+  if (hasMemberOption(typeId)) {
     columns = [
       ...columns,
       {
@@ -77,8 +83,7 @@ const getIndicatorColumns = (viewEntity, hasMemberOption, intl) => {
   }
   return columns;
 };
-const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
-  && MEMBERSHIPS[typeId].length > 0;
+
 
 export function TabStatements(props) {
   const {
@@ -91,14 +96,10 @@ export function TabStatements(props) {
     onSetIncludeActorMembers,
     intl,
     viewEntity,
+    isAdmin,
   } = props;
-  // console.log('statements', statements && statements.toJS());
-  // console.log('actorsWithPositions', actorssWithPositions && actorsWithPositions.toJS());
-  // console.log('associationsByType', associationsByType && associationsByType.toJS());
-  // console.log('includeInofficial', includeInofficial);
-  // console.log('includeActorMembers', includeActorMembers);
   const actorWithPositions = actorsWithPositions && actorsWithPositions.get(viewEntity.get('id'));
-  // const indicatorsWithSupport = indicators;
+
   const indicatorsWithSupport = indicators && indicators.reduce(
     (memo, indicator, id) => {
       const indicatorPositions = actorWithPositions
@@ -164,7 +165,7 @@ export function TabStatements(props) {
                 indicators: indicatorsWithSupport,
                 onEntityClick,
                 skipLabel: true,
-                columns: getIndicatorColumns(viewEntity, hasMemberOption(typeId), intl),
+                columns: getIndicatorColumns(viewEntity, typeId, intl, isAdmin),
               }),
             ],
           }}
@@ -181,6 +182,7 @@ TabStatements.propTypes = {
   includeInofficial: PropTypes.bool,
   onSetIncludeInofficial: PropTypes.func,
   includeActorMembers: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   onSetIncludeActorMembers: PropTypes.func,
   onEntityClick: PropTypes.func,
   // onUpdatePath: PropTypes.func,
@@ -192,6 +194,7 @@ const mapStateToProps = (state) => ({
   actorsWithPositions: selectActorsWithPositions(state),
   includeInofficial: selectIncludeInofficialStatements(state),
   includeActorMembers: selectIncludeActorMembers(state),
+  isAdmin: selectIsUserAdmin(state),
 });
 
 function mapDispatchToProps(dispatch) {

@@ -136,7 +136,7 @@ export default defineMessages({
     },
     connectedTaxonomies: {
       id: 'app.components.EntityListHeader.filterGroupLabel.connectedTaxonomies',
-      defaultMessage: 'By connected category',
+      defaultMessage: 'Activities by category',
     },
   },
   editGroupLabel: {

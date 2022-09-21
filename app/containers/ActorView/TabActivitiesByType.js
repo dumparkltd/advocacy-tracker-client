@@ -18,13 +18,12 @@ import { List, Map } from 'immutable';
 
 import { getActionConnectionField } from 'utils/fields';
 import { lowerCase } from 'utils/string';
+import { getActiontypeColumns } from 'utils/entities';
 
-import {
-  ACTIONTYPES_CONFIG,
-  API,
-} from 'themes/config';
+import { API, ROUTES } from 'themes/config';
 import FieldGroup from 'components/fields/FieldGroup';
 import AccordionHeader from 'components/AccordionHeader';
+import A from 'components/styled/A';
 
 import {
   openNewEntityModal,
@@ -34,37 +33,19 @@ import {
 } from 'containers/App/selectors';
 import appMessages from 'containers/App/messages';
 
-const getActiontypeColumns = (typeid, viewSubject) => {
-  if (
-    ACTIONTYPES_CONFIG[parseInt(typeid, 10)]
-    && ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns
-  ) {
-    return ACTIONTYPES_CONFIG[parseInt(typeid, 10)].columns.filter(
-      (col) => {
-        if (typeof col.showOnSingle !== 'undefined') {
-          if (viewSubject && Array.isArray(col.showOnSingle)) {
-            return col.showOnSingle.indexOf(viewSubject) > -1;
-          }
-          return col.showOnSingle;
-        }
-        return true;
-      }
-    );
-  }
-  return [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: ['title'],
-  }];
-};
-
-
 const getTypeLabel = (
   typeId,
   count,
   intl,
 ) => lowerCase(intl.formatMessage(appMessages.entities[`actions_${typeId}`][count === 1 ? 'single' : 'plural']));
+
+const getActorLink = (entity) => `${ROUTES.ACTOR}/${entity.get('id')}`;
+
+const getActorOnClick = (entity, onEntityClick) => (evt) => {
+  if (evt) evt.preventDefault();
+  onEntityClick(entity.get('id'), ROUTES.ACTOR);
+};
+
 
 const defaultState = [0];
 
@@ -83,6 +64,7 @@ export function TabActivitiesByType(props) {
     onEntityClick,
     intl,
     onCreateOption,
+    isAdmin,
   } = props;
   const [actives, setActive] = useState(defaultState);
 
@@ -187,12 +169,17 @@ export function TabActivitiesByType(props) {
                     onEntityClick,
                     connections: actionConnections,
                     typeid: activeActiontypeId,
-                    columns: getActiontypeColumns(activeActiontypeId, viewSubject),
+                    columns: getActiontypeColumns({
+                      typeId: activeActiontypeId,
+                      viewSubject,
+                      isAdmin,
+                    }),
                     onCreateOption: () => onCreateOption({
                       path: API.ACTIONS,
                       attributes: {
                         measuretype_id: activeActiontypeId,
                       },
+                      invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
                       autoUser: true,
                       connect: {
                         type: viewSubject === 'actors' ? 'actorActions' : 'actionActors',
@@ -234,7 +221,11 @@ export function TabActivitiesByType(props) {
                             onEntityClick,
                             connections: actionConnections,
                             typeid: activeActiontypeId,
-                            columns: getActiontypeColumns(activeActiontypeId, viewSubject),
+                            columns: getActiontypeColumns({
+                              typeId: activeActiontypeId,
+                              viewSubject,
+                              isAdmin,
+                            }),
                           }),
                         ],
                       }}
@@ -264,7 +255,19 @@ export function TabActivitiesByType(props) {
                     <FieldGroup
                       seamless
                       group={{
-                        title: `From member: "${actor.getIn(['attributes', 'title'])}" (${actortypeLabel})`,
+                        title: (
+                          <div>
+                            {`From member ${actortypeLabel}: `}
+                            <A
+                              weight={600}
+                              href={getActorLink(actor)}
+                              onClick={getActorOnClick(actor, onEntityClick)}
+                              title={actor.getIn(['attributes', 'title'])}
+                            >
+                              {actor.getIn(['attributes', 'title'])}
+                            </A>
+                          </div>
+                        ),
                         fields: [
                           getActionConnectionField({
                             actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),
@@ -272,7 +275,11 @@ export function TabActivitiesByType(props) {
                             onEntityClick,
                             connections: actionConnections,
                             typeid: activeActiontypeId,
-                            columns: getActiontypeColumns(activeActiontypeId, viewSubject),
+                            columns: getActiontypeColumns({
+                              typeId: activeActiontypeId,
+                              viewSubject,
+                              isAdmin,
+                            }),
                           }),
                         ],
                       }}
@@ -291,6 +298,7 @@ export function TabActivitiesByType(props) {
 TabActivitiesByType.propTypes = {
   viewEntity: PropTypes.instanceOf(Map),
   viewSubject: PropTypes.string,
+  isAdmin: PropTypes.bool,
   taxonomies: PropTypes.instanceOf(Map),
   actionConnections: PropTypes.instanceOf(Map),
   onEntityClick: PropTypes.func,

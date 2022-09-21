@@ -31,6 +31,7 @@ import {
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
+import { qe } from 'utils/quasi-equals';
 
 import {
   loadEntitiesIfNeeded,
@@ -44,11 +45,13 @@ import {
 import {
   selectReady,
   selectSessionUserHighestRoleId,
-  selectIsUserManager,
+  selectIsUserMember,
+  selectIsUserAdmin,
+  selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES, USER_ROLES } from 'themes/config';
+import { ROUTES, USER_ROLES, ACTORTYPES } from 'themes/config';
 
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
@@ -63,7 +66,6 @@ import {
   selectViewEntity,
   selectRoles,
   selectActionsByActiontype,
-  selectConnectedTaxonomies,
   selectActorsByActortype,
 } from './selectors';
 
@@ -105,6 +107,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       viewEntity,
       actorsByActortype,
       actionsByActiontype,
+      isAdmin,
     } = props;
 
     return Map({
@@ -116,10 +119,20 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       associatedTaxonomies: taxonomyOptions(taxonomies),
       associatedRole: getHighestUserRoleId(roles),
       associatedActorsByActortype: actorsByActortype
-        ? actorsByActortype.map((actors) => entityOptions(actors, true))
+        ? actorsByActortype.map(
+          (actors, typeId) => entityOptions({
+            entities: actors,
+            showCode: isAdmin || qe(typeId, ACTORTYPES.COUNTRY),
+          })
+        )
         : Map(),
       associatedActionsByActiontype: actionsByActiontype
-        ? actionsByActiontype.map((actions) => entityOptions(actions, true))
+        ? actionsByActiontype.map(
+          (actions) => entityOptions({
+            entities: actions,
+            showCode: isAdmin,
+          })
+        )
         : Map(),
     });
   }
@@ -139,11 +152,11 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       {
         fields: (roles && roles.size > 0) ? [
           getRoleFormField(intl.formatMessage, roles),
-          getMetaField(entity),
+          getMetaField(entity, true),
         ]
           : [
             getRoleField(entity),
-            getMetaField(entity),
+            getMetaField(entity, true),
           ],
       },
     ]);
@@ -154,16 +167,18 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
     actionsByActiontype,
     connectedTaxonomies,
     onCreateOption,
+    isAdmin,
   ) => {
     const { intl } = this.context;
     const groups = [];
     if (actorsByActortype) {
-      const actorConnections = renderActorsByActortypeControl(
-        actorsByActortype,
-        connectedTaxonomies,
+      const actorConnections = renderActorsByActortypeControl({
+        entitiesByActortype: actorsByActortype,
+        taxonomies: connectedTaxonomies,
         onCreateOption,
         intl,
-      );
+        isAdmin,
+      });
       if (actorConnections) {
         groups.push(
           {
@@ -178,7 +193,8 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
         entitiesByActiontype: actionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
-        contextIntl: intl,
+        intl,
+        isAdmin,
       });
       if (actionConnections) {
         groups.push(
@@ -218,7 +234,8 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       actionsByActiontype,
       onCreateOption,
       connectedTaxonomies,
-      isManager,
+      isMember,
+      isAdmin,
     } = this.props;
     const reference = this.props.params.id;
     const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
@@ -298,11 +315,12 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
                   aside: this.getHeaderAsideFields(viewEntity, editableRoles),
                 },
                 body: {
-                  main: isManager && this.getBodyMainFields(
+                  main: isMember && this.getBodyMainFields(
                     actorsByActortype,
                     actionsByActiontype,
                     connectedTaxonomies,
                     onCreateOption,
+                    isAdmin,
                   ),
                   // aside: this.getBodyAsideFields(),
                 },
@@ -330,7 +348,8 @@ UserEdit.propTypes = {
   viewDomain: PropTypes.object,
   viewEntity: PropTypes.object,
   roles: PropTypes.object,
-  isManager: PropTypes.bool,
+  isAdmin: PropTypes.bool,
+  isMember: PropTypes.bool,
   dataReady: PropTypes.bool,
   sessionUserHighestRoleId: PropTypes.number,
   params: PropTypes.object,
@@ -354,8 +373,9 @@ const mapStateToProps = (state, props) => ({
   roles: selectRoles(state, props.params.id),
   actorsByActortype: selectActorsByActortype(state, props.params.id),
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
-  connectedTaxonomies: selectConnectedTaxonomies(state),
-  isManager: selectIsUserManager(state),
+  connectedTaxonomies: selectTaxonomiesWithCategories(state),
+  isMember: selectIsUserMember(state),
+  isAdmin: selectIsUserAdmin(state),
 });
 
 function mapDispatchToProps(dispatch) {
