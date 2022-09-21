@@ -40,7 +40,7 @@ const StyledTextareaMarkdown = styled(
   padding: 0.7em;
   border-radius: 0.5em;
   color: ${palette('text', 0)};
-  min-height: ${MIN_TEXTAREA_HEIGHT};
+  min-height: ${MIN_TEXTAREA_HEIGHT}px;
   resize: "none";
 `;
 const Preview = styled((p) => <Box {...p} />)`
@@ -49,7 +49,7 @@ const Preview = styled((p) => <Box {...p} />)`
   border: 1px solid ${palette('light', 1)};
   padding: 0.7em;
   color: ${palette('text', 0)};
-  min-height:14em;
+  min-height: ${MIN_TEXTAREA_HEIGHT}px;
 `;
 
 const MDButton = styled((p) => (
