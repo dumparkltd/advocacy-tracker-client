@@ -62,12 +62,18 @@ export function TabActors({
       .flatten(true)
       .filter((action) => action.get('targetsByType'))
       .size > 0;
+  const hasChildActors = viewSubject === 'actors'
+    && hasChildren
+    && childActionsByActiontype
+    && childActionsByActiontype
+      .flatten(true)
+      .filter((action) => action.get('actorsByType'))
+      .size > 0;
 
-  const hasActivities = (
-    actortypesForSubject && actortypesForSubject.size > 0
-  ) || (
-    childActionsByActiontype && childActionsByActiontype.size > 0
-  );
+  const hasActivities = (actortypesForSubject && actortypesForSubject.size > 0)
+    || hasChildTargets
+    || hasChildActors;
+
   return (
     <>
       {!hasActivities && (
