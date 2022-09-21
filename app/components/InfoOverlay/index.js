@@ -60,7 +60,9 @@ function InfoOverlay({
         pad={padButton || (inline ? null : { horizontal: 'small' })}
         ref={infoRef}
         flex={inline ? false : { grow: 0, shrink: 0 }}
-        style={inline ? { width: 'auto', display: 'inline-block' } : null}
+        style={inline ? { width: 'auto' } : null}
+        align="center"
+        justify="center"
       >
         <Button
           plain

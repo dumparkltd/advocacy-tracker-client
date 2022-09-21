@@ -89,7 +89,7 @@ const MDButtonText = styled((p) => (
   <Text weight="bold" size="medium" {...p} />
 ))`
   position: relative;
-  top: -2px;
+  top: -1px;
 `;
 
 function TextareaMarkdownWrapper(props) {
@@ -110,7 +110,7 @@ function TextareaMarkdownWrapper(props) {
   const mdDisabled = view !== 'write';
   return (
     <Box>
-      <Box direction="row" justify="between" align="center" margin={{ vertical: 'small' }}>
+      <Box direction="row" justify="between" align="center" margin={{ vertical: 'small' }} wrap>
         <Box direction="row" gap="small" align="center">
           <ViewButton
             onClick={() => setView('write')}
@@ -125,12 +125,16 @@ function TextareaMarkdownWrapper(props) {
             Preview
           </ViewButton>
         </Box>
-        <Box direction="row" align="center" gap="hair">
-          <Box margin={{ right: 'xsmall' }}>
-            <Box direction="row" align="center" gap="xsmall">
+        <Box direction="row" align="center" gap="xsmall" wrap justify="end">
+          <Box direction="row" align="center" gap="xsmall" justify="end">
+            <Box fill="vertical">
               <Text size="xsmall" color="hint">Format text</Text>
+            </Box>
+            <Box>
               <InfoOverlay
                 title="Format text using markdown"
+                colorButton={theme.global.colors.hint}
+                inline
                 content={(
                   <div>
                     <p>
@@ -174,86 +178,84 @@ function TextareaMarkdownWrapper(props) {
                     </p>
                   </div>
                 )}
-                colorButton={theme.global.colors.hint}
-                inline
               />
             </Box>
           </Box>
-          <MDButton
-            title="## Heading"
-            disabled={mdDisabled}
-            onClick={() => {
-              if (!mdDisabled && textareaRef.current) {
-                textareaRef.current.trigger('h2');
-              }
-            }}
-          >
-            <MDButtonText>H2</MDButtonText>
-          </MDButton>
-          <MDButton
-            title="### Secondary heading"
-            disabled={mdDisabled}
-            onClick={() => {
-              if (!mdDisabled && textareaRef.current) {
-                textareaRef.current.trigger('h3');
-              }
-            }}
-          >
-            <MDButtonText>H3</MDButtonText>
-          </MDButton>
-          <MDButton
-            title="Bold: **bold**"
-            disabled={mdDisabled}
-            onClick={() => {
-              if (!mdDisabled && textareaRef.current) {
-                textareaRef.current.trigger('bold');
-              }
-            }}
-            icon={<Bold size="xsmall" />}
-          />
-          <MDButton
-            title="Italic: _italic_"
-            disabled={mdDisabled}
-            onClick={() => {
-              if (!mdDisabled && textareaRef.current) {
-                textareaRef.current.trigger('italic');
-              }
-            }}
-            icon={<Italic size="xsmall" />}
-          />
-          <MDButton
-            title="Link: (text)[url]"
-            disabled={mdDisabled}
-            onClick={() => {
-              if (!mdDisabled && textareaRef.current) {
-                textareaRef.current.trigger('link');
-              }
-            }}
-            icon={<LinkIcon size="18px" />}
-          />
-          <MDButton
-            title="Unordered list: -"
-            disabled={mdDisabled}
-            onClick={() => {
-              if (!mdDisabled && textareaRef.current) {
-                textareaRef.current.trigger('unordered-list');
-              }
-            }}
-            icon={<List size="xsmall" />}
-          />
-          <MDButton
-            title="Ordered list: 1."
-            disabled={mdDisabled}
-            onClick={() => {
-              if (!mdDisabled && textareaRef.current) {
-                textareaRef.current.trigger('ordered-list');
-              }
-            }}
-            label={
-              <MDButtonText size="xxsmall">123</MDButtonText>
-            }
-          >
-          </MDButton>
+          <Box direction="row" align="center" gap="hair" justify="end">
+            <MDButton
+              title="## Heading"
+              disabled={mdDisabled}
+              onClick={() => {
+                if (!mdDisabled && textareaRef.current) {
+                  textareaRef.current.trigger('h2');
+                }
+              }}
+            >
+              <MDButtonText>H2</MDButtonText>
+            </MDButton>
+            <MDButton
+              title="### Secondary heading"
+              disabled={mdDisabled}
+              onClick={() => {
+                if (!mdDisabled && textareaRef.current) {
+                  textareaRef.current.trigger('h3');
+                }
+              }}
+            >
+              <MDButtonText>H3</MDButtonText>
+            </MDButton>
+            <MDButton
+              title="Bold: **bold**"
+              disabled={mdDisabled}
+              onClick={() => {
+                if (!mdDisabled && textareaRef.current) {
+                  textareaRef.current.trigger('bold');
+                }
+              }}
+              icon={<Bold size="xsmall" />}
+            />
+            <MDButton
+              title="Italic: _italic_"
+              disabled={mdDisabled}
+              onClick={() => {
+                if (!mdDisabled && textareaRef.current) {
+                  textareaRef.current.trigger('italic');
+                }
+              }}
+              icon={<Italic size="xsmall" />}
+            />
+            <MDButton
+              title="Link: (text)[url]"
+              disabled={mdDisabled}
+              onClick={() => {
+                if (!mdDisabled && textareaRef.current) {
+                  textareaRef.current.trigger('link');
+                }
+              }}
+              icon={<LinkIcon size="18px" />}
+            />
+            <MDButton
+              title="Unordered list: -"
+              disabled={mdDisabled}
+              onClick={() => {
+                if (!mdDisabled && textareaRef.current) {
+                  textareaRef.current.trigger('unordered-list');
+                }
+              }}
+              icon={<List size="xsmall" />}
+            />
+            <MDButton
+              title="Ordered list: 1."
+              disabled={mdDisabled}
+              onClick={() => {
+                if (!mdDisabled && textareaRef.current) {
+                  textareaRef.current.trigger('ordered-list');
+                }
+              }}
+            >
+              <MDButtonText size="xxsmall" style={{ top: '-4px' }}>123</MDButtonText>
+            </MDButton>
+          </Box>
         </Box>
       </Box>
       {view === 'preview' && (
@@ -267,6 +269,8 @@ function TextareaMarkdownWrapper(props) {
             ref={textareaRef}
             options={{
               preferredItalicSyntax: '_',
+              linkTextPlaceholder: 'link-title',
+              linkUrlPlaceholder: 'https://link-url.ext',
             }}
             {...props}
           />
