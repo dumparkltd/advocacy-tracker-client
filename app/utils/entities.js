@@ -917,14 +917,16 @@ export const getTaxonomyCategories = (
 };
 
 
-const checkAttribute = ({
+export const checkAttribute = ({
   typeId,
   att,
   attributes,
   isAdmin,
 }) => {
   if (typeId && attributes && attributes[att]) {
-    if (attributes[att].adminOnly && !isAdmin
+    if (
+      attributes[att].adminOnly
+      && !isAdmin
     ) {
       return false;
     }

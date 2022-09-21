@@ -8,15 +8,51 @@ const getColumnTitle = (field, formatMessage) => {
     : formatMessage(appMessages.attributes[field.label || field.attribute]);
   return `${msg} [database:${field.attribute}]`;
 };
+const getRelationshipColumnTitle = (field) => {
+  let msg = field.attribute;
+  msg = `${msg} [rel:${field.attribute}`; // open bracket
+  if (field.relationshipValue && field.relationshipValue.code) {
+    msg = `${msg}${field.separator || '|'}${field.relationshipValue.code}`;
+  }
+  return `${msg}]`; // close bracket
+};
 
 export const getImportFields = (shape, formatMessage) => {
-  const fields = filter(shape.fields, (field) => field.import === true && !field.disabled);
-  const values = reduce(fields, (memo, field) => {
-    const value = `${field.required
-      ? formatMessage(appMessages.import.required)
-      : formatMessage(appMessages.import.optional)}: ${formatMessage(appMessages.import[field.type], { format: DATE_FORMAT })}`;
-    return Object.assign(memo, { [getColumnTitle(field, formatMessage)]: value });
-  }, {});
+  // console.log(shape)
+  let values = {};
+  if (shape.fields) {
+    const fields = filter(
+      shape.fields,
+      (field) => field.import === true && !field.disabled
+    );
+    values = reduce(
+      fields,
+      (memo, field) => {
+        const value = field.value || `${field.required
+          ? formatMessage(appMessages.import.required)
+          : formatMessage(appMessages.import.optional)}: ${formatMessage(appMessages.import[field.type], { format: DATE_FORMAT })}`;
+        return Object.assign(memo, { [getColumnTitle(field, formatMessage)]: value });
+      },
+      values,
+    );
+  }
+  if (shape.relationshipFields) {
+    values = reduce(
+      shape.relationshipFields,
+      (memo, field) => {
+        const value = field.value || `${field.required
+          ? formatMessage(appMessages.import.required)
+          : formatMessage(appMessages.import.optional)}: ${formatMessage(appMessages.import[field.type])}`;
+        return Object.assign(
+          memo,
+          {
+            [getRelationshipColumnTitle(field)]: value,
+          },
+        );
+      },
+      values,
+    );
+  }
   return Object.assign(values, { '': formatMessage(appMessages.import.hint) });
 };
 
@@ -26,3 +62,14 @@ export const getColumnAttribute = (columnTitle) => {
     ? split[1].replace(']', '')
     : columnTitle;
 };
+
+export const countRelationshipsFromRows = (rows) => rows.reduce(
+  (counter, row) => {
+    const relKeys = Object.keys(row).filter((key) => key.indexOf('[rel:') > -1);
+    return relKeys.reduce(
+      (counter2, key) => (row[key] && row[key] !== '') ? counter2 + 1 : counter2,
+      counter,
+    );
+  },
+  0,
+);

@@ -115,6 +115,141 @@ export const RESOURCETYPES = {
 export const OFFICIAL_STATEMENT_CATEGORY_ID = 56;
 export const AUTHORITY_TAXONOMY = 13;
 
+
+export const ACTION_INDICATOR_SUPPORTLEVELS = {
+  // not assigned
+  0: {
+    value: '0',
+    default: true,
+    color: '#EDEFF0',
+    order: 100,
+  },
+  // strong
+  1: {
+    value: '1',
+    // color: '#02A650', // green-purple
+    color: '#02A650', // green-pink
+    // color: '#029481', // teal-brown
+    order: 1,
+  },
+  // quite positive
+  2: {
+    value: '2',
+    // color: '#81DD90', // green-purple
+    color: '#81DD90', // green-pink
+    // color: '#80CDC1', // teal-brown
+    order: 2,
+  },
+  // on the fence
+  3: {
+    value: '3',
+    // color: '#E5CCF3', // green-purple
+    color: '#EBB2D3', // green-pink
+    // color: '#E2CDAD', // teal-brown
+    order: 3,
+  },
+  // rather sceptical
+  4: {
+    value: '4',
+    // color: '#BF7FDD', // green-purple
+    color: '#D966A8', // green-pink
+    // color: '#B88034', // teal-brown
+    order: 4,
+  },
+  // opponent
+  5: {
+    value: '5',
+    // color: '#5B0290', // green-purple
+    color: '#BF0071', // green-pink
+    // color: '#67402E', // teal-brown
+    order: 5,
+  },
+};
+
+export const ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS = {
+  [ACTIONTYPES.EXPRESS]: [
+    ACTION_INDICATOR_SUPPORTLEVELS['0'],
+    ACTION_INDICATOR_SUPPORTLEVELS['1'],
+    ACTION_INDICATOR_SUPPORTLEVELS['2'],
+    ACTION_INDICATOR_SUPPORTLEVELS['3'],
+    ACTION_INDICATOR_SUPPORTLEVELS['4'],
+    ACTION_INDICATOR_SUPPORTLEVELS['5'],
+  ],
+};
+
+export const MAP_OPTIONS = {
+  RANGE: ['#CAE0F7', '#164571'],
+  GRADIENT: {
+    // actors: ['#FAFA6E', '#81DD90', '#029481', '#035E93', '#043465'],
+    actors: ['#FAFA6E', '#81DD90', '#029481', '#00728f', '#043465'],
+    targets: ['#FAFA6E', '#FAAB4B', '#DD654A', '#BF0071', '#59004d'],
+  },
+  NO_DATA_COLOR: '#EDEFF0',
+  DEFAULT_STYLE: {
+    weight: 1,
+    color: '#CFD3D7',
+    fillOpacity: 1,
+    fillColor: '#EDEFF0',
+  },
+  STYLE: {
+    active: {
+      weight: 2,
+      color: '#000000',
+    },
+    members: {
+      fillColor: '#aaa',
+    },
+    country: {
+      fillColor: '#0063b5',
+      weight: 1.5,
+      color: '#333333',
+    },
+  },
+  TOOLTIP_STYLE: {
+    weight: 1,
+    fillOpacity: 0,
+    color: '#666666',
+    interactive: false,
+  },
+  OVER_STYLE: {
+    weight: 1,
+    fillOpacity: 0,
+    color: '#ADB4B9',
+    interactive: false,
+  },
+  BBOX_STYLE: {
+    fillColor: '#F9F9FA',
+    fillOpacity: 1,
+    weight: 0.5,
+    color: '#DEE1E3',
+  },
+  CENTER: [20, 0],
+  ZOOM: {
+    INIT: 1,
+    MIN: 0,
+    MAX: 9,
+  },
+  BOUNDS: {
+    N: 90,
+    W: -3600,
+    S: -90,
+    E: 3600,
+  },
+  PROJ: {
+    robinson: {
+      name: 'Robinson',
+      crs: 'ESRI:54030',
+      proj4def: '+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
+      resolutions: [
+        65536, 32768, 16384, 8192, 4096, 2048, 1024, 512, 256, 128,
+      ],
+      origin: [0, 0],
+      bounds: [[90, -180], [-90, 180]], // [[N, W], [S, E]]
+      addBBox: true,
+    },
+  },
+};
+
 export const ACTIONTYPE_NAVGROUPS = {
   // Plans & Tasks
   1: {
@@ -185,11 +320,66 @@ export const ACTION_FIELDS = {
       },
     },
   },
+  // additional
+  RELATIONSHIPS_IMPORT: {
+    // related to a topic with a position
+    // column: topicCode:supportNo
+    topicCode: {
+      type: 'text',
+      optional: [ACTIONTYPES.EXPRESS],
+      lookup: {
+        table: API.INDICATORS,
+        attribute: 'code',
+      },
+      table: API.ACTION_INDICATORS,
+      keyPair: ['measure_id', 'indicator_id'], // own, other
+      attribute: {
+        column: 'supportlevel_id',
+        code: 'supportNo',
+        map: ACTION_INDICATOR_SUPPORTLEVELS,
+      },
+      separator: '|',
+    },
+    // expressed by country
+    // column: countryCode
+    countryCode: {
+      type: 'text',
+      optional: [ACTIONTYPES.EXPRESS],
+      lookup: {
+        table: API.ACTORS,
+        attribute: 'code',
+      },
+      table: API.ACTOR_ACTIONS,
+      keyPair: ['measure_id', 'actor_id'], // own, other
+    },
+    // belongs to event
+    eventCode: {
+      type: 'text',
+      optional: [ACTIONTYPES.EXPRESS],
+      lookup: {
+        table: API.ACTIONS,
+        attribute: 'code',
+      },
+      table: API.ACTION_ACTIONS,
+      keyPair: ['measure_id', 'other_measure_id'], // own, other
+    },
+    // has resource
+    resourcesID: {
+      type: 'text',
+      optional: [ACTIONTYPES.EXPRESS],
+      lookup: {
+        table: API.RESOURCES, // id assumed
+      },
+      table: API.ACTION_RESOURCES,
+      keyPair: ['measure_id', 'resource_id'], // own, other
+    },
+  },
   ATTRIBUTES: {
     measuretype_id: {
       defaultValue: '1',
       required: Object.values(ACTIONTYPES), // all types
       type: 'number',
+      importDefault: 'type',
       table: API.ACTIONTYPES,
     },
     draft: {
@@ -939,131 +1129,6 @@ export const ACTIONTYPES_CONFIG = {
     ],
   },
 };
-
-export const ACTION_INDICATOR_SUPPORTLEVELS = {
-  // not assigned
-  0: {
-    value: '0',
-    default: true,
-    color: '#EDEFF0',
-    order: 100,
-  },
-  // strong
-  1: {
-    value: '1',
-    color: '#02A650',
-    order: 1,
-  },
-  // quite positive
-  2: {
-    value: '2',
-    color: '#81DD90',
-    order: 2,
-  },
-  // on the fence
-  3: {
-    value: '3',
-    color: '#E5CCF3',
-    order: 3,
-  },
-  // rather sceptical
-  4: {
-    value: '4',
-    color: '#BF7FDD',
-    order: 4,
-  },
-  // opponent
-  5: {
-    value: '5',
-    color: '#5B0290',
-    order: 5,
-  },
-};
-
-export const ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS = {
-  [ACTIONTYPES.EXPRESS]: [
-    ACTION_INDICATOR_SUPPORTLEVELS['0'],
-    ACTION_INDICATOR_SUPPORTLEVELS['1'],
-    ACTION_INDICATOR_SUPPORTLEVELS['2'],
-    ACTION_INDICATOR_SUPPORTLEVELS['3'],
-    ACTION_INDICATOR_SUPPORTLEVELS['4'],
-    ACTION_INDICATOR_SUPPORTLEVELS['5'],
-  ],
-};
-
-export const MAP_OPTIONS = {
-  RANGE: ['#CAE0F7', '#164571'],
-  GRADIENT: {
-    // actors: ['#FAFA6E', '#81DD90', '#029481', '#035E93', '#043465'],
-    actors: ['#FAFA6E', '#81DD90', '#029481', '#00728f', '#043465'],
-    targets: ['#FAFA6E', '#FAAB4B', '#DD654A', '#BF0071', '#59004d'],
-  },
-  NO_DATA_COLOR: '#EDEFF0',
-  DEFAULT_STYLE: {
-    weight: 1,
-    color: '#CFD3D7',
-    fillOpacity: 1,
-    fillColor: '#EDEFF0',
-  },
-  STYLE: {
-    active: {
-      weight: 2,
-      color: '#000000',
-    },
-    members: {
-      fillColor: '#aaa',
-    },
-    country: {
-      fillColor: '#0063b5',
-      weight: 1.5,
-      color: '#333333',
-    },
-  },
-  TOOLTIP_STYLE: {
-    weight: 1,
-    fillOpacity: 0,
-    color: '#666666',
-    interactive: false,
-  },
-  OVER_STYLE: {
-    weight: 1,
-    fillOpacity: 0,
-    color: '#ADB4B9',
-    interactive: false,
-  },
-  BBOX_STYLE: {
-    fillColor: '#F9F9FA',
-    fillOpacity: 1,
-    weight: 0.5,
-    color: '#DEE1E3',
-  },
-  CENTER: [20, 0],
-  ZOOM: {
-    INIT: 1,
-    MIN: 0,
-    MAX: 9,
-  },
-  BOUNDS: {
-    N: 90,
-    W: -3600,
-    S: -90,
-    E: 3600,
-  },
-  PROJ: {
-    robinson: {
-      name: 'Robinson',
-      crs: 'ESRI:54030',
-      proj4def: '+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
-      resolutions: [
-        65536, 32768, 16384, 8192, 4096, 2048, 1024, 512, 256, 128,
-      ],
-      origin: [0, 0],
-      bounds: [[90, -180], [-90, 180]], // [[N, W], [S, E]]
-      addBBox: true,
-    },
-  },
-};
-
 
 export const KEEP_FILTERS = ['view', 'ms', 'subj', 'msubj', 'tm', 'am'];
 
