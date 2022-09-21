@@ -183,7 +183,7 @@ function TextareaMarkdownWrapper(props) {
             title="## Heading"
             disabled={mdDisabled}
             onClick={() => {
-              if (mdDisabled && textareaRef.current) {
+              if (!mdDisabled && textareaRef.current) {
                 textareaRef.current.trigger('h2');
               }
             }}
