@@ -344,7 +344,7 @@ export const ACTION_FIELDS = {
     // column: countryCode
     countryCode: {
       type: 'text',
-      optional: [ACTIONTYPES.EXPRESS],
+      optional: [ACTIONTYPES.EXPRESS, ACTIONTYPES.TASK],
       lookup: {
         table: API.ACTORS,
         attribute: 'code',
@@ -365,7 +365,7 @@ export const ACTION_FIELDS = {
     },
     // has resource
     resourcesID: {
-      type: 'text',
+      type: 'number',
       optional: [ACTIONTYPES.EXPRESS],
       lookup: {
         table: API.RESOURCES, // id assumed
