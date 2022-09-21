@@ -134,7 +134,7 @@ function TextareaMarkdownWrapper(props) {
               <InfoOverlay
                 title="Format text using markdown"
                 colorButton={theme.global.colors.hint}
-                inline
+                padButton="none"
                 content={(
                   <div>
                     <p>
