@@ -127,40 +127,40 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
   // strong
   1: {
     value: '1',
-    // color: '#02A650', // green-purple
-    color: '#02A650', // green-pink
+    color: '#02A650', // green-purple
+    // color: '#02A650', // green-pink
     // color: '#029481', // teal-brown
     order: 1,
   },
   // quite positive
   2: {
     value: '2',
-    // color: '#81DD90', // green-purple
-    color: '#81DD90', // green-pink
+    color: '#81DD90', // green-purple
+    // color: '#81DD90', // green-pink
     // color: '#80CDC1', // teal-brown
     order: 2,
   },
   // on the fence
   3: {
     value: '3',
-    // color: '#E5CCF3', // green-purple
-    color: '#EBB2D3', // green-pink
+    color: '#E5CCF3', // green-purple
+    // color: '#EBB2D3', // green-pink
     // color: '#E2CDAD', // teal-brown
     order: 3,
   },
   // rather sceptical
   4: {
     value: '4',
-    // color: '#BF7FDD', // green-purple
-    color: '#D966A8', // green-pink
+    color: '#BF7FDD', // green-purple
+    // color: '#D966A8', // green-pink
     // color: '#B88034', // teal-brown
     order: 4,
   },
   // opponent
   5: {
     value: '5',
-    // color: '#5B0290', // green-purple
-    color: '#BF0071', // green-pink
+    color: '#5B0290', // green-purple
+    // color: '#BF0071', // green-pink
     // color: '#67402E', // teal-brown
     order: 5,
   },
