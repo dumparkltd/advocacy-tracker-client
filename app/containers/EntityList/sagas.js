@@ -18,14 +18,17 @@ import {
 } from './constants';
 
 export function* updateQuery({ value }) {
-  const params = value.map((val) => ({
-    arg: val.get('query'),
-    value: val.get('value'),
-    prevValue: val.get('prevValue'),
-    replace: val.get('replace'),
-    add: val.get('checked'),
-    remove: !val.get('checked'),
-  })).toJS();
+  // console.log('updateQuery', value && value.toJS())
+  const params = value.map(
+    (val) => ({
+      arg: val.get('query'),
+      value: val.get('value'),
+      prevValue: val.get('prevValue'),
+      replace: val.get('replace'),
+      add: val.get('checked'),
+      remove: !val.get('checked'),
+    })
+  ).toJS();
   yield params.push({
     arg: 'page',
     value: '',
@@ -36,13 +39,18 @@ export function* updateQuery({ value }) {
 }
 
 export function* updateQueryMultiple({ values }) {
-  const params = values.map((value) => ({
-    arg: value.get('query'),
-    value: value.get('value') || 1,
-    replace: value.get('replace'),
-    add: value.get('checked'),
-    remove: !value.get('checked'),
-  })).toJS();
+  // console.log('updateQueryMultiple', values && values.toJS())
+  const params = values.filter(
+    (value) => value.get('hasChanged')
+  ).map(
+    (value) => ({
+      arg: value.get('query'),
+      value: value.get('value') || 1,
+      replace: value.get('replace'),
+      add: value.get('checked'),
+      remove: !value.get('checked'),
+    })
+  ).toJS();
   yield params.push({
     arg: 'page',
     value: '',

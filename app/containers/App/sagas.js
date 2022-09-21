@@ -846,7 +846,7 @@ const getNextQuery = (query, extend, location) => {
   return asArray(query).reduce((memo, param) => {
     const queryUpdated = memo;
     // if arg already set and not replacing
-    if (queryUpdated[param.arg] && typeof param.replace !== 'undefined' && !param.replace) {
+    if (queryUpdated[param.arg] && (typeof param.replace === 'undefined' || !param.replace)) {
       const val = param.value && param.value.toString();
       // check for connection attribute queries
       if (
@@ -917,7 +917,14 @@ const getNextQuery = (query, extend, location) => {
         queryUpdated[param.arg] = param.value;
       }
     } else if (queryUpdated[param.arg] && (param.remove || typeof param.value === 'undefined')) {
-      delete queryUpdated[param.arg];
+      // make sure we remove the right values
+      if (param.value && (param.arg === 'without' || param.arg === 'any' || param.arg === 'cat')) {
+        if (qe(queryUpdated[param.arg], param.value)) {
+          delete queryUpdated[param.arg];
+        }
+      } else {
+        delete queryUpdated[param.arg];
+      }
     // if not set or replacing with new value
     } else if (typeof param.value !== 'undefined' && !param.remove) {
       queryUpdated[param.arg] = param.value;
