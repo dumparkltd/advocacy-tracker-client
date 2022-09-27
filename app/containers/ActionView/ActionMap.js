@@ -159,7 +159,7 @@ export function ActionMap({
       },
     };
   }
-  if (hasMemberOption && hasAssociations) {
+  if (hasMemberOption) {
     mapKeyOptionMap = {
       ...mapKeyOptionMap,
       via: {
@@ -217,7 +217,6 @@ export function ActionMap({
             ? 'As actor of child activity' //  should never happen
             : 'As target of child activity';
         }
-        // console.log(feature)
         return [
           ...memo,
           {
