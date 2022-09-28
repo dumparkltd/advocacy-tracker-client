@@ -886,6 +886,7 @@ function mapDispatchToProps(dispatch, props) {
               case ('roles'):
               case ('children'):
               case ('users'):
+              case ('parents'):
                 existingAssignments = entity.get(activeEditOption.connection);
                 break;
               default:
