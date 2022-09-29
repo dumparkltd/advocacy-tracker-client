@@ -815,10 +815,17 @@ function mapDispatchToProps(
             || modalConnect.get('type') === 'subActions'
           )
         ) {
-          saveData = saveData.mergeIn(
-            [modalConnect.get('type'), 'create'],
-            modalConnect.get('create'),
-          );
+          if (saveData.get('type')) {
+            saveData = saveData.mergeIn(
+              [modalConnect.get('type'), 'create'],
+              modalConnect.get('create'),
+            );
+          } else {
+            saveData = saveData.setIn(
+              [modalConnect.get('type'), 'create'],
+              modalConnect.get('create'),
+            );
+          }
         }
       }
       dispatch(
