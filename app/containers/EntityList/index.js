@@ -13,7 +13,7 @@ import { Text } from 'grommet';
 import { Edit } from 'grommet-icons';
 import { Map, List, fromJS } from 'immutable';
 
-// import { getEntityReference } from 'utils/entities';
+import { qe } from 'utils/quasi-equals';
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import Icon from 'components/Icon';
@@ -902,26 +902,37 @@ function mapDispatchToProps(dispatch, props) {
               const prevHighestRoleId = existingAssignments
                 ? existingAssignments.toList().first()
                 : USER_ROLES.DEFAULT.value;
+              // console.log('existingAssignments', existingAssignments && existingAssignments.toJS())
+              // console.log('prevHighestRoleId', prevHighestRoleId)
               const newHighestRoleId = creates.size > 0 ? creates.first() : USER_ROLES.DEFAULT.value;
+              // console.log('newHighestRoleId', newHighestRoleId)
               const prevRoleIds = roles.filter(
-                (role) => prevHighestRoleId <= parseInt(role.get('id'), 10)
-              ).map((role) => parseInt(role.get('id'), 10)).toList();
+                (role) => {
+                  const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(role.get('id'), 10)));
+                  const prevHighestRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(prevHighestRoleId, 10)));
+                  return prevHighestRole.order <= theRole.order;
+                }
+              ).map(
+                (role) => parseInt(role.get('id'), 10)
+              ).toList();
+              // console.log('prevRoleIds', prevRoleIds && prevRoleIds.toJS())
               const createRoleIds = newHighestRoleId === USER_ROLES.DEFAULT.value
                 ? List()
                 : roles.filter(
                   (role) => {
-                    const roleId = parseInt(role.get('id'), 10);
-                    return newHighestRoleId <= roleId && !prevRoleIds.includes(roleId);
+                    const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(role.get('id'), 10)));
+                    const newHighestRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(newHighestRoleId, 10)));
+                    return newHighestRole && newHighestRole.order <= theRole.order && !prevRoleIds.includes(theRole.value);
                   }
                 ).map((role) => parseInt(role.get('id'), 10)).toList();
               const deleteRoleIds = roles.filter(
                 (role) => {
-                  const roleId = parseInt(role.get('id'), 10);
-                  return newHighestRoleId > roleId && prevRoleIds.includes(roleId);
+                  const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(role.get('id'), 10)));
+                  const newHighestRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(newHighestRoleId, 10)));
+                  return !newHighestRole || (newHighestRole.order > theRole.order && prevRoleIds.includes(theRole.value));
                 }
               ).map((role) => parseInt(role.get('id'), 10)).toList();
-              // console.log('newHighestRoleId', newHighestRoleId)
-              // console.log('newRoleIds', createRoleIds.toJS())
+              // console.log('createRoleIds', createRoleIds.toJS())
               // console.log('deleteRoleIds', deleteRoleIds.toJS())
               // console.log('entity.allRoles', entity.get('allRoles').toJS())
               if (createRoleIds.size > 0) {

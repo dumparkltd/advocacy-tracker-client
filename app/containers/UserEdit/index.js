@@ -208,19 +208,38 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
     return groups;
   };
 
-  getEditableUserRoles = (roles, sessionUserHighestRoleId) => {
-    if (roles) {
-      const userHighestRoleId = getHighestUserRoleId(roles);
-      // roles are editable by the session user (logged on user) if
-      // unless the session user is an ADMIN
-      // the session user can only assign roles "lower" (that is higher id) than his/her own role
-      // and when the session user has a "higher" (lower id) role than the user profile being edited
-      return roles
-        .filter((role) => sessionUserHighestRoleId === USER_ROLES.ADMIN.value
-          || (sessionUserHighestRoleId < userHighestRoleId && sessionUserHighestRoleId < parseInt(role.get('id'), 10)));
-    }
-    return Map();
-  }
+  // only admins can assign any roles to any other user TODO check
+  getEditableUserRoles = (roles, sessionUserHighestRoleId) => roles && (sessionUserHighestRoleId === USER_ROLES.ADMIN.value)
+    ? roles
+    : Map();
+  //   if (roles) {
+  //     // const userHighestRoleId = getHighestUserRoleId(roles);
+  //     // const userHighestRole = Object.values(USER_ROLES).find((r) => qe(r.value, userHighestRoleId));
+  //     // const sessionUserHighestRole = Object.values(USER_ROLES).find((r) => qe(r.value, sessionUserHighestRoleId));
+  //
+  //     // TODO check!!
+  //     // roles are editable by the session user (logged on user) if
+  //     // the session user is an ADMIN
+  //     // the session user can only assign roles "lower" (that is higher id) than his/her own role
+  //     // and when the session user has a "higher" (lower id) role than the user profile being edited
+  //     // only admins can assign any roles to any other user
+  //     // if (sessionUserHighestRoleId === USER_ROLES.ADMIN.value) {
+  //     // }
+  //     return sessionUserHighestRoleId === USER_ROLES.ADMIN.value ? roles : Map();
+  //     // // other users can only assign roles to users that have a lower role / higher order
+  //     // if (sessionUserHighestRole.order < userHighestRole.order) {
+  //     //   return roles.filter(
+  //     //     (role) => {
+  //     //       // also can only assign roles than their own role
+  //     //       const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(role.get('id'), 10)));
+  //     //       return sessionUserHighestRole.order < theRole.order;
+  //     //     }
+  //     //   );
+  //     // }
+  //     // return Map();
+  //   }
+  //   return Map();
+  // }
 
   render() {
     const { intl } = this.context;
@@ -403,16 +422,20 @@ function mapDispatchToProps(dispatch) {
       let saveData = formData;
       // roles
       // higher is actually lower
-      const newHighestRole = parseInt(formData.get('associatedRole'), 10);
-
-      // store all higher roles
-      const newRoleIds = newHighestRole === USER_ROLES.DEFAULT.value
+      const newHighestRoleId = parseInt(formData.get('associatedRole'), 10);
+      const newHighestRole = Object.values(USER_ROLES).find((role) => qe(role.value, newHighestRoleId));
+      // store all higher roles (i.e. with lower order)
+      const newRoleIds = newHighestRole.order === USER_ROLES.DEFAULT.order
         ? List()
-        : roles.reduce((memo, role) => newHighestRole <= parseInt(role.get('id'), 10)
-          ? memo.push(role.get('id'))
-          : memo,
-        List());
-
+        : roles.reduce(
+          (memo, role) => {
+            const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(role.get('id'), 10)));
+            return newHighestRole.order <= theRole.order
+              ? memo.push(role.get('id'))
+              : memo;
+          },
+          List()
+        );
       saveData = saveData.set('userRoles', Map({
         delete: roles.reduce((memo, role) => role.get('associated')
             && !newRoleIds.includes(role.get('id'))

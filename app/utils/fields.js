@@ -2,6 +2,7 @@ import { truncateText } from 'utils/string';
 import { sortEntities, sortCategories } from 'utils/sort';
 // import { filterTaxonomies } from 'utils/entities';
 import isNumber from 'utils/is-number';
+import qe from 'utils/quasi-equals';
 
 import {
   USER_ROLES, TEXT_TRUNCATE, ROUTES, API,
@@ -144,8 +145,24 @@ export const getStatusFieldIf = ({
 };
 
 // only show the highest rated role (lower role ids means higher)
-const getHighestUserRoleId = (roles) => roles.reduce(
-  (memo, role) => role && role.get('id') < memo ? role.get('id') : memo,
+// const getHighestUserRoleId = (roles) => roles.reduce(
+//   (memo, role) => role && role.get('id') < memo ? role.get('id') : memo,
+//   USER_ROLES.DEFAULT.value
+// );
+//
+
+// only show the highest rated role (lower role ids means higher)
+export const getHighestUserRoleId = (roles) => roles.reduce(
+  (currentHighestRoleId, role) => {
+    if (role) {
+      const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(role.get('id'), 10)));
+      const highestRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(currentHighestRoleId, 10)));
+      return theRole.order < highestRole.order
+        ? role.get('id')
+        : currentHighestRoleId;
+    }
+    return currentHighestRoleId;
+  },
   USER_ROLES.DEFAULT.value
 );
 
