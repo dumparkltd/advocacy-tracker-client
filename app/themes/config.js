@@ -112,7 +112,7 @@ export const RESOURCETYPES = {
   DOC: '3',
 };
 
-export const OFFICIAL_STATEMENT_CATEGORY_ID = 56;
+export const OFFICIAL_STATEMENT_CATEGORY_ID = 55;
 export const AUTHORITY_TAXONOMY = 13;
 
 
