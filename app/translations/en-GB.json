@@ -642,6 +642,7 @@
   "app.containers.App.messages.recoverSuccess": "Please check your email and follow the instructions to reset your password.",
   "app.containers.App.messages.createdAsGuest": "{entityType} created successfully. It will become publicly available once verified and published by an authorised user.",
   "app.containers.App.ui.userRoles.admin": "Administrator",
+  "app.containers.App.ui.userRoles.coordinator": "Coordinator",
   "app.containers.App.ui.userRoles.member": "Team member",
   "app.containers.App.ui.userRoles.visitor": "Visitor",
   "app.containers.App.ui.userRoles.default": "External (no role assigned)",

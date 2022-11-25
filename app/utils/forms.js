@@ -690,10 +690,19 @@ export const getConnectionUpdatesFromFormData = ({
 };
 
 // only show the highest rated role (lower role ids means higher)
-export const getHighestUserRoleId = (roles) => roles.reduce((currentHighestRoleId, role) => role.get('associated') && parseInt(role.get('id'), 10) < parseInt(currentHighestRoleId, 10)
-  ? role.get('id').toString()
-  : currentHighestRoleId.toString(),
-USER_ROLES.DEFAULT.value);
+export const getHighestUserRoleId = (roles) => roles.reduce(
+  (currentHighestRoleId, role) => {
+    if (role.get('associated')) {
+      const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(role.get('id'), 10)));
+      const highestRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(currentHighestRoleId, 10)));
+      return theRole.order < highestRole.order
+        ? role.get('id').toString()
+        : currentHighestRoleId.toString();
+    }
+    return currentHighestRoleId.toString();
+  },
+  USER_ROLES.DEFAULT.value
+);
 
 export const getRoleFormField = (formatMessage, roleOptions) => ({
   id: 'role',

@@ -18,6 +18,7 @@ import {
   getEmailField,
   getTaxonomyFields,
   getActorConnectionField,
+  getHighestUserRoleId,
 } from 'utils/fields';
 
 import qe from 'utils/quasi-equals';
@@ -81,12 +82,12 @@ import {
 import { DEPENDENCIES } from './constants';
 
 // only show the highest rated role (lower role ids means higher)
-const getHighestUserRoleId = (user) => user
-  ? user.get('roles').reduce(
-    (memo, role) => (role && role.get('id') < memo) ? role.get('id') : memo,
-    USER_ROLES.DEFAULT.value
-  )
-  : USER_ROLES.DEFAULT.value;
+// const getHighestUserRoleId = (user) => user
+//   ? user.get('roles').reduce(
+//     (memo, role) => (role && role.get('id') < memo) ? role.get('id') : memo,
+//     USER_ROLES.DEFAULT.value
+//   )
+//   : USER_ROLES.DEFAULT.value;
 
 const VALID_SUBJECTS = ['uactivities', 'uactors'];
 
@@ -159,9 +160,14 @@ export function UserView({
       onClick: () => handleEditPassword(userId),
     });
   }
-  if (sessionUserHighestRoleId === USER_ROLES.ADMIN.value // is admin
-    || userId === sessionUserId // own profile
-    || sessionUserHighestRoleId < getHighestUserRoleId(user) // TODO verify
+  const sessionUserHighestRole = Object.values(USER_ROLES).find((r) => qe(r.value, sessionUserHighestRoleId));
+  const userHighestRole = user && Object.values(USER_ROLES).find((r) => qe(r.value, getHighestUserRoleId(user.get('roles'))));
+  if (user
+    && (
+      sessionUserHighestRoleId === USER_ROLES.ADMIN.value // is admin
+      || userId === sessionUserId // own profile
+      || sessionUserHighestRole.order < userHighestRole.order // TODO verify
+    )
   ) {
     buttons.push({
       type: 'edit',

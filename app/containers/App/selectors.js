@@ -133,30 +133,42 @@ export const selectSessionUserRoles = createSelector(
     : Map()
 );
 
+// admins require the admin role
 export const selectIsUserAdmin = createSelector(
   selectSessionUserRoles,
   (userRoles) => userRoles.includes(USER_ROLES.ADMIN.value)
 );
 
+// admins also have coordinator privileges
+export const selectIsUserCoordinator = createSelector(
+  selectSessionUserRoles,
+  (userRoles) => userRoles.includes(USER_ROLES.COORDINATOR.value)
+    || userRoles.includes(USER_ROLES.ADMIN.value)
+);
+// admins and coordinators also have member privileges
 export const selectIsUserMember = createSelector(
   selectSessionUserRoles,
   (userRoles) => userRoles.includes(USER_ROLES.MEMBER.value)
+    || userRoles.includes(USER_ROLES.COORDINATOR.value)
     || userRoles.includes(USER_ROLES.ADMIN.value)
 );
-
+// admins, coordinators and members also have visitor privileges
 export const selectIsUserVisitor = createSelector(
   selectSessionUserRoles,
   (userRoles) => userRoles.includes(USER_ROLES.VISITOR.value)
     || userRoles.includes(USER_ROLES.MEMBER.value)
+    || userRoles.includes(USER_ROLES.COORDINATOR.value)
     || userRoles.includes(USER_ROLES.ADMIN.value)
 );
 
 export const selectHasUserRole = createSelector(
   selectIsUserAdmin,
+  selectIsUserCoordinator,
   selectIsUserMember,
   selectIsUserVisitor,
-  (isAdmin, isMember, isVisitor) => ({
+  (isAdmin, isCoordinator, isMember, isVisitor) => ({
     [USER_ROLES.ADMIN.value]: isAdmin,
+    [USER_ROLES.COORDINATOR.value]: isCoordinator,
     [USER_ROLES.MEMBER.value]: isMember,
     [USER_ROLES.VISITOR.value]: isVisitor,
   })
@@ -167,6 +179,9 @@ export const selectSessionUserHighestRoleId = createSelector(
   (userRoles) => {
     if (userRoles.includes(USER_ROLES.ADMIN.value)) {
       return USER_ROLES.ADMIN.value;
+    }
+    if (userRoles.includes(USER_ROLES.COORDINATOR.value)) {
+      return USER_ROLES.COORDINATOR.value;
     }
     if (userRoles.includes(USER_ROLES.MEMBER.value)) {
       return USER_ROLES.MEMBER.value;

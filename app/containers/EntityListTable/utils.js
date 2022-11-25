@@ -638,10 +638,13 @@ export const prepareEntityRows = ({
               },
             };
           case 'userrole':
+            // TODO: optimise - entities should only/already have a single/hightest role associated
             temp = entity.get('roles') && entity.get('roles').reduce(
               (highest, roleId) => {
                 if (!highest) return parseInt(roleId, 10);
-                return Math.min(parseInt(roleId, 10), highest);
+                const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(roleId, 10)));
+                const highestRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(highest, 10)));
+                return Math.min(theRole.order, highestRole.order);
               },
               null,
             );

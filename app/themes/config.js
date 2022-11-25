@@ -1240,11 +1240,14 @@ export const SERVER_ERRORS = {
 // Map server attribute values **************************
 
 // user roles
+// value: db-id
+// order: order of privileges, smaller values encompass larger values
 export const USER_ROLES = {
-  ADMIN: { value: 1, message: 'ui.userRoles.admin' },
-  MEMBER: { value: 2, message: 'ui.userRoles.member' },
-  VISITOR: { value: 3, message: 'ui.userRoles.visitor' },
-  DEFAULT: { value: 9999, message: 'ui.userRoles.default' }, // note: client side only - no role assigned on server
+  ADMIN: { value: 1, message: 'ui.userRoles.admin', order: 1 },
+  COORDINATOR: { value: 4, message: 'ui.userRoles.coordinator', order: 2 },
+  MEMBER: { value: 2, message: 'ui.userRoles.member', order: 3 },
+  VISITOR: { value: 3, message: 'ui.userRoles.visitor', order: 4 },
+  DEFAULT: { value: 9999, message: 'ui.userRoles.default', order: 9999 }, // note: client side only - no role assigned on server
 };
 // Entity publish statuses
 export const PUBLISH_STATUSES = [

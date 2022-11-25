@@ -2330,6 +2330,10 @@ export default defineMessages({
         id: 'app.containers.App.ui.userRoles.admin',
         defaultMessage: 'Administrator',
       },
+      coordinator: {
+        id: 'app.containers.App.ui.userRoles.coordinator',
+        defaultMessage: 'Coordinator',
+      },
       member: {
         id: 'app.containers.App.ui.userRoles.member',
         defaultMessage: 'Member',
