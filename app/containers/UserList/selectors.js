@@ -70,6 +70,20 @@ export const selectConnections = createSelector(
   }
 );
 
+const getHighestUserRoleId = (roleIds) => roleIds.reduce(
+  (currentHighestRoleId, roleId) => {
+    if (roleId) {
+      const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(roleId, 10)));
+      const highestRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(currentHighestRoleId, 10)));
+      return theRole.order < highestRole.order
+        ? roleId
+        : currentHighestRoleId;
+    }
+    return currentHighestRoleId;
+  },
+  USER_ROLES.DEFAULT.value
+);
+
 export const selectUsersWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   (state, locationQuery) => selectEntitiesSearchQuery(state, {
@@ -102,10 +116,7 @@ export const selectUsersWithConnections = createSelector(
           ).map(
             (association) => association.getIn(['attributes', 'role_id'])
           );
-          const entityHighestRoleId = entityRoleIds.reduce(
-            (memo, roleId) => roleId < memo ? roleId : memo,
-            USER_ROLES.DEFAULT.value,
-          );
+          const entityHighestRoleId = getHighestUserRoleId(entityRoleIds);
           const userActions = actionAssociationsGrouped.get(parseInt(entity.get('id'), 10));
           const userActors = actorAssociationsGrouped.get(parseInt(entity.get('id'), 10));
           const userCategories = entityCategories && entityCategories.filter(
