@@ -323,8 +323,8 @@ export const ACTION_FIELDS = {
   // additional
   RELATIONSHIPS_IMPORT: {
     // related to a topic with a position
-    // column: topicCode:supportNo
-    topicCode: {
+    // column: topic-code:supportNo
+    'topic-code': {
       type: 'text',
       optional: [ACTIONTYPES.EXPRESS],
       lookup: {
@@ -341,10 +341,14 @@ export const ACTION_FIELDS = {
       separator: '|',
     },
     // expressed by country
-    // column: countryCode
-    countryCode: {
+    // column: country-code
+    'country-code': {
       type: 'text',
-      optional: [ACTIONTYPES.EXPRESS, ACTIONTYPES.TASK],
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.INTERACTION,
+      ],
       lookup: {
         table: API.ACTORS,
         attribute: 'code',
@@ -352,10 +356,78 @@ export const ACTION_FIELDS = {
       table: API.ACTOR_ACTIONS,
       keyPair: ['measure_id', 'actor_id'], // own, other
     },
-    // belongs to event
-    eventCode: {
+    // expressed by actor
+    // column: country-code
+    'actor-code': {
       type: 'text',
-      optional: [ACTIONTYPES.EXPRESS],
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.INTERACTION,
+      ],
+      multiple: true,
+      lookup: {
+        table: API.ACTORS,
+        attribute: 'code',
+      },
+      table: API.ACTOR_ACTIONS,
+      keyPair: ['measure_id', 'actor_id'], // own, other
+    },
+    // column: country-code
+    'actor-id': {
+      type: 'text',
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.INTERACTION,
+      ],
+      multiple: true,
+      lookup: {
+        table: API.ACTORS, // id assumed
+      },
+      table: API.ACTOR_ACTIONS,
+      keyPair: ['measure_id', 'actor_id'], // own, other
+    },
+    // column: country-code
+    'target-code': {
+      type: 'text',
+      optional: [
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
+        ACTIONTYPES.TASK,
+      ],
+      multiple: true,
+      lookup: {
+        table: API.ACTORS,
+        attribute: 'code',
+      },
+      table: API.ACTION_ACTORS,
+      keyPair: ['measure_id', 'actor_id'], // own, other
+    },
+    // column: country-code
+    'target-id': {
+      type: 'text',
+      optional: [
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
+        ACTIONTYPES.TASK,
+      ],
+      multiple: true,
+      lookup: {
+        table: API.ACTORS, // id assumed
+      },
+      table: API.ACTION_ACTORS,
+      keyPair: ['measure_id', 'actor_id'], // own, other
+    },
+    // belongs to event
+    'event-code': {
+      type: 'text',
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.INTERACTION,
+      ],
+      multiple: true,
       lookup: {
         table: API.ACTIONS,
         attribute: 'code',
@@ -363,15 +435,107 @@ export const ACTION_FIELDS = {
       table: API.ACTION_ACTIONS,
       keyPair: ['measure_id', 'other_measure_id'], // own, other
     },
-    // has resource
-    resourcesID: {
-      type: 'number',
+    // belongs to interaction
+    'interaction-code': {
+      type: 'text',
       optional: [ACTIONTYPES.EXPRESS],
+      multiple: true,
+      lookup: {
+        table: API.ACTIONS,
+        attribute: 'code',
+      },
+      table: API.ACTION_ACTIONS,
+      keyPair: ['measure_id', 'other_measure_id'], // own, other
+    },
+    // belongs to action by code
+    'parent-action-code': {
+      type: 'text',
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.INTERACTION,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.OP,
+      ],
+      multiple: true,
+      lookup: {
+        table: API.ACTIONS,
+        attribute: 'code',
+      },
+      table: API.ACTION_ACTIONS,
+      keyPair: ['measure_id', 'other_measure_id'], // own, other
+    },
+    // belongs to action by ID
+    'parent-action-id': {
+      type: 'text',
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.INTERACTION,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.OP,
+      ],
+      multiple: true,
+      lookup: {
+        table: API.ACTIONS,
+      },
+      table: API.ACTION_ACTIONS,
+      keyPair: ['measure_id', 'other_measure_id'], // own, other
+    },
+    // has resource
+    'resources-id': {
+      type: 'number',
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.INTERACTION,
+      ],
+      multiple: true,
       lookup: {
         table: API.RESOURCES, // id assumed
       },
       table: API.ACTION_RESOURCES,
       keyPair: ['measure_id', 'resource_id'], // own, other
+    },
+    // has category
+    'category-id': {
+      type: 'number',
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.INTERACTION,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
+        ACTIONTYPES.TASK,
+      ],
+      multiple: true,
+      lookup: {
+        table: API.CATEGORIES, // id assumed
+      },
+      table: API.ACTION_CATEGORIES,
+      keyPair: ['measure_id', 'category_id'], // own, other
+    },
+    // has category
+    'category-code': {
+      type: 'number',
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.INTERACTION,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
+        ACTIONTYPES.TASK,
+      ],
+      multiple: true,
+      lookup: {
+        table: API.CATEGORIES, // id assumed
+        attribute: 'code',
+      },
+      table: API.ACTION_CATEGORIES,
+      keyPair: ['measure_id', 'category_id'], // own, other
     },
   },
   ATTRIBUTES: {

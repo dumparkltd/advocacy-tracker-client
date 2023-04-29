@@ -39,6 +39,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectActionConnections,
+  selectCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -80,7 +81,7 @@ export class ActionImport extends React.PureComponent { // eslint-disable-line r
 
   render() {
     const { intl } = this.context;
-    const { connections, params } = this.props;
+    const { connections, categories, params } = this.props;
     const typeId = params.id;
     const typeLabel = typeId
       ? intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural)
@@ -113,7 +114,7 @@ export class ActionImport extends React.PureComponent { // eslint-disable-line r
             fieldModel="import"
             formData={this.props.formData}
             handleSubmit={(formData) => {
-              this.props.handleSubmit(formData, connections);
+              this.props.handleSubmit(formData, connections, categories);
             }}
             handleCancel={this.props.handleCancel}
             handleReset={this.props.handleReset}
@@ -203,6 +204,7 @@ ActionImport.propTypes = {
   success: PropTypes.object,
   params: PropTypes.object,
   connections: PropTypes.object,
+  categories: PropTypes.object,
 };
 
 ActionImport.contextTypes = {
@@ -215,6 +217,7 @@ const mapStateToProps = (state) => ({
   errors: selectErrors(state),
   success: selectSuccess(state),
   connections: selectActionConnections(state),
+  categories: selectCategories(state),
   dataReady: selectReady(state, {
     path: [
       API.USER_ROLES,
@@ -238,7 +241,7 @@ function mapDispatchToProps(dispatch, { params }) {
     initialiseForm: (model, formData) => {
       dispatch(formActions.load(model, formData));
     },
-    handleSubmit: (formData, connections) => {
+    handleSubmit: (formData, connections, categories) => {
       if (formData.get('import') !== null) {
         fromJS(formData.get('import').rows).forEach((row, index) => {
           const rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
@@ -288,6 +291,7 @@ function mapDispatchToProps(dispatch, { params }) {
                   {
                     column: key,
                     value: rowJS[key],
+                    values: rowJS[key].trim().split(','),
                     field,
                     fieldValues: values,
                   },
@@ -302,93 +306,120 @@ function mapDispatchToProps(dispatch, { params }) {
             let actorActions;
             let topActions;
             let actionResources;
+            let actionCategories;
             Object.values(relRows).forEach(
               (relationship) => {
-                const [id, value] = relationship.value.split('|');
-                const relField = relationship.field;
-                const relConfig = ACTION_FIELDS.RELATIONSHIPS_IMPORT[relationship.field];
-                if (relConfig) {
-                  let connectionId = id;
-                  if (
-                    connections
-                    && relConfig.lookup
-                    && relConfig.lookup.table
-                    && relConfig.lookup.attribute
-                  ) {
-                    const connection = connections.get(relConfig.lookup.table)
-                      && connections.get(relConfig.lookup.table).find(
-                        (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
-                      );
-                    connectionId = connection ? connection.get('id') : 'INVALID';
-                  }
-                  if (relField === 'topicCode') {
-                    const create = {
-                      indicator_id: connectionId,
-                      supportlevel_id: value,
-                    };
-                    if (actionIndicators && actionIndicators.create) {
-                      actionIndicators.create = [
-                        ...actionIndicators.create,
-                        create,
-                      ];
-                    } else {
-                      actionIndicators = {
-                        create: [create],
-                      };
+                if (relationship.values) {
+                  const relField = relationship.field;
+                  const relConfig = ACTION_FIELDS.RELATIONSHIPS_IMPORT[relationship.field];
+                  relationship.values.forEach(
+                    (relValue) => {
+                      const [id, value] = relValue.trim().split('|');
+                      if (relConfig) {
+                        // assume field to referencet the id
+                        let connectionId = id;
+                        // unless attribute specified
+                        if (relConfig.lookup
+                          && relConfig.lookup.table
+                          && relConfig.lookup.attribute
+                        ) {
+                          if (categories && relConfig.lookup.table === API.CATEGORIES) {
+                            const category = categories.find(
+                              (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
+                            );
+                            connectionId = category ? category.get('id') : 'INVALID';
+                          } else if (connections) {
+                            const connection = connections.get(relConfig.lookup.table)
+                            && connections.get(relConfig.lookup.table).find(
+                              (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
+                            );
+                            connectionId = connection ? connection.get('id') : 'INVALID';
+                          }
+                        }
+                        // actionIndicators by code
+                        if (relField === 'topic-code') {
+                          const create = { indicator_id: connectionId, supportlevel_id: value };
+                          if (actionIndicators && actionIndicators.create) {
+                            actionIndicators.create = [
+                              ...actionIndicators.create,
+                              create,
+                            ];
+                          } else {
+                            actionIndicators = { create: [create] };
+                          }
+                        }
+                        // actorActions by code or id
+                        if (
+                          relField === 'country-code'
+                          || relField === 'actor-code'
+                          || relField === 'actor-id'
+                        ) {
+                          const create = { actor_id: connectionId };
+                          if (actorActions && actorActions.create) {
+                            actorActions.create = [
+                              ...actorActions.create,
+                              create,
+                            ];
+                          } else {
+                            actorActions = { create: [create] };
+                          }
+                        }
+                        // actionCategories by code or id
+                        if (relField === 'category-code' || relField === 'category-id') {
+                          const create = { category_id: connectionId };
+                          if (actionCategories && actionCategories.create) {
+                            actionCategories.create = [
+                              ...actionCategories.create,
+                              create,
+                            ];
+                          } else {
+                            actionCategories = { create: [create] };
+                          }
+                        }
+                        // topActions/parent actions
+                        if (
+                          relField === 'interaction-code'
+                          || relField === 'event-code'
+                          || relField === 'parent-action-code'
+                          || relField === 'parent-action-id'
+                        ) {
+                          const create = {
+                            other_measure_id: connectionId,
+                          };
+                          if (topActions && topActions.create) {
+                            topActions.create = [
+                              ...topActions.create,
+                              create,
+                            ];
+                          } else {
+                            topActions = {
+                              create: [create],
+                            };
+                          }
+                        }
+                        // actionResources by id
+                        if (relField === 'resources-id') {
+                          const create = { resource_id: connectionId };
+                          if (actionResources && actionResources.create) {
+                            actionResources.create = [
+                              ...actionResources.create,
+                              create,
+                            ];
+                          } else {
+                            actionResources = { create: [create] };
+                          }
+                        } // actionResources
+                      } // relConfig
                     }
-                  }
-                  if (relField === 'countryCode') {
-                    const create = {
-                      actor_id: connectionId,
-                    };
-                    if (actorActions && actorActions.create) {
-                      actorActions.create = [
-                        ...actorActions.create,
-                        create,
-                      ];
-                    } else {
-                      actorActions = {
-                        create: [create],
-                      };
-                    }
-                  }
-                  if (relField === 'eventCode') {
-                    const create = {
-                      other_measure_id: connectionId,
-                    };
-                    if (topActions && topActions.create) {
-                      topActions.create = [
-                        ...topActions.create,
-                        create,
-                      ];
-                    } else {
-                      topActions = {
-                        create: [create],
-                      };
-                    }
-                  }
-                  if (relField === 'resourcesID') {
-                    const create = {
-                      resource_id: connectionId,
-                    };
-                    if (actionResources && actionResources.create) {
-                      actionResources.create = [
-                        ...actionResources.create,
-                        create,
-                      ];
-                    } else {
-                      actionResources = {
-                        create: [create],
-                      };
-                    }
-                  }
+                  ); // forEach
                 }
               }
             );
             rowClean = {
               ...rowClean,
-              actionIndicators,
               actorActions,
+              actionIndicators,
+              actionCategories,
               topActions,
               actionResources,
             };
