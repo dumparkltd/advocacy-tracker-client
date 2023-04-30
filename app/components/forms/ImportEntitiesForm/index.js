@@ -1,12 +1,22 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { Form } from 'react-redux-form/immutable';
 
 import CsvDownloader from 'react-csv-downloader';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { Text } from 'grommet';
+import {
+  Text,
+  Box,
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableCell,
+  Accordion,
+  AccordionPanel,
+} from 'grommet';
 
 import { omit } from 'lodash/object';
 import { map } from 'lodash/collection';
@@ -16,7 +26,7 @@ import { lowerCase } from 'utils/string';
 
 import A from 'components/styled/A';
 import Field from 'components/fields/Field';
-
+import AccordionHeader from 'components/AccordionHeader';
 import ViewPanel from 'components/EntityView/ViewPanel';
 import Main from 'components/EntityView/Main';
 
@@ -113,47 +123,46 @@ const ErrorHintText = styled.p``;
 // These props will be omitted before being passed to the Control component
 const nonControlProps = ['label', 'component', 'controlType', 'children', 'errorMessages'];
 
-export class ImportEntitiesForm extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  getControlProps = (field) => omit(field, nonControlProps);
+const getControlProps = (field) => omit(field, nonControlProps);
 
-  render() {
-    const {
-      model,
-      handleSubmit,
-      handleCancel,
-      handleReset,
-      fieldModel,
-      template,
-      formData,
-      progress,
-      errors,
-      success,
-      typeLabel = '',
-    } = this.props;
-    const { intl } = this.context;
-    const field = {
-      id: 'file',
-      model: `.${fieldModel}`,
-      placeholder: 'filename',
-    };
-
-    const { id, ...props } = this.getControlProps(field);
-
-    return (
-      <FormWrapper white>
-        <StyledForm model={model} onSubmit={(data) => data.get('import') !== null && handleSubmit(data)}>
-          <FormBody>
-            <ViewPanel>
-              <Main bottom>
-                <FieldGroupWrapper>
-                  <FormTitle>
-                    <FormattedMessage {...messages.title} values={{ type: lowerCase(typeLabel) }} />
-                  </FormTitle>
-                  <Intro>
-                    <Text size="medium">
-                      <FormattedMessage {...messages.introduction} />
-                    </Text>
-                  </Intro>
+function ImportEntitiesForm({
+  model,
+  handleSubmit,
+  handleCancel,
+  handleReset,
+  fieldModel,
+  template,
+  formData,
+  progress,
+  errors,
+  success,
+  typeLabel = '',
+  intl,
+}) {
+  const [actives, setActive] = React.useState([]);
+  // const { intl } = this.context;
+  const field = {
+    id: 'file',
+    model: `.${fieldModel}`,
+    placeholder: 'filename',
+  };
+  const { id, ...props } = getControlProps(field);
+  return (
+    <FormWrapper white>
+      <StyledForm model={model} onSubmit={(data) => data.get('import') !== null && handleSubmit(data)}>
+        <FormBody>
+          <ViewPanel>
+            <Main bottom>
+              <FieldGroupWrapper>
+                <FormTitle>
+                  <FormattedMessage {...messages.title} values={{ type: lowerCase(typeLabel) }} />
+                </FormTitle>
+                <Intro>
+                  <Text size="medium">
+                    <FormattedMessage {...messages.introduction} />
+                  </Text>
+                </Intro>
+                {progress === null && (
                   <Hint>
                     <HintTitle>
                       <Text size="medium">
@@ -182,144 +191,176 @@ export class ImportEntitiesForm extends React.PureComponent { // eslint-disable-
                         <Text size="medium">
                           <FormattedMessage {...messages.formatHint} />
                         </Text>
-                        { messages.formatHintLink && messages.formatHintLink !== ''
-                          && (
-                            <A href={intl.formatMessage(messages.formatHintLink)} target="_blank">
-                              <Text size="medium">
-                                {intl.formatMessage(messages.formatHintLinkAnchor)}
-                              </Text>
-                            </A>
-                          )
-                        }
+                        {messages.formatHintLink && messages.formatHintLink !== '' && (
+                          <A href={intl.formatMessage(messages.formatHintLink)} target="_blank">
+                            <Text size="medium">
+                              {intl.formatMessage(messages.formatHintLinkAnchor)}
+                            </Text>
+                          </A>
+                        )}
                       </li>
                     </HintList>
                   </Hint>
-                  <Field noPadding>
-                    <FormFieldWrap>
-                      { (progress === null)
-                        && (
-                          <ImportFileSelectControl
-                            id={id}
-                            model={field.model}
-                            as="text"
-                            accept=".csv, text/csv"
-                            {...props}
+                )}
+                {progress === null && template.data && (
+                  <Box margin={{ vertical: 'small' }}>
+                    <Accordion
+                      activeIndex={actives}
+                      onActive={(newActive) => setActive(newActive)}
+                      multiple
+                      animate={false}
+                    >
+                      <AccordionPanel
+                        header={(
+                          <AccordionHeader
+                            title={actives.includes(0)
+                              ? 'Hide field/column overview'
+                              : 'Show field/column overview'
+                            }
+                            open={actives.includes(0)}
                           />
-                        )
-                      }
-                      { progress !== null
-                        && (
+                        )}
+                      >
+                        <Box background="light-1" pad="medium">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableCell scope="col" border="bottom">
+                                  <Text size="xsmall" weight={600}>Field/column name</Text>
+                                </TableCell>
+                                <TableCell scope="col" border="bottom">
+                                  <Text size="xsmall" weight={600}>Content/info</Text>
+                                </TableCell>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {template.data && Object.keys(template.data).filter((d) => d.trim() !== '').map(
+                                (d, index) => (
+                                  <TableRow key={index}>
+                                    <TableCell scope="row">
+                                      <Text size="xsmall">{d}</Text>
+                                    </TableCell>
+                                    <TableCell>
+                                      <Text size="xsmall">{template.data[d]}</Text>
+                                    </TableCell>
+                                  </TableRow>
+                                )
+                              )}
+                            </TableBody>
+                          </Table>
+                        </Box>
+                      </AccordionPanel>
+                    </Accordion>
+                  </Box>
+                )}
+                <Field noPadding>
+                  <FormFieldWrap>
+                    {(progress === null) && (
+                      <ImportFileSelectControl
+                        id={id}
+                        model={field.model}
+                        as="text"
+                        accept=".csv, text/csv"
+                        {...props}
+                      />
+                    )}
+                    {progress !== null && (
+                      <div>
+                        {progress < 100 && (
+                          <DocumentWrapEdit>
+                            <Importing>
+                              <ImportingText>
+                                <FormattedMessage {...messages.importing} />
+                                { formData && `"${formData.get('import').file.name}"`}
+                              </ImportingText>
+                              <Loading progress={progress} />
+                            </Importing>
+                          </DocumentWrapEdit>
+                        )}
+                        {progress >= 100 && (
                           <div>
-                            { progress < 100
+                            {(errors.size > 0 && success.size === 0)
                             && (
-                              <DocumentWrapEdit>
-                                <Importing>
-                                  <ImportingText>
-                                    <FormattedMessage {...messages.importing} />
-                                    { formData && `"${formData.get('import').file.name}"`}
-                                  </ImportingText>
-                                  <Loading progress={progress} />
-                                </Importing>
-                              </DocumentWrapEdit>
-                            )
-                            }
-                            { progress >= 100
-                            && (
-                              <div>
-                                {(errors.size > 0 && success.size === 0)
-                                && (
-                                  <Messages
-                                    type="error"
-                                    message={intl.formatMessage(messages.allErrors)}
-                                  />
-                                )
-                                }
-                                {(errors.size > 0 && success.size > 0)
-                                && (
-                                  <Messages
-                                    type="error"
-                                    message={intl.formatMessage(messages.someErrors, {
-                                      successNo: success.size,
-                                      rowNo: errors.size + success.size,
-                                    })}
-                                  />
-                                )
-                                }
-                                {(errors.size === 0)
-                                && (
-                                  <Messages
-                                    type="success"
-                                    message={intl.formatMessage(messages.success, {
-                                      rowNo: success.size,
-                                    })}
-                                  />
-                                )
-                                }
-                              </div>
-                            )
-                            }
-                            {(errors.size > 0)
-                            && (
-                              <RowErrors>
-                                <FormattedMessage {...messages.rowErrorHint} />
-                                <Messages
-                                  type="error"
-                                  details
-                                  preMessage={false}
-                                  messages={
-                                    errors
-                                      .sortBy((error) => error && error.data && error.data.saveRef)
-                                      .reduce((memo, error) => error.error.messages
-                                        ? memo.concat(map(error.error.messages, (message) => error.data.saveRef
-                                          ? [`${error.data.saveRef}:`, message]
-                                          : message))
-                                        : memo,
-                                      [])
-                                  }
-                                />
-                              </RowErrors>
-                            )
-                            }
-                            {(errors.size > 0 && progress >= 100)
-                            && (
-                              <ErrorHint>
-                                <ErrorHintTitle>
-                                  <FormattedMessage {...messages.errorHintTitle} />
-                                </ErrorHintTitle>
-                                <ErrorHintText>
-                                  <FormattedMessage {...messages.errorHintText} />
-                                </ErrorHintText>
-                              </ErrorHint>
-                            )
-                            }
+                              <Messages
+                                type="error"
+                                message={intl.formatMessage(messages.allErrors)}
+                              />
+                            )}
+                            {(errors.size > 0 && success.size > 0) && (
+                              <Messages
+                                type="error"
+                                message={intl.formatMessage(messages.someErrors, {
+                                  successNo: success.size,
+                                  rowNo: errors.size + success.size,
+                                })}
+                              />
+                            )}
+                            {(errors.size === 0) && (
+                              <Messages
+                                type="success"
+                                message={intl.formatMessage(messages.success, {
+                                  rowNo: success.size,
+                                })}
+                              />
+                            )}
                           </div>
-                        )
-                      }
-                    </FormFieldWrap>
-                  </Field>
-                </FieldGroupWrapper>
-              </Main>
-            </ViewPanel>
-          </FormBody>
-          { progress >= 100
-            && (
-              <FormFooter>
-                <FormFooterButtons>
-                  <ButtonCancel type="button" onClick={handleReset}>
-                    <FormattedMessage {...messages.importAgain} />
-                  </ButtonCancel>
-                  <ButtonSubmit type="button" onClick={handleCancel}>
-                    <FormattedMessage {...messages.done} />
-                  </ButtonSubmit>
-                </FormFooterButtons>
-                <Clear />
-              </FormFooter>
-            )
-          }
-        </StyledForm>
-      </FormWrapper>
-    );
-  }
+                        )}
+                        {(errors.size > 0) && (
+                          <RowErrors>
+                            <FormattedMessage {...messages.rowErrorHint} />
+                            <Messages
+                              type="error"
+                              details
+                              preMessage={false}
+                              messages={
+                                errors
+                                  .sortBy((error) => error && error.data && error.data.saveRef)
+                                  .reduce((memo, error) => error.error.messages
+                                    ? memo.concat(map(error.error.messages, (message) => error.data.saveRef
+                                      ? [`${error.data.saveRef}:`, message]
+                                      : message))
+                                    : memo,
+                                  [])
+                              }
+                            />
+                          </RowErrors>
+                        )}
+                        {(errors.size > 0 && progress >= 100) && (
+                          <ErrorHint>
+                            <ErrorHintTitle>
+                              <FormattedMessage {...messages.errorHintTitle} />
+                            </ErrorHintTitle>
+                            <ErrorHintText>
+                              <FormattedMessage {...messages.errorHintText} />
+                            </ErrorHintText>
+                          </ErrorHint>
+                        )}
+                      </div>
+                    )}
+                  </FormFieldWrap>
+                </Field>
+              </FieldGroupWrapper>
+            </Main>
+          </ViewPanel>
+        </FormBody>
+        { progress >= 100
+          && (
+            <FormFooter>
+              <FormFooterButtons>
+                <ButtonCancel type="button" onClick={handleReset}>
+                  <FormattedMessage {...messages.importAgain} />
+                </ButtonCancel>
+                <ButtonSubmit type="button" onClick={handleCancel}>
+                  <FormattedMessage {...messages.done} />
+                </ButtonSubmit>
+              </FormFooterButtons>
+              <Clear />
+            </FormFooter>
+          )
+        }
+      </StyledForm>
+    </FormWrapper>
+  );
 }
 
 ImportEntitiesForm.propTypes = {
@@ -334,10 +375,8 @@ ImportEntitiesForm.propTypes = {
   errors: PropTypes.object,
   success: PropTypes.object,
   template: PropTypes.object,
+  intl: intlShape,
 };
 
-ImportEntitiesForm.contextTypes = {
-  intl: PropTypes.object.isRequired,
-};
 
-export default ImportEntitiesForm;
+export default injectIntl(ImportEntitiesForm);

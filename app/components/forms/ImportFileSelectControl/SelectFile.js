@@ -126,74 +126,68 @@ class SelectFile extends React.PureComponent { // eslint-disable-line react/pref
     const relCount = rows && countRelationshipsFromRows(rows);
     return (
       <Styled>
-        { (this.state.errors.length > 0)
-          && (
-            <Messages
-              type="error"
-              messages={[intl.formatMessage(messages.fileSelectError)].concat(this.state.errors.map((err) => `Code: "${err.code}", Message: "${err.message}"`))}
-              onDismiss={this.onDismissErrors}
-            />
-          )
-        }
-        { this.props.value && (this.state.errors.length === 0)
-          && (
-            <div>
-              <DocumentWrapEdit>
-                <FileName>
-                  {this.props.value.file.name}
-                </FileName>
-                <Remove onClick={this.handleRemove}>
-                  <Icon name="removeLarge" />
-                </Remove>
-              </DocumentWrapEdit>
-              <ImportButton type="submit" primary>
-                <div style={{ position: 'relative' }}>
-                  {rows.length === 1 && (
-                    <FormattedMessage
-                      {...messages.import.single}
-                      values={{
-                        total: rows.length,
-                      }}
-                    />
-                  )}
-                  {rows.length !== 1 && (
-                    <FormattedMessage
-                      {...messages.import.plural}
-                      values={{
-                        total: rows.length,
-                      }}
-                    />
-                  )}
-                  {relCount && relCount > 0 && (
-                    <div style={{ position: 'relative' }}>
-                      <div style={{ position: 'absolute', top: '-7px' }}>
-                        <Text size="xxsmall" weight={400} style={{ textTransform: 'none', letterSpacing: 0, opacity: 0.85 }}>
-                          <FormattedMessage
-                            {...messages.import.relationships}
-                            values={{
-                              total: relCount,
-                            }}
-                          />
-                        </Text>
-                      </div>
+        {(this.state.errors.length > 0) && (
+          <Messages
+            type="error"
+            messages={[intl.formatMessage(messages.fileSelectError)].concat(this.state.errors.map((err) => `Code: "${err.code}", Message: "${err.message}"`))}
+            onDismiss={this.onDismissErrors}
+          />
+        )}
+        { this.props.value && (this.state.errors.length === 0) && (
+          <div>
+            <DocumentWrapEdit>
+              <FileName>
+                {this.props.value.file.name}
+              </FileName>
+              <Remove onClick={this.handleRemove}>
+                <Icon name="removeLarge" />
+              </Remove>
+            </DocumentWrapEdit>
+            <ImportButton type="submit" primary>
+              <div style={{ position: 'relative' }}>
+                {rows.length === 1 && (
+                  <FormattedMessage
+                    {...messages.import.single}
+                    values={{
+                      total: rows.length,
+                    }}
+                  />
+                )}
+                {rows.length !== 1 && (
+                  <FormattedMessage
+                    {...messages.import.plural}
+                    values={{
+                      total: rows.length,
+                    }}
+                  />
+                )}
+                {!!relCount && relCount > 0 && (
+                  <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'absolute', top: '-7px' }}>
+                      <Text size="xxsmall" weight={400} style={{ textTransform: 'none', letterSpacing: 0, opacity: 0.85 }}>
+                        <FormattedMessage
+                          {...messages.import.relationships}
+                          values={{
+                            total: relCount,
+                          }}
+                        />
+                      </Text>
                     </div>
-                  )}
-                </div>
-              </ImportButton>
-            </div>
-          )
-        }
-        { !this.props.value && (this.state.errors.length === 0)
-          && (
-            <FileReaderInput
-              as={this.props.as}
-              accept={this.props.accept}
-              onChange={this.handleChange}
-            >
-              <ButtonDefaultWithIcon type="button" title={intl.formatMessage(messages.selectFile)} icon="add" />
-            </FileReaderInput>
-          )
-        }
+                  </div>
+                )}
+              </div>
+            </ImportButton>
+          </div>
+        )}
+        {!this.props.value && (this.state.errors.length === 0) && (
+          <FileReaderInput
+            as={this.props.as}
+            accept={this.props.accept}
+            onChange={this.handleChange}
+          >
+            <ButtonDefaultWithIcon type="button" title={intl.formatMessage(messages.selectFile)} icon="add" />
+          </FileReaderInput>
+        )}
       </Styled>
     );
   }

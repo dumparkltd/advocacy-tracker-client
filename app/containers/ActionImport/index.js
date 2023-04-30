@@ -26,6 +26,7 @@ import {
 import qe from 'utils/quasi-equals';
 import { getImportFields, getColumnAttribute } from 'utils/import';
 import { checkActionAttribute, checkAttribute } from 'utils/entities';
+import { lowerCase } from 'utils/string';
 import validateDateFormat from 'components/forms/validators/validate-date-format';
 
 import {
@@ -87,6 +88,58 @@ export class ActionImport extends React.PureComponent { // eslint-disable-line r
       ? intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural)
       : intl.formatMessage(appMessages.entities.actions.plural);
 
+    const fields = Object.keys(ACTION_FIELDS.ATTRIBUTES).reduce((memo, key) => {
+      const val = ACTION_FIELDS.ATTRIBUTES[key];
+      if (
+        !val.skipImport
+        && checkActionAttribute(typeId, key)
+      ) {
+        return [
+          ...memo,
+          {
+            attribute: key,
+            type: val.type || 'text',
+            value: (val.importDefault && val.importDefault === 'type')
+              ? typeId
+              : null,
+            required: !!val.required,
+            import: true,
+          },
+        ];
+      }
+      return memo;
+    }, []);
+    const relationshipFields = Object.keys(
+      ACTION_FIELDS.RELATIONSHIPS_IMPORT
+    ).reduce(
+      (memo, key) => {
+        if (
+          checkAttribute({
+            typeId,
+            att: key,
+            attributes: ACTION_FIELDS.RELATIONSHIPS_IMPORT,
+          })
+          // (val.optional && val.optional.indexOf(typeId) > -1)
+          // || (val.required && val.required.indexOf(typeId) > -1)
+        ) {
+          const val = ACTION_FIELDS.RELATIONSHIPS_IMPORT[key];
+          return [
+            ...memo,
+            {
+              attribute: key,
+              type: val.type || 'text',
+              required: !!val.required,
+              import: true,
+              relationshipValue: val.attribute,
+              separator: val.separator,
+              hint: val.hint,
+            },
+          ];
+        }
+        return memo;
+      },
+      [],
+    );
     return (
       <div>
         <Helmet
@@ -123,63 +176,8 @@ export class ActionImport extends React.PureComponent { // eslint-disable-line r
             success={this.props.success}
             progress={this.props.progress}
             template={{
-              filename: `${intl.formatMessage(messages.filename)}.csv`,
-              data: getImportFields(
-                {
-                  fields: Object.keys(ACTION_FIELDS.ATTRIBUTES).reduce((memo, key) => {
-                    const val = ACTION_FIELDS.ATTRIBUTES[key];
-                    if (
-                      !val.skipImport
-                      && checkActionAttribute(typeId, key)
-                    ) {
-                      return [
-                        ...memo,
-                        {
-                          attribute: key,
-                          type: val.type || 'text',
-                          value: (val.importDefault && val.importDefault === 'type')
-                            ? typeId
-                            : null,
-                          required: !!val.required,
-                          import: true,
-                        },
-                      ];
-                    }
-                    return memo;
-                  }, []),
-                  relationshipFields: Object.keys(
-                    ACTION_FIELDS.RELATIONSHIPS_IMPORT
-                  ).reduce(
-                    (memo, key) => {
-                      if (
-                        checkAttribute({
-                          typeId,
-                          att: key,
-                          attributes: ACTION_FIELDS.RELATIONSHIPS_IMPORT,
-                        })
-                        // (val.optional && val.optional.indexOf(typeId) > -1)
-                        // || (val.required && val.required.indexOf(typeId) > -1)
-                      ) {
-                        const val = ACTION_FIELDS.RELATIONSHIPS_IMPORT[key];
-                        return [
-                          ...memo,
-                          {
-                            attribute: key,
-                            type: val.type || 'text',
-                            required: !!val.required,
-                            import: true,
-                            relationshipValue: val.attribute,
-                            separator: val.separator,
-                          },
-                        ];
-                      }
-                      return memo;
-                    },
-                    [],
-                  ),
-                },
-                intl.formatMessage,
-              ),
+              filename: `${intl.formatMessage(messages.filename, { type: lowerCase(typeLabel) })}.csv`,
+              data: getImportFields({ fields, relationshipFields }, intl.formatMessage),
             }}
           />
         </Content>
@@ -244,8 +242,10 @@ function mapDispatchToProps(dispatch, { params }) {
     handleSubmit: (formData, connections, categories) => {
       if (formData.get('import') !== null) {
         fromJS(formData.get('import').rows).forEach((row, index) => {
-          const rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
-          const typeId = rowCleanColumns.get('measuretype_id');
+          let rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
+          // make sure type id is set
+          const typeId = params.id;
+          rowCleanColumns = rowCleanColumns.set('measuretype_id', typeId);
           let rowClean = {
             attributes: rowCleanColumns
               // make sure only valid fields are imported
@@ -304,9 +304,11 @@ function mapDispatchToProps(dispatch, { params }) {
           if (relRows) {
             let actionIndicators;
             let actorActions;
+            let actionActors;
             let topActions;
             let actionResources;
             let actionCategories;
+            let userActions;
             Object.values(relRows).forEach(
               (relationship) => {
                 if (relationship.values) {
@@ -364,6 +366,20 @@ function mapDispatchToProps(dispatch, { params }) {
                             actorActions = { create: [create] };
                           }
                         }
+                        if (
+                          relField === 'target-code'
+                          || relField === 'target-id'
+                        ) {
+                          const create = { actor_id: connectionId };
+                          if (actionActors && actionActors.create) {
+                            actionActors.create = [
+                              ...actionActors.create,
+                              create,
+                            ];
+                          } else {
+                            actionActors = { create: [create] };
+                          }
+                        }
                         // actionCategories by code or id
                         if (relField === 'category-code' || relField === 'category-id') {
                           const create = { category_id: connectionId };
@@ -409,6 +425,21 @@ function mapDispatchToProps(dispatch, { params }) {
                             actionResources = { create: [create] };
                           }
                         } // actionResources
+                        // actionUsers by id or email
+                        if (
+                          relField === 'user-id'
+                          || relField === 'user-email'
+                        ) {
+                          const create = { user_id: connectionId };
+                          if (userActions && userActions.create) {
+                            userActions.create = [
+                              ...userActions.create,
+                              create,
+                            ];
+                          } else {
+                            userActions = { create: [create] };
+                          }
+                        } // actionUsers
                       } // relConfig
                     }
                   ); // forEach
@@ -418,10 +449,12 @@ function mapDispatchToProps(dispatch, { params }) {
             rowClean = {
               ...rowClean,
               actorActions,
+              actionActors, // targets
               actionIndicators,
               actionCategories,
               topActions,
               actionResources,
+              userActions,
             };
           }
           dispatch(save(rowClean));

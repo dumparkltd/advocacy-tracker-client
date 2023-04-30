@@ -21,8 +21,10 @@ import {
   DATE_FORMAT,
   API_DATE_FORMAT,
 } from 'themes/config';
+import qe from 'utils/quasi-equals';
 import { getImportFields, getColumnAttribute } from 'utils/import';
-import { checkActorAttribute } from 'utils/entities';
+import { checkActorAttribute, checkAttribute } from 'utils/entities';
+import { lowerCase } from 'utils/string';
 import validateDateFormat from 'components/forms/validators/validate-date-format';
 import {
   redirectIfNotPermitted,
@@ -34,6 +36,8 @@ import {
 import {
   selectReady,
   selectReadyForAuthCheck,
+  selectActorConnections,
+  selectCategories,
 } from 'containers/App/selectors';
 
 // import Loading from 'components/Loading';
@@ -51,7 +55,7 @@ import {
 
 import messages from './messages';
 import { save, resetForm } from './actions';
-import { FORM_INITIAL } from './constants';
+import { FORM_INITIAL, DEPENDENCIES } from './constants';
 
 export class ActorImport extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
@@ -75,10 +79,60 @@ export class ActorImport extends React.PureComponent { // eslint-disable-line re
 
   render() {
     const { intl } = this.context;
-    const typeId = this.props.params.id;
+    const { connections, categories, params } = this.props;
+    const typeId = params.id;
     const typeLabel = typeId
       ? intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural)
       : intl.formatMessage(appMessages.entities.actors.plural);
+    const fields = Object.keys(ACTOR_FIELDS.ATTRIBUTES).reduce((memo, key) => {
+      const val = ACTOR_FIELDS.ATTRIBUTES[key];
+      if (
+        !val.skipImport
+        && checkActorAttribute(typeId, key)
+      ) {
+        return [
+          ...memo,
+          {
+            attribute: key,
+            type: val.type || 'text',
+            required: !!val.required,
+            import: true,
+          },
+        ];
+      }
+      return memo;
+    }, []);
+    const relationshipFields = Object.keys(
+      ACTOR_FIELDS.RELATIONSHIPS_IMPORT
+    ).reduce(
+      (memo, key) => {
+        if (
+          checkAttribute({
+            typeId,
+            att: key,
+            attributes: ACTOR_FIELDS.RELATIONSHIPS_IMPORT,
+          })
+          // (val.optional && val.optional.indexOf(typeId) > -1)
+          // || (val.required && val.required.indexOf(typeId) > -1)
+        ) {
+          const val = ACTOR_FIELDS.RELATIONSHIPS_IMPORT[key];
+          return [
+            ...memo,
+            {
+              attribute: key,
+              type: val.type || 'text',
+              required: !!val.required,
+              import: true,
+              relationshipValue: val.attribute,
+              separator: val.separator,
+              hint: val.hint,
+            },
+          ];
+        }
+        return memo;
+      },
+      [],
+    );
     return (
       <div>
         <Helmet
@@ -105,7 +159,7 @@ export class ActorImport extends React.PureComponent { // eslint-disable-line re
             model="actorImport.form.data"
             fieldModel="import"
             formData={this.props.formData}
-            handleSubmit={(formData) => this.props.handleSubmit(formData)}
+            handleSubmit={(formData) => this.props.handleSubmit(formData, connections, categories)}
             handleCancel={this.props.handleCancel}
             handleReset={this.props.handleReset}
             resetProgress={this.props.resetProgress}
@@ -113,24 +167,8 @@ export class ActorImport extends React.PureComponent { // eslint-disable-line re
             success={this.props.success}
             progress={this.props.progress}
             template={{
-              filename: `${intl.formatMessage(messages.filename)}.csv`,
-              data: getImportFields({
-                fields: Object.keys(ACTOR_FIELDS.ATTRIBUTES).reduce((memo, key) => {
-                  const val = ACTOR_FIELDS.ATTRIBUTES[key];
-                  if (!val.skipImport) {
-                    return [
-                      ...memo,
-                      {
-                        attribute: key,
-                        type: val.type || 'text',
-                        required: !!val.required,
-                        import: true,
-                      },
-                    ];
-                  }
-                  return memo;
-                }, []),
-              }, intl.formatMessage),
+              filename: `${intl.formatMessage(messages.filename, { type: lowerCase(typeLabel) })}.csv`,
+              data: getImportFields({ fields, relationshipFields }, intl.formatMessage),
             }}
           />
         </Content>
@@ -154,6 +192,8 @@ ActorImport.propTypes = {
   errors: PropTypes.object,
   success: PropTypes.object,
   params: PropTypes.object,
+  connections: PropTypes.object,
+  categories: PropTypes.object,
 };
 
 ActorImport.contextTypes = {
@@ -165,6 +205,8 @@ const mapStateToProps = (state) => ({
   progress: selectProgress(state),
   errors: selectErrors(state),
   success: selectSuccess(state),
+  connections: selectActorConnections(state),
+  categories: selectCategories(state),
   dataReady: selectReady(state, {
     path: [
       API.USER_ROLES,
@@ -176,7 +218,7 @@ const mapStateToProps = (state) => ({
 function mapDispatchToProps(dispatch, { params }) {
   return {
     loadEntitiesIfNeeded: () => {
-      dispatch(loadEntitiesIfNeeded(API.USER_ROLES));
+      DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     resetProgress: () => {
       dispatch(resetProgress());
@@ -188,12 +230,14 @@ function mapDispatchToProps(dispatch, { params }) {
     redirectIfNotPermitted: () => {
       dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
-    handleSubmit: (formData) => {
+    handleSubmit: (formData, connections, categories) => {
       if (formData.get('import') !== null) {
         fromJS(formData.get('import').rows).forEach((row, index) => {
-          const rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
-          const typeId = rowCleanColumns.get('actortype_id');
-          const rowClean = {
+          let rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
+          const typeId = params.id;
+          // make sure type id is set
+          rowCleanColumns = rowCleanColumns.set('actortype_id', typeId);
+          let rowClean = {
             attributes: rowCleanColumns
               // make sure only valid fields are imported
               .filter((val, att) => checkActorAttribute(typeId, att))
@@ -215,6 +259,147 @@ function mapDispatchToProps(dispatch, { params }) {
               .toJS(),
             saveRef: index + 1,
           };
+          const rowJS = row.toJS();
+          const relRows = Object.keys(rowJS).reduce(
+            (memo, key) => {
+              const hasRelData = key.indexOf('[rel:') > -1
+                && rowJS[key]
+                && rowJS[key].trim() !== '';
+              // console.log('hasRelData', hasRelData, key, rowJS[key])
+              if (!hasRelData) return memo;
+              const start = key.indexOf('[');
+              const end = key.indexOf(']');
+              const [, fieldValues] = key.substring(start + 1, end).split('rel:');
+              const [field, values] = fieldValues.split('|');
+              // console.log('values', values);
+              return checkAttribute({
+                typeId,
+                att: field,
+                attributes: ACTOR_FIELDS.RELATIONSHIPS_IMPORT,
+              })
+                ? [
+                  ...memo,
+                  {
+                    column: key,
+                    value: rowJS[key],
+                    values: rowJS[key].trim().split(','),
+                    field,
+                    fieldValues: values,
+                  },
+                ]
+                : memo;
+            },
+            [],
+          );
+          // check relationships
+          if (relRows) {
+            let memberships;
+            let actorActions;
+            let actorCategories;
+            let userActors;
+            Object.values(relRows).forEach(
+              (relationship) => {
+                if (relationship.values) {
+                  const relField = relationship.field;
+                  const relConfig = ACTOR_FIELDS.RELATIONSHIPS_IMPORT[relationship.field];
+                  // console.log('connections', connections && connections.toJS(0))
+                  relationship.values.forEach(
+                    (relValue) => {
+                      const id = relValue;
+                      if (relConfig) {
+                        // assume field to referencet the id
+                        let connectionId = id;
+                        // unless attribute specified
+                        if (relConfig.lookup
+                          && relConfig.lookup.table
+                          && relConfig.lookup.attribute
+                        ) {
+                          if (categories && relConfig.lookup.table === API.CATEGORIES) {
+                            const category = categories.find(
+                              (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
+                            );
+                            connectionId = category ? category.get('id') : 'INVALID';
+                          } else if (connections) {
+                            const connection = connections.get(relConfig.lookup.table)
+                            && connections.get(relConfig.lookup.table).find(
+                              (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
+                            );
+                            connectionId = connection ? connection.get('id') : 'INVALID';
+                          }
+                        }
+                        // memberships by code or id
+                        if (
+                          relField === 'country-code'
+                          || relField === 'actor-code'
+                          || relField === 'actor-id'
+                        ) {
+                          const create = { memberof_id: connectionId };
+                          if (memberships && memberships.create) {
+                            memberships.create = [
+                              ...memberships.create,
+                              create,
+                            ];
+                          } else {
+                            memberships = { create: [create] };
+                          }
+                        }
+                        // actor actions
+                        if (relField === 'event-code') {
+                          const create = {
+                            measure_id: connectionId,
+                          };
+                          if (actorActions && actorActions.create) {
+                            actorActions.create = [
+                              ...actorActions.create,
+                              create,
+                            ];
+                          } else {
+                            actorActions = {
+                              create: [create],
+                            };
+                          }
+                        }
+                        // actionUsers by id or email
+                        if (
+                          relField === 'user-id'
+                          || relField === 'user-email'
+                        ) {
+                          const create = { user_id: connectionId };
+                          if (userActors && userActors.create) {
+                            userActors.create = [
+                              ...userActors.create,
+                              create,
+                            ];
+                          } else {
+                            userActors = { create: [create] };
+                          }
+                        } // actionUsers
+                        // actorCategories by code or id
+                        if (relField === 'category-code' || relField === 'category-id') {
+                          const create = { category_id: connectionId };
+                          if (actorCategories && actorCategories.create) {
+                            actorCategories.create = [
+                              ...actorCategories.create,
+                              create,
+                            ];
+                          } else {
+                            actorCategories = { create: [create] };
+                          }
+                        }
+                      } // relConfig
+                    }
+                  ); // forEach
+                }
+              }
+            );
+            rowClean = {
+              ...rowClean,
+              memberships,
+              actorActions,
+              userActors,
+              actorCategories,
+            };
+          }
           dispatch(save(rowClean));
         });
       }

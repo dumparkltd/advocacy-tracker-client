@@ -30,8 +30,7 @@ export const getImportFields = (shape, formatMessage) => {
         const pre = field.required
           ? formatMessage(appMessages.import.required)
           : formatMessage(appMessages.import.optional);
-        const value = field.value || `${pre}: ${field.hint || formatMessage(appMessages.import[field.type], { format: DATE_FORMAT })}`;
-
+        const value = `${pre}: ${field.hint || formatMessage(appMessages.import[field.type], { format: DATE_FORMAT })}`;
         return Object.assign(memo, { [getColumnTitle(field, formatMessage)]: value });
       },
       values,
@@ -44,7 +43,7 @@ export const getImportFields = (shape, formatMessage) => {
         const pre = field.required
           ? formatMessage(appMessages.import.required)
           : formatMessage(appMessages.import.optional);
-        const value = `${pre}: ${field.hint || field.value || formatMessage(appMessages.import[field.type])}`;
+        const value = `${pre}: ${field.hint || formatMessage(appMessages.import[field.type])}`;
         return Object.assign(
           memo,
           {

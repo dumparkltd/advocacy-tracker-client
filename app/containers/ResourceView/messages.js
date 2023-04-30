@@ -16,6 +16,6 @@ export default defineMessages({
   },
   notFound: {
     id: 'app.containers.ResourceView.notFound',
-    defaultMessage: 'Sorry no actor found',
+    defaultMessage: 'Sorry no resource found',
   },
 });
