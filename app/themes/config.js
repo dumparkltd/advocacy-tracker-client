@@ -342,25 +342,6 @@ export const ACTION_FIELDS = {
       hint:
         'one or more unique topic codes (as assigned by the users/comma-separated) optionally specifying levels of support for each using |. Example: CODE1|3,CODE2|1',
     },
-    // expressed by country
-    // // column: country-code
-    // 'country-code': {
-    //   type: 'text',
-    //   optional: [
-    //     ACTIONTYPES.EXPRESS,
-    //     ACTIONTYPES.EVENT,
-    //     ACTIONTYPES.INTERACTION,
-    //   ],
-    //   lookup: {
-    //     table: API.ACTORS,
-    //     attribute: 'code',
-    //   },
-    //   table: API.ACTOR_ACTIONS,
-    //   keyPair: ['measure_id', 'actor_id'], // own, other
-    //   hint: 'one or more unique country codes',
-    // },
-    // expressed by actor
-    // column: country-code
     'actor-code': {
       type: 'text',
       optional: [
@@ -500,15 +481,7 @@ export const ACTION_FIELDS = {
     // has category
     'category-id': {
       type: 'number',
-      optional: [
-        ACTIONTYPES.EXPRESS,
-        ACTIONTYPES.INTERACTION,
-        ACTIONTYPES.EVENT,
-        ACTIONTYPES.OP,
-        ACTIONTYPES.AP,
-        ACTIONTYPES.TASK,
-      ],
-      multiple: true,
+      optional: Object.values(ACTIONTYPES),
       table: API.ACTION_CATEGORIES,
       keyPair: ['measure_id', 'category_id'], // own, other
       hint: 'one or more category ids (as assigned by the database / comma-separated)',
@@ -516,15 +489,7 @@ export const ACTION_FIELDS = {
     // has category
     'category-code': {
       type: 'number',
-      optional: [
-        ACTIONTYPES.EXPRESS,
-        ACTIONTYPES.INTERACTION,
-        ACTIONTYPES.EVENT,
-        ACTIONTYPES.OP,
-        ACTIONTYPES.AP,
-        ACTIONTYPES.TASK,
-      ],
-      multiple: true,
+      optional: Object.values(ACTIONTYPES),
       lookup: {
         table: API.CATEGORIES, // id assumed
         attribute: 'code',
@@ -748,6 +713,72 @@ export const ACTOR_FIELDS = {
     address: {
       optional: [ACTORTYPES.CONTACT],
       type: 'text',
+    },
+  },
+  RELATIONSHIPS_IMPORT: {
+    // related to a topic with a position
+    // column: topic-code:supportNo
+    'country-code': {
+      type: 'text',
+      optional: [ACTORTYPES.CONTACT],
+      lookup: {
+        table: API.ACTORS,
+        attribute: 'code',
+      },
+      table: API.MEMBERSHIPS,
+      keyPair: ['member_id', 'memberof_id'], // own, other
+      hint: 'one or more unique country codes (as assigned by the users/comma-separated) actors are member of',
+    },
+    // belongs to event
+    'event-code': {
+      type: 'text',
+      optional: [ACTORTYPES.CONTACT],
+      lookup: {
+        table: API.ACTIONS,
+        attribute: 'code',
+      },
+      table: API.ACTOR_ACTIONS,
+      keyPair: ['actor_id', 'measure_id'], // own, other
+      hint: 'one or more unique event codes (as assigned by the users / comma-separated) for events the action belongs to',
+    },
+    // has category
+    'user-id': {
+      type: 'number',
+      optional: [ACTORTYPES.CONTACT],
+      table: API.USER_ACTORS,
+      keyPair: ['actor_id', 'user_id'], // own, other
+      hint: 'one or more user IDs (as assigned by the database / comma-separated)',
+    },
+    'user-email': {
+      type: 'number',
+      optional: [ACTORTYPES.CONTACT],
+      lookup: {
+        table: API.USERS, // id assumed
+        attribute: 'email',
+      },
+      table: API.USER_ACTORS,
+      keyPair: ['actor_id', 'user_id'], // own, other
+      hint: 'one or more user email addresses (exact / comma-separated)',
+    },
+    // has category
+    'category-id': {
+      type: 'number',
+      optional: Object.values(ACTORTYPES),
+      table: API.ACTOR_CATEGORIES,
+      keyPair: ['actor_id', 'category_id'], // own, other
+      hint: 'one or more category ids (as assigned by the database / comma-separated)',
+    },
+    // has category
+    'category-code': {
+      type: 'number',
+      optional: Object.values(ACTORTYPES),
+      lookup: {
+        table: API.CATEGORIES, // id assumed
+        attribute: 'code',
+      },
+      table: API.ACTOR_CATEGORIES,
+      keyPair: ['actor_id', 'category_id'], // own, other
+      hint: 'one or more category codes (as assigned by the users / comma-separated)',
     },
   },
 };
