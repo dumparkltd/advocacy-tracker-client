@@ -385,9 +385,6 @@ export const ACTION_FIELDS = {
         ACTIONTYPES.INTERACTION,
       ],
       multiple: true,
-      lookup: {
-        table: API.ACTORS, // id assumed
-      },
       table: API.ACTOR_ACTIONS,
       keyPair: ['measure_id', 'actor_id'], // own, other
       hint: 'one or more unique actor ids (as assigned by the database / comma-separated)',
@@ -418,9 +415,6 @@ export const ACTION_FIELDS = {
         ACTIONTYPES.TASK,
       ],
       multiple: true,
-      lookup: {
-        table: API.ACTORS, // id assumed
-      },
       table: API.ACTION_ACTORS,
       keyPair: ['measure_id', 'actor_id'], // own, other
       hint: 'one or more unique actor ids (as assigned by the database / comma-separated) for actors targeted',
@@ -484,9 +478,6 @@ export const ACTION_FIELDS = {
         ACTIONTYPES.EVENT,
         ACTIONTYPES.OP,
       ],
-      lookup: {
-        table: API.ACTIONS,
-      },
       table: API.ACTION_ACTIONS,
       keyPair: ['measure_id', 'other_measure_id'], // own, other
       hint: 'one or more action ids (as assigned by the database / comma-separated) for any associated parent-actions',
@@ -502,9 +493,6 @@ export const ACTION_FIELDS = {
         ACTIONTYPES.TASK,
         ACTIONTYPES.INTERACTION,
       ],
-      lookup: {
-        table: API.RESOURCES, // id assumed
-      },
       table: API.ACTION_RESOURCES,
       keyPair: ['measure_id', 'resource_id'], // own, other
       hint: 'one or more resource ids (as assigned by the database / comma-separated)',
@@ -521,9 +509,6 @@ export const ACTION_FIELDS = {
         ACTIONTYPES.TASK,
       ],
       multiple: true,
-      lookup: {
-        table: API.CATEGORIES, // id assumed
-      },
       table: API.ACTION_CATEGORIES,
       keyPair: ['measure_id', 'category_id'], // own, other
       hint: 'one or more category ids (as assigned by the database / comma-separated)',
@@ -547,6 +532,37 @@ export const ACTION_FIELDS = {
       table: API.ACTION_CATEGORIES,
       keyPair: ['measure_id', 'category_id'], // own, other
       hint: 'one or more category codes (as assigned by the users / comma-separated)',
+    },
+    // has category
+    'user-id': {
+      type: 'number',
+      optional: [
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.INTERACTION,
+      ],
+      table: API.USER_ACTIONS,
+      keyPair: ['measure_id', 'user_id'], // own, other
+      hint: 'one or more user IDs (as assigned by the database / comma-separated)',
+    },
+    'user-email': {
+      type: 'number',
+      optional: [
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.INTERACTION,
+      ],
+      lookup: {
+        table: API.USERS, // id assumed
+        attribute: 'email',
+      },
+      table: API.USER_ACTIONS,
+      keyPair: ['measure_id', 'user_id'], // own, other
+      hint: 'one or more user email addresses (exact / comma-separated)',
     },
   },
   ATTRIBUTES: {

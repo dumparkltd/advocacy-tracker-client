@@ -242,9 +242,10 @@ function mapDispatchToProps(dispatch, { params }) {
     handleSubmit: (formData, connections, categories) => {
       if (formData.get('import') !== null) {
         fromJS(formData.get('import').rows).forEach((row, index) => {
-          const rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
-          // const typeId = rowCleanColumns.get('measuretype_id');
+          let rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
+          // make sure type id is set
           const typeId = params.id;
+          rowCleanColumns = rowCleanColumns.set('measuretype_id', typeId);
           let rowClean = {
             attributes: rowCleanColumns
               // make sure only valid fields are imported
@@ -303,9 +304,11 @@ function mapDispatchToProps(dispatch, { params }) {
           if (relRows) {
             let actionIndicators;
             let actorActions;
+            let actionActors;
             let topActions;
             let actionResources;
             let actionCategories;
+            let userActions;
             Object.values(relRows).forEach(
               (relationship) => {
                 if (relationship.values) {
@@ -363,6 +366,20 @@ function mapDispatchToProps(dispatch, { params }) {
                             actorActions = { create: [create] };
                           }
                         }
+                        if (
+                          relField === 'target-code'
+                          || relField === 'target-id'
+                        ) {
+                          const create = { actor_id: connectionId };
+                          if (actionActors && actionActors.create) {
+                            actionActors.create = [
+                              ...actionActors.create,
+                              create,
+                            ];
+                          } else {
+                            actionActors = { create: [create] };
+                          }
+                        }
                         // actionCategories by code or id
                         if (relField === 'category-code' || relField === 'category-id') {
                           const create = { category_id: connectionId };
@@ -408,6 +425,21 @@ function mapDispatchToProps(dispatch, { params }) {
                             actionResources = { create: [create] };
                           }
                         } // actionResources
+                        // actionUsers by id or email
+                        if (
+                          relField === 'user-id'
+                          || relField === 'user-email'
+                        ) {
+                          const create = { user_id: connectionId };
+                          if (userActions && userActions.create) {
+                            userActions.create = [
+                              ...userActions.create,
+                              create,
+                            ];
+                          } else {
+                            userActions = { create: [create] };
+                          }
+                        } // actionUsers
                       } // relConfig
                     }
                   ); // forEach
@@ -417,10 +449,12 @@ function mapDispatchToProps(dispatch, { params }) {
             rowClean = {
               ...rowClean,
               actorActions,
+              actionActors, // targets
               actionIndicators,
               actionCategories,
               topActions,
               actionResources,
+              userActions,
             };
           }
           dispatch(save(rowClean));

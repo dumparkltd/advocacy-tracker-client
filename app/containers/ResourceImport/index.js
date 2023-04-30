@@ -190,8 +190,10 @@ function mapDispatchToProps(dispatch, { params }) {
     handleSubmit: (formData) => {
       if (formData.get('import') !== null) {
         fromJS(formData.get('import').rows).forEach((row, index) => {
-          const rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
-          const typeId = rowCleanColumns.get('resourcetype_id');
+          let rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
+          const typeId = params.id;
+          // make sure type id is set
+          rowCleanColumns = rowCleanColumns.set('resourcetype_id', typeId);
           const rowClean = {
             attributes: rowCleanColumns
               // make sure only valid fields are imported
