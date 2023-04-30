@@ -339,23 +339,26 @@ export const ACTION_FIELDS = {
         map: ACTION_INDICATOR_SUPPORTLEVELS,
       },
       separator: '|',
+      hint:
+        'one or more unique topic codes (as assigned by the users/comma-separated) optionally specifying levels of support for each using |. Example: CODE1|3,CODE2|1',
     },
     // expressed by country
-    // column: country-code
-    'country-code': {
-      type: 'text',
-      optional: [
-        ACTIONTYPES.EXPRESS,
-        ACTIONTYPES.EVENT,
-        ACTIONTYPES.INTERACTION,
-      ],
-      lookup: {
-        table: API.ACTORS,
-        attribute: 'code',
-      },
-      table: API.ACTOR_ACTIONS,
-      keyPair: ['measure_id', 'actor_id'], // own, other
-    },
+    // // column: country-code
+    // 'country-code': {
+    //   type: 'text',
+    //   optional: [
+    //     ACTIONTYPES.EXPRESS,
+    //     ACTIONTYPES.EVENT,
+    //     ACTIONTYPES.INTERACTION,
+    //   ],
+    //   lookup: {
+    //     table: API.ACTORS,
+    //     attribute: 'code',
+    //   },
+    //   table: API.ACTOR_ACTIONS,
+    //   keyPair: ['measure_id', 'actor_id'], // own, other
+    //   hint: 'one or more unique country codes',
+    // },
     // expressed by actor
     // column: country-code
     'actor-code': {
@@ -365,13 +368,13 @@ export const ACTION_FIELDS = {
         ACTIONTYPES.EVENT,
         ACTIONTYPES.INTERACTION,
       ],
-      multiple: true,
       lookup: {
         table: API.ACTORS,
         attribute: 'code',
       },
       table: API.ACTOR_ACTIONS,
       keyPair: ['measure_id', 'actor_id'], // own, other
+      hint: 'one or more unique actor codes (as assigned by the users / comma-separated)',
     },
     // column: country-code
     'actor-id': {
@@ -387,6 +390,7 @@ export const ACTION_FIELDS = {
       },
       table: API.ACTOR_ACTIONS,
       keyPair: ['measure_id', 'actor_id'], // own, other
+      hint: 'one or more unique actor ids (as assigned by the database / comma-separated)',
     },
     // column: country-code
     'target-code': {
@@ -403,6 +407,7 @@ export const ACTION_FIELDS = {
       },
       table: API.ACTION_ACTORS,
       keyPair: ['measure_id', 'actor_id'], // own, other
+      hint: 'one or more unique actor codes (as assigned by the users / comma-separated) for actors targeted',
     },
     // column: country-code
     'target-id': {
@@ -418,6 +423,7 @@ export const ACTION_FIELDS = {
       },
       table: API.ACTION_ACTORS,
       keyPair: ['measure_id', 'actor_id'], // own, other
+      hint: 'one or more unique actor ids (as assigned by the database / comma-separated) for actors targeted',
     },
     // belongs to event
     'event-code': {
@@ -434,6 +440,7 @@ export const ACTION_FIELDS = {
       },
       table: API.ACTION_ACTIONS,
       keyPair: ['measure_id', 'other_measure_id'], // own, other
+      hint: 'one or more unique event codes (as assigned by the users / comma-separated) for events the action belongs to',
     },
     // belongs to interaction
     'interaction-code': {
@@ -446,6 +453,7 @@ export const ACTION_FIELDS = {
       },
       table: API.ACTION_ACTIONS,
       keyPair: ['measure_id', 'other_measure_id'], // own, other
+      hint: 'one or more unique interaction codes (as assigned by the users / comma-separated) for events the action belongs to',
     },
     // belongs to action by code
     'parent-action-code': {
@@ -464,6 +472,7 @@ export const ACTION_FIELDS = {
       },
       table: API.ACTION_ACTIONS,
       keyPair: ['measure_id', 'other_measure_id'], // own, other
+      hint: 'one or more unique action codes (as assigned by the users / comma-separated) for any associated parent-actions',
     },
     // belongs to action by ID
     'parent-action-id': {
@@ -475,12 +484,12 @@ export const ACTION_FIELDS = {
         ACTIONTYPES.EVENT,
         ACTIONTYPES.OP,
       ],
-      multiple: true,
       lookup: {
         table: API.ACTIONS,
       },
       table: API.ACTION_ACTIONS,
       keyPair: ['measure_id', 'other_measure_id'], // own, other
+      hint: 'one or more action ids (as assigned by the database / comma-separated) for any associated parent-actions',
     },
     // has resource
     'resources-id': {
@@ -493,12 +502,12 @@ export const ACTION_FIELDS = {
         ACTIONTYPES.TASK,
         ACTIONTYPES.INTERACTION,
       ],
-      multiple: true,
       lookup: {
         table: API.RESOURCES, // id assumed
       },
       table: API.ACTION_RESOURCES,
       keyPair: ['measure_id', 'resource_id'], // own, other
+      hint: 'one or more resource ids (as assigned by the database / comma-separated)',
     },
     // has category
     'category-id': {
@@ -517,6 +526,7 @@ export const ACTION_FIELDS = {
       },
       table: API.ACTION_CATEGORIES,
       keyPair: ['measure_id', 'category_id'], // own, other
+      hint: 'one or more category ids (as assigned by the database / comma-separated)',
     },
     // has category
     'category-code': {
@@ -536,6 +546,7 @@ export const ACTION_FIELDS = {
       },
       table: API.ACTION_CATEGORIES,
       keyPair: ['measure_id', 'category_id'], // own, other
+      hint: 'one or more category codes (as assigned by the users / comma-separated)',
     },
   },
   ATTRIBUTES: {
@@ -543,7 +554,7 @@ export const ACTION_FIELDS = {
       defaultValue: '1',
       required: Object.values(ACTIONTYPES), // all types
       type: 'number',
-      importDefault: 'type',
+      skipImport: true,
       table: API.ACTIONTYPES,
     },
     draft: {
@@ -635,6 +646,7 @@ export const ACTOR_FIELDS = {
       required: true,
       type: 'number',
       table: API.ACTORTYPES,
+      skipImport: true,
     },
     draft: {
       defaultValue: true,
@@ -741,6 +753,7 @@ export const RESOURCE_FIELDS = {
       required: Object.values(RESOURCETYPES), // all types
       type: 'number',
       table: API.RESOURCETYPES,
+      skipImport: true,
     },
     draft: {
       defaultValue: true,

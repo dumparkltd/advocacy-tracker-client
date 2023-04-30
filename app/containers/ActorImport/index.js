@@ -23,6 +23,7 @@ import {
 } from 'themes/config';
 import { getImportFields, getColumnAttribute } from 'utils/import';
 import { checkActorAttribute } from 'utils/entities';
+import { lowerCase } from 'utils/string';
 import validateDateFormat from 'components/forms/validators/validate-date-format';
 import {
   redirectIfNotPermitted,
@@ -79,6 +80,21 @@ export class ActorImport extends React.PureComponent { // eslint-disable-line re
     const typeLabel = typeId
       ? intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural)
       : intl.formatMessage(appMessages.entities.actors.plural);
+    const fields = Object.keys(ACTOR_FIELDS.ATTRIBUTES).reduce((memo, key) => {
+      const val = ACTOR_FIELDS.ATTRIBUTES[key];
+      if (!val.skipImport) {
+        return [
+          ...memo,
+          {
+            attribute: key,
+            type: val.type || 'text',
+            required: !!val.required,
+            import: true,
+          },
+        ];
+      }
+      return memo;
+    }, []);
     return (
       <div>
         <Helmet
@@ -113,24 +129,8 @@ export class ActorImport extends React.PureComponent { // eslint-disable-line re
             success={this.props.success}
             progress={this.props.progress}
             template={{
-              filename: `${intl.formatMessage(messages.filename)}.csv`,
-              data: getImportFields({
-                fields: Object.keys(ACTOR_FIELDS.ATTRIBUTES).reduce((memo, key) => {
-                  const val = ACTOR_FIELDS.ATTRIBUTES[key];
-                  if (!val.skipImport) {
-                    return [
-                      ...memo,
-                      {
-                        attribute: key,
-                        type: val.type || 'text',
-                        required: !!val.required,
-                        import: true,
-                      },
-                    ];
-                  }
-                  return memo;
-                }, []),
-              }, intl.formatMessage),
+              filename: `${intl.formatMessage(messages.filename, { type: lowerCase(typeLabel) })}.csv`,
+              data: getImportFields({ fields }, intl.formatMessage),
             }}
           />
         </Content>
