@@ -23,6 +23,7 @@ import {
 } from 'themes/config';
 import { getImportFields, getColumnAttribute } from 'utils/import';
 import { checkResourceAttribute } from 'utils/entities';
+import { lowerCase } from 'utils/string';
 import validateDateFormat from 'components/forms/validators/validate-date-format';
 import {
   redirectIfNotPermitted,
@@ -79,7 +80,21 @@ export class ResourceImport extends React.PureComponent { // eslint-disable-line
     const typeLabel = typeId
       ? intl.formatMessage(appMessages.entities[`resources_${typeId}`].plural)
       : intl.formatMessage(appMessages.entities.resources.plural);
-
+    const fields = Object.keys(RESOURCE_FIELDS.ATTRIBUTES).reduce((memo, key) => {
+      const val = RESOURCE_FIELDS.ATTRIBUTES[key];
+      if (!val.skipImport) {
+        return [
+          ...memo,
+          {
+            attribute: key,
+            type: val.type || 'text',
+            required: !!val.required,
+            import: true,
+          },
+        ];
+      }
+      return memo;
+    }, []);
     return (
       <div>
         <Helmet
@@ -113,24 +128,8 @@ export class ResourceImport extends React.PureComponent { // eslint-disable-line
             success={this.props.success}
             progress={this.props.progress}
             template={{
-              filename: `${intl.formatMessage(messages.filename)}.csv`,
-              data: getImportFields({
-                fields: Object.keys(RESOURCE_FIELDS.ATTRIBUTES).reduce((memo, key) => {
-                  const val = RESOURCE_FIELDS.ATTRIBUTES[key];
-                  if (!val.skipImport) {
-                    return [
-                      ...memo,
-                      {
-                        attribute: key,
-                        type: val.type || 'text',
-                        required: !!val.required,
-                        import: true,
-                      },
-                    ];
-                  }
-                  return memo;
-                }, []),
-              }, intl.formatMessage),
+              filename: `${intl.formatMessage(messages.filename, { type: lowerCase(typeLabel) })}.csv`,
+              data: getImportFields({ fields }, intl.formatMessage),
             }}
           />
         </Content>
@@ -191,8 +190,10 @@ function mapDispatchToProps(dispatch, { params }) {
     handleSubmit: (formData) => {
       if (formData.get('import') !== null) {
         fromJS(formData.get('import').rows).forEach((row, index) => {
-          const rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
-          const typeId = rowCleanColumns.get('resourcetype_id');
+          let rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
+          const typeId = params.id;
+          // make sure type id is set
+          rowCleanColumns = rowCleanColumns.set('resourcetype_id', typeId);
           const rowClean = {
             attributes: rowCleanColumns
               // make sure only valid fields are imported

@@ -323,8 +323,8 @@ export const ACTION_FIELDS = {
   // additional
   RELATIONSHIPS_IMPORT: {
     // related to a topic with a position
-    // column: topicCode:supportNo
-    topicCode: {
+    // column: topic-code:supportNo
+    'topic-code': {
       type: 'text',
       optional: [ACTIONTYPES.EXPRESS],
       lookup: {
@@ -339,39 +339,195 @@ export const ACTION_FIELDS = {
         map: ACTION_INDICATOR_SUPPORTLEVELS,
       },
       separator: '|',
+      hint:
+        'one or more unique topic codes (as assigned by the users/comma-separated) optionally specifying levels of support for each using |. Example: CODE1|3,CODE2|1',
     },
-    // expressed by country
-    // column: countryCode
-    countryCode: {
+    'actor-code': {
       type: 'text',
-      optional: [ACTIONTYPES.EXPRESS, ACTIONTYPES.TASK],
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.INTERACTION,
+      ],
       lookup: {
         table: API.ACTORS,
         attribute: 'code',
       },
       table: API.ACTOR_ACTIONS,
       keyPair: ['measure_id', 'actor_id'], // own, other
+      hint: 'one or more unique actor codes (as assigned by the users / comma-separated)',
+    },
+    // column: country-code
+    'actor-id': {
+      type: 'text',
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.INTERACTION,
+      ],
+      multiple: true,
+      table: API.ACTOR_ACTIONS,
+      keyPair: ['measure_id', 'actor_id'], // own, other
+      hint: 'one or more unique actor ids (as assigned by the database / comma-separated)',
+    },
+    // column: country-code
+    'target-code': {
+      type: 'text',
+      optional: [
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
+        ACTIONTYPES.TASK,
+      ],
+      multiple: true,
+      lookup: {
+        table: API.ACTORS,
+        attribute: 'code',
+      },
+      table: API.ACTION_ACTORS,
+      keyPair: ['measure_id', 'actor_id'], // own, other
+      hint: 'one or more unique actor codes (as assigned by the users / comma-separated) for actors targeted',
+    },
+    // column: country-code
+    'target-id': {
+      type: 'text',
+      optional: [
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
+        ACTIONTYPES.TASK,
+      ],
+      multiple: true,
+      table: API.ACTION_ACTORS,
+      keyPair: ['measure_id', 'actor_id'], // own, other
+      hint: 'one or more unique actor ids (as assigned by the database / comma-separated) for actors targeted',
     },
     // belongs to event
-    eventCode: {
+    'event-code': {
       type: 'text',
-      optional: [ACTIONTYPES.EXPRESS],
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.INTERACTION,
+      ],
+      multiple: true,
       lookup: {
         table: API.ACTIONS,
         attribute: 'code',
       },
       table: API.ACTION_ACTIONS,
       keyPair: ['measure_id', 'other_measure_id'], // own, other
+      hint: 'one or more unique event codes (as assigned by the users / comma-separated) for events the action belongs to',
+    },
+    // belongs to interaction
+    'interaction-code': {
+      type: 'text',
+      optional: [ACTIONTYPES.EXPRESS],
+      multiple: true,
+      lookup: {
+        table: API.ACTIONS,
+        attribute: 'code',
+      },
+      table: API.ACTION_ACTIONS,
+      keyPair: ['measure_id', 'other_measure_id'], // own, other
+      hint: 'one or more unique interaction codes (as assigned by the users / comma-separated) for events the action belongs to',
+    },
+    // belongs to action by code
+    'parent-action-code': {
+      type: 'text',
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.INTERACTION,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.OP,
+      ],
+      multiple: true,
+      lookup: {
+        table: API.ACTIONS,
+        attribute: 'code',
+      },
+      table: API.ACTION_ACTIONS,
+      keyPair: ['measure_id', 'other_measure_id'], // own, other
+      hint: 'one or more unique action codes (as assigned by the users / comma-separated) for any associated parent-actions',
+    },
+    // belongs to action by ID
+    'parent-action-id': {
+      type: 'text',
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.INTERACTION,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.OP,
+      ],
+      table: API.ACTION_ACTIONS,
+      keyPair: ['measure_id', 'other_measure_id'], // own, other
+      hint: 'one or more action ids (as assigned by the database / comma-separated) for any associated parent-actions',
     },
     // has resource
-    resourcesID: {
+    'resources-id': {
       type: 'number',
-      optional: [ACTIONTYPES.EXPRESS],
-      lookup: {
-        table: API.RESOURCES, // id assumed
-      },
+      optional: [
+        ACTIONTYPES.EXPRESS,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.INTERACTION,
+      ],
       table: API.ACTION_RESOURCES,
       keyPair: ['measure_id', 'resource_id'], // own, other
+      hint: 'one or more resource ids (as assigned by the database / comma-separated)',
+    },
+    // has category
+    'category-id': {
+      type: 'number',
+      optional: Object.values(ACTIONTYPES),
+      table: API.ACTION_CATEGORIES,
+      keyPair: ['measure_id', 'category_id'], // own, other
+      hint: 'one or more category ids (as assigned by the database / comma-separated)',
+    },
+    // has category
+    'category-code': {
+      type: 'number',
+      optional: Object.values(ACTIONTYPES),
+      lookup: {
+        table: API.CATEGORIES, // id assumed
+        attribute: 'code',
+      },
+      table: API.ACTION_CATEGORIES,
+      keyPair: ['measure_id', 'category_id'], // own, other
+      hint: 'one or more category codes (as assigned by the users / comma-separated)',
+    },
+    // has category
+    'user-id': {
+      type: 'number',
+      optional: [
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.INTERACTION,
+      ],
+      table: API.USER_ACTIONS,
+      keyPair: ['measure_id', 'user_id'], // own, other
+      hint: 'one or more user IDs (as assigned by the database / comma-separated)',
+    },
+    'user-email': {
+      type: 'number',
+      optional: [
+        ACTIONTYPES.OP,
+        ACTIONTYPES.AP,
+        ACTIONTYPES.TASK,
+        ACTIONTYPES.EVENT,
+        ACTIONTYPES.INTERACTION,
+      ],
+      lookup: {
+        table: API.USERS, // id assumed
+        attribute: 'email',
+      },
+      table: API.USER_ACTIONS,
+      keyPair: ['measure_id', 'user_id'], // own, other
+      hint: 'one or more user email addresses (exact / comma-separated)',
     },
   },
   ATTRIBUTES: {
@@ -379,7 +535,7 @@ export const ACTION_FIELDS = {
       defaultValue: '1',
       required: Object.values(ACTIONTYPES), // all types
       type: 'number',
-      importDefault: 'type',
+      skipImport: true,
       table: API.ACTIONTYPES,
     },
     draft: {
@@ -471,6 +627,7 @@ export const ACTOR_FIELDS = {
       required: true,
       type: 'number',
       table: API.ACTORTYPES,
+      skipImport: true,
     },
     draft: {
       defaultValue: true,
@@ -558,6 +715,72 @@ export const ACTOR_FIELDS = {
       type: 'text',
     },
   },
+  RELATIONSHIPS_IMPORT: {
+    // related to a topic with a position
+    // column: topic-code:supportNo
+    'country-code': {
+      type: 'text',
+      optional: [ACTORTYPES.CONTACT],
+      lookup: {
+        table: API.ACTORS,
+        attribute: 'code',
+      },
+      table: API.MEMBERSHIPS,
+      keyPair: ['member_id', 'memberof_id'], // own, other
+      hint: 'one or more unique country codes (as assigned by the users/comma-separated) actors are member of',
+    },
+    // belongs to event
+    'event-code': {
+      type: 'text',
+      optional: [ACTORTYPES.CONTACT],
+      lookup: {
+        table: API.ACTIONS,
+        attribute: 'code',
+      },
+      table: API.ACTOR_ACTIONS,
+      keyPair: ['actor_id', 'measure_id'], // own, other
+      hint: 'one or more unique event codes (as assigned by the users / comma-separated) for events the action belongs to',
+    },
+    // has category
+    'user-id': {
+      type: 'number',
+      optional: [ACTORTYPES.CONTACT],
+      table: API.USER_ACTORS,
+      keyPair: ['actor_id', 'user_id'], // own, other
+      hint: 'one or more user IDs (as assigned by the database / comma-separated)',
+    },
+    'user-email': {
+      type: 'number',
+      optional: [ACTORTYPES.CONTACT],
+      lookup: {
+        table: API.USERS, // id assumed
+        attribute: 'email',
+      },
+      table: API.USER_ACTORS,
+      keyPair: ['actor_id', 'user_id'], // own, other
+      hint: 'one or more user email addresses (exact / comma-separated)',
+    },
+    // has category
+    'category-id': {
+      type: 'number',
+      optional: Object.values(ACTORTYPES),
+      table: API.ACTOR_CATEGORIES,
+      keyPair: ['actor_id', 'category_id'], // own, other
+      hint: 'one or more category ids (as assigned by the database / comma-separated)',
+    },
+    // has category
+    'category-code': {
+      type: 'number',
+      optional: Object.values(ACTORTYPES),
+      lookup: {
+        table: API.CATEGORIES, // id assumed
+        attribute: 'code',
+      },
+      table: API.ACTOR_CATEGORIES,
+      keyPair: ['actor_id', 'category_id'], // own, other
+      hint: 'one or more category codes (as assigned by the users / comma-separated)',
+    },
+  },
 };
 
 export const RESOURCE_FIELDS = {
@@ -577,6 +800,7 @@ export const RESOURCE_FIELDS = {
       required: Object.values(RESOURCETYPES), // all types
       type: 'number',
       table: API.RESOURCETYPES,
+      skipImport: true,
     },
     draft: {
       defaultValue: true,

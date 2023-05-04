@@ -26,6 +26,7 @@ import {
 import qe from 'utils/quasi-equals';
 import { getImportFields, getColumnAttribute } from 'utils/import';
 import { checkActionAttribute, checkAttribute } from 'utils/entities';
+import { lowerCase } from 'utils/string';
 import validateDateFormat from 'components/forms/validators/validate-date-format';
 
 import {
@@ -39,6 +40,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectActionConnections,
+  selectCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -80,12 +82,64 @@ export class ActionImport extends React.PureComponent { // eslint-disable-line r
 
   render() {
     const { intl } = this.context;
-    const { connections, params } = this.props;
+    const { connections, categories, params } = this.props;
     const typeId = params.id;
     const typeLabel = typeId
       ? intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural)
       : intl.formatMessage(appMessages.entities.actions.plural);
 
+    const fields = Object.keys(ACTION_FIELDS.ATTRIBUTES).reduce((memo, key) => {
+      const val = ACTION_FIELDS.ATTRIBUTES[key];
+      if (
+        !val.skipImport
+        && checkActionAttribute(typeId, key)
+      ) {
+        return [
+          ...memo,
+          {
+            attribute: key,
+            type: val.type || 'text',
+            value: (val.importDefault && val.importDefault === 'type')
+              ? typeId
+              : null,
+            required: !!val.required,
+            import: true,
+          },
+        ];
+      }
+      return memo;
+    }, []);
+    const relationshipFields = Object.keys(
+      ACTION_FIELDS.RELATIONSHIPS_IMPORT
+    ).reduce(
+      (memo, key) => {
+        if (
+          checkAttribute({
+            typeId,
+            att: key,
+            attributes: ACTION_FIELDS.RELATIONSHIPS_IMPORT,
+          })
+          // (val.optional && val.optional.indexOf(typeId) > -1)
+          // || (val.required && val.required.indexOf(typeId) > -1)
+        ) {
+          const val = ACTION_FIELDS.RELATIONSHIPS_IMPORT[key];
+          return [
+            ...memo,
+            {
+              attribute: key,
+              type: val.type || 'text',
+              required: !!val.required,
+              import: true,
+              relationshipValue: val.attribute,
+              separator: val.separator,
+              hint: val.hint,
+            },
+          ];
+        }
+        return memo;
+      },
+      [],
+    );
     return (
       <div>
         <Helmet
@@ -113,7 +167,7 @@ export class ActionImport extends React.PureComponent { // eslint-disable-line r
             fieldModel="import"
             formData={this.props.formData}
             handleSubmit={(formData) => {
-              this.props.handleSubmit(formData, connections);
+              this.props.handleSubmit(formData, connections, categories);
             }}
             handleCancel={this.props.handleCancel}
             handleReset={this.props.handleReset}
@@ -122,63 +176,8 @@ export class ActionImport extends React.PureComponent { // eslint-disable-line r
             success={this.props.success}
             progress={this.props.progress}
             template={{
-              filename: `${intl.formatMessage(messages.filename)}.csv`,
-              data: getImportFields(
-                {
-                  fields: Object.keys(ACTION_FIELDS.ATTRIBUTES).reduce((memo, key) => {
-                    const val = ACTION_FIELDS.ATTRIBUTES[key];
-                    if (
-                      !val.skipImport
-                      && checkActionAttribute(typeId, key)
-                    ) {
-                      return [
-                        ...memo,
-                        {
-                          attribute: key,
-                          type: val.type || 'text',
-                          value: (val.importDefault && val.importDefault === 'type')
-                            ? typeId
-                            : null,
-                          required: !!val.required,
-                          import: true,
-                        },
-                      ];
-                    }
-                    return memo;
-                  }, []),
-                  relationshipFields: Object.keys(
-                    ACTION_FIELDS.RELATIONSHIPS_IMPORT
-                  ).reduce(
-                    (memo, key) => {
-                      if (
-                        checkAttribute({
-                          typeId,
-                          att: key,
-                          attributes: ACTION_FIELDS.RELATIONSHIPS_IMPORT,
-                        })
-                        // (val.optional && val.optional.indexOf(typeId) > -1)
-                        // || (val.required && val.required.indexOf(typeId) > -1)
-                      ) {
-                        const val = ACTION_FIELDS.RELATIONSHIPS_IMPORT[key];
-                        return [
-                          ...memo,
-                          {
-                            attribute: key,
-                            type: val.type || 'text',
-                            required: !!val.required,
-                            import: true,
-                            relationshipValue: val.attribute,
-                            separator: val.separator,
-                          },
-                        ];
-                      }
-                      return memo;
-                    },
-                    [],
-                  ),
-                },
-                intl.formatMessage,
-              ),
+              filename: `${intl.formatMessage(messages.filename, { type: lowerCase(typeLabel) })}.csv`,
+              data: getImportFields({ fields, relationshipFields }, intl.formatMessage),
             }}
           />
         </Content>
@@ -203,6 +202,7 @@ ActionImport.propTypes = {
   success: PropTypes.object,
   params: PropTypes.object,
   connections: PropTypes.object,
+  categories: PropTypes.object,
 };
 
 ActionImport.contextTypes = {
@@ -215,6 +215,7 @@ const mapStateToProps = (state) => ({
   errors: selectErrors(state),
   success: selectSuccess(state),
   connections: selectActionConnections(state),
+  categories: selectCategories(state),
   dataReady: selectReady(state, {
     path: [
       API.USER_ROLES,
@@ -238,11 +239,13 @@ function mapDispatchToProps(dispatch, { params }) {
     initialiseForm: (model, formData) => {
       dispatch(formActions.load(model, formData));
     },
-    handleSubmit: (formData, connections) => {
+    handleSubmit: (formData, connections, categories) => {
       if (formData.get('import') !== null) {
         fromJS(formData.get('import').rows).forEach((row, index) => {
-          const rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
-          const typeId = rowCleanColumns.get('measuretype_id');
+          let rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
+          // make sure type id is set
+          const typeId = params.id;
+          rowCleanColumns = rowCleanColumns.set('measuretype_id', typeId);
           let rowClean = {
             attributes: rowCleanColumns
               // make sure only valid fields are imported
@@ -288,6 +291,7 @@ function mapDispatchToProps(dispatch, { params }) {
                   {
                     column: key,
                     value: rowJS[key],
+                    values: rowJS[key].trim().split(','),
                     field,
                     fieldValues: values,
                   },
@@ -300,97 +304,157 @@ function mapDispatchToProps(dispatch, { params }) {
           if (relRows) {
             let actionIndicators;
             let actorActions;
+            let actionActors;
             let topActions;
             let actionResources;
+            let actionCategories;
+            let userActions;
             Object.values(relRows).forEach(
               (relationship) => {
-                const [id, value] = relationship.value.split('|');
-                const relField = relationship.field;
-                const relConfig = ACTION_FIELDS.RELATIONSHIPS_IMPORT[relationship.field];
-                if (relConfig) {
-                  let connectionId = id;
-                  if (
-                    connections
-                    && relConfig.lookup
-                    && relConfig.lookup.table
-                    && relConfig.lookup.attribute
-                  ) {
-                    const connection = connections.get(relConfig.lookup.table)
-                      && connections.get(relConfig.lookup.table).find(
-                        (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
-                      );
-                    connectionId = connection ? connection.get('id') : 'INVALID';
-                  }
-                  if (relField === 'topicCode') {
-                    const create = {
-                      indicator_id: connectionId,
-                      supportlevel_id: value,
-                    };
-                    if (actionIndicators && actionIndicators.create) {
-                      actionIndicators.create = [
-                        ...actionIndicators.create,
-                        create,
-                      ];
-                    } else {
-                      actionIndicators = {
-                        create: [create],
-                      };
+                if (relationship.values) {
+                  const relField = relationship.field;
+                  const relConfig = ACTION_FIELDS.RELATIONSHIPS_IMPORT[relationship.field];
+                  relationship.values.forEach(
+                    (relValue) => {
+                      const [id, value] = relValue.trim().split('|');
+                      if (relConfig) {
+                        // assume field to referencet the id
+                        let connectionId = id;
+                        // unless attribute specified
+                        if (relConfig.lookup
+                          && relConfig.lookup.table
+                          && relConfig.lookup.attribute
+                        ) {
+                          if (categories && relConfig.lookup.table === API.CATEGORIES) {
+                            const category = categories.find(
+                              (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
+                            );
+                            connectionId = category ? category.get('id') : 'INVALID';
+                          } else if (connections) {
+                            const connection = connections.get(relConfig.lookup.table)
+                            && connections.get(relConfig.lookup.table).find(
+                              (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
+                            );
+                            connectionId = connection ? connection.get('id') : 'INVALID';
+                          }
+                        }
+                        // actionIndicators by code
+                        if (relField === 'topic-code') {
+                          const create = { indicator_id: connectionId, supportlevel_id: value };
+                          if (actionIndicators && actionIndicators.create) {
+                            actionIndicators.create = [
+                              ...actionIndicators.create,
+                              create,
+                            ];
+                          } else {
+                            actionIndicators = { create: [create] };
+                          }
+                        }
+                        // actorActions by code or id
+                        if (
+                          relField === 'country-code'
+                          || relField === 'actor-code'
+                          || relField === 'actor-id'
+                        ) {
+                          const create = { actor_id: connectionId };
+                          if (actorActions && actorActions.create) {
+                            actorActions.create = [
+                              ...actorActions.create,
+                              create,
+                            ];
+                          } else {
+                            actorActions = { create: [create] };
+                          }
+                        }
+                        if (
+                          relField === 'target-code'
+                          || relField === 'target-id'
+                        ) {
+                          const create = { actor_id: connectionId };
+                          if (actionActors && actionActors.create) {
+                            actionActors.create = [
+                              ...actionActors.create,
+                              create,
+                            ];
+                          } else {
+                            actionActors = { create: [create] };
+                          }
+                        }
+                        // actionCategories by code or id
+                        if (relField === 'category-code' || relField === 'category-id') {
+                          const create = { category_id: connectionId };
+                          if (actionCategories && actionCategories.create) {
+                            actionCategories.create = [
+                              ...actionCategories.create,
+                              create,
+                            ];
+                          } else {
+                            actionCategories = { create: [create] };
+                          }
+                        }
+                        // topActions/parent actions
+                        if (
+                          relField === 'interaction-code'
+                          || relField === 'event-code'
+                          || relField === 'parent-action-code'
+                          || relField === 'parent-action-id'
+                        ) {
+                          const create = {
+                            other_measure_id: connectionId,
+                          };
+                          if (topActions && topActions.create) {
+                            topActions.create = [
+                              ...topActions.create,
+                              create,
+                            ];
+                          } else {
+                            topActions = {
+                              create: [create],
+                            };
+                          }
+                        }
+                        // actionResources by id
+                        if (relField === 'resources-id') {
+                          const create = { resource_id: connectionId };
+                          if (actionResources && actionResources.create) {
+                            actionResources.create = [
+                              ...actionResources.create,
+                              create,
+                            ];
+                          } else {
+                            actionResources = { create: [create] };
+                          }
+                        } // actionResources
+                        // actionUsers by id or email
+                        if (
+                          relField === 'user-id'
+                          || relField === 'user-email'
+                        ) {
+                          const create = { user_id: connectionId };
+                          if (userActions && userActions.create) {
+                            userActions.create = [
+                              ...userActions.create,
+                              create,
+                            ];
+                          } else {
+                            userActions = { create: [create] };
+                          }
+                        } // actionUsers
+                      } // relConfig
                     }
-                  }
-                  if (relField === 'countryCode') {
-                    const create = {
-                      actor_id: connectionId,
-                    };
-                    if (actorActions && actorActions.create) {
-                      actorActions.create = [
-                        ...actorActions.create,
-                        create,
-                      ];
-                    } else {
-                      actorActions = {
-                        create: [create],
-                      };
-                    }
-                  }
-                  if (relField === 'eventCode') {
-                    const create = {
-                      other_measure_id: connectionId,
-                    };
-                    if (topActions && topActions.create) {
-                      topActions.create = [
-                        ...topActions.create,
-                        create,
-                      ];
-                    } else {
-                      topActions = {
-                        create: [create],
-                      };
-                    }
-                  }
-                  if (relField === 'resourcesID') {
-                    const create = {
-                      resource_id: connectionId,
-                    };
-                    if (actionResources && actionResources.create) {
-                      actionResources.create = [
-                        ...actionResources.create,
-                        create,
-                      ];
-                    } else {
-                      actionResources = {
-                        create: [create],
-                      };
-                    }
-                  }
+                  ); // forEach
                 }
               }
             );
             rowClean = {
               ...rowClean,
-              actionIndicators,
               actorActions,
+              actionActors, // targets
+              actionIndicators,
+              actionCategories,
               topActions,
               actionResources,
+              userActions,
             };
           }
           dispatch(save(rowClean));

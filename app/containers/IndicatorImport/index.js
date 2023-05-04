@@ -40,6 +40,9 @@ import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
 import ImportEntitiesForm from 'components/forms/ImportEntitiesForm';
 
+import appMessages from 'containers/App/messages';
+import messages from './messages';
+
 import {
   selectErrors,
   selectProgress,
@@ -47,7 +50,6 @@ import {
   selectSuccess,
 } from './selectors';
 
-import messages from './messages';
 import { save, resetForm } from './actions';
 import { FORM_INITIAL } from './constants';
 
@@ -73,6 +75,21 @@ export class IndicatorImport extends React.PureComponent { // eslint-disable-lin
 
   render() {
     const { intl } = this.context;
+    const fields = Object.keys(INDICATOR_FIELDS.ATTRIBUTES).reduce((memo, key) => {
+      const val = INDICATOR_FIELDS.ATTRIBUTES[key];
+      if (!val.skipImport) {
+        return [
+          ...memo,
+          {
+            attribute: key,
+            type: val.type || 'text',
+            required: !!val.required,
+            import: true,
+          },
+        ];
+      }
+      return memo;
+    }, []);
     return (
       <div>
         <Helmet
@@ -95,6 +112,7 @@ export class IndicatorImport extends React.PureComponent { // eslint-disable-lin
           />
           <ImportEntitiesForm
             model="indicatorImport.form.data"
+            typeLabel={intl.formatMessage(appMessages.entities.indicators.plural)}
             fieldModel="import"
             formData={this.props.formData}
             handleSubmit={(formData) => this.props.handleSubmit(formData)}
@@ -106,23 +124,7 @@ export class IndicatorImport extends React.PureComponent { // eslint-disable-lin
             progress={this.props.progress}
             template={{
               filename: `${intl.formatMessage(messages.filename)}.csv`,
-              data: getImportFields({
-                fields: Object.keys(INDICATOR_FIELDS.ATTRIBUTES).reduce((memo, key) => {
-                  const val = INDICATOR_FIELDS.ATTRIBUTES[key];
-                  if (!val.skipImport) {
-                    return [
-                      ...memo,
-                      {
-                        attribute: key,
-                        type: val.type || 'text',
-                        required: !!val.required,
-                        import: true,
-                      },
-                    ];
-                  }
-                  return memo;
-                }, []),
-              }, intl.formatMessage),
+              data: getImportFields({ fields }, intl.formatMessage),
             }}
           />
         </Content>

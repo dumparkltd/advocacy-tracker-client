@@ -18,7 +18,6 @@ const getRelationshipColumnTitle = (field) => {
 };
 
 export const getImportFields = (shape, formatMessage) => {
-  // console.log(shape)
   let values = {};
   if (shape.fields) {
     const fields = filter(
@@ -28,9 +27,10 @@ export const getImportFields = (shape, formatMessage) => {
     values = reduce(
       fields,
       (memo, field) => {
-        const value = field.value || `${field.required
+        const pre = field.required
           ? formatMessage(appMessages.import.required)
-          : formatMessage(appMessages.import.optional)}: ${formatMessage(appMessages.import[field.type], { format: DATE_FORMAT })}`;
+          : formatMessage(appMessages.import.optional);
+        const value = `${pre}: ${field.hint || formatMessage(appMessages.import[field.type], { format: DATE_FORMAT })}`;
         return Object.assign(memo, { [getColumnTitle(field, formatMessage)]: value });
       },
       values,
@@ -40,9 +40,10 @@ export const getImportFields = (shape, formatMessage) => {
     values = reduce(
       shape.relationshipFields,
       (memo, field) => {
-        const value = field.value || `${field.required
+        const pre = field.required
           ? formatMessage(appMessages.import.required)
-          : formatMessage(appMessages.import.optional)}: ${formatMessage(appMessages.import[field.type])}`;
+          : formatMessage(appMessages.import.optional);
+        const value = `${pre}: ${field.hint || formatMessage(appMessages.import[field.type])}`;
         return Object.assign(
           memo,
           {
@@ -67,7 +68,13 @@ export const countRelationshipsFromRows = (rows) => rows.reduce(
   (counter, row) => {
     const relKeys = Object.keys(row).filter((key) => key.indexOf('[rel:') > -1);
     return relKeys.reduce(
-      (counter2, key) => (row[key] && row[key] !== '') ? counter2 + 1 : counter2,
+      (counter2, key) => {
+        if (row[key] && row[key].trim() !== '') {
+          const inc = row[key].split(',').length;
+          return counter2 + inc;
+        }
+        return counter2;
+      },
       counter,
     );
   },

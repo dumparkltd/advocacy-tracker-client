@@ -703,18 +703,6 @@ export default defineMessages({
     },
   },
   importFields: {
-    actortype_id: {
-      id: 'app.containers.App.importFields.actortype_id',
-      defaultMessage: 'Actortype id',
-    },
-    measuretype_id: {
-      id: 'app.containers.App.importFields.measuretype_id',
-      defaultMessage: 'Actiontype id',
-    },
-    resourcetype_id: {
-      id: 'app.containers.App.importFields.resourcetype_id',
-      defaultMessage: 'Resourcetype id',
-    },
     title: {
       id: 'app.containers.App.importFields.title',
       defaultMessage: 'Title',
