@@ -141,7 +141,7 @@ export function EntitiesMapActors({
       plural: intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural),
     };
     reduceCountryAreas = (features) => features.map((feature) => {
-      const country = entities.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3));
+      const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
       if (country) {
         const countActions = country.get('actions')
           ? country.get('actions').toSet().size
@@ -309,7 +309,7 @@ export function EntitiesMapActors({
       countryActionIds,
     );
     reduceCountryAreas = (features) => features.map((feature) => {
-      const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3));
+      const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
       if (country) {
         const actionIds = countryActionIds && countryActionIds.get(parseInt(country.get('id'), 10));
         const countTargetingActions = actionIds && actionIds.get('targetingActions')

@@ -11,6 +11,7 @@ import { Box, Text } from 'grommet';
 import { Map } from 'immutable';
 import styled from 'styled-components';
 import countriesTopo from 'data/ne_countries_10m_v5.topo.json';
+import countryPointsJSON from 'data/country-points.json';
 import * as topojson from 'topojson-client';
 
 import {
@@ -33,7 +34,32 @@ const MapWrapper = styled((p) => <Box {...p} />)`
   position: relative;
   height: 400px;
 `;
-
+const reduceCountryData = ({ features, countries }) => features.reduce(
+  (memo, feature) => {
+    const country = countries && countries.find(
+      (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code)
+    );
+    if (country) {
+      return [
+        ...memo,
+        {
+          ...feature,
+          id: country.get('id'),
+          attributes: country.get('attributes').toJS(),
+          tooltip: {
+            id: country.get('id'),
+            title: country.getIn(['attributes', 'title']),
+          },
+          values: {
+            actions: 1,
+          },
+        },
+      ];
+    }
+    return memo;
+  },
+  [],
+);
 export function TabMembers(props) {
   const {
     onEntityClick,
@@ -50,32 +76,14 @@ export function TabMembers(props) {
   const otherMembers = membersByType && membersByType.filter(
     (type, typeId) => !qe(typeId, ACTORTYPES.COUNTRY),
   );
-  const countryData = countries && countries.size > 0 && countriesJSON.features.reduce(
-    (memo, feature) => {
-      const country = countries && countries.find(
-        (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3)
-      );
-      if (country) {
-        return [
-          ...memo,
-          {
-            ...feature,
-            id: country.get('id'),
-            attributes: country.get('attributes').toJS(),
-            tooltip: {
-              id: country.get('id'),
-              title: country.getIn(['attributes', 'title']),
-            },
-            values: {
-              actions: 1,
-            },
-          },
-        ];
-      }
-      return memo;
-    },
-    [],
-  );
+  const countryData = countries && countries.size > 0 && reduceCountryData({
+    features: countriesJSON.features,
+    countries,
+  });
+  const countryPointData = countries && countries.size > 0 && reduceCountryData({
+    features: countryPointsJSON.features,
+    countries,
+  });
 
   return (
     <Box>
@@ -92,6 +100,7 @@ export function TabMembers(props) {
             <MapWrapper>
               <MapContainer
                 countryData={countryData}
+                countryPointData={countryPointData}
                 countryFeatures={countriesJSON.features}
                 styleType="members"
                 onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}

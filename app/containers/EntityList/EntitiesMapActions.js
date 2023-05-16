@@ -214,7 +214,7 @@ export function EntitiesMapActions({
       )
     );
     reduceCountryAreas = (features) => features.map((feature) => {
-      const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3));
+      const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
       if (country) {
         let hasActiveStatements = indicatorEntities.some(
           (entity) => entity.get('actors').some(
@@ -394,7 +394,7 @@ export function EntitiesMapActions({
     }, [Map(), 0]);
 
     reduceCountryAreas = (features) => features.map((feature) => {
-      const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3));
+      const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
       if (country) {
         const cCounts = countryCounts.get(parseInt(country.get('id'), 10));
         const countActions = (cCounts && cCounts.get('actions')) || 0;

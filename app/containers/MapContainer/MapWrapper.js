@@ -95,6 +95,7 @@ const TOOLTIP_INITIAL = { features: [] };
 export function MapWrapper({
   countryFeatures,
   countryData,
+  countryPointData,
   locationData,
   indicator,
   onCountryClick,
@@ -112,6 +113,8 @@ export function MapWrapper({
   circleLayerConfig = {},
   valueToStyle,
 }) {
+  console.log('MapWrapper: countryData', countryData);
+  console.log('MapWrapper: countryPointData', countryPointData);
   const mapOptions = merge({}, options, MAP_OPTIONS);
   const customMapProjection = mapOptions.PROJ[projection];
   const size = React.useContext(ResponsiveContext);
@@ -603,6 +606,7 @@ export function MapWrapper({
 MapWrapper.propTypes = {
   countryFeatures: PropTypes.array, // country basemap
   countryData: PropTypes.array, // country data overlay
+  countryPointData: PropTypes.array, // country data overlay
   locationData: PropTypes.array, // location data overlay
   indicator: PropTypes.string,
   onCountryClick: PropTypes.func,
