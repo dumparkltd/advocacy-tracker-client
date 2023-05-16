@@ -258,7 +258,7 @@ export function ActionMap({
     mapKeyOptionMap,
     mapSubject,
   });
-  const countryPointData = entities && ({
+  const countryPointData = entities && reduceCountryData({
     features: countryPointsJSON.features,
     entities, // actors
     countriesVia,
