@@ -141,7 +141,8 @@ export function EntitiesMapActors({
       plural: intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural),
     };
     reduceCountryAreas = (features) => features.map((feature) => {
-      const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
+      const country = entities.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
+      // console.log('country', country && country.toJS())
       if (country) {
         const countActions = country.get('actions')
           ? country.get('actions').toSet().size
