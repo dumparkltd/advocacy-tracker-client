@@ -18,7 +18,7 @@ import qe from 'utils/quasi-equals';
 
 import Tooltip from './Tooltip';
 import TooltipContent from './TooltipContent';
-import { scaleColorCount, getCircleLayer } from './utils';
+import { scaleColorCount, getCircleLayer, getPointLayer } from './utils';
 
 const Styled = styled.div`
   position: absolute;
@@ -113,9 +113,8 @@ export function MapWrapper({
   circleLayerConfig = {},
   valueToStyle,
 }) {
-  console.log('MapWrapper: countryData', countryData);
-  console.log('MapWrapper: countryPointData', countryPointData);
   const mapOptions = merge({}, options, MAP_OPTIONS);
+
   const customMapProjection = mapOptions.PROJ[projection];
   const size = React.useContext(ResponsiveContext);
   const leafletOptions = customMapProjection
@@ -164,6 +163,7 @@ export function MapWrapper({
   const mapRef = useRef(null);
   const countryLayerGroupRef = useRef(null);
   const countryOverlayGroupRef = useRef(null);
+  const countryPointOverlayGroupRef = useRef(null);
   const locationOverlayGroupRef = useRef(null);
   const countryTooltipGroupRef = useRef(null);
   const countryOverGroupRef = useRef(null);
@@ -315,6 +315,8 @@ export function MapWrapper({
     countryTooltipGroupRef.current.addTo(mapRef.current);
     countryOverGroupRef.current = L.layerGroup();
     countryOverGroupRef.current.addTo(mapRef.current);
+    countryPointOverlayGroupRef.current = L.layerGroup();
+    countryPointOverlayGroupRef.current.addTo(mapRef.current);
     //
     // mapRef.current.on('zoomend', () => {
     //   setZoom(mapRef.current.getZoom());
@@ -346,6 +348,24 @@ export function MapWrapper({
       countryLayerGroupRef.current.addLayer(jsonLayer);
     }
   }, [countryFeatures]);
+
+  // add countryPointData
+  useEffect(() => {
+    countryPointOverlayGroupRef.current.clearLayers();
+
+    if (countryPointData && countryPointData.length > 0) {
+      const jsonLayer = getPointLayer({
+        data: countryPointData,
+        config: mapOptions,
+        markerEvents: {
+          click: (e) => onFeatureClick(e),
+          mouseout: () => onFeatureOver(),
+        },
+      });
+
+      countryPointOverlayGroupRef.current.addLayer(jsonLayer);
+    }
+  }, [countryPointData]);
 
   // add countryData
   useEffect(() => {

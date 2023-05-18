@@ -56,6 +56,36 @@ export const valueOfCircle = (radius, range, config) => {
     .range([0, range.max]);
   return scale(radius);
 };
+export const getPointLayer = ({ data, config, markerEvents }) => {
+  const layer = L.featureGroup(null);
+
+  const events = {
+    mouseover: (e) => markerEvents.mouseover ? markerEvents.mouseover(e, config) : null,
+    mouseout: (e) => markerEvents.mouseout ? markerEvents.mouseout(e, config) : null,
+    click: (e) => (markerEvents.click ? markerEvents.click(e, config) : null),
+  };
+
+  const circleIcon = L.divIcon({
+    className: 'countryPointIcon',
+    html:
+      '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">'
+      + '<circle cx="8" cy="8" r="7" fill="grey" stroke="#191919" strokeWidth="2" />'
+      + '</svg>',
+    iconSize: [16, 16],
+  });
+
+  const jsonLayer = L.geoJSON(data, {
+    pointToLayer: (feature, latlng) => L.marker(latlng, {
+      zIndex: config['z-index'] || 1,
+      opacity: 0.5,
+      icon: circleIcon,
+    }).on(events),
+  });
+
+  layer.addLayer(jsonLayer);
+
+  return layer;
+};
 
 export const getCircleLayer = ({ features, config, markerEvents }) => {
   const options = {
