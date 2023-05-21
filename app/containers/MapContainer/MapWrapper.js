@@ -18,7 +18,9 @@ import qe from 'utils/quasi-equals';
 
 import Tooltip from './Tooltip';
 import TooltipContent from './TooltipContent';
-import { scaleColorCount, getCircleLayer, getPointLayer } from './utils';
+import {
+  filterFeatureMaxZoom, getAreaLayer, getCircleLayer, getPointLayer,
+} from './utils';
 
 const Styled = styled.div`
   position: absolute;
@@ -360,7 +362,9 @@ export function MapWrapper({
     if (countryPointData && countryPointData.length > 0) {
       const jsonLayer = getPointLayer({
         data: countryPointData,
-        config: { zoom },
+        config: {
+          zoom, indicator, mapOptions, mapSubject, maxValueCountries, styleType, valueToStyle,
+        },
         markerEvents: {
           click: (e) => onFeatureClick(e),
           mouseout: () => onFeatureOver(),
@@ -368,78 +372,34 @@ export function MapWrapper({
       });
       countryPointOverlayGroupRef.current.addLayer(jsonLayer);
     }
-  }, [countryPointData, zoom]);
+  }, [countryPointData, zoom, indicator, tooltip, mapSubject]);
 
   // add countryData
   useEffect(() => {
     countryOverlayGroupRef.current.clearLayers();
     if (countryData && countryData.length > 0) {
-      const scale = mapSubject
-        && scaleColorCount(maxValueCountries, mapOptions.GRADIENT[mapSubject], indicator === 'indicator');
-      // treat 0 as no data when showing counts
-      const noDataThreshold = indicator === 'indicator' ? 0 : 1;
       const jsonLayer = L.geoJSON(
         countryData,
         {
-          style: (f) => {
-            // default style
-            const defaultStyle = styleType && mapOptions.STYLE[styleType]
-              ? {
-                ...mapOptions.DEFAULT_STYLE,
-                ...mapOptions.STYLE[styleType],
-              }
-              : mapOptions.DEFAULT_STYLE;
-            // check if feature is "active"
-            const fstyle = f.isActive
-              ? {
-                ...defaultStyle,
-                ...mapOptions.STYLE.active,
-              }
-              : defaultStyle;
-            // check for value-to-style function
-            if (
-              valueToStyle
-              && f.values
-              && typeof f.values[indicator] !== 'undefined'
-            ) {
-              return {
-                ...fstyle,
-                ...valueToStyle(f.values[indicator]),
-                ...f.style,
-              };
-            }
-            // style based on subject/indicator
-            if (mapSubject) {
-              if (
-                f.values
-                && typeof f.values[indicator] !== 'undefined'
-                && f.values[indicator] >= noDataThreshold
-              ) {
-                return {
-                  ...fstyle,
-                  fillColor: scale(f.values[indicator]),
-                  ...f.style,
-                };
-              }
-              return {
-                ...fstyle,
-                fillColor: mapOptions.NO_DATA_COLOR,
-                ...f.style,
-              };
-            }
+          style: (feature) => {
+            const styles = getAreaLayer(feature, indicator, mapOptions, mapSubject, maxValueCountries, styleType, valueToStyle);
+            const filterFeature = filterFeatureMaxZoom(feature, zoom);
+            console.log(filterFeature);
             return {
-              ...fstyle,
-              ...f.style,
+              // not working
+              opacity: filterFeature ? 0 : 1,
+              fillOpacity: filterFeature ? 0 : 1,
+              ...styles,
             };
           },
-        },
+        }
       ).on({
         click: (e) => onFeatureClick(e),
         mouseout: () => onFeatureOver(),
       });
       countryOverlayGroupRef.current.addLayer(jsonLayer);
     }
-  }, [countryData, indicator, tooltip, mapSubject]);
+  }, [countryData, indicator, tooltip, mapSubject, zoom]);
   // add zoom to countryData
   useEffect(() => {
     if (

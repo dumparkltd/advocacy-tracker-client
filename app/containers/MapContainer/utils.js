@@ -57,34 +57,37 @@ export const valueOfCircle = (radius, range, config) => {
   return scale(radius);
 };
 
-const filterFeatureMaxZoom = (feature, zoom) => {
+export const filterFeatureMaxZoom = (feature, zoom) => {
   if (
     feature.properties && feature.properties.marker_max_zoom
   ) {
-    console.log(zoom >= parseInt(feature.properties.marker_max_zoom, 10));
     return zoom <= parseInt(feature.properties.marker_max_zoom, 10);
   }
   return false;
 };
 
+// append point countries onto map
 export const getPointLayer = ({ data, config, markerEvents }) => {
   const layer = L.featureGroup(null);
-
+  const {
+    indicator, mapOptions, mapSubject, maxValueCountries, styleType, valueToStyle, zoom,
+  } = config;
   const events = {
     mouseover: (e) => markerEvents.mouseover ? markerEvents.mouseover(e, config) : null,
     mouseout: (e) => markerEvents.mouseout ? markerEvents.mouseout(e, config) : null,
     click: (e) => (markerEvents.click ? markerEvents.click(e, config) : null),
   };
-  const { zoom } = config;
 
   const jsonLayer = L.geoJSON(data, {
     pointToLayer: (feature, latlng) => {
       const filterFeature = filterFeatureMaxZoom(feature, zoom);
+      const styles = getAreaLayer(feature, indicator, mapOptions, mapSubject, maxValueCountries, styleType, valueToStyle);
       return L.circleMarker(latlng, {
-        radius: 5,
+        radius: 6,
         zIndex: 1,
         opacity: filterFeature ? 1 : 0,
         fillOpacity: filterFeature ? 1 : 0,
+        ...styles,
       }).on(events);
     },
   });
@@ -92,6 +95,64 @@ export const getPointLayer = ({ data, config, markerEvents }) => {
   layer.addLayer(jsonLayer);
 
   return layer;
+};
+
+// generate styles for a feature
+export const getAreaLayer = (feature, indicator, mapOptions, mapSubject, maxValueCountries, styleType, valueToStyle) => {
+  const scale = mapSubject
+    && scaleColorCount(maxValueCountries, mapOptions.GRADIENT[mapSubject], indicator === 'indicator');
+  // treat 0 as no data when showing counts
+  const noDataThreshold = indicator === 'indicator' ? 0 : 1;
+
+  // default style
+  const defaultStyle = styleType && mapOptions.STYLE[styleType]
+    ? {
+      ...mapOptions.DEFAULT_STYLE,
+      ...mapOptions.STYLE[styleType],
+    }
+    : mapOptions.DEFAULT_STYLE;
+  // check if feature is "active"
+  const fstyle = feature.isActive
+    ? {
+      ...defaultStyle,
+      ...mapOptions.STYLE.active,
+    }
+    : defaultStyle;
+  // check for value-to-style function
+  if (
+    valueToStyle
+    && feature.values
+    && typeof feature.values[indicator] !== 'undefined'
+  ) {
+    return {
+      ...fstyle,
+      ...valueToStyle(feature.values[indicator]),
+      ...feature.style,
+    };
+  }
+  // style based on subject/indicator
+  if (mapSubject) {
+    if (
+      feature.values
+      && typeof feature.values[indicator] !== 'undefined'
+      && feature.values[indicator] >= noDataThreshold
+    ) {
+      return {
+        ...fstyle,
+        fillColor: scale(feature.values[indicator]),
+        ...feature.style,
+      };
+    }
+    return {
+      ...fstyle,
+      fillColor: mapOptions.NO_DATA_COLOR,
+      ...feature.style,
+    };
+  }
+  return {
+    ...fstyle,
+    ...feature.style,
+  };
 };
 
 export const getCircleLayer = ({ features, config, markerEvents }) => {
