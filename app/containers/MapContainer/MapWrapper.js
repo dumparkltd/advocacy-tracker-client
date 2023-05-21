@@ -159,6 +159,7 @@ export function MapWrapper({
     };
   const [tooltip, setTooltip] = useState(TOOLTIP_INITIAL);
   const [featureOver, setFeatureOver] = useState(null);
+  const [zoom, setZoom] = useState(MAP_OPTIONS.ZOOM.INIT);
   const ref = useRef(null);
   const mapRef = useRef(null);
   const countryLayerGroupRef = useRef(null);
@@ -328,6 +329,9 @@ export function MapWrapper({
       mapOptions.CENTER,
       mapOptions.ZOOM.INIT,
     );
+    mapRef.current.on('zoomend', () => {
+      setZoom(mapRef.current.getZoom());
+    });
     if (mapRef.current.zoomControl) {
       mapRef.current.zoomControl.setPosition('topleft');
     }
@@ -356,16 +360,15 @@ export function MapWrapper({
     if (countryPointData && countryPointData.length > 0) {
       const jsonLayer = getPointLayer({
         data: countryPointData,
-        config: mapOptions,
+        config: { zoom },
         markerEvents: {
           click: (e) => onFeatureClick(e),
           mouseout: () => onFeatureOver(),
         },
       });
-
       countryPointOverlayGroupRef.current.addLayer(jsonLayer);
     }
-  }, [countryPointData]);
+  }, [countryPointData, zoom]);
 
   // add countryData
   useEffect(() => {
