@@ -85,6 +85,7 @@ export const getPointLayer = ({ data, config, markerEvents }) => {
       return L.circleMarker(latlng, {
         radius: 6,
         zIndex: 1,
+        pane: 'markerPane',
         opacity: filterFeature ? 1 : 0,
         fillOpacity: filterFeature ? 1 : 0,
         ...styles,
