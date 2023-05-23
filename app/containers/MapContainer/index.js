@@ -72,6 +72,7 @@ export function MapContainer({
 
   const [showAsPoint, setShowAsPoint] = useState(false);
 
+  // convert TopoJSON to JSON
   const countriesJSON = topojson.feature(
     countriesTopo,
     Object.values(countriesTopo.objects)[0],
@@ -79,6 +80,7 @@ export function MapContainer({
 
   let countryData = null;
   let locationData = null;
+  let countryPointData = null;
   let maxValue;
   let minValue;
   const minMaxValues = { points: null, countries: null };
@@ -92,6 +94,8 @@ export function MapContainer({
   ) {
     const ffUnit = unit || circleLayerConfig.unit || '';
     const isPercentage = ffUnit.indexOf('%') > -1;
+
+    // reducePoints sets up the country marker data merging the country attributes from the db with the JSON feature attributes
     locationData = reducePoints && reducePoints(
       countryPointsJSON.features,
       showAsPoint,
@@ -115,11 +119,14 @@ export function MapContainer({
       min: minValue,
     };
   }
+  // reduceCountryAreas sets up the country data merging the country attributes from the db with the JSON feature attributes
   if (
     reduceCountryAreas
     && !showPointsOnly
   ) {
     countryData = reduceCountryAreas && reduceCountryAreas(countriesJSON.features);
+    countryPointData = reduceCountryAreas && reduceCountryAreas(countryPointsJSON.features);
+
     if (indicator) {
       [maxValue, minValue] = countryData
         ? countryData.reduce(
@@ -136,7 +143,6 @@ export function MapContainer({
       };
     }
   }
-
   let allMapOptions = mapOptions;
   if (hasPointOption) {
     allMapOptions = [
@@ -158,6 +164,7 @@ export function MapContainer({
           typeLabels={typeLabels}
           includeSecondaryMembers={includeSecondaryMembers}
           countryData={countryData}
+          countryPointData={countryPointData}
           locationData={locationData}
           countryFeatures={countriesJSON.features}
           indicator={indicator}
