@@ -213,7 +213,7 @@ export function EntitiesMapActions({
         (connection) => qe(connection.get('indicator_id'), mapIndicator)
       )
     );
-    reduceCountryAreas = (features) => features.map((feature) => {
+    reduceCountryAreas = (features) => features.reduce((memo, feature) => {
       const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
       if (country) {
         let hasActiveStatements = indicatorEntities.some(
@@ -240,66 +240,64 @@ export function EntitiesMapActions({
         const statement = countryPosition && countryPosition.get('measure');
         const level = countryPosition
           && parseInt(countryPosition.get('supportlevel_id'), 10);
-        const position = level || level === 0
-          ? ACTION_INDICATOR_SUPPORTLEVELS[level || 0]
-          : {
+        let position;
+        if (statement) {
+          position = ACTION_INDICATOR_SUPPORTLEVELS[level || 0];
+        } else {
+          position = {
             value: '99',
-            color: '#EDEFF0',
           };
-        return {
-          ...feature,
-          id: country.get('id'),
-          attributes: country.get('attributes').toJS(),
-          tooltip: {
+        }
+        const values = statement ? { [mapIndicator]: level || 0 } : {};
+        return [
+          ...memo,
+          {
+            ...feature,
             id: country.get('id'),
-            title: country.getIn(['attributes', 'title']),
-            content: (
-              <Box gap="small" pad={{ top: 'small' }}>
-                <Text weight={600}>
-                  {intl.formatMessage(appMessages.supportlevels[position.value])}
-                </Text>
-                {statement && (
-                  <Box gap="xxsmall">
-                    <Box direction="row" gap="xxsmall" align="center">
-                      <Text size="xxxsmall" color="textSecondary">
-                        Statement
-                      </Text>
-                      {statement.get('date_start') && (
+            attributes: country.get('attributes').toJS(),
+            tooltip: {
+              id: country.get('id'),
+              title: country.getIn(['attributes', 'title']),
+              content: (
+                <Box gap="small" pad={{ top: 'small' }}>
+                  <Text weight={600}>
+                    {intl.formatMessage(appMessages.supportlevels[position.value])}
+                  </Text>
+                  {statement && (
+                    <Box gap="xxsmall">
+                      <Box direction="row" gap="xxsmall" align="center">
                         <Text size="xxxsmall" color="textSecondary">
-                          {`(${intl.formatDate(statement.get('date_start'))})`}
+                          Statement
                         </Text>
-                      )}
+                        {statement.get('date_start') && (
+                          <Text size="xxxsmall" color="textSecondary">
+                            {`(${intl.formatDate(statement.get('date_start'))})`}
+                          </Text>
+                        )}
+                      </Box>
+                      <StatementButton
+                        as="a"
+                        plain
+                        href={`${ROUTES.ACTION}/${statement.get('id')}`}
+                        onClick={(evt) => {
+                          if (evt && evt.preventDefault) evt.preventDefault();
+                          if (evt && evt.stopPropagation) evt.stopPropagation();
+                          onEntityClick(statement.get('id'), ROUTES.ACTION);
+                        }}
+                      >
+                        {statement.get('title')}
+                      </StatementButton>
                     </Box>
-                    <StatementButton
-                      as="a"
-                      plain
-                      href={`${ROUTES.ACTION}/${statement.get('id')}`}
-                      onClick={(evt) => {
-                        if (evt && evt.preventDefault) evt.preventDefault();
-                        if (evt && evt.stopPropagation) evt.stopPropagation();
-                        onEntityClick(statement.get('id'), ROUTES.ACTION);
-                      }}
-                    >
-                      {statement.get('title')}
-                    </StatementButton>
-                  </Box>
-                )}
-              </Box>
-            ),
+                  )}
+                </Box>
+              ),
+            },
+            values,
           },
-          values: {
-            [mapIndicator]: level || 0,
-          },
-        };
+        ];
       }
-      // }
-      return {
-        ...feature,
-        values: {
-          [mapIndicator]: 0,
-        },
-      };
-    });
+      return memo;
+    }, []);
     indicator = mapIndicator;
     mapSubjectClean = null;
     mapInfo = [{
@@ -393,7 +391,7 @@ export function EntitiesMapActions({
       return [updated, total];
     }, [Map(), 0]);
 
-    reduceCountryAreas = (features) => features.map((feature) => {
+    reduceCountryAreas = (features) => features.reduce((memo, feature) => {
       const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
       if (country) {
         const cCounts = countryCounts.get(parseInt(country.get('id'), 10));
@@ -441,35 +439,30 @@ export function EntitiesMapActions({
             },
           ];
         }
-        return {
-          ...feature,
-          id: country.get('id'),
-          attributes: country.get('attributes').toJS(),
-          tooltip: {
+        return [
+          ...memo,
+          {
+            ...feature,
             id: country.get('id'),
-            title: country.getIn(['attributes', 'title']),
-            stats,
-            isCount: true,
-            isCountryData: true,
+            attributes: country.get('attributes').toJS(),
+            tooltip: {
+              id: country.get('id'),
+              title: country.getIn(['attributes', 'title']),
+              stats,
+              isCount: true,
+              isCountryData: true,
+            },
+            values: {
+              actions: countActions,
+              actionsTotal,
+              targetingActions: countTargetingActions,
+              targetingActionsTotal,
+            },
           },
-          values: {
-            actions: countActions,
-            actionsTotal,
-            targetingActions: countTargetingActions,
-            targetingActionsTotal,
-          },
-        };
+        ];
       }
-      return {
-        ...feature,
-        values: {
-          actions: 0,
-          actionsTotal: 0,
-          targetingActions: 0,
-          targetingActionsTotal: 0,
-        },
-      };
-    });
+      return memo;
+    }, []);
     infoTitle = `No. of ${typeLabels[actionsTotalShowing === 1 ? 'single' : 'plural']} by Country`;
     infoSubTitle = `Showing ${actionsTotalShowing} of ${entities ? entities.size : 0} activities total${hasFilters ? ' (filtered)' : ''}`;
     mapInfo = [{

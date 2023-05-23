@@ -19,7 +19,11 @@ import qe from 'utils/quasi-equals';
 import Tooltip from './Tooltip';
 import TooltipContent from './TooltipContent';
 import {
-  getCircleLayer, getPointLayer, scaleColorCount, filterFeaturesByZoom,
+  getCircleLayer,
+  getPointLayer,
+  scaleColorCount,
+  filterFeaturesByZoom,
+  filterNoDataFeatures,
 } from './utils';
 
 const Styled = styled.div`
@@ -360,8 +364,13 @@ export function MapWrapper({
     countryPointOverlayGroupRef.current.clearLayers();
     // console.log('countryPointData', countryPointData)
     if (countryPointData && countryPointData.length > 0) {
+      // TODO find a better way to determine isCount?
       const jsonLayer = getPointLayer({
-        data: filterFeaturesByZoom(countryPointData, zoom, 'marker_max_zoom'),
+        data: filterNoDataFeatures(
+          filterFeaturesByZoom(countryPointData, zoom, 'marker_max_zoom'),
+          indicator,
+          !!mapSubject, // proxy for isCount: mapSubject only set for "count indicators"
+        ),
         config: {
           indicator, mapOptions, mapSubject, maxValueCountries, tooltip, valueToStyle,
         },

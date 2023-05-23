@@ -69,6 +69,21 @@ export const filterFeaturesByZoom = (
   }
   return false;
 });
+export const filterNoDataFeatures = (
+  features,
+  indicator,
+  isCount,
+) => features.filter((f) => {
+  // exclude if no value is set
+  if (!f.values || typeof f.values[indicator] === 'undefined') {
+    return false;
+  }
+  // exclude if value is 0 and where 0 means "no data"
+  if (isCount && f.values && f.values[indicator] === 0) {
+    return false;
+  }
+  return true;
+});
 
 const getPointIconFillColor = ({
   feature,
