@@ -74,6 +74,9 @@ export const filterNoDataFeatures = (
   indicator,
   isCount,
 ) => features.filter((f) => {
+  if (f.hasData) {
+    return true;
+  }
   // exclude if no value is set
   if (!f.values || typeof f.values[indicator] === 'undefined') {
     return false;
