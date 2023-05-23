@@ -78,30 +78,31 @@ const getPointIconFillColor = ({
   mapOptions,
   valueToStyle,
 }) => {
+  // check for explicitly set feature color
   if (feature.style && feature.style.fillColor) {
     return feature.style.fillColor;
   }
-  if (
-    valueToStyle
-    && feature.values
-    && typeof feature.values[indicator] !== 'undefined'
-  ) {
-    const style = valueToStyle(feature.values[indicator]);
-    if (style && style.fillColor) {
-      return style.fillColor;
+  if (feature.values && typeof feature.values[indicator] !== 'undefined') {
+    // check for custom valueToStyle mapping function
+    if (valueToStyle) {
+      const style = valueToStyle(feature.values[indicator]);
+      if (style && style.fillColor) {
+        return style.fillColor;
+      }
     }
-  }
-  if (mapSubject) {
+    // use gradient scale if available
+    // ... and if a value of 0 is not assumed to be "no data" (i.e. when counting activities)
     const noDataThreshold = indicator === 'indicator' ? 0 : 1;
-    if (feature.values
-      && typeof feature.values[indicator] !== 'undefined'
-      && feature.values[indicator] >= noDataThreshold) {
-      const scale = mapSubject
-        && scaleColorCount(maxValueCountries, mapOptions.GRADIENT[mapSubject], indicator === 'indicator');
-
+    if (
+      mapSubject
+      && mapOptions.GRADIENT[mapSubject]
+      && feature.values[indicator] >= noDataThreshold
+    ) {
+      const scale = scaleColorCount(maxValueCountries, mapOptions.GRADIENT[mapSubject], indicator === 'indicator');
       return scale(feature.values[indicator]);
     }
   }
+  // return default "no data" color
   return mapOptions.NO_DATA_COLOR;
 };
 
