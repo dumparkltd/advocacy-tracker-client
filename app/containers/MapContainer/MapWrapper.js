@@ -374,6 +374,7 @@ export function MapWrapper({
         config: {
           indicator, mapOptions, mapSubject, maxValueCountries, tooltip, valueToStyle,
         },
+        styleType,
         markerEvents: {
           click: (e) => onFeatureClick(e),
           mouseout: () => onFeatureOver(),
@@ -392,11 +393,6 @@ export function MapWrapper({
         countryData,
         {
           style: (feature) => {
-            const scale = mapSubject
-              && scaleColorCount(maxValueCountries, mapOptions.GRADIENT[mapSubject], indicator === 'indicator');
-            // treat 0 as no data when showing counts
-            const noDataThreshold = indicator === 'indicator' ? 0 : 1;
-
             // default style
             const defaultStyle = styleType && mapOptions.STYLE[styleType]
               ? {
@@ -427,11 +423,15 @@ export function MapWrapper({
             }
             // style based on subject/indicator
             if (mapSubject) {
+              // treat 0 as no data when showing counts
+              const noDataThreshold = indicator === 'indicator' ? 0 : 1;
               if (
                 feature.values
                 && typeof feature.values[indicator] !== 'undefined'
                 && feature.values[indicator] >= noDataThreshold
               ) {
+                const scale = mapSubject
+                  && scaleColorCount(maxValueCountries, mapOptions.GRADIENT[mapSubject], indicator === 'indicator');
                 return {
                   ...fstyle,
                   fillColor: scale(feature.values[indicator]),
