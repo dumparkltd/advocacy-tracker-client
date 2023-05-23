@@ -57,14 +57,18 @@ export const valueOfCircle = (radius, range, config) => {
   return scale(radius);
 };
 
-const filterFeaturesByZoom = (feature, zoom, propertyMaxZoom) => {
+export const filterFeaturesByZoom = (
+  features,
+  zoom,
+  propertyMaxZoom,
+) => features.filter((f) => {
   if (
-    feature.properties && feature.properties[propertyMaxZoom]
+    f.properties && f.properties[propertyMaxZoom]
   ) {
-    return zoom <= parseInt(feature.properties[propertyMaxZoom], 10);
+    return zoom <= parseInt(f.properties[propertyMaxZoom], 10);
   }
   return false;
-};
+});
 
 const getPointIconFillColor = (feature, mapSubject, indicator, maxValueCountries, mapOptions) => {
   if (feature.style && feature.style.fillColor) {
@@ -87,7 +91,7 @@ const getPointIconFillColor = (feature, mapSubject, indicator, maxValueCountries
 export const getPointLayer = ({ data, config, markerEvents }) => {
   const layer = L.featureGroup(null);
   const {
-    indicator, mapOptions, mapSubject, maxValueCountries, tooltip, zoom,
+    indicator, mapOptions, mapSubject, maxValueCountries, tooltip,
   } = config;
   const events = {
     mouseover: (e) => markerEvents.mouseover ? markerEvents.mouseover(e, config) : null,
@@ -105,24 +109,24 @@ export const getPointLayer = ({ data, config, markerEvents }) => {
 <svg
   xmlns="http://www.w3.org/2000/svg"
   viewBox="0 0 28 30"
-  width="28"
-  height="30"
+  width="25"
+  height="27"
 >
-  <path d="m24,14.18c0-5.52-4.48-10-10-10S4,8.66,4,14.18c0,4.37,2.8,8.07,6.71,9.43l3.29,4.2,3.29-4.2c3.9-1.36,6.71-5.07,6.71-9.43Z" fill="${iconRingColor}" filter="drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.4))"/>
+  <path
+    d="m24,14.18c0-5.52-4.48-10-10-10S4,8.66,4,14.18c0,4.37,2.8,8.07,6.71,9.43l3.29,4.2,3.29-4.2c3.9-1.36,6.71-5.07,6.71-9.43Z"
+    fill="${iconRingColor}"
+    filter="drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.3))"
+  />
   <circle cx="14" cy="14.18" r="8.18" fill="${iconCircleColor}"/>
 </svg>`,
-        className: '',
-        iconSize: [20, 25],
-        iconAnchor: [15, 28],
+        className: 'country-marker-svg-icon',
+        iconSize: [24, 25],
+        iconAnchor: [12.5, 27],
       });
-
-      const filterFeature = filterFeaturesByZoom(feature, zoom, 'marker_max_zoom');
 
       return L.marker(latlng, {
         zIndex: 1,
         pane: 'markerPane',
-        opacity: filterFeature ? 1 : 0,
-        fillOpacity: filterFeature ? 1 : 0,
         icon: svgIcon,
       }).on(events);
     },

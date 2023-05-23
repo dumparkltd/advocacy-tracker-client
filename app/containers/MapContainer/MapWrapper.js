@@ -19,7 +19,7 @@ import qe from 'utils/quasi-equals';
 import Tooltip from './Tooltip';
 import TooltipContent from './TooltipContent';
 import {
-  getCircleLayer, getPointLayer, scaleColorCount,
+  getCircleLayer, getPointLayer, scaleColorCount, filterFeaturesByZoom,
 } from './utils';
 
 const Styled = styled.div`
@@ -358,12 +358,12 @@ export function MapWrapper({
   // add countryPointData
   useEffect(() => {
     countryPointOverlayGroupRef.current.clearLayers();
-
+    // console.log('countryPointData', countryPointData)
     if (countryPointData && countryPointData.length > 0) {
       const jsonLayer = getPointLayer({
-        data: countryPointData,
+        data: filterFeaturesByZoom(countryPointData, zoom, 'marker_max_zoom'),
         config: {
-          zoom, indicator, mapOptions, mapSubject, maxValueCountries, tooltip,
+          indicator, mapOptions, mapSubject, maxValueCountries, tooltip,
         },
         markerEvents: {
           click: (e) => onFeatureClick(e),
