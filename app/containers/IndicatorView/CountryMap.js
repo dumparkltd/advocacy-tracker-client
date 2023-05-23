@@ -69,6 +69,7 @@ const reduceCountryData = ({
             ...feature,
             id: country.get('id'),
             positionId: position.value,
+            hasData: true,
             tooltip: {
               id: country.get('id'),
               title: country.getIn(['attributes', 'title']),
