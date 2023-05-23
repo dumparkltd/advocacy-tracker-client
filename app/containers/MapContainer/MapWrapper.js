@@ -304,7 +304,7 @@ export function MapWrapper({
   // }, [ref]);
   useEffect(() => {
     mapRef.current = L.map(mapId, leafletOptions).on(mapEvents);
-    // create an orange rectangle
+    // create an background rectangle
     if (customMapProjection && customMapProjection.addBBox) {
       L.geoJSON(getBBox(customMapProjection.bounds), mapOptions.BBOX_STYLE).addTo(mapRef.current);
     }
