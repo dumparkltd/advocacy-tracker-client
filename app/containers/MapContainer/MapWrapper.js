@@ -363,7 +363,7 @@ export function MapWrapper({
       const jsonLayer = getPointLayer({
         data: filterFeaturesByZoom(countryPointData, zoom, 'marker_max_zoom'),
         config: {
-          indicator, mapOptions, mapSubject, maxValueCountries, tooltip,
+          indicator, mapOptions, mapSubject, maxValueCountries, tooltip, valueToStyle,
         },
         markerEvents: {
           click: (e) => onFeatureClick(e),

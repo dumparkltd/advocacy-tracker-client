@@ -70,10 +70,28 @@ export const filterFeaturesByZoom = (
   return false;
 });
 
-const getPointIconFillColor = (feature, mapSubject, indicator, maxValueCountries, mapOptions) => {
+const getPointIconFillColor = ({
+  feature,
+  mapSubject,
+  indicator,
+  maxValueCountries,
+  mapOptions,
+  valueToStyle,
+}) => {
   if (feature.style && feature.style.fillColor) {
     return feature.style.fillColor;
-  } if (mapSubject) {
+  }
+  if (
+    valueToStyle
+    && feature.values
+    && typeof feature.values[indicator] !== 'undefined'
+  ) {
+    const style = valueToStyle(feature.values[indicator]);
+    if (style && style.fillColor) {
+      return style.fillColor;
+    }
+  }
+  if (mapSubject) {
     const noDataThreshold = indicator === 'indicator' ? 0 : 1;
     if (feature.values
       && typeof feature.values[indicator] !== 'undefined'
@@ -91,7 +109,7 @@ const getPointIconFillColor = (feature, mapSubject, indicator, maxValueCountries
 export const getPointLayer = ({ data, config, markerEvents }) => {
   const layer = L.featureGroup(null);
   const {
-    indicator, mapOptions, mapSubject, maxValueCountries, tooltip,
+    indicator, mapOptions, mapSubject, maxValueCountries, tooltip, valueToStyle,
   } = config;
   const events = {
     mouseover: (e) => markerEvents.mouseover ? markerEvents.mouseover(e, config) : null,
@@ -102,7 +120,14 @@ export const getPointLayer = ({ data, config, markerEvents }) => {
   const tooltipFeatureIds = (tooltip && tooltip.features && tooltip.features.length > 0) ? tooltip.features.map((f) => f.id) : [];
   const jsonLayer = L.geoJSON(data, {
     pointToLayer: (feature, latlng) => {
-      const iconCircleColor = getPointIconFillColor(feature, mapSubject, indicator, maxValueCountries, mapOptions);
+      const iconCircleColor = getPointIconFillColor({
+        feature,
+        mapSubject,
+        indicator,
+        maxValueCountries,
+        mapOptions,
+        valueToStyle,
+      });
       const iconRingColor = tooltipFeatureIds.length && tooltipFeatureIds.indexOf(feature.id) > -1 ? mapOptions.STYLE.active.color : 'white';
       const svgIcon = L.divIcon({
         html: `
@@ -120,7 +145,7 @@ export const getPointLayer = ({ data, config, markerEvents }) => {
   <circle cx="14" cy="14.18" r="8.18" fill="${iconCircleColor}"/>
 </svg>`,
         className: 'country-marker-svg-icon',
-        iconSize: [24, 25],
+        iconSize: [25, 27],
         iconAnchor: [12.5, 27],
       });
 
