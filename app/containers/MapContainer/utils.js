@@ -95,6 +95,7 @@ const getPointIconFillColor = ({
   maxValueCountries,
   mapOptions,
   valueToStyle,
+  styleType,
 }) => {
   // check for explicitly set feature color
   if (feature.style && feature.style.fillColor) {
@@ -120,12 +121,23 @@ const getPointIconFillColor = ({
       return scale(feature.values[indicator]);
     }
   }
+  const defaultStyle = styleType && mapOptions.STYLE[styleType]
+    ? {
+      ...mapOptions.DEFAULT_STYLE,
+      ...mapOptions.STYLE[styleType],
+    }
+    : mapOptions.DEFAULT_STYLE;
   // return default "no data" color
-  return mapOptions.NO_DATA_COLOR;
+  return defaultStyle.fillColor || mapOptions.NO_DATA_COLOR;
 };
 
 // append point countries onto map
-export const getPointLayer = ({ data, config, markerEvents }) => {
+export const getPointLayer = ({
+  data,
+  config,
+  markerEvents,
+  styleType,
+}) => {
   const layer = L.featureGroup(null);
   const {
     indicator, mapOptions, mapSubject, maxValueCountries, tooltip, valueToStyle,
@@ -146,6 +158,7 @@ export const getPointLayer = ({ data, config, markerEvents }) => {
         maxValueCountries,
         mapOptions,
         valueToStyle,
+        styleType,
       });
       const iconRingColor = tooltipFeatureIds.length && tooltipFeatureIds.indexOf(feature.id) > -1 ? mapOptions.STYLE.active.color : 'white';
       const svgIcon = L.divIcon({
