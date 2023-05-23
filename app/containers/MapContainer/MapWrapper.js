@@ -18,7 +18,13 @@ import qe from 'utils/quasi-equals';
 
 import Tooltip from './Tooltip';
 import TooltipContent from './TooltipContent';
-import { scaleColorCount, getCircleLayer } from './utils';
+import {
+  getCircleLayer,
+  getPointLayer,
+  scaleColorCount,
+  filterFeaturesByZoom,
+  filterNoDataFeatures,
+} from './utils';
 
 const Styled = styled.div`
   position: absolute;
@@ -95,6 +101,7 @@ const TOOLTIP_INITIAL = { features: [] };
 export function MapWrapper({
   countryFeatures,
   countryData,
+  countryPointData,
   locationData,
   indicator,
   onCountryClick,
@@ -113,6 +120,7 @@ export function MapWrapper({
   valueToStyle,
 }) {
   const mapOptions = merge({}, options, MAP_OPTIONS);
+
   const customMapProjection = mapOptions.PROJ[projection];
   const size = React.useContext(ResponsiveContext);
   const leafletOptions = customMapProjection
@@ -157,10 +165,12 @@ export function MapWrapper({
     };
   const [tooltip, setTooltip] = useState(TOOLTIP_INITIAL);
   const [featureOver, setFeatureOver] = useState(null);
+  const [zoom, setZoom] = useState(MAP_OPTIONS.ZOOM.INIT);
   const ref = useRef(null);
   const mapRef = useRef(null);
   const countryLayerGroupRef = useRef(null);
   const countryOverlayGroupRef = useRef(null);
+  const countryPointOverlayGroupRef = useRef(null);
   const locationOverlayGroupRef = useRef(null);
   const countryTooltipGroupRef = useRef(null);
   const countryOverGroupRef = useRef(null);
@@ -298,7 +308,7 @@ export function MapWrapper({
   // }, [ref]);
   useEffect(() => {
     mapRef.current = L.map(mapId, leafletOptions).on(mapEvents);
-    // create an orange rectangle
+    // create an background rectangle
     if (customMapProjection && customMapProjection.addBBox) {
       L.geoJSON(getBBox(customMapProjection.bounds), mapOptions.BBOX_STYLE).addTo(mapRef.current);
     }
@@ -312,6 +322,8 @@ export function MapWrapper({
     countryTooltipGroupRef.current.addTo(mapRef.current);
     countryOverGroupRef.current = L.layerGroup();
     countryOverGroupRef.current.addTo(mapRef.current);
+    countryPointOverlayGroupRef.current = L.layerGroup();
+    countryPointOverlayGroupRef.current.addTo(mapRef.current);
     //
     // mapRef.current.on('zoomend', () => {
     //   setZoom(mapRef.current.getZoom());
@@ -323,6 +335,9 @@ export function MapWrapper({
       mapOptions.CENTER,
       mapOptions.ZOOM.INIT,
     );
+    mapRef.current.on('zoomend', () => {
+      setZoom(mapRef.current.getZoom());
+    });
     if (mapRef.current.zoomControl) {
       mapRef.current.zoomControl.setPosition('topleft');
     }
@@ -344,18 +359,44 @@ export function MapWrapper({
     }
   }, [countryFeatures]);
 
+  // add countryPointData
+  useEffect(() => {
+    countryPointOverlayGroupRef.current.clearLayers();
+    // console.log('countryPointData', countryPointData)
+    if (countryPointData && countryPointData.length > 0) {
+      // TODO find a better way to determine isCount?
+      const jsonLayer = getPointLayer({
+        data: filterNoDataFeatures(
+          filterFeaturesByZoom(countryPointData, zoom, 'marker_max_zoom'),
+          indicator,
+          !!mapSubject, // proxy for isCount: mapSubject only set for "count indicators"
+        ),
+        config: {
+          indicator, mapOptions, mapSubject, maxValueCountries, tooltip, valueToStyle,
+        },
+        markerEvents: {
+          click: (e) => onFeatureClick(e),
+          mouseout: () => onFeatureOver(),
+        },
+      });
+
+      countryPointOverlayGroupRef.current.addLayer(jsonLayer);
+    }
+  }, [countryPointData, zoom, indicator, tooltip, mapSubject]);
+
   // add countryData
   useEffect(() => {
     countryOverlayGroupRef.current.clearLayers();
     if (countryData && countryData.length > 0) {
-      const scale = mapSubject
-        && scaleColorCount(maxValueCountries, mapOptions.GRADIENT[mapSubject], indicator === 'indicator');
-      // treat 0 as no data when showing counts
-      const noDataThreshold = indicator === 'indicator' ? 0 : 1;
       const jsonLayer = L.geoJSON(
         countryData,
         {
-          style: (f) => {
+          style: (feature) => {
+            const scale = mapSubject
+              && scaleColorCount(maxValueCountries, mapOptions.GRADIENT[mapSubject], indicator === 'indicator');
+            // treat 0 as no data when showing counts
+            const noDataThreshold = indicator === 'indicator' ? 0 : 1;
+
             // default style
             const defaultStyle = styleType && mapOptions.STYLE[styleType]
               ? {
@@ -363,57 +404,59 @@ export function MapWrapper({
                 ...mapOptions.STYLE[styleType],
               }
               : mapOptions.DEFAULT_STYLE;
+
             // check if feature is "active"
-            const fstyle = f.isActive
+            const fstyle = feature.isActive
               ? {
                 ...defaultStyle,
                 ...mapOptions.STYLE.active,
               }
               : defaultStyle;
+
             // check for value-to-style function
             if (
               valueToStyle
-              && f.values
-              && typeof f.values[indicator] !== 'undefined'
+              && feature.values
+              && typeof feature.values[indicator] !== 'undefined'
             ) {
               return {
                 ...fstyle,
-                ...valueToStyle(f.values[indicator]),
-                ...f.style,
+                ...valueToStyle(feature.values[indicator]),
+                ...feature.style,
               };
             }
             // style based on subject/indicator
             if (mapSubject) {
               if (
-                f.values
-                && typeof f.values[indicator] !== 'undefined'
-                && f.values[indicator] >= noDataThreshold
+                feature.values
+                && typeof feature.values[indicator] !== 'undefined'
+                && feature.values[indicator] >= noDataThreshold
               ) {
                 return {
                   ...fstyle,
-                  fillColor: scale(f.values[indicator]),
-                  ...f.style,
+                  fillColor: scale(feature.values[indicator]),
+                  ...feature.style,
                 };
               }
               return {
                 ...fstyle,
                 fillColor: mapOptions.NO_DATA_COLOR,
-                ...f.style,
+                ...feature.style,
               };
             }
             return {
               ...fstyle,
-              ...f.style,
+              ...feature.style,
             };
           },
-        },
+        }
       ).on({
         click: (e) => onFeatureClick(e),
         mouseout: () => onFeatureOver(),
       });
       countryOverlayGroupRef.current.addLayer(jsonLayer);
     }
-  }, [countryData, indicator, tooltip, mapSubject]);
+  }, [countryData, indicator, tooltip, mapSubject, zoom]);
   // add zoom to countryData
   useEffect(() => {
     if (
@@ -603,6 +646,7 @@ export function MapWrapper({
 MapWrapper.propTypes = {
   countryFeatures: PropTypes.array, // country basemap
   countryData: PropTypes.array, // country data overlay
+  countryPointData: PropTypes.array, // country data overlay
   locationData: PropTypes.array, // location data overlay
   indicator: PropTypes.string,
   onCountryClick: PropTypes.func,

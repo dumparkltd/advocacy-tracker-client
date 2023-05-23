@@ -14,6 +14,7 @@ import * as topojson from 'topojson-client';
 // import { FormattedMessage } from 'react-intl';
 
 import countriesTopo from 'data/ne_countries_10m_v5.topo.json';
+import countryPointsJSON from 'data/country-points.json';
 
 import { ACTORTYPES, MAP_OPTIONS } from 'themes/config';
 
@@ -55,6 +56,72 @@ const MapWrapper = styled((p) => <Box {...p} />)`
   background: #F9F9FA;
 `;
 const MAX_VALUE_COUNTRIES = 100;
+
+const reduceCountryData = ({
+  features,
+  entities, // actors
+  countriesVia,
+  countriesChildTargets,
+  hasDirectCountries,
+  mapKeyOptionMap,
+  mapSubject,
+}) => features.reduce(
+  (memo, feature) => {
+    const countryDirect = hasDirectCountries
+      && entities.get(parseInt(ACTORTYPES.COUNTRY, 10)).find(
+        (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code)
+      );
+    const countryVia = !countryDirect
+      && countriesVia
+      && countriesVia.find(
+        (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code)
+      );
+    const countryChildTarget = !countryDirect
+      && !countryVia
+      && countriesChildTargets
+      && countriesChildTargets.find(
+        (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code)
+      );
+    const country = countryDirect || countryVia || countryChildTarget;
+
+    if (country) {
+      let styleOption = mapKeyOptionMap.direct;
+      let content = mapSubject === 'actors'
+        ? 'As direct actor'
+        : 'As direct target';
+      if (countryVia) {
+        styleOption = mapKeyOptionMap.via;
+        content = mapSubject === 'actors'
+          ? 'As member of group actor'
+          : 'As member of target';
+      } else if (countryChildTarget) {
+        styleOption = mapKeyOptionMap.children;
+        content = mapSubject === 'actors'
+          ? 'As actor of child activity' //  should never happen
+          : 'As target of child activity';
+      }
+      return [
+        ...memo,
+        {
+          ...feature,
+          id: country.get('id'),
+          attributes: country.get('attributes').toJS(),
+          tooltip: {
+            id: country.get('id'),
+            title: country.getIn(['attributes', 'title']),
+            content: <Text size="small" style={{ fontStyle: 'italic' }}>{content}</Text>,
+          },
+          values: {
+            actions: styleOption.colorValue,
+          },
+        },
+      ];
+    }
+    return memo;
+  },
+  [],
+);
+
 export function ActionMap({
   entities,
   mapSubject,
@@ -182,62 +249,24 @@ export function ActionMap({
     };
   }
 
-  const countryData = countriesJSON.features.reduce(
-    (memo, feature) => {
-      const countryDirect = hasDirectCountries
-        && entities.get(parseInt(ACTORTYPES.COUNTRY, 10)).find(
-          (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3)
-        );
-      const countryVia = !countryDirect
-        && countriesVia
-        && countriesVia.find(
-          (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3)
-        );
-      const countryChildTarget = !countryDirect
-        && !countryVia
-        && countriesChildTargets
-        && countriesChildTargets.find(
-          (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3)
-        );
-      const country = countryDirect || countryVia || countryChildTarget;
-
-      if (country) {
-        let styleOption = mapKeyOptionMap.direct;
-        let content = mapSubject === 'actors'
-          ? 'As direct actor'
-          : 'As direct target';
-        if (countryVia) {
-          styleOption = mapKeyOptionMap.via;
-          content = mapSubject === 'actors'
-            ? 'As member of group actor'
-            : 'As member of target';
-        } else if (countryChildTarget) {
-          styleOption = mapKeyOptionMap.children;
-          content = mapSubject === 'actors'
-            ? 'As actor of child activity' //  should never happen
-            : 'As target of child activity';
-        }
-        return [
-          ...memo,
-          {
-            ...feature,
-            id: country.get('id'),
-            attributes: country.get('attributes').toJS(),
-            tooltip: {
-              id: country.get('id'),
-              title: country.getIn(['attributes', 'title']),
-              content: <Text size="small" style={{ fontStyle: 'italic' }}>{content}</Text>,
-            },
-            values: {
-              actions: styleOption.colorValue,
-            },
-          },
-        ];
-      }
-      return memo;
-    },
-    [],
-  );
+  const countryData = entities && reduceCountryData({
+    features: countriesJSON.features,
+    entities, // actors
+    countriesVia,
+    countriesChildTargets,
+    hasDirectCountries,
+    mapKeyOptionMap,
+    mapSubject,
+  });
+  const countryPointData = entities && reduceCountryData({
+    features: countryPointsJSON.features,
+    entities, // actors
+    countriesVia,
+    countriesChildTargets,
+    hasDirectCountries,
+    mapKeyOptionMap,
+    mapSubject,
+  });
 
   let memberOption;
   let mapTitle;
@@ -277,6 +306,7 @@ export function ActionMap({
       <MapWrapper>
         <MapContainer
           countryData={countryData}
+          countryPointData={countryPointData}
           countryFeatures={countriesJSON.features}
           indicator="actions"
           onCountryClick={(id) => onActorClick(id)}
