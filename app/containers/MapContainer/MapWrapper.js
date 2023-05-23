@@ -19,7 +19,7 @@ import qe from 'utils/quasi-equals';
 import Tooltip from './Tooltip';
 import TooltipContent from './TooltipContent';
 import {
-  filterFeatureMaxZoom, getAreaLayer, getCircleLayer, getPointLayer,
+  getCircleLayer, getPointLayer, scaleColorCount,
 } from './utils';
 
 const Styled = styled.div`
@@ -363,13 +363,14 @@ export function MapWrapper({
       const jsonLayer = getPointLayer({
         data: countryPointData,
         config: {
-          zoom, indicator, mapOptions, mapSubject, maxValueCountries, styleType, valueToStyle,
+          zoom, indicator, mapOptions, mapSubject, maxValueCountries, tooltip,
         },
         markerEvents: {
           click: (e) => onFeatureClick(e),
           mouseout: () => onFeatureOver(),
         },
       });
+
       countryPointOverlayGroupRef.current.addLayer(jsonLayer);
     }
   }, [countryPointData, zoom, indicator, tooltip, mapSubject]);
@@ -382,14 +383,61 @@ export function MapWrapper({
         countryData,
         {
           style: (feature) => {
-            const styles = getAreaLayer(feature, indicator, mapOptions, mapSubject, maxValueCountries, styleType, valueToStyle);
-            const filterFeature = filterFeatureMaxZoom(feature, zoom);
-            console.log(filterFeature);
+            const scale = mapSubject
+              && scaleColorCount(maxValueCountries, mapOptions.GRADIENT[mapSubject], indicator === 'indicator');
+            // treat 0 as no data when showing counts
+            const noDataThreshold = indicator === 'indicator' ? 0 : 1;
+
+            // default style
+            const defaultStyle = styleType && mapOptions.STYLE[styleType]
+              ? {
+                ...mapOptions.DEFAULT_STYLE,
+                ...mapOptions.STYLE[styleType],
+              }
+              : mapOptions.DEFAULT_STYLE;
+
+            // check if feature is "active"
+            const fstyle = feature.isActive
+              ? {
+                ...defaultStyle,
+                ...mapOptions.STYLE.active,
+              }
+              : defaultStyle;
+
+            // check for value-to-style function
+            if (
+              valueToStyle
+              && feature.values
+              && typeof feature.values[indicator] !== 'undefined'
+            ) {
+              return {
+                ...fstyle,
+                ...valueToStyle(feature.values[indicator]),
+                ...feature.style,
+              };
+            }
+            // style based on subject/indicator
+            if (mapSubject) {
+              if (
+                feature.values
+                && typeof feature.values[indicator] !== 'undefined'
+                && feature.values[indicator] >= noDataThreshold
+              ) {
+                return {
+                  ...fstyle,
+                  fillColor: scale(feature.values[indicator]),
+                  ...feature.style,
+                };
+              }
+              return {
+                ...fstyle,
+                fillColor: mapOptions.NO_DATA_COLOR,
+                ...feature.style,
+              };
+            }
             return {
-              // not working
-              opacity: filterFeature ? 0 : 1,
-              fillOpacity: filterFeature ? 0 : 1,
-              ...styles,
+              ...fstyle,
+              ...feature.style,
             };
           },
         }
