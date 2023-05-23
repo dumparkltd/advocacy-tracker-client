@@ -363,13 +363,14 @@ export function MapWrapper({
       const jsonLayer = getPointLayer({
         data: countryPointData,
         config: {
-          zoom, indicator, mapOptions, mapSubject, maxValueCountries, styleType, valueToStyle,
+          zoom, indicator, mapOptions, mapSubject, maxValueCountries, tooltip,
         },
         markerEvents: {
           click: (e) => onFeatureClick(e),
           mouseout: () => onFeatureOver(),
         },
       });
+
       countryPointOverlayGroupRef.current.addLayer(jsonLayer);
     }
   }, [countryPointData, zoom, indicator, tooltip, mapSubject]);

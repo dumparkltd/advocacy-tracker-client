@@ -57,20 +57,37 @@ export const valueOfCircle = (radius, range, config) => {
   return scale(radius);
 };
 
-export const filterFeatureMaxZoom = (feature, zoom) => {
+const filterFeaturesByZoom = (feature, zoom, propertyMaxZoom) => {
   if (
-    feature.properties && feature.properties.marker_max_zoom
+    feature.properties && feature.properties[propertyMaxZoom]
   ) {
-    return zoom <= parseInt(feature.properties.marker_max_zoom, 10);
+    return zoom <= parseInt(feature.properties[propertyMaxZoom], 10);
   }
   return false;
+};
+
+const getPointIconFillColor = (feature, mapSubject, indicator, maxValueCountries, mapOptions) => {
+  if (feature.style && feature.style.fillColor) {
+    return feature.style.fillColor;
+  } if (mapSubject) {
+    const noDataThreshold = indicator === 'indicator' ? 0 : 1;
+    if (feature.values
+      && typeof feature.values[indicator] !== 'undefined'
+      && feature.values[indicator] >= noDataThreshold) {
+      const scale = mapSubject
+        && scaleColorCount(maxValueCountries, mapOptions.GRADIENT[mapSubject], indicator === 'indicator');
+
+      return scale(feature.values[indicator]);
+    }
+  }
+  return mapOptions.NO_DATA_COLOR;
 };
 
 // append point countries onto map
 export const getPointLayer = ({ data, config, markerEvents }) => {
   const layer = L.featureGroup(null);
   const {
-    indicator, mapOptions, mapSubject, maxValueCountries, styleType, valueToStyle, zoom,
+    indicator, mapOptions, mapSubject, maxValueCountries, tooltip, zoom,
   } = config;
   const events = {
     mouseover: (e) => markerEvents.mouseover ? markerEvents.mouseover(e, config) : null,
@@ -78,17 +95,35 @@ export const getPointLayer = ({ data, config, markerEvents }) => {
     click: (e) => (markerEvents.click ? markerEvents.click(e, config) : null),
   };
 
+  const tooltipFeatureIds = (tooltip && tooltip.features && tooltip.features.length > 0) ? tooltip.features.map((f) => f.id) : [];
   const jsonLayer = L.geoJSON(data, {
     pointToLayer: (feature, latlng) => {
-      const filterFeature = filterFeatureMaxZoom(feature, zoom);
-      const styles = getAreaLayer(feature, indicator, mapOptions, mapSubject, maxValueCountries, styleType, valueToStyle);
-      return L.circleMarker(latlng, {
-        radius: 6,
+      const iconCircleColor = getPointIconFillColor(feature, mapSubject, indicator, maxValueCountries, mapOptions);
+      const iconRingColor = tooltipFeatureIds.length && tooltipFeatureIds.indexOf(feature.id) > -1 ? mapOptions.STYLE.active.color : 'white';
+      const svgIcon = L.divIcon({
+        html: `
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 28 30"
+  width="28"
+  height="30"
+>
+  <path d="m24,14.18c0-5.52-4.48-10-10-10S4,8.66,4,14.18c0,4.37,2.8,8.07,6.71,9.43l3.29,4.2,3.29-4.2c3.9-1.36,6.71-5.07,6.71-9.43Z" fill="${iconRingColor}" filter="drop-shadow(0px 2px 2px rgba(0, 0, 0, 0.4))"/>
+  <circle cx="14" cy="14.18" r="8.18" fill="${iconCircleColor}"/>
+</svg>`,
+        className: '',
+        iconSize: [20, 25],
+        iconAnchor: [15, 28],
+      });
+
+      const filterFeature = filterFeaturesByZoom(feature, zoom, 'marker_max_zoom');
+
+      return L.marker(latlng, {
         zIndex: 1,
         pane: 'markerPane',
         opacity: filterFeature ? 1 : 0,
         fillOpacity: filterFeature ? 1 : 0,
-        ...styles,
+        icon: svgIcon,
       }).on(events);
     },
   });
