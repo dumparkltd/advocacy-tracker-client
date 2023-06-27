@@ -217,13 +217,13 @@ export function EntitiesMapActions({
       const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
       if (country) {
         let hasActiveStatements = indicatorEntities.some(
-          (entity) => entity.get('actors').some(
+          (entity) => entity.get('actors') && entity.get('actors').some(
             (actorId) => qe(actorId, country.get('id'))
           )
         );
         if (!hasActiveStatements && includeActorMembers) {
           hasActiveStatements = indicatorEntities.some(
-            (entity) => entity.get('actorsMembers').some(
+            (entity) => entity.get('actorsMembers') && entity.get('actorsMembers').some(
               (actorId) => qe(actorId, country.get('id'))
             )
           );
