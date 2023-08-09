@@ -907,15 +907,17 @@ function mapDispatchToProps(dispatch, props) {
               // console.log('prevHighestRoleId', prevHighestRoleId)
               const newHighestRoleId = creates.size > 0 ? creates.first() : USER_ROLES.DEFAULT.value;
               // console.log('newHighestRoleId', newHighestRoleId)
-              const prevRoleIds = roles.filter(
-                (role) => {
-                  const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(role.get('id'), 10)));
-                  const prevHighestRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(prevHighestRoleId, 10)));
-                  return prevHighestRole.order <= theRole.order;
-                }
-              ).map(
-                (role) => parseInt(role.get('id'), 10)
-              ).toList();
+              const prevRoleIds = prevHighestRoleId
+                ? roles.filter(
+                  (role) => {
+                    const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(role.get('id'), 10)));
+                    const prevHighestRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(prevHighestRoleId, 10)));
+                    return prevHighestRole.order <= theRole.order;
+                  }
+                ).map(
+                  (role) => parseInt(role.get('id'), 10)
+                ).toList()
+                : List();
               // console.log('prevRoleIds', prevRoleIds && prevRoleIds.toJS())
               const createRoleIds = newHighestRoleId === USER_ROLES.DEFAULT.value
                 ? List()
