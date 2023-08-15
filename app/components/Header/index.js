@@ -163,7 +163,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
     } else {
       this.props.onPageLink(path);
     }
-  }
+  };
 
   resize = () => {
     // reset
@@ -204,7 +204,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                     title={appTitle}
                   >
                     <LogoWrap>
-                      <Icon name="logo" size={isMinSize(size, 'medium') ? '72px' : '60px'} />
+                      <Icon name="logo" size={isMinSize(size, 'medium') ? '72px' : '50px'} />
                     </LogoWrap>
                     <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
                       <BrandTitle>

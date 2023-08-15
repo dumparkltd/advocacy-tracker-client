@@ -6,8 +6,8 @@ const LogoWrap = styled.div`
   color: black;
   margin-left: ${(props) => props.theme.sizes.header.paddingLeft.mobile || 6}px;
   box-shadow: rgb(0 0 0 / 20%) 0px 2px 4px;
-  height: 67px;
-  width: 60px;
+  height: 58px;
+  width: 50px;
   @media print {
     padding-left: 0;
   }
