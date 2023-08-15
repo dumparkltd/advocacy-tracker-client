@@ -71,7 +71,7 @@ const LinkPage = styled((p) => <Button plain as="a" justify="center" fill="verti
   background-color: ${({ active }) => active ? '#f0f0f0' : 'transparent'};
   padding-right: 12px;
   padding-left: 12px;
-  padding-top: 24px;
+  padding-top: 16px;
   padding-bottom: ${({ wide }) => !wide ? 16 : 0}px;
   width: ${({ wide }) => !wide ? '100%' : 'auto'};
   text-align: center;
