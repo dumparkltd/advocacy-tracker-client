@@ -13,7 +13,7 @@ import { version } from '../../package.json';
 export const SERVER = (process && process.env && process.env.SERVER) || 'production';
 export const IS_DEV = SERVER !== 'production';
 
-export const VERSION = `${version}${IS_DEV ? ' [DEV]' : ''}`;
+export const VERSION = `${version}${IS_DEV ? ' [TEST-DB]' : ''}`;
 
 export const ENDPOINTS = {
   API: IS_DEV // server API endpoint

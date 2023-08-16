@@ -5,7 +5,7 @@ import styled, { withTheme } from 'styled-components';
 import {
   Box, Button, ResponsiveContext, Heading,
 } from 'grommet';
-import { ROUTES } from 'themes/config';
+import { ROUTES, IS_DEV } from 'themes/config';
 import { isMinSize } from 'utils/responsive';
 import appMessages from 'containers/App/messages';
 import Icon from 'components/Icon';
@@ -15,28 +15,28 @@ import Brand from './Brand';
 import LogoWrap from './LogoWrap';
 
 // const Claim = styled((p) => <Text {...p} />)`
-//   font-family: ${(props) => props.theme.fonts.title};
-//   font-size: ${(props) => props.theme.text.xxsmall.size};
-//   line-height: ${(props) => props.theme.text.xxsmall.size};
-//   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-//     font-size: ${(props) => props.theme.text.xsmall.size};
-//     line-height: ${(props) => props.theme.text.xsmall.size};
+//   font-family: ${({ theme }) => theme.fonts.title};
+//   font-size: ${({ theme }) => theme.text.xxsmall.size};
+//   line-height: ${({ theme }) => theme.text.xxsmall.size};
+//   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+//     font-size: ${({ theme }) => theme.text.xsmall.size};
+//     line-height: ${({ theme }) => theme.text.xsmall.size};
 //   }
 // `;
 const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
   margin: 0;
-  font-family: ${(props) => props.theme.fonts.title};
-  font-size: ${(props) => props.theme.text.large.size};
-  line-height: ${(props) => props.theme.text.large.size};
+  font-family: ${({ theme }) => theme.fonts.title};
+  font-size: ${({ theme, isDev }) => isDev ? theme.text.medium.size : theme.text.large.size};
+  line-height: ${({ theme, isDev }) => isDev ? theme.text.medium.size : theme.text.large.size};
   font-weight: 500;
   padding: 0;
   max-width: 120px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${(props) => props.theme.text.xlarge.size};
-    line-height: ${(props) => props.theme.text.xlarge.size};
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    font-size: ${({ theme, isDev }) => isDev ? theme.text.large.size : theme.text.xlarge.size};
+    line-height: ${({ theme, isDev }) => isDev ? theme.text.large.size : theme.text.xlarge.size};
   }
   @media print {
-    font-size: ${(props) => props.theme.sizes.header.print.title};
+    font-size: ${({ theme }) => theme.sizes.header.print.title};
   }
 `;
 
@@ -50,9 +50,9 @@ const Styled = styled.div`
   top: 0;
   left: 0;
   right: 0;
-  height:${(props) => props.theme.sizes.header.banner.heightMobile}px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    height:${(props) => props.theme.sizes.header.banner.height}px;
+  height:${({ theme }) => theme.sizes.header.banner.heightMobile}px;
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    height:${({ theme }) => theme.sizes.header.banner.height}px;
   }
   background-color: #000;
   box-shadow: ${(props) => props.hasShadow ? '0px 0px 5px 0px rgba(0,0,0,0.5)' : 'none'};
@@ -78,9 +78,9 @@ const LinkPage = styled((p) => <Button plain as="a" justify="center" fill="verti
   font-size: ${({ theme }) => theme.text.small.size};
   line-height: ${({ theme }) => theme.text.small.height};
   font-weight: ${({ wide, active }) => (!wide && active) ? 500 : 300};
-  height:${(props) => props.theme.sizes.header.banner.heightMobile}px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    height:${(props) => props.theme.sizes.header.banner.height}px;
+  height:${({ theme }) => theme.sizes.header.banner.heightMobile}px;
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    height:${({ theme }) => theme.sizes.header.banner.height}px;
   }
   &:hover {
     color: ${({ active }) => active ? 'black' : 'white'};
@@ -207,8 +207,8 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                       <Icon name="logo" size={isMinSize(size, 'medium') ? '72px' : '60px'} />
                     </LogoWrap>
                     <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
-                      <BrandTitle>
-                        <FormattedMessage {...appMessages.app.title} />
+                      <BrandTitle isDev={IS_DEV}>
+                        {`${intl.formatMessage(appMessages.app.title)}${IS_DEV ? ' [TEST-DB]' : ''}`}
                       </BrandTitle>
                     </Box>
                   </Brand>
