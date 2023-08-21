@@ -16,7 +16,7 @@ import { Add, Multiple } from 'grommet-icons';
 
 import { isEqual } from 'lodash/lang';
 import { truncateText } from 'utils/string';
-import { isMinSize } from 'utils/responsive';
+import { isMinSize, isMaxSize } from 'utils/responsive';
 
 import { TEXT_TRUNCATE } from 'themes/config';
 import { FILTER_FORM_MODEL, EDIT_FORM_MODEL } from 'containers/EntityListForm/constants';
@@ -138,6 +138,14 @@ const TypeOption = styled(ButtonOld)`
   color: ${(props) => props.active ? palette('headerNavMainItem', 1) : 'inherit'};
 `;
 
+const Count = styled((p) => <Box {...p} />)`
+  background-color: ${({ theme }) => theme.global.colors.highlight};
+  border-radius: 9999px;
+  width: 24px;
+  height: 24px;
+  color: white;
+`;
+
 const STATE_INITIAL = {
   activeOption: null,
   showTypes: false,
@@ -215,7 +223,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     if (!wrapperContains && !buttonContains) {
       this.setState({ showTypes: false });
     }
-  }
+  };
 
   onSetActiveOption = (option) => {
     this.setState({ activeOption: option });
@@ -474,6 +482,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     const normalActions = headerActions && headerActions.filter(
       (action) => !action.isMember
     );
+
     return (
       <ResponsiveContext.Consumer>
         {(size) => {
@@ -573,6 +582,12 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                       label={(
                         <Box direction="row" gap="small" align="center">
                           <Box>{<Icon name="filter" text />}</Box>
+                          {isMaxSize(size, 'medium') && currentFilters && currentFilters.length > 0
+                            && (
+                              <Count alignContent="center" align="center" justify="center">
+                                <Text color="white" size="small">{currentFilters.length}</Text>
+                              </Count>
+                            )}
                           {isMinSize(size, 'medium') && (
                             <Text>{intl.formatMessage(messages.listOptions.showFilter)}</Text>
                           )}
@@ -733,7 +748,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                   showCancelButton={showFilters}
                   onSubmit={showEditOptions
                     ? (associations) => {
-                    // close and reset option panel
+                      // close and reset option panel
                       this.setState({ activeOption: null });
                       onUpdate(associations, activeOption);
                     }
