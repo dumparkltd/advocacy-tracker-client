@@ -71,16 +71,19 @@ const LinkPage = styled((p) => <Button plain as="a" justify="center" fill="verti
   background-color: ${({ active }) => active ? '#f0f0f0' : 'transparent'};
   padding-right: 12px;
   padding-left: 12px;
-  padding-top: 16px;
+  padding-top: 24px;
   padding-bottom: ${({ wide }) => !wide ? 16 : 0}px;
   width: ${({ wide }) => !wide ? '100%' : 'auto'};
   text-align: center;
   font-size: ${({ theme }) => theme.text.small.size};
-  line-height: ${({ theme }) => theme.text.small.height};
+  line-height: ${({ theme }) => theme.text.small.size};
   font-weight: ${({ wide, active }) => (!wide && active) ? 500 : 300};
   height:${(props) => props.theme.sizes.header.banner.heightMobile}px;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     height:${(props) => props.theme.sizes.header.banner.height}px;
+  }
+  @media (max-width: ${({ theme }) => theme.breakpoints.medium}) {
+  padding-top: 16px;
   }
   &:hover {
     color: ${({ active }) => active ? 'black' : 'white'};
