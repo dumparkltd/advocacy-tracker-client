@@ -23,6 +23,7 @@ const ListWrapper = styled.div`
 
 const OptionsWrapper = styled((p) => <Box {...p} />)`
   width: 100%;
+  margin-bottom:5px;
 `;
 
 const GroupWrapper = styled.div`
@@ -54,6 +55,7 @@ const More = styled.div`
   padding: 0.5em 1em;
   text-align: center;
   font-size: 0.85em;
+  margin-bottom: 20px;
   @media print {
     font-size: ${(props) => props.theme.sizes.print.smaller};
   }
@@ -84,15 +86,15 @@ function OptionList(props) {
   return (
     <Styled>
       <ListWrapper>
-        { groups && groups.toList().map((group, gid) => (
+        {groups && groups.toList().map((group, gid) => (
           <GroupWrapper key={gid}>
-            { group.get('title') && (
+            {group.get('title') && (
               <GroupTitle>
-                { group.get('title') }
+                {group.get('title')}
               </GroupTitle>
             )}
             <OptionsWrapper>
-              { group.get('options') && group.get('options').map((option, i) => {
+              {group.get('options') && group.get('options').map((option, i) => {
                 const id = `${i}-${kebabCase(option.get('value'))}`;
                 return (
                   <Option
@@ -107,7 +109,7 @@ function OptionList(props) {
             </OptionsWrapper>
           </GroupWrapper>
         ))}
-        { (!props.options || props.options.size === 0)
+        {(!props.options || props.options.size === 0)
           && (
             <Empty>
               <FormattedMessage {...messages.empty} />
@@ -115,7 +117,7 @@ function OptionList(props) {
           )
         }
       </ListWrapper>
-      { hasMore
+      {hasMore
         && (
           <More>
             <FormattedMessage
