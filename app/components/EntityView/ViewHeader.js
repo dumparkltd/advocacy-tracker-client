@@ -7,7 +7,7 @@ import {
 import { LinkPrevious } from 'grommet-icons';
 import ButtonFactory from 'components/buttons/ButtonFactory';
 
-import { isMinSize, isMaxSize } from 'utils/responsive';
+import { isMaxSize } from 'utils/responsive';
 
 import ViewPanel from './ViewPanel';
 import ViewPanelInside from './ViewPanelInside';
@@ -34,7 +34,11 @@ const MyButton = styled((p) => <Button plain {...p} />)`
     stroke: ${({ theme }) => theme.global.colors.highlight};
   }
 `;
-
+const StyledButtonBox = styled((p) => <Box {...p} />)`
+  @media (max-width: ${({ theme }) => theme.breakpoints.ms}){
+    max-width:100px
+  }
+`;
 function ViewHeader({
   title,
   buttons,
@@ -42,6 +46,7 @@ function ViewHeader({
   onTypeClick,
 }) {
   const size = React.useContext(ResponsiveContext);
+
   return (
     <ViewPanel>
       <ViewPanelInside>
@@ -80,44 +85,21 @@ function ViewHeader({
                 </Box>
               )}
             </Box>
-            {isMinSize(size, 'ms')
-              && buttons && buttons.length > 0
+            {buttons && buttons.length > 0
               && (
-                <Box direction="row" align="center" gap="small">
-                  <Box direction="row" align="center" gap="small">
+                <Box direction="row" align="center" gap={isMaxSize(size, 'small') ? '0px' : 'small'}>
+                  <Box direction="row" align="center" gap={isMaxSize(size, 'small') ? '0px' : 'small'}>
                     {buttons.map(
                       (button, i) => (
-                        <Box pad="xsmall" key={i}>
+                        <StyledButtonBox gap={isMaxSize(size, 'small') ? '0px' : 'small'} key={i}>
                           <ButtonFactory button={button} />
-                        </Box>
+                        </StyledButtonBox>
                       )
                     )}
                   </Box>
                 </Box>
               )}
           </Box>
-          {isMaxSize(size, 'small')
-            && buttons && buttons.length > 0
-            && (
-              <Box
-                direction="row"
-                pad={{ top: 'medium', horizontal: 'medium', bottom: 'small' }}
-                align="end"
-                justify="between"
-              >
-                <Box direction="row" align="center" gap="small">
-                  <Box direction="row" align="center" gap="small">
-                    {buttons.map(
-                      (button, i) => (
-                        <Box pad="xsmall" key={i}>
-                          <ButtonFactory button={button} />
-                        </Box>
-                      )
-                    )}
-                  </Box>
-                </Box>
-              </Box>
-            )}
         </Main>
       </ViewPanelInside>
     </ViewPanel>
