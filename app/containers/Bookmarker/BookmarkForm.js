@@ -35,11 +35,11 @@ const Styled = styled.div`
   z-index: 10;
   left: auto;
   right:0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.ms}) {
     width: 340px;
   }
-  @media (max-width: ${(props) => props.theme.breakpoints.medium}) {
-    width: 200px;
+  @media (max-width: ${({ theme }) => theme.breakpoints.ms}) {
+    width: 260px;
   }
 `;
 const StyledForm = styled.form`
