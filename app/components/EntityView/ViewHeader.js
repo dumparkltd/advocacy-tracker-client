@@ -57,7 +57,7 @@ function ViewHeader({
             align="center"
             justify="between"
           >
-            <Box direction="row" align="center" gap="small">
+            <Box direction="row" align="center" gap="xsmall">
               {onClose && (
                 <MyButton onClick={onClose} title="Back to previous view">
                   <Box pad="xsmall">
@@ -87,11 +87,11 @@ function ViewHeader({
             </Box>
             {buttons && buttons.length > 0
               && (
-                <Box direction="row" align="center" gap={isMaxSize(size, 'small') ? '0px' : 'small'}>
-                  <Box direction="row" align="center" gap={isMaxSize(size, 'small') ? '0px' : 'small'}>
+                <Box direction="row" align="center" gap={isMaxSize(size, 'ms') ? '0px' : 'small'}>
+                  <Box direction="row" align="center" gap={isMaxSize(size, 'ms') ? '0px' : 'small'}>
                     {buttons.map(
                       (button, i) => (
-                        <StyledButtonBox gap={isMaxSize(size, 'small') ? '0px' : 'small'} key={i}>
+                        <StyledButtonBox gap={isMaxSize(size, 'ms') ? '0px' : 'small'} key={i}>
                           <ButtonFactory button={button} />
                         </StyledButtonBox>
                       )
