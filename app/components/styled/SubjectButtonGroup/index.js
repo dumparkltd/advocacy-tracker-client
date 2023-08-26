@@ -17,6 +17,10 @@ const SubjectButtonGroup = styled((p) => (
 };
   overflow-x: scroll;
   white-space: nowrap; 
+  ::-webkit-scrollbar {
+   padding-top:1px;
+  }
 `;
+
 
 export default SubjectButtonGroup;
