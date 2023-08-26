@@ -65,7 +65,7 @@ export const selectRequestedAt = createSelector(
 export const selectReady = (state, { path }) => reduce(asArray(path),
   (areReady, readyPath) => areReady && (
     !!state.getIn(['global', 'ready', readyPath])
-      || Object.values(API).indexOf(readyPath) === -1
+    || Object.values(API).indexOf(readyPath) === -1
   ),
   true);
 
@@ -545,6 +545,15 @@ export const selectMapIndicator = createSelector(
     }
     return null; // default
   }
+);
+
+export const selectIsPrintView = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('print') ? locationQuery.get('print') !== '' : false
+);
+export const selectPrintConfig = createSelector(
+  getGlobal,
+  (state) => state.get('printConfig') || {}
 );
 
 // database ////////////////////////////////////////////////////////////////////////
@@ -1246,25 +1255,25 @@ export const selectActionTaxonomies = createSelector(
           tax.get('id'),
         )
       )
-    // ).map(
-    //   (tax) => {
-    //     // connectedActortypes
-    //     const actiontypeIds = actiontypeTaxonomies.reduce(
-    //       (memo, type) => {
-    //         if (
-    //           qe(
-    //             type.getIn(['attributes', 'taxonomy_id']),
-    //             tax.get('id')
-    //           )
-    //         ) {
-    //           return memo.push(type.getIn(['attributes', 'actortype_id']));
-    //         }
-    //         return memo;
-    //       },
-    //       List(),
-    //     );
-    //     return tax.set('actiontypeIds', actiontypeIds);
-    //   }
+      // ).map(
+      //   (tax) => {
+      //     // connectedActortypes
+      //     const actiontypeIds = actiontypeTaxonomies.reduce(
+      //       (memo, type) => {
+      //         if (
+      //           qe(
+      //             type.getIn(['attributes', 'taxonomy_id']),
+      //             tax.get('id')
+      //           )
+      //         ) {
+      //           return memo.push(type.getIn(['attributes', 'actortype_id']));
+      //         }
+      //         return memo;
+      //       },
+      //       List(),
+      //     );
+      //     return tax.set('actiontypeIds', actiontypeIds);
+      //   }
     )
 );
 
@@ -1341,25 +1350,25 @@ export const selectActiontypeTaxonomies = createSelector(
           typeId,
         )
       )
-    // ).map(
-    //   (tax) => {
-    //     // set all actiontypes valid for taxonomy
-    //     const actiontypeIds = actiontypeTaxonomies.reduce(
-    //       (memo, type) => {
-    //         if (
-    //           qe(
-    //             type.getIn(['attributes', 'taxonomy_id']),
-    //             tax.get('id')
-    //           )
-    //         ) {
-    //           return memo.push(type.getIn(['attributes', 'measuretype_id']));
-    //         }
-    //         return memo;
-    //       },
-    //       List(),
-    //     );
-    //     return tax.set('actiontypeIds', actiontypeIds);
-    //   }
+      // ).map(
+      //   (tax) => {
+      //     // set all actiontypes valid for taxonomy
+      //     const actiontypeIds = actiontypeTaxonomies.reduce(
+      //       (memo, type) => {
+      //         if (
+      //           qe(
+      //             type.getIn(['attributes', 'taxonomy_id']),
+      //             tax.get('id')
+      //           )
+      //         ) {
+      //           return memo.push(type.getIn(['attributes', 'measuretype_id']));
+      //         }
+      //         return memo;
+      //       },
+      //       List(),
+      //     );
+      //     return tax.set('actiontypeIds', actiontypeIds);
+      //   }
     )
 );
 
