@@ -1,9 +1,17 @@
+import React from 'react';
 import styled from 'styled-components';
+import { usePrint } from 'containers/App/PrintContext';
 
-const PrintHide = styled.div`
+const Styled = styled.div`
+  display: ${({ isPrint, displayProp }) => isPrint ? (displayProp || 'block') : 'none'};
   @media print {
-    display: none !important;
+    display: ${({ displayProp }) => displayProp || 'block'};
   }
 `;
 
-export default PrintHide;
+export function PrintOnly(props) {
+  const isPrint = usePrint();
+  return <Styled isPrint={isPrint} {...props} />;
+}
+
+export default PrintOnly;

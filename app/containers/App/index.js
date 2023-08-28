@@ -20,7 +20,7 @@ import EntityNew from 'containers/EntityNew';
 import { getAuthValues } from 'utils/api-request';
 
 import { sortEntities } from 'utils/sort';
-import { ROUTES, API, PRINT } from 'themes/config';
+import { ROUTES, API } from 'themes/config';
 
 import {
   selectIsSignedIn,
@@ -47,7 +47,6 @@ import {
 import { DEPENDENCIES } from './constants';
 
 import messages from './messages';
-import { PrintContext } from './PrintContext';
 
 const Main = styled.div`
   position: ${(props) => props.isHome ? 'relative' : 'absolute'};
@@ -73,69 +72,6 @@ const Main = styled.div`
   }
 `;
 // overflow: ${(props) => props.isHome ? 'auto' : 'hidden'};
-const PrintWrapperInner = styled.div`
-  position: ${({ isPrint, fixed = false }) => (isPrint && fixed) ? 'absolute' : 'static'};
-  top: ${({ isPrint }) => isPrint ? 20 : 0}px;
-  bottom: ${({ isPrint, fixed = false }) => {
-    if (isPrint && fixed) {
-      return '20px';
-    }
-    if (isPrint) {
-      return 'auto';
-    }
-    return 0;
-  }};
-  right: ${({ isPrint }) => isPrint ? 20 : 0}px;
-  left: ${({ isPrint }) => isPrint ? 20 : 0}px;
-  @media print {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    width: ${(props) => props.fixed ? getPrintWidth(props) : '100%'};
-    height: ${(props) => getPrintHeight(props)};
-  }
-`;
-const PrintWrapper = styled.div`
-  position: relative;
-  margin-bottom: ${({ isPrint }) => isPrint ? '140px' : '0px'};
-  margin-right: ${({ isPrint }) => isPrint ? 'auto' : '0px'};
-  margin-left: ${({ isPrint }) => isPrint ? 'auto' : '0px'};
-  bottom: ${({ isPrint, fixed = false }) => {
-    if (isPrint && fixed) {
-      return 0;
-    }
-    if (isPrint) {
-      return 'auto';
-    }
-    return 0;
-  }};`;
-const getPrintHeight = ({
-  isPrint,
-  orient = 'portrait',
-  size = 'A4',
-  fixed = false,
-}) => {
-  if (fixed && isPrint) {
-    return `${PRINT.SIZES[size][orient].H}pt`;
-  }
-  if (isPrint) {
-    return 'auto';
-  }
-  return '100%';
-};
-
-const getPrintWidth = ({
-  isPrint,
-  orient = 'portrait',
-  size = 'A4',
-}) => {
-  if (isPrint) {
-    return `${PRINT.SIZES[size][orient].W}pt`;
-  }
-  return '100%';
-};
 
 class App extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
@@ -217,14 +153,15 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       isUserSignedIn,
       isMember,
       isVisitor,
-      isPrintView,
       location,
       newEntityModal,
       user,
       children,
       isUserAuthenticating,
+      isPrintView,
       printArgs,
     } = this.props;
+    console.log(isPrintView, printArgs);
     const { intl } = this.context;
     const title = intl.formatMessage(messages.app.title);
     const isHome = location.pathname === '/';
@@ -245,7 +182,6 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           <Header
             isSignedIn={isUserSignedIn}
             isVisitor={isVisitor}
-            isPrintView={isPrintView}
             user={user}
             pages={pages && this.preparePageMenuPages(pages, location.pathname)}
             navItems={this.prepareMainMenuItems(
@@ -267,24 +203,8 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             currentPath={location.pathname}
           />
         )}
-        <Main isHome={isHomeOrAuth} isPrint={isPrintView}>
-          <PrintWrapper
-            isPrint={isPrintView}
-            fixed={printArgs.fixed}
-            orient={printArgs.printOrientation}
-            size={printArgs.printSize}
-          >
-            <PrintWrapperInner
-              isPrint={isPrintView}
-              fixed={printArgs.fixed}
-              orient={printArgs.printOrientation}
-              size={printArgs.printSize}
-            >
-              <PrintContext.Provider value={isPrintView}>
-                {React.Children.toArray(children)}
-              </PrintContext.Provider>
-            </PrintWrapperInner>
-          </PrintWrapper>
+        <Main isHome={isHomeOrAuth}>
+          {React.Children.toArray(children)}
         </Main>
         {newEntityModal && (
           <ReactModal
@@ -351,7 +271,6 @@ App.propTypes = {
   isUserAuthenticating: PropTypes.bool,
   isMember: PropTypes.bool,
   isVisitor: PropTypes.bool,
-  isPrintView: PropTypes.bool,
   user: PropTypes.object,
   pages: PropTypes.object,
   validateToken: PropTypes.func,
@@ -360,6 +279,7 @@ App.propTypes = {
   location: PropTypes.object.isRequired,
   newEntityModal: PropTypes.object,
   onCloseModal: PropTypes.func,
+  isPrintView: PropTypes.bool,
   printArgs: PropTypes.object,
 };
 App.contextTypes = {
@@ -372,14 +292,14 @@ const mapStateToProps = (state) => ({
   isVisitor: selectIsUserVisitor(state),
   isUserSignedIn: selectIsSignedIn(state),
   isUserAuthenticating: selectIsAuthenticating(state),
-  isPrintView: selectIsPrintView(state),
-  printArgs: selectPrintConfig(state),
   user: selectSessionUserAttributes(state),
   pages: selectEntitiesWhere(state, {
     path: API.PAGES,
     where: { draft: false },
   }),
   newEntityModal: selectNewEntityModal(state),
+  isPrintView: selectIsPrintView(state),
+  printArgs: selectPrintConfig(state),
 });
 
 export function mapDispatchToProps(dispatch) {

@@ -88,6 +88,8 @@ export const SET_INCLUDE_TARGET_CHILDREN_ON_MAP = 'impactoss/App/SET_INCLUDE_TAR
 export const SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP = 'impactoss/App/SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP';
 export const SET_INCLUDE_MEMBERS_FORFILTERS = 'impactoss/App/SET_INCLUDE_MEMBERS_FORFILTERS';
 export const SET_INCLUDE_INOFFICAL_STATEMENTS = 'impactoss/App/SET_INCLUDE_INOFFICAL_STATEMENTS';
+export const PRINT_VIEW = 'impactoss/App/PRINT_VIEW';
+export const CLOSE_PRINT_VIEW = 'impactoss/App/CLOSE_PRINT_VIEW';
 
 export const FILTERS_PANEL = 'filters';
 export const EDIT_PANEL = 'edit';
@@ -133,4 +135,10 @@ export const VIEWPORTS = {
   SMALL: 2,
   MEDIUM: 3,
   LARGE: 4,
+};
+
+export const PRINT_TYPES = {
+  LIST: 1,
+  SINGLE: 2,
+  FF: 3,
 };
