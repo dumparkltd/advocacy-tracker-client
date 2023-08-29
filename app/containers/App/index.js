@@ -16,11 +16,12 @@ import { Box, Text } from 'grommet';
 import Header from 'components/Header';
 import Overlay from 'components/InfoOverlay/Overlay';
 import EntityNew from 'containers/EntityNew';
+import PrintUI from 'containers/PrintUI';
 
 import { getAuthValues } from 'utils/api-request';
 
 import { sortEntities } from 'utils/sort';
-import { ROUTES, API } from 'themes/config';
+import { ROUTES, API, PRINT } from 'themes/config';
 
 import {
   selectIsSignedIn,
@@ -44,34 +45,99 @@ import {
   saveErrorDismiss,
 } from './actions';
 
+import { PrintContext } from './PrintContext';
+
 import { DEPENDENCIES } from './constants';
 
 import messages from './messages';
 
 const Main = styled.div`
-  position: ${(props) => props.isHome ? 'relative' : 'absolute'};
-  top: ${(props) => props.isHome
-    ? 0
-    : props.theme.sizes.header.banner.heightMobile
-}px;
+  position: absolute;
+  top: ${({ isHome, theme }) => isHome
+    ? 0 : theme.sizes.header.banner.heightMobile}px;
   left: 0;
   right: 0;
   bottom:0;
-  background-color: transparent;
-  overflow: hidden;
-
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    top: ${(props) => props.isHome
-    ? 0
-    : props.theme.sizes.header.banner.height
-}px;
-  }
+  overflow: ${({ isPrint }) => isPrint ? 'auto' : 'hidden'};
+  width: auto;
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+      top: ${({ isHome, theme }) => isHome
+    ? 0 : theme.sizes.header.banner.height}px;
+    }
   @media print {
-    background: white;
+    background: transparent;
     position: static;
+    overflow: hidden;
   }
 `;
-// overflow: ${(props) => props.isHome ? 'auto' : 'hidden'};
+
+const PrintWrapperInner = styled.div`
+  position: ${({ isPrint, fixed = false }) => (isPrint && fixed) ? 'absolute' : 'static'};
+  top: ${({ isPrint }) => isPrint ? 20 : 0}px;
+  bottom: ${({ isPrint, fixed = false }) => {
+    if (isPrint && fixed) {
+      return '20px';
+    }
+    if (isPrint) {
+      return 'auto';
+    }
+    return 0;
+  }};
+  right: ${({ isPrint }) => isPrint ? 20 : 0}px;
+  left: ${({ isPrint }) => isPrint ? 20 : 0}px;
+  @media print {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: ${(props) => props.fixed ? getPrintWidth(props) : '100%'};
+    height: ${(props) => getPrintHeight(props)};
+  }
+`;
+
+const PrintWrapper = styled.div`
+  height:100%;
+  position: relative;
+  margin-bottom: ${({ isPrint }) => isPrint ? '140px' : '0px'};
+  margin-right: ${({ isPrint }) => isPrint ? 'auto' : '0px'};
+  margin-left: ${({ isPrint }) => isPrint ? 'auto' : '0px'};
+  bottom: ${({ isPrint, fixed = false }) => {
+    if (isPrint && fixed) {
+      return 0;
+    }
+    if (isPrint) {
+      return 'auto';
+    }
+    return 0;
+  }};`;
+
+const getPrintHeight = ({
+  isPrint,
+  orient = 'portrait',
+  size = 'A4',
+  fixed = false,
+}) => {
+  if (fixed && isPrint) {
+    return `${PRINT.SIZES[size][orient].H}pt`;
+  }
+  if (isPrint) {
+    return 'auto';
+  }
+  return '100%';
+};
+
+const getPrintWidth = ({
+  isPrint,
+  orient = 'portrait',
+  size = 'A4',
+}) => {
+  if (isPrint) {
+    return `${PRINT.SIZES[size][orient].W}pt`;
+  }
+  return '100%';
+};
+
 
 class App extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
@@ -182,6 +248,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           <Header
             isSignedIn={isUserSignedIn}
             isVisitor={isVisitor}
+            isPrintView={isPrintView}
             user={user}
             pages={pages && this.preparePageMenuPages(pages, location.pathname)}
             navItems={this.prepareMainMenuItems(
@@ -203,8 +270,25 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             currentPath={location.pathname}
           />
         )}
-        <Main isHome={isHomeOrAuth}>
-          {React.Children.toArray(children)}
+        <Main isHome={isHomeOrAuth} isPrint={isPrintView}>
+          {isPrintView && (<PrintUI />)}
+          <PrintWrapper
+            isPrint={isPrintView}
+            fixed={printArgs.fixed}
+            orient={printArgs.printOrientation}
+            size={printArgs.printSize}
+          >
+            <PrintWrapperInner
+              isPrint={isPrintView}
+              fixed={printArgs.fixed}
+              orient={printArgs.printOrientation}
+              size={printArgs.printSize}
+            >
+              <PrintContext.Provider value={isPrintView}>
+                {React.Children.toArray(children)}
+              </PrintContext.Provider>
+            </PrintWrapperInner>
+          </PrintWrapper>
         </Main>
         {newEntityModal && (
           <ReactModal

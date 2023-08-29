@@ -163,7 +163,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
     } else {
       this.props.onPageLink(path);
     }
-  }
+  };
 
   resize = () => {
     // reset
@@ -180,7 +180,9 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
       user,
       currentPath,
       isVisitor,
+      isPrintView,
     } = this.props;
+    console.log(isPrintView);
     const { intl } = this.context;
     const appTitle = `${intl.formatMessage(appMessages.app.title)} - ${intl.formatMessage(appMessages.app.claim)}`;
     const userPath = user ? `${ROUTES.USERS}/${user.id}` : '';
@@ -410,6 +412,7 @@ Header.propTypes = {
   theme: PropTypes.object.isRequired,
   search: PropTypes.object,
   isVisitor: PropTypes.bool,
+  isPrintView: PropTypes.bool,
 };
 
 export default withTheme(Header);
