@@ -52,7 +52,7 @@ import { DEPENDENCIES } from './constants';
 import messages from './messages';
 
 const Main = styled.div`
-  position: absolute;
+  position: ${({ isHome }) => isHome ? 'relative' : 'absolute'};
   top: ${({ isHome, theme }) => isHome
     ? 0 : theme.sizes.header.banner.heightMobile}px;
   left: 0;
@@ -60,6 +60,7 @@ const Main = styled.div`
   bottom:0;
   overflow: ${({ isPrint }) => isPrint ? 'auto' : 'hidden'};
   width: auto;
+  background-color: transparent;
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
       top: ${({ isHome, theme }) => isHome
     ? 0 : theme.sizes.header.banner.height}px;

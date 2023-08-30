@@ -190,7 +190,7 @@ export function PrintUI({
                   <Field>
                     <FormFieldWrap>
                       <FieldLabel>
-                                                Size
+                        Size
                       </FieldLabel>
                     </FormFieldWrap>
                     <FormFieldWrap>

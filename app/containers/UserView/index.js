@@ -31,9 +31,10 @@ import {
   setSubject,
   setActiontype,
   openNewEntityModal,
+  printView,
 } from 'containers/App/actions';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
+import { CONTENT_SINGLE, PRINT_TYPES } from 'containers/App/constants';
 import {
   USER_ROLES,
   ROUTES,
@@ -69,6 +70,7 @@ import {
 
 import appMessages from 'containers/App/messages';
 
+import { keydownHandlerPrint } from 'utils/print';
 import Activities from './Activities';
 import messages from './messages';
 
@@ -79,7 +81,9 @@ import {
   selectActorsByType,
 } from './selectors';
 
+
 import { DEPENDENCIES } from './constants';
+
 
 // only show the highest rated role (lower role ids means higher)
 // const getHighestUserRoleId = (user) => user
@@ -117,6 +121,7 @@ export function UserView({
   actiontypes,
   onCreateOption,
   isAdmin,
+  onSetPrintView,
 }) {
   useEffect(() => {
     // kick off loading of data
@@ -129,6 +134,21 @@ export function UserView({
       onLoadData();
     }
   }, [dataReady]);
+
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.SINGLE,
+    printOrientation: 'portrait',
+    printSize: 'A4',
+  });
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
 
   const pageTitle = intl.formatMessage(
     isMember ? messages.pageTitleBack : messages.pageTitle
@@ -148,7 +168,7 @@ export function UserView({
   if (dataReady) {
     buttons.push({
       type: 'icon',
-      onClick: () => window.print(),
+      onClick: () => mySetPrintView(),
       title: 'Print',
       icon: 'print',
     });
@@ -340,6 +360,7 @@ UserView.propTypes = {
   intl: intlShape,
   subject: PropTypes.string,
   onSetSubject: PropTypes.func,
+  onSetPrintView: PropTypes.func,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -390,6 +411,10 @@ function mapDispatchToProps(dispatch) {
     },
     onCreateOption: (args) => {
       dispatch(openNewEntityModal(args));
+    },
+    onSetPrintView: (config) => {
+      console.log(config);
+      dispatch(printView(config));
     },
   };
 }
