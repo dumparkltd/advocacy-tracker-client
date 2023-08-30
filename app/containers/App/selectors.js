@@ -548,9 +548,10 @@ export const selectMapIndicator = createSelector(
 );
 
 export const selectIsPrintView = createSelector(
-  selectLocationQuery,
-  (locationQuery) => locationQuery && locationQuery.get('print') ? locationQuery.get('print') !== '' : false
+  getGlobal,
+  (state) => !!state.get('printConfig')
 );
+
 export const selectPrintConfig = createSelector(
   getGlobal,
   (state) => state.get('printConfig') || {}

@@ -37,6 +37,7 @@ import messages from './messages';
 const Styled = styled.div`
   position: relative;
   z-index: 96;
+  background:white;
   margin: 40px auto;
   @media print {
     display: none;
@@ -134,6 +135,7 @@ export function PrintUI({
     printItems,
     printContentOptions,
   } = printConfig;
+
   const printAllPages = printItems === 'all' || pageItems === 'all';
   // qe(printType, PRINT_TYPES.SINGLE)
   //   || (qe(printType, PRINT_TYPES.LIST) && view === 'list');

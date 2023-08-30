@@ -52,26 +52,64 @@ import { DEPENDENCIES } from './constants';
 import messages from './messages';
 
 const Main = styled.div`
-  position: ${({ isHome }) => isHome ? 'relative' : 'absolute'};
+  position: ${({ isHome, isPrintView }) => {
+    if (isPrintView) {
+      return 'absolute';
+    }
+    if (isHome) {
+      return 'absolute';
+    }
+    return 'absolute';
+  }};
   top: ${({ isHome, theme }) => isHome
-    ? 0 : theme.sizes.header.banner.heightMobile}px;
+    ? 0
+    : theme.sizes.header.banner.heightMobile
+}px;
   left: 0;
   right: 0;
   bottom:0;
   overflow: ${({ isPrint }) => isPrint ? 'auto' : 'hidden'};
   width: auto;
-  background-color: transparent;
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-      top: ${({ isHome, theme }) => isHome
-    ? 0 : theme.sizes.header.banner.height}px;
-    }
+    top: ${({ isHome, theme }) => isHome
+    ? 0
+    : theme.sizes.header.banner.height
+}px;
+  }
   @media print {
     background: transparent;
     position: static;
     overflow: hidden;
   }
 `;
+// A4 595 × 842
+// A3 842 x 1190
+/* eslint-disable prefer-template */
+const getPrintHeight = ({
+  isPrint,
+  orient = 'portrait',
+  size = 'A4',
+  fixed = false,
+}) => {
+  if (fixed && isPrint) {
+    return PRINT.SIZES[size][orient].H + 'pt';
+  }
+  if (isPrint) {
+    return 'auto';
+  }
+  return '100%';
+};
 
+const getPrintWidth = ({
+  isPrint,
+  orient = 'portrait',
+  size = 'A4',
+}) => {
+  if (isPrint) {
+    return PRINT.SIZES[size][orient].W + 'pt';
+  }
+  return '100%';
+};
 const PrintWrapperInner = styled.div`
   position: ${({ isPrint, fixed = false }) => (isPrint && fixed) ? 'absolute' : 'static'};
   top: ${({ isPrint }) => isPrint ? 20 : 0}px;
@@ -93,12 +131,10 @@ const PrintWrapperInner = styled.div`
     right: 0;
     bottom: 0;
     width: ${(props) => props.fixed ? getPrintWidth(props) : '100%'};
-    height: ${(props) => getPrintHeight(props)};
+    height: ${(props) => getPrintHeight(props)};;
   }
 `;
-
 const PrintWrapper = styled.div`
-  height:100%;
   position: relative;
   margin-bottom: ${({ isPrint }) => isPrint ? '140px' : '0px'};
   margin-right: ${({ isPrint }) => isPrint ? 'auto' : '0px'};
@@ -111,33 +147,24 @@ const PrintWrapper = styled.div`
       return 'auto';
     }
     return 0;
-  }};`;
+  }};
+  width: ${(props) => getPrintWidth(props)};
+  height: ${(props) => getPrintHeight(props)};
+  min-height: ${(props) => props.isPrint ? getPrintHeight({ ...props, fixed: true }) : 'auto'};
+  box-shadow: ${({ isPrint }) => isPrint ? '0px 0px 5px 0px rgb(0 0 0 / 50%)' : 'none'};
+  padding: ${({ isPrint }) => isPrint ? 20 : 0}px;
+  @media print {
+    position: static;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    bottom: 0;
+    background: transparent;
+  }
+`;
+// overflow: hidden;
 
-const getPrintHeight = ({
-  isPrint,
-  orient = 'portrait',
-  size = 'A4',
-  fixed = false,
-}) => {
-  if (fixed && isPrint) {
-    return `${PRINT.SIZES[size][orient].H}pt`;
-  }
-  if (isPrint) {
-    return 'auto';
-  }
-  return '100%';
-};
-
-const getPrintWidth = ({
-  isPrint,
-  orient = 'portrait',
-  size = 'A4',
-}) => {
-  if (isPrint) {
-    return `${PRINT.SIZES[size][orient].W}pt`;
-  }
-  return '100%';
-};
+// overflow: ${(props) => props.isHome ? 'auto' : 'hidden'};
 
 
 class App extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
@@ -228,7 +255,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       isPrintView,
       printArgs,
     } = this.props;
-    console.log(isPrintView, printArgs);
+    // console.log(isPrintView, printArgs);
     const { intl } = this.context;
     const title = intl.formatMessage(messages.app.title);
     const isHome = location.pathname === '/';
@@ -272,6 +299,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           />
         )}
         <Main isHome={isHomeOrAuth} isPrint={isPrintView}>
+          {React.Children.toArray(children)}
           {isPrintView && (<PrintUI />)}
           <PrintWrapper
             isPrint={isPrintView}

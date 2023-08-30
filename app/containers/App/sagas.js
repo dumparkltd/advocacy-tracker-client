@@ -54,7 +54,6 @@ import {
   SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
   SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP,
   PARAMS,
-  PRINT_VIEW,
 } from 'containers/App/constants';
 
 import {
@@ -1140,7 +1139,7 @@ export function* setIncludeInofficialStatementsSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
-export function* printViewSaga({ config }) {
+/* export function* printViewSaga({ config }) {
   const location = yield select(selectLocation);
   let queryArgs = [];
   if (config.pages) {
@@ -1197,7 +1196,7 @@ export function* printViewSaga({ config }) {
   );
   const url = `${location.get('pathname')}?${getNextQueryString(queryNext)}`;
   window.open(url, '_blank').focus();
-}
+} */
 export function* openBookmarkSaga({ bookmark }) {
   const path = bookmark.getIn(['attributes', 'view', 'path']);
   const queryString = getNextQueryString(
@@ -1311,7 +1310,7 @@ export default function* rootSaga() {
   yield takeEvery(SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP, setIncludeTargetChildrenMembersOnMapSaga);
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
   yield takeEvery(SET_INCLUDE_INOFFICAL_STATEMENTS, setIncludeInofficialStatementsSaga);
-  yield takeEvery(PRINT_VIEW, printViewSaga);
+  // yield takeEvery(PRINT_VIEW, printViewSaga);
   yield takeEvery(OPEN_BOOKMARK, openBookmarkSaga);
 
   yield takeEvery(DISMISS_QUERY_MESSAGES, dismissQueryMessagesSaga);
