@@ -30,7 +30,7 @@ import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Loading from 'components/Loading';
 import ContentHeader from 'components/ContentHeader';
 import TagSearch from 'components/TagSearch';
-import Content from 'components/styled/Content';
+import ContentSimple from 'components/styled/ContentSimple';
 
 import EntityListItem from 'components/EntityListItem';
 
@@ -95,7 +95,7 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
       return intl.formatMessage(msg.singleLong || msg.single);
     }
     return intl.formatMessage(msg.pluralLong || msg.plural);
-  }
+  };
 
   render() {
     const { intl } = this.context;
@@ -148,7 +148,7 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
         />
         <ContainerWrapper>
           <Container>
-            <Content>
+            <ContentSimple>
               <ContentHeader
                 type={CONTENT_LIST}
                 supTitle={intl.formatMessage(messages.pageTitle)}
@@ -247,7 +247,7 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
                                               </Box>
                                               {(active || !otherTargets) && (
                                                 <Box margin={{ bottom: 'large' }}>
-                                                  { target.get('results').toList().map((entity, key) => (
+                                                  {target.get('results').toList().map((entity, key) => (
                                                     <EntityListItem
                                                       key={key}
                                                       entity={entity}
@@ -275,7 +275,7 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
                   </ListWrapper>
                 </div>
               )}
-            </Content>
+            </ContentSimple>
           </Container>
         </ContainerWrapper>
       </div>

@@ -23,7 +23,7 @@ import { CONTENT_LIST } from 'containers/App/constants';
 import { jumpToComponent } from 'utils/scroll-to-component';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
-import Content from 'components/styled/Content';
+import Content from 'components/styled/ContentSimple';
 import Loading from 'components/Loading';
 import EntityListViewOptions from 'components/EntityListViewOptions';
 import MapSubjectOptions from 'containers/MapContainer/MapInfoOptions/MapSubjectOptions';
@@ -104,11 +104,11 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       this.ScrollReference.current,
       this.ScrollContainer.current
     );
-  }
+  };
 
   setType = (type) => {
     this.setState({ viewType: type });
-  }
+  };
 
   render() {
     const {

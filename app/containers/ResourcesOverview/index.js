@@ -16,7 +16,7 @@ import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import { selectReady } from 'containers/App/selectors';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
-import Content from 'components/styled/Content';
+import ContentSimple from 'components/styled/ContentSimple';
 import CardTeaser from 'components/CardTeaser';
 import Footer from 'containers/Footer';
 import { isMaxSize } from 'utils/responsive';
@@ -49,7 +49,7 @@ export function ResourcesOverview({
   return (
     <ContainerWrapper bg>
       <ViewContainer>
-        <Content>
+        <ContentSimple>
           {Object.keys(RESOURCETYPE_NAVGROUPS).map((key) => (
             <Group key={key}>
               <GroupTitle>
@@ -84,7 +84,7 @@ export function ResourcesOverview({
               </Box>
             </Group>
           ))}
-        </Content>
+        </ContentSimple>
       </ViewContainer>
       <Footer />
     </ContainerWrapper>

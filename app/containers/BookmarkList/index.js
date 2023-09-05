@@ -34,7 +34,7 @@ import SidebarHeader from 'components/styled/SidebarHeader';
 import SidebarGroupLabel from 'components/styled/SidebarGroupLabel';
 import SupTitle from 'components/SupTitle';
 import Component from 'components/styled/Component';
-import Content from 'components/styled/Content';
+import ContentSimple from 'components/styled/ContentSimple';
 import EntityListItem from 'components/EntityListItem';
 import PrintHide from 'components/styled/PrintHide';
 
@@ -179,7 +179,7 @@ export class BookmarkList extends React.PureComponent { // eslint-disable-line r
             <FormattedMessage {...messages.group} />
           </SidebarGroupLabel>
           <div>
-            { this.props.bookmarksForSearch && this.props.bookmarksForSearch
+            {this.props.bookmarksForSearch && this.props.bookmarksForSearch
               .groupBy((e) => e.getIn(['attributes', 'view', 'type']))
               .keySeq()
               .sort((a, b) => a > b ? 1 : -1)
@@ -247,7 +247,7 @@ export class BookmarkList extends React.PureComponent { // eslint-disable-line r
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
-        { dataReady
+        {dataReady
           && hasBookmarks
           && this.state.viewport
           && this.state.viewport !== VIEWPORTS.MOBILE
@@ -270,16 +270,16 @@ export class BookmarkList extends React.PureComponent { // eslint-disable-line r
         }
         <ContainerWithSidebar noSidebar={!hasBookmarks} sidebarResponsiveSmall>
           <Container>
-            <Content>
+            <ContentSimple>
               <ContentHeader
                 type={CONTENT_LIST}
                 title={intl.formatMessage(messages.pageTitle)}
                 icon="bookmark_active"
               />
-              { !dataReady
+              {!dataReady
                 && <Loading />
               }
-              { dataReady && (
+              {dataReady && (
                 <div>
                   <ListWrapper>
                     {(allBookmarks.size === 0) && (
@@ -307,7 +307,7 @@ export class BookmarkList extends React.PureComponent { // eslint-disable-line r
                           onSortOrder={onSortOrder}
                         />
                         <ListEntitiesMain>
-                          { bookmarksFiltered.map((bookmark, key) => {
+                          {bookmarksFiltered.map((bookmark, key) => {
                             const type = bookmark.getIn(['attributes', 'view', 'type']);
                             const label = getTypeLabel(type, intl.formatMessage, false);
                             const path = bookmark.getIn(['attributes', 'view', 'path']);
@@ -330,7 +330,7 @@ export class BookmarkList extends React.PureComponent { // eslint-disable-line r
                   </ListWrapper>
                 </div>
               )}
-            </Content>
+            </ContentSimple>
           </Container>
         </ContainerWithSidebar>
       </div>

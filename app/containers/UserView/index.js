@@ -413,7 +413,6 @@ function mapDispatchToProps(dispatch) {
       dispatch(openNewEntityModal(args));
     },
     onSetPrintView: (config) => {
-      console.log(config);
       dispatch(printView(config));
     },
   };

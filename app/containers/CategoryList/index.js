@@ -27,7 +27,7 @@ import appMessages from 'containers/App/messages';
 // components
 import ContainerWithSidebar from 'components/styled/Container/ContainerWithSidebar';
 import Container from 'components/styled/Container';
-import Content from 'components/styled/Content';
+import ContentSimple from 'components/styled/ContentSimple';
 import Loading from 'components/Loading';
 
 import ContentHeader from 'components/ContentHeader';
@@ -148,10 +148,10 @@ export class CategoryList extends React.PureComponent { // eslint-disable-line r
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
-        { !dataReady
+        {!dataReady
           && <EntityListSidebarLoading responsiveSmall />
         }
-        { dataReady && typeof reference !== 'undefined'
+        {dataReady && typeof reference !== 'undefined'
           && (
             <TaxonomySidebar
               taxonomies={taxonomies}
@@ -164,7 +164,7 @@ export class CategoryList extends React.PureComponent { // eslint-disable-line r
         }
         <ContainerWithSidebar sidebarResponsiveSmall>
           <Container>
-            <Content>
+            <ContentSimple>
               <ContentHeader
                 type={CONTENT_LIST}
                 icon="categories"
@@ -172,15 +172,15 @@ export class CategoryList extends React.PureComponent { // eslint-disable-line r
                 title={contentTitle}
                 buttons={buttons}
               />
-              { contentDescription && (
+              {contentDescription && (
                 <Description>
                   <Markdown source={contentDescription} className="react-markdown" />
                 </Description>
               )}
-              { !dataReady
+              {!dataReady
                 && <Loading />
               }
-              { dataReady && taxonomy
+              {dataReady && taxonomy
                 && (
                   <CategoryListItems
                     taxonomy={taxonomy}
@@ -193,14 +193,14 @@ export class CategoryList extends React.PureComponent { // eslint-disable-line r
                   />
                 )
               }
-              { hasUserCategories
+              {hasUserCategories
                 && (
                   <UsersOnly>
                     <FormattedMessage {...messages.usersOnly} />
                   </UsersOnly>
                 )
               }
-              { dataReady && taxonomy && hasUserCategories
+              {dataReady && taxonomy && hasUserCategories
                 && (
                   <CategoryListItems
                     taxonomy={taxonomy}
@@ -214,7 +214,7 @@ export class CategoryList extends React.PureComponent { // eslint-disable-line r
                   />
                 )
               }
-            </Content>
+            </ContentSimple>
           </Container>
         </ContainerWithSidebar>
       </div>

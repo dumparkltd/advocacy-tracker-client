@@ -150,15 +150,12 @@ function appReducer(state = initialState, payload) {
     case OPEN_NEW_ENTITY_MODAL:
       return state.set('newEntityModal', fromJS(payload.args));
     case PRINT_VIEW:
-    {
-      console.log('print view!!!');
       return state.set(
         'printConfig', {
           ...state.get('printConfig'),
           ...payload.config,
         }
       );
-    }
     case CLOSE_PRINT_VIEW:
       return state.set('printConfig', null);
     case LOCATION_CHANGE:

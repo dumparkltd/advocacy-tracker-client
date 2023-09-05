@@ -255,7 +255,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       isPrintView,
       printArgs,
     } = this.props;
-    // console.log(isPrintView, printArgs);
+
     const { intl } = this.context;
     const title = intl.formatMessage(messages.app.title);
     const isHome = location.pathname === '/';
@@ -299,7 +299,6 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           />
         )}
         <Main isHome={isHomeOrAuth} isPrint={isPrintView}>
-          {React.Children.toArray(children)}
           {isPrintView && (<PrintUI />)}
           <PrintWrapper
             isPrint={isPrintView}
