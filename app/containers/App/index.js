@@ -111,10 +111,10 @@ const getPrintWidth = ({
   return '100%';
 };
 const PrintWrapperInner = styled.div`
-  position: ${({ isPrint, fixed = false }) => (isPrint && fixed) ? 'absolute' : 'static'};
+  position: ${({ isPrint, printArgs }) => (isPrint && printArgs && printArgs.fixed) ? 'absolute' : 'static'};
   top: ${({ isPrint }) => isPrint ? 20 : 0}px;
-  bottom: ${({ isPrint, fixed = false }) => {
-    if (isPrint && fixed) {
+  bottom: ${({ isPrint, printArgs }) => {
+    if (isPrint && printArgs && printArgs.fixed) {
       return '20px';
     }
     if (isPrint) {
@@ -130,8 +130,8 @@ const PrintWrapperInner = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    width: ${(props) => props.fixed ? getPrintWidth(props) : '100%'};
-    height: ${(props) => getPrintHeight(props)};;
+    width: ${({ printArgs, isPrint }) => printArgs && printArgs.fixed ? getPrintWidth({ printArgs, isPrint }) : '100%'};
+    height: ${({ printArgs, isPrint }) => getPrintHeight({ printArgs, isPrint })};
   }
 `;
 const PrintWrapper = styled.div`
@@ -139,8 +139,8 @@ const PrintWrapper = styled.div`
   margin-bottom: ${({ isPrint }) => isPrint ? '140px' : '0px'};
   margin-right: ${({ isPrint }) => isPrint ? 'auto' : '0px'};
   margin-left: ${({ isPrint }) => isPrint ? 'auto' : '0px'};
-  bottom: ${({ isPrint, fixed = false }) => {
-    if (isPrint && fixed) {
+  bottom: ${({ isPrint, printArgs }) => {
+    if (isPrint && printArgs && printArgs.fixed) {
       return 0;
     }
     if (isPrint) {
@@ -148,9 +148,9 @@ const PrintWrapper = styled.div`
     }
     return 0;
   }};
-  width: ${(props) => getPrintWidth(props)};
-  height: ${(props) => getPrintHeight(props)};
-  min-height: ${(props) => props.isPrint ? getPrintHeight({ ...props, fixed: true }) : 'auto'};
+  width: ${({ isPrint, printArgs }) => getPrintWidth({ isPrint, printArgs })};
+  height: ${({ isPrint, printArgs }) => getPrintHeight({ isPrint, printArgs })};
+  min-height: ${({ isPrint, printArgs }) => isPrint ? getPrintHeight({ isPrint, printArgs, fixed: true }) : 'auto'};
   box-shadow: ${({ isPrint }) => isPrint ? '0px 0px 5px 0px rgb(0 0 0 / 50%)' : 'none'};
   padding: ${({ isPrint }) => isPrint ? 20 : 0}px;
   @media print {
@@ -302,15 +302,11 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           {isPrintView && (<PrintUI />)}
           <PrintWrapper
             isPrint={isPrintView}
-            fixed={printArgs.fixed}
-            orient={printArgs.printOrientation}
-            size={printArgs.printSize}
+            printArgs={printArgs}
           >
             <PrintWrapperInner
               isPrint={isPrintView}
-              fixed={printArgs.fixed}
-              orient={printArgs.printOrientation}
-              size={printArgs.printSize}
+              printArgs={printArgs}
             >
               <PrintContext.Provider value={isPrintView}>
                 {React.Children.toArray(children)}
@@ -405,13 +401,13 @@ const mapStateToProps = (state) => ({
   isUserSignedIn: selectIsSignedIn(state),
   isUserAuthenticating: selectIsAuthenticating(state),
   user: selectSessionUserAttributes(state),
+  isPrintView: selectIsPrintView(state),
+  printArgs: selectPrintConfig(state),
   pages: selectEntitiesWhere(state, {
     path: API.PAGES,
     where: { draft: false },
   }),
   newEntityModal: selectNewEntityModal(state),
-  isPrintView: selectIsPrintView(state),
-  printArgs: selectPrintConfig(state),
 });
 
 export function mapDispatchToProps(dispatch) {

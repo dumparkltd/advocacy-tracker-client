@@ -554,7 +554,7 @@ export const selectIsPrintView = createSelector(
 
 export const selectPrintConfig = createSelector(
   getGlobal,
-  (state) => state.get('printConfig') || {}
+  (state) => state.get('printConfig') || null
 );
 
 // database ////////////////////////////////////////////////////////////////////////
