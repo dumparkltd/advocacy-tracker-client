@@ -26,9 +26,9 @@ const Search = styled.div`
   background-color: ${palette('background', 0)};
   color: ${palette('dark', 2)};
   padding: 2px 7px;
-  border: 1px solid ${(props) => props.active ? palette('light', 4) : palette('light', 2)};
-  box-shadow: 0 0 3px 0 ${(props) => props.active ? palette('dark', 2) : 'transparent'};
-  min-height: ${(props) => props.small ? 30 : 36}px;
+  border: 1px solid ${({ active }) => active ? palette('light', 4) : palette('light', 2)};
+  box-shadow: 0 0 3px 0 ${({ active }) => active ? palette('dark', 2) : 'transparent'};
+  min-height: ${({ small }) => small ? 30 : 36}px;
   border-radius: 5px;
   position: relative;
   @media print {
@@ -57,13 +57,13 @@ const Tags = styled.div`
 `;
 
 const Clear = styled(Button)`
-  padding: ${(props) => props.small ? '4px 6px' : '8px 6px'};
+  padding: ${({ small }) => small ? '4px 6px' : '8px 6px'};
   position: absolute;
   top: 0;
   right: 0;
   background-color: ${palette('background', 4)};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: ${(props) => props.small ? '4px 6px' : '8px 6px'};
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    padding: ${({ small }) => small ? '4px 6px' : '8px 6px'};
   }
   @media print {
     display: none;
@@ -72,10 +72,10 @@ const Clear = styled(Button)`
 
 const LabelPrint = styled(PrintOnly)`
   margin-top: 10px;
-  font-size: ${(props) => props.theme.sizes.print.smaller};
+  font-size: ${({ theme }) => theme.sizes.print.smaller};
 `;
 const SearchValuePrint = styled(PrintOnly)`
-  font-size: ${(props) => props.theme.sizes.print.default};
+  font-size: ${({ theme }) => theme.sizes.print.default};
   font-weight: bold;
 `;
 

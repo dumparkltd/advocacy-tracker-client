@@ -43,7 +43,7 @@ function TagList({
   const hasFilters = filters.length > 0;
   const groupedFilters = groupBy(filters, 'group');
   return (
-    <Styled hidePrint={!hasFilters}>
+    <Styled printHide={!hasFilters}>
       {hasFilters && (
         <Tags gap="xsmall" align="end">
           {Object.keys(groupedFilters).map((group, i) => (

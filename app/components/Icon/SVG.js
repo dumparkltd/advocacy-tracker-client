@@ -30,7 +30,7 @@ const SVG = styled.svg`
     height: ${(props) => (props.sizes && props.sizes.large) ? props.sizes.large : props.size};
   }
   @media print {
-    display: ${({ hidePrint }) => (hidePrint ? 'none' : 'inline-block')};
+    display: ${({ printHide }) => (printHide ? 'none' : 'inline-block')};
   }
 `;
 

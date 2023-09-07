@@ -19,7 +19,7 @@ class Icon extends React.PureComponent {
       textRight,
       textLeft,
       hasStroke,
-      hidePrint,
+      printHide,
     } = this.props;
     const icon = icons[name];
 
@@ -39,7 +39,7 @@ class Icon extends React.PureComponent {
           textRight={textRight}
           hasStroke={hasStroke}
           sizes={sizes}
-          hidePrint={hidePrint}
+          printHide={printHide}
         >
           <title>{title || `Icon: ${name}`}</title>
           <path d={asArray(iconPaths).reduce((memo, path) => `${memo}${path}`, '')}></path>
@@ -62,7 +62,7 @@ Icon.propTypes = {
   textRight: PropTypes.bool,
   hasStroke: PropTypes.bool,
   sizes: PropTypes.object,
-  hidePrint: PropTypes.bool,
+  printHide: PropTypes.bool,
 };
 Icon.defaultProps = {
   name: 'placeholder',
