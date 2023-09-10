@@ -73,7 +73,7 @@ import {
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 
 import appMessages from 'containers/App/messages';
 import FormWrapper from './FormWrapper';
@@ -170,7 +170,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           : Map(),
       })
       : Map();
-  }
+  };
 
   getHeaderMainFields = (entity, isAdmin) => {
     const { intl } = this.context;

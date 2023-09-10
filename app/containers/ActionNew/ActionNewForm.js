@@ -66,7 +66,7 @@ import {
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 
 import appMessages from 'containers/App/messages';
 import FormWrapper from './FormWrapper';
@@ -128,7 +128,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         }])
       )
       : dataWithType;
-  }
+  };
 
   getHeaderMainFields = (typeId, isAdmin) => {
     const { intl } = this.context;
@@ -162,7 +162,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       ],
     });
     return groups;
-  }
+  };
 
   getBodyMainFields = (
     typeId,
@@ -389,7 +389,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       }
     }
     return groups;
-  }
+  };
 
   render() {
     const { intl } = this.context;

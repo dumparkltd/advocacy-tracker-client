@@ -63,7 +63,7 @@ import {
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import FormWrapper from './FormWrapper';
 
 import {
@@ -279,7 +279,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       }
     }
     return groups;
-  }
+  };
 
   getBodyAsideFields = (
     entity,

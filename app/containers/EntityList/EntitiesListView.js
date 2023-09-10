@@ -31,7 +31,7 @@ import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 import EntityListTable from 'containers/EntityListTable';
 import ButtonPill from 'components/buttons/ButtonPill';
 
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import qe from 'utils/quasi-equals';
 import { lowerCase } from 'utils/string';
 import { getActiontypeColumns, getActortypeColumns } from 'utils/entities';

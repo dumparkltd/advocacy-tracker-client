@@ -30,7 +30,7 @@ import Container from 'components/styled/Container';
 import ContentSimple from 'components/styled/ContentSimple';
 import Loading from 'components/Loading';
 
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import CategoryListItems from 'components/categoryList/CategoryListItems';
 import TaxonomySidebar from 'components/categoryList/TaxonomySidebar';
 import EntityListSidebarLoading from 'components/EntityListSidebarLoading';

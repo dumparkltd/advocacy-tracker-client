@@ -57,7 +57,7 @@ import {
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 
 import FormWrapper from './FormWrapper';
 import {
@@ -123,7 +123,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
         ],
       },
     ]);
-  }
+  };
 
   getBodyMainFields = (
     connectedTaxonomies,
@@ -174,7 +174,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
       }
     }
     return groups;
-  }
+  };
 
   render() {
     const { intl } = this.context;

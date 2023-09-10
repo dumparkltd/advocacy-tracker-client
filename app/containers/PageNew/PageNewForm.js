@@ -38,7 +38,7 @@ import {
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import FormWrapper from './FormWrapper';
 import messages from './messages';
 import { DEPENDENCIES, FORM_INITIAL } from './constants';
@@ -78,7 +78,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
         ],
       },
     ]);
-  }
+  };
 
   getHeaderAsideFields = () => {
     const { intl } = this.context;

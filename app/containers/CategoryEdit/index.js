@@ -63,7 +63,7 @@ import {
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 
 import { getEntityTitle } from 'utils/entities';
 
@@ -128,10 +128,10 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
           : Map(),
         associatedUser: userOptions(users, viewEntity.getIn(['attributes', 'manager_id'])),
         associatedCategory: parentCategoryOptions(parentOptions, viewEntity.getIn(['attributes', 'parent_id'])),
-      // TODO allow single value for singleSelect
+        // TODO allow single value for singleSelect
       })
       : Map();
-  }
+  };
 
   getHeaderMainFields = () => {
     const { intl } = this.context;
@@ -168,7 +168,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
       });
     }
     return groups;
-  }
+  };
 
   getBodyMainFields = (
     entity,
@@ -229,7 +229,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
       ],
     });
     return fields;
-  }
+  };
 
   getTaxTitle = (id) => this.context.intl.formatMessage(appMessages.entities.taxonomies[id].single);
 
