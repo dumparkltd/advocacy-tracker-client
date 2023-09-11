@@ -26,11 +26,11 @@ const Tags = styled((p) => <Box direction="row" {...p} />)``;
 
 const ConnectionGroupLabel = styled.span`
   color: ${palette('text', 1)};
-  font-size: ${(props) => props.theme.sizes && props.theme.sizes.text.smaller};
+  font-size: ${({ theme }) => theme.sizes && theme.sizes.text.smaller};
   padding-top: 2px;
   white-space: nowrap;
   @media print {
-    font-size: ${(props) => props.theme.sizes.print.smaller};
+    font-size: ${({ theme }) => theme.sizes.print.smaller};
   }
 `;
 

@@ -15,17 +15,18 @@ import { palette } from 'styled-theme';
 import {
   loadEntitiesIfNeeded,
   updatePath,
+  printView,
   // closeEntity
 } from 'containers/App/actions';
 
-import { CONTENT_PAGE } from 'containers/App/constants';
+import { CONTENT_PAGE, PRINT_TYPES } from 'containers/App/constants';
 import { ROUTES } from 'themes/config';
 
 import Footer from 'containers/Footer';
 import Loading from 'components/Loading';
 import Container from 'components/styled/Container';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import EntityView from 'components/EntityView';
 
 import {
@@ -34,6 +35,7 @@ import {
   selectIsUserVisitor,
   selectIsUserMember,
   selectSessionUserId,
+  selectIsPrintView,
 } from 'containers/App/selectors';
 
 import {
@@ -48,12 +50,12 @@ import messages from './messages';
 import { selectViewEntity } from './selectors';
 import { DEPENDENCIES } from './constants';
 
-const Styled = styled(ContainerWrapper)`
+const StyledContainerWrapper = styled((p) => <ContainerWrapper {...p} />)`
   background-color: ${palette('primary', 4)}
 `;
 
 const ViewContainer = styled(Container)`
-  min-height: 85vH;
+min-height: ${({ isPrint }) => isPrint ? '50vH' : '85vH'};
   @media print {
     min-height: 50vH;
   }
@@ -86,14 +88,14 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
     fields: [getMarkdownField(entity, 'content', false)],
   }]);
 
-  getFields = (entity, isMember, isAdmin, isMine) => ({
+  getFields = (entity, isMember, isAdmin, isMine, isPrint) => ({
     body: {
       main: this.getBodyMainFields(entity),
-      aside: isMember
+      aside: (isMember && !isPrint)
         ? this.getBodyAsideFields(entity, isAdmin, isMine)
         : null,
     },
-  })
+  });
 
 
   render() {
@@ -105,15 +107,27 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
       isVisitor,
       isMember,
       myId,
+      isPrintView,
+      onSetPrintView,
     } = this.props;
-    const buttons = [];
+    let buttons = [];
     if (dataReady) {
-      buttons.push({
-        type: 'icon',
-        onClick: () => window.print(),
-        title: 'Print',
-        icon: 'print',
-      });
+      if (window.print) {
+        buttons = [
+          ...buttons,
+          {
+            type: 'icon',
+            // onClick: () => window.print(),
+            onClick: () => onSetPrintView({
+              printType: PRINT_TYPES.SINGLE,
+              printOrientation: 'portrait',
+              printSize: 'A4',
+            }),
+            title: 'Print',
+            icon: 'print',
+          },
+        ];
+      }
       if (isAdmin) {
         buttons.push({
           type: 'edit',
@@ -131,34 +145,34 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
-        <Styled className={`content-${CONTENT_PAGE}`}>
-          <ViewContainer isNarrow={!isVisitor}>
+        <StyledContainerWrapper className={`content-${CONTENT_PAGE}`}>
+          <ViewContainer isNarrow={!isVisitor} isPrint={isPrintView}>
             <ContentHeader
               title={page ? page.getIn(['attributes', 'title']) : ''}
               type={CONTENT_PAGE}
               buttons={buttons}
             />
-            { !dataReady
+            {!dataReady
               && <Loading />
             }
-            { !page && dataReady
+            {!page && dataReady
               && (
                 <div>
                   <FormattedMessage {...messages.notFound} />
                 </div>
               )
             }
-            { page && dataReady
+            {page && dataReady
               && (
                 <EntityView
-                  fields={this.getFields(page, isMember, isAdmin, isMine)}
+                  fields={this.getFields(page, isMember, isAdmin, isMine, isPrintView)}
                   seamless
                 />
               )
             }
           </ViewContainer>
           <Footer />
-        </Styled>
+        </StyledContainerWrapper>
       </div>
     );
   }
@@ -167,13 +181,14 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
 PageView.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func,
   handleEdit: PropTypes.func,
-  // handleClose: PropTypes.func,
+  onSetPrintView: PropTypes.func,
   page: PropTypes.object,
   dataReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
   isVisitor: PropTypes.bool,
   isMember: PropTypes.bool,
   params: PropTypes.object,
+  isPrintView: PropTypes.bool,
   myId: PropTypes.string,
 };
 
@@ -189,6 +204,7 @@ const mapStateToProps = (state, props) => ({
   myId: selectSessionUserId(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   page: selectViewEntity(state, props.params.id),
+  isPrintView: selectIsPrintView(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -198,6 +214,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     handleEdit: () => {
       dispatch(updatePath(`${ROUTES.PAGES}${ROUTES.EDIT}/${props.params.id}`, { replace: true }));
+    },
+    onSetPrintView: (config) => {
+      dispatch(printView(config));
     },
   };
 }

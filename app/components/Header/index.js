@@ -10,7 +10,7 @@ import { isMinSize } from 'utils/responsive';
 import appMessages from 'containers/App/messages';
 import Icon from 'components/Icon';
 import ScreenReaderOnly from 'components/styled/ScreenReaderOnly';
-// import PrintOnly from 'components/styled/PrintOnly';
+import PrintOnly from 'components/styled/PrintOnly';
 import PrintHide from 'components/styled/PrintHide';
 import BoxPrint from 'components/styled/BoxPrint';
 
@@ -43,11 +43,11 @@ const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
 `;
 
 const Styled = styled.div`
-  position: ${(props) => {
-    if (props.fixed) {
+  position: ${({ sticky, fixed }) => {
+    if (fixed) {
       return 'fixed';
     }
-    return props.sticky ? 'absolute' : 'relative';
+    return sticky ? 'absolute' : 'relative';
   }};
   top: 0;
   left: 0;
@@ -57,7 +57,7 @@ const Styled = styled.div`
     height:${({ theme }) => theme.sizes.header.banner.height}px;
   }
   background-color: #000;
-  box-shadow: ${(props) => props.hasShadow ? '0px 0px 5px 0px rgba(0,0,0,0.5)' : 'none'};
+  box-shadow: ${({ hasShadow }) => hasShadow ? '0px 0px 5px 0px rgba(0,0,0,0.5)' : 'none'};
   z-index: 102;
   @media print {
     display: ${({ isPrint }) => isPrint ? 'none' : 'block'};
@@ -215,6 +215,11 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                         <Icon name="logo" size={isMinSize(size, 'medium') ? '72px' : '60px'} />
                       </LogoWrap>
                     </PrintHide>
+                    <PrintOnly>
+                      <LogoWrap>
+                        <Icon name="logo" size="100px" />
+                      </LogoWrap>
+                    </PrintOnly>
                     <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
                       <BrandTitle isDev={IS_DEV}>
                         {`${intl.formatMessage(appMessages.app.title)}${IS_DEV ? ' [TEST-DB]' : ''}`}

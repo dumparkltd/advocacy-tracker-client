@@ -35,7 +35,7 @@ const Search = styled.div`
     border: none;
     box-shadow: none;
     padding: 0;
-    display: ${({ hidePrint }) => hidePrint ? 'none' : 'block'};
+    display: ${({ printHide }) => printHide ? 'none' : 'block'};
   }
 `;
 const SearchInput = styled(DebounceInput)`
@@ -107,7 +107,7 @@ export class TagSearch extends React.Component { // eslint-disable-line react/pr
       <Search
         active={this.state.active}
         small={this.props.multiselect}
-        hidePrint={!hasFilters}
+        printHide={!hasFilters}
       >
         {filters.length > 0 && (
           <LabelPrint>
