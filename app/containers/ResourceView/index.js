@@ -27,9 +27,12 @@ import {
   getActiontypeColumns,
 } from 'utils/entities';
 
-import { loadEntitiesIfNeeded, updatePath, closeEntity } from 'containers/App/actions';
+import {
+  loadEntitiesIfNeeded, updatePath, closeEntity, printView,
+} from 'containers/App/actions';
 
 import { ROUTES } from 'themes/config';
+import { PRINT_TYPES } from 'containers/App/constants';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
@@ -115,9 +118,9 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
         fields: [
           checkResourceAttribute(typeId, 'url') && getLinkField(entity),
           checkResourceAttribute(typeId, 'description')
-            && getMarkdownField(entity, 'description', true),
+          && getMarkdownField(entity, 'description', true),
           checkResourceAttribute(typeId, 'status')
-            && getMarkdownField(entity, 'status', true),
+          && getMarkdownField(entity, 'status', true),
         ],
       },
     );
@@ -176,19 +179,26 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
       handleClose,
       isAdmin,
       myId,
+      onSetPrintView,
     } = this.props;
     const typeId = viewEntity && viewEntity.getIn(['attributes', 'resourcetype_id']);
     let buttons = [];
     if (dataReady) {
-      buttons = [
-        ...buttons,
-        {
-          type: 'icon',
-          onClick: () => window.print(),
-          title: 'Print',
-          icon: 'print',
-        },
-      ];
+      if (window.print) {
+        buttons = [
+          ...buttons,
+          {
+            type: 'icon',
+            onClick: () => onSetPrintView({
+              printType: PRINT_TYPES.SINGLE,
+              printOrientation: 'portrait',
+              printSize: 'A4',
+            }),
+            title: 'Print',
+            icon: 'print',
+          },
+        ];
+      }
       if (isMember) {
         buttons = [
           ...buttons,
@@ -217,17 +227,17 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
           ]}
         />
         <Content isSingle>
-          { !dataReady
+          {!dataReady
             && <Loading />
           }
-          { !viewEntity && dataReady
+          {!viewEntity && dataReady
             && (
               <div>
                 <FormattedMessage {...messages.notFound} />
               </div>
             )
           }
-          { viewEntity && dataReady
+          {viewEntity && dataReady
             && (
               <EntityView
                 header={{
@@ -267,6 +277,7 @@ export class ResourceView extends React.PureComponent { // eslint-disable-line r
 ResourceView.propTypes = {
   viewEntity: PropTypes.object,
   loadEntitiesIfNeeded: PropTypes.func,
+  onSetPrintView: PropTypes.func,
   dataReady: PropTypes.bool,
   handleEdit: PropTypes.func,
   handleClose: PropTypes.func,
@@ -312,6 +323,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onEntityClick: (id, path) => {
       dispatch(updatePath(`${path}/${id}`));
+    },
+    onSetPrintView: (config) => {
+      dispatch(printView(config));
     },
   };
 }

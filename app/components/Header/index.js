@@ -10,7 +10,7 @@ import { isMinSize } from 'utils/responsive';
 import appMessages from 'containers/App/messages';
 import Icon from 'components/Icon';
 import ScreenReaderOnly from 'components/styled/ScreenReaderOnly';
-import PrintOnly from 'components/styled/PrintOnly';
+// import PrintOnly from 'components/styled/PrintOnly';
 import PrintHide from 'components/styled/PrintHide';
 import BoxPrint from 'components/styled/BoxPrint';
 
@@ -215,11 +215,6 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                         <Icon name="logo" size={isMinSize(size, 'medium') ? '72px' : '60px'} />
                       </LogoWrap>
                     </PrintHide>
-                    <PrintOnly>
-                      <LogoWrap>
-                        <Icon name="logo" size="100px" />
-                      </LogoWrap>
-                    </PrintOnly>
                     <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
                       <BrandTitle isDev={IS_DEV}>
                         {`${intl.formatMessage(appMessages.app.title)}${IS_DEV ? ' [TEST-DB]' : ''}`}

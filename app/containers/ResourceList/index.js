@@ -10,7 +10,11 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { Map, List, fromJS } from 'immutable';
 
-import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
+import {
+  loadEntitiesIfNeeded,
+  updatePath,
+  printView,
+} from 'containers/App/actions';
 import {
   selectReady,
   selectIsUserMember,
@@ -21,6 +25,7 @@ import {
 
 import appMessages from 'containers/App/messages';
 import { ROUTES } from 'themes/config';
+import { PRINT_TYPES } from 'containers/App/constants';
 
 import EntityList from 'containers/EntityList';
 
@@ -52,7 +57,7 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
       label: intl.formatMessage(appMessages.resourcetypes[type.id]),
       active: activeId === type.id,
     }));
-  }
+  };
 
   render() {
     const { intl } = this.context;
@@ -69,6 +74,7 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
       resourcetypes,
       onSelectType,
       allEntities,
+      onSetPrintView,
     } = this.props;
     const typeId = params.id;
     const type = `resources_${typeId}`;
@@ -86,7 +92,12 @@ export class ResourceList extends React.PureComponent { // eslint-disable-line r
     if (window.print) {
       headerOptions.actions.push({
         type: 'icon',
-        onClick: () => window.print(),
+        onClick: () => onSetPrintView({
+          printType: PRINT_TYPES.LIST,
+          printContentOptions: { pages: true },
+          printOrientation: 'portrait',
+          printSize: 'A4',
+        }),
         title: 'Print',
         icon: 'print',
       });
@@ -157,6 +168,7 @@ ResourceList.propTypes = {
   isVisitor: PropTypes.bool,
   params: PropTypes.object,
   allEntities: PropTypes.instanceOf(Map),
+  onSetPrintView: PropTypes.func,
 };
 
 ResourceList.contextTypes = {
@@ -191,6 +203,9 @@ function mapDispatchToProps(dispatch) {
           ? `${ROUTES.RESOURCES}/${typeId}`
           : ROUTES.RESOURCES
       ));
+    },
+    onSetPrintView: (config) => {
+      dispatch(printView(config));
     },
   };
 }

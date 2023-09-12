@@ -18,8 +18,6 @@ import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import Icon from 'components/Icon';
 import EntityListHeader from 'components/EntityListHeader';
-import EntityListPrintKey from 'components/EntityListPrintKey';
-import PrintOnly from 'components/styled/PrintOnly';
 
 import {
   selectHasUserRole,
@@ -34,6 +32,7 @@ import {
   selectIncludeTargetChildren,
   selectIncludeInofficialStatements,
   selectTaxonomiesWithCategories,
+  selectIsPrintView,
 } from 'containers/App/selectors';
 
 import {
@@ -94,7 +93,7 @@ const Progress = styled.div`
   bottom: 0;
   box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
   background-color: ${palette('primary', 4)};
-  padding: ${(props) => props.error ? 0 : 40}px;
+  padding: ${({ error }) => error ? 0 : 40}px;
   z-index: 200;
 `;
 
@@ -106,7 +105,7 @@ const ProgressText = styled.div`
   margin-top: -0.5em;
   overflow: hidden;
   @media print {
-    font-size: ${(props) => props.theme.sizes.print.default};
+    font-size: ${({ theme }) => theme.sizes.print.default};
   }
 `;
 
@@ -185,7 +184,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       this.props.locationQuery,
     ));
     this.props.onDismissAllErrors();
-  }
+  };
 
   getMessageForType = (type) => {
     switch (type) {
@@ -196,7 +195,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       default:
         return messages.updatesSuccess;
     }
-  }
+  };
 
   mapError = (error, key) => fromJS({
     type: error.data.type,
@@ -277,9 +276,10 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       listActions,
       onEntitiesDelete,
       onUpdateFilters,
+      isPrintView,
     } = this.props;
     // detect print to avoid expensive rendering
-    const printing = !!(
+    const printing = isPrintView || !!(
       typeof window !== 'undefined'
       && window.matchMedia
       && window.matchMedia('print').matches
@@ -451,10 +451,24 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             onSetFilterMemberOption={onSetFilterMemberOption}
             headerActions={headerOptions && headerOptions.actions}
             onClearFilters={this.onClearFilters}
+            isPrintView={isPrintView}
+          />
+        )}
+        {headerStyle === 'simple' && (
+          <EntityListHeader
+            headerStyle={headerStyle}
+            dataReady={dataReady}
+            config={config}
+            canEdit={isMember && showList}
+            isMember={isMember}
+            hasUserRole={hasUserRole}
+            headerActions={headerOptions && headerOptions.actions}
+            isPrintView={isPrintView}
           />
         )}
         {showList && (
           <EntitiesListView
+            isPrintView={isPrintView}
             headerInfo={headerOptions.info}
             listActions={allListActions}
             showEntitiesDelete={onEntitiesDelete}
@@ -544,17 +558,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             includeTargetMembers={includeTargetMembers}
             includeActorChildren={includeActorChildren}
             includeTargetChildren={includeTargetChildren}
+            isPrintView={isPrintView}
           />
-        )}
-        {hasList && dataReady && config.taxonomies && (
-          <PrintOnly>
-            <EntityListPrintKey
-              entities={entities}
-              taxonomies={taxonomies}
-              config={config}
-              locationQuery={locationQuery}
-            />
-          </PrintOnly>
         )}
         {isMember && (progress !== null && progress < 100) && (
           <Progress>
@@ -565,9 +570,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                   processNo: Math.min(success.size + errors.size + 1, sending.size),
                   totalNo: sending.size,
                   types:
-                  intl.formatMessage(messages[
-                    `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
-                  ]),
+                    intl.formatMessage(messages[
+                      `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
+                    ]),
                 }}
               />
             </ProgressText>
@@ -586,9 +591,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                   {
                     errorNo: viewDomain.get('errors').size,
                     types:
-                    intl.formatMessage(messages[
-                      `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
-                    ]),
+                      intl.formatMessage(messages[
+                        `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
+                      ]),
                   },
                 )
               }
@@ -699,6 +704,7 @@ EntityList.propTypes = {
   allEntityCount: PropTypes.number,
   onEntitiesDelete: PropTypes.func,
   onUpdateFilters: PropTypes.func,
+  isPrintView: PropTypes.bool,
 };
 
 EntityList.contextTypes = {
@@ -723,6 +729,7 @@ const mapStateToProps = (state) => ({
   includeTargetChildren: selectIncludeTargetChildren(state),
   includeInofficial: selectIncludeInofficialStatements(state),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
+  isPrintView: selectIsPrintView(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -849,7 +856,7 @@ function mapDispatchToProps(dispatch, props) {
             ).toJS()
           ));
         }
-      // connections
+        // connections
       } else {
         // figure out connection deletions (not necessary for attributes as deletions will be overridden)
         const deletes = changes
@@ -1014,7 +1021,7 @@ function mapDispatchToProps(dispatch, props) {
             activeEditOption.path,
             updates.get('creates').toJS(),
             activeEditOption.invalidateEntitiesPaths
-              && activeEditOption.invalidateEntitiesPaths.toJS(),
+            && activeEditOption.invalidateEntitiesPaths.toJS(),
           ));
         }
         if (updates.get('deletes') && updates.get('deletes').size > 0) {

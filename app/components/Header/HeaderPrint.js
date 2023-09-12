@@ -5,7 +5,10 @@ import styled, { withTheme } from 'styled-components';
 import { Box, Heading } from 'grommet';
 import appMessages from 'containers/App/messages';
 
-import Logo from './Logo';
+// import Logo from './Logo';
+
+import Icon from 'components/Icon';
+import LogoWrap from './LogoWrap';
 import messages from './messages';
 
 const Brand = styled.div`
@@ -65,11 +68,10 @@ const Meta = styled.div`
 
 const CLEANUP = ['mvw'];
 
-function HeaderPrint({ theme, intl }) {
-  const appTitle = `${intl.formatMessage(appMessages.app.title)} - ${intl.formatMessage(appMessages.app.claim)}`;
+function HeaderPrint({ intl }) {
   const now = new Date();
   let url = window && window.location
-        && `${window.location.origin}${window.location.pathname}`;
+    && `${window.location.origin}${window.location.pathname}`;
   if (url && window.location.search) {
     const params = new URLSearchParams(window.location.search);
     CLEANUP.forEach((p) => {
@@ -83,7 +85,9 @@ function HeaderPrint({ theme, intl }) {
         <Box flex={{ shrink: 0 }}>
           <Brand>
             <Box direction="row" align="center">
-              <Logo src={theme.media.headerLogoPrint} alt={appTitle} isPrint />
+              <LogoWrap>
+                <Icon name="logo" size="60px" />
+              </LogoWrap>
               <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
                 <BrandTitle>
                   <FormattedMessage {...appMessages.app.title} />

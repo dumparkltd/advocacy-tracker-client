@@ -2,7 +2,7 @@ import React from 'react';
 import Link from 'containers/Link';
 import PropTypes from 'prop-types';
 import { List } from 'immutable';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { palette } from 'styled-theme';
 import { FormattedMessage } from 'react-intl';
 import { getSortOption } from 'utils/sort';
@@ -18,6 +18,7 @@ import appMessages from 'containers/App/messages';
 
 const Styled = styled.div`
   position: relative;
+  ${({ isPrint }) => isPrint && css`pointer-events: none;`}
 `;
 const CategoryListBody = styled.div`
   padding-top: 5px;
@@ -85,7 +86,7 @@ class CategoryListItems extends React.PureComponent { // eslint-disable-line rea
       });
     }
     return attributes;
-  }
+  };
 
   getListHeaderColumns = ({
     taxonomy,
@@ -184,7 +185,7 @@ class CategoryListItems extends React.PureComponent { // eslint-disable-line rea
       }
     });
     return attributes;
-  }
+  };
 
   getListColumns = ({
     taxonomy,
@@ -223,6 +224,7 @@ class CategoryListItems extends React.PureComponent { // eslint-disable-line rea
       sortOrder,
       onSort,
       userOnly,
+      isPrintView,
     } = this.props;
     const headerColumns = this.getListHeaderColumns({
       taxonomy,
@@ -241,8 +243,8 @@ class CategoryListItems extends React.PureComponent { // eslint-disable-line rea
       headerColumns,
     });
     return (
-      <Styled>
-        <CategoryListHeader columns={headerColumns} />
+      <Styled isPrint={isPrintView}>
+        <CategoryListHeader columns={headerColumns} isPrintView={isPrintView} />
         <CategoryListBody>
           {categoryGroups && categoryGroups.size > 0 && categoryGroups.valueSeq().toArray().map((group) => {
             if (group.get('categories') && group.get('type') === 'categories') {
@@ -285,6 +287,7 @@ class CategoryListItems extends React.PureComponent { // eslint-disable-line rea
                       category={cat}
                       columns={columns}
                       onPageLink={onPageLink}
+                      isPrintView={isPrintView}
                     />
                   ))}
                   {group.get('categories').size === 0 && (
@@ -317,6 +320,7 @@ CategoryListItems.propTypes = {
   sortBy: PropTypes.string,
   sortOrder: PropTypes.string,
   userOnly: PropTypes.bool,
+  isPrintView: PropTypes.bool,
 };
 
 CategoryListItems.contextTypes = {

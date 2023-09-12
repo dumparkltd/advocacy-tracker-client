@@ -3,16 +3,26 @@
  * Taxonomies
  *
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import styled from 'styled-components';
 import ReactMarkdown from 'react-markdown';
 
+
 // containers
-import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
+import {
+  loadEntitiesIfNeeded,
+  updatePath,
+  printView,
+} from 'containers/App/actions';
+
+import { keydownHandlerPrint } from 'utils/print';
+import { usePrint } from 'containers/App/PrintContext';
+import HeaderPrint from 'components/Header/HeaderPrint';
+
 import {
   selectTaxonomiesSorted,
   selectReady,
@@ -20,7 +30,7 @@ import {
   selectActortypes,
   selectActiontypes,
 } from 'containers/App/selectors';
-import { CONTENT_LIST } from 'containers/App/constants';
+import { CONTENT_LIST, PRINT_TYPES } from 'containers/App/constants';
 import { ROUTES, DEFAULT_TAXONOMY } from 'themes/config';
 import appMessages from 'containers/App/messages';
 
@@ -53,174 +63,167 @@ const Description = styled.div`
 `;
 
 const Markdown = styled(ReactMarkdown)`
-  font-size: ${(props) => props.theme.sizes.text.markdownMobile};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${(props) => props.theme.sizes.text.markdown};
+  font-size: ${({ theme }) => theme.sizes.text.markdownMobile};
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    font-size: ${({ theme }) => theme.sizes.text.markdown};
   }
   @media print {
-    font-size: ${(props) => props.theme.sizes.print.markdown};
+    font-size: ${({ theme }) => theme.sizes.print.markdown};
   }
 `;
+const getTaxTitle = (id, intl) => intl.formatMessage(appMessages.entities.taxonomies[id].plural);
+
+const getTaxDescription = (id, intl) => intl.formatMessage(appMessages.entities.taxonomies[id].description);
+
+const getTaxButtonTitle = (id, intl) => intl.formatMessage(
+  appMessages.entities.taxonomies[id].shortSingle || appMessages.entities.taxonomies[id].single
+);
 
 
-export class CategoryList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  // make sure to load all data from server
-  UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
-    // redirect to default taxonomy if needed
-    if (this.props.dataReady && typeof this.props.taxonomy === 'undefined') {
-      this.props.redirectToDefaultTaxonomy(DEFAULT_TAXONOMY);
-    }
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    // reload entities if invalidated
-    if (!nextProps.dataReady) {
-      this.props.loadEntitiesIfNeeded();
-    }
-    // redirect to default taxonomy if needed
-    if (nextProps.dataReady && typeof nextProps.taxonomy === 'undefined') {
-      this.props.redirectToDefaultTaxonomy(DEFAULT_TAXONOMY);
-    }
-  }
-
-  /* eslint-disable react/destructuring-assignment */
-  getTaxTitle = (id) => this.context.intl.formatMessage(appMessages.entities.taxonomies[id].plural);
-
-  getTaxDescription = (id) => this.context.intl.formatMessage(appMessages.entities.taxonomies[id].description);
-
-  getTaxButtonTitle = (id) => this.context.intl.formatMessage(
-    appMessages.entities.taxonomies[id].shortSingle || appMessages.entities.taxonomies[id].single
-  );
-  /* eslint-enable react/destructuring-assignment */
-
-  render() {
-    const { intl } = this.context;
-    const {
-      taxonomy,
-      taxonomies,
-      categoryGroups,
-      userOnlyCategoryGroups,
-      dataReady,
-      isMember,
-      onPageLink,
-      onTaxonomyLink,
-      actortypes,
-      actiontypes,
-    } = this.props;
-    const reference = taxonomy && taxonomy.get('id');
-    const contentTitle = (taxonomy && typeof reference !== 'undefined') ? this.getTaxTitle(reference) : '';
-    const contentDescription = (taxonomy && typeof reference !== 'undefined') && this.getTaxDescription(reference);
-    const buttons = [];
-    if (dataReady && !!reference) {
+export function CategoryList({
+  taxonomy,
+  taxonomies,
+  categoryGroups,
+  userOnlyCategoryGroups,
+  dataReady,
+  isMember,
+  onPageLink,
+  onTaxonomyLink,
+  actortypes,
+  actiontypes,
+  onSort,
+  location,
+  intl,
+  onLoadEntitiesIfNeeded,
+  handleNew,
+  redirectToDefaultTaxonomy,
+  onSetPrintView,
+}) {
+  useEffect(() => {
+    if (!dataReady) onLoadEntitiesIfNeeded();
+  }, [dataReady]);
+  useEffect(() => {
+    if (!taxonomy) redirectToDefaultTaxonomy(DEFAULT_TAXONOMY);
+  }, [taxonomy]);
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.LIST,
+    printOrientation: 'portrait',
+    printSize: 'A4',
+  });
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
+  const reference = taxonomy && taxonomy.get('id');
+  const contentTitle = (taxonomy && typeof reference !== 'undefined') ? getTaxTitle(reference, intl) : '';
+  const contentDescription = (taxonomy && typeof reference !== 'undefined') && getTaxDescription(reference, intl);
+  const buttons = [];
+  if (dataReady && !!reference && window.print) {
+    buttons.push({
+      type: 'icon',
+      onClick: mySetPrintView,
+      title: 'Print',
+      icon: 'print',
+    });
+    if (isMember && typeof reference !== 'undefined') {
       buttons.push({
-        type: 'icon',
-        onClick: () => window.print(),
-        title: 'Print',
-        icon: 'print',
+        type: 'add',
+        title: [
+          intl.formatMessage(appMessages.buttons.add),
+          {
+            title: getTaxButtonTitle(reference, intl),
+            hiddenSmall: true,
+          },
+        ],
+        onClick: () => handleNew(reference),
       });
-      if (isMember && typeof reference !== 'undefined') {
-        buttons.push({
-          type: 'add',
-          title: [
-            intl.formatMessage(appMessages.buttons.add),
-            {
-              title: this.getTaxButtonTitle(reference),
-              hiddenSmall: true,
-            },
-          ],
-          onClick: () => this.props.handleNew(reference),
-        });
-      }
     }
-
-    const hasUserCategories = isMember
-      && dataReady
-      && userOnlyCategoryGroups
-      && userOnlyCategoryGroups.reduce((memo, group) => memo || (group.get('categories') && group.get('categories').size > 0),
-        false);
-
-    return (
-      <div>
-        <Helmet
-          title={`${intl.formatMessage(messages.supTitle)}: ${contentTitle}`}
-          meta={[
-            { name: 'description', content: intl.formatMessage(messages.metaDescription) },
-          ]}
-        />
-        {!dataReady
-          && <EntityListSidebarLoading responsiveSmall />
-        }
-        {dataReady && typeof reference !== 'undefined'
-          && (
-            <TaxonomySidebar
-              taxonomies={taxonomies}
-              active={reference}
-              actortypes={actortypes}
-              actiontypes={actiontypes}
-              onTaxonomyLink={onTaxonomyLink}
-            />
-          )
-        }
-        <ContainerWithSidebar sidebarResponsiveSmall>
-          <Container>
-            <ContentSimple>
-              <ContentHeader
-                type={CONTENT_LIST}
-                icon="categories"
-                supTitle={intl.formatMessage(messages.supTitle)}
-                title={contentTitle}
-                buttons={buttons}
-              />
-              {contentDescription && (
-                <Description>
-                  <Markdown source={contentDescription} className="react-markdown" />
-                </Description>
-              )}
-              {!dataReady
-                && <Loading />
-              }
-              {dataReady && taxonomy
-                && (
-                  <CategoryListItems
-                    taxonomy={taxonomy}
-                    categoryGroups={categoryGroups}
-                    onPageLink={onPageLink}
-                    onSort={this.props.onSort}
-                    sortOptions={[SORT_OPTION_DEFAULT]}
-                    sortBy={this.props.location.query && this.props.location.query.sort}
-                    sortOrder={this.props.location.query && this.props.location.query.order}
-                  />
-                )
-              }
-              {hasUserCategories
-                && (
-                  <UsersOnly>
-                    <FormattedMessage {...messages.usersOnly} />
-                  </UsersOnly>
-                )
-              }
-              {dataReady && taxonomy && hasUserCategories
-                && (
-                  <CategoryListItems
-                    taxonomy={taxonomy}
-                    categoryGroups={userOnlyCategoryGroups}
-                    onPageLink={onPageLink}
-                    onSort={this.props.onSort}
-                    sortOptions={[SORT_OPTION_DEFAULT]}
-                    sortBy="title"
-                    sortOrder={this.props.location.query && this.props.location.query.order}
-                    userOnly
-                  />
-                )
-              }
-            </ContentSimple>
-          </Container>
-        </ContainerWithSidebar>
-      </div>
-    );
   }
+
+  const hasUserCategories = isMember
+    && dataReady
+    && userOnlyCategoryGroups
+    && userOnlyCategoryGroups.reduce((memo, group) => memo || (group.get('categories') && group.get('categories').size > 0),
+      false);
+  const isPrintView = usePrint();
+  return (
+    <div>
+      <Helmet
+        title={`${intl.formatMessage(messages.supTitle)}: ${contentTitle}`}
+        meta={[
+          { name: 'description', content: intl.formatMessage(messages.metaDescription) },
+        ]}
+      />
+      {!dataReady && (
+        <EntityListSidebarLoading responsiveSmall />
+      )}
+      {dataReady && typeof reference !== 'undefined' && (
+        <TaxonomySidebar
+          taxonomies={taxonomies}
+          active={reference}
+          actortypes={actortypes}
+          actiontypes={actiontypes}
+          onTaxonomyLink={onTaxonomyLink}
+        />
+      )}
+      <ContainerWithSidebar sidebarResponsiveSmall isPrint={isPrintView}>
+        {isPrintView && <HeaderPrint />}
+        <Container isPrint={isPrintView}>
+          <ContentSimple isPrint={isPrintView}>
+            <ContentHeader
+              type={CONTENT_LIST}
+              icon="categories"
+              supTitle={intl.formatMessage(messages.supTitle)}
+              title={contentTitle}
+              buttons={buttons}
+            />
+            {contentDescription && (
+              <Description>
+                <Markdown source={contentDescription} className="react-markdown" />
+              </Description>
+            )}
+            {!dataReady && <Loading />}
+            {dataReady && taxonomy && (
+              <CategoryListItems
+                taxonomy={taxonomy}
+                categoryGroups={categoryGroups}
+                onPageLink={onPageLink}
+                onSort={onSort}
+                sortOptions={[SORT_OPTION_DEFAULT]}
+                sortBy={location.query && location.query.sort}
+                sortOrder={location.query && location.query.order}
+                isPrintView={isPrintView}
+              />
+            )}
+            {hasUserCategories && (
+              <UsersOnly>
+                <FormattedMessage {...messages.usersOnly} />
+              </UsersOnly>
+            )}
+            {dataReady && taxonomy && hasUserCategories && (
+              <CategoryListItems
+                taxonomy={taxonomy}
+                categoryGroups={userOnlyCategoryGroups}
+                onPageLink={onPageLink}
+                onSort={onSort}
+                sortOptions={[SORT_OPTION_DEFAULT]}
+                sortBy="title"
+                sortOrder={location.query && location.query.order}
+                userOnly
+              />
+            )}
+          </ContentSimple>
+        </Container>
+      </ContainerWithSidebar>
+    </div>
+  );
 }
+
 CategoryList.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func,
   redirectToDefaultTaxonomy: PropTypes.func,
@@ -237,10 +240,9 @@ CategoryList.propTypes = {
   location: PropTypes.object,
   actortypes: PropTypes.object,
   actiontypes: PropTypes.object,
-};
-
-CategoryList.contextTypes = {
-  intl: PropTypes.object.isRequired,
+  onLoadEntitiesIfNeeded: PropTypes.func,
+  onSetPrintView: PropTypes.func,
+  intl: intlShape,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -266,7 +268,7 @@ const mapStateToProps = (state, props) => ({
 
 function mapDispatchToProps(dispatch) {
   return {
-    loadEntitiesIfNeeded: () => {
+    onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     redirectToDefaultTaxonomy: (taxonomyId) => {
@@ -284,7 +286,10 @@ function mapDispatchToProps(dispatch) {
     onSort: (sort, order) => {
       dispatch(updateSort({ sort, order }));
     },
+    onSetPrintView: (config) => {
+      dispatch(printView(config));
+    },
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(CategoryList);
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(CategoryList));
