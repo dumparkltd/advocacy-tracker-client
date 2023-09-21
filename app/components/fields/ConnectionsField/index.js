@@ -4,6 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 
 import appMessages from 'containers/App/messages';
+import { usePrint } from 'containers/App/PrintContext';
 
 import FieldWrap from 'components/fields/FieldWrap';
 import EntityListTable from 'containers/EntityListTable';
@@ -25,6 +26,7 @@ class ConnectionsField extends React.PureComponent { // eslint-disable-line reac
         ? appMessages.entities[field.entityType].single
         : appMessages.entities[field.entityType].plural
     )}`;
+    const isPrint = usePrint();
 
     return (
       <StyledFieldWrap>
@@ -41,7 +43,7 @@ class ConnectionsField extends React.PureComponent { // eslint-disable-line reac
             onEntityClick={field.onEntityClick}
             showValueForAction={field.showValueForAction}
             columns={field.columns}
-            moreLess
+            moreLess={!isPrint}
             inSingleView
           />
         )}
