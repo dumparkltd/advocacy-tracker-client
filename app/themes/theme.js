@@ -541,6 +541,22 @@ theme.text = {
   xxxsmall: { size: '11px', height: '13px', maxWidth: '500px' },
 };
 
+theme.textPrint = {
+  xxxlarge: { size: '24pt', height: '32pt' },
+  xxlarge: { size: '14pt', height: '18pt' },
+  xlarge: { size: '12pt', height: '16pt' },
+  large: { size: '11pt', height: '14.5pt' },
+  largeTall: { size: '11pt', height: '16pt' },
+  medium: { size: '10pt', height: '14pt' },
+  mediumTall: { size: '10pt', height: '16pt' },
+  mediumTight: { size: '10pt', height: '11pt' },
+  small: { size: '9pt', height: '12pt' },
+  smallTight: { size: '9pt', height: '10.5pt' },
+  xsmall: { size: '8pt', height: '10.5pt' },
+  xsmallTight: { size: '8pt', height: '9pt' },
+  xxsmall: { size: '7pt', height: '8.5pt' },
+};
+
 theme.icon = {
   size: {
     xxsmall: '14px',

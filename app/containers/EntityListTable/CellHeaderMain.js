@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box, Text } from 'grommet';
+import { Box } from 'grommet';
 import IndeterminateCheckbox from 'components/forms/IndeterminateCheckbox';
 import PrintHide from 'components/styled/PrintHide';
+import BoxPrint from 'components/styled/BoxPrint';
+import TextPrint from 'components/styled/TextPrint';
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import Icon from 'components/Icon';
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
@@ -35,7 +37,7 @@ export function CellHeaderMain({ column, canEdit }) {
   return (
     <Box direction="row" align="center" justify="start" flex={false}>
       {canEdit && (
-        <Box>
+        <BoxPrint printHide>
           <Select>
             <Checkbox
               id="select-all"
@@ -43,20 +45,20 @@ export function CellHeaderMain({ column, canEdit }) {
               onChange={column.onSelect}
             />
           </Select>
-        </Box>
+        </BoxPrint>
       )}
       {canEdit && (
-        <Text as="label" htmlFor="select-all" weight={500} size="small" wordBreak="keep-all">
+        <TextPrint as="label" htmlFor="select-all" weight={500} size="small" wordBreak="keep-all">
           {column.title}
-        </Text>
+        </TextPrint>
       )}
       {!canEdit && (
-        <Text weight={500} size="small">
+        <TextPrint weight={500} size="small">
           {column.title}
-        </Text>
+        </TextPrint>
       )}
       {column.onSort && (
-        <Box pad={{ left: 'xxsmall' }} flex={false}>
+        <BoxPrint printHide pad={{ left: 'xxsmall' }} flex={false}>
           <SortButton
             onClick={() => {
               if (column.sortActive) {
@@ -74,11 +76,11 @@ export function CellHeaderMain({ column, canEdit }) {
               }
               palette="dark"
               paletteIndex={column.sortActive ? 1 : 4}
-              hidePrint={!column.sortActive}
+              printHide={!column.sortActive}
               size="20px"
             />
           </SortButton>
-        </Box>
+        </BoxPrint>
       )}
     </Box>
   );

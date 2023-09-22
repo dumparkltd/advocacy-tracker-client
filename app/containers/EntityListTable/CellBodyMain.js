@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Text, Button } from 'grommet';
 import PrintHide from 'components/styled/PrintHide';
+
 import styled from 'styled-components';
 import { injectIntl, intlShape } from 'react-intl';
 
@@ -70,13 +71,15 @@ export function CellBodyMain({
   return (
     <Box direction="row" align="center" justify="start">
       {canEdit && (
-        <Select>
-          <input
-            type="checkbox"
-            checked={entity.selected}
-            onChange={(evt) => entity.onSelect(evt.target.checked)}
-          />
-        </Select>
+        <PrintHide>
+          <Select>
+            <input
+              type="checkbox"
+              checked={entity.selected}
+              onChange={(evt) => entity.onSelect(evt.target.checked)}
+            />
+          </Select>
+        </PrintHide>
       )}
       <Box gap="xsmall">
         {meta.length > 0 && (

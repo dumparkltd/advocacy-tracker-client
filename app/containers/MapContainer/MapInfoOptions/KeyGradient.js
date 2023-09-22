@@ -13,7 +13,7 @@ const SVG = styled.svg`
 `;
 
 export function KeyGradient({
-  stops, log = false, ...props
+  stops, log = false, isPrint, ...props
 }) {
   const cleanStops = stops.map((stop) => ({
     ...stop,
@@ -26,7 +26,7 @@ export function KeyGradient({
     ],
     [null, null],
   );
-  const lfid = 'mpx-svg-lg-x';
+  const lfid = isPrint ? 'mpx-svg-lg-x-print' : 'mpx-svg-lg-x';
   return (
     <SVG
       xmlns="http://www.w3.org/2000/svg"
@@ -61,6 +61,7 @@ KeyGradient.propTypes = {
   // id: PropTypes.string.isRequired,
   stops: PropTypes.array,
   // continuous: PropTypes.bool,
+  isPrint: PropTypes.bool,
   log: PropTypes.bool,
 };
 
