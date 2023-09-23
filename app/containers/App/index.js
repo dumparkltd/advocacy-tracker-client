@@ -87,9 +87,8 @@ const Main = styled.div`
 /* eslint-disable prefer-template */
 const getPrintHeight = ({
   isPrint,
-  orient = 'portrait',
-  size = 'A4',
-  fixed = false,
+  size, orient,
+  fixed,
 }) => {
   if (fixed && isPrint) {
     return PRINT.SIZES[size][orient].H + 'pt';
@@ -102,19 +101,20 @@ const getPrintHeight = ({
 
 const getPrintWidth = ({
   isPrint,
-  orient = 'portrait',
-  size = 'A4',
+  orient,
+  size,
 }) => {
   if (isPrint) {
     return PRINT.SIZES[size][orient].W + 'pt';
   }
   return '100%';
 };
+
 const PrintWrapperInner = styled.div`
-  position: ${({ isPrint, printArgs }) => (isPrint && printArgs && printArgs.fixed) ? 'absolute' : 'static'};
+  position: ${({ isPrint, fixed }) => (isPrint && fixed) ? 'absolute' : 'static'};
   top: ${({ isPrint }) => isPrint ? 20 : 0}px;
-  bottom: ${({ isPrint, printArgs }) => {
-    if (isPrint && printArgs && printArgs.fixed) {
+  bottom: ${({ isPrint, fixed }) => {
+    if (isPrint && fixed) {
       return '20px';
     }
     if (isPrint) {
@@ -130,8 +130,14 @@ const PrintWrapperInner = styled.div`
     left: 0;
     right: 0;
     bottom: 0;
-    width: ${({ printArgs, isPrint }) => printArgs && printArgs.fixed ? getPrintWidth({ printArgs, isPrint }) : '100%'};
-    height: ${({ printArgs, isPrint }) => getPrintHeight({ printArgs, isPrint })};
+    width: ${({
+    isPrint, orient, size, fixed,
+  }) => fixed ? getPrintWidth({ size, orient, isPrint }) : '100%'};
+    height: ${({
+    isPrint, size, orient, fixed,
+  }) => getPrintHeight({
+    isPrint, size, orient, fixed,
+  })};
   }
 `;
 const PrintWrapper = styled.div`
@@ -139,8 +145,8 @@ const PrintWrapper = styled.div`
   margin-bottom: ${({ isPrint }) => isPrint ? '140px' : '0px'};
   margin-right: ${({ isPrint }) => isPrint ? 'auto' : '0px'};
   margin-left: ${({ isPrint }) => isPrint ? 'auto' : '0px'};
-  bottom: ${({ isPrint, printArgs }) => {
-    if (isPrint && printArgs && printArgs.fixed) {
+  bottom: ${({ isPrint, fixed }) => {
+    if (isPrint && fixed) {
       return 0;
     }
     if (isPrint) {
@@ -148,9 +154,15 @@ const PrintWrapper = styled.div`
     }
     return 0;
   }};
-  width: ${({ isPrint, printArgs }) => getPrintWidth({ isPrint, printArgs })};
-  height: ${({ isPrint, printArgs }) => getPrintHeight({ isPrint, printArgs })};
-  min-height: ${({ isPrint, printArgs }) => isPrint ? getPrintHeight({ isPrint, printArgs, fixed: true }) : 'auto'};
+  width: ${({ isPrint, size, orient }) => getPrintWidth({ isPrint, size, orient })};
+  height: ${({
+    isPrint, size, orient, fixed,
+  }) => getPrintHeight({
+    isPrint, size, orient, fixed,
+  })};
+  min-height: ${({ isPrint, size, orient }) => isPrint ? getPrintHeight({
+    isPrint, size, orient, fixed: true,
+  }) : 'auto'};
   box-shadow: ${({ isPrint }) => isPrint ? '0px 0px 5px 0px rgb(0 0 0 / 50%)' : 'none'};
   padding: ${({ isPrint }) => isPrint ? 20 : 0}px;
   @media print {
@@ -162,10 +174,6 @@ const PrintWrapper = styled.div`
     background: transparent;
   }
 `;
-// overflow: hidden;
-
-// overflow: ${(props) => props.isHome ? 'auto' : 'hidden'};
-
 
 class App extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
@@ -269,6 +277,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       const authValues = getAuthValues();
       authUID = authValues && authValues.uid;
     }
+
     return (
       <div id="app">
         <Helmet titleTemplate={`%s - ${title}`} defaultTitle={title} />
@@ -302,11 +311,15 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           {isPrintView && (<PrintUI />)}
           <PrintWrapper
             isPrint={isPrintView}
-            printArgs={printArgs}
+            fixed={printArgs && printArgs.fixed ? printArgs.fixed : false}
+            orient={printArgs && printArgs.printOrientation ? printArgs.printOrientation : 'portrait'}
+            size={printArgs && printArgs.printSize ? printArgs.printSize : 'A4'}
           >
             <PrintWrapperInner
               isPrint={isPrintView}
-              printArgs={printArgs}
+              fixed={printArgs && printArgs.fixed ? printArgs.fixed : false}
+              orient={printArgs && printArgs.printOrientation ? printArgs.printOrientation : 'portrait'}
+              size={printArgs && printArgs.printSize ? printArgs.printSize : 'A4'}
             >
               <PrintContext.Provider value={isPrintView}>
                 {React.Children.toArray(children)}

@@ -30,7 +30,7 @@ import {
 
 const Styled = styled.div`
   position: absolute;
-  top: ${({ theme, isPrint }) => isPrint ? theme.sizes.header.banner.heightPrint : 0}px;
+  top: ${({ theme, isPrint, fullMap }) => isPrint && fullMap ? theme.sizes.header.banner.heightPrint : 0}px;
   bottom: ${({ isPrint }) => isPrint ? '180px' : 0};
   right: 0;
   left: 0;
@@ -39,7 +39,7 @@ const Styled = styled.div`
   overflow: hidden;
   width: 100%;
   @media print {
-    top: 0px;
+    top: ${({ theme, fullMap }) => fullMap ? theme.sizes.header.banner.heightPrint : 0}px;
     bottom: 0px;
   }
 `;
@@ -128,6 +128,7 @@ export function MapWrapper({
   valueToStyle,
   printArgs,
   isPrintView,
+  fullMap,
 }) {
   const mapOptions = merge({}, options, MAP_OPTIONS);
 
@@ -644,7 +645,7 @@ export function MapWrapper({
   }, [mapSubject, countryData]);
 
   return (
-    <Styled isPrint={isPrintView}>
+    <Styled isPrint={isPrintView} fullMap={fullMap}>
       <Map id={mapId} ref={ref} styleType={styleType} />
       {tooltip && tooltip.features && tooltip.features.length > 0 && (
         <Tooltip
@@ -683,6 +684,7 @@ MapWrapper.propTypes = {
   interactive: PropTypes.bool,
   scrollWheelZoom: PropTypes.bool,
   isPrintView: PropTypes.bool,
+  fullMap: PropTypes.bool,
   mapSubject: PropTypes.string,
   projection: PropTypes.string,
   styleType: PropTypes.string,
