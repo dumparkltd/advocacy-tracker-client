@@ -121,26 +121,11 @@ export function ActorList({
   }, [dataReady]);
 
   const [emailEntities, onSetEmailEntities] = useState(null);
-  const typeId = params.id;
-  const type = `actions_${typeId}`;
-
   const resetEmails = () => onSetEmailEntities(null);
-  const mySetPrintView = () => onSetPrintView({
-    printType: PRINT_TYPES.LIST,
-    printContentOptions: { pages: true },
-    printOrientation: 'portrait',
-    printSize: 'A4',
-  });
 
-  const keydownHandler = (e) => {
-    keydownHandlerPrint(e, mySetPrintView);
-  };
-  useEffect(() => {
-    document.addEventListener('keydown', keydownHandler);
-    return () => {
-      document.removeEventListener('keydown', keydownHandler);
-    };
-  }, []);
+  const typeId = params.id;
+  const type = `actors_${typeId}`;
+
 
   const headerOptions = {
     supTitle: intl.formatMessage(messages.pageTitle),
@@ -153,6 +138,23 @@ export function ActorList({
       }
       : null,
   };
+
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.LIST,
+    printContentOptions: { pages: true },
+    printOrientation: 'portrait',
+    printSize: 'A4',
+  });
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
+
   if (isVisitor) {
     headerOptions.actions.push({
       type: 'bookmarker',
@@ -229,7 +231,7 @@ export function ActorList({
         membertypes={membertypes}
         parentAssociationtypes={parentAssociationtypes}
         associationtypes={associationtypes}
-        typeOptions={prepareTypeOptions(actiontypes, typeId, intl)}
+        typeOptions={prepareTypeOptions(actortypes, typeId, intl)}
         onSelectType={onSelectType}
         typeId={typeId}
         showCode={checkActorAttribute(typeId, 'code', isAdmin)}

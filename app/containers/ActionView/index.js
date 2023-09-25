@@ -35,11 +35,14 @@ import {
   checkActionAttribute,
 } from 'utils/entities';
 
+import { keydownHandlerPrint } from 'utils/print';
+
 import {
   loadEntitiesIfNeeded,
   updatePath,
   closeEntity,
   setSubject,
+  printView,
 } from 'containers/App/actions';
 
 import {
@@ -51,6 +54,8 @@ import {
   INDICATOR_ACTIONTYPES,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
+
+import { PRINT_TYPES } from 'containers/App/constants';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
@@ -64,6 +69,7 @@ import FieldGroup from 'components/fields/FieldGroup';
 import SubjectButton from 'components/styled/SubjectButton';
 import SubjectButtonGroup from 'components/styled/SubjectButtonGroup';
 import SubjectTabWrapper from 'components/styled/SubjectTabWrapper';
+import HeaderPrint from 'components/Header/HeaderPrint';
 
 import {
   selectReady,
@@ -76,6 +82,7 @@ import {
   selectUserConnections,
   selectActiontypeQuery,
   selectSessionUserId,
+  selectIsPrintView,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -136,6 +143,8 @@ export function ActionView(props) {
     onLoadData,
     subject,
     onSetSubject,
+    onSetPrintView,
+    isPrintView,
     intl,
     handleEdit,
     handleClose,
@@ -162,6 +171,30 @@ export function ActionView(props) {
   }, [dataReady]);
 
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
+  // const type = `actions_${typeId}`;
+
+  const showMap = !!hasChildren;
+
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.LIST,
+    printMapOptions: showMap ? { markers: true } : null,
+    printMapMarkers: true,
+    fixed: showMap,
+    printOrientation: showMap ? 'landscape' : 'portrait',
+    printSize: 'A4',
+  });
+
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
+
+  // const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
   // const viewActivitytype = activitytypes && activitytypes.find((type) => qe(type.get('id'), typeId));
 
   let buttons = [];
@@ -170,7 +203,7 @@ export function ActionView(props) {
       ...buttons,
       {
         type: 'icon',
-        onClick: () => window.print(),
+        onClick: () => mySetPrintView(),
         title: 'Print',
         icon: 'print',
       },
@@ -223,7 +256,6 @@ export function ActionView(props) {
   if (validViewSubjects.indexOf(viewSubject) === -1) {
     viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
   }
-
   // check date comment for date spceficity
   // const DATE_SPECIFICITIES = ['y', 'm', 'd'];
   const dateSpecificity = 'd';
@@ -255,16 +287,18 @@ export function ActionView(props) {
           { name: 'description', content: intl.formatMessage(messages.metaDescription) },
         ]}
       />
-      <Content isSingle>
-        { !dataReady && <Loading /> }
-        { !viewEntity && dataReady && (
+      <Content isSingle isPrint={isPrintView}>
+        {!dataReady && <Loading />}
+        {!viewEntity && dataReady && (
           <div>
             <FormattedMessage {...messages.notFound} />
           </div>
         )}
-        { viewEntity && dataReady && (
-          <ViewWrapper>
+        {viewEntity && dataReady && (
+          <ViewWrapper isPrint={isPrintView}>
+            {isPrintView && <HeaderPrint />}
             <ViewHeader
+              isPrintView={isPrintView}
               title={typeId
                 ? intl.formatMessage(appMessages.actiontypes[typeId])
                 : intl.formatMessage(appMessages.entities.actions.plural)
@@ -275,7 +309,7 @@ export function ActionView(props) {
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isMember}>
+                <Main hasAside={isMember && !isPrintView}>
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
@@ -320,11 +354,11 @@ export function ActionView(props) {
                     group={{
                       fields: [
                         checkActionAttribute(typeId, 'description')
-                          && getMarkdownField(viewEntity, 'description', true),
+                        && getMarkdownField(viewEntity, 'description', true),
                         checkActionAttribute(typeId, 'comment')
-                          && getMarkdownField(viewEntity, 'comment', true),
+                        && getMarkdownField(viewEntity, 'comment', true),
                         checkActionAttribute(typeId, 'status_comment')
-                          && getMarkdownField(viewEntity, 'status_comment', true),
+                        && getMarkdownField(viewEntity, 'status_comment', true),
                       ],
                     }}
                   />
@@ -463,20 +497,20 @@ export function ActionView(props) {
                       type: 'dark',
                       fields: [
                         checkActionAttribute(typeId, 'date_start')
-                          && getDateField(
-                            viewEntity,
-                            'date_start',
-                            {
-                              specificity: dateSpecificity,
-                              attributeLabel: datesEqual ? 'date' : 'date_start',
-                            }
-                          ),
+                        && getDateField(
+                          viewEntity,
+                          'date_start',
+                          {
+                            specificity: dateSpecificity,
+                            attributeLabel: datesEqual ? 'date' : 'date_start',
+                          }
+                        ),
                         !datesEqual
-                          && checkActionAttribute(typeId, 'date_end')
-                          && getDateField(viewEntity, 'date_end', { specificity: dateSpecificity }),
+                        && checkActionAttribute(typeId, 'date_end')
+                        && getDateField(viewEntity, 'date_end', { specificity: dateSpecificity }),
                         !dateSpecificity
-                          && checkActionAttribute(typeId, 'date_comment')
-                          && getTextField(viewEntity, 'date_comment'),
+                        && checkActionAttribute(typeId, 'date_comment')
+                        && getTextField(viewEntity, 'date_comment'),
                       ],
                     }}
                   />
@@ -539,6 +573,7 @@ ActionView.propTypes = {
   onEntityClick: PropTypes.func,
   isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isPrintView: PropTypes.bool,
   myId: PropTypes.string,
   viewTaxonomies: PropTypes.object,
   taxonomies: PropTypes.object,
@@ -549,6 +584,7 @@ ActionView.propTypes = {
   subActionsByType: PropTypes.object,
   topActionsByType: PropTypes.object,
   onSetSubject: PropTypes.func,
+  onSetPrintView: PropTypes.func,
   intl: intlShape.isRequired,
   subject: PropTypes.string,
   // indicatorConnections: PropTypes.object,
@@ -578,6 +614,7 @@ const mapStateToProps = (state, props) => ({
   actiontypes: selectActiontypes(state),
   isAdmin: selectIsUserAdmin(state),
   myId: selectSessionUserId(state),
+  isPrintView: selectIsPrintView(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -599,6 +636,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetSubject: (type) => {
       dispatch(setSubject(type));
+    },
+    onSetPrintView: (config) => {
+      dispatch(printView(config));
     },
   };
 }
