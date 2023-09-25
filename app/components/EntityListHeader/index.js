@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import styled, { withTheme } from 'styled-components';
 import { Map, List } from 'immutable';
 import { palette } from 'styled-theme';
@@ -48,12 +48,7 @@ const Styled = styled(PrintHide)`
 `;
 
 const TheHeader = styled((p) => <Box direction="row" {...p} />)`
-  height: ${({ theme, headerStyle }) => {
-    if (headerStyle === 'simple') {
-      return 40;
-    }
-    return theme.sizes.headerList.banner.height;
-  }}px;
+  height: ${({ theme }) => theme.sizes.headerList.banner.height}px;
   padding: 0 3px;
   background-color: ${palette('primary', 3)};
   box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
@@ -247,8 +242,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     this.setState({ showTypes: false });
   };
 
-  getFormButtons = (activeOption) => {
-    const { intl } = this.context;
+  getFormButtons = (activeOption, intl) => {
     const { onCreateOption } = this.props;
     return [
       activeOption.create
@@ -333,9 +327,8 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       isAdmin,
       onClearFilters,
       isPrintView,
-      headerStyle,
+      intl,
     } = this.props;
-    const { intl } = this.context;
     const { activeOption } = this.state;
     const hasSelected = dataReady && canEdit && entityIdsSelected && entityIdsSelected.size > 0;
     const entitiesSelected = hasSelected
@@ -489,7 +482,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           const iconSize = isMinSize(size, 'medium') ? 'xxsmall' : 'small';
           return (
             <Styled isPrint={isPrintView}>
-              <TheHeader align="center" headerStyle={headerStyle}>
+              <TheHeader align="center">
                 {config.types && hasTypeOptions && (
                   <HeaderSection noBorder>
                     <ButtonFlatIconOnly onClick={() => onSelectType()}>
@@ -736,7 +729,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                   activeOptionId={`${activeOption.group}-${activeOption.optionId}`}
                   formOptions={formOptions}
                   buttons={showEditOptions
-                    ? this.getFormButtons(activeOption)
+                    ? this.getFormButtons(activeOption, intl)
                     : this.getFilterFormButtons()
                   }
                   onCancel={this.onHideForm}
@@ -804,12 +797,12 @@ EntityListHeader.propTypes = {
   onSetFilterMemberOption: PropTypes.func,
   onClearFilters: PropTypes.func,
   typeId: PropTypes.string,
-  headerStyle: PropTypes.string,
   headerActions: PropTypes.array,
+  intl: intlShape.isRequired,
 };
 
 EntityListHeader.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-export default withTheme(EntityListHeader);
+export default withTheme(injectIntl(EntityListHeader));
