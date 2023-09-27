@@ -30,6 +30,7 @@ import {
   getUserConnectionField,
 } from 'utils/fields';
 import qe from 'utils/quasi-equals';
+import { keydownHandlerPrint } from 'utils/print';
 
 import { getEntityTitleTruncated, checkActorAttribute } from 'utils/entities';
 
@@ -38,9 +39,10 @@ import {
   updatePath,
   closeEntity,
   setSubject,
+  printView,
 } from 'containers/App/actions';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
+import { CONTENT_SINGLE, PRINT_TYPES } from 'containers/App/constants';
 import {
   ROUTES,
   ACTORTYPES,
@@ -73,9 +75,12 @@ import {
   selectSubjectQuery,
   selectActortypes,
   selectUserConnections,
+  selectIsPrintView,
+  selectPrintConfig,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
+import HeaderPrint from 'components/Header/HeaderPrint';
 import messages from './messages';
 import TabActivities from './TabActivities';
 import TabMembers from './TabMembers';
@@ -92,33 +97,34 @@ import {
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
-
-export function ActorView(props) {
-  const {
-    intl,
-    viewEntity,
-    dataReady,
-    isMember,
-    onLoadData,
-    params,
-    handleEdit,
-    handleClose,
-    handleTypeClick,
-    viewTaxonomies,
-    associationsByType,
-    onEntityClick,
-    subject,
-    onSetSubject,
-    membersByType,
-    actortypes,
-    taxonomies,
-    actorConnections,
-    actionsByActiontype,
-    users,
-    userConnections,
-    isAdmin,
-    myId,
-  } = props;
+export function ActorView({
+  intl,
+  viewEntity,
+  dataReady,
+  isMember,
+  onLoadData,
+  params,
+  handleEdit,
+  handleClose,
+  handleTypeClick,
+  viewTaxonomies,
+  associationsByType,
+  onEntityClick,
+  onSetSubject,
+  membersByType,
+  actortypes,
+  taxonomies,
+  actorConnections,
+  actionsByActiontype,
+  users,
+  userConnections,
+  isAdmin,
+  myId,
+  isPrintView,
+  onSetPrintView,
+  printArgs,
+  subject,
+}) {
   useEffect(() => {
     // kick off loading of data
     onLoadData();
@@ -131,20 +137,42 @@ export function ActorView(props) {
     }
   }, [dataReady]);
 
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.SINGLE,
+    printContentOptions: { tabs: true, types: true },
+    printMapOptions: subject !== 'facts' ? { markers: true } : null,
+    printMapMarkers: true,
+    printOrientation: 'portrait',
+    printSize: 'A4',
+  });
+
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
+
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'actortype_id']);
   const viewActortype = actortypes && actortypes.find((type) => qe(type.get('id'), typeId));
 
   let buttons = [];
   if (dataReady) {
-    buttons = [
-      ...buttons,
-      {
-        type: 'icon',
-        onClick: () => window.print(),
-        title: 'Print',
-        icon: 'print',
-      },
-    ];
+    if (window.print) {
+      buttons = [
+        ...buttons,
+        {
+          type: 'icon',
+          onClick: mySetPrintView,
+          title: 'Print',
+          icon: 'print',
+        },
+      ];
+    }
     if (isMember) {
       buttons = [
         ...buttons,
@@ -201,20 +229,24 @@ export function ActorView(props) {
           { name: 'description', content: intl.formatMessage(messages.metaDescription) },
         ]}
       />
-      <Content isSingle>
-        { !dataReady
+      <Content isSingle isPrintView={isPrintView}>
+        {!dataReady
           && <Loading />
         }
-        { !viewEntity && dataReady
+        {!viewEntity && dataReady
           && (
             <div>
               <FormattedMessage {...messages.notFound} />
             </div>
           )
         }
-        { viewEntity && dataReady && (
-          <ViewWrapper>
+        {viewEntity && dataReady && (
+          <ViewWrapper isPrint={isPrintView}>
+            {isPrintView && (
+              <HeaderPrint />
+            )}
             <ViewHeader
+              isPrintView={isPrintView}
               title={typeId
                 ? intl.formatMessage(appMessages.actortypes[typeId])
                 : intl.formatMessage(appMessages.entities.actors.plural)
@@ -226,7 +258,7 @@ export function ActorView(props) {
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isMember}>
+                <Main hasAside={isMember && !isPrintView}>
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
@@ -245,7 +277,7 @@ export function ActorView(props) {
                     }}
                   />
                 </Main>
-                {isMember && (
+                {isMember && !isPrintView && (
                   <Aside>
                     <FieldGroup
                       group={{
@@ -275,9 +307,9 @@ export function ActorView(props) {
                     group={{
                       fields: [
                         checkActorAttribute(typeId, 'description')
-                          && getMarkdownField(viewEntity, 'description', true),
+                        && getMarkdownField(viewEntity, 'description', true),
                         checkActorAttribute(typeId, 'activity_summary')
-                          && getMarkdownField(viewEntity, 'activity_summary', true),
+                        && getMarkdownField(viewEntity, 'activity_summary', true),
                       ],
                     }}
                   />
@@ -363,8 +395,8 @@ export function ActorView(props) {
                       ],
                     }}
                   />
-                  {isCountry && (
-                    <CountryMap actor={viewEntity} />
+                  {isCountry && !isPrintView && (
+                    <CountryMap actor={viewEntity} printArgs={printArgs} />
                   )}
                   <FieldGroup
                     aside
@@ -374,7 +406,7 @@ export function ActorView(props) {
                         checkActorAttribute(typeId, 'phone') && getTextField(viewEntity, 'phone'),
                         checkActorAttribute(typeId, 'address') && getTextField(viewEntity, 'address'),
                         checkActorAttribute(typeId, 'url')
-                          && getLinkField(viewEntity),
+                        && getLinkField(viewEntity),
                       ],
                     }}
                   />
@@ -443,6 +475,9 @@ ActorView.propTypes = {
   users: PropTypes.object,
   isAdmin: PropTypes.bool,
   myId: PropTypes.string,
+  isPrintView: PropTypes.bool,
+  onSetPrintView: PropTypes.func,
+  printArgs: PropTypes.object,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -461,6 +496,8 @@ const mapStateToProps = (state, props) => ({
   userConnections: selectUserConnections(state),
   isAdmin: selectIsUserAdmin(state),
   myId: selectSessionUserId(state),
+  isPrintView: selectIsPrintView(state),
+  printArgs: selectPrintConfig(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -482,6 +519,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetSubject: (type) => {
       dispatch(setSubject(type));
+    },
+    onSetPrintView: (config) => {
+      dispatch(printView(config));
     },
   };
 }

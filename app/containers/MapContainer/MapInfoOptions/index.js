@@ -6,6 +6,8 @@ import { Box, Text, Button } from 'grommet';
 import InfoOverlay from 'components/InfoOverlay';
 
 import qe from 'utils/quasi-equals';
+import PrintHide from 'components/styled/PrintHide';
+// import PrintOnly from 'components/styled/PrintOnly';
 
 import MapKey from './MapKey';
 import MapSubjectOptions from './MapSubjectOptions';
@@ -18,20 +20,39 @@ const Title = styled((p) => <Text weight={500} {...p} />)`
 `;
 const SubTitle = styled((p) => <Text size="small" {...p} />)``;
 
-const Styled = styled.div`
-  position: absolute;
-  z-index: 50;
-  bottom: 10px;
-  width: 100%;
-  height: ${({ hasTabs }) => hasTabs ? 260 : 220}px;
+const Styled = styled.div` 
+position: absolute;
+z-index: 50;
+background: ${({ isPrint }) => isPrint ? 'white' : 'transparent'};
+bottom: ${({ isPrint }) => isPrint ? 0 : 10}px;
+width: ${({ isPrint }) => isPrint ? 'auto' : '100%'};
+height: ${({ hasTabs, isPrint }) => {
+    if (isPrint) {
+      return 'auto';
+    } if (hasTabs) {
+      return '260px';
+    }
+    return '220px';
+  }};
+min-height: ${({ isPrint }) => isPrint ? '180px' : 'auto'};
+left: 0;
+right: ${({ isPrint }) => isPrint ? 0 : 'auto'};
+max-width: ${({ isPrint }) => isPrint ? '100%' : '320px'};
+border-top: ${({ isPrint }) => isPrint ? '1px solid #f1f0f1' : 'none'};
+@media (min-width: 370px) {
+  left: ${({ isPrint }) => isPrint ? 0 : 10}px;
+  bottom: ${({ isPrint }) => isPrint ? 0 : 30}px;
+  max-width: 420px;
+}
+@media print {
+  height: auto;
+  right: 0;
   left: 0;
-  max-width: 320px;
-  @media (min-width: 370px) {
-    max-width: 420px;
-    left: 10px;
-    bottom: 30px;
-  }
-`;
+  bottom: 0;
+  max-width: 100%;
+  border-top: 1px solid #f1f0f1;
+}`;
+
 const IndicatorButton = styled((p) => <Button plain {...p} />)`
     color: #0077d8;
     &:hover {
@@ -77,6 +98,7 @@ export function MapInfoOptions({
   countryMapSubject,
   minMaxValues,
   circleLayerConfig,
+  isPrintView,
 }) {
   if (!options) return null;
   const [tab, setTab] = useState(options[0].id);
@@ -130,15 +152,17 @@ export function MapInfoOptions({
     );
   }
   return (
-    <Styled hasTabs={options.length > 1 || activeOption.indicatorOptions}>
-      <Pane>
-        {options.length > 1 && (
-          <Box fill="horizontal" direction="row" style={{ zIndex: 1 }}>
-            {renderTabs(true)}
-          </Box>
-        )}
-        <Box flex={{ grow: 1 }} direction="row" elevation="medium" background="white" style={{ zIndex: 2 }} />
-      </Pane>
+    <Styled hasTabs={options.length > 1 || activeOption.indicatorOptions} isPrint={isPrintView}>
+      <PrintHide>
+        <Pane>
+          {options.length > 1 && (
+            <Box fill="horizontal" direction="row" style={{ zIndex: 1 }}>
+              {renderTabs(true)}
+            </Box>
+          )}
+          <Box flex={{ grow: 1 }} direction="row" elevation="medium" background="white" style={{ zIndex: 2 }} />
+        </Pane>
+      </PrintHide>
       <Pane>
         {options.length > 1 && (
           <Box fill="horizontal" direction="row">
@@ -329,6 +353,7 @@ MapInfoOptions.propTypes = {
   minMaxValues: PropTypes.object,
   circleLayerConfig: PropTypes.object,
   countryMapSubject: PropTypes.string,
+  isPrintView: PropTypes.bool,
 };
 
 export default MapInfoOptions;

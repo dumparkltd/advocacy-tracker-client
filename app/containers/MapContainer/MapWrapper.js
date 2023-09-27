@@ -3,7 +3,9 @@
  * MapWrapper
  *
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, {
+  useEffect, useRef, useState, useLayoutEffect,
+} from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import L from 'leaflet';
@@ -28,14 +30,20 @@ import {
 
 const Styled = styled.div`
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: ${({ theme, isPrint, fullMap }) => isPrint && fullMap ? theme.sizes.header.banner.heightPrint : 0}px;
+  bottom: ${({ isPrint }) => isPrint ? '180px' : 0};
   right: 0;
   left: 0;
   background: transparent;
   z-index: 10;
   overflow: hidden;
+  width: 100%;
+  @media print {
+    top: ${({ theme, fullMap }) => fullMap ? theme.sizes.header.banner.heightPrint : 0}px;
+    bottom: 0px;
+  }
 `;
+
 const Map = styled.div`
   position: absolute;
   top: 0;
@@ -118,12 +126,15 @@ export function MapWrapper({
   isLocationData = false, // real location data not country points
   circleLayerConfig = {},
   valueToStyle,
+  printArgs,
+  isPrintView,
+  fullMap,
 }) {
   const mapOptions = merge({}, options, MAP_OPTIONS);
 
   const customMapProjection = mapOptions.PROJ[projection];
   const size = React.useContext(ResponsiveContext);
-  const leafletOptions = customMapProjection
+  let leafletOptions = customMapProjection
     ? {
       crs: new L.Proj.CRS(
         customMapProjection.crs,
@@ -163,6 +174,14 @@ export function MapWrapper({
       worldCopyJump: false,
       attributionControl: false,
     };
+  if (isPrintView) {
+    leafletOptions = {
+      ...leafletOptions,
+      preferCanvas: true,
+      renderer: L.canvas(),
+    };
+  }
+
   const [tooltip, setTooltip] = useState(TOOLTIP_INITIAL);
   const [featureOver, setFeatureOver] = useState(null);
   const [zoom, setZoom] = useState(MAP_OPTIONS.ZOOM.INIT);
@@ -287,6 +306,12 @@ export function MapWrapper({
     if (!e || !feature || feature.id) setFeatureOver(null);
     if (feature && feature.id) setFeatureOver(feature.id);
   };
+  useLayoutEffect(() => {
+    if (mapRef.current) {
+      mapRef.current.invalidateSize();
+    }
+  }, [printArgs]);
+
   // useEffect(() => {
   //   /**
   //    * Alert if clicked on outside of element
@@ -362,8 +387,8 @@ export function MapWrapper({
   // add countryPointData
   useEffect(() => {
     countryPointOverlayGroupRef.current.clearLayers();
-    // console.log('countryPointData', countryPointData)
-    if (countryPointData && countryPointData.length > 0) {
+    const showMarkers = !isPrintView || (printArgs && printArgs.printMapMarkers);
+    if (countryPointData && countryPointData.length > 0 && showMarkers) {
       // TODO find a better way to determine isCount?
       const jsonLayer = getPointLayer({
         data: filterNoDataFeatures(
@@ -383,7 +408,7 @@ export function MapWrapper({
 
       countryPointOverlayGroupRef.current.addLayer(jsonLayer);
     }
-  }, [countryPointData, zoom, indicator, tooltip, mapSubject]);
+  }, [countryPointData, zoom, indicator, tooltip, mapSubject, printArgs, isPrintView]);
 
   // add countryData
   useEffect(() => {
@@ -620,10 +645,12 @@ export function MapWrapper({
   }, [mapSubject, countryData]);
 
   return (
-    <Styled>
+    <Styled isPrint={isPrintView} fullMap={fullMap}>
       <Map id={mapId} ref={ref} styleType={styleType} />
       {tooltip && tooltip.features && tooltip.features.length > 0 && (
         <Tooltip
+          isPrintView={isPrintView}
+          printArgs={printArgs}
           isLocationData={isLocationData}
           mapRef={ref}
           position={null}
@@ -656,6 +683,8 @@ MapWrapper.propTypes = {
   fitBounds: PropTypes.bool,
   interactive: PropTypes.bool,
   scrollWheelZoom: PropTypes.bool,
+  isPrintView: PropTypes.bool,
+  fullMap: PropTypes.bool,
   mapSubject: PropTypes.string,
   projection: PropTypes.string,
   styleType: PropTypes.string,
@@ -663,6 +692,7 @@ MapWrapper.propTypes = {
   options: PropTypes.object,
   isLocationData: PropTypes.bool,
   circleLayerConfig: PropTypes.object,
+  printArgs: PropTypes.object,
   // onSetMapSubject: PropTypes.func,
 };
 

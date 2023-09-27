@@ -10,6 +10,7 @@ import { Box, ResponsiveContext } from 'grommet';
 import styled from 'styled-components';
 
 import appMessages from 'containers/App/messages';
+import { usePrint } from 'containers/App/PrintContext';
 
 import { ROUTES, RESOURCETYPE_NAVGROUPS } from 'themes/config';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
@@ -32,7 +33,7 @@ const GroupTitle = styled.h5`
   color: ${({ theme }) => theme.global.colors.text.brand};
 `;
 const ViewContainer = styled(Container)`
-  min-height: 85vH;
+min-height: ${({ isPrint }) => isPrint ? '50vH' : '85vH'};
   @media print {
     min-height: 50vH;
   }
@@ -45,10 +46,10 @@ export function ResourcesOverview({
     onLoadData();
   }, []);
   const size = React.useContext(ResponsiveContext);
-
+  const isPrint = usePrint();
   return (
     <ContainerWrapper bg>
-      <ViewContainer>
+      <ViewContainer isPrint={isPrint}>
         <ContentSimple>
           {Object.keys(RESOURCETYPE_NAVGROUPS).map((key) => (
             <Group key={key}>

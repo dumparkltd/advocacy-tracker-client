@@ -1,13 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box, Text, Button } from 'grommet';
+import { Box, Button } from 'grommet';
 
 // import ButtonFactory from 'components/buttons/ButtonFactory';
 
+import PrintHide from 'components/styled/PrintHide';
+import PrintOnly from 'components/styled/PrintOnly';
+import TextPrint from 'components/styled/TextPrint';
+import { usePrint } from 'containers/App/PrintContext';
+
 const Styled = styled.div`
   padding-bottom: ${({ inList }) => inList ? 2 : 10}px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     padding-bottom: ${({ inList }) => inList ? 5 : 15}px;
   }
 `;
@@ -17,30 +22,51 @@ const TypeButton = styled((p) => <Button plain {...p} />)`
   border-bottom-color: ${({ active }) => active ? 'auto' : 'transparent'};
   background: none;
 `;
+const TextWrap = styled((p) => <Box {...p} />)`
+  border-bottom: 1px solid;
+  border-bottom-color: ${({ hasBorder }) => hasBorder ? 'auto' : 'transparent'};
+`;
 
-class MapSubjectOptions extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  render() {
-    const { options, inList } = this.props;
-    return (
-      <Styled inList={inList}>
+function MapSubjectOptions({ options, inList }) {
+  const isPrint = usePrint();
+  const optionActiveForPrint = isPrint && options
+    ? options.find(
+      (option) => option && option.active && !option.printHide
+    )
+    : null;
+
+  return (
+    <Styled inList={inList}>
+      <PrintHide>
         {options && (
           <Box direction="row" gap="small">
             {
               options.map((option, i) => option && (
                 <Box key={i}>
                   <TypeButton active={option.active} onClick={option.onClick} inList={inList}>
-                    <Text size={inList ? 'medium' : 'large'}>
+                    <TextPrint size={inList ? 'medium' : 'large'}>
                       {option.title}
-                    </Text>
+                    </TextPrint>
                   </TypeButton>
                 </Box>
               ))
             }
           </Box>
         )}
-      </Styled>
-    );
-  }
+      </PrintHide>
+      <PrintOnly>
+        {optionActiveForPrint && (
+          <Box direction="row" gap="small" justify="start">
+            <TextWrap hasBorder={inList}>
+              <TextPrint size={inList ? 'medium' : 'large'}>
+                {optionActiveForPrint.title}
+              </TextPrint>
+            </TextWrap>
+          </Box>
+        )}
+      </PrintOnly>
+    </Styled>
+  );
 }
 
 MapSubjectOptions.propTypes = {

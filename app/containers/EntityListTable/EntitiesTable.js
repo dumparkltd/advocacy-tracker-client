@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, ResponsiveContext } from 'grommet';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { isMinSize } from 'utils/responsive';
 import { scaleColorCount } from 'containers/MapContainer/utils';
 
@@ -26,11 +26,20 @@ const Table = styled.table`
   width: inherit;
   table-layout: fixed;
   width: 100%;
+  ${({ isPrint }) => isPrint && css`pointer-events: none;`}
+  @media print {
+    display: block;
+    page-break-inside: auto;
+  }
 `;
 const TableHeader = styled.thead``;
 const TableBody = styled.tbody``;
 const TableRow = styled.tr`
   height: 100%;
+  @media print {
+    height: auto;
+    page-break-inside: avoid;
+  }
 `;
 const getColWidth = ({
   col, count, colSpan = 1, inSingleView,
@@ -56,9 +65,9 @@ const getColWidth = ({
   return 0;
 };
 // background-color: ${({ utility, col }) => {
-  //   if (utility && col.type === 'options') return '#f9f9f9';
-  //   return 'transparent';
-  // }};
+//   if (utility && col.type === 'options') return '#f9f9f9';
+//   return 'transparent';
+// }};
 const TableCellHeader = styled.th`
   margin: 0;
   padding: 0;
@@ -128,11 +137,12 @@ export function EntitiesTable({
   memberOption,
   subjectOptions,
   inSingleView,
+  isPrintView,
 }) {
   const size = React.useContext(ResponsiveContext);
   return (
     <Box fill="horizontal">
-      <Table>
+      <Table isPrint={isPrintView}>
         {headerColumns && (
           <TableHeader>
             {headerColumnsUtility && isMinSize(size, 'large') && (
@@ -171,7 +181,7 @@ export function EntitiesTable({
             )}
             <TableRow>
               {headerColumns.map(
-                (col, i) => (isMinSize(size, 'large') || col.type === 'main') && (
+                (col, i) => (isMinSize(size, 'large') || isPrintView || col.type === 'main') && (
                   <TableCellHeader
                     key={i}
                     scope="col"
@@ -185,11 +195,12 @@ export function EntitiesTable({
                       {col.type === 'main' && (
                         <CellHeaderMain
                           column={col}
-                          canEdit={canEdit}
+                          canEdit={canEdit && !isPrintView}
+                          isPrintView={isPrintView}
                         />
                       )}
-                      {isMinSize(size, 'large') && col.type !== 'main' && (
-                        <CellHeaderPlain column={col} />
+                      {(isMinSize(size, 'large') || isPrintView) && col.type !== 'main' && (
+                        <CellHeaderPlain column={col} isPrintView={isPrintView} />
                       )}
                     </TableCellHeaderInner>
                   </TableCellHeader>
@@ -201,7 +212,7 @@ export function EntitiesTable({
         <TableBody>
           {entities.length > 0 && entities.map((entity, key) => (
             <TableRow key={key}>
-              {columns.map((col, i) => (isMinSize(size, 'large') || col.type === 'main') && (
+              {columns.map((col, i) => (isMinSize(size, 'large') || isPrintView || col.type === 'main') && (
                 <TableCellBody
                   key={i}
                   scope="row"
@@ -215,7 +226,7 @@ export function EntitiesTable({
                     {col.type === 'main' && (
                       <CellBodyMain
                         entity={entity[col.id]}
-                        canEdit={canEdit}
+                        canEdit={canEdit && !isPrintView}
                         column={col}
                       />
                     )}
@@ -341,6 +352,7 @@ EntitiesTable.propTypes = {
   headerColumnsUtility: PropTypes.array,
   canEdit: PropTypes.bool,
   inSingleView: PropTypes.bool,
+  isPrintView: PropTypes.bool,
   onEntityClick: PropTypes.func,
   memberOption: PropTypes.node,
   subjectOptions: PropTypes.node,

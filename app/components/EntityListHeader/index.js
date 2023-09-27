@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import styled, { withTheme } from 'styled-components';
 import { Map, List } from 'immutable';
 import { palette } from 'styled-theme';
@@ -43,7 +43,9 @@ import { makeActiveEditOptions } from './utilEditOptions';
 
 import messages from './messages';
 
-const Styled = styled(PrintHide)``;
+const Styled = styled(PrintHide)`
+  display: ${({ isPrint }) => isPrint ? 'none' : 'block'};
+`;
 
 const TheHeader = styled((p) => <Box direction="row" {...p} />)`
   height: ${({ theme }) => theme.sizes.headerList.banner.height}px;
@@ -52,7 +54,7 @@ const TheHeader = styled((p) => <Box direction="row" {...p} />)`
   box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
   position: relative;
   z-index: 96;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     padding: 0 15px 0 75px;
   }
 `;
@@ -62,7 +64,7 @@ const HeaderSection = styled((p) => <Box direction="row" {...p} />)`
   height: 100%;
   padding: 2px 5px;
   flex: ${({ grow }) => grow ? '1' : '0'} ${({ shrink = '1' }) => shrink ? '1' : '0'} auto;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     padding: 2px 10px;
   }
 `;
@@ -76,7 +78,7 @@ const HeaderSectionType = styled((p) => <Box direction="column" {...p} />)`
 const SelectType = styled(ButtonOld)`
   display: none;
   text-align: left;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     display: block;
     padding-left: 2px;
     padding-right: 2px;
@@ -89,38 +91,38 @@ const ButtonOptions = styled((p) => <Button plain {...p} />)`
 `;
 
 const Label = styled.div`
-  font-size: ${(props) => props.theme.sizes.text.smallMobile};
+  font-size: ${({ theme }) => theme.sizes.text.smallMobile};
   color: ${palette('text', 1)};
   padding-left: 2px;
   padding-right: 2px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${(props) => props.theme.sizes.text.smaller};
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    font-size: ${({ theme }) => theme.sizes.text.smaller};
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.smaller};
   }
 `;
 const LinkTitle = styled.div`
-  font-size: ${(props) => props.theme.sizes.text.small};
+  font-size: ${({ theme }) => theme.sizes.text.small};
   font-weight: bold;
   color: ${(props) => props.active ? palette('headerNavMainItem', 1) : 'inherit'};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${(props) => props.theme.sizes.text.default};
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    font-size: ${({ theme }) => theme.sizes.text.default};
   }
   @media print {
-    font-size: ${(props) => props.theme.sizes.print.default};
+    font-size: ${({ theme }) => theme.sizes.print.default};
   }
 `;
 
-const TypeOptions = styled(PrintHide)`
+const TypeOptions = styled.div`
   display: none;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     position: absolute;
     top: 100%;
     left: 0;
     display: block;
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
     min-width: 240px;
   }
   background: white;
@@ -215,7 +217,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     if (!wrapperContains && !buttonContains) {
       this.setState({ showTypes: false });
     }
-  }
+  };
 
   onSetActiveOption = (option) => {
     this.setState({ activeOption: option });
@@ -240,8 +242,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     this.setState({ showTypes: false });
   };
 
-  getFormButtons = (activeOption) => {
-    const { intl } = this.context;
+  getFormButtons = (activeOption, intl) => {
     const { onCreateOption } = this.props;
     return [
       activeOption.create
@@ -325,8 +326,9 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       headerActions,
       isAdmin,
       onClearFilters,
+      isPrintView,
+      intl,
     } = this.props;
-    const { intl } = this.context;
     const { activeOption } = this.state;
     const hasSelected = dataReady && canEdit && entityIdsSelected && entityIdsSelected.size > 0;
     const entitiesSelected = hasSelected
@@ -479,7 +481,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
         {(size) => {
           const iconSize = isMinSize(size, 'medium') ? 'xxsmall' : 'small';
           return (
-            <Styled>
+            <Styled isPrint={isPrintView}>
               <TheHeader align="center">
                 {config.types && hasTypeOptions && (
                   <HeaderSection noBorder>
@@ -534,20 +536,22 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                       </SelectType>
                     )}
                     {this.state.showTypes && typeOptions && (
-                      <TypeOptions ref={this.typeWrapperRef}>
-                        {typeOptions.map((option) => (
-                          <TypeOption
-                            key={option.value}
-                            active={option.active}
-                            onClick={() => {
-                              this.onHideTypes();
-                              onSelectType(option.value);
-                            }}
-                          >
-                            {option.label}
-                          </TypeOption>
-                        ))}
-                      </TypeOptions>
+                      <PrintHide>
+                        <TypeOptions ref={this.typeWrapperRef}>
+                          {typeOptions.map((option) => (
+                            <TypeOption
+                              key={option.value}
+                              active={option.active}
+                              onClick={() => {
+                                this.onHideTypes();
+                                onSelectType(option.value);
+                              }}
+                            >
+                              {option.label}
+                            </TypeOption>
+                          ))}
+                        </TypeOptions>
+                      </PrintHide>
                     )}
                   </HeaderSectionType>
                 )}
@@ -725,7 +729,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                   activeOptionId={`${activeOption.group}-${activeOption.optionId}`}
                   formOptions={formOptions}
                   buttons={showEditOptions
-                    ? this.getFormButtons(activeOption)
+                    ? this.getFormButtons(activeOption, intl)
                     : this.getFilterFormButtons()
                   }
                   onCancel={this.onHideForm}
@@ -733,7 +737,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                   showCancelButton={showFilters}
                   onSubmit={showEditOptions
                     ? (associations) => {
-                    // close and reset option panel
+                      // close and reset option panel
                       this.setState({ activeOption: null });
                       onUpdate(associations, activeOption);
                     }
@@ -787,16 +791,18 @@ EntityListHeader.propTypes = {
   dataReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
   includeMembers: PropTypes.bool,
+  isPrintView: PropTypes.bool,
   typeOptions: PropTypes.array,
   onSelectType: PropTypes.func,
   onSetFilterMemberOption: PropTypes.func,
   onClearFilters: PropTypes.func,
   typeId: PropTypes.string,
   headerActions: PropTypes.array,
+  intl: intlShape.isRequired,
 };
 
 EntityListHeader.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-export default withTheme(EntityListHeader);
+export default withTheme(injectIntl(EntityListHeader));
