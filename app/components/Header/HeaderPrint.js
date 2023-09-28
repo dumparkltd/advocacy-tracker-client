@@ -85,7 +85,7 @@ function HeaderPrint({ intl }) {
         <Box flex={{ shrink: 0 }}>
           <Brand>
             <Box direction="row" align="center">
-              <LogoWrap>
+              <LogoWrap isPrint>
                 <Icon name="logo" size="60px" />
               </LogoWrap>
               <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">

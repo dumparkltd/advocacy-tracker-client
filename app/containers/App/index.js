@@ -380,7 +380,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             loading
           />
         )}
-        <GlobalStyle />
+        <GlobalStyle isPrint={isPrintView} />
       </div>
     );
   }

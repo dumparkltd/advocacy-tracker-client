@@ -2,12 +2,14 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box } from 'grommet';
+
 import IndeterminateCheckbox from 'components/forms/IndeterminateCheckbox';
 import PrintHide from 'components/styled/PrintHide';
 import BoxPrint from 'components/styled/BoxPrint';
 import TextPrint from 'components/styled/TextPrint';
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import Icon from 'components/Icon';
+
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
 
 const Checkbox = styled(IndeterminateCheckbox)`
@@ -34,6 +36,7 @@ export function CellHeaderMain({ column, canEdit }) {
   const sortOrderOption = column.onSort && SORT_ORDER_OPTIONS.find(
     (option) => column.sortOrder === option.value
   );
+
   return (
     <Box direction="row" align="center" justify="start" flex={false}>
       {canEdit && (
@@ -58,29 +61,31 @@ export function CellHeaderMain({ column, canEdit }) {
         </TextPrint>
       )}
       {column.onSort && (
-        <BoxPrint printHide pad={{ left: 'xxsmall' }} flex={false}>
-          <SortButton
-            onClick={() => {
-              if (column.sortActive) {
-                const nextSortOrderOption = SORT_ORDER_OPTIONS.find((option) => sortOrderOption.nextValue === option.value);
-                column.onSort(column.id || column.type, nextSortOrderOption.value);
-              } else {
-                column.onSort(column.id || column.type, sortOrderOption.value);
-              }
-            }}
-          >
-            <Icon
-              name={column.sortActive && sortOrderOption
-                ? sortOrderOption.icon
-                : 'sorting'
-              }
-              palette="dark"
-              paletteIndex={column.sortActive ? 1 : 4}
-              printHide={!column.sortActive}
-              size="20px"
-            />
-          </SortButton>
-        </BoxPrint>
+        <PrintHide>
+          <BoxPrint printHide pad={{ left: 'xxsmall' }} flex={false}>
+            <SortButton
+              onClick={() => {
+                if (column.sortActive) {
+                  const nextSortOrderOption = SORT_ORDER_OPTIONS.find((option) => sortOrderOption.nextValue === option.value);
+                  column.onSort(column.id || column.type, nextSortOrderOption.value);
+                } else {
+                  column.onSort(column.id || column.type, sortOrderOption.value);
+                }
+              }}
+            >
+              <Icon
+                name={column.sortActive && sortOrderOption
+                  ? sortOrderOption.icon
+                  : 'sorting'
+                }
+                palette="dark"
+                paletteIndex={column.sortActive ? 1 : 4}
+                printHide={!column.sortActive}
+                size="20px"
+              />
+            </SortButton>
+          </BoxPrint>
+        </PrintHide>
       )}
     </Box>
   );

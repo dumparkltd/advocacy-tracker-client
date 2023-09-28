@@ -25,7 +25,7 @@ const Label = styled.label`
 `;
 const Styled = styled.span`;
   @media print {
-    display: ${({ printHide }) => (printHide ? 'none' : 'inline')};
+    display: ${({ printHide }) => printHide ? 'none' : 'inline'};
   }
 `;
 const Select = styled.select`

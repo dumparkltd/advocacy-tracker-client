@@ -20,11 +20,14 @@ import {
   selectActortypes,
   selectCategories,
   selectResources,
+  selectIsPrintView,
+  selectPrintConfig,
 } from 'containers/App/selectors';
 import { updateQuery } from 'containers/EntityList/actions';
 
 import SelectReset from 'components/SelectReset';
 import EntityListSearch from 'components/EntityListSearch';
+import BoxPrint from 'components/styled/BoxPrint';
 
 import ToggleAllItems from 'components/fields/ToggleAllItems';
 import appMessages from 'containers/App/messages';
@@ -106,6 +109,8 @@ export function EntityListTable({
   includeChildren,
   onPageItemsSelect,
   onPageSelect,
+  printConfig,
+  isPrintView,
 }) {
   if (!columns) return null;
   const sortColumn = columns.find((c) => !!c.sortDefault);
@@ -141,7 +146,7 @@ export function EntityListTable({
       searchAttributes,
     );
   }
-  const activeColumns = columns.filter((col) => !col.skip);
+  const activeColumns = columns.filter((col) => !col.skip && !(isPrintView && col.printHideOnSingle));
   // warning converting List to Array
   const entityRows = prepareEntityRows({
     entities: searchedEntities,
@@ -160,6 +165,8 @@ export function EntityListTable({
     resources,
     includeMembers,
     includeChildren,
+    isPrintView,
+    printConfig,
   });
   const columnMaxValues = getColumnMaxValues(
     entityRows,
@@ -217,13 +224,14 @@ export function EntityListTable({
   const isSortedOrPaged = !!pageNo || !!pageItems || !!cleanSortBy || !!cleanSortOrder;
   if (paginate) {
     if (pageItems) {
-      if (pageItems === 'all') {
+      if (pageItems === 'all' || (isPrintView && printConfig.printItems === 'all')) {
         pageSize = sortedEntities.length;
       } else {
-        pageSize = Math.min(
-          (pageItems && parseInt(pageItems, 10)),
-          PAGE_SIZE_MAX
-        );
+        pageSize = pageItems
+          ? Math.min(
+            (pageItems && parseInt(pageItems, 10)),
+            PAGE_SIZE_MAX
+          ) : Math.min(PAGE_SIZE, PAGE_SIZE_MAX);
       }
     } else {
       pageSize = Math.min(PAGE_SIZE, PAGE_SIZE_MAX);
@@ -268,6 +276,7 @@ export function EntityListTable({
     }),
     intl,
   });
+
   return (
     <div>
       <Box
@@ -286,19 +295,21 @@ export function EntityListTable({
           </Box>
         )}
         <Box flex={{ shrink: 1, grow: 0 }}>
-          {entitiesOnPage.length > 0 && paginate && (
-            <SelectReset
-              value={pageItems === 'all' ? pageItems : pageSize.toString()}
-              label={intl && intl.formatMessage(appMessages.labels.perPage)}
-              index="page-select"
-              options={PAGE_ITEM_OPTIONS && PAGE_ITEM_OPTIONS.map((option) => ({
-                value: option.value.toString(),
-                label: option.value.toString(),
-              }))}
-              isReset={false}
-              onChange={onPageItemsSelect}
-            />
-          )}
+          <BoxPrint printHide>
+            {entitiesOnPage.length > 0 && paginate && (
+              <SelectReset
+                value={pageItems === 'all' ? pageItems : pageSize.toString()}
+                label={intl && intl.formatMessage(appMessages.labels.perPage)}
+                index="page-select"
+                options={PAGE_ITEM_OPTIONS && PAGE_ITEM_OPTIONS.map((option) => ({
+                  value: option.value.toString(),
+                  label: option.value.toString(),
+                }))}
+                isReset={false}
+                onChange={onPageItemsSelect}
+              />
+            )}
+          </BoxPrint>
         </Box>
       </Box>
       <EntitiesTable
@@ -312,6 +323,7 @@ export function EntityListTable({
         memberOption={memberOption}
         subjectOptions={subjectOptions}
         inSingleView={inSingleView}
+        isPrintView={isPrintView}
       />
       <ListEntitiesMain>
         {entityIdsOnPage.length === 0
@@ -368,7 +380,8 @@ export function EntityListTable({
       {entitiesOnPage.length > 0 && paginate && (
         <EntityListFooter
           pager={pager}
-          pageSize={pageSize}
+          isPrintView={isPrintView}
+          pageSize={(pageItems === 'all' || (isPrintView && printConfig.printItems === 'all')) ? 'all' : pageSize}
           onPageSelect={onPageSelect}
         />
       )}
@@ -430,6 +443,8 @@ EntityListTable.propTypes = {
   subjectOptions: PropTypes.node,
   includeMembers: PropTypes.bool,
   includeChildren: PropTypes.bool,
+  isPrintView: PropTypes.bool,
+  printConfig: PropTypes.object,
   pageItemSelectConfig: PropTypes.object,
 };
 
@@ -442,6 +457,8 @@ const mapStateToProps = (state) => ({
   actortypes: selectActortypes(state),
   categories: selectCategories(state),
   resources: selectResources(state),
+  isPrintView: selectIsPrintView(state),
+  printConfig: selectPrintConfig(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

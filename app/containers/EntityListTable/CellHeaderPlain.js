@@ -6,6 +6,7 @@ import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import Icon from 'components/Icon';
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
 import InfoOverlay from 'components/InfoOverlay';
+import PrintHide from 'components/styled/PrintHide';
 import CellHeaderInfoOverlay from './CellHeaderInfoOverlay';
 
 const SortButton = styled(ButtonFlatIconOnly)`
@@ -35,31 +36,33 @@ export function CellHeaderPlain({ column }) {
         />
       )}
       {column.onSort && (
-        <Box pad={{ left: 'xxsmall' }} flex={false}>
-          <SortButton
-            onClick={() => {
-              if (column.sortActive) {
-                const nextSortOrderOption = SORT_ORDER_OPTIONS.find(
-                  (option) => sortOrderOption.nextValue === option.value
-                );
-                column.onSort(column.id || column.type, nextSortOrderOption.value);
-              } else {
-                column.onSort(column.id || column.type, sortOrderOption.value);
-              }
-            }}
-          >
-            <Icon
-              name={column.sortActive && sortOrderOption
-                ? sortOrderOption.icon
-                : 'sorting'
-              }
-              palette="dark"
-              paletteIndex={column.sortActive ? 1 : 4}
-              hidePrint={!column.sortActive}
-              size="20px"
-            />
-          </SortButton>
-        </Box>
+        <PrintHide>
+          <Box pad={{ left: 'xxsmall' }} flex={false}>
+            <SortButton
+              onClick={() => {
+                if (column.sortActive) {
+                  const nextSortOrderOption = SORT_ORDER_OPTIONS.find(
+                    (option) => sortOrderOption.nextValue === option.value
+                  );
+                  column.onSort(column.id || column.type, nextSortOrderOption.value);
+                } else {
+                  column.onSort(column.id || column.type, sortOrderOption.value);
+                }
+              }}
+            >
+              <Icon
+                name={column.sortActive && sortOrderOption
+                  ? sortOrderOption.icon
+                  : 'sorting'
+                }
+                palette="dark"
+                paletteIndex={column.sortActive ? 1 : 4}
+                hidePrint={!column.sortActive}
+                size="20px"
+              />
+            </SortButton>
+          </Box>
+        </PrintHide>
       )}
     </Box>
   );
