@@ -86,6 +86,7 @@ const InfoTitlePrintOnly = styled(Text)`
 
 const renderTitle = (type, title) => {
   switch (type) {
+    case CONTENT_PAGE:
     case CONTENT_MODAL:
     case CONTENT_SINGLE:
       return (
@@ -104,6 +105,7 @@ export function ContentHeader({
   subTitle,
   hasViewOptions,
   info,
+  entityIdsSelected,
 }) {
   const isPrintView = usePrint();
   const size = React.useContext(ResponsiveContext);
@@ -133,7 +135,11 @@ export function ContentHeader({
             <ButtonGroup>
               {buttons.map((button, i) => (
                 <ButtonWrap key={i}>
-                  <ButtonFactory button={button} />
+                  {button.warning && <span style={{ marginRight: '8px' }}>{button.warning}</span>}
+                  <ButtonFactory
+                    button={button}
+                    args={{ ids: entityIdsSelected }}
+                  />
                 </ButtonWrap>
               ))}
             </ButtonGroup>
@@ -157,7 +163,10 @@ export function ContentHeader({
         <ButtonGroup justify="end">
           {buttons.map((button, i) => button && (
             <ButtonWrap key={i}>
-              <ButtonFactory button={button} />
+              <ButtonFactory
+                button={button}
+                args={{ ids: entityIdsSelected }}
+              />
             </ButtonWrap>
           ))}
         </ButtonGroup>
@@ -177,6 +186,7 @@ ContentHeader.propTypes = {
   info: PropTypes.object,
   type: PropTypes.string,
   hasViewOptions: PropTypes.bool,
+  entityIdsSelected: PropTypes.object, // PropTypes.instanceOf(List),
 };
 
 export default ContentHeader;
