@@ -31,7 +31,7 @@ import {
 const Styled = styled.div`
   position: absolute;
   top: ${({ theme, isPrint, fullMap }) => isPrint && fullMap ? theme.sizes.header.banner.heightPrint : 0}px;
-  bottom: ${({ isPrint }) => isPrint ? '180px' : 0};
+  bottom: ${({ hasInfo, isPrint }) => isPrint && hasInfo ? '180px' : 0};
   right: 0;
   left: 0;
   background: transparent;
@@ -40,7 +40,7 @@ const Styled = styled.div`
   width: 100%;
   @media print {
     top: ${({ theme, fullMap }) => fullMap ? theme.sizes.header.banner.heightPrint : 0}px;
-    bottom: 0px;
+    bottom: ${({ hasInfo }) => hasInfo ? '180px' : 0};
   }
 `;
 
@@ -52,6 +52,7 @@ const Map = styled.div`
   left: 0;
   background: transparent;
   z-index: 10;
+  width: 100%;
 `;
 
 // const PROJ[projection] = {
@@ -126,6 +127,7 @@ export function MapWrapper({
   isLocationData = false, // real location data not country points
   circleLayerConfig = {},
   valueToStyle,
+  hasInfo,
   printArgs,
   isPrintView,
   fullMap,
@@ -645,7 +647,7 @@ export function MapWrapper({
   }, [mapSubject, countryData]);
 
   return (
-    <Styled isPrint={isPrintView} fullMap={fullMap}>
+    <Styled isPrint={isPrintView} fullMap={fullMap} hasInfo={hasInfo}>
       <Map id={mapId} ref={ref} styleType={styleType} />
       {tooltip && tooltip.features && tooltip.features.length > 0 && (
         <Tooltip
@@ -685,6 +687,7 @@ MapWrapper.propTypes = {
   scrollWheelZoom: PropTypes.bool,
   isPrintView: PropTypes.bool,
   fullMap: PropTypes.bool,
+  hasInfo: PropTypes.bool,
   mapSubject: PropTypes.string,
   projection: PropTypes.string,
   styleType: PropTypes.string,

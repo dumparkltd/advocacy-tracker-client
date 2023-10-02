@@ -49,12 +49,14 @@ export function EntitiesMap({
   includeTargetMembers,
   onEntityClick,
   hasFilters,
+  isPrintView,
 }) {
   if (dataReady) {
     // actors ===================================================
     if (config.types === 'actortypes') {
       return (
         <EntitiesMapActors
+          isPrintView={isPrintView}
           entities={entities}
           actortypes={actortypes}
           actiontypes={actiontypes}
@@ -121,6 +123,7 @@ EntitiesMap.propTypes = {
   includeTargetMembers: PropTypes.bool,
   hasFilters: PropTypes.bool,
   onEntityClick: PropTypes.func,
+  isPrintView: PropTypes.bool,
 };
 
 const mapStateToProps = (state) => ({

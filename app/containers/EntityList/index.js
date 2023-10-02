@@ -235,7 +235,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onSelectType,
       onSetView,
       typeId,
-      view,
+      view = 'list',
       onEntitySelectAll,
       dataReady,
       showCode,

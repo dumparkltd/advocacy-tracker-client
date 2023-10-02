@@ -33,7 +33,9 @@ const MapKeyWrapper = styled((p) => <Box margin={{ horizontal: 'medium', top: 'x
 `;
 // import messages from './messages';
 
-const Styled = styled((p) => <Box {...p} />)`
+const Styled = styled(
+  React.forwardRef((p, ref) => <Box {...p} ref={ref} />)
+)`
   z-index: 0;
   @media print {
     page-break-inside: avoid;
@@ -211,6 +213,7 @@ export function MapContainer({
           fitBounds={fitBounds}
           projection={projection}
           mapId={mapId}
+          hasInfo={mapInfo && mapInfo.length > 0}
           circleLayerConfig={{
             ...circleLayerConfig,
             rangeMax: minMaxValues && minMaxValues.points && minMaxValues.points.max,

@@ -85,6 +85,7 @@ export function CountryMap({
           styleType="country"
           fitBounds
           projection="gall-peters"
+          printArgs={printArgs}
         />
       </MapWrapper>
     </Styled>
