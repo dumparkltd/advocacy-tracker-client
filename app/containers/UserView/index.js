@@ -52,6 +52,7 @@ import ViewPanelInside from 'components/EntityView/ViewPanelInside';
 import FieldGroup from 'components/fields/FieldGroup';
 import SubjectButton from 'components/styled/SubjectButton';
 import SubjectButtonGroup from 'components/styled/SubjectButtonGroup';
+import HeaderPrint from 'components/Header/HeaderPrint';
 
 import {
   selectReady,
@@ -66,6 +67,7 @@ import {
   selectActortypes,
   selectActiontypes,
   selectTaxonomiesWithCategories,
+  selectIsPrintView,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -122,6 +124,7 @@ export function UserView({
   onCreateOption,
   isAdmin,
   onSetPrintView,
+  isPrintView,
 }) {
   useEffect(() => {
     // kick off loading of data
@@ -194,7 +197,7 @@ export function UserView({
       onClick: () => handleEdit(userId),
     });
   }
-
+  console.log(isPrintView);
   return (
     <div>
       <Helmet
@@ -212,6 +215,7 @@ export function UserView({
         )}
         {user && dataReady && (
           <ViewWrapper>
+            {isPrintView && (<HeaderPrint />)}
             <ViewHeader
               title={pageTitle}
               type={CONTENT_SINGLE}
@@ -221,8 +225,9 @@ export function UserView({
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isMember}>
+                <Main hasAside={isMember && !isPrintView}>
                   <FieldGroup
+                    aside={!isPrintView}
                     group={{ // fieldGroup
                       fields: [
                         getTitleField(user, isMember, 'name', appMessages.attributes.name),
@@ -239,7 +244,7 @@ export function UserView({
                           getMetaField(user, true),
                         ],
                       }}
-                      aside
+                      aside={!isPrintView}
                     />
                   </Aside>
                 )}
@@ -247,7 +252,7 @@ export function UserView({
             </ViewPanel>
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside bottom>
+                <Main hasAside={!isPrintView} bottom>
                   {isMember && (
                     <Box>
                       <SubjectButtonGroup>
@@ -277,10 +282,12 @@ export function UserView({
                           actionsByActiontype={actionsByActiontype}
                           actiontypes={actiontypes}
                           isAdmin={isAdmin}
+                          isPrint={isPrintView}
                         />
                       )}
                       {viewSubject === 'uactors' && actorsByActortype && (
                         <FieldGroup
+                          aside={!isPrintView}
                           group={{
                             fields: actorsByActortype.reduce(
                               (memo, actors, typeid) => memo.concat([
@@ -311,7 +318,7 @@ export function UserView({
                         getEmailField(user),
                       ],
                     }}
-                    aside
+                    aside={!isPrintView}
                   />
                   {isMember && (
                     <FieldGroup
@@ -320,7 +327,7 @@ export function UserView({
                           getTaxonomyFields(taxonomies),
                         ],
                       }}
-                      aside
+                      aside={!isPrintView}
                     />
                   )}
                 </Aside>
@@ -355,6 +362,7 @@ UserView.propTypes = {
   onSetActiontype: PropTypes.func,
   isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isPrintView: PropTypes.bool,
   sessionUserId: PropTypes.string,
   viewActiontypeId: PropTypes.string,
   intl: intlShape,
@@ -381,6 +389,7 @@ const mapStateToProps = (state, props) => ({
   viewActiontypeId: selectActiontypeQuery(state),
   actortypes: selectActortypes(state),
   actiontypes: selectActiontypes(state),
+  isPrintView: selectIsPrintView(state),
 });
 
 function mapDispatchToProps(dispatch) {

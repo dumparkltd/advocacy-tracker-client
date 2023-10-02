@@ -17,6 +17,10 @@ export default defineMessages({
     id: 'app.containers.PrintUI.titleContent',
     defaultMessage: 'Configure content',
   },
+  titleMap: {
+    id: 'app.containers.PrintUI.titleMap',
+    defaultMessage: 'Configure map',
+  },
   hint: {
     id: 'app.containers.PrintUI.hint',
     defaultMessage: "This is a print-optimised layout for printing this page or exporting it as PDF using your browser's print feature. In addition to configuring the page layout and content elements, you can also still adjust any map extent within the page. For any other adjustments, go back to the regular page view by clicking 'Cancel'.",
@@ -33,9 +37,21 @@ export default defineMessages({
     id: 'app.containers.PrintUI.hintContentSingle',
     defaultMessage: 'Configure the page content - optionally show content from all tabs and for all action types (where available)',
   },
+  hintMap: {
+    id: 'app.containers.PrintUI.hintMap',
+    defaultMessage: 'In addition you can configure the map zoom level and position in the print preview below',
+  },
   pagesOption: {
     id: 'app.containers.PrintUI.pagesOption',
     defaultMessage: 'Configure list pages',
+  },
+  mapMarkersOption: {
+    id: 'app.containers.PrintUI.mapMarkersOption',
+    defaultMessage: 'Map markers',
+  },
+  mapMarkersLabel: {
+    id: 'app.containers.PrintUI.mapMarkersLabel',
+    defaultMessage: 'Show markers for small states',
   },
   pagesAll: {
     id: 'app.containers.PrintUI.pagesAll',

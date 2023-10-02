@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import appMessages from 'containers/App/messages';
 import { usePrint } from 'containers/App/PrintContext';
 
+import PrintHide from 'components/styled/PrintHide';
 import FieldWrap from 'components/fields/FieldWrap';
 import EntityListTable from 'containers/EntityListTable';
 // import EntityListItemsWrap from 'components/fields/EntityListItemsWrap';
@@ -52,15 +53,17 @@ export function ConnectionsField({ field, intl }) {
         </EmptyHint>
       )}
       {field.onCreate && (
-        <div style={{ textAlign: 'right' }}>
-          <ButtonFactory
-            button={{
-              type: 'addFlatPrimary',
-              title: `Add new ${intl.formatMessage(appMessages.entities[field.entityType].single)}`,
-              onClick: () => field.onCreate(),
-            }}
-          />
-        </div>
+        <PrintHide>
+          <div style={{ textAlign: 'right' }}>
+            <ButtonFactory
+              button={{
+                type: 'addFlatPrimary',
+                title: `Add new ${intl.formatMessage(appMessages.entities[field.entityType].single)}`,
+                onClick: () => field.onCreate(),
+              }}
+            />
+          </div>
+        </PrintHide>
       )}
     </StyledFieldWrap>
   );

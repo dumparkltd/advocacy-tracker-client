@@ -44,6 +44,7 @@ export function Activities(props) {
     actionsByActiontype,
     actiontypes,
     isAdmin,
+    isPrint,
   } = props;
   const actiontypeIds = actiontypes && actiontypes
     .filter((type, id) => USER_ACTIONTYPES.indexOf(id) > -1)
@@ -54,7 +55,7 @@ export function Activities(props) {
   return (
     <Box>
       {(!actiontypeIds || actiontypeIds.size === 0) && (
-        <Box margin={{ vertical: 'small', horizontal: 'medium' }}>
+        <Box margin={{ vertical: 'small', right: 'medium', left: isPrint ? 0 : 'medium' }}>
           {viewSubject === 'uactivities' && (
             <Text>
               No activities assigned
@@ -71,7 +72,9 @@ export function Activities(props) {
         <TypeSelectBox
           direction="row"
           gap="xxsmall"
-          margin={{ top: 'small', horizontal: 'medium', bottom: 'medium' }}
+          margin={{
+            top: 'small', right: 'medium', bottom: 'medium', left: isPrint ? 0 : 'medium',
+          }}
           wrap
         >
           {actiontypeIds.map(
@@ -149,6 +152,7 @@ Activities.propTypes = {
   actiontypes: PropTypes.instanceOf(Map),
   onCreateOption: PropTypes.func,
   isAdmin: PropTypes.bool,
+  isPrint: PropTypes.bool,
 };
 
 
