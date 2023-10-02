@@ -197,7 +197,6 @@ export function UserView({
       onClick: () => handleEdit(userId),
     });
   }
-  console.log(isPrintView);
   return (
     <div>
       <Helmet

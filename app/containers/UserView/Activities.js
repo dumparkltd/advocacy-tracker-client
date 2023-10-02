@@ -55,7 +55,7 @@ export function Activities(props) {
   return (
     <Box>
       {(!actiontypeIds || actiontypeIds.size === 0) && (
-        <Box margin={{ vertical: 'small', right: 'medium', left: isPrint ? 0 : 'medium' }}>
+        <Box margin={{ vertical: 'small', horizontal: 'medium', left: isPrint ? 0 : 'medium' }}>
           {viewSubject === 'uactivities' && (
             <Text>
               No activities assigned
@@ -73,7 +73,7 @@ export function Activities(props) {
           direction="row"
           gap="xxsmall"
           margin={{
-            top: 'small', right: 'medium', bottom: 'medium', left: isPrint ? 0 : 'medium',
+            top: 'small', bottom: 'medium', horizontal: 'medium', left: isPrint ? '0px' : 'medium',
           }}
           wrap
         >

@@ -19,8 +19,6 @@ const Styled = styled((p) => (
 };
   margin-left: ${({ isPrint }) => isPrint ? 0 : 'medium'};
 `;
-
-
 export function SubjectButtonGroup(props) {
   const isPrint = usePrint();
   return <Styled isPrint={isPrint} {...props} />;
