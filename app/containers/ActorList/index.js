@@ -33,6 +33,7 @@ import {
   selectMembertypesForActortype,
   selectAssociationtypesForActortype,
   selectParentAssociationtypesForActortype,
+  selectViewQuery,
 } from 'containers/App/selectors';
 
 import { checkActorAttribute } from 'utils/entities';
@@ -86,12 +87,36 @@ const LayerContent = styled((p) => (
   />
 ))``;
 
-const prepareTypeOptions = (types, activeId, intl) => types.toList().toJS().map((type) => ({
-  value: type.id,
-  label: intl.formatMessage(appMessages.actiontypes[type.id]),
-  active: activeId === type.id,
-}));
+const prepareTypeOptions = (
+  types,
+  activeId,
+  intl,
+) => types.toList().toJS().map(
+  (type) => ({
+    value: type.id,
+    label: intl.formatMessage(appMessages.actortypes[type.id]),
+    active: activeId === type.id,
+  })
+);
 
+const VALID_VIEWS = ['map', 'list'];
+const getView = ({
+  view,
+  hasMapOption,
+}) => {
+  // return default view if view unset, invalid or inconsistent
+  if (
+    !view
+    || VALID_VIEWS.indexOf(view) === -1
+    || (view === 'map' && !hasMapOption)
+  ) {
+    if (hasMapOption) {
+      return 'map';
+    }
+    return 'list';
+  }
+  return view;
+};
 export function ActorList({
   dataReady,
   onLoadEntitiesIfNeeded,
@@ -114,6 +139,7 @@ export function ActorList({
   handleNew,
   handleImport,
   onSetPrintView,
+  view,
   intl,
 }) {
   useEffect(() => {
@@ -125,7 +151,38 @@ export function ActorList({
 
   const typeId = params.id;
   const type = `actors_${typeId}`;
+  const hasList = CONFIG.views && !!CONFIG.views.list;
+  const hasMapOption = typeId
+    && CONFIG.views
+    && CONFIG.views.map
+    && CONFIG.views.map.types
+    && CONFIG.views.map.types.indexOf(typeId) > -1;
 
+  const cleanView = getView({
+    view,
+    hasMapOption,
+    hasList,
+  });
+  const showList = cleanView === 'list';
+  const showMap = cleanView === 'map';
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.LIST,
+    printContentOptions: showList ? { pages: true } : null,
+    printMapOptions: showMap ? { markers: true } : null,
+    printMapMarkers: true,
+    fixed: showMap,
+    printOrientation: showMap ? 'landscape' : 'portrait',
+    printSize: 'A4',
+  });
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
 
   const headerOptions = {
     supTitle: intl.formatMessage(messages.pageTitle),
@@ -138,22 +195,6 @@ export function ActorList({
       }
       : null,
   };
-
-  const mySetPrintView = () => onSetPrintView({
-    printType: PRINT_TYPES.LIST,
-    printContentOptions: { pages: true },
-    printOrientation: 'portrait',
-    printSize: 'A4',
-  });
-  const keydownHandler = (e) => {
-    keydownHandlerPrint(e, mySetPrintView);
-  };
-  useEffect(() => {
-    document.addEventListener('keydown', keydownHandler);
-    return () => {
-      document.removeEventListener('keydown', keydownHandler);
-    };
-  }, []);
 
   if (isVisitor) {
     headerOptions.actions.push({
@@ -231,7 +272,11 @@ export function ActorList({
         membertypes={membertypes}
         parentAssociationtypes={parentAssociationtypes}
         associationtypes={associationtypes}
-        typeOptions={prepareTypeOptions(actortypes, typeId, intl)}
+        typeOptions={prepareTypeOptions(
+          actortypes,
+          typeId,
+          intl,
+        )}
         onSelectType={onSelectType}
         typeId={typeId}
         showCode={checkActorAttribute(typeId, 'code', isAdmin)}
@@ -274,6 +319,7 @@ ActorList.propTypes = {
   isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
   isVisitor: PropTypes.bool,
+  view: PropTypes.string,
   entities: PropTypes.instanceOf(List).isRequired,
   allEntities: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
@@ -305,6 +351,7 @@ const mapStateToProps = (state, props) => ({
   associationtypes: selectAssociationtypesForActortype(state, { type: props.params.id }),
   actortypes: selectActortypes(state),
   allEntities: selectActorsWithConnections(state, { type: props.params.id }),
+  view: selectViewQuery(state),
 });
 
 function mapDispatchToProps(dispatch) {
