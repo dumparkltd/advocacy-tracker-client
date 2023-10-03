@@ -45,6 +45,8 @@ const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
   font-size: ${({ theme }) => theme.sizes.header.print.title};
   line-height: ${({ theme }) => theme.text.small.size};
   font-weight: 500;
+  max-width: 120px;
+  word-break: break-all;
   padding: 0;
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     font-size: ${({ theme }) => theme.text.large.size};
@@ -86,7 +88,7 @@ function HeaderPrint({ intl }) {
           <Brand>
             <Box direction="row" align="center">
               <LogoWrap isPrint>
-                <Icon name="logo" size="60px" />
+                <Icon name="logo" size="50px" />
               </LogoWrap>
               <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
                 <BrandTitle>
