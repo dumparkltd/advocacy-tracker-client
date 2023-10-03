@@ -192,6 +192,7 @@ export function MapContainer({
     <Styled>
       <MapInnerWrapper isPrint={isPrintView} orient={printArgs && printArgs.printOrientation}>
         <MapWrapper
+          fullMap={fullMap}
           isPrintView={isPrintView}
           printArgs={printArgs}
           scrollWheelZoom={scrollWheelZoom}

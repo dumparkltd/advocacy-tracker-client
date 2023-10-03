@@ -328,6 +328,7 @@ theme.sizes = {
   header: {
     banner: {
       height: 60,
+      heightPrint: 66,
       heightMobile: 50,
     },
     nav: {
