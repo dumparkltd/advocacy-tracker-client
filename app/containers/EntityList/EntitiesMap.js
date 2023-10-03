@@ -78,6 +78,7 @@ export function EntitiesMap({
     if (config.types === 'actiontypes') {
       return (
         <EntitiesMapActions
+          isPrintView={isPrintView}
           entities={entities}
           actortypes={actortypes}
           actiontypes={actiontypes}

@@ -11,7 +11,7 @@ const SVG = styled.svg`
   }} !important;
   bottom: ${({ text }) => text ? 0.1 : 0}em;
   position: relative;
-  display: inline-block;
+  display: ${({ printHide }) => printHide ? 'none' : 'inline-block'};
   vertical-align: middle;
   margin-right: ${({ size, textLeft }) => textLeft ? (parseFloat(size) / 4) + size.split(/[0-9]+/)[1] : 0};
   margin-left: ${({ size, textRight }) => textRight ? (parseFloat(size) / 4) + size.split(/[0-9]+/)[1] : 0};
@@ -30,7 +30,7 @@ const SVG = styled.svg`
     height: ${({ sizes, size }) => (sizes && sizes.large) ? sizes.large : size};
   }
   @media print {
-    display: ${({ printHide }) => (printHide ? 'none' : 'inline-block')};
+    display: ${({ printHide }) => printHide ? 'none' : 'inline-block'};
   }
 `;
 

@@ -383,7 +383,7 @@ export function EntitiesMapActors({
   }
 
   return (
-    <Styled headerStyle="types" noOverflowisPrint={isPrintView}>
+    <Styled headerStyle="types" noOverflow isPrint={isPrintView}>
       {isPrintView && (
         <HeaderPrint />
       )}
@@ -414,7 +414,7 @@ export function EntitiesMapActors({
         }]}
       />
       {viewOptions && viewOptions.length > 1 && !isPrintView && (
-        <EntityListViewOptions options={viewOptions} isOnMap />
+        <EntityListViewOptions options={viewOptions} isOnMap isPrintView={isPrintView} />
       )}
     </Styled>
   );
