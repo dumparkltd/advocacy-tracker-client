@@ -172,15 +172,16 @@ export function ActionView(props) {
 
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
   // const type = `actions_${typeId}`;
+  let viewSubject = subject || 'actors';
 
-  const showMap = !!hasChildren;
+  const showMap = viewSubject === 'actors' || viewSubject === 'targets';
 
   const mySetPrintView = () => onSetPrintView({
-    printType: PRINT_TYPES.LIST,
+    printType: showMap ? PRINT_TYPES.FF : PRINT_TYPES.SINGLE,
+    printContentOptions: { tabs: true },
     printMapOptions: showMap ? { markers: true } : null,
     printMapMarkers: true,
-    fixed: showMap,
-    printOrientation: showMap ? 'landscape' : 'portrait',
+    printOrientation: 'portrait',
     printSize: 'A4',
   });
 
@@ -242,7 +243,6 @@ export function ActionView(props) {
 
   const hasIndicators = typeId && INDICATOR_ACTIONTYPES.indexOf(typeId.toString()) > -1;
 
-  let viewSubject = subject || 'actors';
   const validViewSubjects = [];
   if (hasActor) {
     validViewSubjects.push('actors');

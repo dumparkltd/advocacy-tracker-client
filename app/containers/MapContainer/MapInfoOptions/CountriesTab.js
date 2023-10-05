@@ -5,7 +5,7 @@ import { Box, Text, Button } from 'grommet';
 import InfoOverlay from 'components/InfoOverlay';
 
 import PrintHide from 'components/styled/PrintHide';
-// import PrintOnly from 'components/styled/PrintOnly';
+import PrintOnly from 'components/styled/PrintOnly';
 
 import MapKey from './MapKey';
 import MapSubjectOptions from './MapSubjectOptions';
@@ -28,7 +28,7 @@ export function CountriesTab({
   minMaxValues,
   activeIndicatorOption,
   countryMapSubject,
-  // isPrintView,
+  isPrintView,
 }) {
   const {
     title,
@@ -53,16 +53,29 @@ export function CountriesTab({
           <SelectIndicators config={config} />
         </Box>
         {id === 'all'
-                    && minMaxValues.countries
-                    && minMaxValues.countries.max > 0
-                    && (<MapKey maxValue={minMaxValues.countries.max} mapSubject={countryMapSubject} />)}
-        {id !== 'all' && categoryConfig && (<MapKey type="categories" config={categoryConfig} />)}
+          && minMaxValues.countries
+          && minMaxValues.countries.max > 0
+          && (
+            <MapKey
+              maxValue={minMaxValues.countries.max}
+              mapSubject={countryMapSubject}
+              isPrint={isPrintView}
+            />
+          )}
+        {id !== 'all' && categoryConfig
+          && (
+            <MapKey
+              type="categories"
+              config={categoryConfig}
+              isPrint={isPrintView}
+            />
+          )}
         {id === 'all' && (
           <Box gap="xsmall" margin={{ vertical: 'small' }}>
             {titlePrint && (
               <Title>{titlePrint}</Title>
             )}
-            {title && !titlePrint(
+            {title && !titlePrint && (
               <Title>{title}</Title>
             )}
             {subTitle && (
@@ -110,29 +123,45 @@ export function CountriesTab({
           <MapOption option={memberOption} type="member" />
         )}
         {infoOptions
-                    && infoOptions.length > 0
-                    && infoOptions.map(
-                      (infoOption, i) => (
-                        <MapOption
-                          key={i}
-                          option={{ ...infoOption, id: infoOption.id || i }}
-                          type="info"
-                        />
-                      )
-                    )
+          && infoOptions.length > 0
+          && infoOptions.map(
+            (infoOption, i) => (
+              <MapOption
+                key={i}
+                option={{ ...infoOption, id: infoOption.id || i }}
+                type="info"
+              />
+            )
+          )
         }
       </Box>
     );
   }
   return (
     <Box fill="horizontal">
+      <PrintOnly>
+        {title
+          && <Text size="small">{title}</Text>}
+        <Box gap="xsmall" margin={{ top: 'xsmall', bottom: 'small' }}>
+          {titlePrint && (
+            <Title>{titlePrint}</Title>
+          )}
+          {subTitle && (
+            <SubTitle>{subTitle}</SubTitle>
+          )}
+        </Box>
+      </PrintOnly>
       {subjectOptions && (
         <PrintHide>
           <MapSubjectOptions options={subjectOptions} />
         </PrintHide>
       )}
       {minMaxValues.countries && minMaxValues.countries.max > 0 && (
-        <MapKey maxValue={minMaxValues.countries.max} mapSubject={countryMapSubject} />
+        <MapKey
+          maxValue={minMaxValues.countries.max}
+          mapSubject={countryMapSubject}
+          isPrint={isPrintView}
+        />
       )}
       <PrintHide>
         <Box gap="xsmall" margin={{ vertical: 'small' }}>
@@ -144,21 +173,18 @@ export function CountriesTab({
           )}
         </Box>
       </PrintHide>
-      {memberOption && (
-        <MapOption option={memberOption} type="info" />
-      )}
+      {memberOption && (<MapOption option={memberOption} type="info" />)}
       {infoOptions
-                    && infoOptions.length > 0
-                    && infoOptions.map(
-                      (infoOption, i) => (
-                        <MapOption
-                          key={i}
-                          option={{ ...infoOption, id: infoOption.id || i }}
-                          type="info"
-                        />
-                      )
-                    )
-      }
+        && infoOptions.length > 0
+        && infoOptions.map(
+          (infoOption, i) => (
+            <MapOption
+              key={i}
+              option={{ ...infoOption, id: infoOption.id || i }}
+              type="info"
+            />
+          )
+        )}
     </Box>
   );
 }
@@ -168,7 +194,7 @@ CountriesTab.propTypes = {
   config: PropTypes.object,
   minMaxValues: PropTypes.object,
   countryMapSubject: PropTypes.string,
-  // isPrintView: PropTypes.bool,
+  isPrintView: PropTypes.bool,
 };
 
 export default CountriesTab;

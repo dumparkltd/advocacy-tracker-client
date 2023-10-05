@@ -4,10 +4,10 @@ import styled from 'styled-components';
 // import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import { Box, Text, Button } from 'grommet';
 
-
 import qe from 'utils/quasi-equals';
-import PrintHide from 'components/styled/PrintHide';
 
+import PrintHide from 'components/styled/PrintHide';
+import PrintOnly from 'components/styled/PrintOnly';
 import CountriesTab from './CountriesTab';
 import IndicatorsTab from './IndicatorsTab';
 
@@ -165,6 +165,37 @@ export function MapInfoOptions({
           </Box>
         </Pane>
       </PrintHide>
+      <PrintOnly>
+        <Box
+          flex={{ grow: 1 }}
+          direction="row"
+          pad={{ top: 'small' }}
+          gap="small"
+        >
+          {options && options.map(
+            (option) => (
+              <Box key={option.id} basis="1/2" pad={{ horizontal: 'small' }}>
+                {option.id === 'countries' && (
+                  <CountriesTab
+                    isPrintView
+                    config={option}
+                    minMaxValues={minMaxValues}
+                    countryMapSubject={countryMapSubject}
+                  />
+                )}
+                {option.id === 'indicators' && (
+                  <IndicatorsTab
+                    isPrintView
+                    config={option}
+                    minMaxValues={minMaxValues}
+                    circleLayerConfig={circleLayerConfig}
+                  />
+                )}
+              </Box>
+            )
+          )}
+        </Box>
+      </PrintOnly>
     </Styled>
   );
 }
