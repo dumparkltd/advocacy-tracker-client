@@ -26,7 +26,6 @@ import Footer from 'containers/Footer';
 import Loading from 'components/Loading';
 import Container from 'components/styled/Container';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
-import ContentHeader from 'containers/ContentHeader';
 import EntityView from 'components/EntityView';
 
 import {
@@ -117,7 +116,6 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
           ...buttons,
           {
             type: 'icon',
-            // onClick: () => window.print(),
             onClick: () => onSetPrintView({
               printType: PRINT_TYPES.SINGLE,
               printOrientation: 'portrait',
@@ -147,11 +145,6 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
         />
         <StyledContainerWrapper className={`content-${CONTENT_PAGE}`}>
           <ViewContainer isNarrow={!isVisitor} isPrint={isPrintView}>
-            <ContentHeader
-              title={page ? page.getIn(['attributes', 'title']) : ''}
-              type={CONTENT_PAGE}
-              buttons={buttons}
-            />
             {!dataReady
               && <Loading />
             }
@@ -165,6 +158,11 @@ export class PageView extends React.PureComponent { // eslint-disable-line react
             {page && dataReady
               && (
                 <EntityView
+                  header={{
+                    title: page ? page.getIn(['attributes', 'title']) : '',
+                    type: CONTENT_PAGE,
+                    buttons,
+                  }}
                   fields={this.getFields(page, isMember, isAdmin, isMine, isPrintView)}
                   seamless
                 />
