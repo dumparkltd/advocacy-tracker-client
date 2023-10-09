@@ -579,7 +579,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                 {config.types === 'actiontypes' && subjectOptions && (
                   <Box>
                     {subjectOptions && (
-                      <MapSubjectOptions options={subjectOptions} />
+                      <MapSubjectOptions options={subjectOptions} inList />
                     )}
                   </Box>
                 )}

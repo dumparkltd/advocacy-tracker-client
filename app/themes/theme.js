@@ -537,9 +537,10 @@ theme.text = {
   mediumTall: { size: '16px', height: '23px', maxWidth: '800px' },
   mediumTight: { size: '16px', height: '18px', maxWidth: '800px' },
   small: { size: '14px', height: '18px', maxWidth: '700px' },
+  smallTight: { size: '14px', height: '16px', maxWidth: '700px' },
   xsmall: { size: '13px', height: '16px', maxWidth: '600px' },
+  xsmallTight: { size: '13px', height: '14px', maxWidth: '600px' },
   xxsmall: { size: '12px', height: '14px', maxWidth: '500px' },
-  xxxsmall: { size: '11px', height: '13px', maxWidth: '500px' },
 };
 
 theme.textPrint = {
