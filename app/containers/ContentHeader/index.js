@@ -13,7 +13,10 @@ import {
 import SupTitle from 'components/SupTitle';
 import InfoOverlay from 'components/InfoOverlay';
 import ButtonFactory from 'components/buttons/ButtonFactory';
+import TagList from 'components/TagList';
 import BoxPrint from 'components/styled/BoxPrint';
+import PrintHide from 'components/styled/PrintHide';
+
 import { usePrint } from 'containers/App/PrintContext';
 
 const Styled = styled.div`
@@ -39,6 +42,11 @@ const TitleMedium = styled.h3`
   line-height: 1;
   margin: 15px 0;
   display: inline-block;
+`;
+const TitleMediumPrint = styled.h3`
+  margin-bottom: 0px;
+  margin-top: 22px;
+  font-size: 18pt;
   @media print {
     margin-bottom: 5px;
   }
@@ -81,6 +89,7 @@ const MarkdownPrintOnly = styled(ReactMarkdown)`
 `;
 const InfoTitlePrintOnly = styled(Text)`
   font-size: ${({ theme }) => theme.sizes.print.smaller};
+  line-height: ${({ theme }) => theme.sizes.print.default};
 `;
 
 
@@ -106,6 +115,8 @@ export function ContentHeader({
   hasViewOptions,
   info,
   entityIdsSelected,
+  hasFilters,
+  filters,
 }) {
   const isPrintView = usePrint();
   const size = React.useContext(ResponsiveContext);
@@ -116,13 +127,30 @@ export function ContentHeader({
       hasViewOptions={hasViewOptions}
     >
       <TitleWrap fill="horizontal">
+        {info && (
+          <BoxPrint printOnly>
+            <Box>
+              {info.title && (<InfoTitlePrintOnly>{info.title}</InfoTitlePrintOnly>)}
+            </Box>
+            <Box width={{ max: 'large' }}>
+              {info.content && (
+                <MarkdownPrintOnly source={info.content} className="react-markdown" />
+              )}
+            </Box>
+          </BoxPrint>
+        )}
         {supTitle && <SupTitle title={supTitle} />}
         <TitleButtonWrap fill="horizontal" justify="between">
           <Box align="center" direction="row">
             {title && (
-              <Box>
-                {renderTitle(type, title)}
-              </Box>
+              <PrintHide>
+                <Box>
+                  {renderTitle(type, title)}
+                </Box>
+              </PrintHide>
+            )}
+            {title && isPrintView && (
+              <TitleMediumPrint>{title}</TitleMediumPrint>
             )}
             {info && !isPrintView && (
               <InfoOverlay
@@ -148,13 +176,17 @@ export function ContentHeader({
         {subTitle && <SubTitle>{subTitle}</SubTitle>}
         {info && (
           <BoxPrint printOnly>
-            <Box>
-              {info.title && (<InfoTitlePrintOnly>{info.title}</InfoTitlePrintOnly>)}
-            </Box>
-            <Box width={{ max: 'large' }}>
-              {info.content && (
-                <MarkdownPrintOnly source={info.content} className="react-markdown" />
-              )}
+            <Box direction="row">
+              <Box flex="shrink">
+                {info.title && (
+                  <InfoTitlePrintOnly>{`${info.title}: `}</InfoTitlePrintOnly>
+                )}
+              </Box>
+              <Box width={{ max: 'large' }} flex>
+                {info.content && (
+                  <MarkdownPrintOnly source={info.content} className="react-markdown" />
+                )}
+              </Box>
             </Box>
           </BoxPrint>
         )}
@@ -171,6 +203,7 @@ export function ContentHeader({
           ))}
         </ButtonGroup>
       )}
+      {isPrintView && hasFilters && <TagList filters={filters} isPrintView isPrint />}
     </Styled>
   );
 }
@@ -187,6 +220,8 @@ ContentHeader.propTypes = {
   type: PropTypes.string,
   hasViewOptions: PropTypes.bool,
   entityIdsSelected: PropTypes.object, // PropTypes.instanceOf(List),
+  filters: PropTypes.array,
+  hasFilters: PropTypes.bool,
 };
 
 export default ContentHeader;

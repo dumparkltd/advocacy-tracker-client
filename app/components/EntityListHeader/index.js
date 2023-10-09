@@ -476,6 +476,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     const normalActions = headerActions && headerActions.filter(
       (action) => !action.isMember
     );
+
     return (
       <ResponsiveContext.Consumer>
         {(size) => {
@@ -562,7 +563,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                   justify="start"
                   overflow={{ horizontal: 'auto' }}
                 >
-                  {dataReady && isMinSize(size, 'large') && (
+                  {dataReady && currentFilters && isMinSize(size, 'large') && (
                     <TagList
                       filters={currentFilters}
                       onClear={onClearFilters}

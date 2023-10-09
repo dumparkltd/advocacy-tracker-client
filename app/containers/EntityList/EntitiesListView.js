@@ -129,6 +129,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       headerStyle,
       viewOptions,
       hasFilters,
+      filters,
       showCode,
       entityIdsSelected,
       listUpdating,
@@ -572,6 +573,8 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                   info={headerInfo}
                   buttons={listActions}
                   entityIdsSelected={entityIdsSelected}
+                  hasFilters={hasFilters}
+                  filters={filters}
                 />
                 {config.types === 'actiontypes' && subjectOptions && (
                   <Box>
@@ -821,6 +824,7 @@ EntitiesListView.propTypes = {
   headerInfo: PropTypes.object,
   listActions: PropTypes.array,
   checkboxOptions: PropTypes.array,
+  filters: PropTypes.array,
   intl: intlShape.isRequired,
   // primitive
   isPrintView: PropTypes.bool,
