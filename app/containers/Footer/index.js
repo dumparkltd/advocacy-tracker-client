@@ -17,8 +17,8 @@ import messages from './messages';
 const FooterMain = styled.div`
   background-color: ${({ isPrint }) => isPrint ? 'transparent' : '#000000'};
   color: ${({ isPrint, theme }) => isPrint ? theme.global.colors.text.secondary : 'white'};
-  border-color: ${({ isPrint, theme }) => isPrint ? theme.global.colors.text.secondary : 'transparent'};
-  color: white;
+  border-top: 1px solid;
+  border-color: ${({ isPrint, theme }) => isPrint ? theme.global.colors.text.secondary : 'transparent'};s
   padding: 0;
   @media print {
     color: ${({ theme }) => theme.global.colors.text.secondary} !important;

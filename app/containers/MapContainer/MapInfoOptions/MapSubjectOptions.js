@@ -56,7 +56,7 @@ function MapSubjectOptions({ options, inList }) {
       </PrintHide>
       <PrintOnly>
         {optionActiveForPrint && (
-          <Box direction="row" gap="small" justify="start">
+          <Box direction="row" gap="small" justify="end">
             <TextWrap hasBorder={inList}>
               <TextPrint size={inList ? 'medium' : 'large'}>
                 {optionActiveForPrint.title}
