@@ -4,11 +4,11 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 
@@ -18,6 +18,8 @@ import {
   printView,
   // closeEntity
 } from 'containers/App/actions';
+
+import { keydownHandlerPrint } from 'utils/print';
 
 import { CONTENT_PAGE, PRINT_TYPES } from 'containers/App/constants';
 import { ROUTES } from 'themes/config';
@@ -59,125 +61,128 @@ min-height: ${({ isPrint }) => isPrint ? '50vH' : '85vH'};
     min-height: 50vH;
   }
 `;
+const getBodyAsideFields = (entity, isAdmin, isMine) => ([{
+  fields: [
+    getStatusField(entity),
+    (isAdmin || isMine) && getStatusFieldIf({
+      entity,
+      attribute: 'private',
+    }),
+    getMetaField(entity),
+  ],
+}]);
 
-export class PageView extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
-  }
+const getBodyMainFields = (entity) => ([{
+  fields: [getMarkdownField(entity, 'content', false)],
+}]);
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    // reload entities if invalidated
-    if (!nextProps.dataReady) {
-      this.props.loadEntitiesIfNeeded();
-    }
-  }
+const getFields = (entity, isMember, isAdmin, isMine, isPrint) => ({
+  body: {
+    main: getBodyMainFields(entity),
+    aside: (isMember && !isPrint)
+      ? getBodyAsideFields(entity, isAdmin, isMine)
+      : null,
+  },
+});
 
-  getBodyAsideFields = (entity, isAdmin, isMine) => ([{
-    fields: [
-      getStatusField(entity),
-      (isAdmin || isMine) && getStatusFieldIf({
-        entity,
-        attribute: 'private',
-      }),
-      getMetaField(entity),
-    ],
-  }]);
+export function PageView({
+  onLoadEntitiesIfNeeded,
+  page,
+  params,
+  handleEdit,
+  dataReady,
+  isAdmin,
+  isVisitor,
+  isMember,
+  myId,
+  isPrintView,
+  onSetPrintView,
+  intl,
+}) {
+  useEffect(() => {
+    if (!dataReady) onLoadEntitiesIfNeeded();
+  }, [dataReady]);
 
-  getBodyMainFields = (entity) => ([{
-    fields: [getMarkdownField(entity, 'content', false)],
-  }]);
-
-  getFields = (entity, isMember, isAdmin, isMine, isPrint) => ({
-    body: {
-      main: this.getBodyMainFields(entity),
-      aside: (isMember && !isPrint)
-        ? this.getBodyAsideFields(entity, isAdmin, isMine)
-        : null,
-    },
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.SINGLE,
+    printOrientation: 'portrait',
+    printSize: 'A4',
   });
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
 
-
-  render() {
-    const { intl } = this.context;
-    const {
-      page,
-      dataReady,
-      isAdmin,
-      isVisitor,
-      isMember,
-      myId,
-      isPrintView,
-      onSetPrintView,
-    } = this.props;
-    let buttons = [];
-    if (dataReady) {
-      if (window.print) {
-        buttons = [
-          ...buttons,
-          {
-            type: 'icon',
-            onClick: () => onSetPrintView({
-              printType: PRINT_TYPES.SINGLE,
-              printOrientation: 'portrait',
-              printSize: 'A4',
-            }),
-            title: 'Print',
-            icon: 'print',
-          },
-        ];
-      }
-      if (isAdmin) {
-        buttons.push({
-          type: 'edit',
-          onClick: this.props.handleEdit,
-        });
-      }
+  let buttons = [];
+  if (dataReady) {
+    if (window.print) {
+      buttons = [
+        ...buttons,
+        {
+          type: 'icon',
+          onClick: () => mySetPrintView(),
+          title: 'Print',
+          icon: 'print',
+        },
+      ];
     }
-    const isMine = page && qe(page.getIn(['attributes', 'created_by_id']), myId);
-
-    return (
-      <div>
-        <Helmet
-          title={page ? page.getIn(['attributes', 'title']) : `${intl.formatMessage(messages.pageTitle)}: ${this.props.params.id}`}
-          meta={[
-            { name: 'description', content: intl.formatMessage(messages.metaDescription) },
-          ]}
-        />
-        <StyledContainerWrapper className={`content-${CONTENT_PAGE}`}>
-          <ViewContainer isNarrow={!isVisitor} isPrint={isPrintView}>
-            {!dataReady
-              && <Loading />
-            }
-            {!page && dataReady
-              && (
-                <div>
-                  <FormattedMessage {...messages.notFound} />
-                </div>
-              )
-            }
-            {page && dataReady
-              && (
-                <EntityView
-                  header={{
-                    title: page ? page.getIn(['attributes', 'title']) : '',
-                    type: CONTENT_PAGE,
-                    buttons,
-                  }}
-                  fields={this.getFields(page, isMember, isAdmin, isMine, isPrintView)}
-                  seamless
-                />
-              )
-            }
-          </ViewContainer>
-          <Footer />
-        </StyledContainerWrapper>
-      </div>
-    );
+    if (isAdmin) {
+      buttons.push({
+        type: 'edit',
+        onClick: handleEdit,
+      });
+    }
   }
+  const isMine = page && qe(page.getIn(['attributes', 'created_by_id']), myId);
+
+  return (
+    <div>
+      <Helmet
+        title={page ? page.getIn(['attributes', 'title']) : `${intl.formatMessage(messages.pageTitle)}: ${params.id}`}
+        meta={[
+          { name: 'description', content: intl.formatMessage(messages.metaDescription) },
+        ]}
+      />
+      <StyledContainerWrapper className={`content-${CONTENT_PAGE}`}>
+        <ViewContainer isNarrow={!isVisitor} isPrint={isPrintView}>
+          {!dataReady
+            && <Loading />
+          }
+          {!page && dataReady
+            && (
+              <div>
+                <FormattedMessage {...messages.notFound} />
+              </div>
+            )
+          }
+          {page && dataReady
+            && (
+              <EntityView
+                header={{
+                  title: page ? page.getIn(['attributes', 'title']) : '',
+                  type: CONTENT_PAGE,
+                  buttons,
+                }}
+                fields={getFields(page, isMember, isAdmin, isMine, isPrintView)}
+                seamless
+              />
+            )
+          }
+        </ViewContainer>
+        <Footer />
+      </StyledContainerWrapper>
+    </div>
+  );
 }
 
+
 PageView.propTypes = {
-  loadEntitiesIfNeeded: PropTypes.func,
+  onLoadEntitiesIfNeeded: PropTypes.func,
   handleEdit: PropTypes.func,
   onSetPrintView: PropTypes.func,
   page: PropTypes.object,
@@ -188,10 +193,7 @@ PageView.propTypes = {
   params: PropTypes.object,
   isPrintView: PropTypes.bool,
   myId: PropTypes.string,
-};
-
-PageView.contextTypes = {
-  intl: PropTypes.object.isRequired,
+  intl: intlShape.isRequired,
 };
 
 
@@ -207,7 +209,7 @@ const mapStateToProps = (state, props) => ({
 
 function mapDispatchToProps(dispatch, props) {
   return {
-    loadEntitiesIfNeeded: () => {
+    onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     handleEdit: () => {
@@ -219,4 +221,4 @@ function mapDispatchToProps(dispatch, props) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(PageView);
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(PageView));

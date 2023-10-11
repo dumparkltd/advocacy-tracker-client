@@ -4,11 +4,12 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { Map, List, fromJS } from 'immutable';
+import { injectIntl, intlShape } from 'react-intl';
 
 import {
   loadEntitiesIfNeeded,
@@ -27,6 +28,8 @@ import appMessages from 'containers/App/messages';
 import { ROUTES } from 'themes/config';
 import { PRINT_TYPES } from 'containers/App/constants';
 
+import { keydownHandlerPrint } from 'utils/print';
+
 import EntityList from 'containers/EntityList';
 
 import { CONFIG, DEPENDENCIES } from './constants';
@@ -38,122 +41,129 @@ import {
 
 import messages from './messages';
 
-export class ResourceList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
-  }
+const prepareTypeOptions = (types, activeId, intl) => types.toList().toJS().map((type) => ({
+  value: type.id,
+  label: intl.formatMessage(appMessages.resourcetypes[type.id]),
+  active: activeId === type.id,
+}));
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    // reload entities if invalidated
-    if (!nextProps.dataReady) {
-      this.props.loadEntitiesIfNeeded();
-    }
-  }
+export function ResourceList({
+  onLoadEntitiesIfNeeded,
+  dataReady,
+  entities,
+  connections,
+  // connectedTaxonomies,
+  location,
+  isMember,
+  isVisitor,
+  params, // { id: the action type }
+  actiontypes,
+  resourcetypes,
+  onSelectType,
+  handleImport,
+  handleNew,
+  allEntities,
+  onSetPrintView,
+  intl,
+}) {
+  useEffect(() => {
+    if (!dataReady) onLoadEntitiesIfNeeded();
+  }, [dataReady]);
 
-  prepareTypeOptions = (types, activeId) => {
-    const { intl } = this.context;
-    return types.toList().toJS().map((type) => ({
-      value: type.id,
-      label: intl.formatMessage(appMessages.resourcetypes[type.id]),
-      active: activeId === type.id,
-    }));
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.LIST,
+    printContentOptions: { pages: true },
+    printOrientation: 'portrait',
+    printSize: 'A4',
+  });
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
   };
-
-  render() {
-    const { intl } = this.context;
-    const {
-      dataReady,
-      entities,
-      connections,
-      // connectedTaxonomies,
-      location,
-      isMember,
-      isVisitor,
-      params, // { id: the action type }
-      actiontypes,
-      resourcetypes,
-      onSelectType,
-      allEntities,
-      onSetPrintView,
-    } = this.props;
-    const typeId = params.id;
-    const type = `resources_${typeId}`;
-    const headerOptions = {
-      supTitle: intl.formatMessage(messages.pageTitle),
-      actions: [],
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
     };
-    if (isVisitor) {
-      headerOptions.actions.push({
-        type: 'bookmarker',
-        title: intl.formatMessage(appMessages.entities[type].plural),
-        entityType: type,
-      });
-    }
-    if (window.print) {
-      headerOptions.actions.push({
-        type: 'icon',
-        onClick: () => onSetPrintView({
-          printType: PRINT_TYPES.LIST,
-          printContentOptions: { pages: true },
-          printOrientation: 'portrait',
-          printSize: 'A4',
-        }),
-        title: 'Print',
-        icon: 'print',
-      });
-    }
-    if (isMember) {
-      headerOptions.actions.push({
-        type: 'text',
-        title: 'Create new',
-        onClick: () => this.props.handleNew(typeId),
-        icon: 'add',
-        isMember,
-      });
-      headerOptions.actions.push({
-        type: 'text',
-        title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(typeId),
-        icon: 'import',
-        isMember,
-      });
-    }
+  }, []);
 
-    // connectedTaxonomies={connectedTaxonomies}
-    return (
-      <div>
-        <Helmet
-          title={`${intl.formatMessage(messages.pageTitle)}`}
-          meta={[
-            { name: 'description', content: intl.formatMessage(messages.metaDescription) },
-          ]}
-        />
-        <EntityList
-          entities={entities}
-          allEntities={allEntities.toList()}
-          allEntityCount={allEntities && allEntities.size}
-          connections={connections}
-          config={CONFIG}
-          headerOptions={headerOptions}
-          dataReady={dataReady}
-          entityTitle={{
-            single: intl.formatMessage(appMessages.entities[type].single),
-            plural: intl.formatMessage(appMessages.entities[type].plural),
-          }}
-          locationQuery={fromJS(location.query)}
-          resourcetypes={resourcetypes}
-          actiontypes={actiontypes}
-          typeOptions={this.prepareTypeOptions(resourcetypes, typeId)}
-          onSelectType={onSelectType}
-          typeId={typeId}
-        />
-      </div>
-    );
+  const typeId = params.id;
+  const type = `resources_${typeId}`;
+  const headerOptions = {
+    supTitle: intl.formatMessage(messages.pageTitle),
+    actions: [],
+  };
+  if (isVisitor) {
+    headerOptions.actions.push({
+      type: 'bookmarker',
+      title: intl.formatMessage(appMessages.entities[type].plural),
+      entityType: type,
+    });
   }
+  if (window.print) {
+    headerOptions.actions.push({
+      type: 'icon',
+      onClick: () => onSetPrintView({
+        printType: PRINT_TYPES.LIST,
+        printContentOptions: { pages: true },
+        printOrientation: 'portrait',
+        printSize: 'A4',
+      }),
+      title: 'Print',
+      icon: 'print',
+    });
+  }
+  if (isMember) {
+    headerOptions.actions.push({
+      type: 'text',
+      title: 'Create new',
+      onClick: () => handleNew(typeId),
+      icon: 'add',
+      isMember,
+    });
+    headerOptions.actions.push({
+      type: 'text',
+      title: intl.formatMessage(appMessages.buttons.import),
+      onClick: () => handleImport(typeId),
+      icon: 'import',
+      isMember,
+    });
+  }
+
+  // connectedTaxonomies={connectedTaxonomies}
+  return (
+    <div>
+      <Helmet
+        title={`${intl.formatMessage(messages.pageTitle)}`}
+        meta={[
+          { name: 'description', content: intl.formatMessage(messages.metaDescription) },
+        ]}
+      />
+      <EntityList
+        entities={entities}
+        allEntities={allEntities.toList()}
+        allEntityCount={allEntities && allEntities.size}
+        connections={connections}
+        config={CONFIG}
+        headerOptions={headerOptions}
+        dataReady={dataReady}
+        entityTitle={{
+          single: intl.formatMessage(appMessages.entities[type].single),
+          plural: intl.formatMessage(appMessages.entities[type].plural),
+        }}
+        locationQuery={fromJS(location.query)}
+        resourcetypes={resourcetypes}
+        actiontypes={actiontypes}
+        typeOptions={prepareTypeOptions(resourcetypes, typeId, intl)}
+        onSelectType={onSelectType}
+        typeId={typeId}
+      />
+    </div>
+  );
 }
 
+
 ResourceList.propTypes = {
-  loadEntitiesIfNeeded: PropTypes.func,
+  onLoadEntitiesIfNeeded: PropTypes.func,
   handleNew: PropTypes.func,
   handleImport: PropTypes.func,
   onSelectType: PropTypes.func,
@@ -169,10 +179,7 @@ ResourceList.propTypes = {
   params: PropTypes.object,
   allEntities: PropTypes.instanceOf(Map),
   onSetPrintView: PropTypes.func,
-};
-
-ResourceList.contextTypes = {
-  intl: PropTypes.object.isRequired,
+  intl: intlShape.isRequired,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -188,7 +195,7 @@ const mapStateToProps = (state, props) => ({
 
 function mapDispatchToProps(dispatch) {
   return {
-    loadEntitiesIfNeeded: () => {
+    onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     handleNew: (typeId) => {
@@ -210,4 +217,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ResourceList);
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(ResourceList));
