@@ -21,6 +21,8 @@ import { getActiontypeColumns } from 'utils/entities';
 import { API } from 'themes/config';
 import FieldGroup from 'components/fields/FieldGroup';
 import ButtonPill from 'components/buttons/ButtonPill';
+import PrintHide from 'components/styled/PrintHide';
+import PrintOnly from 'components/styled/PrintOnly';
 
 import appMessages from 'containers/App/messages';
 
@@ -35,6 +37,9 @@ import {
 const TypeSelectBox = styled((p) => <Box {...p} />)``;
 const TypeButton = styled((p) => <ButtonPill {...p} />)`
   margin-bottom: 5px;
+`;
+const StyledPrint = styled.div`
+  margin-left: 0;
 `;
 // max-width: ${({ listItems }) => 100 / listItems}%;
 
@@ -66,37 +71,47 @@ export function TabActivities(props) {
         </Box>
       )}
       {actiontypeIds && actiontypeIds.size > 0 && (
-        <TypeSelectBox
-          direction="row"
-          gap="xxsmall"
-          margin={{ top: 'small', bottom: 'medium' }}
-          wrap
-        >
-          {actiontypeIds.map(
-            (id) => {
-              const actiontypeActions = actionsByActiontype && actionsByActiontype.get(parseInt(id, 10));
-              const noActions = actiontypeActions ? actiontypeActions.size : 0;
-              return (
-                <TypeButton
-                  key={id}
-                  onClick={() => onSetActiontype(id)}
-                  active={qe(viewActiontypeId, id) || actiontypeIds.size === 1}
-                  listItems={actiontypeIds.size}
-                >
-                  <Text size="small">
-                    {`${noActions} `}
-                    {actiontypeIds.size > 4 && (
-                      <FormattedMessage {...appMessages.entities[`actions_${id}`][noActions === 1 ? 'singleShort' : 'pluralShort']} />
-                    )}
-                    {actiontypeIds.size <= 4 && (
-                      <FormattedMessage {...appMessages.entities[`actions_${id}`][noActions === 1 ? 'single' : 'plural']} />
-                    )}
-                  </Text>
-                </TypeButton>
-              );
-            }
-          )}
-        </TypeSelectBox>
+        <>
+          <PrintHide>
+            <TypeSelectBox
+              direction="row"
+              gap="xxsmall"
+              margin={{ top: 'small', bottom: 'medium' }}
+              wrap
+            >
+
+              {actiontypeIds.map(
+                (id) => {
+                  const actiontypeActions = actionsByActiontype && actionsByActiontype.get(parseInt(id, 10));
+                  const noActions = actiontypeActions ? actiontypeActions.size : 0;
+                  return (
+                    <TypeButton
+                      key={id}
+                      onClick={() => onSetActiontype(id)}
+                      active={qe(viewActiontypeId, id) || actiontypeIds.size === 1}
+                      listItems={actiontypeIds.size}
+                    >
+                      <Text size="small">
+                        {`${noActions} `}
+                        {actiontypeIds.size > 4 && (
+                          <FormattedMessage {...appMessages.entities[`actions_${id}`][noActions === 1 ? 'singleShort' : 'pluralShort']} />
+                        )}
+                        {actiontypeIds.size <= 4 && (
+                          <FormattedMessage {...appMessages.entities[`actions_${id}`][noActions === 1 ? 'single' : 'plural']} />
+                        )}
+                      </Text>
+                    </TypeButton>
+                  );
+                }
+              )}
+            </TypeSelectBox>
+          </PrintHide>
+          <PrintOnly>
+            <StyledPrint>
+              <Text size="small" style={{ textDecoration: 'underline' }}>Tab Activity Title</Text>
+            </StyledPrint>
+          </PrintOnly>
+        </>
       )}
       <Box pad={{ vertical: 'small' }}>
         <FieldGroup

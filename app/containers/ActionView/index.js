@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { Box, Text } from 'grommet';
+import styled from 'styled-components';
 
 import {
   getTitleField,
@@ -70,6 +71,8 @@ import SubjectButton from 'components/styled/SubjectButton';
 import SubjectButtonGroup from 'components/styled/SubjectButtonGroup';
 import SubjectTabWrapper from 'components/styled/SubjectTabWrapper';
 import HeaderPrint from 'components/Header/HeaderPrint';
+import PrintHide from 'components/styled/PrintHide';
+import PrintOnly from 'components/styled/PrintOnly';
 
 import {
   selectReady,
@@ -83,6 +86,7 @@ import {
   selectActiontypeQuery,
   selectSessionUserId,
   selectIsPrintView,
+  selectPrintConfig,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -90,6 +94,7 @@ import messages from './messages';
 
 import TabActivities from './TabActivities';
 import TabActors from './TabActors';
+
 
 import {
   selectViewEntity,
@@ -102,6 +107,10 @@ import {
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
+
+const PrintSectionTitleWrapper = styled(
+  (p) => <Box margin={{ top: 'large', bottom: 'small' }} pad={{ bottom: 'small' }} border="bottom" {...p} />
+)``;
 
 const getIndicatorColumns = (viewEntity, intl, isAdmin) => {
   let columns = [{
@@ -126,7 +135,6 @@ const getIndicatorColumns = (viewEntity, intl, isAdmin) => {
   }
   return columns;
 };
-
 export function ActionView(props) {
   const {
     viewEntity,
@@ -145,6 +153,7 @@ export function ActionView(props) {
     onSetSubject,
     onSetPrintView,
     isPrintView,
+    printArgs,
     intl,
     handleEdit,
     handleClose,
@@ -278,7 +287,7 @@ export function ActionView(props) {
   }
 
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
-
+  const showAllTabs = isPrintView && printArgs && printArgs.printTabs === 'all';
   return (
     <div>
       <Helmet
@@ -379,55 +388,73 @@ export function ActionView(props) {
                     />
                   )}
                   <Box>
-                    <SubjectButtonGroup>
-                      {hasActor && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('actors')}
-                          active={viewSubject === 'actors'}
-                        >
-                          <Text size="large">Actors</Text>
-                        </SubjectButton>
-                      )}
-                      {hasTarget && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('targets')}
-                          active={viewSubject === 'targets'}
-                        >
-                          <Text size="large">Targets</Text>
-                        </SubjectButton>
-                      )}
-                      {hasChildren && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('children')}
-                          active={viewSubject === 'children'}
-                        >
-                          <Text size="large">Child activities</Text>
-                        </SubjectButton>
-                      )}
-                    </SubjectButtonGroup>
+                    <>
+                      <PrintHide>
+                        <SubjectButtonGroup>
+                          {hasActor && (
+                            <SubjectButton
+                              onClick={() => onSetSubject('actors')}
+                              active={viewSubject === 'actors'}
+                            >
+                              <Text size="large">Actors</Text>
+                            </SubjectButton>
+                          )}
+                          {hasTarget && (
+                            <SubjectButton
+                              onClick={() => onSetSubject('targets')}
+                              active={viewSubject === 'targets'}
+                            >
+                              <Text size="large">Targets</Text>
+                            </SubjectButton>
+                          )}
+                          {hasChildren && (
+                            <SubjectButton
+                              onClick={() => onSetSubject('children')}
+                              active={viewSubject === 'children'}
+                            >
+                              <Text size="large">Child activities</Text>
+                            </SubjectButton>
+                          )}
+                        </SubjectButtonGroup>
+                      </PrintHide>
+                    </>
                     <SubjectTabWrapper>
-                      {viewSubject === 'children' && (
-                        <TabActivities
-                          isAdmin={isAdmin}
-                          viewEntity={viewEntity}
-                          taxonomies={taxonomies}
-                          onEntityClick={onEntityClick}
-                          viewActiontypeId={childActiontypeIds.indexOf(viewActiontypeId) > -1 ? viewActiontypeId : childActiontypeIds[0]}
-                          actiontypes={actiontypes.filter((type) => childActiontypeIds.indexOf(type.get('id')) > -1)}
-                          actionsByActiontype={subActionsByType}
-                        />
+                      {(showAllTabs || viewSubject === 'children') && (
+                        <>
+                          <PrintOnly>
+                            <PrintSectionTitleWrapper>
+                              <Text size="large">Child Activities</Text>
+                            </PrintSectionTitleWrapper>
+                          </PrintOnly>
+                          <TabActivities
+                            isAdmin={isAdmin}
+                            viewEntity={viewEntity}
+                            taxonomies={taxonomies}
+                            onEntityClick={onEntityClick}
+                            viewActiontypeId={childActiontypeIds.indexOf(viewActiontypeId) > -1 ? viewActiontypeId : childActiontypeIds[0]}
+                            actiontypes={actiontypes.filter((type) => childActiontypeIds.indexOf(type.get('id')) > -1)}
+                            actionsByActiontype={subActionsByType}
+                          />
+                        </>
                       )}
-                      {viewSubject !== 'children' && (
-                        <TabActors
-                          isAdmin={isAdmin}
-                          hasChildren={hasChildren}
-                          childActionsByActiontype={subActionsByType}
-                          viewEntity={viewEntity}
-                          typeId={typeId.toString()}
-                          viewSubject={viewSubject}
-                          taxonomies={taxonomies}
-                          onEntityClick={onEntityClick}
-                        />
+                      {(showAllTabs || viewSubject !== 'children') && (
+                        <>
+                          <PrintOnly>
+                            <PrintSectionTitleWrapper>
+                              <Text size="large">{viewSubject === 'actors' ? 'Actors' : 'Targets'}</Text>
+                            </PrintSectionTitleWrapper>
+                          </PrintOnly>
+                          <TabActors
+                            isAdmin={isAdmin}
+                            hasChildren={hasChildren}
+                            childActionsByActiontype={subActionsByType}
+                            viewEntity={viewEntity}
+                            typeId={typeId.toString()}
+                            viewSubject={viewSubject}
+                            taxonomies={taxonomies}
+                            onEntityClick={onEntityClick}
+                          />
+                        </>
                       )}
                     </SubjectTabWrapper>
                     <Box>
@@ -593,6 +620,7 @@ ActionView.propTypes = {
   users: PropTypes.object,
   viewActiontypeId: PropTypes.string,
   actiontypes: PropTypes.object,
+  printArgs: PropTypes.object,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -615,6 +643,7 @@ const mapStateToProps = (state, props) => ({
   isAdmin: selectIsUserAdmin(state),
   myId: selectSessionUserId(state),
   isPrintView: selectIsPrintView(state),
+  printArgs: selectPrintConfig(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
