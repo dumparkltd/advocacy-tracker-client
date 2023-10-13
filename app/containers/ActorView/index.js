@@ -78,9 +78,12 @@ import {
   selectIsPrintView,
   selectPrintConfig,
 } from 'containers/App/selectors';
+import styled from 'styled-components';
 
 import appMessages from 'containers/App/messages';
 import HeaderPrint from 'components/Header/HeaderPrint';
+import PrintOnly from 'components/styled/PrintOnly';
+import PrintHide from 'components/styled/PrintHide';
 import messages from './messages';
 import TabActivities from './TabActivities';
 import TabMembers from './TabMembers';
@@ -97,6 +100,10 @@ import {
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
+
+const PrintSectionTitleWrapper = styled(
+  (p) => <Box margin={{ top: 'large', bottom: 'small' }} pad={{ bottom: 'small' }} border="bottom" {...p} />
+)``;
 export function ActorView({
   intl,
   viewEntity,
@@ -220,7 +227,7 @@ export function ActorView({
     viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
   }
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
-
+  const showAllTabs = isPrintView && printArgs && printArgs.printTabs === 'all';
   return (
     <div>
       <Helmet
@@ -314,68 +321,91 @@ export function ActorView({
                     }}
                   />
                   <Box>
-                    <SubjectButtonGroup>
-                      {isActive && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('actors')}
-                          active={viewSubject === 'actors'}
-                        >
-                          <Text size="large">Activities</Text>
-                        </SubjectButton>
-                      )}
-                      {isTarget && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('targets')}
-                          active={viewSubject === 'targets'}
-                        >
-                          <Text size="large">Targeted by</Text>
-                        </SubjectButton>
-                      )}
-                      {hasMembers && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('members')}
-                          active={viewSubject === 'members'}
-                        >
-                          <Text size="large">Members</Text>
-                        </SubjectButton>
-                      )}
-                      {hasStatements && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('topics')}
-                          active={viewSubject === 'topics'}
-                        >
-                          <Text size="large">Positions</Text>
-                        </SubjectButton>
-                      )}
-                    </SubjectButtonGroup>
+                    <PrintHide>
+                      <SubjectButtonGroup>
+                        {isActive && (
+                          <SubjectButton
+                            onClick={() => onSetSubject('actors')}
+                            active={viewSubject === 'actors'}
+                          >
+                            <Text size="large">Activities</Text>
+                          </SubjectButton>
+                        )}
+                        {isTarget && (
+                          <SubjectButton
+                            onClick={() => onSetSubject('targets')}
+                            active={viewSubject === 'targets'}
+                          >
+                            <Text size="large">Targeted by</Text>
+                          </SubjectButton>
+                        )}
+                        {hasMembers && (
+                          <SubjectButton
+                            onClick={() => onSetSubject('members')}
+                            active={viewSubject === 'members'}
+                          >
+                            <Text size="large">Members</Text>
+                          </SubjectButton>
+                        )}
+                        {hasStatements && (
+                          <SubjectButton
+                            onClick={() => onSetSubject('topics')}
+                            active={viewSubject === 'topics'}
+                          >
+                            <Text size="large">Positions</Text>
+                          </SubjectButton>
+                        )}
+                      </SubjectButtonGroup>
+                    </PrintHide>
                     <SubjectTabWrapper>
-                      {viewSubject === 'members' && hasMembers && (
-                        <TabMembers
-                          isAdmin={isAdmin}
-                          membersByType={membersByType}
-                          onEntityClick={(id, path) => onEntityClick(id, path)}
-                          taxonomies={taxonomies}
-                          actorConnections={actorConnections}
-                        />
+                      {(showAllTabs || viewSubject === 'actors' || viewSubject === 'targets') && (
+                        <>
+                          <PrintOnly>
+                            <PrintSectionTitleWrapper>
+                              <Text size="large">{viewSubject === 'actors' ? 'Activities' : 'Targeted By'}</Text>
+                            </PrintSectionTitleWrapper>
+                          </PrintOnly>
+                          <TabActivities
+                            isAdmin={isAdmin}
+                            viewEntity={viewEntity}
+                            onEntityClick={onEntityClick}
+                            viewSubject={viewSubject}
+                            taxonomies={taxonomies}
+                            actionsByActiontype={actionsByActiontype}
+                          />
+                        </>
                       )}
-                      {viewSubject === 'topics' && hasStatements && (
-                        <TabStatements
-                          isAdmin={isAdmin}
-                          viewEntity={viewEntity}
-                          onEntityClick={(id, path) => onEntityClick(id, path)}
-                          statements={actionsByActiontype && actionsByActiontype.get(parseInt(ACTIONTYPES.EXPRESS, 10))}
-                          associationsByType={associationsByType}
-                        />
+                      {(showAllTabs || viewSubject === 'members') && hasMembers && (
+                        <>
+                          <PrintOnly>
+                            <PrintSectionTitleWrapper>
+                              <Text size="large">Members</Text>
+                            </PrintSectionTitleWrapper>
+                          </PrintOnly>
+                          <TabMembers
+                            isAdmin={isAdmin}
+                            membersByType={membersByType}
+                            onEntityClick={(id, path) => onEntityClick(id, path)}
+                            taxonomies={taxonomies}
+                            actorConnections={actorConnections}
+                          />
+                        </>
                       )}
-                      {(viewSubject === 'actors' || viewSubject === 'targets') && (
-                        <TabActivities
-                          isAdmin={isAdmin}
-                          viewEntity={viewEntity}
-                          onEntityClick={onEntityClick}
-                          viewSubject={viewSubject}
-                          taxonomies={taxonomies}
-                          actionsByActiontype={actionsByActiontype}
-                        />
+                      {(showAllTabs || viewSubject === 'topics') && hasStatements && (
+                        <>
+                          <PrintOnly>
+                            <PrintSectionTitleWrapper>
+                              <Text size="large">Topics</Text>
+                            </PrintSectionTitleWrapper>
+                          </PrintOnly>
+                          <TabStatements
+                            isAdmin={isAdmin}
+                            viewEntity={viewEntity}
+                            onEntityClick={(id, path) => onEntityClick(id, path)}
+                            statements={actionsByActiontype && actionsByActiontype.get(parseInt(ACTIONTYPES.EXPRESS, 10))}
+                            associationsByType={associationsByType}
+                          />
+                        </>
                       )}
                     </SubjectTabWrapper>
                   </Box>
