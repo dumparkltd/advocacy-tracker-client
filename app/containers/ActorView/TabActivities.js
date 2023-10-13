@@ -29,6 +29,8 @@ import {
   selectActiontypeQuery,
 } from 'containers/App/selectors';
 import appMessages from 'containers/App/messages';
+import PrintHide from 'components/styled/PrintHide';
+import PrintOnly from 'components/styled/PrintOnly';
 import TabActivitiesByType from './TabActivitiesByType';
 
 import {
@@ -43,7 +45,9 @@ const TypeSelectBox = styled((p) => <Box {...p} />)``;
 const TypeButton = styled((p) => <ButtonPill {...p} />)`
   margin-bottom: 5px;
 `;
-
+const StyledPrint = styled.div`
+  margin-left: 0;
+`;
 
 export function TabActivities(props) {
   const {
@@ -187,27 +191,36 @@ export function TabActivities(props) {
         </Box>
       )}
       {actiontypeIdsForSubjectOptions && actiontypeIdsForSubjectOptions.size > 0 && (
-        <TypeSelectBox
-          direction="row"
-          gap="xxsmall"
-          margin={{ top: 'small', bottom: 'medium' }}
-          wrap
-        >
-          {actiontypeIdsForSubjectOptions.map(
-            (id) => (
-              <TypeButton
-                key={id}
-                onClick={() => onSetActiontype(id)}
-                active={qe(activeActiontypeId, id) || actiontypeIdsForSubjectOptions.size === 1}
-                listItems={actiontypeIdsForSubjectOptions.size}
-              >
-                <Text size="small">
-                  <FormattedMessage {...appMessages.entities[`actions_${id}`].pluralShort} />
-                </Text>
-              </TypeButton>
-            )
-          )}
-        </TypeSelectBox>
+        <>
+          <PrintHide>
+            <TypeSelectBox
+              direction="row"
+              gap="xxsmall"
+              margin={{ top: 'small', bottom: 'medium' }}
+              wrap
+            >
+              {actiontypeIdsForSubjectOptions.map(
+                (id) => (
+                  <TypeButton
+                    key={id}
+                    onClick={() => onSetActiontype(id)}
+                    active={qe(activeActiontypeId, id) || actiontypeIdsForSubjectOptions.size === 1}
+                    listItems={actiontypeIdsForSubjectOptions.size}
+                  >
+                    <Text size="small">
+                      <FormattedMessage {...appMessages.entities[`actions_${id}`].pluralShort} />
+                    </Text>
+                  </TypeButton>
+                )
+              )}
+            </TypeSelectBox>
+          </PrintHide>
+          <PrintOnly>
+            <StyledPrint>
+              <Text size="small" style={{ textDecoration: 'underline' }}>{typeLabel}</Text>
+            </StyledPrint>
+          </PrintOnly>
+        </>
       )}
       <TabActivitiesByType
         isAdmin={isAdmin}

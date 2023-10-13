@@ -4,6 +4,8 @@ import { Box, Heading } from 'grommet';
 import { Up, Down } from 'grommet-icons';
 import styled from 'styled-components';
 
+import PrintHide from 'components/styled/PrintHide';
+
 const StyledBox = styled((p) => (
   <Box
     direction="row"
@@ -34,8 +36,10 @@ function AccordionHeader({ title, open, level = 1 }) {
         </Heading>
       </Box>
       <Box margin={{ left: 'auto' }}>
-        {!open && <Down size="small" />}
-        {open && <Up size="small" />}
+        <PrintHide>
+          {!open && <Down size="small" />}
+          {open && <Up size="small" />}
+        </PrintHide>
       </Box>
     </StyledBox>
   );
