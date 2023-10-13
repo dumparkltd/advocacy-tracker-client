@@ -147,6 +147,7 @@ function ImportEntitiesForm({
     placeholder: 'filename',
   };
   const { id, ...props } = getControlProps(field);
+  console.log(asArray(template.data));
   return (
     <FormWrapper white>
       <StyledForm model={model} onSubmit={(data) => data.get('import') !== null && handleSubmit(data)}>
