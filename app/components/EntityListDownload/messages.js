@@ -9,4 +9,12 @@ export default defineMessages({
     id: 'app.components.EntityListDownload.buttonDownload',
     defaultMessage: 'Download CSV',
   },
+  groupShow: {
+    id: 'app.components.EntityListDownload.groupShow',
+    defaultMessage: 'Show',
+  },
+  groupHide: {
+    id: 'app.components.EntityListDownload.groupHide',
+    defaultMessage: 'Hide',
+  },
 });

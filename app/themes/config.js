@@ -537,6 +537,8 @@ export const ACTION_FIELDS = {
       type: 'number',
       skipImport: true,
       table: API.ACTIONTYPES,
+      exportColumn: 'activity_type',
+      export: true,
     },
     draft: {
       defaultValue: true,
@@ -569,6 +571,7 @@ export const ACTION_FIELDS = {
     title: {
       required: Object.values(ACTIONTYPES), // all types
       type: 'text',
+      exportRequired: true,
     },
     // parent_id: {
     //   skipImport: true,

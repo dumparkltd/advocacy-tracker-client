@@ -6,13 +6,19 @@ export const getAttributes = ({
     return Object.keys(fieldAttributes).reduce((memo, attKey) => {
       const attValue = fieldAttributes[attKey];
       if (
-        (attValue.optional && attValue.optional.indexOf(parseInt(typeId, 10)))
-        || (attValue.required && attValue.required.indexOf(parseInt(typeId, 10)))
+        !attValue.skipExport
+        && (
+          (attValue.optional && attValue.optional.indexOf(parseInt(typeId, 10)))
+          || (attValue.required && attValue.required.indexOf(parseInt(typeId, 10)))
+          || (!attValue.optional && !attValue.required)
+        )
       ) {
         return {
           ...memo,
           [attKey]: {
             ...attValue,
+            active: typeof attValue.export === 'undefined' || !!attValue.export || !!attValue.exportRequired,
+            column: attValue.exportColumn || attKey,
           },
         };
       }
@@ -34,8 +40,16 @@ const sanitiseText = (text) => {
     .replaceAll(/"/g, '""')}"`;
 };
 
-const getValue = ({ key, attribute, entity }) => {
+const getValue = ({
+  key, attribute, entity, types,
+}) => {
   const val = entity.getIn(['attributes', key]) || '';
+  if (key === 'measuretype_id') {
+    return types.actiontypes[val] || val;
+  }
+  if (attribute.type === 'bool') {
+    return val || false;
+  }
   if (attribute.type === 'date') {
     if (val && val !== '') {
       const date = new Date(val);
@@ -60,6 +74,7 @@ export const prepareDatas = ({
   // config,
   attributes,
   entities,
+  types,
   // taxonomies,
   // connections,
 }) => entities.reduce((memo, entity) => {
@@ -67,10 +82,14 @@ export const prepareDatas = ({
   return [
     ...memo,
     Object.keys(attributes).reduce((memo2, attKey) => {
+      if (!attributes[attKey].active) {
+        return memo2;
+      }
       const value = getValue({
         key: attKey,
         attribute: attributes[attKey],
         entity,
+        types,
       });
       return ({
         ...memo2,

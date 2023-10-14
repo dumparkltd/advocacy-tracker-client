@@ -53,6 +53,7 @@ import {
   newMultipleEntities,
   deleteMultipleEntities,
 } from 'containers/App/actions';
+import appMessages from 'containers/App/messages';
 
 // import appMessages from 'containers/App/messages';
 import { USER_ROLES, ACTION_FIELDS, ACTOR_FIELDS } from 'themes/config';
@@ -450,6 +451,10 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               taxonomies={taxonomies}
               connections={connections}
               onClose={() => this.onDownloadDismiss()}
+              types={{
+                actiontypes: actiontypes.map((type) => intl.formatMessage(appMessages.actiontypes[type.get('id')])).toJS(),
+                actortypes: actortypes.map((type) => intl.formatMessage(appMessages.actortypes[type.get('id')])).toJS(),
+              }}
             />
           </ReactModal>
         )}
