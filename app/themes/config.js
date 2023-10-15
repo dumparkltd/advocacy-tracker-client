@@ -571,7 +571,7 @@ export const ACTION_FIELDS = {
     title: {
       required: Object.values(ACTIONTYPES), // all types
       type: 'text',
-      exportRequired: true,
+      // exportRequired: true,
     },
     // parent_id: {
     //   skipImport: true,

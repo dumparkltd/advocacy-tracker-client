@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { intlShape, injectIntl, FormattedMessage } from 'react-intl';
 import { palette } from 'styled-theme';
 import DebounceInput from 'react-debounce-input';
+import { snakeCase } from 'lodash/string';
 
 import styled from 'styled-components';
 import { List, Map } from 'immutable';
@@ -20,13 +21,20 @@ import {
 
 import appMessages from 'containers/App/messages';
 import { CONTENT_MODAL } from 'containers/App/constants';
+import { ACTIONTYPE_ACTORTYPES } from 'themes/config';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonSubmit from 'components/buttons/ButtonSubmit';
 import OptionGroupToggle from './OptionGroupToggle';
+import OptionListHeader from './OptionListHeader';
+
 import messages from './messages';
-import { prepareDatas, getAttributes } from './utils';
+import {
+  prepareData,
+  getAttributes,
+  // getTaxonomies,
+} from './utils';
 
 
 const Footer = styled.div`
@@ -56,14 +64,6 @@ const Select = styled.div`
   padding-right: 6px;
 `;
 
-// const TextInput = styled.input`
-//   background-color: ${palette('background', 0)};
-//   width: 200px;
-//   border: 1px solid ${palette('light', 1)};
-//   padding: 0.2em;
-//   border-radius: 0.5em;
-// `;
-
 const TextInput = styled(DebounceInput)`
   background-color: ${palette('background', 0)};
   padding: 3px;
@@ -86,6 +86,10 @@ const Group = styled((p) => (
   }
 `;
 
+const StyledInput = styled.input`
+  accent-color: ${({ theme }) => theme.global.colors.highlight};
+`;
+
 export function EntityListDownload({
   typeId,
   config,
@@ -94,43 +98,164 @@ export function EntityListDownload({
   taxonomies,
   connections,
   onClose,
-  types,
+  typeNames,
   intl,
 }) {
   const [attributes, setAttributes] = useState({});
   const [expandAttributes, setExpandAttributes] = useState(false);
+  const [taxonomyColumns, setTaxonomies] = useState({});
+  const [expandTaxonomies, setExpandTaxonomies] = useState(false);
+  const [actortypes, setActortypes] = useState({});
+  const [expandActortypes, setExpandActortypes] = useState(false);
+  const [actorsAsRows, setActorsAsRows] = useState(false);
+  // const [actiontypes, setActiontypes] = useState({});
+  // const [expandActiontypes, setExpandActiontypes] = useState(false);
+  // const [actiontypesAsTarget, setActiontypesAsTarget] = useState({});
+  // const [expandActiontypesAsTarget, setExpandActiontypesAsTarget] = useState(false);
+  // const [parenttypes, setParenttypes] = useState({});
+  // const [expandParenttypes, setExpandParenttypes] = useState(false);
+  // const [childtypes, setChildtypes] = useState({});
+  // const [expandChildtypes, setExpandChildtypes] = useState(false);
+  // const [resourcetypes, setResourcetypes] = useState({});
+  // const [expandResourcetypes, setExpandResourcetypes] = useState(false);
+  // const [membertypes, setMembertypes] = useState({});
+  // const [expandMembertypes, setExpandMembertypes] = useState(false);
+  // const [expandUsers, setExpandUsers] = useState(false);
+  // const [expandTopics, setExpandTopics] = useState(false);
   useEffect(() => {
-    // kick off loading of data
-    setAttributes(
-      getAttributes({
-        typeId,
-        fieldAttributes: fields && fields.ATTRIBUTES,
-      })
-    );
+    // set initial config values
+    if (config.attributes && fields && typeId) {
+      setAttributes(
+        getAttributes({
+          typeId,
+          fieldAttributes: fields && fields.ATTRIBUTES,
+        })
+      );
+    }
+    if (config.taxonomies && taxonomies) {
+      setTaxonomies(
+        taxonomies.map((tax) => {
+          const name = intl.formatMessage(appMessages.entities.taxonomies[tax.get('id')].plural);
+          return ({
+            id: tax.get('id'),
+            name,
+            active: true,
+            column: snakeCase(name),
+          });
+        }).toJS()
+      );
+    }
+    if (config.connections && config.connections.actors && typeNames.actortypes && ACTIONTYPE_ACTORTYPES[typeId]) {
+      setActortypes(
+        ACTIONTYPE_ACTORTYPES[typeId].reduce((memo, actortypeId) => {
+          const name = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].pluralLong);
+          return {
+            ...memo,
+            [actortypeId]: {
+              id: actortypeId,
+              name,
+              active: true,
+              column: `actors_${snakeCase(name)}`,
+            },
+          };
+        }, {})
+      );
+    }
   }, []);
-  const datas = prepareDatas({
+
+  const hasAttributes = config.attributes && Object.keys(attributes).length > 0;
+  const hasTaxonomies = config.taxonomies && Object.keys(taxonomyColumns).length > 0;
+  const hasActors = config.connections && config.connections.actors && Object.keys(actortypes).length > 0;
+  // console.log('typeNames', typeNames)
+  // console.log('config', config)
+  // console.log('actortypes', actortypes)
+  // console.log('taxonomyColumns', taxonomyColumns)
+  // console.log('attributes', attributes)
+  // console.log('hasActors', hasActors)
+  const activeAttributeCount = hasAttributes && Object.keys(attributes).reduce((counter, attKey) => {
+    if (attributes[attKey].active) return counter + 1;
+    return counter;
+  }, 0);
+  const activeTaxonomyCount = hasTaxonomies && Object.keys(taxonomyColumns).reduce((counter, taxId) => {
+    if (taxonomyColumns[taxId].active) return counter + 1;
+    return counter;
+  }, 0);
+  const activeActortypeCount = hasActors && Object.keys(actortypes).reduce((counter, actortypeId) => {
+    if (actortypes[actortypeId].active) return counter + 1;
+    return counter;
+  }, 0);
+  let csvColumns = [{ id: 'id' }];
+  if (hasAttributes) {
+    csvColumns = Object.keys(attributes).reduce((memo, attKey) => {
+      if (attributes[attKey].active) {
+        let displayName = attributes[attKey].column;
+        if (!displayName || attributes[attKey].column === '') {
+          displayName = attKey;
+        }
+        return [
+          ...memo,
+          { id: attKey, displayName },
+        ];
+      }
+      return memo;
+    }, csvColumns);
+  }
+  if (hasTaxonomies) {
+    csvColumns = Object.keys(taxonomyColumns).reduce((memo, taxId) => {
+      if (taxonomyColumns[taxId].active) {
+        let displayName = taxonomyColumns[taxId].column;
+        if (!displayName || taxonomyColumns[taxId].column === '') {
+          displayName = taxId;
+        }
+        return [
+          ...memo,
+          { id: `taxonomy_${taxId}`, displayName },
+        ];
+      }
+      return memo;
+    }, csvColumns);
+  }
+  if (hasActors) {
+    if (!actorsAsRows) {
+      csvColumns = Object.keys(actortypes).reduce((memo, actortypeId) => {
+        if (actortypes[actortypeId].active) {
+          let displayName = actortypes[actortypeId].column;
+          if (!displayName || actortypes[actortypeId].column === '') {
+            displayName = actortypeId;
+          }
+          return [
+            ...memo,
+            { id: `actors_${actortypeId}`, displayName },
+          ];
+        }
+        return memo;
+      }, csvColumns);
+    } else {
+      csvColumns = [
+        ...csvColumns,
+        { id: 'actor_id', displayName: 'actor_id' },
+        { id: 'actortype_id', displayName: 'actor_type' },
+        { id: 'actor_code', displayName: 'actor_code' },
+        { id: 'actor_title', displayName: 'actor_title' },
+      ];
+    }
+  }
+  const csvData = prepareData({
     typeId,
     config,
     attributes,
     entities,
     taxonomies,
+    taxonomyColumns,
     connections,
-    types,
+    typeNames,
+    hasActors,
+    actorsAsRows,
+    actortypes,
   });
-  const activeAttributeCount = Object.keys(attributes).reduce((counter, attKey) => {
-    if (attributes[attKey].active) return counter + 1;
-    return counter;
-  }, 0);
-  const columns = Object.keys(attributes).reduce((memo, attKey) => {
-    let displayName = attributes[attKey].column;
-    if (!displayName || attributes[attKey].column === '') {
-      displayName = attKey;
-    }
-    return [
-      ...memo,
-      { id: attKey, displayName },
-    ];
-  }, [{ id: 'id' }]);
+
+  // console.log('csvColumns', csvColumns);
+  // console.log('csvData', csvData);
   return (
     <Content inModal>
       <ContentHeader
@@ -150,7 +275,7 @@ export function EntityListDownload({
             You can optionally customise your data export below
           </Text>
         </Box>
-        {Object.keys(attributes).length > 0 && (
+        {hasAttributes && (
           <Group>
             <OptionGroupToggle
               label="Attributes"
@@ -166,24 +291,18 @@ export function EntityListDownload({
                   </Text>
                 </Box>
                 <Box margin={{ top: 'medium' }}>
-                  <Box
-                    direction="row"
-                    gap="small"
-                    align="center"
-                    justify="between"
-                    pad={{ bottom: 'small' }}
-                    margin={{ bottom: 'small' }}
-                    border={{ side: 'bottom', color: 'rgba(0,0,0,0.33)' }}
-                  >
-                    <Text style={{ fontWeight: 700 }}>Select attributes</Text>
-                    <Text style={{ fontWeight: 700 }}>Customise column name</Text>
-                  </Box>
+                  <OptionListHeader
+                    labels={{
+                      attributes: 'Select attributes',
+                      columns: 'Customise column name',
+                    }}
+                  />
                   <Box gap="xsmall">
                     {Object.keys(attributes).map((attKey) => (
                       <Box key={attKey} direction="row" gap="small" align="center" justify="between">
                         <Box direction="row" gap="small" align="center" justify="start">
                           <Select>
-                            <input
+                            <StyledInput
                               id={`check-attribute-${attKey}`}
                               type="checkbox"
                               checked={attributes[attKey].exportRequired || attributes[attKey].active}
@@ -227,6 +346,144 @@ export function EntityListDownload({
             )}
           </Group>
         )}
+        {hasTaxonomies && (
+          <Group>
+            <OptionGroupToggle
+              label="Categories"
+              onToggle={() => setExpandTaxonomies(!expandTaxonomies)}
+              expanded={expandTaxonomies}
+              activeCount={activeTaxonomyCount === Object.keys(taxonomyColumns).length ? 'all' : `${activeTaxonomyCount}`}
+            />
+            {expandTaxonomies && (
+              <Box gap="small" margin={{ vertical: 'medium' }}>
+                <Box gap="small">
+                  <Text size="small">
+                    The resulting CSV file will have one column for each category group (taxonomy) selected
+                  </Text>
+                </Box>
+                <Box margin={{ top: 'medium' }}>
+                  <OptionListHeader
+                    labels={{
+                      attributes: 'Select category groups',
+                      columns: 'Customise column name',
+                    }}
+                  />
+                  <Box gap="xsmall">
+                    {Object.keys(taxonomyColumns).map((taxId) => (
+                      <Box key={taxId} direction="row" gap="small" align="center" justify="between">
+                        <Box direction="row" gap="small" align="center" justify="start">
+                          <Select>
+                            <StyledInput
+                              id={`check-taxonomy-${taxId}`}
+                              type="checkbox"
+                              checked={taxonomyColumns[taxId].active}
+                              onChange={(evt) => {
+                                setTaxonomies({
+                                  ...taxonomyColumns,
+                                  [taxId]: {
+                                    ...taxonomyColumns[taxId],
+                                    active: evt.target.checked,
+                                  },
+                                });
+                              }}
+                            />
+                          </Select>
+                          <Text as="label" htmlFor={`check-taxonomy-${taxId}`}>
+                            {taxonomyColumns[taxId].name}
+                          </Text>
+                        </Box>
+                        <Box>
+                          <TextInput
+                            minLength={1}
+                            debounceTimeout={500}
+                            value={taxonomyColumns[taxId].column}
+                            onChange={(evt) => {
+                              setTaxonomies({
+                                ...taxonomyColumns,
+                                [taxId]: {
+                                  ...taxonomyColumns[taxId],
+                                  column: evt.target.value,
+                                },
+                              });
+                            }}
+                          />
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </Box>
+            )}
+          </Group>
+        )}
+        {hasActors && (
+          <Group>
+            <OptionGroupToggle
+              label="Actors"
+              onToggle={() => setExpandActortypes(!expandActortypes)}
+              expanded={expandActortypes}
+              activeCount={activeActortypeCount === Object.keys(actortypes).length ? 'all' : `${activeActortypeCount}`}
+            />
+            {expandActortypes && (
+              <Box gap="small" margin={{ vertical: 'medium' }}>
+                <Box gap="small">
+                  <Text size="small">
+                    By default, the resulting CSV file will have one column for each type of actor selected. Alternatively you can chose to include actors as rows, resulting in one row per activity and actor
+                  </Text>
+                </Box>
+                <Box margin={{ top: 'medium' }}>
+                  <Box direction="row" gap="small" align="center" justify="start">
+                    <Select>
+                      <StyledInput
+                        id="check-actors-as-rows"
+                        type="checkbox"
+                        checked={actorsAsRows}
+                        onChange={(evt) => setActorsAsRows(evt.target.checked)}
+                      />
+                    </Select>
+                    <Text as="label" htmlFor="check-actors-as-rows">
+                      Include actors as rows (one row for each activity and actor)
+                    </Text>
+                  </Box>
+                </Box>
+                <Box margin={{ top: 'medium' }}>
+                  <OptionListHeader
+                    labels={{
+                      attributes: 'Select actor types',
+                    }}
+                  />
+                  <Box gap="xsmall">
+                    {Object.keys(actortypes).map((actortypeId) => (
+                      <Box key={actortypeId} direction="row" gap="small" align="center" justify="between">
+                        <Box direction="row" gap="small" align="center" justify="start">
+                          <Select>
+                            <StyledInput
+                              id={`check-actortype-${actortypeId}`}
+                              type="checkbox"
+                              checked={actortypes[actortypeId].active}
+                              onChange={(evt) => {
+                                setActortypes({
+                                  ...actortypes,
+                                  [actortypeId]: {
+                                    ...actortypes[actortypeId],
+                                    active: evt.target.checked,
+                                  },
+                                });
+                              }}
+                            />
+                          </Select>
+                          <Text as="label" htmlFor={`check-actortype-${actortypeId}`}>
+                            {actortypes[actortypeId].name}
+                          </Text>
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              </Box>
+            )}
+          </Group>
+        )}
       </Main>
       <Footer>
         <Box direction="row" justify="end">
@@ -234,8 +491,8 @@ export function EntityListDownload({
             <FormattedMessage {...appMessages.buttons.cancel} />
           </StyledButtonCancel>
           <CsvDownloader
-            datas={datas}
-            columns={columns}
+            datas={csvData}
+            columns={csvColumns}
             filename="csv"
             bom={false}
             suffix
@@ -259,7 +516,7 @@ export function EntityListDownload({
 EntityListDownload.propTypes = {
   fields: PropTypes.object,
   config: PropTypes.object,
-  types: PropTypes.object,
+  typeNames: PropTypes.object,
   typeId: PropTypes.string,
   entities: PropTypes.instanceOf(List),
   taxonomies: PropTypes.instanceOf(Map),

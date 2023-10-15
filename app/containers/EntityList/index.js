@@ -451,9 +451,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               taxonomies={taxonomies}
               connections={connections}
               onClose={() => this.onDownloadDismiss()}
-              types={{
-                actiontypes: actiontypes.map((type) => intl.formatMessage(appMessages.actiontypes[type.get('id')])).toJS(),
-                actortypes: actortypes.map((type) => intl.formatMessage(appMessages.actortypes[type.get('id')])).toJS(),
+              typeNames={{
+                actiontypes: actiontypes.map((type) => intl.formatMessage(appMessages.entities[`actions_${type.get('id')}`].single)).toJS(),
+                actortypes: actortypes.map((type) => intl.formatMessage(appMessages.entities[`actors_${type.get('id')}`].single)).toJS(),
               }}
             />
           </ReactModal>
