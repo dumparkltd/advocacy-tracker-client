@@ -368,6 +368,5 @@ export const makeFilterGroups = ({
         ),
     };
   }
-  console.log(filterGroups);
   return filterGroups;
 };

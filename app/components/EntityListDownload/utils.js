@@ -1,3 +1,4 @@
+import qe from 'utils/quasi-equals';
 export const getAttributes = ({
   typeId,
   fieldAttributes,
@@ -131,40 +132,89 @@ const prepActorData = ({
   actortypes,
   actors, // Map
   data,
-}) => {
-  console.log('entity', entity && entity.toJS());
-  // console.log('actortypes', actortypes)
-  // console.log('types', types)
-  // console.log('actors', actors && actors.toJS())
-  // console.log('data', data)
-  return Object.keys(actortypes).reduce((memo, actortypeId) => {
-    if (!actortypes[actortypeId].active) {
-      return memo;
-    }
-    const entityActorIds = entity.getIn(['actorsByType', parseInt(actortypeId, 10)]);
-    let actorsValue = '';
-    // console.log(entityActorIds)
-    if (entityActorIds) {
-      actorsValue = entityActorIds.reduce((memo2, actorId) => {
-        // console.log(actorId)
-        const actor = actors.get(actorId.toString());
-        if (actor) {
-          const title = actor.getIn(['attributes', 'title']);
-          const code = actor.getIn(['attributes', 'code']);
-          const actorValue = code !== '' ? `${code}|${title}` : title;
-          return memo2 === ''
-            ? actorValue
-            : `${memo2}, ${actorValue}`;
-        }
-        return memo2;
-      }, '');
-    }
-    return ({
-      ...memo,
-      [`actors_${actortypeId}`]: `"${actorsValue}"`,
-    });
-  }, data);
+}) => Object.keys(actortypes).reduce((memo, actortypeId) => {
+  if (!actortypes[actortypeId].active) {
+    return memo;
+  }
+  const entityActorIds = entity.getIn(['actorsByType', parseInt(actortypeId, 10)]);
+  let actorsValue = '';
+  // console.log(entityActorIds)
+  if (entityActorIds) {
+    actorsValue = entityActorIds.reduce((memo2, actorId) => {
+      // console.log(actorId)
+      const actor = actors.get(actorId.toString());
+      if (actor) {
+        const title = actor.getIn(['attributes', 'title']);
+        const code = actor.getIn(['attributes', 'code']);
+        const actorValue = code !== '' ? `${code}|${title}` : title;
+        return memo2 === ''
+          ? actorValue
+          : `${memo2}, ${actorValue}`;
+      }
+      return memo2;
+    }, '');
+  }
+  return ({
+    ...memo,
+    [`actors_${actortypeId}`]: `"${actorsValue}"`,
+  });
+}, data);
+// const prepIndicatorData = ({
+//   entity, // Map
+//   indicators, // Map
+//   data,
+// }) => {
+//   const entityIndicatorConnections = entity.get('indicatorConnections');
+//   // let actorsValue = '';
+//   // // console.log(entityActorIds)
+//   if (entityIndicatorConnections) {
+//     const indicatorsValue = entityIndicatorConnections.reduce((memo, indicatorConnection) => {
+//       // console.log(actorId)
+//       const indicator = indicators.get(indicatorConnection.get('indicator_id').toString());
+//       if (indicator) {
+//         const code = indicator.getIn(['attributes', 'code']);
+//         const title = indicator.getIn(['attributes', 'title']);
+//         let indicatorValue = code !== '' ? `${code}|${title}` : title;
+//         indicatorValue = indicatorConnection.get('supportlevel_id')
+//           ? `${indicatorValue}|Support:${indicatorConnection.get('supportlevel_id')}`
+//           : indicatorValue;
+//         return memo === ''
+//           ? indicatorValue
+//           : `${memo}, ${indicatorValue}`;
+//       }
+//       return memo;
+//     }, '');
+//     return ({
+//       ...data,
+//       indicators: `"${indicatorsValue}"`,
+//     });
+//   }
+//   return data;
+// };
+const getIndicatorValue = ({ entity, indicatorId }) => {
+  const indicatorConnection = entity
+    .get('indicatorConnections')
+    .find((connection) => qe(connection.get('indicator_id'), indicatorId));
+  if (indicatorConnection) {
+    return indicatorConnection.get('supportlevel_id');
+  }
+  return '';
 };
+const prepIndicatorDataColumns = ({
+  entity, // Map
+  indicators, // Map
+  data,
+}) => indicators.reduce((memo, indicator) => {
+  const value = getIndicatorValue({
+    entity,
+    indicatorId: indicator.get('id'),
+  });
+  return ({
+    ...memo,
+    [`indicator_${indicator.get('id')}`]: value,
+  });
+}, data);
+
 const prepActorDataAsRows = ({
   entity, // Map
   actortypes,
@@ -210,6 +260,45 @@ const prepActorDataAsRows = ({
   }
   return [data];
 };
+const prepIndicatorDataAsRows = ({
+  entity, // Map
+  indicators, // Map
+  dataRows, // array of entity rows (i.e. for each actor and action)
+}) => {
+  const entityIndicatorConnections = entity.get('indicatorConnections');
+  // let actorsValue = '';
+  if (entityIndicatorConnections) {
+    // console.log('entityIndicatorConnections', entityIndicatorConnections)
+    // for each indicator
+    const dataIndicatorRows = entityIndicatorConnections.reduce((memo, indicatorConnection) => {
+      const indicator = indicators.get(indicatorConnection.get('indicator_id').toString());
+      // and for each row: add indicator columns
+      if (indicator) {
+        const dataRowsIndicator = dataRows.reduce((memo2, data) => {
+          const dataRow = {
+            ...data,
+            indicator_id: indicatorConnection.get('indicator_id'),
+            indicator_code: indicator.getIn(['attributes', 'code']),
+            indicator_title: indicator.getIn(['attributes', 'title']),
+            indicator_supportlevel: indicatorConnection.get('supportlevel_id'),
+          };
+          return [
+            ...memo2,
+            dataRow,
+          ];
+        }, []);
+        return [
+          ...memo,
+          ...dataRowsIndicator,
+        ];
+      }
+      return memo;
+    }, []);
+    return dataIndicatorRows;
+  }
+  return dataRows;
+};
+
 export const prepareData = ({
   // typeId,
   // config,
@@ -222,6 +311,8 @@ export const prepareData = ({
   hasActors,
   actorsAsRows,
   actortypes,
+  hasIndicators,
+  indicatorsAsRows,
 }) => entities.reduce((memo, entity) => {
   let data = { id: entity.get('id') };
   // add attribute columns
@@ -249,7 +340,14 @@ export const prepareData = ({
       data,
     });
   }
-  let dataRows;
+  if (hasIndicators && !indicatorsAsRows) {
+    data = prepIndicatorDataColumns({
+      entity,
+      indicators: connections && connections.get('indicators'),
+      data,
+    });
+  }
+  let dataRows = [data];
   if (hasActors && actorsAsRows) {
     dataRows = prepActorDataAsRows({
       entity,
@@ -259,7 +357,12 @@ export const prepareData = ({
       typeNames,
     });
   }
-  return dataRows
-    ? [...memo, ...dataRows]
-    : [...memo, data];
+  if (hasIndicators && indicatorsAsRows) {
+    dataRows = prepIndicatorDataAsRows({
+      entity,
+      indicators: connections && connections.get('indicators'),
+      dataRows,
+    });
+  }
+  return [...memo, ...dataRows];
 }, []);

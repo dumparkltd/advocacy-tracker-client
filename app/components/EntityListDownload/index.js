@@ -21,7 +21,7 @@ import {
 
 import appMessages from 'containers/App/messages';
 import { CONTENT_MODAL } from 'containers/App/constants';
-import { ACTIONTYPE_ACTORTYPES } from 'themes/config';
+import { ACTIONTYPE_ACTORTYPES, INDICATOR_ACTIONTYPES } from 'themes/config';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
 import ButtonForm from 'components/buttons/ButtonForm';
@@ -108,6 +108,8 @@ export function EntityListDownload({
   const [actortypes, setActortypes] = useState({});
   const [expandActortypes, setExpandActortypes] = useState(false);
   const [actorsAsRows, setActorsAsRows] = useState(false);
+  const [indicatorsAsRows, setIndicatorsAsRows] = useState(false);
+  const [expandIndicators, setExpandIndicators] = useState(false);
   // const [actiontypes, setActiontypes] = useState({});
   // const [expandActiontypes, setExpandActiontypes] = useState(false);
   // const [actiontypesAsTarget, setActiontypesAsTarget] = useState({});
@@ -121,7 +123,6 @@ export function EntityListDownload({
   // const [membertypes, setMembertypes] = useState({});
   // const [expandMembertypes, setExpandMembertypes] = useState(false);
   // const [expandUsers, setExpandUsers] = useState(false);
-  // const [expandTopics, setExpandTopics] = useState(false);
   useEffect(() => {
     // set initial config values
     if (config.attributes && fields && typeId) {
@@ -166,12 +167,10 @@ export function EntityListDownload({
   const hasAttributes = config.attributes && Object.keys(attributes).length > 0;
   const hasTaxonomies = config.taxonomies && Object.keys(taxonomyColumns).length > 0;
   const hasActors = config.connections && config.connections.actors && Object.keys(actortypes).length > 0;
-  // console.log('typeNames', typeNames)
-  // console.log('config', config)
-  // console.log('actortypes', actortypes)
-  // console.log('taxonomyColumns', taxonomyColumns)
-  // console.log('attributes', attributes)
-  // console.log('hasActors', hasActors)
+  const hasIndicators = config.connections
+    && config.connections.indicators
+    && INDICATOR_ACTIONTYPES.indexOf(typeId) > -1
+    && connections.get('indicators');
   const activeAttributeCount = hasAttributes && Object.keys(attributes).reduce((counter, attKey) => {
     if (attributes[attKey].active) return counter + 1;
     return counter;
@@ -240,7 +239,32 @@ export function EntityListDownload({
       ];
     }
   }
-  const csvData = prepareData({
+  if (hasIndicators) {
+    if (!indicatorsAsRows) {
+      const indicatorColumns = connections
+        && connections.get('indicators')
+        && connections.get('indicators').reduce((memo, indicator) => [
+          ...memo,
+          {
+            id: `indicator_${indicator.get('id')}`,
+            displayName: `topic_${indicator.getIn(['attributes', 'code'])}_supportlevel`,
+          },
+        ], []);
+      csvColumns = [
+        ...csvColumns,
+        ...indicatorColumns,
+      ];
+    } else {
+      csvColumns = [
+        ...csvColumns,
+        { id: 'indicator_id', displayName: 'topic_id' },
+        { id: 'indicator_code', displayName: 'topic_code' },
+        { id: 'indicator_title', displayName: 'topic_title' },
+        { id: 'indicator_supportlevel', displayName: 'topic_supportlevel' },
+      ];
+    }
+  }
+  const csvData = entities && prepareData({
     typeId,
     config,
     attributes,
@@ -252,10 +276,10 @@ export function EntityListDownload({
     hasActors,
     actorsAsRows,
     actortypes,
+    hasIndicators,
+    indicatorsAsRows,
   });
-
-  // console.log('csvColumns', csvColumns);
-  // console.log('csvData', csvData);
+  // console.log('columns', csvColumns)
   return (
     <Content inModal>
       <ContentHeader
@@ -478,6 +502,39 @@ export function EntityListDownload({
                         </Box>
                       </Box>
                     ))}
+                  </Box>
+                </Box>
+              </Box>
+            )}
+          </Group>
+        )}
+        {hasIndicators && (
+          <Group>
+            <OptionGroupToggle
+              label="Topics"
+              onToggle={() => setExpandIndicators(!expandIndicators)}
+              expanded={expandIndicators}
+            />
+            {expandIndicators && (
+              <Box gap="small" margin={{ vertical: 'medium' }}>
+                <Box gap="small">
+                  <Text size="small">
+                    By default, the resulting CSV file will have one column for each topic. Alternatively you can chose to include topics as rows, resulting in one row per activity and topic
+                  </Text>
+                </Box>
+                <Box margin={{ top: 'medium' }}>
+                  <Box direction="row" gap="small" align="center" justify="start">
+                    <Select>
+                      <StyledInput
+                        id="check-indicators-as-rows"
+                        type="checkbox"
+                        checked={indicatorsAsRows}
+                        onChange={(evt) => setIndicatorsAsRows(evt.target.checked)}
+                      />
+                    </Select>
+                    <Text as="label" htmlFor="check-indicators-as-rows">
+                      Include topics as rows (one row for each activity and indicator)
+                    </Text>
                   </Box>
                 </Box>
               </Box>
