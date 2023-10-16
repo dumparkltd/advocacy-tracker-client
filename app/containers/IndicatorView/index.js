@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { Box, Text } from 'grommet';
+import styled from 'styled-components';
 
 import {
   getTitleField,
@@ -43,6 +44,7 @@ import {
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
   selectIsPrintView,
+  selectPrintConfig,
 } from 'containers/App/selectors';
 
 import {
@@ -62,6 +64,8 @@ import FieldGroup from 'components/fields/FieldGroup';
 import SubjectButton from 'components/styled/SubjectButton';
 import SubjectButtonGroup from 'components/styled/SubjectButtonGroup';
 import HeaderPrint from 'components/Header/HeaderPrint';
+import PrintOnly from 'components/styled/PrintOnly';
+import PrintHide from 'components/styled/PrintHide';
 
 import appMessages from 'containers/App/messages';
 import { PRINT_TYPES } from 'containers/App/constants';
@@ -76,6 +80,10 @@ import {
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
+
+const PrintSectionTitleWrapper = styled(
+  (p) => <Box margin={{ top: 'large', bottom: 'small' }} pad={{ bottom: 'small' }} border="bottom" {...p} />
+)``;
 export function IndicatorView({
   viewEntity,
   dataReady,
@@ -97,6 +105,7 @@ export function IndicatorView({
   params,
   onSetPrintView,
   isPrintView,
+  printArgs,
 }) {
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
@@ -104,7 +113,7 @@ export function IndicatorView({
 
   const mySetPrintView = () => onSetPrintView({
     printType: PRINT_TYPES.SINGLE,
-    printContentOptions: { tabs: true, types: true },
+    printContentOptions: { tabs: true, types: false },
     printMapOptions: { markers: true },
     printMapMarkers: true,
     printOrientation: 'portrait',
@@ -240,30 +249,54 @@ export function IndicatorView({
                     />
                   </Box>
                   <Box margin={{ vertical: 'large' }}>
-                    <SubjectButtonGroup margin={{ horizontal: 'medium' }}>
-                      <SubjectButton
-                        onClick={() => onSetSubject('statements')}
-                        active={viewSubject === 'statements'}
-                      >
-                        <Text size="large">Statements</Text>
-                      </SubjectButton>
-                      <SubjectButton
-                        onClick={() => onSetSubject('actors')}
-                        active={viewSubject === 'actors'}
-                      >
-                        <Text size="large">Countries & other actors</Text>
-                      </SubjectButton>
-                    </SubjectButtonGroup>
-                    {viewSubject === 'statements' && (
-                      <Statements
-                        viewEntity={viewEntity}
-                      />
+                    <PrintHide>
+                      <SubjectButtonGroup margin={{ horizontal: 'medium' }}>
+                        <SubjectButton
+                          onClick={() => onSetSubject('statements')}
+                          active={viewSubject === 'statements'}
+                        >
+                          <Text size="large">Statements</Text>
+                        </SubjectButton>
+                        <SubjectButton
+                          onClick={() => onSetSubject('actors')}
+                          active={viewSubject === 'actors'}
+                        >
+                          <Text size="large">Countries & other actors</Text>
+                        </SubjectButton>
+                      </SubjectButtonGroup>
+                    </PrintHide>
+                    {(viewSubject === 'statements' || (isPrintView && printArgs && printArgs.printTabs === 'all')) && (
+                      <>
+                        {' '}
+                        {isPrintView
+                        && (
+                          <PrintOnly>
+                            <PrintSectionTitleWrapper>
+                              <Text size="large">Statements</Text>
+                            </PrintSectionTitleWrapper>
+                          </PrintOnly>
+                        )}
+                        <Statements
+                          viewEntity={viewEntity}
+                        />
+                      </>
                     )}
-                    {viewSubject === 'actors' && (
-                      <Actors
-                        viewEntity={viewEntity}
-                        isAdmin={isAdmin}
-                      />
+                    {(viewSubject === 'actors' || (isPrintView && printArgs && printArgs.printTabs === 'all')) && (
+                      <>
+                        {' '}
+                        {isPrintView
+                        && (
+                          <PrintOnly>
+                            <PrintSectionTitleWrapper>
+                              <Text size="large">Countries & other actors</Text>
+                            </PrintSectionTitleWrapper>
+                          </PrintOnly>
+                        )}
+                        <Actors
+                          viewEntity={viewEntity}
+                          isAdmin={isAdmin}
+                        />
+                      </>
                     )}
                   </Box>
                 </Main>
@@ -296,6 +329,7 @@ IndicatorView.propTypes = {
   onSetIncludeActorMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   isPrintView: PropTypes.bool,
+  printArgs: PropTypes.object,
   intl: intlShape,
 };
 
@@ -310,6 +344,7 @@ const mapStateToProps = (state, props) => ({
   includeInofficial: selectIncludeInofficialStatements(state),
   includeActorMembers: selectIncludeActorMembers(state),
   isPrintView: selectIsPrintView(state),
+  printArgs: selectPrintConfig(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
