@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { Box, Text } from 'grommet';
 import { Map } from 'immutable';
 import styled from 'styled-components';
@@ -43,24 +43,23 @@ const StyledPrint = styled.div`
 `;
 // max-width: ${({ listItems }) => 100 / listItems}%;
 
-export function TabActivities(props) {
-  const {
-    viewEntity, // current entity
-    // viewSubject,
-    taxonomies,
-    actionConnections,
-    onSetActiontype,
-    onEntityClick,
-    onCreateOption,
-    viewActiontypeId, // as set in URL
-    actionsByActiontype,
-    actiontypes,
-    isAdmin,
-  } = props;
-
+export function TabActivities({
+  viewEntity, // current entity
+  // viewSubject,
+  taxonomies,
+  actionConnections,
+  onSetActiontype,
+  onEntityClick,
+  onCreateOption,
+  viewActiontypeId, // as set in URL
+  actionsByActiontype,
+  actiontypes,
+  isAdmin,
+  intl,
+}) {
   const actiontypeIds = actiontypes && actiontypes.entrySeq().map(([id]) => id.toString());
   const activeActiontypeActions = actionsByActiontype && actionsByActiontype.get(parseInt(viewActiontypeId, 10));
-
+  const typeLabel = intl.formatMessage(appMessages.entities[`actions_${viewActiontypeId}`].plural);
   return (
     <Box>
       {(!actiontypeIds || actiontypeIds.size === 0) && (
@@ -108,7 +107,7 @@ export function TabActivities(props) {
           </PrintHide>
           <PrintOnly>
             <StyledPrint>
-              <Text size="small" style={{ textDecoration: 'underline' }}>Tab Activity Title</Text>
+              <Text size="small" style={{ textDecoration: 'underline' }}>{typeLabel}</Text>
             </StyledPrint>
           </PrintOnly>
         </>
@@ -162,6 +161,7 @@ TabActivities.propTypes = {
   actiontypes: PropTypes.instanceOf(Map),
   onCreateOption: PropTypes.func,
   isAdmin: PropTypes.bool,
+  intl: intlShape.isRequired,
 };
 
 const mapStateToProps = (state) => ({
@@ -179,4 +179,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(TabActivities);
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(TabActivities));
