@@ -59,7 +59,7 @@ const MAX_VALUE_COUNTRIES = 100;
 
 const reduceCountryData = ({
   features,
-  entities, // actors
+  entities, // actors by type
   countriesVia,
   countriesChildTargets,
   hasDirectCountries,
@@ -68,6 +68,7 @@ const reduceCountryData = ({
 }) => features.reduce(
   (memo, feature) => {
     const countryDirect = hasDirectCountries
+      && entities
       && entities.get(parseInt(ACTORTYPES.COUNTRY, 10)).find(
         (e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code)
       );
@@ -249,7 +250,7 @@ export function ActionMap({
     };
   }
 
-  const countryData = entities && reduceCountryData({
+  const countryData = reduceCountryData({
     features: countriesJSON.features,
     entities, // actors
     countriesVia,
@@ -258,7 +259,7 @@ export function ActionMap({
     mapKeyOptionMap,
     mapSubject,
   });
-  const countryPointData = entities && reduceCountryData({
+  const countryPointData = reduceCountryData({
     features: countryPointsJSON.features,
     entities, // actors
     countriesVia,
@@ -267,7 +268,6 @@ export function ActionMap({
     mapKeyOptionMap,
     mapSubject,
   });
-
   let memberOption;
   let mapTitle;
   if (mapSubject === 'targets') {
