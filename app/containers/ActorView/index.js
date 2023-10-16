@@ -372,6 +372,7 @@ export function ActorView({
                             viewSubject={viewSubject}
                             taxonomies={taxonomies}
                             actionsByActiontype={actionsByActiontype}
+                            printArgs={printArgs}
                           />
                         </>
                       )}

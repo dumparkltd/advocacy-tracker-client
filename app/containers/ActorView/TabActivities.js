@@ -20,17 +20,22 @@ import {
   ACTIONTYPE_TARGETTYPES,
   MEMBERSHIPS,
 } from 'themes/config';
-import ButtonPill from 'components/buttons/ButtonPill';
+
 import {
   setActiontype,
 } from 'containers/App/actions';
+
 import {
   selectActiontypes,
   selectActiontypeQuery,
 } from 'containers/App/selectors';
+
+import { usePrint } from 'containers/App/PrintContext';
+
 import appMessages from 'containers/App/messages';
 import PrintHide from 'components/styled/PrintHide';
 import PrintOnly from 'components/styled/PrintOnly';
+import ButtonPill from 'components/buttons/ButtonPill';
 import TabActivitiesByType from './TabActivitiesByType';
 
 import {
@@ -66,8 +71,10 @@ export function TabActivities(props) {
     actionsViaMembersByActortype,
     actionsAsTargetViaMembersByActortype,
     isAdmin,
+    printArgs,
   } = props;
 
+  const isPrint = usePrint();
   const viewActortypeId = viewEntity.getIn(['attributes', 'actortype_id']).toString();
   // figure out connected action types ##################################################
   const canBeMember = viewActortypeId
@@ -173,7 +180,6 @@ export function TabActivities(props) {
         );
     }
   }
-  const typeLabel = intl.formatMessage(appMessages.entities[`actions_${activeActiontypeId}`].plural);
   return (
     <Box>
       {(!actiontypeIdsForSubjectOptions || actiontypeIdsForSubjectOptions.size === 0) && (
@@ -215,27 +221,41 @@ export function TabActivities(props) {
               )}
             </TypeSelectBox>
           </PrintHide>
-          <PrintOnly>
-            <StyledPrint>
-              <Text size="small" style={{ textDecoration: 'underline' }}>{typeLabel}</Text>
-            </StyledPrint>
-          </PrintOnly>
         </>
       )}
-      <TabActivitiesByType
-        isAdmin={isAdmin}
-        viewEntity={viewEntity}
-        viewSubject={viewSubject}
-        taxonomies={taxonomies}
-        canBeMember={canBeMember}
-        canHaveMembers={canHaveMembers}
-        activeActiontypeId={activeActiontypeId}
-        activeActiontypeActions={activeActiontypeActions}
-        typeLabel={typeLabel}
-        actiontypesAsMemberForSubject={actiontypesAsMemberForSubject}
-        actiontypesViaMembersForSubject={actiontypesViaMembersForSubject}
-        onEntityClick={onEntityClick}
-      />
+      {viewEntity
+        && actiontypes
+        && activeActiontypeId
+        && actiontypeIdsForSubjectOptions
+        && actiontypeIdsForSubjectOptions.size > 0
+        && actiontypeIdsForSubjectOptions.filter(
+          (typeId) => qe(typeId, activeActiontypeId) || (isPrint && printArgs && printArgs.printAllTypes === 'all')
+        ).map((typeId) => {
+          const typeLabel = intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural);
+          return (
+            <div key={typeId}>
+              <PrintOnly>
+                <StyledPrint>
+                  <Text size="small" style={{ textDecoration: 'underline' }}>{typeLabel}</Text>
+                </StyledPrint>
+              </PrintOnly>
+              <TabActivitiesByType
+                isAdmin={isAdmin}
+                viewEntity={viewEntity}
+                viewSubject={viewSubject}
+                taxonomies={taxonomies}
+                canBeMember={canBeMember}
+                canHaveMembers={canHaveMembers}
+                activeActiontypeId={activeActiontypeId}
+                activeActiontypeActions={activeActiontypeActions}
+                typeLabel={typeLabel}
+                actiontypesAsMemberForSubject={actiontypesAsMemberForSubject}
+                actiontypesViaMembersForSubject={actiontypesViaMembersForSubject}
+                onEntityClick={onEntityClick}
+              />
+            </div>
+          );
+        })}
     </Box>
   );
 }
@@ -255,6 +275,7 @@ TabActivities.propTypes = {
   actionsAsTargetAsMemberByActortype: PropTypes.instanceOf(Map),
   actionsViaMembersByActortype: PropTypes.instanceOf(Map),
   actionsAsTargetViaMembersByActortype: PropTypes.instanceOf(Map),
+  printArgs: PropTypes.object,
   intl: intlShape,
 };
 
