@@ -223,19 +223,16 @@ export function EntityListTable({
   let pager;
   const isSortedOrPaged = !!pageNo || !!pageItems || !!cleanSortBy || !!cleanSortOrder;
   if (paginate) {
-    if (pageItems) {
-      if (pageItems === 'all' || (isPrintView && printConfig.printItems === 'all')) {
-        pageSize = sortedEntities.length;
-      } else {
-        pageSize = pageItems
-          ? Math.min(
-            (pageItems && parseInt(pageItems, 10)),
-            PAGE_SIZE_MAX
-          ) : Math.min(PAGE_SIZE, PAGE_SIZE_MAX);
-      }
+    if (pageItems === 'all' || (isPrintView && printConfig && printConfig.printItems === 'all')) {
+      pageSize = sortedEntities.length;
     } else {
-      pageSize = Math.min(PAGE_SIZE, PAGE_SIZE_MAX);
+      pageSize = pageItems
+        ? Math.min(
+          (pageItems && parseInt(pageItems, 10)),
+          PAGE_SIZE_MAX
+        ) : Math.min(PAGE_SIZE, PAGE_SIZE_MAX);
     }
+
     // grouping and paging
     // if grouping required
     if (sortedEntities.length > pageSize) {
