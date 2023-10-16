@@ -33,6 +33,7 @@ import messages from './messages';
 import {
   prepareData,
   getAttributes,
+  getDateSuffix,
   // getTaxonomies,
 } from './utils';
 
@@ -101,6 +102,9 @@ export function EntityListDownload({
   typeNames,
   intl,
 }) {
+  const [csvFilename, setCSVFilename] = useState('csv');
+  const [csvSuffix, setCSVSuffix] = useState(false);
+  const [typeTitle, setTypeTitle] = useState('Entities');
   const [attributes, setAttributes] = useState({});
   const [expandAttributes, setExpandAttributes] = useState(false);
   const [taxonomyColumns, setTaxonomies] = useState({});
@@ -164,6 +168,15 @@ export function EntityListDownload({
     }
   }, []);
 
+  useEffect(() => {
+    if (config.types === 'actiontypes') {
+      const title = intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural);
+      setTypeTitle(title);
+      setCSVFilename(snakeCase(title));
+    }
+  }, []);
+
+  // figure out export options
   const hasAttributes = config.attributes && Object.keys(attributes).length > 0;
   const hasTaxonomies = config.taxonomies && Object.keys(taxonomyColumns).length > 0;
   const hasActors = config.connections && config.connections.actors && Object.keys(actortypes).length > 0;
@@ -171,6 +184,8 @@ export function EntityListDownload({
     && config.connections.indicators
     && INDICATOR_ACTIONTYPES.indexOf(typeId) > -1
     && connections.get('indicators');
+
+  // count active export options
   const activeAttributeCount = hasAttributes && Object.keys(attributes).reduce((counter, attKey) => {
     if (attributes[attKey].active) return counter + 1;
     return counter;
@@ -183,6 +198,8 @@ export function EntityListDownload({
     if (actortypes[actortypeId].active) return counter + 1;
     return counter;
   }, 0);
+
+  // figure out columns
   let csvColumns = [{ id: 'id' }];
   if (hasAttributes) {
     csvColumns = Object.keys(attributes).reduce((memo, attKey) => {
@@ -247,7 +264,7 @@ export function EntityListDownload({
           ...memo,
           {
             id: `indicator_${indicator.get('id')}`,
-            displayName: `topic_${indicator.getIn(['attributes', 'code'])}_supportlevel`,
+            displayName: `position_topic_${indicator.getIn(['attributes', 'code'])}`,
           },
         ], []);
       csvColumns = [
@@ -260,7 +277,7 @@ export function EntityListDownload({
         { id: 'indicator_id', displayName: 'topic_id' },
         { id: 'indicator_code', displayName: 'topic_code' },
         { id: 'indicator_title', displayName: 'topic_title' },
-        { id: 'indicator_supportlevel', displayName: 'topic_supportlevel' },
+        { id: 'indicator_supportlevel', displayName: 'topic_position' },
       ];
     }
   }
@@ -279,7 +296,7 @@ export function EntityListDownload({
     hasIndicators,
     indicatorsAsRows,
   });
-  // console.log('columns', csvColumns)
+  const csvDateSuffix = `_${getDateSuffix()}`;
   return (
     <Content inModal>
       <ContentHeader
@@ -292,255 +309,301 @@ export function EntityListDownload({
       />
       <Main margin={{ bottom: 'large' }}>
         <Box margin={{ bottom: 'large' }} gap="small">
-          <Text size="xlarge">
-            Configure export
+          <Text size="xxlarge">
+            <strong>{`Export ${typeTitle} as CSV`}</strong>
           </Text>
           <Text>
             You can optionally customise your data export below
           </Text>
         </Box>
-        {hasAttributes && (
-          <Group>
-            <OptionGroupToggle
-              label="Attributes"
-              onToggle={() => setExpandAttributes(!expandAttributes)}
-              expanded={expandAttributes}
-              activeCount={activeAttributeCount === Object.keys(attributes).length ? 'all' : `${activeAttributeCount}`}
-            />
-            {expandAttributes && (
-              <Box gap="small" margin={{ vertical: 'medium' }}>
-                <Box gap="small">
-                  <Text size="small">
-                    The resulting CSV file will have one column for each attribute selected
-                  </Text>
-                </Box>
-                <Box margin={{ top: 'medium' }}>
-                  <OptionListHeader
-                    labels={{
-                      attributes: 'Select attributes',
-                      columns: 'Customise column name',
-                    }}
-                  />
-                  <Box gap="xsmall">
-                    {Object.keys(attributes).map((attKey) => (
-                      <Box key={attKey} direction="row" gap="small" align="center" justify="between">
-                        <Box direction="row" gap="small" align="center" justify="start">
-                          <Select>
-                            <StyledInput
-                              id={`check-attribute-${attKey}`}
-                              type="checkbox"
-                              checked={attributes[attKey].exportRequired || attributes[attKey].active}
-                              disabled={attributes[attKey].exportRequired}
+        <Box margin={{ bottom: 'large' }}>
+          {hasAttributes && (
+            <Group>
+              <OptionGroupToggle
+                label="Attributes"
+                onToggle={() => setExpandAttributes(!expandAttributes)}
+                expanded={expandAttributes}
+                activeCount={activeAttributeCount === Object.keys(attributes).length ? 'all' : `${activeAttributeCount}`}
+              />
+              {expandAttributes && (
+                <Box gap="small" margin={{ vertical: 'medium' }}>
+                  <Box gap="small">
+                    <Text size="small">
+                      The resulting CSV file will have one column for each attribute selected
+                    </Text>
+                  </Box>
+                  <Box margin={{ top: 'medium' }}>
+                    <OptionListHeader
+                      labels={{
+                        attributes: 'Select attributes',
+                        columns: 'Customise column name',
+                      }}
+                    />
+                    <Box gap="xsmall">
+                      {Object.keys(attributes).map((attKey) => (
+                        <Box key={attKey} direction="row" gap="small" align="center" justify="between">
+                          <Box direction="row" gap="small" align="center" justify="start">
+                            <Select>
+                              <StyledInput
+                                id={`check-attribute-${attKey}`}
+                                type="checkbox"
+                                checked={attributes[attKey].exportRequired || attributes[attKey].active}
+                                disabled={attributes[attKey].exportRequired}
+                                onChange={(evt) => {
+                                  setAttributes({
+                                    ...attributes,
+                                    [attKey]: {
+                                      ...attributes[attKey],
+                                      active: evt.target.checked,
+                                    },
+                                  });
+                                }}
+                              />
+                            </Select>
+                            <Text as="label" htmlFor={`check-attribute-${attKey}`}>
+                              {`${intl.formatMessage(appMessages.attributes[attKey])}${attributes[attKey].exportRequired ? ' (required)' : ''}`}
+                            </Text>
+                          </Box>
+                          <Box>
+                            <TextInput
+                              minLength={1}
+                              debounceTimeout={500}
+                              value={attributes[attKey].column}
                               onChange={(evt) => {
                                 setAttributes({
                                   ...attributes,
                                   [attKey]: {
                                     ...attributes[attKey],
-                                    active: evt.target.checked,
+                                    column: evt.target.value,
                                   },
                                 });
                               }}
                             />
-                          </Select>
-                          <Text as="label" htmlFor={`check-attribute-${attKey}`}>
-                            {`${intl.formatMessage(appMessages.attributes[attKey])}${attributes[attKey].exportRequired ? ' (required)' : ''}`}
-                          </Text>
+                          </Box>
                         </Box>
-                        <Box>
-                          <TextInput
-                            minLength={1}
-                            debounceTimeout={500}
-                            value={attributes[attKey].column}
-                            onChange={(evt) => {
-                              setAttributes({
-                                ...attributes,
-                                [attKey]: {
-                                  ...attributes[attKey],
-                                  column: evt.target.value,
-                                },
-                              });
-                            }}
-                          />
-                        </Box>
-                      </Box>
-                    ))}
+                      ))}
+                    </Box>
                   </Box>
                 </Box>
-              </Box>
-            )}
-          </Group>
-        )}
-        {hasTaxonomies && (
-          <Group>
-            <OptionGroupToggle
-              label="Categories"
-              onToggle={() => setExpandTaxonomies(!expandTaxonomies)}
-              expanded={expandTaxonomies}
-              activeCount={activeTaxonomyCount === Object.keys(taxonomyColumns).length ? 'all' : `${activeTaxonomyCount}`}
-            />
-            {expandTaxonomies && (
-              <Box gap="small" margin={{ vertical: 'medium' }}>
-                <Box gap="small">
-                  <Text size="small">
-                    The resulting CSV file will have one column for each category group (taxonomy) selected
-                  </Text>
-                </Box>
-                <Box margin={{ top: 'medium' }}>
-                  <OptionListHeader
-                    labels={{
-                      attributes: 'Select category groups',
-                      columns: 'Customise column name',
-                    }}
-                  />
-                  <Box gap="xsmall">
-                    {Object.keys(taxonomyColumns).map((taxId) => (
-                      <Box key={taxId} direction="row" gap="small" align="center" justify="between">
-                        <Box direction="row" gap="small" align="center" justify="start">
-                          <Select>
-                            <StyledInput
-                              id={`check-taxonomy-${taxId}`}
-                              type="checkbox"
-                              checked={taxonomyColumns[taxId].active}
+              )}
+            </Group>
+          )}
+          {hasTaxonomies && (
+            <Group>
+              <OptionGroupToggle
+                label="Categories"
+                onToggle={() => setExpandTaxonomies(!expandTaxonomies)}
+                expanded={expandTaxonomies}
+                activeCount={activeTaxonomyCount === Object.keys(taxonomyColumns).length ? 'all' : `${activeTaxonomyCount}`}
+              />
+              {expandTaxonomies && (
+                <Box gap="small" margin={{ vertical: 'medium' }}>
+                  <Box gap="small">
+                    <Text size="small">
+                      The resulting CSV file will have one column for each category group (taxonomy) selected
+                    </Text>
+                  </Box>
+                  <Box margin={{ top: 'medium' }}>
+                    <OptionListHeader
+                      labels={{
+                        attributes: 'Select category groups',
+                        columns: 'Customise column name',
+                      }}
+                    />
+                    <Box gap="xsmall">
+                      {Object.keys(taxonomyColumns).map((taxId) => (
+                        <Box key={taxId} direction="row" gap="small" align="center" justify="between">
+                          <Box direction="row" gap="small" align="center" justify="start">
+                            <Select>
+                              <StyledInput
+                                id={`check-taxonomy-${taxId}`}
+                                type="checkbox"
+                                checked={taxonomyColumns[taxId].active}
+                                onChange={(evt) => {
+                                  setTaxonomies({
+                                    ...taxonomyColumns,
+                                    [taxId]: {
+                                      ...taxonomyColumns[taxId],
+                                      active: evt.target.checked,
+                                    },
+                                  });
+                                }}
+                              />
+                            </Select>
+                            <Text as="label" htmlFor={`check-taxonomy-${taxId}`}>
+                              {taxonomyColumns[taxId].name}
+                            </Text>
+                          </Box>
+                          <Box>
+                            <TextInput
+                              minLength={1}
+                              debounceTimeout={500}
+                              value={taxonomyColumns[taxId].column}
                               onChange={(evt) => {
                                 setTaxonomies({
                                   ...taxonomyColumns,
                                   [taxId]: {
                                     ...taxonomyColumns[taxId],
-                                    active: evt.target.checked,
+                                    column: evt.target.value,
                                   },
                                 });
                               }}
                             />
-                          </Select>
-                          <Text as="label" htmlFor={`check-taxonomy-${taxId}`}>
-                            {taxonomyColumns[taxId].name}
-                          </Text>
+                          </Box>
                         </Box>
-                        <Box>
-                          <TextInput
-                            minLength={1}
-                            debounceTimeout={500}
-                            value={taxonomyColumns[taxId].column}
-                            onChange={(evt) => {
-                              setTaxonomies({
-                                ...taxonomyColumns,
-                                [taxId]: {
-                                  ...taxonomyColumns[taxId],
-                                  column: evt.target.value,
-                                },
-                              });
-                            }}
-                          />
-                        </Box>
-                      </Box>
-                    ))}
+                      ))}
+                    </Box>
                   </Box>
                 </Box>
-              </Box>
-            )}
-          </Group>
-        )}
-        {hasActors && (
-          <Group>
-            <OptionGroupToggle
-              label="Actors"
-              onToggle={() => setExpandActortypes(!expandActortypes)}
-              expanded={expandActortypes}
-              activeCount={activeActortypeCount === Object.keys(actortypes).length ? 'all' : `${activeActortypeCount}`}
-            />
-            {expandActortypes && (
-              <Box gap="small" margin={{ vertical: 'medium' }}>
-                <Box gap="small">
-                  <Text size="small">
-                    By default, the resulting CSV file will have one column for each type of actor selected. Alternatively you can chose to include actors as rows, resulting in one row per activity and actor
-                  </Text>
-                </Box>
-                <Box margin={{ top: 'medium' }}>
-                  <Box direction="row" gap="small" align="center" justify="start">
-                    <Select>
-                      <StyledInput
-                        id="check-actors-as-rows"
-                        type="checkbox"
-                        checked={actorsAsRows}
-                        onChange={(evt) => setActorsAsRows(evt.target.checked)}
-                      />
-                    </Select>
-                    <Text as="label" htmlFor="check-actors-as-rows">
-                      Include actors as rows (one row for each activity and actor)
+              )}
+            </Group>
+          )}
+          {hasActors && (
+            <Group>
+              <OptionGroupToggle
+                label="Actors"
+                onToggle={() => setExpandActortypes(!expandActortypes)}
+                expanded={expandActortypes}
+                activeCount={activeActortypeCount === Object.keys(actortypes).length ? 'all' : `${activeActortypeCount}`}
+              />
+              {expandActortypes && (
+                <Box gap="small" margin={{ vertical: 'medium' }}>
+                  <div>
+                    <Text size="small">
+                      By default, the resulting CSV file will have one column for each type of actor selected.
                     </Text>
-                  </Box>
-                </Box>
-                <Box margin={{ top: 'medium' }}>
-                  <OptionListHeader
-                    labels={{
-                      attributes: 'Select actor types',
-                    }}
-                  />
-                  <Box gap="xsmall">
-                    {Object.keys(actortypes).map((actortypeId) => (
-                      <Box key={actortypeId} direction="row" gap="small" align="center" justify="between">
-                        <Box direction="row" gap="small" align="center" justify="start">
-                          <Select>
-                            <StyledInput
-                              id={`check-actortype-${actortypeId}`}
-                              type="checkbox"
-                              checked={actortypes[actortypeId].active}
-                              onChange={(evt) => {
-                                setActortypes({
-                                  ...actortypes,
-                                  [actortypeId]: {
-                                    ...actortypes[actortypeId],
-                                    active: evt.target.checked,
-                                  },
-                                });
-                              }}
-                            />
-                          </Select>
-                          <Text as="label" htmlFor={`check-actortype-${actortypeId}`}>
-                            {actortypes[actortypeId].name}
-                          </Text>
-                        </Box>
-                      </Box>
-                    ))}
-                  </Box>
-                </Box>
-              </Box>
-            )}
-          </Group>
-        )}
-        {hasIndicators && (
-          <Group>
-            <OptionGroupToggle
-              label="Topics"
-              onToggle={() => setExpandIndicators(!expandIndicators)}
-              expanded={expandIndicators}
-            />
-            {expandIndicators && (
-              <Box gap="small" margin={{ vertical: 'medium' }}>
-                <Box gap="small">
-                  <Text size="small">
-                    By default, the resulting CSV file will have one column for each topic. Alternatively you can chose to include topics as rows, resulting in one row per activity and topic
-                  </Text>
-                </Box>
-                <Box margin={{ top: 'medium' }}>
-                  <Box direction="row" gap="small" align="center" justify="start">
-                    <Select>
-                      <StyledInput
-                        id="check-indicators-as-rows"
-                        type="checkbox"
-                        checked={indicatorsAsRows}
-                        onChange={(evt) => setIndicatorsAsRows(evt.target.checked)}
-                      />
-                    </Select>
-                    <Text as="label" htmlFor="check-indicators-as-rows">
-                      Include topics as rows (one row for each activity and indicator)
+                    <Text size="small">
+                      {!indicatorsAsRows && ' Alternatively you can chose to include actors as rows, resulting in one row per activity and actor'}
+                      {indicatorsAsRows && ' Alternatively you can chose to include actors as rows, resulting in one row per activity, topic and actor'}
                     </Text>
+                  </div>
+                  <Box margin={{ top: 'medium' }}>
+                    <Box direction="row" gap="small" align="center" justify="start">
+                      <Select>
+                        <StyledInput
+                          id="check-actors-as-rows"
+                          type="checkbox"
+                          checked={actorsAsRows}
+                          onChange={(evt) => setActorsAsRows(evt.target.checked)}
+                        />
+                      </Select>
+                      <Text as="label" htmlFor="check-actors-as-rows">
+                        {!indicatorsAsRows && 'Include actors as rows (one row for each activity and actor)'}
+                        {indicatorsAsRows && 'Include actors as rows (one row for each activity, topic and actor)'}
+                      </Text>
+                    </Box>
+                  </Box>
+                  <Box margin={{ top: 'medium' }}>
+                    <OptionListHeader
+                      labels={{
+                        attributes: 'Select actor types',
+                      }}
+                    />
+                    <Box gap="xsmall">
+                      {Object.keys(actortypes).map((actortypeId) => (
+                        <Box key={actortypeId} direction="row" gap="small" align="center" justify="between">
+                          <Box direction="row" gap="small" align="center" justify="start">
+                            <Select>
+                              <StyledInput
+                                id={`check-actortype-${actortypeId}`}
+                                type="checkbox"
+                                checked={actortypes[actortypeId].active}
+                                onChange={(evt) => {
+                                  setActortypes({
+                                    ...actortypes,
+                                    [actortypeId]: {
+                                      ...actortypes[actortypeId],
+                                      active: evt.target.checked,
+                                    },
+                                  });
+                                }}
+                              />
+                            </Select>
+                            <Text as="label" htmlFor={`check-actortype-${actortypeId}`}>
+                              {actortypes[actortypeId].name}
+                            </Text>
+                          </Box>
+                        </Box>
+                      ))}
+                    </Box>
                   </Box>
                 </Box>
-              </Box>
-            )}
-          </Group>
-        )}
+              )}
+            </Group>
+          )}
+          {hasIndicators && (
+            <Group>
+              <OptionGroupToggle
+                label="Topics"
+                onToggle={() => setExpandIndicators(!expandIndicators)}
+                expanded={expandIndicators}
+              />
+              {expandIndicators && (
+                <Box gap="small" margin={{ vertical: 'medium' }}>
+                  <div>
+                    <Text size="small">
+                      By default, the resulting CSV file will have one column for each topic.
+                    </Text>
+                    <Text size="small">
+                      {!actorsAsRows && ' Alternatively you can chose to include topics as rows, resulting in one row per activity and topic'}
+                      {actorsAsRows && ' Alternatively you can chose to include topics as rows, resulting in one row per activity, actor and topic'}
+                    </Text>
+                  </div>
+                  <Box margin={{ top: 'medium' }}>
+                    <Box direction="row" gap="small" align="center" justify="start">
+                      <Select>
+                        <StyledInput
+                          id="check-indicators-as-rows"
+                          type="checkbox"
+                          checked={indicatorsAsRows}
+                          onChange={(evt) => setIndicatorsAsRows(evt.target.checked)}
+                        />
+                      </Select>
+                      <Text as="label" htmlFor="check-indicators-as-rows">
+                        {!actorsAsRows && 'Include topics as rows (one row for each activity and topic)'}
+                        {actorsAsRows && 'Include topics as rows (one row for each activity, actor and topic)'}
+                      </Text>
+                    </Box>
+                  </Box>
+                </Box>
+              )}
+            </Group>
+          )}
+        </Box>
+        <Box direction="row" gap="medium" align="center" margin={{ top: 'xlarge' }}>
+          <Box direction="row" gap="small" align="center" fill={false}>
+            <Text as="label" htmlFor="input-filename">
+              Enter filename
+            </Text>
+            <Box direction="row" align="center">
+              <TextInput
+                minLength={1}
+                debounceTimeout={500}
+                value={csvFilename}
+                onChange={(evt) => setCSVFilename(evt.target.value)}
+                style={{ maxWidth: '250px', textAlign: 'right' }}
+              />
+              <Text>
+                {`${csvSuffix ? csvDateSuffix : ''}.csv`}
+              </Text>
+            </Box>
+          </Box>
+          <Box direction="row" align="center" fill={false}>
+            <Box direction="row" align="center">
+              <Select>
+                <StyledInput
+                  id="check-timestamp"
+                  type="checkbox"
+                  checked={csvSuffix}
+                  onChange={(evt) => setCSVSuffix(evt.target.checked)}
+                />
+              </Select>
+            </Box>
+            <Text size="small" as="label" htmlFor="check-timestamp">
+              Include timestamp
+            </Text>
+          </Box>
+        </Box>
       </Main>
       <Footer>
         <Box direction="row" justify="end">
@@ -550,9 +613,8 @@ export function EntityListDownload({
           <CsvDownloader
             datas={csvData}
             columns={csvColumns}
-            filename="csv"
+            filename={`${csvFilename}${csvSuffix ? csvDateSuffix : ''}`}
             bom={false}
-            suffix
           >
             <ButtonSubmit
               type="button"
