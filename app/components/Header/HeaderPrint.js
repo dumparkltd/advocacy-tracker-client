@@ -45,8 +45,8 @@ const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
   font-size: ${({ theme }) => theme.sizes.header.print.title};
   line-height: ${({ theme }) => theme.text.small.size};
   font-weight: 500;
-  max-width: 120px;
-  word-break: break-all;
+  max-width: 90px;
+  word-break: break-word;
   padding: 0;
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     font-size: ${({ theme }) => theme.text.large.size};
