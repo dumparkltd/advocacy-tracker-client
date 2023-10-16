@@ -8,11 +8,7 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { intlShape, injectIntl } from 'react-intl';
-import {
-  Box,
-  Accordion,
-  AccordionPanel,
-} from 'grommet';
+import { Box } from 'grommet';
 import { List, Map } from 'immutable';
 // import styled from 'styled-components';
 
@@ -22,7 +18,7 @@ import { getActiontypeColumns } from 'utils/entities';
 
 import { API, ROUTES } from 'themes/config';
 import FieldGroup from 'components/fields/FieldGroup';
-import AccordionHeader from 'components/AccordionHeader';
+import Accordion from 'components/Accordion';
 import A from 'components/styled/A';
 
 import {
@@ -137,160 +133,145 @@ export function TabActivitiesByType(props) {
   return (
     <Box margin={{ bottom: 'xlarge' }}>
       <Accordion
-        activeIndex={actives}
-        onActive={(newActive) => setActive(newActive)}
-        multiple
-        animate={false}
-      >
-        <AccordionPanel
-          header={(
-            <AccordionHeader
-              title={
-                `Direct${
-                  viewSubject === 'actors' ? '' : ' (as target)'
-                }: ${
-                  activeActiontypeActions ? activeActiontypeActions.size : 0
-                } ${
-                  getTypeLabel(activeActiontypeId, activeActiontypeActions ? activeActiontypeActions.size : 0, intl)
-                }`
-              }
-              open={actives.includes(0)}
-            />
-          )}
-        >
-          <Box pad={{ vertical: 'small' }}>
-            <FieldGroup
-              seamless
-              group={{
-                fields: [
-                  getActionConnectionField({
-                    actions: activeActiontypeActions,
-                    taxonomies,
-                    onEntityClick,
-                    connections: actionConnections,
-                    typeid: activeActiontypeId,
-                    columns: getActiontypeColumns({
-                      typeId: activeActiontypeId,
-                      viewSubject,
-                      isAdmin,
-                    }),
-                    onCreateOption: () => onCreateOption({
-                      path: API.ACTIONS,
-                      attributes: {
-                        measuretype_id: activeActiontypeId,
-                      },
-                      invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
-                      autoUser: true,
-                      connect: {
-                        type: viewSubject === 'actors' ? 'actorActions' : 'actionActors',
-                        create: [{
-                          actor_id: viewEntity.get('id'),
-                        }],
-                      },
-                    }),
-                  }),
-                ],
-              }}
-            />
-          </Box>
-        </AccordionPanel>
-        {hasAsMemberPanel && (
-          <AccordionPanel
-            header={(
-              <AccordionHeader
-                title={
-                  `As member${viewSubject === 'actors' ? '' : ' (of target)'}: ${uniqueActionsAsMember.size} ${getTypeLabel(activeActiontypeId, uniqueActionsAsMember.size, intl)}`
-                }
-                open={actives.includes(1)}
-              />
-            )}
-          >
-            {associationsWithActionsViaMemberships && associationsWithActionsViaMemberships.entrySeq().map(
-              ([actorId, actor]) => {
-                const actortypeLabel = lowerCase(intl.formatMessage(appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].singleShort));
-                return (
-                  <Box key={actorId} pad={{ top: 'medium', bottom: 'hair' }}>
-                    <FieldGroup
-                      seamless
-                      group={{
-                        title: `As member of ${actortypeLabel}: "${actor.getIn(['attributes', 'title'])}"`,
-                        fields: [
-                          getActionConnectionField({
-                            actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),
-                            taxonomies,
-                            onEntityClick,
-                            connections: actionConnections,
-                            typeid: activeActiontypeId,
-                            columns: getActiontypeColumns({
-                              typeId: activeActiontypeId,
-                              viewSubject,
-                              isAdmin,
-                            }),
-                          }),
-                        ],
-                      }}
-                    />
-                  </Box>
-                );
-              }
-            )}
-          </AccordionPanel>
-        )}
-        {hasViaMembersPanel && (
-          <AccordionPanel
-            header={(
-              <AccordionHeader
-                title={
-                  `From members${viewSubject === 'actors' ? '' : ' (as targets)'}: ${uniqueActionsViaMembers.size} ${getTypeLabel(activeActiontypeId, uniqueActionsViaMembers.size, intl)}`
-                }
-                open={actives.includes(hasAsMemberPanel ? 2 : 1)}
-              />
-            )}
-          >
-            {membersWithActionsViaMembership && membersWithActionsViaMembership.entrySeq().map(
-              ([actorId, actor]) => {
-                const actortypeLabel = lowerCase(intl.formatMessage(appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].singleShort));
-                return (
-                  <Box key={actorId} pad={{ top: 'medium', bottom: 'hair' }}>
-                    <FieldGroup
-                      seamless
-                      group={{
-                        title: (
-                          <div>
-                            {`From member ${actortypeLabel}: `}
-                            <A
-                              weight={600}
-                              href={getActorLink(actor)}
-                              onClick={getActorOnClick(actor, onEntityClick)}
-                              title={actor.getIn(['attributes', 'title'])}
-                            >
-                              {actor.getIn(['attributes', 'title'])}
-                            </A>
-                          </div>
-                        ),
-                        fields: [
-                          getActionConnectionField({
-                            actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),
-                            taxonomies,
-                            onEntityClick,
-                            connections: actionConnections,
-                            typeid: activeActiontypeId,
-                            columns: getActiontypeColumns({
-                              typeId: activeActiontypeId,
-                              viewSubject,
-                              isAdmin,
-                            }),
-                          }),
-                        ],
-                      }}
-                    />
-                  </Box>
-                );
-              }
-            )}
-          </AccordionPanel>
-        )}
-      </Accordion>
+        activePanels={actives}
+        onActive={(newActives) => setActive(newActives)}
+        options={[
+          {
+            id: 0,
+            titleButton:
+              `Direct${
+                viewSubject === 'actors' ? '' : ' (as target)'
+              }: ${
+                activeActiontypeActions ? activeActiontypeActions.size : 0
+              } ${
+                getTypeLabel(activeActiontypeId, activeActiontypeActions ? activeActiontypeActions.size : 0, intl)
+              }`,
+            content: actives.indexOf(0) > -1 && (
+              <Box pad={{ vertical: 'small' }}>
+                <FieldGroup
+                  seamless
+                  group={{
+                    fields: [
+                      getActionConnectionField({
+                        actions: activeActiontypeActions,
+                        taxonomies,
+                        onEntityClick,
+                        connections: actionConnections,
+                        typeid: activeActiontypeId,
+                        columns: getActiontypeColumns({
+                          typeId: activeActiontypeId,
+                          viewSubject,
+                          isAdmin,
+                        }),
+                        onCreateOption: () => onCreateOption({
+                          path: API.ACTIONS,
+                          attributes: {
+                            measuretype_id: activeActiontypeId,
+                          },
+                          invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
+                          autoUser: true,
+                          connect: {
+                            type: viewSubject === 'actors' ? 'actorActions' : 'actionActors',
+                            create: [{
+                              actor_id: viewEntity.get('id'),
+                            }],
+                          },
+                        }),
+                      }),
+                    ],
+                  }}
+                />
+              </Box>
+            ),
+          },
+          hasAsMemberPanel ? {
+            id: 1,
+            titleButton: `As member${viewSubject === 'actors' ? '' : ' (of target)'}: ${uniqueActionsAsMember.size} ${getTypeLabel(activeActiontypeId, uniqueActionsAsMember.size, intl)}`,
+            content: actives.indexOf(1) > -1 && (
+              <div>
+                {associationsWithActionsViaMemberships && associationsWithActionsViaMemberships.entrySeq().map(
+                  ([actorId, actor]) => {
+                    const actortypeLabel = lowerCase(intl.formatMessage(appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].singleShort));
+                    return (
+                      <Box key={actorId} pad={{ top: 'medium', bottom: 'hair' }}>
+                        <FieldGroup
+                          seamless
+                          group={{
+                            title: `As member of ${actortypeLabel}: "${actor.getIn(['attributes', 'title'])}"`,
+                            fields: [
+                              getActionConnectionField({
+                                actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),
+                                taxonomies,
+                                onEntityClick,
+                                connections: actionConnections,
+                                typeid: activeActiontypeId,
+                                columns: getActiontypeColumns({
+                                  typeId: activeActiontypeId,
+                                  viewSubject,
+                                  isAdmin,
+                                }),
+                              }),
+                            ],
+                          }}
+                        />
+                      </Box>
+                    );
+                  }
+                )}
+              </div>
+            ),
+          } : null,
+          hasViaMembersPanel ? {
+            id: 2,
+            titleButton: `From members${viewSubject === 'actors' ? '' : ' (as targets)'}: ${uniqueActionsViaMembers.size} ${getTypeLabel(activeActiontypeId, uniqueActionsViaMembers.size, intl)}`,
+            content: actives.indexOf(2) > -1 && (
+              <div>
+                {membersWithActionsViaMembership && membersWithActionsViaMembership.entrySeq().map(
+                  ([actorId, actor]) => {
+                    const actortypeLabel = lowerCase(intl.formatMessage(appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].singleShort));
+                    return (
+                      <Box key={actorId} pad={{ top: 'medium', bottom: 'hair' }}>
+                        <FieldGroup
+                          seamless
+                          group={{
+                            title: (
+                              <div>
+                                {`From member ${actortypeLabel}: `}
+                                <A
+                                  weight={600}
+                                  href={getActorLink(actor)}
+                                  onClick={getActorOnClick(actor, onEntityClick)}
+                                  title={actor.getIn(['attributes', 'title'])}
+                                >
+                                  {actor.getIn(['attributes', 'title'])}
+                                </A>
+                              </div>
+                            ),
+                            fields: [
+                              getActionConnectionField({
+                                actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),
+                                taxonomies,
+                                onEntityClick,
+                                connections: actionConnections,
+                                typeid: activeActiontypeId,
+                                columns: getActiontypeColumns({
+                                  typeId: activeActiontypeId,
+                                  viewSubject,
+                                  isAdmin,
+                                }),
+                              }),
+                            ],
+                          }}
+                        />
+                      </Box>
+                    );
+                  }
+                )}
+              </div>
+            ),
+          } : null,
+        ]}
+      />
     </Box>
   );
 }
