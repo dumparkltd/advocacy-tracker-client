@@ -540,29 +540,6 @@ export const ACTION_FIELDS = {
       exportColumn: 'activity_type',
       export: true,
     },
-    draft: {
-      defaultValue: true,
-      required: Object.values(ACTIONTYPES), // all types
-      type: 'bool',
-      // ui: 'dropdown',
-      skipImport: true,
-      // options: [
-      //   { value: true, message: 'ui.publishStatuses.draft' },
-      //   { value: false, message: 'ui.publishStatuses.public' },
-      // ],
-    },
-    private: {
-      defaultValue: false,
-      type: 'bool',
-    },
-    is_archive: {
-      defaultValue: false,
-      type: 'bool',
-    },
-    notifications: {
-      defaultValue: true,
-      type: 'bool',
-    },
     code: {
       optional: Object.values(ACTIONTYPES), // all types
       adminOnly: true,
@@ -601,6 +578,72 @@ export const ACTION_FIELDS = {
     date_comment: {
       optional: Object.values(ACTIONTYPES),
       type: 'text',
+    },
+    draft: {
+      defaultValue: true,
+      required: Object.values(ACTIONTYPES), // all types
+      type: 'bool',
+      // ui: 'dropdown',
+      skipImport: true,
+      // options: [
+      //   { value: true, message: 'ui.publishStatuses.draft' },
+      //   { value: false, message: 'ui.publishStatuses.public' },
+      // ],
+    },
+    private: {
+      defaultValue: false,
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      type: 'bool',
+    },
+    notifications: {
+      defaultValue: true,
+      type: 'bool',
+    },
+    created_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: false,
+      meta: true,
+    },
+    created_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: false,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'created_by',
+    },
+    updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: false,
+      meta: true,
+    },
+    updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: false,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'updated_by',
+    },
+    relationship_updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: false,
+      meta: true,
+      exportColumn: 'connection_updated_at',
+    },
+    relationship_updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: false,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'connection_updated_by',
     },
   },
 };
@@ -990,7 +1033,7 @@ export const ACTIONTYPE_RESOURCETYPES = {
   ],
 };
 
-// related actions
+// related parent actions
 export const ACTIONTYPE_ACTIONTYPES = {
   // top-actions - no sub-actions
   // [ACTIONTYPES.EVENT]: [],

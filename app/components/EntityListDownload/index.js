@@ -21,7 +21,12 @@ import {
 
 import appMessages from 'containers/App/messages';
 import { CONTENT_MODAL } from 'containers/App/constants';
-import { ACTIONTYPE_ACTORTYPES, INDICATOR_ACTIONTYPES } from 'themes/config';
+import {
+  ACTIONTYPE_ACTORTYPES,
+  INDICATOR_ACTIONTYPES,
+  ACTIONTYPE_ACTIONTYPES,
+  ACTIONTYPE_RESOURCETYPES,
+} from 'themes/config';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
 import ButtonForm from 'components/buttons/ButtonForm';
@@ -101,9 +106,11 @@ export function EntityListDownload({
   onClose,
   typeNames,
   intl,
+  isAdmin,
 }) {
+  // console.log('connections', connections && connections.toJS())
   const [csvFilename, setCSVFilename] = useState('csv');
-  const [csvSuffix, setCSVSuffix] = useState(false);
+  const [csvSuffix, setCSVSuffix] = useState(true);
   const [typeTitle, setTypeTitle] = useState('Entities');
   const [attributes, setAttributes] = useState({});
   const [expandAttributes, setExpandAttributes] = useState(false);
@@ -114,16 +121,16 @@ export function EntityListDownload({
   const [actorsAsRows, setActorsAsRows] = useState(false);
   const [indicatorsAsRows, setIndicatorsAsRows] = useState(false);
   const [expandIndicators, setExpandIndicators] = useState(false);
+  const [parenttypes, setParenttypes] = useState({});
+  const [expandParenttypes, setExpandParenttypes] = useState(false);
+  const [resourcetypes, setResourcetypes] = useState({});
+  const [expandResourcetypes, setExpandResourcetypes] = useState(false);
   // const [actiontypes, setActiontypes] = useState({});
   // const [expandActiontypes, setExpandActiontypes] = useState(false);
   // const [actiontypesAsTarget, setActiontypesAsTarget] = useState({});
   // const [expandActiontypesAsTarget, setExpandActiontypesAsTarget] = useState(false);
-  // const [parenttypes, setParenttypes] = useState({});
-  // const [expandParenttypes, setExpandParenttypes] = useState(false);
   // const [childtypes, setChildtypes] = useState({});
   // const [expandChildtypes, setExpandChildtypes] = useState(false);
-  // const [resourcetypes, setResourcetypes] = useState({});
-  // const [expandResourcetypes, setExpandResourcetypes] = useState(false);
   // const [membertypes, setMembertypes] = useState({});
   // const [expandMembertypes, setExpandMembertypes] = useState(false);
   // const [expandUsers, setExpandUsers] = useState(false);
@@ -134,6 +141,7 @@ export function EntityListDownload({
         getAttributes({
           typeId,
           fieldAttributes: fields && fields.ATTRIBUTES,
+          isAdmin,
         })
       );
     }
@@ -166,6 +174,52 @@ export function EntityListDownload({
         }, {})
       );
     }
+    // parents
+    if (config.types === 'actiontypes') {
+      if (
+        config.connections
+        && config.connections.parents
+        && typeNames.actiontypes
+        && ACTIONTYPE_ACTIONTYPES[typeId]
+        && ACTIONTYPE_ACTIONTYPES[typeId].length > 0
+      ) {
+        setParenttypes(
+          ACTIONTYPE_ACTIONTYPES[typeId].reduce((memo, actiontypeId) => {
+            const name = intl.formatMessage(appMessages.entities[`actions_${actiontypeId}`].pluralLong);
+            return {
+              ...memo,
+              [actiontypeId]: {
+                id: actiontypeId,
+                name,
+                active: true,
+                column: `parents_${snakeCase(name)}`,
+              },
+            };
+          }, {})
+        );
+        if (
+          config.connections
+          && config.connections.resources
+          && ACTIONTYPE_RESOURCETYPES[typeId]
+          && ACTIONTYPE_RESOURCETYPES[typeId].length > 0
+        ) {
+          setResourcetypes(
+            ACTIONTYPE_RESOURCETYPES[typeId].reduce((memo, resourcetypeId) => {
+              const name = intl.formatMessage(appMessages.entities[`resources_${resourcetypeId}`].pluralLong);
+              return {
+                ...memo,
+                [resourcetypeId]: {
+                  id: resourcetypeId,
+                  name,
+                  active: true,
+                  column: `resources_${snakeCase(name)}`,
+                },
+              };
+            }, {})
+          );
+        }
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -176,14 +230,30 @@ export function EntityListDownload({
     }
   }, []);
 
+  let relationships = connections;
   // figure out export options
   const hasAttributes = config.attributes && Object.keys(attributes).length > 0;
   const hasTaxonomies = config.taxonomies && Object.keys(taxonomyColumns).length > 0;
-  const hasActors = config.connections && config.connections.actors && Object.keys(actortypes).length > 0;
-  const hasIndicators = config.connections
-    && config.connections.indicators
-    && INDICATOR_ACTIONTYPES.indexOf(typeId) > -1
-    && connections.get('indicators');
+  let hasActors;
+  let hasIndicators;
+  let hasParents;
+  let hasResources;
+  if (config.types === 'actiontypes') {
+    hasActors = config.connections && config.connections.actors && Object.keys(actortypes).length > 0;
+    hasIndicators = config.connections
+      && config.connections.indicators
+      && INDICATOR_ACTIONTYPES.indexOf(typeId) > -1
+      && connections.get('indicators');
+    hasParents = config.connections
+      && config.connections.parents
+      && ACTIONTYPE_ACTIONTYPES[typeId]
+      && ACTIONTYPE_ACTIONTYPES[typeId].length > 0;
+    relationships = relationships.set('parents', relationships.get('measures'));
+    hasResources = config.connections
+      && config.connections.resources
+      && ACTIONTYPE_RESOURCETYPES[typeId]
+      && ACTIONTYPE_RESOURCETYPES[typeId].length > 0;
+  }
 
   // count active export options
   const activeAttributeCount = hasAttributes && Object.keys(attributes).reduce((counter, attKey) => {
@@ -196,6 +266,14 @@ export function EntityListDownload({
   }, 0);
   const activeActortypeCount = hasActors && Object.keys(actortypes).reduce((counter, actortypeId) => {
     if (actortypes[actortypeId].active) return counter + 1;
+    return counter;
+  }, 0);
+  const activeParenttypeCount = hasParents && Object.keys(parenttypes).reduce((counter, parenttypeId) => {
+    if (parenttypes[parenttypeId].active) return counter + 1;
+    return counter;
+  }, 0);
+  const activeResourcetypeCount = hasResources && Object.keys(resourcetypes).reduce((counter, resourcetypeId) => {
+    if (resourcetypes[resourcetypeId].active) return counter + 1;
     return counter;
   }, 0);
 
@@ -256,11 +334,41 @@ export function EntityListDownload({
       ];
     }
   }
+  if (hasParents) {
+    csvColumns = Object.keys(parenttypes).reduce((memo, parenttypeId) => {
+      if (parenttypes[parenttypeId].active) {
+        let displayName = parenttypes[parenttypeId].column;
+        if (!displayName || parenttypes[parenttypeId].column === '') {
+          displayName = parenttypeId;
+        }
+        return [
+          ...memo,
+          { id: `parents_${parenttypeId}`, displayName },
+        ];
+      }
+      return memo;
+    }, csvColumns);
+  }
+  if (hasResources) {
+    csvColumns = Object.keys(resourcetypes).reduce((memo, resourcetypeId) => {
+      if (resourcetypes[resourcetypeId].active) {
+        let displayName = resourcetypes[resourcetypeId].column;
+        if (!displayName || resourcetypes[resourcetypeId].column === '') {
+          displayName = resourcetypeId;
+        }
+        return [
+          ...memo,
+          { id: `resources_${resourcetypeId}`, displayName },
+        ];
+      }
+      return memo;
+    }, csvColumns);
+  }
   if (hasIndicators) {
     if (!indicatorsAsRows) {
-      const indicatorColumns = connections
-        && connections.get('indicators')
-        && connections.get('indicators').reduce((memo, indicator) => [
+      const indicatorColumns = relationships
+        && relationships.get('indicators')
+        && relationships.get('indicators').reduce((memo, indicator) => [
           ...memo,
           {
             id: `indicator_${indicator.get('id')}`,
@@ -281,6 +389,7 @@ export function EntityListDownload({
       ];
     }
   }
+  // console.log('entities', entities && entities.toJS())
   const csvData = entities && prepareData({
     typeId,
     config,
@@ -288,11 +397,15 @@ export function EntityListDownload({
     entities,
     taxonomies,
     taxonomyColumns,
-    connections,
+    relationships,
     typeNames,
     hasActors,
     actorsAsRows,
     actortypes,
+    hasParents,
+    parenttypes,
+    hasResources,
+    resourcetypes,
     hasIndicators,
     indicatorsAsRows,
   });
@@ -531,6 +644,112 @@ export function EntityListDownload({
               )}
             </Group>
           )}
+          {hasParents && (
+            <Group>
+              <OptionGroupToggle
+                label="Parent activities"
+                onToggle={() => setExpandParenttypes(!expandParenttypes)}
+                expanded={expandParenttypes}
+                activeCount={activeParenttypeCount === Object.keys(parenttypes).length ? 'all' : `${activeParenttypeCount}`}
+              />
+              {expandParenttypes && (
+                <Box gap="small" margin={{ vertical: 'medium' }}>
+                  <div>
+                    <Text size="small">
+                      By default, the resulting CSV file will have one column for each type of parent activity selected.
+                    </Text>
+                  </div>
+                  <Box margin={{ top: 'medium' }}>
+                    <OptionListHeader
+                      labels={{
+                        attributes: 'Select parent activity types',
+                      }}
+                    />
+                    <Box gap="xsmall">
+                      {Object.keys(parenttypes).map((parenttypeId) => (
+                        <Box key={parenttypeId} direction="row" gap="small" align="center" justify="between">
+                          <Box direction="row" gap="small" align="center" justify="start">
+                            <Select>
+                              <StyledInput
+                                id={`check-parenttype-${parenttypeId}`}
+                                type="checkbox"
+                                checked={parenttypes[parenttypeId].active}
+                                onChange={(evt) => {
+                                  setParenttypes({
+                                    ...parenttypes,
+                                    [parenttypeId]: {
+                                      ...parenttypes[parenttypeId],
+                                      active: evt.target.checked,
+                                    },
+                                  });
+                                }}
+                              />
+                            </Select>
+                            <Text as="label" htmlFor={`check-parenttype-${parenttypeId}`}>
+                              {parenttypes[parenttypeId].name}
+                            </Text>
+                          </Box>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              )}
+            </Group>
+          )}
+          {hasResources && (
+            <Group>
+              <OptionGroupToggle
+                label="Resources"
+                onToggle={() => setExpandResourcetypes(!expandResourcetypes)}
+                expanded={expandResourcetypes}
+                activeCount={activeResourcetypeCount === Object.keys(resourcetypes).length ? 'all' : `${activeResourcetypeCount}`}
+              />
+              {expandResourcetypes && (
+                <Box gap="small" margin={{ vertical: 'medium' }}>
+                  <div>
+                    <Text size="small">
+                      By default, the resulting CSV file will have one column for each type of resource selected.
+                    </Text>
+                  </div>
+                  <Box margin={{ top: 'medium' }}>
+                    <OptionListHeader
+                      labels={{
+                        attributes: 'Select resource types',
+                      }}
+                    />
+                    <Box gap="xsmall">
+                      {Object.keys(resourcetypes).map((resourcetypeId) => (
+                        <Box key={resourcetypeId} direction="row" gap="small" align="center" justify="between">
+                          <Box direction="row" gap="small" align="center" justify="start">
+                            <Select>
+                              <StyledInput
+                                id={`check-resourcetype-${resourcetypeId}`}
+                                type="checkbox"
+                                checked={resourcetypes[resourcetypeId].active}
+                                onChange={(evt) => {
+                                  setResourcetypes({
+                                    ...resourcetypes,
+                                    [resourcetypeId]: {
+                                      ...resourcetypes[resourcetypeId],
+                                      active: evt.target.checked,
+                                    },
+                                  });
+                                }}
+                              />
+                            </Select>
+                            <Text as="label" htmlFor={`check-resourcetype-${resourcetypeId}`}>
+                              {resourcetypes[resourcetypeId].name}
+                            </Text>
+                          </Box>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              )}
+            </Group>
+          )}
           {hasIndicators && (
             <Group>
               <OptionGroupToggle
@@ -641,6 +860,7 @@ EntityListDownload.propTypes = {
   taxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   onClose: PropTypes.func,
+  isAdmin: PropTypes.bool,
   intl: intlShape,
 };
 

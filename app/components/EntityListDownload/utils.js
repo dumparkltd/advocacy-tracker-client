@@ -2,12 +2,14 @@ import qe from 'utils/quasi-equals';
 export const getAttributes = ({
   typeId,
   fieldAttributes,
+  isAdmin,
 }) => {
   if (fieldAttributes) {
     return Object.keys(fieldAttributes).reduce((memo, attKey) => {
       const attValue = fieldAttributes[attKey];
       if (
         !attValue.skipExport
+        && (!attValue.adminOnly || isAdmin)
         && (
           (attValue.optional && attValue.optional.indexOf(parseInt(typeId, 10)))
           || (attValue.required && attValue.required.indexOf(parseInt(typeId, 10)))
@@ -31,7 +33,7 @@ export const getAttributes = ({
 
 const sanitiseText = (text) => {
   let val = text.trim();
-  if (val.startsWith('-')) {
+  if (val.startsWith('-') || val.startsWith('+')) {
     val = `'${val}`;
   }
   return `"${val
@@ -43,7 +45,7 @@ const sanitiseText = (text) => {
 };
 
 const getValue = ({
-  key, attribute, entity, typeNames,
+  key, attribute, entity, typeNames, relationships,
 }) => {
   const val = entity.getIn(['attributes', key]) || '';
   if (key === 'measuretype_id') {
@@ -62,11 +64,30 @@ const getValue = ({
     }
     return '';
   }
+  if (attribute.type === 'datetime') {
+    if (val && val !== '') {
+      return getDateSuffix(val);
+    }
+    return '';
+  }
   if (
     attribute.type === 'markdown'
     || attribute.type === 'text'
   ) {
     return sanitiseText(val);
+  }
+  if (attribute.type === 'key' && relationships && relationships.get(attribute.table)) {
+    const connectedEntity = relationships.getIn([attribute.table, `${val}`]);
+    if (connectedEntity) {
+      const title = connectedEntity.getIn(['attributes', 'title']) || connectedEntity.getIn(['attributes', 'name']);
+      if (title) {
+        const email = connectedEntity.getIn(['attributes', 'email']);
+        if (email) {
+          return `${title} (${email})`;
+        }
+        return title;
+      }
+    }
   }
   return val;
 };
@@ -90,6 +111,7 @@ const prepAttributeData = ({
   attributes,
   typeNames,
   data,
+  relationships,
 }) => Object.keys(attributes).reduce((memo, attKey) => {
   if (!attributes[attKey].active) {
     return memo;
@@ -99,6 +121,7 @@ const prepAttributeData = ({
     attribute: attributes[attKey],
     entity,
     typeNames,
+    relationships,
   });
   return ({
     ...memo,
@@ -146,7 +169,7 @@ const prepActorData = ({
       if (actor) {
         const title = actor.getIn(['attributes', 'title']);
         const code = actor.getIn(['attributes', 'code']);
-        const actorValue = code !== '' ? `${code}|${title}` : title;
+        const actorValue = (code && code !== '') ? `${code}|${title}` : title;
         return memo2 === ''
           ? actorValue
           : `${memo2}, ${actorValue}`;
@@ -157,6 +180,72 @@ const prepActorData = ({
   return ({
     ...memo,
     [`actors_${actortypeId}`]: `"${actorsValue}"`,
+  });
+}, data);
+const prepParentData = ({
+  entity, // Map
+  parenttypes,
+  parents, // Map
+  data,
+}) => Object.keys(parenttypes).reduce((memo, parenttypeId) => {
+  if (!parenttypes[parenttypeId].active) {
+    return memo;
+  }
+  const entityParentIds = entity.getIn(['parentsByType', parseInt(parenttypeId, 10)]);
+  let parentsValue = '';
+  // console.log(entityActorIds)
+  if (entityParentIds) {
+    parentsValue = entityParentIds.reduce((memo2, parentId) => {
+      // console.log(actorId)
+      const parent = parents && parents.get(parentId.toString());
+      if (parent) {
+        const title = parent.getIn(['attributes', 'title']);
+        const code = parent.getIn(['attributes', 'code']);
+        const parentValue = (code && code !== '') ? `${code}|${title}` : title;
+        return memo2 === ''
+          ? parentValue
+          : `${memo2}, ${parentValue}`;
+      }
+      return memo2;
+    }, '');
+  }
+  return ({
+    ...memo,
+    [`parents_${parenttypeId}`]: `"${parentsValue}"`,
+  });
+}, data);
+const prepResourceData = ({
+  entity, // Map
+  resourcetypes,
+  resources, // Map
+  data,
+}) => Object.keys(resourcetypes).reduce((memo, resourcetypeId) => {
+  if (!resourcetypes[resourcetypeId].active) {
+    return memo;
+  }
+  const entityParentIds = entity.getIn(['resourcesByType', parseInt(resourcetypeId, 10)]);
+  let resourcesValue = '';
+  // console.log(entityActorIds)
+  if (entityParentIds) {
+    resourcesValue = entityParentIds.reduce((memo2, resourceId) => {
+      // console.log(actorId)
+      const resource = resources && resources.get(resourceId.toString());
+      if (resource) {
+        const title = resource.getIn(['attributes', 'title']);
+        const code = resource.getIn(['attributes', 'code']);
+        const url = resource.getIn(['attributes', 'url']);
+        let resourceValue = (code && code !== '') ? `${code}|${title}` : title;
+        resourceValue = (url && url !== '') ? `${resourceValue}(${url})` : title;
+        return memo2 === ''
+          ? resourceValue
+          : `${memo2}, ${resourceValue}`;
+      }
+      return memo2;
+    }, '');
+  }
+  return ({
+    ...memo,
+    [`resources_${resourcetypeId}`]: `"${resourcesValue}"`,
   });
 }, data);
 // const prepIndicatorData = ({
@@ -222,10 +311,6 @@ const prepActorDataAsRows = ({
   data,
   typeNames,
 }) => {
-  // console.log('entity', entity && entity.toJS());
-  // console.log('actortypes', actortypes)
-  // console.log('actors', actors && actors.toJS())
-  // console.log('data', data)
   if (entity.get('actors') && actortypes) {
     const dataRows = Object.keys(actortypes).reduce((memo, actortypeId) => {
       if (!actortypes[actortypeId].active) {
@@ -307,12 +392,16 @@ export const prepareData = ({
   typeNames,
   taxonomies,
   taxonomyColumns,
-  connections,
+  relationships,
   hasActors,
   actorsAsRows,
   actortypes,
   hasIndicators,
   indicatorsAsRows,
+  hasParents,
+  parenttypes,
+  hasResources,
+  resourcetypes,
 }) => entities.reduce((memo, entity) => {
   let data = { id: entity.get('id') };
   // add attribute columns
@@ -322,6 +411,7 @@ export const prepareData = ({
       attributes,
       typeNames,
       data,
+      relationships,
     });
   }
   if (taxonomyColumns) {
@@ -336,14 +426,30 @@ export const prepareData = ({
     data = prepActorData({
       entity,
       actortypes,
-      actors: connections && connections.get('actors'),
+      actors: relationships && relationships.get('actors'),
+      data,
+    });
+  }
+  if (hasParents) {
+    data = prepParentData({
+      entity,
+      parenttypes,
+      parents: relationships && relationships.get('parents'),
+      data,
+    });
+  }
+  if (hasResources) {
+    data = prepResourceData({
+      entity,
+      resourcetypes,
+      resources: relationships && relationships.get('resources'),
       data,
     });
   }
   if (hasIndicators && !indicatorsAsRows) {
     data = prepIndicatorDataColumns({
       entity,
-      indicators: connections && connections.get('indicators'),
+      indicators: relationships && relationships.get('indicators'),
       data,
     });
   }
@@ -352,7 +458,7 @@ export const prepareData = ({
     dataRows = prepActorDataAsRows({
       entity,
       actortypes,
-      actors: connections && connections.get('actors'),
+      actors: relationships && relationships.get('actors'),
       data,
       typeNames,
     });
@@ -360,7 +466,7 @@ export const prepareData = ({
   if (hasIndicators && indicatorsAsRows) {
     dataRows = prepIndicatorDataAsRows({
       entity,
-      indicators: connections && connections.get('indicators'),
+      indicators: relationships && relationships.get('indicators'),
       dataRows,
     });
   }
@@ -368,8 +474,8 @@ export const prepareData = ({
 }, []);
 
 
-export const getDateSuffix = () => {
-  const date = new Date();
+export const getDateSuffix = (datetime) => {
+  const date = datetime ? new Date(datetime) : new Date();
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is zero-based
   const day = String(date.getDate()).padStart(2, '0');
