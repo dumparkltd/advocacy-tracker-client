@@ -267,6 +267,11 @@ export function EntityListDownload({
       setTypeTitle(title);
       setCSVFilename(snakeCase(title));
     }
+    if (config.types === 'actortypes') {
+      const title = intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural);
+      setTypeTitle(title);
+      setCSVFilename(snakeCase(title));
+    }
   }, []);
 
   let relationships = connections;

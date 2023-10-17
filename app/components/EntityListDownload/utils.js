@@ -7,14 +7,27 @@ export const getAttributes = ({
   if (fieldAttributes) {
     return Object.keys(fieldAttributes).reduce((memo, attKey) => {
       const attValue = fieldAttributes[attKey];
+      const optional = typeof attValue.optional === 'boolean'
+        ? attValue.optional
+        : attValue.optional && attValue.optional.indexOf(typeId) > -1;
+      const required = typeof attValue.required === 'boolean'
+        ? attValue.required
+        : attValue.required && attValue.required.indexOf(typeId) > -1;
+      let passAdmin = true;
+      if (
+        !isAdmin
+        && (
+          attValue.adminOnly
+          || (attValue.adminOnlyForTypes && attValue.adminOnlyForTypes.indexOf(typeId) > -1)
+        )
+      ) {
+        passAdmin = false;
+      }
       if (
         !attValue.skipExport
-        && (!attValue.adminOnly || isAdmin)
-        && (
-          (attValue.optional && attValue.optional.indexOf(parseInt(typeId, 10)))
-          || (attValue.required && attValue.required.indexOf(parseInt(typeId, 10)))
-          || (!attValue.optional && !attValue.required)
-        )
+        // TODO: adminOnlyForTypes
+        && passAdmin
+        && (optional || required || (!attValue.optional && !attValue.required))
       ) {
         return {
           ...memo,

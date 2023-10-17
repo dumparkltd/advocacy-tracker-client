@@ -675,27 +675,6 @@ export const ACTOR_FIELDS = {
       table: API.ACTORTYPES,
       skipImport: true,
     },
-    draft: {
-      defaultValue: true,
-      required: true,
-      type: 'bool',
-      skipImport: true,
-      // ui: 'dropdown',
-      // options: [
-      //   { value: true, message: 'ui.publishStatuses.draft' },
-      //   { value: false, message: 'ui.publishStatuses.public' },
-      // ],
-    },
-    private: {
-      defaultValue: false,
-      required: true,
-      type: 'bool',
-    },
-    is_archive: {
-      defaultValue: false,
-      required: true,
-      type: 'bool',
-    },
     code: {
       optional: [
         ACTORTYPES.COUNTRY,
@@ -759,6 +738,70 @@ export const ACTOR_FIELDS = {
     address: {
       optional: [ACTORTYPES.CONTACT],
       type: 'text',
+    },
+    draft: {
+      defaultValue: true,
+      required: true,
+      type: 'bool',
+      skipImport: true,
+      // ui: 'dropdown',
+      // options: [
+      //   { value: true, message: 'ui.publishStatuses.draft' },
+      //   { value: false, message: 'ui.publishStatuses.public' },
+      // ],
+    },
+    private: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    created_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    created_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'created_by',
+    },
+    updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'updated_by',
+    },
+    relationship_updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+      exportColumn: 'connection_updated_at',
+    },
+    relationship_updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'connection_updated_by',
     },
   },
   RELATIONSHIPS_IMPORT: {
