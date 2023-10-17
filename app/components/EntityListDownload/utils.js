@@ -64,6 +64,9 @@ const getValue = ({
   if (key === 'measuretype_id') {
     return typeNames.actiontypes[val] || val;
   }
+  if (key === 'actortype_id') {
+    return typeNames.actortypes[val] || val;
+  }
   if (attribute.type === 'bool') {
     return val || false;
   }
