@@ -182,17 +182,21 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         typeId,
         showCode,
         isSingle: false,
+        isAdmin,
       });
       type = actiontypes.find((at) => qe(at.get('id'), typeId));
       // hasByTarget = type.getIn(['attributes', 'has_target']);
       hasByActor = ACTIONTYPE_ACTORTYPES[typeId] && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
       hasByTarget = ACTIONTYPE_TARGETTYPES[typeId] && ACTIONTYPE_TARGETTYPES[typeId].length > 0;
-      hasByUser = USER_ACTIONTYPES && USER_ACTIONTYPES.indexOf(typeId) > -1;
+      hasByUser = isAdmin && USER_ACTIONTYPES && USER_ACTIONTYPES.indexOf(typeId) > -1;
       // console.log(typeId, type.get('id'), ACTIONTYPE_ACTORTYPES, ACTIONTYPE_ACTORTYPES[typeId], hasByActor, hasByTarget)
       if (!hasByTarget && mapSubject === 'targets') {
         mapSubjectClean = null;
       }
       if (!hasByActor && mapSubject === 'actors') {
+        mapSubjectClean = null;
+      }
+      if (!hasByUser && mapSubject === 'users') {
         mapSubjectClean = null;
       }
       subjectOptions = [
@@ -228,7 +232,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           },
         ];
       }
-      if (hasByUser && isAdmin) {
+      if (hasByUser) {
         subjectOptions = [
           ...subjectOptions,
           {
@@ -354,6 +358,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         showCode,
         includeMain: false,
         isSingle: false,
+        isAdmin,
       });
       columns = [
         {

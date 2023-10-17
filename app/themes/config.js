@@ -1249,6 +1249,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        adminOnly: true,
       },
     ],
   },
@@ -1290,6 +1291,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        adminOnly: true,
       },
     ],
   },
@@ -1329,6 +1331,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        adminOnly: true,
       },
     ],
   },
@@ -1367,6 +1370,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        adminOnly: true,
       },
     ],
   },
@@ -1395,6 +1399,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        adminOnly: true,
       },
     ],
   },
