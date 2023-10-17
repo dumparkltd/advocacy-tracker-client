@@ -178,13 +178,13 @@ export const getMetaField = (entity, includeRelationshipUpdatedAt) => {
 
   // creation
   fields.push({
-    label: appMessages.attributes.meta.created_at,
+    label: appMessages.attributes.created_at,
     value: entity.getIn(['attributes', 'created_at']),
     date: true,
   });
   if (entity.get('creator') && entity.getIn(['creator', 'attributes', 'name'])) {
     fields.push({
-      label: appMessages.attributes.meta.created_by_id,
+      label: appMessages.attributes.created_by_id,
       value: entity.getIn(['creator', 'attributes', 'name']),
     });
   }
@@ -203,28 +203,28 @@ export const getMetaField = (entity, includeRelationshipUpdatedAt) => {
     )
   ) {
     fields.push({
-      label: appMessages.attributes.meta.updated_at,
+      label: appMessages.attributes.updated_at,
       value: entity.getIn(['attributes', 'updated_at']),
       date: true,
       time: true,
     });
     if (entity.get('user') && entity.getIn(['user', 'attributes', 'name'])) {
       fields.push({
-        label: appMessages.attributes.meta.updated_by_id,
+        label: appMessages.attributes.updated_by_id,
         value: entity.getIn(['user', 'attributes', 'name']),
       });
     }
   } else if (includeRelationshipUpdatedAt && hasUpdatedRelationship) {
     // updated connections
     fields.push({
-      label: appMessages.attributes.meta.updated_at,
+      label: appMessages.attributes.updated_at,
       value: entity.getIn(['attributes', 'relationship_updated_at']),
       date: true,
       time: true,
     });
     if (entity.get('userRelationship') && entity.getIn(['userRelationship', 'attributes', 'name'])) {
       fields.push({
-        label: appMessages.attributes.meta.updated_by_id,
+        label: appMessages.attributes.updated_by_id,
         value: entity.getIn(['userRelationship', 'attributes', 'name']),
       });
     }
