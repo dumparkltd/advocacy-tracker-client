@@ -153,6 +153,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       allEntityCount,
       headerInfo,
       listActions,
+      isAdmin,
     } = this.props;
     const { viewType } = this.state;
     let type;
@@ -227,7 +228,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           },
         ];
       }
-      if (hasByUser) {
+      if (hasByUser && isAdmin) {
         subjectOptions = [
           ...subjectOptions,
           {
@@ -820,6 +821,7 @@ EntitiesListView.propTypes = {
   includeTargetChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
   listUpdating: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   headerStyle: PropTypes.string,
   hasFilters: PropTypes.bool,
   typeId: PropTypes.string,
