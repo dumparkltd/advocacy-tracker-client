@@ -605,13 +605,13 @@ export const ACTION_FIELDS = {
     created_at: {
       skipImport: true,
       type: 'datetime',
-      adminOnly: false,
+      adminOnly: true,
       meta: true,
     },
     created_by_id: {
       skipImport: true,
       type: 'key',
-      adminOnly: false,
+      adminOnly: true,
       meta: true,
       table: API.USERS,
       exportColumn: 'created_by',
@@ -619,13 +619,13 @@ export const ACTION_FIELDS = {
     updated_at: {
       skipImport: true,
       type: 'datetime',
-      adminOnly: false,
+      adminOnly: true,
       meta: true,
     },
     updated_by_id: {
       skipImport: true,
       type: 'key',
-      adminOnly: false,
+      adminOnly: true,
       meta: true,
       table: API.USERS,
       exportColumn: 'updated_by',
@@ -633,14 +633,14 @@ export const ACTION_FIELDS = {
     relationship_updated_at: {
       skipImport: true,
       type: 'datetime',
-      adminOnly: false,
+      adminOnly: true,
       meta: true,
       exportColumn: 'connection_updated_at',
     },
     relationship_updated_by_id: {
       skipImport: true,
       type: 'key',
-      adminOnly: false,
+      adminOnly: true,
       meta: true,
       table: API.USERS,
       exportColumn: 'connection_updated_by',
@@ -1036,6 +1036,7 @@ export const ACTIONTYPE_RESOURCETYPES = {
 // related parent actions
 export const ACTIONTYPE_ACTIONTYPES = {
   // top-actions - no sub-actions
+  // child: [...parents],
   // [ACTIONTYPES.EVENT]: [],
   [ACTIONTYPES.EVENT]: [
     ACTIONTYPES.AP,

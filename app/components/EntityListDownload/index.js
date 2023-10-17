@@ -26,6 +26,8 @@ import {
   INDICATOR_ACTIONTYPES,
   ACTIONTYPE_ACTIONTYPES,
   ACTIONTYPE_RESOURCETYPES,
+  ACTIONTYPE_TARGETTYPES,
+  USER_ACTIONTYPES,
 } from 'themes/config';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
@@ -109,31 +111,22 @@ export function EntityListDownload({
   isAdmin,
 }) {
   // console.log('connections', connections && connections.toJS())
+  const [typeTitle, setTypeTitle] = useState('entities');
   const [csvFilename, setCSVFilename] = useState('csv');
   const [csvSuffix, setCSVSuffix] = useState(true);
-  const [typeTitle, setTypeTitle] = useState('Entities');
-  const [attributes, setAttributes] = useState({});
-  const [expandAttributes, setExpandAttributes] = useState(false);
-  const [taxonomyColumns, setTaxonomies] = useState({});
-  const [expandTaxonomies, setExpandTaxonomies] = useState(false);
-  const [actortypes, setActortypes] = useState({});
-  const [expandActortypes, setExpandActortypes] = useState(false);
   const [actorsAsRows, setActorsAsRows] = useState(false);
   const [indicatorsAsRows, setIndicatorsAsRows] = useState(false);
-  const [expandIndicators, setExpandIndicators] = useState(false);
+  const [attributes, setAttributes] = useState({});
+  const [taxonomyColumns, setTaxonomies] = useState({});
+  const [actortypes, setActortypes] = useState({});
+  const [targettypes, setTargettypes] = useState({});
   const [parenttypes, setParenttypes] = useState({});
-  const [expandParenttypes, setExpandParenttypes] = useState(false);
+  const [childtypes, setChildtypes] = useState({});
   const [resourcetypes, setResourcetypes] = useState({});
-  const [expandResourcetypes, setExpandResourcetypes] = useState(false);
+  const [expandGroup, setExpandGroup] = useState([]);
   // const [actiontypes, setActiontypes] = useState({});
-  // const [expandActiontypes, setExpandActiontypes] = useState(false);
   // const [actiontypesAsTarget, setActiontypesAsTarget] = useState({});
-  // const [expandActiontypesAsTarget, setExpandActiontypesAsTarget] = useState(false);
-  // const [childtypes, setChildtypes] = useState({});
-  // const [expandChildtypes, setExpandChildtypes] = useState(false);
   // const [membertypes, setMembertypes] = useState({});
-  // const [expandMembertypes, setExpandMembertypes] = useState(false);
-  // const [expandUsers, setExpandUsers] = useState(false);
   useEffect(() => {
     // set initial config values
     if (config.attributes && fields && typeId) {
@@ -158,24 +151,42 @@ export function EntityListDownload({
         }).toJS()
       );
     }
-    if (config.connections && config.connections.actors && typeNames.actortypes && ACTIONTYPE_ACTORTYPES[typeId]) {
-      setActortypes(
-        ACTIONTYPE_ACTORTYPES[typeId].reduce((memo, actortypeId) => {
-          const name = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].pluralLong);
-          return {
-            ...memo,
-            [actortypeId]: {
-              id: actortypeId,
-              name,
-              active: true,
-              column: `actors_${snakeCase(name)}`,
-            },
-          };
-        }, {})
-      );
-    }
-    // parents
     if (config.types === 'actiontypes') {
+      // actors
+      if (config.connections && config.connections.actors && typeNames.actortypes && ACTIONTYPE_ACTORTYPES[typeId]) {
+        setActortypes(
+          ACTIONTYPE_ACTORTYPES[typeId].reduce((memo, actortypeId) => {
+            const name = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].pluralLong);
+            return {
+              ...memo,
+              [actortypeId]: {
+                id: actortypeId,
+                name,
+                active: true,
+                column: `actors_${snakeCase(name)}`,
+              },
+            };
+          }, {})
+        );
+      }
+      // targets
+      if (config.connections && config.connections.targets && typeNames.actortypes && ACTIONTYPE_TARGETTYPES[typeId]) {
+        setTargettypes(
+          ACTIONTYPE_TARGETTYPES[typeId].reduce((memo, actortypeId) => {
+            const name = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].pluralLong);
+            return {
+              ...memo,
+              [actortypeId]: {
+                id: actortypeId,
+                name,
+                active: true,
+                column: `targets_${snakeCase(name)}`,
+              },
+            };
+          }, {})
+        );
+      }
+      // parents
       if (
         config.connections
         && config.connections.parents
@@ -197,27 +208,55 @@ export function EntityListDownload({
             };
           }, {})
         );
-        if (
-          config.connections
-          && config.connections.resources
-          && ACTIONTYPE_RESOURCETYPES[typeId]
-          && ACTIONTYPE_RESOURCETYPES[typeId].length > 0
-        ) {
-          setResourcetypes(
-            ACTIONTYPE_RESOURCETYPES[typeId].reduce((memo, resourcetypeId) => {
-              const name = intl.formatMessage(appMessages.entities[`resources_${resourcetypeId}`].pluralLong);
+      }
+      // children
+      if (
+        config.connections
+        && config.connections.children
+        && typeNames.actiontypes
+      ) {
+        const childtypeIds = Object.keys(ACTIONTYPE_ACTIONTYPES).filter((childtypeId) => {
+          const parenttypeIds = ACTIONTYPE_ACTIONTYPES[childtypeId];
+          return parenttypeIds.indexOf(typeId) > -1;
+        });
+        if (childtypeIds && childtypeIds.length > 0) {
+          setChildtypes(
+            childtypeIds.reduce((memo, actiontypeId) => {
+              const name = intl.formatMessage(appMessages.entities[`actions_${actiontypeId}`].pluralLong);
               return {
                 ...memo,
-                [resourcetypeId]: {
-                  id: resourcetypeId,
+                [actiontypeId]: {
+                  id: actiontypeId,
                   name,
                   active: true,
-                  column: `resources_${snakeCase(name)}`,
+                  column: `children_${snakeCase(name)}`,
                 },
               };
             }, {})
           );
         }
+      }
+      // resources
+      if (
+        config.connections
+        && config.connections.resources
+        && ACTIONTYPE_RESOURCETYPES[typeId]
+        && ACTIONTYPE_RESOURCETYPES[typeId].length > 0
+      ) {
+        setResourcetypes(
+          ACTIONTYPE_RESOURCETYPES[typeId].reduce((memo, resourcetypeId) => {
+            const name = intl.formatMessage(appMessages.entities[`resources_${resourcetypeId}`].pluralLong);
+            return {
+              ...memo,
+              [resourcetypeId]: {
+                id: resourcetypeId,
+                name,
+                active: true,
+                column: `resources_${snakeCase(name)}`,
+              },
+            };
+          }, {})
+        );
       }
     }
   }, []);
@@ -235,24 +274,51 @@ export function EntityListDownload({
   const hasAttributes = config.attributes && Object.keys(attributes).length > 0;
   const hasTaxonomies = config.taxonomies && Object.keys(taxonomyColumns).length > 0;
   let hasActors;
+  let hasTargets;
   let hasIndicators;
   let hasParents;
+  let hasChildren;
   let hasResources;
+  let hasUsers;
   if (config.types === 'actiontypes') {
-    hasActors = config.connections && config.connections.actors && Object.keys(actortypes).length > 0;
+    hasActors = config.connections
+      && config.connections.actors
+      && Object.keys(actortypes).length > 0;
+
+    hasTargets = config.connections
+      && config.connections.targets
+      && ACTIONTYPE_TARGETTYPES[typeId]
+      && ACTIONTYPE_TARGETTYPES[typeId].length > 0
+      && Object.keys(targettypes).length > 0;
+
     hasIndicators = config.connections
       && config.connections.indicators
       && INDICATOR_ACTIONTYPES.indexOf(typeId) > -1
       && connections.get('indicators');
+
     hasParents = config.connections
       && config.connections.parents
       && ACTIONTYPE_ACTIONTYPES[typeId]
       && ACTIONTYPE_ACTIONTYPES[typeId].length > 0;
     relationships = relationships.set('parents', relationships.get('measures'));
+
+    hasChildren = config.connections
+      && config.connections.children
+      && Object.keys(ACTIONTYPE_ACTIONTYPES).find((childtypeId) => {
+        const parenttypeIds = ACTIONTYPE_ACTIONTYPES[childtypeId];
+        return parenttypeIds.indexOf(typeId) > -1;
+      });
+    relationships = relationships.set('children', relationships.get('measures'));
+
     hasResources = config.connections
       && config.connections.resources
       && ACTIONTYPE_RESOURCETYPES[typeId]
       && ACTIONTYPE_RESOURCETYPES[typeId].length > 0;
+
+    hasUsers = isAdmin
+      && config.connections
+      && config.connections.users
+      && USER_ACTIONTYPES.indexOf(typeId) > -1;
   }
 
   // count active export options
@@ -268,8 +334,16 @@ export function EntityListDownload({
     if (actortypes[actortypeId].active) return counter + 1;
     return counter;
   }, 0);
+  const activeTargettypeCount = hasTargets && Object.keys(targettypes).reduce((counter, actortypeId) => {
+    if (targettypes[actortypeId].active) return counter + 1;
+    return counter;
+  }, 0);
   const activeParenttypeCount = hasParents && Object.keys(parenttypes).reduce((counter, parenttypeId) => {
     if (parenttypes[parenttypeId].active) return counter + 1;
+    return counter;
+  }, 0);
+  const activeChildtypeCount = hasChildren && Object.keys(childtypes).reduce((counter, childtypeId) => {
+    if (childtypes[childtypeId].active) return counter + 1;
     return counter;
   }, 0);
   const activeResourcetypeCount = hasResources && Object.keys(resourcetypes).reduce((counter, resourcetypeId) => {
@@ -334,6 +408,21 @@ export function EntityListDownload({
       ];
     }
   }
+  if (hasTargets) {
+    csvColumns = Object.keys(targettypes).reduce((memo, actortypeId) => {
+      if (targettypes[actortypeId].active) {
+        let displayName = targettypes[actortypeId].column;
+        if (!displayName || targettypes[actortypeId].column === '') {
+          displayName = actortypeId;
+        }
+        return [
+          ...memo,
+          { id: `targets_${actortypeId}`, displayName },
+        ];
+      }
+      return memo;
+    }, csvColumns);
+  }
   if (hasParents) {
     csvColumns = Object.keys(parenttypes).reduce((memo, parenttypeId) => {
       if (parenttypes[parenttypeId].active) {
@@ -344,6 +433,21 @@ export function EntityListDownload({
         return [
           ...memo,
           { id: `parents_${parenttypeId}`, displayName },
+        ];
+      }
+      return memo;
+    }, csvColumns);
+  }
+  if (hasChildren) {
+    csvColumns = Object.keys(childtypes).reduce((memo, childtypeId) => {
+      if (childtypes[childtypeId].active) {
+        let displayName = childtypes[childtypeId].column;
+        if (!displayName || childtypes[childtypeId].column === '') {
+          displayName = childtypeId;
+        }
+        return [
+          ...memo,
+          { id: `children_${childtypeId}`, displayName },
         ];
       }
       return memo;
@@ -363,6 +467,12 @@ export function EntityListDownload({
       }
       return memo;
     }, csvColumns);
+  }
+  if (hasUsers) {
+    csvColumns = [
+      ...csvColumns,
+      { id: 'users', displayName: 'assigned_users' },
+    ];
   }
   if (hasIndicators) {
     if (!indicatorsAsRows) {
@@ -402,12 +512,17 @@ export function EntityListDownload({
     hasActors,
     actorsAsRows,
     actortypes,
+    hasTargets,
+    targettypes,
     hasParents,
     parenttypes,
+    hasChildren,
+    childtypes,
     hasResources,
     resourcetypes,
     hasIndicators,
     indicatorsAsRows,
+    hasUsers,
   });
   const csvDateSuffix = `_${getDateSuffix()}`;
   return (
@@ -434,11 +549,11 @@ export function EntityListDownload({
             <Group>
               <OptionGroupToggle
                 label="Attributes"
-                onToggle={() => setExpandAttributes(!expandAttributes)}
-                expanded={expandAttributes}
+                onToggle={() => setExpandGroup(expandGroup !== 'attributes' ? 'attributes' : null)}
+                expanded={expandGroup === 'attributes'}
                 activeCount={activeAttributeCount === Object.keys(attributes).length ? 'all' : `${activeAttributeCount}`}
               />
-              {expandAttributes && (
+              {expandGroup === 'attributes' && (
                 <Box gap="small" margin={{ vertical: 'medium' }}>
                   <Box gap="small">
                     <Text size="small">
@@ -505,11 +620,11 @@ export function EntityListDownload({
             <Group>
               <OptionGroupToggle
                 label="Categories"
-                onToggle={() => setExpandTaxonomies(!expandTaxonomies)}
-                expanded={expandTaxonomies}
+                onToggle={() => setExpandGroup(expandGroup !== 'taxonomies' ? 'taxonomies' : null)}
+                expanded={expandGroup === 'taxonomies'}
                 activeCount={activeTaxonomyCount === Object.keys(taxonomyColumns).length ? 'all' : `${activeTaxonomyCount}`}
               />
-              {expandTaxonomies && (
+              {expandGroup === 'taxonomies' && (
                 <Box gap="small" margin={{ vertical: 'medium' }}>
                   <Box gap="small">
                     <Text size="small">
@@ -575,11 +690,11 @@ export function EntityListDownload({
             <Group>
               <OptionGroupToggle
                 label="Actors"
-                onToggle={() => setExpandActortypes(!expandActortypes)}
-                expanded={expandActortypes}
+                onToggle={() => setExpandGroup(expandGroup !== 'actors' ? 'actors' : '')}
+                expanded={expandGroup === 'actors'}
                 activeCount={activeActortypeCount === Object.keys(actortypes).length ? 'all' : `${activeActortypeCount}`}
               />
-              {expandActortypes && (
+              {expandGroup === 'actors' && (
                 <Box gap="small" margin={{ vertical: 'medium' }}>
                   <div>
                     <Text size="small">
@@ -644,15 +759,68 @@ export function EntityListDownload({
               )}
             </Group>
           )}
+          {hasTargets && (
+            <Group>
+              <OptionGroupToggle
+                label="Targets"
+                onToggle={() => setExpandGroup(expandGroup !== 'targets' ? 'targets' : '')}
+                expanded={expandGroup === 'targets'}
+                activeCount={activeTargettypeCount === Object.keys(targettypes).length ? 'all' : `${activeTargettypeCount}`}
+              />
+              {expandGroup === 'targets' && (
+                <Box gap="small" margin={{ vertical: 'medium' }}>
+                  <div>
+                    <Text size="small">
+                      By default, the resulting CSV file will have one column for each type of target selected.
+                    </Text>
+                  </div>
+                  <Box margin={{ top: 'medium' }}>
+                    <OptionListHeader
+                      labels={{
+                        attributes: 'Select target types',
+                      }}
+                    />
+                    <Box gap="xsmall">
+                      {Object.keys(targettypes).map((actortypeId) => (
+                        <Box key={actortypeId} direction="row" gap="small" align="center" justify="between">
+                          <Box direction="row" gap="small" align="center" justify="start">
+                            <Select>
+                              <StyledInput
+                                id={`check-targettype-${actortypeId}`}
+                                type="checkbox"
+                                checked={targettypes[actortypeId].active}
+                                onChange={(evt) => {
+                                  setTargettypes({
+                                    ...targettypes,
+                                    [actortypeId]: {
+                                      ...targettypes[actortypeId],
+                                      active: evt.target.checked,
+                                    },
+                                  });
+                                }}
+                              />
+                            </Select>
+                            <Text as="label" htmlFor={`check-targettype-${actortypeId}`}>
+                              {targettypes[actortypeId].name}
+                            </Text>
+                          </Box>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              )}
+            </Group>
+          )}
           {hasParents && (
             <Group>
               <OptionGroupToggle
                 label="Parent activities"
-                onToggle={() => setExpandParenttypes(!expandParenttypes)}
-                expanded={expandParenttypes}
+                onToggle={() => setExpandGroup(expandGroup !== 'parents' ? 'parents' : '')}
+                expanded={expandGroup === 'parents'}
                 activeCount={activeParenttypeCount === Object.keys(parenttypes).length ? 'all' : `${activeParenttypeCount}`}
               />
-              {expandParenttypes && (
+              {expandGroup === 'parents' && (
                 <Box gap="small" margin={{ vertical: 'medium' }}>
                   <div>
                     <Text size="small">
@@ -697,15 +865,68 @@ export function EntityListDownload({
               )}
             </Group>
           )}
+          {hasChildren && (
+            <Group>
+              <OptionGroupToggle
+                label="Child activities"
+                onToggle={() => setExpandGroup(expandGroup !== 'children' ? 'children' : '')}
+                expanded={expandGroup === 'children'}
+                activeCount={activeChildtypeCount === Object.keys(childtypes).length ? 'all' : `${activeChildtypeCount}`}
+              />
+              {expandGroup === 'children' && (
+                <Box gap="small" margin={{ vertical: 'medium' }}>
+                  <div>
+                    <Text size="small">
+                      By default, the resulting CSV file will have one column for each type of child activity selected.
+                    </Text>
+                  </div>
+                  <Box margin={{ top: 'medium' }}>
+                    <OptionListHeader
+                      labels={{
+                        attributes: 'Select child activity types',
+                      }}
+                    />
+                    <Box gap="xsmall">
+                      {Object.keys(childtypes).map((childtypeId) => (
+                        <Box key={childtypes} direction="row" gap="small" align="center" justify="between">
+                          <Box direction="row" gap="small" align="center" justify="start">
+                            <Select>
+                              <StyledInput
+                                id={`check-childtype-${childtypeId}`}
+                                type="checkbox"
+                                checked={childtypes[childtypeId].active}
+                                onChange={(evt) => {
+                                  setChildtypes({
+                                    ...childtypes,
+                                    [childtypeId]: {
+                                      ...childtypes[childtypeId],
+                                      active: evt.target.checked,
+                                    },
+                                  });
+                                }}
+                              />
+                            </Select>
+                            <Text as="label" htmlFor={`check-childtype-${childtypeId}`}>
+                              {childtypes[childtypeId].name}
+                            </Text>
+                          </Box>
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                </Box>
+              )}
+            </Group>
+          )}
           {hasResources && (
             <Group>
               <OptionGroupToggle
                 label="Resources"
-                onToggle={() => setExpandResourcetypes(!expandResourcetypes)}
-                expanded={expandResourcetypes}
+                onToggle={() => setExpandGroup(expandGroup !== 'resources' ? 'resources' : '')}
+                expanded={expandGroup === 'resources'}
                 activeCount={activeResourcetypeCount === Object.keys(resourcetypes).length ? 'all' : `${activeResourcetypeCount}`}
               />
-              {expandResourcetypes && (
+              {expandGroup === 'resources' && (
                 <Box gap="small" margin={{ vertical: 'medium' }}>
                   <div>
                     <Text size="small">
@@ -754,10 +975,10 @@ export function EntityListDownload({
             <Group>
               <OptionGroupToggle
                 label="Topics"
-                onToggle={() => setExpandIndicators(!expandIndicators)}
-                expanded={expandIndicators}
+                onToggle={() => setExpandGroup(expandGroup !== 'indicators' ? 'indicators' : '')}
+                expanded={expandGroup === 'indicators'}
               />
-              {expandIndicators && (
+              {expandGroup === 'indicators' && (
                 <Box gap="small" margin={{ vertical: 'medium' }}>
                   <div>
                     <Text size="small">

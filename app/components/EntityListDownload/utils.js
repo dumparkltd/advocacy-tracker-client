@@ -182,6 +182,39 @@ const prepActorData = ({
     [`actors_${actortypeId}`]: `"${actorsValue}"`,
   });
 }, data);
+const prepTargetData = ({
+  entity,
+  targettypes,
+  targets,
+  data,
+}) => Object.keys(targettypes).reduce((memo, actortypeId) => {
+  if (!targettypes[actortypeId].active) {
+    return memo;
+  }
+  const entityActorIds = entity.getIn(['targetsByType', parseInt(actortypeId, 10)]);
+  let actorsValue = '';
+  // console.log(entityActorIds)
+  if (entityActorIds) {
+    actorsValue = entityActorIds.reduce((memo2, actorId) => {
+      // console.log(actorId)
+      const actor = targets.get(actorId.toString());
+      if (actor) {
+        const title = actor.getIn(['attributes', 'title']);
+        const code = actor.getIn(['attributes', 'code']);
+        const actorValue = (code && code !== '') ? `${code}|${title}` : title;
+        return memo2 === ''
+          ? actorValue
+          : `${memo2}, ${actorValue}`;
+      }
+      return memo2;
+    }, '');
+  }
+  return ({
+    ...memo,
+    [`targets_${actortypeId}`]: `"${actorsValue}"`,
+  });
+}, data);
+
 const prepParentData = ({
   entity, // Map
   parenttypes,
@@ -212,6 +245,38 @@ const prepParentData = ({
   return ({
     ...memo,
     [`parents_${parenttypeId}`]: `"${parentsValue}"`,
+  });
+}, data);
+const prepChildData = ({
+  entity, // Map
+  childtypes,
+  children, // Map
+  data,
+}) => Object.keys(childtypes).reduce((memo, childtypeId) => {
+  if (!childtypes[childtypeId].active) {
+    return memo;
+  }
+  const entityParentIds = entity.getIn(['childrenByType', parseInt(childtypeId, 10)]);
+  let childrenValue = '';
+  // console.log(entityActorIds)
+  if (entityParentIds) {
+    childrenValue = entityParentIds.reduce((memo2, childId) => {
+      // console.log(actorId)
+      const child = children && children.get(childId.toString());
+      if (child) {
+        const title = child.getIn(['attributes', 'title']);
+        const code = child.getIn(['attributes', 'code']);
+        const childValue = (code && code !== '') ? `${code}|${title}` : title;
+        return memo2 === ''
+          ? childValue
+          : `${memo2}, ${childValue}`;
+      }
+      return memo2;
+    }, '');
+  }
+  return ({
+    ...memo,
+    [`children_${childtypeId}`]: `"${childrenValue}"`,
   });
 }, data);
 const prepResourceData = ({
@@ -303,6 +368,35 @@ const prepIndicatorDataColumns = ({
     [`indicator_${indicator.get('id')}`]: value,
   });
 }, data);
+const prepUserData = ({
+  entity, // Map
+  users, // Map
+  data,
+}) => {
+  const entityUsers = entity.get('users');
+  // let actorsValue = '';
+  // // console.log(entityActorIds)
+  if (entityUsers) {
+    const usersValue = entityUsers.reduce((memo, userId) => {
+      // console.log(actorId)
+      const user = users.get(userId.toString());
+      if (user) {
+        const title = user.getIn(['attributes', 'name']);
+        const email = user.getIn(['attributes', 'email']);
+        const indicatorValue = email !== '' ? `${title}(${email})` : title;
+        return memo === ''
+          ? indicatorValue
+          : `${memo}, ${indicatorValue}`;
+      }
+      return memo;
+    }, '');
+    return ({
+      ...data,
+      users: `"${usersValue}"`,
+    });
+  }
+  return data;
+};
 
 const prepActorDataAsRows = ({
   entity, // Map
@@ -396,12 +490,17 @@ export const prepareData = ({
   hasActors,
   actorsAsRows,
   actortypes,
+  hasTargets,
+  targettypes,
   hasIndicators,
   indicatorsAsRows,
   hasParents,
   parenttypes,
+  hasChildren,
+  childtypes,
   hasResources,
   resourcetypes,
+  hasUsers,
 }) => entities.reduce((memo, entity) => {
   let data = { id: entity.get('id') };
   // add attribute columns
@@ -430,6 +529,14 @@ export const prepareData = ({
       data,
     });
   }
+  if (hasTargets) {
+    data = prepTargetData({
+      entity,
+      targettypes,
+      targets: relationships && relationships.get('actors'),
+      data,
+    });
+  }
   if (hasParents) {
     data = prepParentData({
       entity,
@@ -438,11 +545,26 @@ export const prepareData = ({
       data,
     });
   }
+  if (hasChildren) {
+    data = prepChildData({
+      entity,
+      childtypes,
+      children: relationships && relationships.get('children'),
+      data,
+    });
+  }
   if (hasResources) {
     data = prepResourceData({
       entity,
       resourcetypes,
       resources: relationships && relationships.get('resources'),
+      data,
+    });
+  }
+  if (hasUsers) {
+    data = prepUserData({
+      entity,
+      users: relationships && relationships.get('users'),
       data,
     });
   }
