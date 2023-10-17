@@ -15,6 +15,7 @@ import {
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPES_CONFIG,
+  USER_ACTIONTYPES,
   MEMBERSHIPS,
   ACTION_INDICATOR_SUPPORTLEVELS,
   // ACTIONTYPES,
@@ -157,6 +158,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     let type;
     let hasByTarget;
     let hasByActor;
+    let hasByUser;
     let isTarget;
     let isActive;
     let subjectOptions = [];
@@ -184,6 +186,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       // hasByTarget = type.getIn(['attributes', 'has_target']);
       hasByActor = ACTIONTYPE_ACTORTYPES[typeId] && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
       hasByTarget = ACTIONTYPE_TARGETTYPES[typeId] && ACTIONTYPE_TARGETTYPES[typeId].length > 0;
+      hasByUser = USER_ACTIONTYPES && USER_ACTIONTYPES.indexOf(typeId) > -1;
       // console.log(typeId, type.get('id'), ACTIONTYPE_ACTORTYPES, ACTIONTYPE_ACTORTYPES[typeId], hasByActor, hasByTarget)
       if (!hasByTarget && mapSubject === 'targets') {
         mapSubjectClean = null;
@@ -224,16 +227,18 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           },
         ];
       }
-      subjectOptions = [
-        ...subjectOptions,
-        {
-          type: 'secondary',
-          title: 'By user',
-          onClick: () => onSetMapSubject('users'),
-          active: mapSubjectClean === 'users',
-          disabled: mapSubjectClean === 'users',
-        },
-      ];
+      if (hasByUser) {
+        subjectOptions = [
+          ...subjectOptions,
+          {
+            type: 'secondary',
+            title: 'By user',
+            onClick: () => onSetMapSubject('users'),
+            active: mapSubjectClean === 'users',
+            disabled: mapSubjectClean === 'users',
+          },
+        ];
+      }
       if (mapSubjectClean === 'actors' || mapSubjectClean === 'targets') {
         if (mapSubjectClean === 'actors') {
           relatedActortypes = ACTIONTYPE_ACTORTYPES[typeId]
