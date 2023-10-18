@@ -27,7 +27,7 @@ const TextWrap = styled((p) => <Box {...p} />)`
   border-bottom-color: ${({ hasBorder }) => hasBorder ? 'auto' : 'transparent'};
 `;
 
-function MapSubjectOptions({ options, inList }) {
+function MapSubjectOptions({ options, inList, align = 'start' }) {
   const isPrint = usePrint();
   const optionActiveForPrint = isPrint && options
     ? options.find(
@@ -56,7 +56,7 @@ function MapSubjectOptions({ options, inList }) {
       </PrintHide>
       <PrintOnly>
         {optionActiveForPrint && (
-          <Box direction="row" gap="small" justify="end">
+          <Box direction="row" gap="small" justify={align}>
             <TextWrap hasBorder={inList}>
               <TextPrint size={inList ? 'medium' : 'large'}>
                 {optionActiveForPrint.title}
@@ -72,6 +72,7 @@ function MapSubjectOptions({ options, inList }) {
 MapSubjectOptions.propTypes = {
   options: PropTypes.array,
   inList: PropTypes.bool,
+  align: PropTypes.string,
 };
 
 export default MapSubjectOptions;
