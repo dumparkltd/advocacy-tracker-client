@@ -1,8 +1,11 @@
 import qe from 'utils/quasi-equals';
+import appMessages from 'containers/App/messages';
+
 export const getAttributes = ({
   typeId,
   fieldAttributes,
   isAdmin,
+  intl,
 }) => {
   if (fieldAttributes) {
     return Object.keys(fieldAttributes).reduce((memo, attKey) => {
@@ -36,12 +39,14 @@ export const getAttributes = ({
         if (attValue.exportRequired) {
           active = true;
         }
+        const label = `${intl.formatMessage(appMessages.attributes[attKey])}${attValue.exportRequired ? ' (required)' : ''}`;
         return {
           ...memo,
           [attKey]: {
             ...attValue,
             active,
             column: attValue.exportColumn || attKey,
+            label,
           },
         };
       }
@@ -126,7 +131,7 @@ const getTaxonomyValue = ({ taxonomy, categories }) => {
     }
     return memo;
   }, []);
-  return cats.join(',');
+  return `"${cats.join(',')}"`;
 };
 
 const prepAttributeData = ({
