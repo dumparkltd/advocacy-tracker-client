@@ -481,7 +481,7 @@ export function EntitiesMapActions({
   return (
     <Styled headerStyle="types" noOverflow isPrint={isPrintView}>
       {isPrintView && (
-        <HeaderPrint />
+        <HeaderPrint argsRemove={['msubj', 'subj', 'ac', 'tc', 'mtchm', 'mtch', 'actontype']} />
       )}
       <MapContainer
         fullMap

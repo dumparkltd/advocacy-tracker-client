@@ -67,7 +67,7 @@ export function EntityView({ fields, seamless, header }) {
   return (
     <ViewWrapper seamless={seamless}>
       {isPrint && (
-        <HeaderPrint />
+        <HeaderPrint argsKeep={[]} />
       )}
       {header && (
         <ViewHeader {...header} />

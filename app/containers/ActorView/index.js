@@ -250,7 +250,7 @@ export function ActorView({
         {viewEntity && dataReady && (
           <ViewWrapper isPrint={isPrintView}>
             {isPrintView && (
-              <HeaderPrint />
+              <HeaderPrint argsKeep={['am', 'tm', 'subj', 'actiontype', 'inofficial']} />
             )}
             <ViewHeader
               isPrintView={isPrintView}
