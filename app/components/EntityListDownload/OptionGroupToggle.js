@@ -35,7 +35,7 @@ const Count = styled((p) => <Box {...p} />)`
 `;
 
 export function OptionGroupToggle({
-  label, onToggle, expanded, activeCount, intl,
+  label, onToggle, expanded, activeCount, optionCount, intl,
 }) {
   return (
     <Box>
@@ -51,7 +51,7 @@ export function OptionGroupToggle({
           <Box direction="row" align="center" gap="xsmall">
             {typeof activeCount !== 'undefined' && (
               <Count alignContent="center" align="center" justify="center">
-                <Text color="white" size="small">{activeCount}</Text>
+                <Text color="white" size="small">{`${activeCount}/${optionCount}`}</Text>
               </Count>
             )}
             {expanded && (
@@ -71,7 +71,8 @@ OptionGroupToggle.propTypes = {
   label: PropTypes.string.isRequired,
   onToggle: PropTypes.func,
   expanded: PropTypes.bool,
-  activeCount: PropTypes.string,
+  activeCount: PropTypes.number,
+  optionCount: PropTypes.number,
   intl: intlShape,
 };
 

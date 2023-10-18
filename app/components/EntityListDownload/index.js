@@ -98,6 +98,10 @@ const StyledInput = styled.input`
   accent-color: ${({ theme }) => theme.global.colors.highlight};
 `;
 
+const OptionLabel = styled((p) => <Text as="label" {...p} />)`
+  opacity: ${({ disabled }) => disabled ? 0.5 : 1};
+`;
+
 export function EntityListDownload({
   typeId,
   config,
@@ -116,6 +120,8 @@ export function EntityListDownload({
   const [csvSuffix, setCSVSuffix] = useState(true);
   const [actorsAsRows, setActorsAsRows] = useState(false);
   const [indicatorsAsRows, setIndicatorsAsRows] = useState(false);
+  const [indicatorsActive, setIndicatorsActive] = useState(false);
+  const [usersActive, setUsersActive] = useState(false);
   const [attributes, setAttributes] = useState({});
   const [taxonomyColumns, setTaxonomies] = useState({});
   const [actortypes, setActortypes] = useState({});
@@ -145,7 +151,7 @@ export function EntityListDownload({
           return ({
             id: tax.get('id'),
             name,
-            active: true,
+            active: false,
             column: snakeCase(name),
           });
         }).toJS()
@@ -162,7 +168,7 @@ export function EntityListDownload({
               [actortypeId]: {
                 id: actortypeId,
                 name,
-                active: true,
+                active: false,
                 column: `actors_${snakeCase(name)}`,
               },
             };
@@ -179,7 +185,7 @@ export function EntityListDownload({
               [actortypeId]: {
                 id: actortypeId,
                 name,
-                active: true,
+                active: false,
                 column: `targets_${snakeCase(name)}`,
               },
             };
@@ -202,7 +208,7 @@ export function EntityListDownload({
               [actiontypeId]: {
                 id: actiontypeId,
                 name,
-                active: true,
+                active: false,
                 column: `parents_${snakeCase(name)}`,
               },
             };
@@ -228,7 +234,7 @@ export function EntityListDownload({
                 [actiontypeId]: {
                   id: actiontypeId,
                   name,
-                  active: true,
+                  active: false,
                   column: `children_${snakeCase(name)}`,
                 },
               };
@@ -251,13 +257,21 @@ export function EntityListDownload({
               [resourcetypeId]: {
                 id: resourcetypeId,
                 name,
-                active: true,
+                active: false,
                 column: `resources_${snakeCase(name)}`,
               },
             };
           }, {})
         );
       }
+      // //
+      // if (
+      //   config.connections
+      //   && config.connections.
+      //   && INDICATOR_ACTIONTYPES.indexOf(typeId) > -1
+      // ) {
+      //   setIndicators(false);
+      // }
     }
   }, []);
 
@@ -473,23 +487,31 @@ export function EntityListDownload({
       return memo;
     }, csvColumns);
   }
-  if (hasUsers) {
+  if (hasUsers && usersActive) {
     csvColumns = [
       ...csvColumns,
       { id: 'users', displayName: 'assigned_users' },
     ];
   }
-  if (hasIndicators) {
+  if (hasIndicators && indicatorsActive) {
     if (!indicatorsAsRows) {
       const indicatorColumns = relationships
         && relationships.get('indicators')
-        && relationships.get('indicators').reduce((memo, indicator) => [
-          ...memo,
-          {
-            id: `indicator_${indicator.get('id')}`,
-            displayName: `position_topic_${indicator.getIn(['attributes', 'code'])}`,
-          },
-        ], []);
+        && relationships.get('indicators').reduce((memo, indicator) => {
+          let displayName = 'position_topic_';
+          if (indicator.getIn(['attributes', 'code']) && indicator.getIn(['attributes', 'code']).trim() !== '') {
+            displayName += indicator.getIn(['attributes', 'code']);
+          } else {
+            displayName += indicator.get('id');
+          }
+          return [
+            ...memo,
+            {
+              id: `indicator_${indicator.get('id')}`,
+              displayName,
+            },
+          ];
+        }, []);
       csvColumns = [
         ...csvColumns,
         ...indicatorColumns,
@@ -525,9 +547,9 @@ export function EntityListDownload({
     childtypes,
     hasResources,
     resourcetypes,
-    hasIndicators,
+    hasIndicators: hasIndicators && indicatorsActive,
     indicatorsAsRows,
-    hasUsers,
+    hasUsers: hasUsers && usersActive,
   });
   const csvDateSuffix = `_${getDateSuffix()}`;
   return (
@@ -556,7 +578,8 @@ export function EntityListDownload({
                 label="Attributes"
                 onToggle={() => setExpandGroup(expandGroup !== 'attributes' ? 'attributes' : null)}
                 expanded={expandGroup === 'attributes'}
-                activeCount={activeAttributeCount === Object.keys(attributes).length ? 'all' : `${activeAttributeCount}`}
+                activeCount={activeAttributeCount}
+                optionCount={Object.keys(attributes).length}
               />
               {expandGroup === 'attributes' && (
                 <Box gap="small" margin={{ vertical: 'medium' }}>
@@ -593,9 +616,9 @@ export function EntityListDownload({
                                 }}
                               />
                             </Select>
-                            <Text as="label" htmlFor={`check-attribute-${attKey}`}>
+                            <OptionLabel htmlFor={`check-attribute-${attKey}`}>
                               {`${intl.formatMessage(appMessages.attributes[attKey])}${attributes[attKey].exportRequired ? ' (required)' : ''}`}
-                            </Text>
+                            </OptionLabel>
                           </Box>
                           <Box>
                             <TextInput
@@ -627,7 +650,8 @@ export function EntityListDownload({
                 label="Categories"
                 onToggle={() => setExpandGroup(expandGroup !== 'taxonomies' ? 'taxonomies' : null)}
                 expanded={expandGroup === 'taxonomies'}
-                activeCount={activeTaxonomyCount === Object.keys(taxonomyColumns).length ? 'all' : `${activeTaxonomyCount}`}
+                activeCount={activeTaxonomyCount}
+                optionCount={Object.keys(taxonomyColumns).length}
               />
               {expandGroup === 'taxonomies' && (
                 <Box gap="small" margin={{ vertical: 'medium' }}>
@@ -663,9 +687,9 @@ export function EntityListDownload({
                                 }}
                               />
                             </Select>
-                            <Text as="label" htmlFor={`check-taxonomy-${taxId}`}>
+                            <OptionLabel htmlFor={`check-taxonomy-${taxId}`}>
                               {taxonomyColumns[taxId].name}
-                            </Text>
+                            </OptionLabel>
                           </Box>
                           <Box>
                             <TextInput
@@ -697,42 +721,29 @@ export function EntityListDownload({
                 label="Actors"
                 onToggle={() => setExpandGroup(expandGroup !== 'actors' ? 'actors' : '')}
                 expanded={expandGroup === 'actors'}
-                activeCount={activeActortypeCount === Object.keys(actortypes).length ? 'all' : `${activeActortypeCount}`}
+                activeCount={activeActortypeCount}
+                optionCount={Object.keys(actortypes).length}
               />
               {expandGroup === 'actors' && (
-                <Box gap="small" margin={{ vertical: 'medium' }}>
-                  <div>
-                    <Text size="small">
-                      By default, the resulting CSV file will have one column for each type of actor selected.
-                    </Text>
-                    <Text size="small">
-                      {!indicatorsAsRows && ' Alternatively you can chose to include actors as rows, resulting in one row per activity and actor'}
-                      {indicatorsAsRows && ' Alternatively you can chose to include actors as rows, resulting in one row per activity, topic and actor'}
-                    </Text>
-                  </div>
-                  <Box margin={{ top: 'medium' }}>
-                    <Box direction="row" gap="small" align="center" justify="start">
-                      <Select>
-                        <StyledInput
-                          id="check-actors-as-rows"
-                          type="checkbox"
-                          checked={actorsAsRows}
-                          onChange={(evt) => setActorsAsRows(evt.target.checked)}
-                        />
-                      </Select>
-                      <Text as="label" htmlFor="check-actors-as-rows">
-                        {!indicatorsAsRows && 'Include actors as rows (one row for each activity and actor)'}
-                        {indicatorsAsRows && 'Include actors as rows (one row for each activity, topic and actor)'}
+                <Box gap="medium" margin={{ vertical: 'medium' }}>
+                  <Box>
+                    <div>
+                      <Text size="small">
+                        By default, the resulting CSV file will have one column for each type of actor selected.
                       </Text>
-                    </Box>
+                      <Text size="small">
+                        {(!indicatorsAsRows || !indicatorsActive) && ' Alternatively you can chose to include actors as rows, resulting in one row per activity and actor'}
+                        {indicatorsAsRows && indicatorsActive && ' Alternatively you can chose to include actors as rows, resulting in one row per activity, topic and actor'}
+                      </Text>
+                    </div>
                   </Box>
-                  <Box margin={{ top: 'medium' }}>
+                  <Box>
                     <OptionListHeader
                       labels={{
                         attributes: 'Select actor types',
                       }}
                     />
-                    <Box gap="xsmall">
+                    <Box gap="edge">
                       {Object.keys(actortypes).map((actortypeId) => (
                         <Box key={actortypeId} direction="row" gap="small" align="center" justify="between">
                           <Box direction="row" gap="small" align="center" justify="start">
@@ -752,12 +763,43 @@ export function EntityListDownload({
                                 }}
                               />
                             </Select>
-                            <Text as="label" htmlFor={`check-actortype-${actortypeId}`}>
+                            <OptionLabel htmlFor={`check-actortype-${actortypeId}`}>
                               {actortypes[actortypeId].name}
-                            </Text>
+                            </OptionLabel>
                           </Box>
                         </Box>
                       ))}
+                    </Box>
+                  </Box>
+                  <Box gap="edge">
+                    <Box direction="row" gap="small" align="center" justify="start">
+                      <Select>
+                        <StyledInput
+                          id="check-actors-as-columns"
+                          type="radio"
+                          checked={!actorsAsRows}
+                          onChange={(evt) => setActorsAsRows(!evt.target.checked)}
+                          disabled={activeActortypeCount === 0}
+                        />
+                      </Select>
+                      <OptionLabel htmlFor="check-actors-as-columns" disabled={activeActortypeCount === 0}>
+                        Include actors as columns (one column for each actor type)
+                      </OptionLabel>
+                    </Box>
+                    <Box direction="row" gap="small" align="center" justify="start">
+                      <Select>
+                        <StyledInput
+                          id="check-actors-as-rows"
+                          type="radio"
+                          checked={actorsAsRows}
+                          onChange={(evt) => setActorsAsRows(evt.target.checked)}
+                          disabled={activeActortypeCount === 0}
+                        />
+                      </Select>
+                      <OptionLabel htmlFor="check-actors-as-rows" disabled={activeActortypeCount === 0}>
+                        {!indicatorsAsRows && 'Include actors as rows (one row for each activity and actor)'}
+                        {indicatorsAsRows && 'Include actors as rows (one row for each activity, topic and actor)'}
+                      </OptionLabel>
                     </Box>
                   </Box>
                 </Box>
@@ -770,7 +812,8 @@ export function EntityListDownload({
                 label="Targets"
                 onToggle={() => setExpandGroup(expandGroup !== 'targets' ? 'targets' : '')}
                 expanded={expandGroup === 'targets'}
-                activeCount={activeTargettypeCount === Object.keys(targettypes).length ? 'all' : `${activeTargettypeCount}`}
+                activeCount={activeTargettypeCount}
+                optionCount={Object.keys(targettypes).length}
               />
               {expandGroup === 'targets' && (
                 <Box gap="small" margin={{ vertical: 'medium' }}>
@@ -805,9 +848,9 @@ export function EntityListDownload({
                                 }}
                               />
                             </Select>
-                            <Text as="label" htmlFor={`check-targettype-${actortypeId}`}>
+                            <OptionLabel htmlFor={`check-targettype-${actortypeId}`}>
                               {targettypes[actortypeId].name}
-                            </Text>
+                            </OptionLabel>
                           </Box>
                         </Box>
                       ))}
@@ -823,7 +866,8 @@ export function EntityListDownload({
                 label="Parent activities"
                 onToggle={() => setExpandGroup(expandGroup !== 'parents' ? 'parents' : '')}
                 expanded={expandGroup === 'parents'}
-                activeCount={activeParenttypeCount === Object.keys(parenttypes).length ? 'all' : `${activeParenttypeCount}`}
+                activeCount={activeParenttypeCount}
+                optionCount={Object.keys(parenttypes).length}
               />
               {expandGroup === 'parents' && (
                 <Box gap="small" margin={{ vertical: 'medium' }}>
@@ -858,9 +902,9 @@ export function EntityListDownload({
                                 }}
                               />
                             </Select>
-                            <Text as="label" htmlFor={`check-parenttype-${parenttypeId}`}>
+                            <OptionLabel htmlFor={`check-parenttype-${parenttypeId}`}>
                               {parenttypes[parenttypeId].name}
-                            </Text>
+                            </OptionLabel>
                           </Box>
                         </Box>
                       ))}
@@ -876,7 +920,8 @@ export function EntityListDownload({
                 label="Child activities"
                 onToggle={() => setExpandGroup(expandGroup !== 'children' ? 'children' : '')}
                 expanded={expandGroup === 'children'}
-                activeCount={activeChildtypeCount === Object.keys(childtypes).length ? 'all' : `${activeChildtypeCount}`}
+                activeCount={activeChildtypeCount}
+                optionCount={Object.keys(childtypes).length}
               />
               {expandGroup === 'children' && (
                 <Box gap="small" margin={{ vertical: 'medium' }}>
@@ -911,9 +956,9 @@ export function EntityListDownload({
                                 }}
                               />
                             </Select>
-                            <Text as="label" htmlFor={`check-childtype-${childtypeId}`}>
+                            <OptionLabel htmlFor={`check-childtype-${childtypeId}`}>
                               {childtypes[childtypeId].name}
-                            </Text>
+                            </OptionLabel>
                           </Box>
                         </Box>
                       ))}
@@ -929,7 +974,8 @@ export function EntityListDownload({
                 label="Resources"
                 onToggle={() => setExpandGroup(expandGroup !== 'resources' ? 'resources' : '')}
                 expanded={expandGroup === 'resources'}
-                activeCount={activeResourcetypeCount === Object.keys(resourcetypes).length ? 'all' : `${activeResourcetypeCount}`}
+                activeCount={activeResourcetypeCount}
+                optionCount={Object.keys(resourcetypes).length}
               />
               {expandGroup === 'resources' && (
                 <Box gap="small" margin={{ vertical: 'medium' }}>
@@ -964,9 +1010,9 @@ export function EntityListDownload({
                                 }}
                               />
                             </Select>
-                            <Text as="label" htmlFor={`check-resourcetype-${resourcetypeId}`}>
+                            <OptionLabel htmlFor={`check-resourcetype-${resourcetypeId}`}>
                               {resourcetypes[resourcetypeId].name}
-                            </Text>
+                            </OptionLabel>
                           </Box>
                         </Box>
                       ))}
@@ -982,33 +1028,91 @@ export function EntityListDownload({
                 label="Topics"
                 onToggle={() => setExpandGroup(expandGroup !== 'indicators' ? 'indicators' : '')}
                 expanded={expandGroup === 'indicators'}
+                activeCount={indicatorsActive ? 1 : 0}
+                optionCount={1}
               />
               {expandGroup === 'indicators' && (
-                <Box gap="small" margin={{ vertical: 'medium' }}>
-                  <div>
-                    <Text size="small">
-                      By default, the resulting CSV file will have one column for each topic.
-                    </Text>
-                    <Text size="small">
-                      {!actorsAsRows && ' Alternatively you can chose to include topics as rows, resulting in one row per activity and topic'}
-                      {actorsAsRows && ' Alternatively you can chose to include topics as rows, resulting in one row per activity, actor and topic'}
-                    </Text>
-                  </div>
-                  <Box margin={{ top: 'medium' }}>
+                <Box gap="medium" margin={{ vertical: 'medium' }}>
+                  <Box>
+                    <div>
+                      <Text size="small">
+                        By default, the resulting CSV file will have one column for each topic.
+                      </Text>
+                      <Text size="small">
+                        {!actorsAsRows && ' Alternatively you can chose to include topics as rows, resulting in one row per activity and topic'}
+                        {actorsAsRows && ' Alternatively you can chose to include topics as rows, resulting in one row per activity, actor and topic'}
+                      </Text>
+                    </div>
+                  </Box>
+                  <Box gap="small">
                     <Box direction="row" gap="small" align="center" justify="start">
                       <Select>
                         <StyledInput
-                          id="check-indicators-as-rows"
+                          id="check-indicators"
                           type="checkbox"
-                          checked={indicatorsAsRows}
-                          onChange={(evt) => setIndicatorsAsRows(evt.target.checked)}
+                          checked={indicatorsActive}
+                          onChange={(evt) => setIndicatorsActive(evt.target.checked)}
                         />
                       </Select>
-                      <Text as="label" htmlFor="check-indicators-as-rows">
-                        {!actorsAsRows && 'Include topics as rows (one row for each activity and topic)'}
-                        {actorsAsRows && 'Include topics as rows (one row for each activity, actor and topic)'}
-                      </Text>
+                      <OptionLabel htmlFor="check-indicators">Include topics</OptionLabel>
                     </Box>
+                    <Box gap="edge">
+                      <Box direction="row" gap="small" align="center" justify="start">
+                        <Select>
+                          <StyledInput
+                            id="check-indicators-as-columns"
+                            type="radio"
+                            checked={!indicatorsAsRows}
+                            onChange={(evt) => setIndicatorsAsRows(!evt.target.checked)}
+                            disabled={!indicatorsActive}
+                          />
+                        </Select>
+                        <OptionLabel disabled={!indicatorsActive} htmlFor="check-indicators-as-columns">
+                          Include topics as columns (one column for each topic)
+                        </OptionLabel>
+                      </Box>
+                      <Box direction="row" gap="small" align="center" justify="start">
+                        <Select>
+                          <StyledInput
+                            id="check-indicators-as-rows"
+                            type="radio"
+                            checked={indicatorsAsRows}
+                            onChange={(evt) => setIndicatorsAsRows(evt.target.checked)}
+                            disabled={!indicatorsActive}
+                          />
+                        </Select>
+                        <OptionLabel disabled={!indicatorsActive} htmlFor="check-indicators-as-rows">
+                          {!actorsAsRows && 'Include topics as rows (one row for each activity and topic)'}
+                          {actorsAsRows && 'Include topics as rows (one row for each activity, actor and topic)'}
+                        </OptionLabel>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+              )}
+            </Group>
+          )}
+          {hasUsers && (
+            <Group>
+              <OptionGroupToggle
+                label="Users"
+                onToggle={() => setExpandGroup(expandGroup !== 'users' ? 'users' : '')}
+                expanded={expandGroup === 'users'}
+                activeCount={usersActive ? 1 : 0}
+                optionCount={1}
+              />
+              {expandGroup === 'users' && (
+                <Box gap="medium" margin={{ vertical: 'medium' }}>
+                  <Box direction="row" gap="small" align="center" justify="start">
+                    <Select>
+                      <StyledInput
+                        id="check-users"
+                        type="checkbox"
+                        checked={usersActive}
+                        onChange={(evt) => setUsersActive(evt.target.checked)}
+                      />
+                    </Select>
+                    <OptionLabel htmlFor="check-users">Include users</OptionLabel>
                   </Box>
                 </Box>
               )}
@@ -1017,9 +1121,9 @@ export function EntityListDownload({
         </Box>
         <Box direction="row" gap="medium" align="center" margin={{ top: 'xlarge' }}>
           <Box direction="row" gap="small" align="center" fill={false}>
-            <Text as="label" htmlFor="input-filename">
+            <OptionLabel htmlFor="input-filename">
               Enter filename
-            </Text>
+            </OptionLabel>
             <Box direction="row" align="center">
               <TextInput
                 minLength={1}

@@ -29,11 +29,18 @@ export const getAttributes = ({
         && passAdmin
         && (optional || required || (!attValue.optional && !attValue.required))
       ) {
+        let active = false;
+        if (attValue.exportDefault) {
+          active = attValue.exportDefault;
+        }
+        if (attValue.exportRequired) {
+          active = true;
+        }
         return {
           ...memo,
           [attKey]: {
             ...attValue,
-            active: typeof attValue.export === 'undefined' || !!attValue.export || !!attValue.exportRequired,
+            active,
             column: attValue.exportColumn || attKey,
           },
         };
