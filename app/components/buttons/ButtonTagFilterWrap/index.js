@@ -4,8 +4,10 @@ import { Box, Text } from 'grommet';
 import { FormClose } from 'grommet-icons';
 
 import Dot from 'components/styled/Dot';
-
+import PrintHide from 'components/styled/PrintHide';
+import { usePrint } from 'containers/App/PrintContext';
 import ButtonTagFilterInverse from '../ButtonTagFilterInverse';
+
 
 function ButtonTagFilterWrap({
   filter,
@@ -15,6 +17,7 @@ function ButtonTagFilterWrap({
   showConnectedAttributes = true,
   // level = 1,
 }) {
+  const isPrintView = usePrint();
   if (!filter) return null;
   let title = labelLong || label;
   const hasOnClick = onClick || filter.onClick;
@@ -29,6 +32,7 @@ function ButtonTagFilterWrap({
   }
   return (
     <ButtonTagFilterInverse
+      isPrint={isPrintView}
       onClick={onClick || filter.onClick}
       disabled={!hasOnClick}
       title={title}
@@ -38,7 +42,7 @@ function ButtonTagFilterWrap({
           <Dot color={filter.dot} />
         )}
         <Text size="small">
-          { label }
+          {label}
         </Text>
         {showConnectedAttributes && filter.connectedAttributes && (
           <Box direction="row" gap="hair" align="center">
@@ -50,7 +54,9 @@ function ButtonTagFilterWrap({
           </Box>
         )}
         {hasOnClick && (
-          <FormClose size="xsmall" color="inherit" />
+          <PrintHide>
+            <FormClose size="xsmall" color="inherit" />
+          </PrintHide>
         )}
       </Box>
     </ButtonTagFilterInverse>

@@ -15,6 +15,9 @@ import { FormClose, FormDown, FormUp } from 'grommet-icons';
 import Button from 'components/buttons/Button';
 import ButtonTagFilterWrap from 'components/buttons//ButtonTagFilterWrap';
 import ButtonTagFilterInverse from 'components/buttons/ButtonTagFilterInverse';
+import PrintHide from 'components/styled/PrintHide';
+
+import { usePrint } from 'containers/App/PrintContext';
 
 import { getFilterLabel } from './utils';
 
@@ -38,6 +41,7 @@ function GroupFilters({
   hasMultiple,
   intl,
 }) {
+  const isPrintView = usePrint();
   const dropdown = useRef();
   const [showMultiple, setShowMultiple] = useState(false);
   return (
@@ -55,9 +59,11 @@ function GroupFilters({
               && lastGroup
               && groupFilters.length === (j + 1)
               && (
-                <Box>
-                  <Clear onClick={onClear}><FormClose size="small" /></Clear>
-                </Box>
+                <PrintHide>
+                  <Box>
+                    <Clear onClick={onClear}><FormClose size="small" /></Clear>
+                  </Box>
+                </PrintHide>
               )
             }
           </Box>
@@ -72,6 +78,7 @@ function GroupFilters({
           ref={dropdown}
         >
           <ButtonTagFilterInverse
+            isPrint={isPrintView}
             onClick={() => setShowMultiple(!showMultiple)}
             title={`${groupFilters.length} filters`}
           >
@@ -79,16 +86,20 @@ function GroupFilters({
               <Text size="small" style={{ fontStyle: 'italic' }}>
                 {`${groupFilters.length} filters`}
               </Text>
-              {showMultiple && <FormUp size="xsmall" color="inherit" />}
-              {!showMultiple && <FormDown size="xsmall" color="inherit" />}
+              <PrintHide>
+                {showMultiple && <FormUp size="xsmall" color="inherit" />}
+                {!showMultiple && <FormDown size="xsmall" color="inherit" />}
+              </PrintHide>
             </Box>
           </ButtonTagFilterInverse>
           {hasMultiple
             && lastGroup
             && (
-              <Box>
-                <Clear onClick={onClear}><FormClose size="small" /></Clear>
-              </Box>
+              <PrintHide>
+                <Box>
+                  <Clear onClick={onClear}><FormClose size="small" /></Clear>
+                </Box>
+              </PrintHide>
             )
           }
           {showMultiple && dropdown && dropdown.current && (

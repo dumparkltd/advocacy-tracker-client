@@ -4,33 +4,31 @@ import { palette } from 'styled-theme';
 import ButtonTagFilter from '../ButtonTagFilter';
 
 const ButtonTagFilterInverse = styled(ButtonTagFilter)`
-  color: ${({ theme }) => theme.global.colors.text.light};
   stroke: ${({ theme }) => theme.global.colors.text.light};
+  color: ${({ theme, isPrint }) => isPrint ? theme.global.colors.text.brand : theme.global.colors.text.light};
   fill: ${({ theme }) => theme.global.colors.text.light};
+  background-color: ${({ isPrint, theme }) => isPrint ? 'white' : theme.global.colors.light};
+  border-radius: 3px;
+  border: ${({ isPrint, theme }) => isPrint ? `1px solid ${theme.global.colors.text.brand}` : 'none'};
+  font-size:${({ isPrint }) => isPrint ? '9pt' : '0.85em'};
   background-color: ${({ theme }) => theme.global.colors.white};
-  padding: 2px 6px;
+  padding:${({ isPrint }) => isPrint ? ' 1px 4px' : '2px 6px'};
+  white-space: nowrap; 
   &:hover {
     color: ${({ theme }) => theme.global.colors.highlight};
     stroke: ${({ theme }) => theme.global.colors.highlight};
     fill: ${({ theme }) => theme.global.colors.highlight};
     background-color: ${({ theme }) => theme.global.colors.white};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: 3px 6px;
-    font-size: 0.85em;
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    padding:${({ isPrint }) => isPrint ? ' 1px 4px' : '3px 6px'};
+    font-size:${({ isPrint }) => isPrint ? '9pt' : '0.85em'};
   }
   @media print {
-    color: ${palette('text', 1)};
-    background: transparent;
-    border-radius: 3px;
-    border-right: 1px solid;
-    border-top: 1px solid;
-    border-bottom: 1px solid;
-    border-left: 7px solid;
-    border-color: ${({ theme }) => theme.global.colors.text.brand};
-    padding: 0 4px;
-    font-size: ${(props) => props.theme.sizes.print.smallest};
-    line-height: 10pt;
+    &:hover {
+      color: ${palette('text', 1)};
+      background: transparent;
+    }
   }
 `;
 
