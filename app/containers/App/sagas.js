@@ -897,10 +897,10 @@ const getNextQuery = (query, extend, location) => {
       // if single value set
       // add if not already present and convert to array
       }
-      // if (extend && param.remove && (!param.value || (param.value && queryUpdated[param.arg] === param.value.toString()))) {
-      //   console.log('remove')
-      //   delete queryUpdated[param.arg];
-      // }
+      // remove param from query
+      if (extend && param.remove && (!param.value || (param.value && queryUpdated[param.arg] === param.value.toString()))) {
+        delete queryUpdated[param.arg];
+      }
     // if set and removing
     } else if (queryUpdated[param.arg] && param.value && param.replace) {
       // only replace the previous value if defined
