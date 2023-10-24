@@ -330,31 +330,28 @@ export function* validateTokenSaga() {
 
 export function* authenticateErrorSaga() {
   const location = yield select(selectLocation);
-  const redirectOnAuthSuccess = location.get('pathname');
-  const redirectOnAuthSuccessSearch = location.get('search');
+  const redirectOnAuthSuccess = location.getIn(['query', 'redirectOnAuthSuccess']);
+  const redirectOnAuthSuccessSearch = location.getIn(['query', 'redirectOnAuthSuccessSearch']);
   yield call(clearAuthValues);
   yield put(invalidateEntities());
-  // forward to home
-  yield put(updatePath(
-    ROUTES.LOGIN,
-    {
-      replace: true,
-      query: [
-        {
-          arg: 'info',
-          value: PARAMS.VALIDATE_TOKEN_FAILED,
-        },
-        {
-          arg: 'redirectOnAuthSuccess',
-          value: redirectOnAuthSuccess,
-        },
-        {
-          arg: 'redirectOnAuthSuccessSearch',
-          value: redirectOnAuthSuccessSearch,
-        },
-      ],
-    },
-  ));
+  if (redirectOnAuthSuccess || redirectOnAuthSuccessSearch) {
+    yield put(updatePath(
+      ROUTES.LOGIN,
+      {
+        replace: true,
+        query: [
+          {
+            arg: 'redirectOnAuthSuccess',
+            value: redirectOnAuthSuccess,
+          },
+          {
+            arg: 'redirectOnAuthSuccessSearch',
+            value: redirectOnAuthSuccessSearch,
+          },
+        ],
+      },
+    ));
+  }
 }
 
 function stampPayload(payload, type) {
