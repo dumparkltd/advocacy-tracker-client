@@ -62,33 +62,37 @@ export class UserLogin extends React.PureComponent { // eslint-disable-line reac
           <ContentHeader
             title={intl.formatMessage(messages.pageTitle)}
           />
-          {this.props.queryMessages.info
-            && (
-              <Messages
-                type="info"
-                onDismiss={this.props.onDismissQueryMessages}
-                messageKey={this.props.queryMessages.info}
-              />
-            )
-          }
-          {authError
-            && (
-              <Messages
-                type="error"
-                messages={authError.messages}
-              />
-            )
-          }
-          {isUserAuthenticating
-            && <Loading />
-          }
           {IS_DEV && (
-            <Box margin={{ vertical: 'medium' }}>
+            <Box margin={{ bottom: 'medium' }}>
               <Text>
                 <FormattedMessage {...messages.devNote} />
               </Text>
             </Box>
           )}
+          {this.props.queryMessages.info
+            && (
+              <Box margin={{ bottom: 'medium' }}>
+                <Messages
+                  type="info"
+                  onDismiss={this.props.onDismissQueryMessages}
+                  messageKey={this.props.queryMessages.info}
+                />
+              </Box>
+            )
+          }
+          {authError
+            && (
+              <Box margin={{ bottom: 'medium' }}>
+                <Messages
+                  type="error"
+                  messages={authError.messages}
+                />
+              </Box>
+            )
+          }
+          {isUserAuthenticating
+            && <Box margin={{ bottom: 'medium' }}><Loading /></Box>
+          }
           <AuthForm
             model="userLogin.form.data"
             sending={isUserAuthenticating}
