@@ -20,6 +20,7 @@ import { API } from 'themes/config';
 import {
   AUTHENTICATE_SENDING,
   AUTHENTICATE_SUCCESS,
+  AUTHENTICATE_RESET,
   AUTHENTICATE_ERROR,
   SET_AUTHENTICATION_STATE,
   LOAD_ENTITIES_SUCCESS,
@@ -75,6 +76,12 @@ function appReducer(state = initialState, payload) {
         .setIn(['user', 'attributes'], null)
         .setIn(['user', 'isSignedIn'], false);
     }
+    case AUTHENTICATE_RESET:
+      return state
+        .setIn(['auth', 'sending'], false)
+        .setIn(['auth', 'error'], false)
+        .setIn(['user', 'attributes'], null)
+        .setIn(['user', 'isSignedIn'], false);
     case AUTHENTICATE_SENDING:
       return state
         .setIn(['auth', 'sending'], true)

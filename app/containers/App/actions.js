@@ -19,6 +19,7 @@ import {
   AUTHENTICATE_SENDING,
   AUTHENTICATE,
   AUTHENTICATE_SUCCESS,
+  AUTHENTICATE_RESET,
   AUTHENTICATE_ERROR,
   SET_AUTHENTICATION_STATE,
   LOAD_ENTITIES_IF_NEEDED,
@@ -364,6 +365,11 @@ export function authenticateSending(sending) {
   return {
     type: AUTHENTICATE_SENDING,
     sending,
+  };
+}
+export function authenticateReset() {
+  return {
+    type: AUTHENTICATE_RESET,
   };
 }
 

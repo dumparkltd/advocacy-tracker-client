@@ -69,6 +69,7 @@ import {
   entitiesLoadingError,
   authenticateSuccess,
   authenticateSending,
+  authenticateReset,
   authenticateError,
   logoutSuccess,
   entitiesRequested,
@@ -292,39 +293,37 @@ export function* validateTokenSaga() {
           [KEYS.ACCESS_TOKEN]: accessToken,
         }
       );
-      if (!response.success) {
-        const location = yield select(selectLocation);
-        const redirectOnAuthSuccess = location.get('pathname');
-        const redirectOnAuthSuccessSearch = location.get('search');
-        yield call(clearAuthValues);
-        yield put(invalidateEntities());
-        // forward to home
-        yield put(updatePath(
-          ROUTES.LOGIN,
-          {
-            replace: true,
-            query: [
-              {
-                arg: 'info',
-                value: PARAMS.VALIDATE_TOKEN_FAILED,
-              },
-              {
-                arg: 'redirectOnAuthSuccess',
-                value: redirectOnAuthSuccess,
-              },
-              {
-                arg: 'redirectOnAuthSuccessSearch',
-                value: redirectOnAuthSuccessSearch,
-              },
-            ],
-          },
-        ));
-      }
       yield put(authenticateSuccess(response.data)); // need to store currentUserData
     }
   } catch (err) {
     err.response.json = yield err.response.json();
-    yield put(authenticateError(err));
+    yield put(authenticateReset());
+    const location = yield select(selectLocation);
+    const redirectOnAuthSuccess = location.get('pathname');
+    const redirectOnAuthSuccessSearch = location.get('search');
+    yield call(clearAuthValues);
+    yield put(invalidateEntities());
+    // forward to home
+    yield put(updatePath(
+      ROUTES.LOGIN,
+      {
+        replace: true,
+        query: [
+          {
+            arg: 'info',
+            value: PARAMS.VALIDATE_TOKEN_FAILED,
+          },
+          {
+            arg: 'redirectOnAuthSuccess',
+            value: redirectOnAuthSuccess,
+          },
+          {
+            arg: 'redirectOnAuthSuccessSearch',
+            value: redirectOnAuthSuccessSearch,
+          },
+        ],
+      },
+    ));
   }
 }
 
