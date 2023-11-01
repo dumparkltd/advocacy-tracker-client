@@ -842,17 +842,27 @@ const getNextQuery = (query, extend, location) => {
   // console.log('queryPrevious', queryPrevious)
   return asArray(query).reduce((memo, param) => {
     const queryUpdated = memo;
+    const hasQueryArg = !!queryUpdated[param.arg];
+    const isReplacing = !!param.replace;
+    const isRemoving = !!param.remove;
+    const isAdding = !!param.add;
+    const hasValue = !!param.value;
+    // console.log('hasQueryArg', hasQueryArg);
+    // console.log('isReplacing', isReplacing);
+    // console.log('isRemoving', isRemoving);
+    // console.log('isAdding', isAdding);
+    // console.log('hasValue', hasValue);
+    const val = hasValue && param.value.toString();
+
     // if arg already set and not replacing
-    if (queryUpdated[param.arg] && (typeof param.replace === 'undefined' || !param.replace)) {
-      const val = param.value && param.value.toString();
-      // check for connection attribute queries
-      if (
-        val
+    if (hasQueryArg && !isReplacing) {
+      const isConnectionAttributeQuery = val
         && val.indexOf(':') > -1
         && typeof param.multipleAttributeValues !== 'undefined'
-        && param.multipleAttributeValues === false
-      ) {
-        if (param.add) {
+        && param.multipleAttributeValues === false;
+      // check for connection attribute queries
+      if (isConnectionAttributeQuery) {
+        if (isAdding) {
           const [attribute] = val.split(':');
           const keepAttributeValues = queryPrevious[param.arg]
             ? asArray(queryPrevious[param.arg]).filter(
@@ -864,26 +874,33 @@ const getNextQuery = (query, extend, location) => {
             : [];
           queryUpdated[param.arg] = [
             ...keepAttributeValues,
-            param.value,
+            val,
           ];
-        } else if (param.remove) {
+        } else if (isRemoving) {
           queryUpdated[param.arg] = asArray(queryPrevious[param.arg]).filter(
             (attVal) => !qe(attVal, param.value)
           );
         }
       } else {
+        // remember current value as array
         queryUpdated[param.arg] = asArray(queryUpdated[param.arg]);
-        const isIncluded = !!param.value && !!queryUpdated[param.arg].find(
-          (qv) => qe(qv && qv.toString().split('>')[0], param.value.toString().split('>')[0])
+        // check if value is already included
+        const isAlreadyIncluded = hasValue && !!queryUpdated[param.arg].find(
+          // split to make sure we only take value stem
+          (qv) => qv && qe(qv.toString().split('>')[0], val.split('>')[0])
         );
 
-        // add if not already present
-        if (param.add && !isIncluded) {
-          queryUpdated[param.arg].push(param.value);
+        // add if not already present - no need to add if already included
+        if (!isAlreadyIncluded) {
+          if (isAdding) {
+            queryUpdated[param.arg].push(val);
+          } else if (isRemoving) {
+            delete queryUpdated[param.arg];
+          }
         // remove if present
-        } else if (extend && param.remove && param.value && isIncluded) {
+        } else if (isAlreadyIncluded && extend && isRemoving) {
           queryUpdated[param.arg] = queryUpdated[param.arg].filter(
-            (qv) => !qe(qv.toString().split('>')[0], param.value.toString().split('>')[0])
+            (qv) => !qe(qv.toString().split('>')[0], val.split('>')[0])
           );
           // convert to single value if only one value left
           if (queryUpdated[param.arg].length === 1) {
@@ -894,37 +911,31 @@ const getNextQuery = (query, extend, location) => {
             delete queryUpdated[param.arg];
           }
         }
-      // if single value set
-      // add if not already present and convert to array
       }
-      // remove param from query
-      if (extend && param.remove && (!param.value || (param.value && queryUpdated[param.arg] === param.value.toString()))) {
-        delete queryUpdated[param.arg];
-      }
-    // if set and removing
-    } else if (queryUpdated[param.arg] && param.value && param.replace) {
+    // if replacing
+    } else if (hasQueryArg && isReplacing && hasValue) {
       // only replace the previous value if defined
       if (param.prevValue && queryUpdated[param.arg]) {
         queryUpdated[param.arg] = asArray(queryUpdated[param.arg]).map(
-          (argValue) => qe(argValue, param.prevValue)
-            ? param.value
-            : argValue
+          (argValue) => qe(argValue, param.prevValue) ? val : argValue
         );
       } else {
-        queryUpdated[param.arg] = param.value;
+        queryUpdated[param.arg] = val;
       }
-    } else if (queryUpdated[param.arg] && (param.remove || typeof param.value === 'undefined')) {
-      // make sure we remove the right values
-      if (param.value && (param.arg === 'without' || param.arg === 'any' || param.arg === 'cat')) {
-        if (qe(queryUpdated[param.arg], param.value)) {
-          delete queryUpdated[param.arg];
-        }
-      } else {
+    } else if (hasQueryArg && (isRemoving || !hasValue)) {
+      // make sure we remove the right values if specified
+      if (
+        !hasValue
+        || (
+          (param.arg === 'without' || param.arg === 'any' || param.arg === 'cat')
+          && qe(queryUpdated[param.arg], val)
+        )
+      ) {
         delete queryUpdated[param.arg];
       }
     // if not set or replacing with new value
-    } else if (typeof param.value !== 'undefined' && !param.remove) {
-      queryUpdated[param.arg] = param.value;
+    } else if (hasValue && !isRemoving) {
+      queryUpdated[param.arg] = val;
     }
     return queryUpdated;
   }, queryPrevious);
