@@ -185,7 +185,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       this.props.locationQuery,
     ));
     this.props.onDismissAllErrors();
-  }
+  };
 
   getMessageForType = (type) => {
     switch (type) {
@@ -196,7 +196,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       default:
         return messages.updatesSuccess;
     }
-  }
+  };
 
   mapError = (error, key) => fromJS({
     type: error.data.type,
@@ -327,18 +327,20 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     if (hasList && hasMap) {
       viewOptions = [
         {
-          type: 'primary',
+          type: 'primaryGroup',
           title: 'List',
           onClick: () => onSetView('list'),
           active: showList,
           disabled: showList,
+          isFirst: true,
         },
         {
-          type: 'primary',
+          type: 'primaryGroup',
           title: 'Map',
           onClick: () => onSetView('map'),
           active: showMap,
           disabled: showMap,
+          isLast: true,
         },
       ];
     }
@@ -565,9 +567,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                   processNo: Math.min(success.size + errors.size + 1, sending.size),
                   totalNo: sending.size,
                   types:
-                  intl.formatMessage(messages[
-                    `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
-                  ]),
+                    intl.formatMessage(messages[
+                      `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
+                    ]),
                 }}
               />
             </ProgressText>
@@ -586,9 +588,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                   {
                     errorNo: viewDomain.get('errors').size,
                     types:
-                    intl.formatMessage(messages[
-                      `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
-                    ]),
+                      intl.formatMessage(messages[
+                        `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
+                      ]),
                   },
                 )
               }
@@ -849,7 +851,7 @@ function mapDispatchToProps(dispatch, props) {
             ).toJS()
           ));
         }
-      // connections
+        // connections
       } else {
         // figure out connection deletions (not necessary for attributes as deletions will be overridden)
         const deletes = changes
@@ -1014,7 +1016,7 @@ function mapDispatchToProps(dispatch, props) {
             activeEditOption.path,
             updates.get('creates').toJS(),
             activeEditOption.invalidateEntitiesPaths
-              && activeEditOption.invalidateEntitiesPaths.toJS(),
+            && activeEditOption.invalidateEntitiesPaths.toJS(),
           ));
         }
         if (updates.get('deletes') && updates.get('deletes').size > 0) {
