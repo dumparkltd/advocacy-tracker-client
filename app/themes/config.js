@@ -674,6 +674,7 @@ export const ACTOR_FIELDS = {
       type: 'number',
       table: API.ACTORTYPES,
       skipImport: true,
+      exportColumn: 'actor_type',
     },
     code: {
       optional: [

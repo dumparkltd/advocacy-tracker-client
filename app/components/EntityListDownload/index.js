@@ -27,7 +27,9 @@ import {
   ACTIONTYPE_ACTIONTYPES,
   ACTIONTYPE_RESOURCETYPES,
   ACTIONTYPE_TARGETTYPES,
+  MEMBERSHIPS,
   USER_ACTIONTYPES,
+  USER_ACTORTYPES,
 } from 'themes/config';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
@@ -128,10 +130,100 @@ export function EntityListDownload({
   const [actiontypesAsTarget, setActiontypesAsTarget] = useState({});
   const [membertypes, setMembertypes] = useState({});
   const [associationtypes, setAssociationtypes] = useState({});
+  // figure out export options
+  const hasAttributes = !!config.attributes;
+  const hasTaxonomies = !!config.taxonomies;
+  let hasUsers;
 
+  // check action relationships
+  let hasActors;
+  let hasTargets;
+  let hasIndicators;
+  let hasParentActions;
+  let hasChildActions;
+  let hasResources;
+
+  if (config.types === 'actiontypes') {
+    hasActors = config.connections
+      && config.connections.actors
+      && ACTIONTYPE_ACTORTYPES[typeId]
+      && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
+
+    hasTargets = config.connections
+      && config.connections.targets
+      && ACTIONTYPE_TARGETTYPES[typeId]
+      && ACTIONTYPE_TARGETTYPES[typeId].length > 0;
+
+    hasIndicators = config.connections
+      && config.connections.indicators
+      && INDICATOR_ACTIONTYPES.indexOf(typeId) > -1
+      && !!connections.get('indicators');
+
+    hasParentActions = config.connections
+      && config.connections.parents
+      && ACTIONTYPE_ACTIONTYPES[typeId]
+      && ACTIONTYPE_ACTIONTYPES[typeId].length > 0;
+
+    hasChildActions = config.connections
+      && config.connections.children
+      && !!Object.keys(ACTIONTYPE_ACTIONTYPES).find((childtypeId) => {
+        const parenttypeIds = ACTIONTYPE_ACTIONTYPES[childtypeId];
+        return parenttypeIds.indexOf(typeId) > -1;
+      });
+
+    hasResources = config.connections
+      && config.connections.resources
+      && ACTIONTYPE_RESOURCETYPES[typeId]
+      && ACTIONTYPE_RESOURCETYPES[typeId].length > 0;
+
+    hasUsers = isAdmin
+      && config.connections
+      && config.connections.users
+      && USER_ACTIONTYPES.indexOf(typeId) > -1;
+  }
+  // check actor relationships
+  let hasActions;
+  let hasActionsAsTarget;
+  let hasMembers;
+  let hasAssociations;
+
+  if (config.types === 'actortypes') {
+    hasActions = config.connections
+      && config.connections.actions
+      && !!Object.keys(ACTIONTYPE_ACTORTYPES).find((actiontypeId) => {
+        const actiontypeIds = ACTIONTYPE_ACTORTYPES[actiontypeId];
+        return actiontypeIds.indexOf(typeId) > -1;
+      });
+
+    hasActionsAsTarget = config.connections
+      && config.connections.targets
+      && !!Object.keys(ACTIONTYPE_TARGETTYPES).find((actiontypeId) => {
+        const actiontypeIds = ACTIONTYPE_TARGETTYPES[actiontypeId];
+        return actiontypeIds.indexOf(typeId) > -1;
+      });
+
+    hasAssociations = config.connections
+      && config.connections.associations
+      && MEMBERSHIPS[typeId]
+      && MEMBERSHIPS[typeId].length > 0;
+
+    hasMembers = config.connections
+      && config.connections.members
+      && !!Object.keys(MEMBERSHIPS).find((membertypeId) => {
+        const membertypeIds = MEMBERSHIPS[membertypeId];
+        return membertypeIds.indexOf(typeId) > -1;
+      });
+
+    hasUsers = isAdmin
+      && config.connections
+      && config.connections.users
+      && USER_ACTORTYPES.indexOf(typeId) > -1;
+  }
+
+  // figure out options for each relationship type
   useEffect(() => {
     // set initial config values
-    if (config.attributes && fields && typeId) {
+    if (hasAttributes && fields && typeId) {
       setAttributes(
         getAttributes({
           typeId,
@@ -141,7 +233,7 @@ export function EntityListDownload({
         })
       );
     }
-    if (config.taxonomies && taxonomies) {
+    if (hasTaxonomies && taxonomies) {
       setTaxonomies(
         taxonomies.map((tax) => {
           const label = intl.formatMessage(appMessages.entities.taxonomies[tax.get('id')].plural);
@@ -156,7 +248,7 @@ export function EntityListDownload({
     }
     if (config.types === 'actiontypes') {
       // actors
-      if (config.connections && config.connections.actors && typeNames.actortypes && ACTIONTYPE_ACTORTYPES[typeId]) {
+      if (hasActors && typeNames.actortypes) {
         setActortypes(
           ACTIONTYPE_ACTORTYPES[typeId].reduce((memo, actortypeId) => {
             const label = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].pluralLong);
@@ -173,7 +265,7 @@ export function EntityListDownload({
         );
       }
       // targets
-      if (config.connections && config.connections.targets && typeNames.actortypes && ACTIONTYPE_TARGETTYPES[typeId]) {
+      if (hasTargets && typeNames.actortypes) {
         setTargettypes(
           ACTIONTYPE_TARGETTYPES[typeId].reduce((memo, actortypeId) => {
             const label = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].pluralLong);
@@ -190,13 +282,7 @@ export function EntityListDownload({
         );
       }
       // parents
-      if (
-        config.connections
-        && config.connections.parents
-        && typeNames.actiontypes
-        && ACTIONTYPE_ACTIONTYPES[typeId]
-        && ACTIONTYPE_ACTIONTYPES[typeId].length > 0
-      ) {
+      if (hasParentActions && typeNames.actiontypes) {
         setParenttypes(
           ACTIONTYPE_ACTIONTYPES[typeId].reduce((memo, actiontypeId) => {
             const label = intl.formatMessage(appMessages.entities[`actions_${actiontypeId}`].pluralLong);
@@ -213,38 +299,27 @@ export function EntityListDownload({
         );
       }
       // children
-      if (
-        config.connections
-        && config.connections.children
-        && typeNames.actiontypes
-      ) {
+      if (hasChildActions && typeNames.actiontypes) {
         const childtypeIds = Object.keys(ACTIONTYPE_ACTIONTYPES).filter(
           (childtypeId) => ACTIONTYPE_ACTIONTYPES[childtypeId].indexOf(typeId) > -1
         );
-        if (childtypeIds && childtypeIds.length > 0) {
-          setChildtypes(
-            childtypeIds.reduce((memo, actiontypeId) => {
-              const label = intl.formatMessage(appMessages.entities[`actions_${actiontypeId}`].pluralLong);
-              return {
-                ...memo,
-                [actiontypeId]: {
-                  id: actiontypeId,
-                  label,
-                  active: false,
-                  column: `children_${snakeCase(label)}`,
-                },
-              };
-            }, {})
-          );
-        }
+        setChildtypes(
+          childtypeIds.reduce((memo, actiontypeId) => {
+            const label = intl.formatMessage(appMessages.entities[`actions_${actiontypeId}`].pluralLong);
+            return {
+              ...memo,
+              [actiontypeId]: {
+                id: actiontypeId,
+                label,
+                active: false,
+                column: `children_${snakeCase(label)}`,
+              },
+            };
+          }, {})
+        );
       }
       // resources
-      if (
-        config.connections
-        && config.connections.resources
-        && ACTIONTYPE_RESOURCETYPES[typeId]
-        && ACTIONTYPE_RESOURCETYPES[typeId].length > 0
-      ) {
+      if (hasResources) {
         setResourcetypes(
           ACTIONTYPE_RESOURCETYPES[typeId].reduce((memo, resourcetypeId) => {
             const label = intl.formatMessage(appMessages.entities[`resources_${resourcetypeId}`].pluralLong);
@@ -260,191 +335,117 @@ export function EntityListDownload({
           }, {})
         );
       }
-      // //
-      // if (
-      //   config.connections
-      //   && config.connections.
-      //   && INDICATOR_ACTIONTYPES.indexOf(typeId) > -1
-      // ) {
-      //   setIndicators(false);
-      // }
     }
     if (config.types === 'actortypes') {
       // actions
-      if (
-        config.connections
-        && config.connections.actions
-        && typeNames.actiontypes
-        && !!Object.keys(ACTIONTYPE_ACTORTYPES).find(
-          (actiontypeId) => ACTIONTYPE_ACTORTYPES[actiontypeId].indexOf(typeId) > -1
-        )
-      ) {
+      if (hasActions && typeNames.actiontypes) {
         const actiontypeIds = Object.keys(ACTIONTYPE_ACTORTYPES).filter(
           (actiontypeId) => ACTIONTYPE_ACTORTYPES[actiontypeId].indexOf(typeId) > -1
         );
-        if (actiontypeIds && actiontypeIds.length > 0) {
-          setActiontypes(
-            actiontypeIds.reduce((memo, actiontypeId) => {
-              const label = intl.formatMessage(appMessages.entities[`actions_${actiontypeId}`].pluralLong);
-              return {
-                ...memo,
-                [actiontypeId]: {
-                  id: actiontypeId,
-                  label,
-                  active: false,
-                  column: `actions_${snakeCase(label)}`,
-                },
-              };
-            }, {})
-          );
-        }
+        setActiontypes(
+          actiontypeIds.reduce((memo, actiontypeId) => {
+            const label = intl.formatMessage(appMessages.entities[`actions_${actiontypeId}`].pluralLong);
+            return {
+              ...memo,
+              [actiontypeId]: {
+                id: actiontypeId,
+                label,
+                active: false,
+                column: `actions_${snakeCase(label)}`,
+              },
+            };
+          }, {})
+        );
       }
       // actions as target
-      if (
-        config.connections
-        && config.connections.targets
-        && typeNames.actiontypes
-        && !!Object.keys(ACTIONTYPE_TARGETTYPES).find(
-          (actiontypeId) => ACTIONTYPE_TARGETTYPES[actiontypeId].indexOf(typeId) > -1
-        )
-      ) {
+      if (hasActionsAsTarget && typeNames.actiontypes) {
         const actiontypeIds = Object.keys(ACTIONTYPE_TARGETTYPES).filter(
           (actiontypeId) => ACTIONTYPE_TARGETTYPES[actiontypeId].indexOf(typeId) > -1
         );
-        if (actiontypeIds && actiontypeIds.length > 0) {
-          setActiontypesAsTarget(
-            actiontypeIds.reduce((memo, actiontypeId) => {
-              const label = intl.formatMessage(appMessages.entities[`actions_${actiontypeId}`].pluralLong);
-              return {
-                ...memo,
-                [actiontypeId]: {
-                  id: actiontypeId,
-                  label,
-                  active: false,
-                  column: `actions-as-target_${snakeCase(label)}`,
-                },
-              };
-            }, {})
-          );
-        }
+        setActiontypesAsTarget(
+          actiontypeIds.reduce((memo, actiontypeId) => {
+            const label = intl.formatMessage(appMessages.entities[`actions_${actiontypeId}`].pluralLong);
+            return {
+              ...memo,
+              [actiontypeId]: {
+                id: actiontypeId,
+                label,
+                active: false,
+                column: `actions-as-target_${snakeCase(label)}`,
+              },
+            };
+          }, {})
+        );
       }
-    //   // targets
-    //   if (config.connections && config.connections.targets && typeNames.actortypes && ACTIONTYPE_TARGETTYPES[typeId]) {
-    //     setTargettypes(
-    //       ACTIONTYPE_TARGETTYPES[typeId].reduce((memo, actortypeId) => {
-    //         const label = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].pluralLong);
-    //         return {
-    //           ...memo,
-    //           [actortypeId]: {
-    //             id: actortypeId,
-    //             label,
-    //             active: false,
-    //             column: `targets_${snakeCase(label)}`,
-    //           },
-    //         };
-    //       }, {})
-    //     );
-    //   }
-    //   // parents
-    //   if (
-    //     config.connections
-    //     && config.connections.parents
-    //     && typeNames.actiontypes
-    //     && ACTIONTYPE_ACTIONTYPES[typeId]
-    //     && ACTIONTYPE_ACTIONTYPES[typeId].length > 0
-    //   ) {
-    //     setParenttypes(
-    //       ACTIONTYPE_ACTIONTYPES[typeId].reduce((memo, actiontypeId) => {
-    //         const label = intl.formatMessage(appMessages.entities[`actions_${actiontypeId}`].pluralLong);
-    //         return {
-    //           ...memo,
-    //           [actiontypeId]: {
-    //             id: actiontypeId,
-    //             label,
-    //             active: false,
-    //             column: `parents_${snakeCase(label)}`,
-    //           },
-    //         };
-    //       }, {})
-    //     );
-    //   }
-    //   // children
-    //   if (
-    //     config.connections
-    //     && config.connections.children
-    //     && typeNames.actiontypes
-    //   ) {
-    //     const childtypeIds = Object.keys(ACTIONTYPE_ACTIONTYPES).filter((childtypeId) => {
-    //       const parenttypeIds = ACTIONTYPE_ACTIONTYPES[childtypeId];
-    //       return parenttypeIds.indexOf(typeId) > -1;
-    //     });
-    //     if (childtypeIds && childtypeIds.length > 0) {
-    //       setChildtypes(
-    //         childtypeIds.reduce((memo, actiontypeId) => {
-    //           const label = intl.formatMessage(appMessages.entities[`actions_${actiontypeId}`].pluralLong);
-    //           return {
-    //             ...memo,
-    //             [actiontypeId]: {
-    //               id: actiontypeId,
-    //               label,
-    //               active: false,
-    //               column: `children_${snakeCase(label)}`,
-    //             },
-    //           };
-    //         }, {})
-    //       );
-    //     }
-    //   }
-    //   // resources
-    //   if (
-    //     config.connections
-    //     && config.connections.resources
-    //     && ACTIONTYPE_RESOURCETYPES[typeId]
-    //     && ACTIONTYPE_RESOURCETYPES[typeId].length > 0
-    //   ) {
-    //     setResourcetypes(
-    //       ACTIONTYPE_RESOURCETYPES[typeId].reduce((memo, resourcetypeId) => {
-    //         const label = intl.formatMessage(appMessages.entities[`resources_${resourcetypeId}`].pluralLong);
-    //         return {
-    //           ...memo,
-    //           [resourcetypeId]: {
-    //             id: resourcetypeId,
-    //             label,
-    //             active: false,
-    //             column: `resources_${snakeCase(label)}`,
-    //           },
-    //         };
-    //       }, {})
-    //     );
-    //   }
-    //   // //
-    //   // if (
-    //   //   config.connections
-    //   //   && config.connections.
-    //   //   && INDICATOR_ACTIONTYPES.indexOf(typeId) > -1
-    //   // ) {
-    //   //   setIndicators(false);
-    //   // }
+      // associations/parents
+      if (hasAssociations && typeNames.actortypes) {
+        setAssociationtypes(
+          MEMBERSHIPS[typeId].reduce((memo, actortypeId) => {
+            const label = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].pluralLong);
+            return {
+              ...memo,
+              [actortypeId]: {
+                id: actortypeId,
+                label,
+                active: false,
+                column: `member-of_${snakeCase(label)}`,
+              },
+            };
+          }, {})
+        );
+      }
+      // children
+      if (hasMembers && typeNames.actortypes) {
+        const membertypeIds = Object.keys(MEMBERSHIPS).filter(
+          (membertypeId) => MEMBERSHIPS[membertypeId].indexOf(typeId) > -1
+        );
+        setMembertypes(
+          membertypeIds.reduce((memo, actortypeId) => {
+            const label = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].pluralLong);
+            return {
+              ...memo,
+              [actortypeId]: {
+                id: actortypeId,
+                label,
+                active: false,
+                column: `members_${snakeCase(label)}`,
+              },
+            };
+          }, {})
+        );
+      }
     }
-  }, []);
+  }, [
+    taxonomies,
+    hasAttributes,
+    hasTaxonomies,
+    hasActors,
+    hasTargets,
+    hasIndicators,
+    hasParentActions,
+    hasChildActions,
+    hasResources,
+    hasActions,
+    hasActionsAsTarget,
+    hasMembers,
+    hasAssociations,
+  ]);
 
+  // set initial csv file name
   useEffect(() => {
+    let title = 'unspecified';
     if (config.types === 'actiontypes') {
-      const title = intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural);
-      setTypeTitle(title);
-      setCSVFilename(snakeCase(title));
+      title = intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural);
     }
     if (config.types === 'actortypes') {
-      const title = intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural);
-      setTypeTitle(title);
-      setCSVFilename(snakeCase(title));
+      title = intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural);
     }
+    setTypeTitle(title);
+    setCSVFilename(snakeCase(title));
   }, []);
 
   let relationships = connections;
-  // figure out export options
-  const hasAttributes = config.attributes && Object.keys(attributes).length > 0;
-  const hasTaxonomies = config.taxonomies && Object.keys(taxonomyColumns).length > 0;
+
   // figure out columns
   let csvColumns = [{ id: 'id' }];
   if (hasAttributes) {
@@ -477,56 +478,9 @@ export function EntityListDownload({
       return memo;
     }, csvColumns);
   }
-  // for actions ///////////////////////////////////////////////////////////////
-  let hasActors;
-  let hasTargets;
-  let hasIndicators;
-  let hasParentActions;
-  let hasChildActions;
-  let hasResources;
-  let hasUsers;
-
   let csvData;
-
+  // for actions ///////////////////////////////////////////////////////////////
   if (config.types === 'actiontypes') {
-    hasActors = config.connections
-      && config.connections.actors
-      && Object.keys(actortypes).length > 0;
-
-    hasTargets = config.connections
-      && config.connections.targets
-      && ACTIONTYPE_TARGETTYPES[typeId]
-      && ACTIONTYPE_TARGETTYPES[typeId].length > 0
-      && Object.keys(targettypes).length > 0;
-
-    hasIndicators = config.connections
-      && config.connections.indicators
-      && INDICATOR_ACTIONTYPES.indexOf(typeId) > -1
-      && !!connections.get('indicators');
-
-    hasParentActions = config.connections
-      && config.connections.parents
-      && ACTIONTYPE_ACTIONTYPES[typeId]
-      && ACTIONTYPE_ACTIONTYPES[typeId].length > 0;
-    relationships = relationships.set('parents', relationships.get('measures'));
-
-    hasChildActions = config.connections
-      && config.connections.children
-      && !!Object.keys(ACTIONTYPE_ACTIONTYPES).find((childtypeId) => {
-        const parenttypeIds = ACTIONTYPE_ACTIONTYPES[childtypeId];
-        return parenttypeIds.indexOf(typeId) > -1;
-      });
-    relationships = relationships.set('children', relationships.get('measures'));
-
-    hasResources = config.connections
-      && config.connections.resources
-      && ACTIONTYPE_RESOURCETYPES[typeId]
-      && ACTIONTYPE_RESOURCETYPES[typeId].length > 0;
-
-    hasUsers = isAdmin
-      && config.connections
-      && config.connections.users
-      && USER_ACTIONTYPES.indexOf(typeId) > -1;
     if (hasActors) {
       if (!actorsAsRows) {
         csvColumns = Object.keys(actortypes).reduce((memo, actortypeId) => {
@@ -575,6 +529,8 @@ export function EntityListDownload({
       }, csvColumns);
     }
     if (hasParentActions) {
+      relationships = relationships.set('parents', relationships.get('measures'));
+
       csvColumns = Object.keys(parenttypes).reduce((memo, parenttypeId) => {
         if (parenttypes[parenttypeId].active) {
           let displayName = parenttypes[parenttypeId].column;
@@ -590,6 +546,7 @@ export function EntityListDownload({
       }, csvColumns);
     }
     if (hasChildActions) {
+      relationships = relationships.set('children', relationships.get('measures'));
       csvColumns = Object.keys(childtypes).reduce((memo, childtypeId) => {
         if (childtypes[childtypeId].active) {
           let displayName = childtypes[childtypeId].column;
@@ -619,12 +576,6 @@ export function EntityListDownload({
         return memo;
       }, csvColumns);
     }
-    if (hasUsers && usersActive) {
-      csvColumns = [
-        ...csvColumns,
-        { id: 'users', displayName: 'assigned_users' },
-      ];
-    }
     if (hasIndicators && indicatorsActive) {
       if (!indicatorsAsRows) {
         const indicatorColumns = relationships
@@ -635,6 +586,12 @@ export function EntityListDownload({
               displayName += indicator.getIn(['attributes', 'code']);
             } else {
               displayName += indicator.get('id');
+            }
+            if (indicator.getIn(['attributes', 'draft'])) {
+              displayName += '_DRAFT';
+            }
+            if (indicator.getIn(['attributes', 'private'])) {
+              displayName += '_PRIVATE';
             }
             return [
               ...memo,
@@ -665,7 +622,12 @@ export function EntityListDownload({
         }
       }
     }
-
+    if (hasUsers && usersActive) {
+      csvColumns = [
+        ...csvColumns,
+        { id: 'users', displayName: 'assigned_users' },
+      ];
+    }
     csvData = entities && prepareDataForActions({
       attributes,
       entities,
@@ -690,20 +652,7 @@ export function EntityListDownload({
     });
   }
   // for actors ///////////////////////////////////////////////////////////////
-  let hasActions;
-  let hasActionsAsTarget;
-  let hasMembers;
-  let hasAssociations;
   if (config.types === 'actortypes') {
-    hasActions = config.connections
-      && config.connections.actions
-      && Object.keys(actiontypes).length > 0;
-    hasActionsAsTarget = config.connections
-      && config.connections.targets
-      && !!Object.keys(ACTIONTYPE_TARGETTYPES).find((actiontypeId) => {
-        const actiontypeIds = ACTIONTYPE_TARGETTYPES[actiontypeId];
-        return actiontypeIds.indexOf(typeId) > -1;
-      });
     if (hasActions) {
       if (!actionsAsRows) {
         csvColumns = Object.keys(actiontypes).reduce((memo, actiontypeId) => {
@@ -751,6 +700,44 @@ export function EntityListDownload({
         return memo;
       }, csvColumns);
     }
+    if (hasAssociations) {
+      relationships = relationships.set('associations', relationships.get('actors'));
+      csvColumns = Object.keys(associationtypes).reduce((memo, actortypeId) => {
+        if (associationtypes[actortypeId].active) {
+          let displayName = associationtypes[actortypeId].column;
+          if (!displayName || associationtypes[actortypeId].column === '') {
+            displayName = actortypeId;
+          }
+          return [
+            ...memo,
+            { id: `associations_${actortypeId}`, displayName },
+          ];
+        }
+        return memo;
+      }, csvColumns);
+    }
+    if (hasMembers) {
+      relationships = relationships.set('members', relationships.get('actors'));
+      csvColumns = Object.keys(membertypes).reduce((memo, actortypeId) => {
+        if (membertypes[actortypeId].active) {
+          let displayName = membertypes[actortypeId].column;
+          if (!displayName || membertypes[actortypeId].column === '') {
+            displayName = actortypeId;
+          }
+          return [
+            ...memo,
+            { id: `members_${actortypeId}`, displayName },
+          ];
+        }
+        return memo;
+      }, csvColumns);
+    }
+    if (hasUsers && usersActive) {
+      csvColumns = [
+        ...csvColumns,
+        { id: 'users', displayName: 'assigned_users' },
+      ];
+    }
     csvData = entities && prepareDataForActors({
       attributes,
       entities,
@@ -763,6 +750,11 @@ export function EntityListDownload({
       actiontypes,
       hasActionsAsTarget,
       actiontypesAsTarget,
+      hasAssociations,
+      associationtypes,
+      hasMembers,
+      membertypes,
+      hasUsers: hasUsers && usersActive,
     });
   }
 
@@ -789,6 +781,7 @@ export function EntityListDownload({
         </Box>
         {config.types === 'actiontypes' && (
           <OptionsForActions
+            typeTitle={typeTitle}
             hasActors={hasActors}
             hasTargets={hasTargets}
             hasParentActions={hasParentActions}
@@ -824,6 +817,7 @@ export function EntityListDownload({
         )}
         {config.types === 'actortypes' && (
           <OptionsForActors
+            typeTitle={typeTitle}
             hasActions={hasActions}
             actionsAsRows={actionsAsRows}
             setActionsAsRows={setActionsAsRows}

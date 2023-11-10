@@ -73,6 +73,9 @@ export function OptionGroup({
   onActiveLabel,
 }) {
   const expandGroup = expandedId === groupId;
+  if (!optionCount || optionCount === 0) {
+    return null;
+  }
   return (
     <Group>
       <OptionGroupToggle

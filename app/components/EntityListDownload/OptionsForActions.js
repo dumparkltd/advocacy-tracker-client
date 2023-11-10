@@ -126,15 +126,13 @@ export function OptionsForActions({
           activeOptionCount={activeActortypeCount}
           optionCount={Object.keys(actortypes).length}
           introNode={(
-            <div>
+            <Box gap="small">
               <Text size="small">
                 By default, the resulting CSV file will have one column for each type of actor selected.
+                {(!indicatorsAsRows || !indicatorsActive) && ' Alternatively you can chose to include actors as rows, resulting in one row per activity and actor.'}
+                {indicatorsAsRows && indicatorsActive && ' Alternatively you can chose to include actors as rows, resulting in one row per activity, topic and actor.'}
               </Text>
-              <Text size="small">
-                {(!indicatorsAsRows || !indicatorsActive) && ' Alternatively you can chose to include actors as rows, resulting in one row per activity and actor'}
-                {indicatorsAsRows && indicatorsActive && ' Alternatively you can chose to include actors as rows, resulting in one row per activity, topic and actor'}
-              </Text>
-            </div>
+            </Box>
           )}
           options={actortypes}
           optionListLabels={{
@@ -225,15 +223,13 @@ export function OptionsForActions({
           activeOptionCount={indicatorsActive ? 1 : 0}
           optionCount={1}
           introNode={(
-            <div>
+            <Box gap="xsmall">
               <Text size="small">
                 By default, the resulting CSV file will have one column for each topic.
-              </Text>
-              <Text size="small">
                 {!actorsAsRows && ' Alternatively you can chose to include topics as rows, resulting in one row per activity and topic'}
                 {actorsAsRows && ' Alternatively you can chose to include topics as rows, resulting in one row per activity, actor and topic'}
               </Text>
-            </div>
+            </Box>
           )}
           active={indicatorsActive}
           onSetActive={(val) => setIndicatorsActive(val)}

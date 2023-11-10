@@ -1,63 +1,22 @@
 import qe from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
 
-export const getAttributes = ({
-  typeId,
-  fieldAttributes,
-  isAdmin,
-  intl,
-}) => {
-  if (fieldAttributes) {
-    return Object.keys(fieldAttributes).reduce((memo, attKey) => {
-      const attValue = fieldAttributes[attKey];
-      const optional = typeof attValue.optional === 'boolean'
-        ? attValue.optional
-        : attValue.optional && attValue.optional.indexOf(typeId) > -1;
-      const required = typeof attValue.required === 'boolean'
-        ? attValue.required
-        : attValue.required && attValue.required.indexOf(typeId) > -1;
-      let passAdmin = true;
-      if (
-        !isAdmin
-        && (
-          attValue.adminOnly
-          || (attValue.adminOnlyForTypes && attValue.adminOnlyForTypes.indexOf(typeId) > -1)
-        )
-      ) {
-        passAdmin = false;
-      }
-      if (
-        !attValue.skipExport
-        // TODO: adminOnlyForTypes
-        && passAdmin
-        && (optional || required || (!attValue.optional && !attValue.required))
-      ) {
-        let active = false;
-        if (attValue.exportDefault) {
-          active = attValue.exportDefault;
-        }
-        if (attValue.exportRequired) {
-          active = true;
-        }
-        const label = `${intl.formatMessage(appMessages.attributes[attKey])}${attValue.exportRequired ? ' (required)' : ''}`;
-        return {
-          ...memo,
-          [attKey]: {
-            ...attValue,
-            active,
-            column: attValue.exportColumn || attKey,
-            label,
-          },
-        };
-      }
-      return memo;
-    }, {});
-  }
-  return [];
+// const IN_CELL_SEPARATOR = ', \n';
+const IN_CELL_SEPARATOR = ', ';
+
+export const getDateSuffix = (datetime) => {
+  const date = datetime ? new Date(datetime) : new Date();
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is zero-based
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+  return `${year}${month}${day}_${hours}${minutes}${seconds}`;
 };
 
 const sanitiseText = (text) => {
-  let val = text.trim();
+  let val = text ? `${text}`.trim() : '';
   if (val.startsWith('-') || val.startsWith('+')) {
     val = `'${val}`;
   }
@@ -222,7 +181,7 @@ const prepActorData = ({
         });
         return memo2 === ''
           ? actorValue
-          : `${memo2}, ${actorValue}`;
+          : `${memo2}${IN_CELL_SEPARATOR}${actorValue}`;
       }
       return memo2;
     }, '');
@@ -258,7 +217,7 @@ const prepActionData = ({
         });
         return memo2 === ''
           ? actionValue
-          : `${memo2}, ${actionValue}`;
+          : `${memo2}${IN_CELL_SEPARATOR}${actionValue}`;
       }
       return memo2;
     }, '');
@@ -294,7 +253,7 @@ const prepTargetData = ({
         });
         return memo2 === ''
           ? actorValue
-          : `${memo2}, ${actorValue}`;
+          : `${memo2}${IN_CELL_SEPARATOR}${actorValue}`;
       }
       return memo2;
     }, '');
@@ -330,7 +289,7 @@ const prepActionsAsTargetData = ({
         });
         return memo2 === ''
           ? actionValue
-          : `${memo2}, ${actionValue}`;
+          : `${memo2}${IN_CELL_SEPARATOR}${actionValue}`;
       }
       return memo2;
     }, '');
@@ -352,10 +311,8 @@ const prepParentData = ({
   }
   const entityParentIds = entity.getIn(['parentsByType', parseInt(parenttypeId, 10)]);
   let parentsValue = '';
-  // console.log(entityActorIds)
   if (entityParentIds) {
     parentsValue = entityParentIds.reduce((memo2, parentId) => {
-      // console.log(actorId)
       const parent = parents && parents.get(parentId.toString());
       if (parent) {
         const title = parent.getIn(['attributes', 'title']);
@@ -364,7 +321,7 @@ const prepParentData = ({
         parentValue = addWarnings({ value: parentValue, entity: parent });
         return memo2 === ''
           ? parentValue
-          : `${memo2}, ${parentValue}`;
+          : `${memo2}${IN_CELL_SEPARATOR}${parentValue}`;
       }
       return memo2;
     }, '');
@@ -372,6 +329,39 @@ const prepParentData = ({
   return ({
     ...memo,
     [`parents_${parenttypeId}`]: sanitiseText(parentsValue),
+  });
+}, data);
+const prepAssociationData = ({
+  entity, // Map
+  associationtypes,
+  associations, // Map
+  data,
+}) => Object.keys(associationtypes).reduce((memo, actortypeId) => {
+  if (!associationtypes[actortypeId].active) {
+    return memo;
+  }
+  const entityAssociationIds = entity.getIn(['associationsByType', parseInt(actortypeId, 10)]);
+  let associationsValue = '';
+  // console.log(entityActorIds)
+  if (entityAssociationIds) {
+    associationsValue = entityAssociationIds.reduce((memo2, actorId) => {
+      // console.log(actorId)
+      const association = associations && associations.get(actorId.toString());
+      if (association) {
+        const title = association.getIn(['attributes', 'title']);
+        const code = associations.getIn(['attributes', 'code']);
+        let associationValue = (code && code !== '') ? `${code}|${title}` : title;
+        associationValue = addWarnings({ value: associationValue, entity: association });
+        return memo2 === ''
+          ? associationValue
+          : `${memo2}${IN_CELL_SEPARATOR}${associationValue}`;
+      }
+      return memo2;
+    }, '');
+  }
+  return ({
+    ...memo,
+    [`associations_${actortypeId}`]: sanitiseText(associationsValue),
   });
 }, data);
 const prepChildData = ({
@@ -383,11 +373,11 @@ const prepChildData = ({
   if (!childtypes[childtypeId].active) {
     return memo;
   }
-  const entityParentIds = entity.getIn(['childrenByType', parseInt(childtypeId, 10)]);
+  const entityChildrenIds = entity.getIn(['childrenByType', parseInt(childtypeId, 10)]);
   let childrenValue = '';
   // console.log(entityActorIds)
-  if (entityParentIds) {
-    childrenValue = entityParentIds.reduce((memo2, childId) => {
+  if (entityChildrenIds) {
+    childrenValue = entityChildrenIds.reduce((memo2, childId) => {
       // console.log(actorId)
       const child = children && children.get(childId.toString());
       if (child) {
@@ -397,7 +387,7 @@ const prepChildData = ({
         childValue = addWarnings({ value: childValue, entity: child });
         return memo2 === ''
           ? childValue
-          : `${memo2}, ${childValue}`;
+          : `${memo2}${IN_CELL_SEPARATOR}${childValue}`;
       }
       return memo2;
     }, '');
@@ -407,6 +397,40 @@ const prepChildData = ({
     [`children_${childtypeId}`]: sanitiseText(childrenValue),
   });
 }, data);
+const prepMemberData = ({
+  entity, // Map
+  membertypes,
+  members, // Map
+  data,
+}) => Object.keys(membertypes).reduce((memo, actortypeId) => {
+  if (!membertypes[actortypeId].active) {
+    return memo;
+  }
+  const entityMemberIds = entity.getIn(['membersByType', parseInt(actortypeId, 10)]);
+  let membersValue = '';
+  // console.log(entityActorIds)
+  if (entityMemberIds) {
+    membersValue = entityMemberIds.reduce((memo2, memberId) => {
+      // console.log(actorId)
+      const member = members && members.get(memberId.toString());
+      if (member) {
+        const title = member.getIn(['attributes', 'title']);
+        const code = member.getIn(['attributes', 'code']);
+        let memberValue = (code && code !== '') ? `${code}|${title}` : title;
+        memberValue = addWarnings({ value: memberValue, entity: member });
+        return memo2 === ''
+          ? memberValue
+          : `${memo2}${IN_CELL_SEPARATOR}${memberValue}`;
+      }
+      return memo2;
+    }, '');
+  }
+  return ({
+    ...memo,
+    [`members_${actortypeId}`]: sanitiseText(membersValue),
+  });
+}, data);
+
 const prepResourceData = ({
   entity, // Map
   resourcetypes,
@@ -433,7 +457,7 @@ const prepResourceData = ({
 
         return memo2 === ''
           ? resourceValue
-          : `${memo2}, ${resourceValue}`;
+          : `${memo2}${IN_CELL_SEPARATOR}${resourceValue}`;
       }
       return memo2;
     }, '');
@@ -443,44 +467,13 @@ const prepResourceData = ({
     [`resources_${resourcetypeId}`]: sanitiseText(resourcesValue),
   });
 }, data);
-// const prepIndicatorData = ({
-//   entity, // Map
-//   indicators, // Map
-//   data,
-// }) => {
-//   const entityIndicatorConnections = entity.get('indicatorConnections');
-//   // let actorsValue = '';
-//   // // console.log(entityActorIds)
-//   if (entityIndicatorConnections) {
-//     const indicatorsValue = entityIndicatorConnections.reduce((memo, indicatorConnection) => {
-//       // console.log(actorId)
-//       const indicator = indicators.get(indicatorConnection.get('indicator_id').toString());
-//       if (indicator) {
-//         const code = indicator.getIn(['attributes', 'code']);
-//         const title = indicator.getIn(['attributes', 'title']);
-//         let indicatorValue = code !== '' ? `${code}|${title}` : title;
-//         indicatorValue = indicatorConnection.get('supportlevel_id')
-//           ? `${indicatorValue}|Support:${indicatorConnection.get('supportlevel_id')}`
-//           : indicatorValue;
-//         return memo === ''
-//           ? indicatorValue
-//           : `${memo}, ${indicatorValue}`;
-//       }
-//       return memo;
-//     }, '');
-//     return ({
-//       ...data,
-//       indicators: `"${indicatorsValue}"`,
-//     });
-//   }
-//   return data;
-// };
+
 const getIndicatorValue = ({ entity, indicatorId }) => {
   const indicatorConnection = entity
     .get('indicatorConnections')
     .find((connection) => qe(connection.get('indicator_id'), indicatorId));
   if (indicatorConnection) {
-    return indicatorConnection.get('supportlevel_id');
+    return indicatorConnection.get('supportlevel_id') || '';
   }
   return '';
 };
@@ -493,6 +486,7 @@ const prepIndicatorDataColumns = ({
     entity,
     indicatorId: indicator.get('id'),
   });
+
   return ({
     ...memo,
     [`indicator_${indicator.get('id')}`]: value,
@@ -516,13 +510,13 @@ const prepUserData = ({
         const indicatorValue = email !== '' ? `${title}(${email})` : title;
         return memo === ''
           ? indicatorValue
-          : `${memo}, ${indicatorValue}`;
+          : `${memo}${IN_CELL_SEPARATOR}${indicatorValue}`;
       }
       return memo;
     }, '');
     return ({
       ...data,
-      users: `"${usersValue}"`,
+      users: sanitiseText(usersValue),
     });
   }
   return data;
@@ -550,7 +544,7 @@ const prepActorDataAsRows = ({
             actor_id: actorId,
             actortype_id: typeNames.actortypes[actortypeId] || actortypeId,
             actor_code: actor.getIn(['attributes', 'code']),
-            actor_title: `"${actor.getIn(['attributes', 'title'])}"`,
+            actor_title: sanitiseText(actor.getIn(['attributes', 'title'])),
             actor_draft: !!actor.getIn(['attributes', 'draft']),
             actor_private: !!actor.getIn(['attributes', 'private']),
           };
@@ -592,7 +586,7 @@ const prepActionDataAsRows = ({
             action_id: actionId,
             actiontype_id: typeNames.actiontypes[actiontypeId] || actiontypeId,
             action_code: action.getIn(['attributes', 'code']),
-            action_title: `"${action.getIn(['attributes', 'title'])}"`,
+            action_title: sanitiseText(action.getIn(['attributes', 'title'])),
             action_draft: !!action.getIn(['attributes', 'draft']),
             action_private: !!action.getIn(['attributes', 'private']),
           };
@@ -631,7 +625,7 @@ const prepIndicatorDataAsRows = ({
             ...data,
             indicator_id: indicatorConnection.get('indicator_id'),
             indicator_code: indicator.getIn(['attributes', 'code']),
-            indicator_title: indicator.getIn(['attributes', 'title']),
+            indicator_title: sanitiseText(indicator.getIn(['attributes', 'title'])),
             indicator_supportlevel: indicatorConnection.get('supportlevel_id'),
             indicator_draft: !!indicator.getIn(['attributes', 'draft']),
             indicator_private: !!indicator.getIn(['attributes', 'private']),
@@ -736,17 +730,17 @@ export const prepareDataForActions = ({
       data,
     });
   }
-  if (hasUsers) {
-    data = prepUserData({
-      entity,
-      users: relationships && relationships.get('users'),
-      data,
-    });
-  }
   if (hasIndicators && !indicatorsAsRows) {
     data = prepIndicatorDataColumns({
       entity,
       indicators: relationships && relationships.get('indicators'),
+      data,
+    });
+  }
+  if (hasUsers) {
+    data = prepUserData({
+      entity,
+      users: relationships && relationships.get('users'),
       data,
     });
   }
@@ -783,6 +777,11 @@ export const prepareDataForActors = ({
   actiontypes,
   hasActionsAsTarget,
   actiontypesAsTarget,
+  hasAssociations,
+  associationtypes,
+  hasMembers,
+  membertypes,
+  hasUsers,
 }) => entities.reduce((memo, entity) => {
   let data = { id: entity.get('id') };
   // add attribute columns
@@ -820,6 +819,29 @@ export const prepareDataForActors = ({
       data,
     });
   }
+  if (hasAssociations) {
+    data = prepAssociationData({
+      entity,
+      associationtypes,
+      associations: relationships && relationships.get('associations'),
+      data,
+    });
+  }
+  if (hasMembers) {
+    data = prepMemberData({
+      entity,
+      membertypes,
+      members: relationships && relationships.get('members'),
+      data,
+    });
+  }
+  if (hasUsers) {
+    data = prepUserData({
+      entity,
+      users: relationships && relationships.get('users'),
+      data,
+    });
+  }
   let dataRows = [data];
   if (hasActions && actionsAsRows) {
     dataRows = prepActionDataAsRows({
@@ -841,13 +863,57 @@ export const prepareDataForActors = ({
 }, []);
 
 
-export const getDateSuffix = (datetime) => {
-  const date = datetime ? new Date(datetime) : new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is zero-based
-  const day = String(date.getDate()).padStart(2, '0');
-  const hours = String(date.getHours()).padStart(2, '0');
-  const minutes = String(date.getMinutes()).padStart(2, '0');
-  const seconds = String(date.getSeconds()).padStart(2, '0');
-  return `${year}${month}${day}_${hours}${minutes}${seconds}`;
+export const getAttributes = ({
+  typeId,
+  fieldAttributes,
+  isAdmin,
+  intl,
+}) => {
+  if (fieldAttributes) {
+    return Object.keys(fieldAttributes).reduce((memo, attKey) => {
+      const attValue = fieldAttributes[attKey];
+      const optional = typeof attValue.optional === 'boolean'
+        ? attValue.optional
+        : attValue.optional && attValue.optional.indexOf(typeId) > -1;
+      const required = typeof attValue.required === 'boolean'
+        ? attValue.required
+        : attValue.required && attValue.required.indexOf(typeId) > -1;
+      let passAdmin = true;
+      if (
+        !isAdmin
+        && (
+          attValue.adminOnly
+          || (attValue.adminOnlyForTypes && attValue.adminOnlyForTypes.indexOf(typeId) > -1)
+        )
+      ) {
+        passAdmin = false;
+      }
+      if (
+        !attValue.skipExport
+        // TODO: adminOnlyForTypes
+        && passAdmin
+        && (optional || required || (!attValue.optional && !attValue.required))
+      ) {
+        let active = false;
+        if (attValue.exportDefault) {
+          active = attValue.exportDefault;
+        }
+        if (attValue.exportRequired) {
+          active = true;
+        }
+        const label = `${intl.formatMessage(appMessages.attributes[attKey])}${attValue.exportRequired ? ' (required)' : ''}`;
+        return {
+          ...memo,
+          [attKey]: {
+            ...attValue,
+            active,
+            column: attValue.exportColumn || attKey,
+            label,
+          },
+        };
+      }
+      return memo;
+    }, {});
+  }
+  return [];
 };
