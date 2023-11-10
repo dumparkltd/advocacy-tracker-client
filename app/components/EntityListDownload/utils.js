@@ -177,6 +177,24 @@ const prepTaxonomyData = ({
     [`taxonomy_${taxId}`]: value,
   });
 }, data);
+const addWarnings = ({
+  value,
+  entity,
+}) => {
+  const draft = entity.getIn(['attributes', 'draft']);
+  const isPrivate = entity.getIn(['attributes', 'private']);
+  let warnings = [];
+  if (draft || isPrivate) {
+    if (draft) {
+      warnings = [...warnings, 'draft'];
+    }
+    if (isPrivate) {
+      warnings = [...warnings, 'private'];
+    }
+    return `${value} [${warnings.join('/')}]`;
+  }
+  return value;
+};
 
 const prepActorData = ({
   entity, // Map
@@ -197,7 +215,11 @@ const prepActorData = ({
       if (actor) {
         const title = actor.getIn(['attributes', 'title']);
         const code = actor.getIn(['attributes', 'code']);
-        const actorValue = (code && code !== '') ? `${code}|${title}` : title;
+        let actorValue = (code && code !== '') ? `${code}|${title}` : title;
+        actorValue = addWarnings({
+          value: actorValue,
+          entity: actor,
+        });
         return memo2 === ''
           ? actorValue
           : `${memo2}, ${actorValue}`;
@@ -208,6 +230,42 @@ const prepActorData = ({
   return ({
     ...memo,
     [`actors_${actortypeId}`]: `"${actorsValue}"`,
+  });
+}, data);
+const prepActionData = ({
+  entity, // Map
+  actiontypes,
+  actions, // Map
+  data,
+}) => Object.keys(actiontypes).reduce((memo, actiontypeId) => {
+  if (!actiontypes[actiontypeId].active) {
+    return memo;
+  }
+  const entityActionIds = entity.getIn(['actionsByType', parseInt(actiontypeId, 10)]);
+  let actionsValue = '';
+  // console.log(entityActorIds)
+  if (entityActionIds) {
+    actionsValue = entityActionIds.reduce((memo2, actionId) => {
+      // console.log(actionId)
+      const action = actions.get(actionId.toString());
+      if (action) {
+        const title = action.getIn(['attributes', 'title']);
+        const code = action.getIn(['attributes', 'code']);
+        let actionValue = (code && code !== '') ? `${code}|${title}` : title;
+        actionValue = addWarnings({
+          value: actionValue,
+          entity: action,
+        });
+        return memo2 === ''
+          ? actionValue
+          : `${memo2}, ${actionValue}`;
+      }
+      return memo2;
+    }, '');
+  }
+  return ({
+    ...memo,
+    [`actions_${actiontypeId}`]: sanitiseText(actionsValue),
   });
 }, data);
 const prepTargetData = ({
@@ -229,7 +287,11 @@ const prepTargetData = ({
       if (actor) {
         const title = actor.getIn(['attributes', 'title']);
         const code = actor.getIn(['attributes', 'code']);
-        const actorValue = (code && code !== '') ? `${code}|${title}` : title;
+        let actorValue = (code && code !== '') ? `${code}|${title}` : title;
+        actorValue = addWarnings({
+          value: actorValue,
+          entity: actor,
+        });
         return memo2 === ''
           ? actorValue
           : `${memo2}, ${actorValue}`;
@@ -239,7 +301,43 @@ const prepTargetData = ({
   }
   return ({
     ...memo,
-    [`targets_${actortypeId}`]: `"${actorsValue}"`,
+    [`targets_${actortypeId}`]: sanitiseText(actorsValue),
+  });
+}, data);
+const prepActionsAsTargetData = ({
+  entity,
+  actiontypesAsTarget,
+  actions,
+  data,
+}) => Object.keys(actiontypesAsTarget).reduce((memo, actiontypeId) => {
+  if (!actiontypesAsTarget[actiontypeId].active) {
+    return memo;
+  }
+  const entityActionIds = entity.getIn(['targetingActionsByType', parseInt(actiontypeId, 10)]);
+  let actionsValue = '';
+  // console.log(entityActorIds)
+  if (entityActionIds) {
+    actionsValue = entityActionIds.reduce((memo2, actionId) => {
+      // console.log(actorId)
+      const action = actions.get(actionId.toString());
+      if (action) {
+        const title = action.getIn(['attributes', 'title']);
+        const code = action.getIn(['attributes', 'code']);
+        let actionValue = (code && code !== '') ? `${code}|${title}` : title;
+        actionValue = addWarnings({
+          value: actionValue,
+          entity: action,
+        });
+        return memo2 === ''
+          ? actionValue
+          : `${memo2}, ${actionValue}`;
+      }
+      return memo2;
+    }, '');
+  }
+  return ({
+    ...memo,
+    [`targeted-by-actions_${actiontypeId}`]: sanitiseText(actionsValue),
   });
 }, data);
 
@@ -262,7 +360,8 @@ const prepParentData = ({
       if (parent) {
         const title = parent.getIn(['attributes', 'title']);
         const code = parent.getIn(['attributes', 'code']);
-        const parentValue = (code && code !== '') ? `${code}|${title}` : title;
+        let parentValue = (code && code !== '') ? `${code}|${title}` : title;
+        parentValue = addWarnings({ value: parentValue, entity: parent });
         return memo2 === ''
           ? parentValue
           : `${memo2}, ${parentValue}`;
@@ -272,7 +371,7 @@ const prepParentData = ({
   }
   return ({
     ...memo,
-    [`parents_${parenttypeId}`]: `"${parentsValue}"`,
+    [`parents_${parenttypeId}`]: sanitiseText(parentsValue),
   });
 }, data);
 const prepChildData = ({
@@ -294,7 +393,8 @@ const prepChildData = ({
       if (child) {
         const title = child.getIn(['attributes', 'title']);
         const code = child.getIn(['attributes', 'code']);
-        const childValue = (code && code !== '') ? `${code}|${title}` : title;
+        let childValue = (code && code !== '') ? `${code}|${title}` : title;
+        childValue = addWarnings({ value: childValue, entity: child });
         return memo2 === ''
           ? childValue
           : `${memo2}, ${childValue}`;
@@ -304,7 +404,7 @@ const prepChildData = ({
   }
   return ({
     ...memo,
-    [`children_${childtypeId}`]: `"${childrenValue}"`,
+    [`children_${childtypeId}`]: sanitiseText(childrenValue),
   });
 }, data);
 const prepResourceData = ({
@@ -329,6 +429,8 @@ const prepResourceData = ({
         const url = resource.getIn(['attributes', 'url']);
         let resourceValue = (code && code !== '') ? `${code}|${title}` : title;
         resourceValue = (url && url !== '') ? `${resourceValue}(${url})` : title;
+        resourceValue = addWarnings({ value: resourceValue, entity: resource });
+
         return memo2 === ''
           ? resourceValue
           : `${memo2}, ${resourceValue}`;
@@ -338,7 +440,7 @@ const prepResourceData = ({
   }
   return ({
     ...memo,
-    [`resources_${resourcetypeId}`]: `"${resourcesValue}"`,
+    [`resources_${resourcetypeId}`]: sanitiseText(resourcesValue),
   });
 }, data);
 // const prepIndicatorData = ({
@@ -443,13 +545,56 @@ const prepActorDataAsRows = ({
       if (entityActorIds) {
         const dataTypeRows = entityActorIds.reduce((memo2, actorId) => {
           const actor = actors.get(actorId.toString());
-          const actorTypeId = actor.getIn(['attributes', 'actortype_id']);
           const dataRow = {
             ...data,
             actor_id: actorId,
-            actortype_id: typeNames.actortypes[actorTypeId] || actorTypeId,
+            actortype_id: typeNames.actortypes[actortypeId] || actortypeId,
             actor_code: actor.getIn(['attributes', 'code']),
-            actor_title: actor.getIn(['attributes', 'title']),
+            actor_title: `"${actor.getIn(['attributes', 'title'])}"`,
+            actor_draft: !!actor.getIn(['attributes', 'draft']),
+            actor_private: !!actor.getIn(['attributes', 'private']),
+          };
+          return [
+            ...memo2,
+            dataRow,
+          ];
+        }, []);
+        return [
+          ...memo,
+          ...dataTypeRows,
+        ];
+      }
+      return memo;
+    }, []);
+    return dataRows;
+  }
+  return [data];
+};
+const prepActionDataAsRows = ({
+  entity, // Map
+  actiontypes,
+  actions, // Map
+  data,
+  typeNames,
+}) => {
+  if (entity.get('actions') && actiontypes) {
+    const dataRows = Object.keys(actiontypes).reduce((memo, actiontypeId) => {
+      if (!actiontypes[actiontypeId].active) {
+        return memo;
+      }
+      const entityActorIds = entity.getIn(['actionsByType', parseInt(actiontypeId, 10)]);
+      // console.log(entityActorIds)
+      if (entityActorIds) {
+        const dataTypeRows = entityActorIds.reduce((memo2, actionId) => {
+          const action = actions.get(actionId.toString());
+          const dataRow = {
+            ...data,
+            action_id: actionId,
+            actiontype_id: typeNames.actiontypes[actiontypeId] || actiontypeId,
+            action_code: action.getIn(['attributes', 'code']),
+            action_title: `"${action.getIn(['attributes', 'title'])}"`,
+            action_draft: !!action.getIn(['attributes', 'draft']),
+            action_private: !!action.getIn(['attributes', 'private']),
           };
           return [
             ...memo2,
@@ -488,6 +633,8 @@ const prepIndicatorDataAsRows = ({
             indicator_code: indicator.getIn(['attributes', 'code']),
             indicator_title: indicator.getIn(['attributes', 'title']),
             indicator_supportlevel: indicatorConnection.get('supportlevel_id'),
+            indicator_draft: !!indicator.getIn(['attributes', 'draft']),
+            indicator_private: !!indicator.getIn(['attributes', 'private']),
           };
           return [
             ...memo2,
@@ -506,7 +653,7 @@ const prepIndicatorDataAsRows = ({
   return dataRows;
 };
 
-export const prepareData = ({
+export const prepareDataForActions = ({
   // typeId,
   // config,
   attributes,
@@ -620,6 +767,76 @@ export const prepareData = ({
       dataRows,
     });
   }
+  return [...memo, ...dataRows];
+}, []);
+export const prepareDataForActors = ({
+  // typeId,
+  // config,
+  attributes,
+  entities,
+  typeNames,
+  taxonomies,
+  taxonomyColumns,
+  relationships,
+  hasActions,
+  actionsAsRows,
+  actiontypes,
+  hasActionsAsTarget,
+  actiontypesAsTarget,
+}) => entities.reduce((memo, entity) => {
+  let data = { id: entity.get('id') };
+  // add attribute columns
+  if (attributes) {
+    data = prepAttributeData({
+      entity,
+      attributes,
+      typeNames,
+      data,
+      relationships,
+    });
+  }
+  if (taxonomyColumns) {
+    data = prepTaxonomyData({
+      entity,
+      taxonomyColumns,
+      taxonomies,
+      data,
+    });
+  }
+  if (hasActions && !actionsAsRows) {
+    data = prepActionData({
+      entity,
+      actiontypes,
+      actions: relationships && relationships.get('measures'),
+      data,
+    });
+  }
+
+  if (hasActionsAsTarget) {
+    data = prepActionsAsTargetData({
+      entity,
+      actiontypesAsTarget,
+      actions: relationships && relationships.get('measures'),
+      data,
+    });
+  }
+  let dataRows = [data];
+  if (hasActions && actionsAsRows) {
+    dataRows = prepActionDataAsRows({
+      entity,
+      actiontypes,
+      actions: relationships && relationships.get('measures'),
+      data,
+      typeNames,
+    });
+  }
+  // if (hasIndicators && indicatorsAsRows) {
+  //   dataRows = prepIndicatorDataAsRows({
+  //     entity,
+  //     indicators: relationships && relationships.get('indicators'),
+  //     dataRows,
+  //   });
+  // }
   return [...memo, ...dataRows];
 }, []);
 
