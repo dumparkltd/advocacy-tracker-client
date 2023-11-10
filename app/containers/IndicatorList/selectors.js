@@ -16,6 +16,7 @@ import {
   selectCategories,
   selectActors,
   selectIncludeInofficialStatements,
+  selectUsers,
 } from 'containers/App/selectors';
 
 import {
@@ -43,6 +44,7 @@ export const selectConnections = createSelector(
   selectActors,
   selectConnectedCategoryQuery,
   selectIncludeInofficialStatements,
+  selectUsers,
   (
     ready,
     actions,
@@ -51,6 +53,7 @@ export const selectConnections = createSelector(
     actors,
     connectedCategoryQuery,
     includeInofficial,
+    users,
   ) => {
     if (ready) {
       const actionsWithCategories = entitiesSetCategoryIds(
@@ -86,6 +89,9 @@ export const selectConnections = createSelector(
       ).set(
         API.ACTORS,
         actors,
+      ).set(
+        API.USERS,
+        users,
       );
     }
     return new Map();

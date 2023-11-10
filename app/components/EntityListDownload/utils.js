@@ -32,10 +32,10 @@ const getValue = ({
   key, attribute, entity, typeNames, relationships,
 }) => {
   const val = entity.getIn(['attributes', key]) || '';
-  if (key === 'measuretype_id') {
+  if (key === 'measuretype_id' && typeNames) {
     return typeNames.actiontypes[val] || val;
   }
-  if (key === 'actortype_id') {
+  if (key === 'actortype_id' && typeNames) {
     return typeNames.actortypes[val] || val;
   }
   if (attribute.type === 'bool') {
@@ -859,6 +859,26 @@ export const prepareDataForActors = ({
   //     dataRows,
   //   });
   // }
+  return [...memo, ...dataRows];
+}, []);
+export const prepareDataForIndicators = ({
+  // typeId,
+  // config,
+  entities,
+  relationships,
+  attributes,
+}) => entities.reduce((memo, entity) => {
+  let data = { id: entity.get('id') };
+  // add attribute columns
+  if (attributes) {
+    data = prepAttributeData({
+      entity,
+      attributes,
+      data,
+      relationships,
+    });
+  }
+  const dataRows = [data];
   return [...memo, ...dataRows];
 }, []);
 

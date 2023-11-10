@@ -56,7 +56,12 @@ import {
 import appMessages from 'containers/App/messages';
 
 // import appMessages from 'containers/App/messages';
-import { USER_ROLES, ACTION_FIELDS, ACTOR_FIELDS } from 'themes/config';
+import {
+  USER_ROLES,
+  ACTION_FIELDS,
+  ACTOR_FIELDS,
+  INDICATOR_FIELDS,
+} from 'themes/config';
 
 import EntitiesMap from './EntitiesMap';
 import EntitiesListView from './EntitiesListView';
@@ -215,6 +220,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         return ACTION_FIELDS;
       case 'actortypes':
         return ACTOR_FIELDS;
+      case 'indicators':
+        return INDICATOR_FIELDS;
       default:
         return null;
     }
@@ -454,8 +461,12 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               connections={connections}
               onClose={() => this.onDownloadDismiss()}
               typeNames={{
-                actiontypes: actiontypes.map((type) => intl.formatMessage(appMessages.entities[`actions_${type.get('id')}`].single)).toJS(),
-                actortypes: actortypes.map((type) => intl.formatMessage(appMessages.entities[`actors_${type.get('id')}`].single)).toJS(),
+                actiontypes: actiontypes && actiontypes.map(
+                  (type) => intl.formatMessage(appMessages.entities[`actions_${type.get('id')}`].single)
+                ).toJS(),
+                actortypes: actortypes && actortypes.map(
+                  (type) => intl.formatMessage(appMessages.entities[`actors_${type.get('id')}`].single)
+                ).toJS(),
               }}
               isAdmin={isAdmin}
             />

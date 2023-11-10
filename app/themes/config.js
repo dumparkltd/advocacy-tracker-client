@@ -948,6 +948,18 @@ export const INDICATOR_FIELDS = {
     },
   },
   ATTRIBUTES: {
+    code: {
+      type: 'text',
+      optional: true,
+      adminOnly: true,
+    },
+    title: {
+      required: true,
+      type: 'text',
+    },
+    description: {
+      type: 'markdown',
+    },
     draft: {
       defaultValue: true,
       required: true,
@@ -969,17 +981,48 @@ export const INDICATOR_FIELDS = {
       required: true,
       type: 'bool',
     },
-    title: {
-      required: true,
-      type: 'text',
-    },
-    code: {
-      type: 'text',
-      optional: true,
+    created_at: {
+      skipImport: true,
+      type: 'datetime',
       adminOnly: true,
+      meta: true,
     },
-    description: {
-      type: 'markdown',
+    created_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'created_by',
+    },
+    updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'updated_by',
+    },
+    relationship_updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+      exportColumn: 'connection_updated_at',
+    },
+    relationship_updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'connection_updated_by',
     },
   },
 };

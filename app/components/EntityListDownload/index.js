@@ -37,11 +37,13 @@ import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonSubmit from 'components/buttons/ButtonSubmit';
 import OptionsForActions from './OptionsForActions';
 import OptionsForActors from './OptionsForActors';
+import OptionsForIndicators from './OptionsForIndicators';
 
 import messages from './messages';
 import {
   prepareDataForActions,
   prepareDataForActors,
+  prepareDataForIndicators,
   getAttributes,
   getDateSuffix,
   // getTaxonomies,
@@ -223,10 +225,10 @@ export function EntityListDownload({
   // figure out options for each relationship type
   useEffect(() => {
     // set initial config values
-    if (hasAttributes && fields && typeId) {
+    if (hasAttributes && fields) {
       setAttributes(
         getAttributes({
-          typeId,
+          typeId, // optional
           fieldAttributes: fields && fields.ATTRIBUTES,
           isAdmin,
           intl,
@@ -430,7 +432,6 @@ export function EntityListDownload({
     hasMembers,
     hasAssociations,
   ]);
-
   // set initial csv file name
   useEffect(() => {
     let title = 'unspecified';
@@ -439,6 +440,9 @@ export function EntityListDownload({
     }
     if (config.types === 'actortypes') {
       title = intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural);
+    }
+    if (config.types === 'indicators') {
+      title = intl.formatMessage(appMessages.entities.indicators.plural);
     }
     setTypeTitle(title);
     setCSVFilename(snakeCase(title));
@@ -629,11 +633,11 @@ export function EntityListDownload({
       ];
     }
     csvData = entities && prepareDataForActions({
-      attributes,
       entities,
+      relationships,
+      attributes,
       taxonomies,
       taxonomyColumns,
-      relationships,
       typeNames,
       hasActors,
       actorsAsRows,
@@ -739,11 +743,11 @@ export function EntityListDownload({
       ];
     }
     csvData = entities && prepareDataForActors({
-      attributes,
       entities,
+      relationships,
+      attributes,
       taxonomies,
       taxonomyColumns,
-      relationships,
       typeNames,
       hasActions,
       actionsAsRows,
@@ -755,6 +759,14 @@ export function EntityListDownload({
       hasMembers,
       membertypes,
       hasUsers: hasUsers && usersActive,
+    });
+  }
+  if (config.types === 'indicators') {
+    console.log('relationships', relationships && relationships.toJS());
+    csvData = entities && prepareDataForIndicators({
+      entities,
+      relationships,
+      attributes,
     });
   }
 
@@ -841,6 +853,13 @@ export function EntityListDownload({
             hasTaxonomies={hasTaxonomies}
             setTaxonomies={setTaxonomies}
             taxonomyColumns={taxonomyColumns}
+          />
+        )}
+        {config.types === 'indicators' && (
+          <OptionsForIndicators
+            hasAttributes={hasAttributes}
+            attributes={attributes}
+            setAttributes={setAttributes}
           />
         )}
         <Box direction="row" gap="medium" align="center" margin={{ top: 'xlarge' }}>
