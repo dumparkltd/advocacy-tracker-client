@@ -616,8 +616,8 @@ export function EntityListDownload({
         if (isAdmin) {
           csvColumns = [
             ...csvColumns,
-            { id: 'indicator_draft', displayName: 'indicator_draft' },
-            { id: 'indicator_private', displayName: 'indicator_private' },
+            { id: 'indicator_draft', displayName: 'topic_draft' },
+            { id: 'indicator_private', displayName: 'topic_private' },
           ];
         }
       }
