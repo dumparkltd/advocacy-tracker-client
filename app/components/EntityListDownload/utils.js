@@ -1,5 +1,7 @@
 import qe from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
+import { ACTIONTYPES, ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
+
 
 // const IN_CELL_SEPARATOR = ', \n';
 const IN_CELL_SEPARATOR = ', ';
@@ -522,6 +524,27 @@ const prepUserData = ({
   return data;
 };
 
+const prepSupportData = ({ entity, data }) => {
+  const statementCount = entity.getIn(['actionsByType', parseInt(ACTIONTYPES.EXPRESS, 10)])
+    ? entity.getIn(['actionsByType', parseInt(ACTIONTYPES.EXPRESS, 10)]).size
+    : 0;
+  const supportCounts = Object.values(ACTION_INDICATOR_SUPPORTLEVELS).reduce((memo, level) => {
+    if (level.value === '0') {
+      return memo;
+    }
+    const count = entity.getIn(['supportlevels', level.value, 'count']) || 0;
+    return ({
+      ...memo,
+      [`support_level_${level.value}`]: count,
+    });
+  }, {});
+  return ({
+    ...data,
+    statement_count: statementCount,
+    ...supportCounts,
+  });
+};
+
 const prepActorDataAsRows = ({
   entity, // Map
   actortypes,
@@ -861,25 +884,30 @@ export const prepareDataForActors = ({
   // }
   return [...memo, ...dataRows];
 }, []);
+
 export const prepareDataForIndicators = ({
   // typeId,
   // config,
   entities,
   relationships,
   attributes,
+  includeSupport,
 }) => entities.reduce((memo, entity) => {
   let data = { id: entity.get('id') };
   // add attribute columns
   if (attributes) {
     data = prepAttributeData({
+      data,
       entity,
       attributes,
-      data,
       relationships,
     });
   }
-  const dataRows = [data];
-  return [...memo, ...dataRows];
+  if (includeSupport) {
+    data = prepSupportData({ entity, data });
+  }
+  // const dataRows = [data];
+  return [...memo, data];
 }, []);
 
 

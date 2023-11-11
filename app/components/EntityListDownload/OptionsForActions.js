@@ -22,7 +22,7 @@ export function OptionsForActions({
   indicatorsActive,
   setIndicatorsActive,
   includeUsers,
-  setUsersActive,
+  setIncludeUsers,
   attributes,
   setAttributes,
   taxonomyColumns,
@@ -254,7 +254,7 @@ export function OptionsForActions({
           activeOptionCount={includeUsers ? 1 : 0}
           optionCount={1}
           active={includeUsers}
-          onSetActive={(val) => setUsersActive(val)}
+          onSetActive={(val) => setIncludeUsers(val)}
           onActiveLabel="Include users"
         />
       )}
@@ -270,7 +270,7 @@ OptionsForActions.propTypes = {
   indicatorsActive: PropTypes.bool,
   setIndicatorsActive: PropTypes.func,
   includeUsers: PropTypes.bool,
-  setUsersActive: PropTypes.func,
+  setIncludeUsers: PropTypes.func,
   attributes: PropTypes.object,
   setAttributes: PropTypes.func,
   taxonomyColumns: PropTypes.object,

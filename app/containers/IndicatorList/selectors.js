@@ -121,6 +121,7 @@ export const selectIndicatorsWithConnections = createSelector(
     indicatorAssociationsGrouped,
   ) => {
     if (ready) {
+      // console.log('countries', countries && countries.toJS())
       return indicators.map(
         (indicator) => {
           const indicatorActions = indicatorAssociationsGrouped.get(parseInt(indicator.get('id'), 10));
@@ -136,16 +137,23 @@ export const selectIndicatorsWithConnections = createSelector(
                   ? latest.get('supportlevel_id').toString()
                   : '0';
                 if (levelsMemo.get(level)) {
+                  const actorIds = levelsMemo.getIn([level, 'actors'])
+                    ? levelsMemo.getIn([level, 'actors']).set(country.get('id'), parseInt(country.get('id'), 10))
+                    : Map().set(country.get('id'), parseInt(country.get('id'), 10));
+                  let actorIdsViaGroups = null;
+                  if (latest.get('viaGroups') && latest.get('viaGroups').size > 0) {
+                    actorIdsViaGroups = levelsMemo.getIn([level, 'actorsViaGroups'])
+                      ? levelsMemo.getIn([level, 'actorsViaGroups']).set(country.get('id'), parseInt(country.get('id'), 10))
+                      : Map().set(country.get('id'), parseInt(country.get('id'), 10));
+                  }
                   return levelsMemo.setIn(
-                    [level, 'count'],
-                    levelsMemo.getIn([level, 'count'])
-                      ? levelsMemo.getIn([level, 'count']) + 1
-                      : 1,
+                    [level, 'count'], actorIds ? actorIds.size : 0,
                   ).setIn(
-                    [level, 'actors'],
-                    levelsMemo.getIn([level, 'actors'])
-                      ? levelsMemo.getIn([level, 'actors']).set(country.get('id'), country.get('id'))
-                      : Map().set(country.get('id'), parseInt(country.get('id'), 10)),
+                    [level, 'countViaGroups'], actorIdsViaGroups ? actorIdsViaGroups.size : 0,
+                  ).setIn(
+                    [level, 'actors'], actorIds,
+                  ).setIn(
+                    [level, 'actorsViaGroups'], actorIdsViaGroups,
                   );
                 }
                 return levelsMemo;

@@ -30,6 +30,7 @@ import {
   MEMBERSHIPS,
   USER_ACTIONTYPES,
   USER_ACTORTYPES,
+  ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
@@ -114,7 +115,7 @@ export function EntityListDownload({
   const [typeTitle, setTypeTitle] = useState('entities');
   const [csvFilename, setCSVFilename] = useState('csv');
   const [csvSuffix, setCSVSuffix] = useState(true);
-  const [usersActive, setUsersActive] = useState(false);
+  const [includeUsers, setIncludeUsers] = useState(false);
   const [attributes, setAttributes] = useState({});
   const [taxonomyColumns, setTaxonomies] = useState({});
   // for actions
@@ -132,6 +133,8 @@ export function EntityListDownload({
   const [actiontypesAsTarget, setActiontypesAsTarget] = useState({});
   const [membertypes, setMembertypes] = useState({});
   const [associationtypes, setAssociationtypes] = useState({});
+  // for indicators
+  const [includeSupport, setIncludeSupport] = useState(false);
   // figure out export options
   const hasAttributes = !!config.attributes;
   const hasTaxonomies = !!config.taxonomies;
@@ -483,293 +486,313 @@ export function EntityListDownload({
     }, csvColumns);
   }
   let csvData;
-  // for actions ///////////////////////////////////////////////////////////////
-  if (config.types === 'actiontypes') {
-    if (hasActors) {
-      if (!actorsAsRows) {
-        csvColumns = Object.keys(actortypes).reduce((memo, actortypeId) => {
-          if (actortypes[actortypeId].active) {
-            let displayName = actortypes[actortypeId].column;
-            if (!displayName || actortypes[actortypeId].column === '') {
+  if (entities) {
+    // for actions ///////////////////////////////////////////////////////////////
+    if (config.types === 'actiontypes') {
+      if (hasActors) {
+        if (!actorsAsRows) {
+          csvColumns = Object.keys(actortypes).reduce((memo, actortypeId) => {
+            if (actortypes[actortypeId].active) {
+              let displayName = actortypes[actortypeId].column;
+              if (!displayName || actortypes[actortypeId].column === '') {
+                displayName = actortypeId;
+              }
+              return [
+                ...memo,
+                { id: `actors_${actortypeId}`, displayName },
+              ];
+            }
+            return memo;
+          }, csvColumns);
+        } else {
+          csvColumns = [
+            ...csvColumns,
+            { id: 'actor_id', displayName: 'actor_id' },
+            { id: 'actortype_id', displayName: 'actor_type' },
+            { id: 'actor_code', displayName: 'actor_code' },
+            { id: 'actor_title', displayName: 'actor_title' },
+          ];
+          if (isAdmin) {
+            csvColumns = [
+              ...csvColumns,
+              { id: 'actor_draft', displayName: 'actor_draft' },
+              { id: 'actor_private', displayName: 'actor_private' },
+            ];
+          }
+        }
+      }
+      if (hasTargets) {
+        csvColumns = Object.keys(targettypes).reduce((memo, actortypeId) => {
+          if (targettypes[actortypeId].active) {
+            let displayName = targettypes[actortypeId].column;
+            if (!displayName || targettypes[actortypeId].column === '') {
               displayName = actortypeId;
             }
             return [
               ...memo,
-              { id: `actors_${actortypeId}`, displayName },
+              { id: `targets_${actortypeId}`, displayName },
             ];
           }
           return memo;
         }, csvColumns);
-      } else {
-        csvColumns = [
-          ...csvColumns,
-          { id: 'actor_id', displayName: 'actor_id' },
-          { id: 'actortype_id', displayName: 'actor_type' },
-          { id: 'actor_code', displayName: 'actor_code' },
-          { id: 'actor_title', displayName: 'actor_title' },
-        ];
-        if (isAdmin) {
-          csvColumns = [
-            ...csvColumns,
-            { id: 'actor_draft', displayName: 'actor_draft' },
-            { id: 'actor_private', displayName: 'actor_private' },
-          ];
-        }
       }
-    }
-    if (hasTargets) {
-      csvColumns = Object.keys(targettypes).reduce((memo, actortypeId) => {
-        if (targettypes[actortypeId].active) {
-          let displayName = targettypes[actortypeId].column;
-          if (!displayName || targettypes[actortypeId].column === '') {
-            displayName = actortypeId;
-          }
-          return [
-            ...memo,
-            { id: `targets_${actortypeId}`, displayName },
-          ];
-        }
-        return memo;
-      }, csvColumns);
-    }
-    if (hasParentActions) {
-      relationships = relationships.set('parents', relationships.get('measures'));
+      if (hasParentActions) {
+        relationships = relationships.set('parents', relationships.get('measures'));
 
-      csvColumns = Object.keys(parenttypes).reduce((memo, parenttypeId) => {
-        if (parenttypes[parenttypeId].active) {
-          let displayName = parenttypes[parenttypeId].column;
-          if (!displayName || parenttypes[parenttypeId].column === '') {
-            displayName = parenttypeId;
-          }
-          return [
-            ...memo,
-            { id: `parents_${parenttypeId}`, displayName },
-          ];
-        }
-        return memo;
-      }, csvColumns);
-    }
-    if (hasChildActions) {
-      relationships = relationships.set('children', relationships.get('measures'));
-      csvColumns = Object.keys(childtypes).reduce((memo, childtypeId) => {
-        if (childtypes[childtypeId].active) {
-          let displayName = childtypes[childtypeId].column;
-          if (!displayName || childtypes[childtypeId].column === '') {
-            displayName = childtypeId;
-          }
-          return [
-            ...memo,
-            { id: `children_${childtypeId}`, displayName },
-          ];
-        }
-        return memo;
-      }, csvColumns);
-    }
-    if (hasResources) {
-      csvColumns = Object.keys(resourcetypes).reduce((memo, resourcetypeId) => {
-        if (resourcetypes[resourcetypeId].active) {
-          let displayName = resourcetypes[resourcetypeId].column;
-          if (!displayName || resourcetypes[resourcetypeId].column === '') {
-            displayName = resourcetypeId;
-          }
-          return [
-            ...memo,
-            { id: `resources_${resourcetypeId}`, displayName },
-          ];
-        }
-        return memo;
-      }, csvColumns);
-    }
-    if (hasIndicators && indicatorsActive) {
-      if (!indicatorsAsRows) {
-        const indicatorColumns = relationships
-          && relationships.get('indicators')
-          && relationships.get('indicators').reduce((memo, indicator) => {
-            let displayName = 'position_topic_';
-            if (indicator.getIn(['attributes', 'code']) && indicator.getIn(['attributes', 'code']).trim() !== '') {
-              displayName += indicator.getIn(['attributes', 'code']);
-            } else {
-              displayName += indicator.get('id');
-            }
-            if (indicator.getIn(['attributes', 'draft'])) {
-              displayName += '_DRAFT';
-            }
-            if (indicator.getIn(['attributes', 'private'])) {
-              displayName += '_PRIVATE';
+        csvColumns = Object.keys(parenttypes).reduce((memo, parenttypeId) => {
+          if (parenttypes[parenttypeId].active) {
+            let displayName = parenttypes[parenttypeId].column;
+            if (!displayName || parenttypes[parenttypeId].column === '') {
+              displayName = parenttypeId;
             }
             return [
               ...memo,
-              {
-                id: `indicator_${indicator.get('id')}`,
-                displayName,
-              },
+              { id: `parents_${parenttypeId}`, displayName },
             ];
-          }, []);
-        csvColumns = [
-          ...csvColumns,
-          ...indicatorColumns,
-        ];
-      } else {
-        csvColumns = [
-          ...csvColumns,
-          { id: 'indicator_id', displayName: 'topic_id' },
-          { id: 'indicator_code', displayName: 'topic_code' },
-          { id: 'indicator_title', displayName: 'topic_title' },
-          { id: 'indicator_supportlevel', displayName: 'topic_position' },
-        ];
-        if (isAdmin) {
+          }
+          return memo;
+        }, csvColumns);
+      }
+      if (hasChildActions) {
+        relationships = relationships.set('children', relationships.get('measures'));
+        csvColumns = Object.keys(childtypes).reduce((memo, childtypeId) => {
+          if (childtypes[childtypeId].active) {
+            let displayName = childtypes[childtypeId].column;
+            if (!displayName || childtypes[childtypeId].column === '') {
+              displayName = childtypeId;
+            }
+            return [
+              ...memo,
+              { id: `children_${childtypeId}`, displayName },
+            ];
+          }
+          return memo;
+        }, csvColumns);
+      }
+      if (hasResources) {
+        csvColumns = Object.keys(resourcetypes).reduce((memo, resourcetypeId) => {
+          if (resourcetypes[resourcetypeId].active) {
+            let displayName = resourcetypes[resourcetypeId].column;
+            if (!displayName || resourcetypes[resourcetypeId].column === '') {
+              displayName = resourcetypeId;
+            }
+            return [
+              ...memo,
+              { id: `resources_${resourcetypeId}`, displayName },
+            ];
+          }
+          return memo;
+        }, csvColumns);
+      }
+      if (hasIndicators && indicatorsActive) {
+        if (!indicatorsAsRows) {
+          const indicatorColumns = relationships
+            && relationships.get('indicators')
+            && relationships.get('indicators').reduce((memo, indicator) => {
+              let displayName = 'position_topic_';
+              if (indicator.getIn(['attributes', 'code']) && indicator.getIn(['attributes', 'code']).trim() !== '') {
+                displayName += indicator.getIn(['attributes', 'code']);
+              } else {
+                displayName += indicator.get('id');
+              }
+              if (indicator.getIn(['attributes', 'draft'])) {
+                displayName += '_DRAFT';
+              }
+              if (indicator.getIn(['attributes', 'private'])) {
+                displayName += '_PRIVATE';
+              }
+              return [
+                ...memo,
+                {
+                  id: `indicator_${indicator.get('id')}`,
+                  displayName,
+                },
+              ];
+            }, []);
           csvColumns = [
             ...csvColumns,
-            { id: 'indicator_draft', displayName: 'topic_draft' },
-            { id: 'indicator_private', displayName: 'topic_private' },
+            ...indicatorColumns,
           ];
+        } else {
+          csvColumns = [
+            ...csvColumns,
+            { id: 'indicator_id', displayName: 'topic_id' },
+            { id: 'indicator_code', displayName: 'topic_code' },
+            { id: 'indicator_title', displayName: 'topic_title' },
+            { id: 'indicator_supportlevel', displayName: 'topic_position' },
+          ];
+          if (isAdmin) {
+            csvColumns = [
+              ...csvColumns,
+              { id: 'indicator_draft', displayName: 'topic_draft' },
+              { id: 'indicator_private', displayName: 'topic_private' },
+            ];
+          }
         }
       }
+      if (hasUsers && includeUsers) {
+        csvColumns = [
+          ...csvColumns,
+          { id: 'users', displayName: 'assigned_users' },
+        ];
+      }
+      csvData = prepareDataForActions({
+        entities,
+        relationships,
+        attributes,
+        taxonomies,
+        taxonomyColumns,
+        typeNames,
+        hasActors,
+        actorsAsRows,
+        actortypes,
+        hasTargets,
+        targettypes,
+        hasParentActions,
+        parenttypes,
+        hasChildActions,
+        childtypes,
+        hasResources,
+        resourcetypes,
+        hasIndicators: hasIndicators && indicatorsActive,
+        indicatorsAsRows,
+        hasUsers: hasUsers && includeUsers,
+      });
     }
-    if (hasUsers && usersActive) {
-      csvColumns = [
-        ...csvColumns,
-        { id: 'users', displayName: 'assigned_users' },
-      ];
-    }
-    csvData = entities && prepareDataForActions({
-      entities,
-      relationships,
-      attributes,
-      taxonomies,
-      taxonomyColumns,
-      typeNames,
-      hasActors,
-      actorsAsRows,
-      actortypes,
-      hasTargets,
-      targettypes,
-      hasParentActions,
-      parenttypes,
-      hasChildActions,
-      childtypes,
-      hasResources,
-      resourcetypes,
-      hasIndicators: hasIndicators && indicatorsActive,
-      indicatorsAsRows,
-      hasUsers: hasUsers && usersActive,
-    });
-  }
-  // for actors ///////////////////////////////////////////////////////////////
-  if (config.types === 'actortypes') {
-    if (hasActions) {
-      if (!actionsAsRows) {
-        csvColumns = Object.keys(actiontypes).reduce((memo, actiontypeId) => {
-          if (actiontypes[actiontypeId].active) {
-            let displayName = actiontypes[actiontypeId].column;
-            if (!displayName || actiontypes[actiontypeId].column === '') {
+    // for actors ///////////////////////////////////////////////////////////////
+    if (config.types === 'actortypes') {
+      if (hasActions) {
+        if (!actionsAsRows) {
+          csvColumns = Object.keys(actiontypes).reduce((memo, actiontypeId) => {
+            if (actiontypes[actiontypeId].active) {
+              let displayName = actiontypes[actiontypeId].column;
+              if (!displayName || actiontypes[actiontypeId].column === '') {
+                displayName = actiontypeId;
+              }
+              return [
+                ...memo,
+                { id: `actions_${actiontypeId}`, displayName },
+              ];
+            }
+            return memo;
+          }, csvColumns);
+        } else {
+          csvColumns = [
+            ...csvColumns,
+            { id: 'action_id', displayName: 'action_id' },
+            { id: 'actiontype_id', displayName: 'action_type' },
+            { id: 'action_code', displayName: 'action_code' },
+            { id: 'action_title', displayName: 'action_title' },
+          ];
+          if (isAdmin) {
+            csvColumns = [
+              ...csvColumns,
+              { id: 'action_draft', displayName: 'action_draft' },
+              { id: 'action_private', displayName: 'action_private' },
+            ];
+          }
+        }
+      }
+      if (hasActionsAsTarget) {
+        csvColumns = Object.keys(actiontypesAsTarget).reduce((memo, actiontypeId) => {
+          if (actiontypesAsTarget[actiontypeId].active) {
+            let displayName = actiontypesAsTarget[actiontypeId].column;
+            if (!displayName || actiontypesAsTarget[actiontypeId].column === '') {
               displayName = actiontypeId;
             }
             return [
               ...memo,
-              { id: `actions_${actiontypeId}`, displayName },
+              { id: `targeted-by-actions_${actiontypeId}`, displayName },
             ];
           }
           return memo;
         }, csvColumns);
-      } else {
+      }
+      if (hasAssociations) {
+        relationships = relationships.set('associations', relationships.get('actors'));
+        csvColumns = Object.keys(associationtypes).reduce((memo, actortypeId) => {
+          if (associationtypes[actortypeId].active) {
+            let displayName = associationtypes[actortypeId].column;
+            if (!displayName || associationtypes[actortypeId].column === '') {
+              displayName = actortypeId;
+            }
+            return [
+              ...memo,
+              { id: `associations_${actortypeId}`, displayName },
+            ];
+          }
+          return memo;
+        }, csvColumns);
+      }
+      if (hasMembers) {
+        relationships = relationships.set('members', relationships.get('actors'));
+        csvColumns = Object.keys(membertypes).reduce((memo, actortypeId) => {
+          if (membertypes[actortypeId].active) {
+            let displayName = membertypes[actortypeId].column;
+            if (!displayName || membertypes[actortypeId].column === '') {
+              displayName = actortypeId;
+            }
+            return [
+              ...memo,
+              { id: `members_${actortypeId}`, displayName },
+            ];
+          }
+          return memo;
+        }, csvColumns);
+      }
+      if (hasUsers && includeUsers) {
         csvColumns = [
           ...csvColumns,
-          { id: 'action_id', displayName: 'action_id' },
-          { id: 'actiontype_id', displayName: 'action_type' },
-          { id: 'action_code', displayName: 'action_code' },
-          { id: 'action_title', displayName: 'action_title' },
+          { id: 'users', displayName: 'assigned_users' },
         ];
-        if (isAdmin) {
-          csvColumns = [
-            ...csvColumns,
-            { id: 'action_draft', displayName: 'action_draft' },
-            { id: 'action_private', displayName: 'action_private' },
-          ];
-        }
       }
+      csvData = prepareDataForActors({
+        entities,
+        relationships,
+        attributes,
+        taxonomies,
+        taxonomyColumns,
+        typeNames,
+        hasActions,
+        actionsAsRows,
+        actiontypes,
+        hasActionsAsTarget,
+        actiontypesAsTarget,
+        hasAssociations,
+        associationtypes,
+        hasMembers,
+        membertypes,
+        hasUsers: hasUsers && includeUsers,
+      });
     }
-    if (hasActionsAsTarget) {
-      csvColumns = Object.keys(actiontypesAsTarget).reduce((memo, actiontypeId) => {
-        if (actiontypesAsTarget[actiontypeId].active) {
-          let displayName = actiontypesAsTarget[actiontypeId].column;
-          if (!displayName || actiontypesAsTarget[actiontypeId].column === '') {
-            displayName = actiontypeId;
+    if (config.types === 'indicators') {
+      if (includeSupport) {
+        const supportColumns = Object.values(ACTION_INDICATOR_SUPPORTLEVELS).reduce((memo, level) => {
+          if (level.value === '0') {
+            return memo;
           }
           return [
             ...memo,
-            { id: `targeted-by-actions_${actiontypeId}`, displayName },
+            {
+              id: `support_level_${level.value}`,
+              displayName: `no_countries_support_${level.value}`,
+            },
           ];
-        }
-        return memo;
-      }, csvColumns);
+        }, []);
+        csvColumns = [
+          ...csvColumns,
+          { id: 'statement_count', displayName: 'no_statements' },
+          ...supportColumns,
+        ];
+      }
+      csvData = prepareDataForIndicators({
+        entities,
+        relationships,
+        attributes,
+        includeSupport,
+      });
     }
-    if (hasAssociations) {
-      relationships = relationships.set('associations', relationships.get('actors'));
-      csvColumns = Object.keys(associationtypes).reduce((memo, actortypeId) => {
-        if (associationtypes[actortypeId].active) {
-          let displayName = associationtypes[actortypeId].column;
-          if (!displayName || associationtypes[actortypeId].column === '') {
-            displayName = actortypeId;
-          }
-          return [
-            ...memo,
-            { id: `associations_${actortypeId}`, displayName },
-          ];
-        }
-        return memo;
-      }, csvColumns);
-    }
-    if (hasMembers) {
-      relationships = relationships.set('members', relationships.get('actors'));
-      csvColumns = Object.keys(membertypes).reduce((memo, actortypeId) => {
-        if (membertypes[actortypeId].active) {
-          let displayName = membertypes[actortypeId].column;
-          if (!displayName || membertypes[actortypeId].column === '') {
-            displayName = actortypeId;
-          }
-          return [
-            ...memo,
-            { id: `members_${actortypeId}`, displayName },
-          ];
-        }
-        return memo;
-      }, csvColumns);
-    }
-    if (hasUsers && usersActive) {
-      csvColumns = [
-        ...csvColumns,
-        { id: 'users', displayName: 'assigned_users' },
-      ];
-    }
-    csvData = entities && prepareDataForActors({
-      entities,
-      relationships,
-      attributes,
-      taxonomies,
-      taxonomyColumns,
-      typeNames,
-      hasActions,
-      actionsAsRows,
-      actiontypes,
-      hasActionsAsTarget,
-      actiontypesAsTarget,
-      hasAssociations,
-      associationtypes,
-      hasMembers,
-      membertypes,
-      hasUsers: hasUsers && usersActive,
-    });
   }
-  if (config.types === 'indicators') {
-    console.log('relationships', relationships && relationships.toJS());
-    csvData = entities && prepareDataForIndicators({
-      entities,
-      relationships,
-      attributes,
-    });
-  }
-
   // console.log('entities', entities && entities.toJS())
   const csvDateSuffix = `_${getDateSuffix()}`;
   return (
@@ -809,8 +832,8 @@ export function EntityListDownload({
             setIndicatorsAsRows={setIndicatorsAsRows}
             indicatorsActive={indicatorsActive}
             setIndicatorsActive={setIndicatorsActive}
-            includeUsers={usersActive}
-            setUsersActive={setUsersActive}
+            includeUsers={includeUsers}
+            setIncludeUsers={setIncludeUsers}
             attributes={attributes}
             setAttributes={setAttributes}
             taxonomyColumns={taxonomyColumns}
@@ -845,8 +868,8 @@ export function EntityListDownload({
             associationtypes={associationtypes}
             setAssociationtypes={setAssociationtypes}
             hasUsers={hasUsers}
-            includeUsers={usersActive}
-            setUsersActive={setUsersActive}
+            includeUsers={includeUsers}
+            setIncludeUsers={setIncludeUsers}
             hasAttributes={hasAttributes}
             attributes={attributes}
             setAttributes={setAttributes}
@@ -860,6 +883,8 @@ export function EntityListDownload({
             hasAttributes={hasAttributes}
             attributes={attributes}
             setAttributes={setAttributes}
+            includeSupport={includeSupport}
+            setIncludeSupport={setIncludeSupport}
           />
         )}
         <Box direction="row" gap="medium" align="center" margin={{ top: 'xlarge' }}>

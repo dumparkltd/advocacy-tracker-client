@@ -2119,6 +2119,7 @@ export const selectActorsWithPositions = createSelector(
           }
           return actor
             .set('statements', actorStatements)
+            .set('statementsAsGroup', actorStatementsAsMemberByGroup.flatten(true).toList().toSet())
             .set('indicatorPositions', actorIndicators);
         }
         return actor;

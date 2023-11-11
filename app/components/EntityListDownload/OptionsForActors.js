@@ -29,7 +29,7 @@ export function OptionsForActors({
   setAssociationtypes,
   hasUsers,
   includeUsers,
-  setUsersActive,
+  setIncludeUsers,
   hasAttributes,
   attributes,
   setAttributes,
@@ -217,7 +217,7 @@ export function OptionsForActors({
           activeOptionCount={includeUsers ? 1 : 0}
           optionCount={1}
           active={includeUsers}
-          onSetActive={(val) => setUsersActive(val)}
+          onSetActive={(val) => setIncludeUsers(val)}
           onActiveLabel="Include assigned users"
         />
       )}
@@ -228,7 +228,7 @@ export function OptionsForActors({
 OptionsForActors.propTypes = {
   hasUsers: PropTypes.bool,
   includeUsers: PropTypes.bool,
-  setUsersActive: PropTypes.func,
+  setIncludeUsers: PropTypes.func,
   // attributes
   attributes: PropTypes.object,
   hasAttributes: PropTypes.bool,

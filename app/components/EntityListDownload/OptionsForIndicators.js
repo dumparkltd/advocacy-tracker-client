@@ -18,6 +18,8 @@ export function OptionsForIndicators({
   attributes,
   setAttributes,
   hasAttributes,
+  includeSupport,
+  setIncludeSupport,
 }) {
   const [expandGroup, setExpandGroup] = useState(null);
 
@@ -47,6 +49,18 @@ export function OptionsForIndicators({
           editColumnNames
         />
       )}
+      <OptionGroup
+        groupId="support"
+        label="Support"
+        expandedId={expandGroup}
+        onExpandGroup={(val) => setExpandGroup(val)}
+        activeOptionCount={includeSupport ? 1 : 0}
+        optionCount={1}
+        active={includeSupport}
+        intro="Please note that the values may include indirect support inferred from group statements (depending on the list option selected)"
+        onSetActive={(val) => setIncludeSupport(val)}
+        onActiveLabel="Include country numbers by level of support"
+      />
     </Box>
   );
 }
@@ -55,6 +69,8 @@ OptionsForIndicators.propTypes = {
   attributes: PropTypes.object,
   setAttributes: PropTypes.func,
   hasAttributes: PropTypes.bool,
+  includeSupport: PropTypes.bool,
+  setIncludeSupport: PropTypes.func,
 };
 
 export default OptionsForIndicators;
