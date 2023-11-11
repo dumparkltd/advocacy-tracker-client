@@ -28,6 +28,7 @@ export const CONFIG = {
   serverPath: API.INDICATORS,
   clientPath: ROUTES.INDICATOR,
   batchDelete: true,
+  downloadCSV: true,
   views: {
     list: {
       search: ['code', 'title', 'description'],

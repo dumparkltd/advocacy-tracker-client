@@ -273,6 +273,7 @@ export function UserView({
                                   columns: getActortypeColumns({
                                     typeId: typeid,
                                     showCode: isAdmin || qe(typeid, ACTORTYPES.COUNTRY),
+                                    isAdmin,
                                   }),
                                 }),
                               ]),

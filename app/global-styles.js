@@ -180,6 +180,7 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 
+  .download-csv-modal,
   .new-entity-modal {
     position: absolute;
     top: 10px;
@@ -196,6 +197,7 @@ const GlobalStyle = createGlobalStyle`
     max-width: 1122px;
   }
   @media (min-width: 769px) {
+    .download-csv-modal,
     .new-entity-modal {
       padding: 20px;
       top: 40px;
@@ -205,6 +207,7 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 
+  .download-csv-modal-overlay,
   .new-entity-modal-overlay {
     position: fixed;
     top: 0;

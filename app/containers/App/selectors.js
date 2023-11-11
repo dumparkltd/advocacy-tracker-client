@@ -1103,6 +1103,15 @@ export const selectActionsSearchQuery = createSelector(
     : entities // !search
 );
 
+// filter entities by attributes, using locationQuery
+export const selectIndicatorsWhereQuery = createSelector(
+  selectAttributeQuery,
+  selectIndicators, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
+);
+
 // taxonomies and categories ///////////////////////////////////////////////////
 
 // select all categories
@@ -2110,6 +2119,7 @@ export const selectActorsWithPositions = createSelector(
           }
           return actor
             .set('statements', actorStatements)
+            .set('statementsAsGroup', actorStatementsAsMemberByGroup.flatten(true).toList().toSet())
             .set('indicatorPositions', actorIndicators);
         }
         return actor;

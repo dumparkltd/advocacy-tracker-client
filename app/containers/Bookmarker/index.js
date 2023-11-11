@@ -88,8 +88,8 @@ class Bookmarker extends React.PureComponent { // eslint-disable-line react/pref
               }
             }
           >
-            {bookmark && <Icon name="bookmark_active" />}
-            {!bookmark && <Icon name="bookmark_inactive" />}
+            {bookmark && <Icon name="bookmark_active" title="Edit bookmark for current view" />}
+            {!bookmark && <Icon name="bookmark_inactive" title="Add bookmark for current view" />}
           </ButtonFlatIconOnly>
           {this.state.open && bookmark && (
             <BookmarkForm
