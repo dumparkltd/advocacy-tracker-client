@@ -2,7 +2,7 @@ import { createSelector } from 'reselect';
 import { Map } from 'immutable';
 
 import {
-  selectEntitiesSearchQuery,
+  selectIndicatorsWhereQuery,
   selectWithoutQuery,
   selectActionQuery,
   selectSortByQuery,
@@ -98,18 +98,18 @@ export const selectConnections = createSelector(
   }
 );
 
-const selectIndicatorsSearched = createSelector(
-  (state, locationQuery) => selectEntitiesSearchQuery(state, {
-    path: API.INDICATORS,
-    searchAttributes: CONFIG.views.list.search || ['title'],
-    locationQuery,
-  }),
-  (indicators) => indicators,
-);
+// const selectIndicatorsSearched = createSelector(
+//   (state, locationQuery) => selectEntitiesSearchQuery(state, {
+//     path: API.INDICATORS,
+//     searchAttributes: CONFIG.views.list.search || ['title'],
+//     locationQuery,
+//   }),
+//   (indicators) => indicators,
+// );
 
 export const selectIndicatorsWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectIndicatorsSearched,
+  selectIndicatorsWhereQuery,
   (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
   selectConnections,
   selectActionIndicatorsGroupedByIndicator, // as targets
