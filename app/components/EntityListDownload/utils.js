@@ -583,7 +583,7 @@ const prepActorDataAsRows = ({
       }
       return memo;
     }, []);
-    return dataRows;
+    return dataRows.length > 0 ? dataRows : [data];
   }
   return [data];
 };
@@ -599,10 +599,10 @@ const prepActionDataAsRows = ({
       if (!actiontypes[actiontypeId].active) {
         return memo;
       }
-      const entityActorIds = entity.getIn(['actionsByType', parseInt(actiontypeId, 10)]);
+      const entityActionIds = entity.getIn(['actionsByType', parseInt(actiontypeId, 10)]);
       // console.log(entityActorIds)
-      if (entityActorIds) {
-        const dataTypeRows = entityActorIds.reduce((memo2, actionId) => {
+      if (entityActionIds) {
+        const dataTypeRows = entityActionIds.reduce((memo2, actionId) => {
           const action = actions.get(actionId.toString());
           const dataRow = {
             ...data,
@@ -623,9 +623,11 @@ const prepActionDataAsRows = ({
           ...dataTypeRows,
         ];
       }
-      return memo;
+      return [
+        ...memo,
+      ];
     }, []);
-    return dataRows;
+    return dataRows.length > 0 ? dataRows : [data];
   }
   return [data];
 };
@@ -665,7 +667,7 @@ const prepIndicatorDataAsRows = ({
       }
       return memo;
     }, []);
-    return dataIndicatorRows;
+    return dataIndicatorRows.length > 0 ? dataIndicatorRows : dataRows;
   }
   return dataRows;
 };
