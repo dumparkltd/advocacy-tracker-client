@@ -13,7 +13,7 @@ import { version } from '../../package.json';
 export const SERVER = (process && process.env && process.env.SERVER) || 'production';
 export const IS_DEV = SERVER !== 'production';
 
-export const VERSION = `${version}${IS_DEV ? ' [DEV]' : ''}`;
+export const VERSION = `${version}${IS_DEV ? ' [TEST-DB]' : ''}`;
 
 export const ENDPOINTS = {
   API: IS_DEV // server API endpoint
@@ -537,29 +537,8 @@ export const ACTION_FIELDS = {
       type: 'number',
       skipImport: true,
       table: API.ACTIONTYPES,
-    },
-    draft: {
-      defaultValue: true,
-      required: Object.values(ACTIONTYPES), // all types
-      type: 'bool',
-      // ui: 'dropdown',
-      skipImport: true,
-      // options: [
-      //   { value: true, message: 'ui.publishStatuses.draft' },
-      //   { value: false, message: 'ui.publishStatuses.public' },
-      // ],
-    },
-    private: {
-      defaultValue: false,
-      type: 'bool',
-    },
-    is_archive: {
-      defaultValue: false,
-      type: 'bool',
-    },
-    notifications: {
-      defaultValue: true,
-      type: 'bool',
+      exportColumn: 'activity_type',
+      export: true,
     },
     code: {
       optional: Object.values(ACTIONTYPES), // all types
@@ -569,6 +548,7 @@ export const ACTION_FIELDS = {
     title: {
       required: Object.values(ACTIONTYPES), // all types
       type: 'text',
+      // exportRequired: true,
     },
     // parent_id: {
     //   skipImport: true,
@@ -599,6 +579,72 @@ export const ACTION_FIELDS = {
       optional: Object.values(ACTIONTYPES),
       type: 'text',
     },
+    draft: {
+      defaultValue: true,
+      required: Object.values(ACTIONTYPES), // all types
+      type: 'bool',
+      // ui: 'dropdown',
+      skipImport: true,
+      // options: [
+      //   { value: true, message: 'ui.publishStatuses.draft' },
+      //   { value: false, message: 'ui.publishStatuses.public' },
+      // ],
+    },
+    private: {
+      defaultValue: false,
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      type: 'bool',
+    },
+    notifications: {
+      defaultValue: true,
+      type: 'bool',
+    },
+    created_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    created_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'created_by',
+    },
+    updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'updated_by',
+    },
+    relationship_updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+      exportColumn: 'connection_updated_at',
+    },
+    relationship_updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'connection_updated_by',
+    },
   },
 };
 
@@ -628,27 +674,7 @@ export const ACTOR_FIELDS = {
       type: 'number',
       table: API.ACTORTYPES,
       skipImport: true,
-    },
-    draft: {
-      defaultValue: true,
-      required: true,
-      type: 'bool',
-      skipImport: true,
-      // ui: 'dropdown',
-      // options: [
-      //   { value: true, message: 'ui.publishStatuses.draft' },
-      //   { value: false, message: 'ui.publishStatuses.public' },
-      // ],
-    },
-    private: {
-      defaultValue: false,
-      required: true,
-      type: 'bool',
-    },
-    is_archive: {
-      defaultValue: false,
-      required: true,
-      type: 'bool',
+      exportColumn: 'actor_type',
     },
     code: {
       optional: [
@@ -713,6 +739,70 @@ export const ACTOR_FIELDS = {
     address: {
       optional: [ACTORTYPES.CONTACT],
       type: 'text',
+    },
+    draft: {
+      defaultValue: true,
+      required: true,
+      type: 'bool',
+      skipImport: true,
+      // ui: 'dropdown',
+      // options: [
+      //   { value: true, message: 'ui.publishStatuses.draft' },
+      //   { value: false, message: 'ui.publishStatuses.public' },
+      // ],
+    },
+    private: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    created_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    created_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'created_by',
+    },
+    updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'updated_by',
+    },
+    relationship_updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+      exportColumn: 'connection_updated_at',
+    },
+    relationship_updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'connection_updated_by',
     },
   },
   RELATIONSHIPS_IMPORT: {
@@ -858,6 +948,18 @@ export const INDICATOR_FIELDS = {
     },
   },
   ATTRIBUTES: {
+    code: {
+      type: 'text',
+      optional: true,
+      adminOnly: true,
+    },
+    title: {
+      required: true,
+      type: 'text',
+    },
+    description: {
+      type: 'markdown',
+    },
     draft: {
       defaultValue: true,
       required: true,
@@ -879,17 +981,48 @@ export const INDICATOR_FIELDS = {
       required: true,
       type: 'bool',
     },
-    title: {
-      required: true,
-      type: 'text',
-    },
-    code: {
-      type: 'text',
-      optional: true,
+    created_at: {
+      skipImport: true,
+      type: 'datetime',
       adminOnly: true,
+      meta: true,
     },
-    description: {
-      type: 'markdown',
+    created_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'created_by',
+    },
+    updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'updated_by',
+    },
+    relationship_updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+      exportColumn: 'connection_updated_at',
+    },
+    relationship_updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'connection_updated_by',
     },
   },
 };
@@ -987,9 +1120,10 @@ export const ACTIONTYPE_RESOURCETYPES = {
   ],
 };
 
-// related actions
+// related parent actions
 export const ACTIONTYPE_ACTIONTYPES = {
   // top-actions - no sub-actions
+  // child: [...parents],
   // [ACTIONTYPES.EVENT]: [],
   [ACTIONTYPES.EVENT]: [
     ACTIONTYPES.AP,
@@ -1203,6 +1337,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        adminOnly: true,
       },
     ],
   },
@@ -1244,6 +1379,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        adminOnly: true,
       },
     ],
   },
@@ -1283,6 +1419,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        adminOnly: true,
       },
     ],
   },
@@ -1321,6 +1458,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        adminOnly: true,
       },
     ],
   },
@@ -1349,6 +1487,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        adminOnly: true,
       },
     ],
   },

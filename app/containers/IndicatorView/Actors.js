@@ -92,6 +92,7 @@ export function Actors({
               columns: getActortypeColumns({
                 typeId: actortypeid,
                 showCode: isAdmin || qe(actortypeid, ACTORTYPES.COUNTRY),
+                isAdmin,
                 skipTypeColumns: true,
                 otherColumns: getOwnActortypeColumns({
                   typeId: actortypeid,

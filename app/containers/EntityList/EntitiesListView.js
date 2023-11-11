@@ -15,6 +15,7 @@ import {
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPES_CONFIG,
+  USER_ACTIONTYPES,
   MEMBERSHIPS,
   ACTION_INDICATOR_SUPPORTLEVELS,
   // ACTIONTYPES,
@@ -152,11 +153,13 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       allEntityCount,
       headerInfo,
       listActions,
+      isAdmin,
     } = this.props;
     const { viewType } = this.state;
     let type;
     let hasByTarget;
     let hasByActor;
+    let hasByUser;
     let isTarget;
     let isActive;
     let subjectOptions = [];
@@ -179,16 +182,21 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         typeId,
         showCode,
         isSingle: false,
+        isAdmin,
       });
       type = actiontypes.find((at) => qe(at.get('id'), typeId));
       // hasByTarget = type.getIn(['attributes', 'has_target']);
       hasByActor = ACTIONTYPE_ACTORTYPES[typeId] && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
       hasByTarget = ACTIONTYPE_TARGETTYPES[typeId] && ACTIONTYPE_TARGETTYPES[typeId].length > 0;
+      hasByUser = isAdmin && USER_ACTIONTYPES && USER_ACTIONTYPES.indexOf(typeId) > -1;
       // console.log(typeId, type.get('id'), ACTIONTYPE_ACTORTYPES, ACTIONTYPE_ACTORTYPES[typeId], hasByActor, hasByTarget)
       if (!hasByTarget && mapSubject === 'targets') {
         mapSubjectClean = null;
       }
       if (!hasByActor && mapSubject === 'actors') {
+        mapSubjectClean = null;
+      }
+      if (!hasByUser && mapSubject === 'users') {
         mapSubjectClean = null;
       }
       subjectOptions = [
@@ -224,16 +232,18 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           },
         ];
       }
-      subjectOptions = [
-        ...subjectOptions,
-        {
-          type: 'secondary',
-          title: 'By user',
-          onClick: () => onSetMapSubject('users'),
-          active: mapSubjectClean === 'users',
-          disabled: mapSubjectClean === 'users',
-        },
-      ];
+      if (hasByUser) {
+        subjectOptions = [
+          ...subjectOptions,
+          {
+            type: 'secondary',
+            title: 'By user',
+            onClick: () => onSetMapSubject('users'),
+            active: mapSubjectClean === 'users',
+            disabled: mapSubjectClean === 'users',
+          },
+        ];
+      }
       if (mapSubjectClean === 'actors' || mapSubjectClean === 'targets') {
         if (mapSubjectClean === 'actors') {
           relatedActortypes = ACTIONTYPE_ACTORTYPES[typeId]
@@ -348,6 +358,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         showCode,
         includeMain: false,
         isSingle: false,
+        isAdmin,
       });
       columns = [
         {
@@ -815,6 +826,7 @@ EntitiesListView.propTypes = {
   includeTargetChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
   listUpdating: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   headerStyle: PropTypes.string,
   hasFilters: PropTypes.bool,
   typeId: PropTypes.string,

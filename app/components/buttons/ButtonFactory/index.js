@@ -9,6 +9,7 @@ import ButtonSubmit from '../ButtonSubmit';
 import ButtonFlat from '../ButtonFlat';
 import ButtonFlatWithIcon from '../ButtonFlatWithIcon';
 import ButtonDefaultIconOnly from '../ButtonDefaultIconOnly';
+import ButtonDefaultGrouped from '../ButtonDefaultGrouped';
 import ButtonFlatIconOnly from '../ButtonFlatIconOnly';
 import ButtonSecondary from '../ButtonSecondary';
 import Bookmarker from '../../../containers/Bookmarker';
@@ -35,6 +36,19 @@ class ButtonFactory extends React.PureComponent { // eslint-disable-line react/p
             )}
             {!button.icon && <Text>{button.title}</Text>}
           </ButtonDefault>
+        );
+      case 'primaryGroup':
+        return (
+          <ButtonDefaultGrouped
+            onClick={button.onClick && (() => button.onClick())}
+            type={button.submit ? 'submit' : 'button'}
+            disabled={button.disabled}
+            inactive={!button.active}
+            isFirst={button.isFirst}
+            isLast={button.isLast}
+          >
+            {button.title}
+          </ButtonDefaultGrouped>
         );
       case 'secondary':
         return (

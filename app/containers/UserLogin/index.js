@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import styled from 'styled-components';
 import { actions as formActions } from 'react-redux-form/immutable';
+import { Text, Box } from 'grommet';
 
 import {
   getEmailField,
@@ -28,7 +29,7 @@ import A from 'components/styled/A';
 import { selectQueryMessages } from 'containers/App/selectors';
 import { updatePath, dismissQueryMessages } from 'containers/App/actions';
 
-import { ROUTES } from 'themes/config';
+import { ROUTES, IS_DEV } from 'themes/config';
 import messages from './messages';
 
 import { login } from './actions';
@@ -82,6 +83,13 @@ export class UserLogin extends React.PureComponent { // eslint-disable-line reac
           {authSending
             && <Loading />
           }
+          {IS_DEV && (
+            <Box margin={{ vertical: 'medium' }}>
+              <Text>
+                <FormattedMessage {...messages.devNote} />
+              </Text>
+            </Box>
+          )}
           { this.props.viewDomain.get('form')
             && (
               <AuthForm
