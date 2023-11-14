@@ -7,6 +7,8 @@ import {
   selectReadyForAuthCheck,
 } from 'containers/App/selectors';
 
+import { validateToken } from 'containers/App/actions';
+
 import checkStore from './checkStore';
 
 export function replaceIfNotSignedIn(location, replace, info = PARAMS.NOT_SIGNED_IN, replacePath) {
@@ -33,6 +35,7 @@ export function hasRoleRequired(roleIds, roleRequired) {
 
 function redirectIfSignedIn(store, replacePath) {
   return (nextState, replace) => {
+    store.dispatch(validateToken());
     if (selectIsSignedIn(store.getState())) {
       if (replacePath) {
         replace(replacePath);
@@ -45,6 +48,7 @@ function redirectIfSignedIn(store, replacePath) {
 
 function redirectIfNotSignedIn(store, info = PARAMS.NOT_SIGNED_IN) {
   return (nextState, replace) => {
+    store.dispatch(validateToken());
     if (!selectIsSignedIn(store.getState())) {
       replaceIfNotSignedIn(nextState.location, replace, info);
     }
@@ -53,6 +57,7 @@ function redirectIfNotSignedIn(store, info = PARAMS.NOT_SIGNED_IN) {
 
 function redirectIfNotPermitted(store, roleRequired, replacePath) {
   return (nextState, replace) => {
+    store.dispatch(validateToken());
     if (!selectIsSignedIn(store.getState())) {
       replaceIfNotSignedIn(nextState.location, replace, PARAMS.NOT_SIGNED_IN, replacePath);
     } else if (selectReadyForAuthCheck(store.getState()) && !hasRoleRequired(selectSessionUserRoles(store.getState()), roleRequired)) {

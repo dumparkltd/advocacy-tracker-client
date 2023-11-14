@@ -34,7 +34,6 @@ import {
 } from './selectors';
 
 import {
-  validateToken,
   loadEntitiesIfNeeded,
   updatePath,
   openNewEntityModal,
@@ -73,7 +72,6 @@ const Main = styled.div`
 
 class App extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
-    this.props.validateToken();
     this.props.loadEntitiesIfNeeded();
   }
 
@@ -268,7 +266,6 @@ App.propTypes = {
   isVisitor: PropTypes.bool,
   user: PropTypes.object,
   pages: PropTypes.object,
-  validateToken: PropTypes.func,
   loadEntitiesIfNeeded: PropTypes.func,
   onPageLink: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
@@ -295,9 +292,6 @@ const mapStateToProps = (state) => ({
 
 export function mapDispatchToProps(dispatch) {
   return {
-    validateToken: () => {
-      dispatch(validateToken()); // Maybe this could move to routes.js or App wrapper
-    },
     loadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
