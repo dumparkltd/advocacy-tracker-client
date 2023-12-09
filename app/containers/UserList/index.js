@@ -62,7 +62,7 @@ export function UserList({
   intl,
 }) {
   useEffect(() => {
-    if (!authReady) onRedirectIfNotPermitted();
+    if (authReady) onRedirectIfNotPermitted();
   }, [authReady]);
 
   useEffect(() => {
