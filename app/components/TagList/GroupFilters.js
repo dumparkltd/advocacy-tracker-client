@@ -14,7 +14,7 @@ import { FormClose, FormDown, FormUp } from 'grommet-icons';
 
 import Button from 'components/buttons/Button';
 import ButtonTagFilterWrap from 'components/buttons//ButtonTagFilterWrap';
-import ButtonTagFilterInverse from 'components/buttons/ButtonTagFilterInverse';
+import ButtonTagFilter from 'components/buttons/ButtonTagFilter';
 import PrintHide from 'components/styled/PrintHide';
 
 import { usePrint } from 'containers/App/PrintContext';
@@ -77,7 +77,7 @@ function GroupFilters({
           styled={{ position: 'relative' }}
           ref={dropdown}
         >
-          <ButtonTagFilterInverse
+          <ButtonTagFilter
             isPrint={isPrintView}
             onClick={() => setShowMultiple(!showMultiple)}
             title={`${groupFilters.length} filters`}
@@ -91,7 +91,7 @@ function GroupFilters({
                 {!showMultiple && <FormDown size="xsmall" color="inherit" />}
               </PrintHide>
             </Box>
-          </ButtonTagFilterInverse>
+          </ButtonTagFilter>
           {hasMultiple
             && lastGroup
             && (
