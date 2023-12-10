@@ -22,6 +22,10 @@ export default defineMessages({
     id: 'app.containers.EntityListTable.listEmpty',
     defaultMessage: 'No entities in database',
   },
+  listEmptyByOption: {
+    id: 'app.containers.EntityListTable.listEmptyByOption',
+    defaultMessage: 'No entities in database',
+  },
   listEmptyAfterQuery: {
     id: 'app.containers.EntityListTable.listEmptyAfterQuery',
     defaultMessage: 'We are sorry, no results matched your search',

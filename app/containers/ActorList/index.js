@@ -254,7 +254,6 @@ export function ActorList({
       />
       <EntityList
         entities={entities}
-        allEntityCount={allEntities && allEntities.size}
         allEntities={allEntities.toList()}
         taxonomies={taxonomies}
         connections={connections}

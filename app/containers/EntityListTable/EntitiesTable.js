@@ -117,6 +117,9 @@ const TableCellBodyInner = styled((p) => <Box {...p} />)`
 const MAX_VALUE_COUNTRIES = 100;
 
 const getColorForColumn = (col) => {
+  if (!MAP_OPTIONS.GRADIENT[col.subject]) {
+    return 'black';
+  }
   if (col.members) {
     return scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[col.subject], false)(70);
   }

@@ -161,7 +161,6 @@ export function ActionList({
       <EntityList
         entities={entities}
         allEntities={allEntities.toList()}
-        allEntityCount={allEntities && allEntities.size}
         taxonomies={taxonomies}
         connections={connections}
         config={CONFIG}

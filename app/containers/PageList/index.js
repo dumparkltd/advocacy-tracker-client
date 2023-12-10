@@ -89,7 +89,7 @@ export function PageList({
       />
       <EntityList
         entities={entities}
-        allEntityCount={allEntities && allEntities.size}
+        allEntities={allEntities}
         config={CONFIG}
         headerOptions={headerOptions}
         dataReady={dataReady}

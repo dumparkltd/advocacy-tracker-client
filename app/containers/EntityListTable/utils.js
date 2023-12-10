@@ -24,7 +24,7 @@ export const prepareHeader = ({
   intl,
 }) => columns.map(
   (col) => {
-    let label;
+    let label = col.label || col.title || null;
     const sortActive = sortBy === col.id;
     switch (col.type) {
       case 'main':
@@ -216,19 +216,21 @@ export const prepareHeader = ({
       case 'resourceActions':
       case 'indicatorActions':
       case 'actorActions':
-        if (col.subject === 'targets') {
-          label = 'Targeted by';
-          if (col.members) {
-            label = 'Targeted as member';
-          } else if (col.children) {
-            label = 'Targeted as parent';
-          }
-        } else {
-          label = 'Activities';
-          if (col.members) {
-            label = 'Activities as member';
-          } else if (col.children) {
-            label = 'Activities as parent';
+        if (!label) {
+          if (col.subject === 'targets') {
+            label = 'Targeted by';
+            if (col.members) {
+              label = 'Targeted as member';
+            } else if (col.children) {
+              label = 'Targeted as parent';
+            }
+          } else {
+            label = 'Activities';
+            if (col.members) {
+              label = 'Activities as member';
+            } else if (col.children) {
+              label = 'Activities as parent';
+            }
           }
         }
         return ({
@@ -239,7 +241,7 @@ export const prepareHeader = ({
           onSort,
         });
       case 'userActions':
-        label = 'Assigned to';
+        label = label || 'Assigned to';
         return ({
           ...col,
           title: label,
@@ -248,7 +250,9 @@ export const prepareHeader = ({
           onSort,
         });
       case 'actionsSimple':
-        label = col.subject === 'actors' ? 'Actions' : 'Targets';
+        if (!label) {
+          label = col.subject === 'actors' ? 'Actions' : 'Targets';
+        }
         return ({
           ...col,
           title: label,
@@ -823,7 +827,7 @@ export const getListHeaderLabel = ({
       type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
     });
   }
-  if (pageTotal && (pageTotal < entitiesTotal)) {
+  if (typeof pageTotal !== 'undefined' && (pageTotal < entitiesTotal)) {
     return intl && intl.formatMessage(messages.entityListHeader.noneSelected, {
       pageTotal,
       entitiesTotal,

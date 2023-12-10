@@ -273,7 +273,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       associationtypes,
       handleEditSubmit,
       onCreateOption,
-      allEntityCount,
       listActions,
       onEntitiesDelete,
       onUpdateFilters,
@@ -301,7 +300,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     const filters = currentFilters(
       {
         config,
-        entities: allEntities,
         taxonomies: allTaxonomies,
         connections,
         connectedTaxonomies,
@@ -475,7 +473,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             headerInfo={headerOptions.info}
             listActions={allListActions}
             showEntitiesDelete={onEntitiesDelete}
-            allEntityCount={allEntityCount}
+            allEntityCount={allEntities && allEntities.size}
             viewOptions={viewOptions}
             hasHeader={includeHeader}
             headerStyle={headerStyle}
@@ -706,7 +704,6 @@ EntityList.propTypes = {
   includeActorChildren: PropTypes.bool,
   includeTargetChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
-  allEntityCount: PropTypes.number,
   onEntitiesDelete: PropTypes.func,
   onUpdateFilters: PropTypes.func,
   isPrintView: PropTypes.bool,

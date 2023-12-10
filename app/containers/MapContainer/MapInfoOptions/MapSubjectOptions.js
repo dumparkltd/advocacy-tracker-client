@@ -11,9 +11,15 @@ import TextPrint from 'components/styled/TextPrint';
 import { usePrint } from 'containers/App/PrintContext';
 
 const Styled = styled.div`
-  padding-bottom: ${({ inList }) => inList ? 2 : 10}px;
+  padding-bottom: ${({ inList, isPrint }) => {
+    if (isPrint) return 0;
+    return inList ? 2 : 10;
+  }}px;
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    padding-bottom: ${({ inList }) => inList ? 5 : 15}px;
+    padding-bottom: ${({ inList, isPrint }) => {
+    if (isPrint) return 0;
+    return inList ? 5 : 15;
+  }}px;
   }
 `;
 const TypeButton = styled((p) => <Button plain {...p} />)`
@@ -21,10 +27,6 @@ const TypeButton = styled((p) => <Button plain {...p} />)`
   border-bottom: 2px solid;
   border-bottom-color: ${({ active }) => active ? 'auto' : 'transparent'};
   background: none;
-`;
-const TextWrap = styled((p) => <Box {...p} />)`
-  border-bottom: 1px solid;
-  border-bottom-color: ${({ hasBorder }) => hasBorder ? 'auto' : 'transparent'};
 `;
 
 function MapSubjectOptions({ options, inList, align = 'start' }) {
@@ -36,14 +38,18 @@ function MapSubjectOptions({ options, inList, align = 'start' }) {
     : null;
 
   return (
-    <Styled inList={inList}>
+    <Styled inList={inList} isPrint={isPrint}>
       <PrintHide>
         {options && (
           <Box direction="row" gap="small">
             {
               options.map((option, i) => option && (
                 <Box key={i}>
-                  <TypeButton active={option.active} onClick={option.onClick} inList={inList}>
+                  <TypeButton
+                    active={option.active}
+                    onClick={option.onClick}
+                    inList={inList}
+                  >
                     <TextPrint size={inList ? 'medium' : 'large'}>
                       {option.title}
                     </TextPrint>
@@ -57,11 +63,9 @@ function MapSubjectOptions({ options, inList, align = 'start' }) {
       <PrintOnly>
         {optionActiveForPrint && (
           <Box direction="row" gap="small" justify={align}>
-            <TextWrap hasBorder={inList}>
-              <TextPrint size={inList ? 'medium' : 'large'}>
-                {optionActiveForPrint.title}
-              </TextPrint>
-            </TextWrap>
+            <TextPrint size={inList ? 'medium' : 'large'}>
+              {optionActiveForPrint.title}
+            </TextPrint>
           </Box>
         )}
       </PrintOnly>

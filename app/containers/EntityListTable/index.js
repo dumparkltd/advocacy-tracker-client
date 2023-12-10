@@ -80,7 +80,7 @@ export function EntityListTable({
   onEntitySelect,
   entityTitle,
   onEntitySelectAll,
-  entities,
+  entities = List(),
   errors,
   categories,
   connections,
@@ -95,6 +95,7 @@ export function EntityListTable({
   pageItems,
   pageNo,
   intl,
+  hasFilters = false,
   searchQuery = '',
   onSearch,
   hasSearch,
@@ -111,6 +112,8 @@ export function EntityListTable({
   onPageSelect,
   printConfig,
   isPrintView,
+  allEntityCount,
+  isByOption,
 }) {
   if (!columns) return null;
   const sortColumn = columns.find((c) => !!c.sortDefault);
@@ -266,13 +269,19 @@ export function EntityListTable({
       intl,
       entityTitle,
       pageTotal: entityIdsOnPage.length,
-      entitiesTotal: sortedEntities.length,
+      entitiesTotal: allEntityCount || sortedEntities.length,
       selectedTotal: canEdit && entityIdsSelected && entityIdsSelected.size,
       allSelectedOnPage: canEdit && entityIdsOnPage.length === entityIdsSelected.size,
       messages,
     }),
     intl,
   });
+
+  const listEmpty = searchedEntities.size === 0;
+  const listEmptyAfterQuery = listEmpty
+    && (searchQuery.length > 0 || hasFilters);
+  const listEmptyAfterQueryAndErrors = listEmptyAfterQuery
+    && (errors && errors.size > 0);
 
   return (
     <div>
@@ -323,36 +332,28 @@ export function EntityListTable({
         isPrintView={isPrintView}
       />
       <ListEntitiesMain>
-        {entityIdsOnPage.length === 0
-          && isSortedOrPaged
-          && (!errors || errors.size === 0)
-          && (
-            <ListEntitiesEmpty>
-              <FormattedMessage {...messages.listEmptyAfterQuery} />
-            </ListEntitiesEmpty>
-          )
-        }
-        {entityIdsOnPage.length === 0
-          && !isSortedOrPaged
-          && (!errors || errors.size === 0)
-          && (
-            <ListEntitiesEmpty>
-              <FormattedMessage {...messages.listEmpty} />
-            </ListEntitiesEmpty>
-          )
-        }
-        {entityIdsOnPage.length === 0
-          && isSortedOrPaged
-          && errorsWithoutEntities
-          && errorsWithoutEntities.size > 0
-          && errors
-          && errors.size > 0
-          && (
-            <ListEntitiesEmpty>
-              <FormattedMessage {...messages.listEmptyAfterQueryAndErrors} />
-            </ListEntitiesEmpty>
-          )
-        }
+        {listEmpty && (
+          <ListEntitiesEmpty>
+            {!listEmptyAfterQuery && (
+              <FormattedMessage
+                {...messages[isByOption ? 'listEmptyByOption' : 'listEmpty']}
+                values={{ title: entityTitle.plural }}
+              />
+            )}
+            {listEmptyAfterQuery && !listEmptyAfterQueryAndErrors && (
+              <FormattedMessage
+                {...messages.listEmptyAfterQuery}
+                values={{ title: entityTitle.plural }}
+              />
+            )}
+            {listEmptyAfterQuery && listEmptyAfterQueryAndErrors && (
+              <FormattedMessage
+                {...messages.listEmptyAfterQueryAndErrors}
+                values={{ title: entityTitle.plural }}
+              />
+            )}
+          </ListEntitiesEmpty>
+        )}
         {errorsWithoutEntities
           && errorsWithoutEntities.size > 0
           && !isSortedOrPaged
@@ -433,6 +434,7 @@ EntityListTable.propTypes = {
   pageItems: PropTypes.string,
   pageNo: PropTypes.string,
   searchQuery: PropTypes.string,
+  hasFilters: PropTypes.bool,
   onSearch: PropTypes.func,
   hasSearch: PropTypes.bool,
   label: PropTypes.string,
@@ -440,9 +442,11 @@ EntityListTable.propTypes = {
   subjectOptions: PropTypes.node,
   includeMembers: PropTypes.bool,
   includeChildren: PropTypes.bool,
+  isByOption: PropTypes.bool,
   isPrintView: PropTypes.bool,
   printConfig: PropTypes.object,
   pageItemSelectConfig: PropTypes.object,
+  allEntityCount: PropTypes.number,
 };
 
 const mapStateToProps = (state) => ({

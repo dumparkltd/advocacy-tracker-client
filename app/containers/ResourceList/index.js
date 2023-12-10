@@ -141,7 +141,6 @@ export function ResourceList({
       <EntityList
         entities={entities}
         allEntities={allEntities.toList()}
-        allEntityCount={allEntities && allEntities.size}
         connections={connections}
         config={CONFIG}
         headerOptions={headerOptions}

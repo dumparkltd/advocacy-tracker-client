@@ -4,7 +4,6 @@ import { palette } from 'styled-theme';
 import ButtonTagFilter from '../ButtonTagFilter';
 
 const ButtonTagFilterInverse = styled(ButtonTagFilter)`
-  stroke: ${({ theme }) => theme.global.colors.text.light};
   color: ${({ theme, isPrint }) => isPrint ? theme.global.colors.text.brand : theme.global.colors.text.light};
   fill: ${({ theme }) => theme.global.colors.text.light};
   stroke: ${({ theme }) => theme.global.colors.text.light};
@@ -16,10 +15,10 @@ const ButtonTagFilterInverse = styled(ButtonTagFilter)`
   padding:${({ isPrint }) => isPrint ? ' 1px 4px' : '2px 6px'};
   white-space: nowrap;
   &:hover {
-    color: ${({ theme }) => theme.global.colors.highlight};
+    color: ${({ theme, isPrint }) => isPrint ? theme.global.colors.text.brand : theme.global.colors.highlight};
     stroke: ${({ theme }) => theme.global.colors.highlight};
     fill: ${({ theme }) => theme.global.colors.highlight};
-    background-color: ${({ theme }) => theme.global.colors.white};
+    background-color: ${({ isPrint, theme }) => isPrint ? 'white' : theme.global.colors.white};
   }
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     padding:${({ isPrint }) => isPrint ? ' 1px 4px' : '3px 6px'};

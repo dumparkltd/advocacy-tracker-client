@@ -27,15 +27,16 @@ import Container from 'components/styled/Container';
 import Content from 'components/styled/ContentSimple';
 import Loading from 'components/Loading';
 import EntityListViewOptions from 'components/EntityListViewOptions';
-import MapSubjectOptions from 'containers/MapContainer/MapInfoOptions/MapSubjectOptions';
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
-import EntityListTable from 'containers/EntityListTable';
 import ButtonPill from 'components/buttons/ButtonPill';
-import ContentHeader from 'containers/ContentHeader';
 import HeaderPrint from 'components/Header/HeaderPrint';
 import TagList from 'components/TagList';
 import PrintHide from 'components/styled/PrintHide';
 import BoxPrint from 'components/styled/BoxPrint';
+
+import MapSubjectOptions from 'containers/MapContainer/MapInfoOptions/MapSubjectOptions';
+import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import EntityListTable from 'containers/EntityListTable';
+import ContentHeader from 'containers/ContentHeader';
 
 import qe from 'utils/quasi-equals';
 import { lowerCase } from 'utils/string';
@@ -77,7 +78,6 @@ const getOwnActivityColumns = (mapSubject, typeId) => {
       }
     );
   }
-
   return actionTypeIds.map(
     (id) => ({
       id: `action_${id}`,
@@ -186,6 +186,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     let relatedTargettypes;
     let viewTypeClean = viewType;
 
+    let headerTitle = entityTitle.plural;
     // ACTIONS =================================================================
     if (config.types === 'actiontypes' && dataReady) {
       columns = getActiontypeColumns({
@@ -209,7 +210,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           type: 'secondary',
           title: 'Activities',
           onClick: () => onSetMapSubject(),
-          printHide: true,
           active: !mapSubjectClean,
           disabled: !mapSubjectClean,
         },
@@ -225,6 +225,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             disabled: mapSubjectClean === 'actors',
           },
         ];
+        if (mapSubjectClean === 'actors') {
+          headerTitle = `${headerTitle} by actor`;
+        }
       }
       if (hasByTarget) {
         subjectOptions = [
@@ -237,6 +240,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             disabled: mapSubjectClean === 'targets',
           },
         ];
+        if (mapSubjectClean === 'targets') {
+          headerTitle = `${headerTitle} by target`;
+        }
       }
       subjectOptions = [
         ...subjectOptions,
@@ -248,6 +254,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           disabled: mapSubjectClean === 'users',
         },
       ];
+      if (mapSubjectClean === 'users') {
+        headerTitle = `${headerTitle} by user`;
+      }
       if (mapSubjectClean === 'actors' || mapSubjectClean === 'targets') {
         if (mapSubjectClean === 'actors') {
           relatedActortypes = ACTIONTYPE_ACTORTYPES[typeId]
@@ -342,6 +351,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       isActive = type.getIn(['attributes', 'is_active']);
       if (isTarget && isActive) {
         mapSubjectClean = mapSubject || 'actors';
+        if (mapSubjectClean === 'users') {
+          mapSubjectClean = 'actors';
+        }
       } else if (isTarget && !isActive) {
         mapSubjectClean = 'targets';
       } else if (!isTarget && isActive) {
@@ -390,7 +402,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           ...subjectOptions,
           {
             type: 'secondary',
-            title: 'As actors',
+            title: isPrintView ? 'Activities' : 'As actors',
             onClick: () => onSetMapSubject('actors'),
             active: mapSubjectClean === 'actors',
             disabled: mapSubjectClean === 'actors',
@@ -402,7 +414,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           ...subjectOptions,
           {
             type: 'secondary',
-            title: 'As targets',
+            title: isPrintView ? 'Activities targeted by' : 'As targets',
             onClick: () => onSetMapSubject('targets'),
             active: mapSubjectClean === 'targets',
             disabled: mapSubjectClean === 'targets',
@@ -478,6 +490,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {
           id: 'statements', // one row per type,
           type: 'indicatorActions', // one row per type,
+          title: intl.formatMessage(appMessages.actiontypes[1]),
         },
         {
           id: 'support', // one row per type,
@@ -513,6 +526,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         },
       ];
     } else if (config.types === 'users' && dataReady) {
+      mapSubjectClean = 'actors';
       columns = [
         {
           id: 'main',
@@ -543,16 +557,10 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         },
       ];
     }
-    let headerTitle;
-    let headerSubTitle;
-    if (entityTitle) {
-      headerTitle = entities
-        ? `${entities.size} ${entities.size === 1 ? entityTitle.single : entityTitle.plural}`
-        : entityTitle.plural;
-    }
-    if (hasFilters) {
-      headerSubTitle = `of ${allEntityCount} total`;
-    }
+    // let headerSubTitle = `${allEntityCount} ${allEntityCount === 1 ? entityTitle.single : entityTitle.plural} in database`;
+    // if (entities && hasFilters) {
+    //   headerSubTitle = `Showing ${entities.size} of ${headerSubTitle}`;
+    // }
 
     const showRelatedActorsForActions = !!entityActors;
     const showRelatedUsersForActions = !!entityUsers;
@@ -576,7 +584,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                 <ContentHeader
                   type={CONTENT_LIST}
                   title={headerTitle}
-                  subTitle={headerSubTitle}
                   hasViewOptions={viewOptions && viewOptions.length > 1}
                   info={headerInfo}
                   buttons={listActions}
@@ -668,81 +675,88 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                         <MapOption option={childOption} type="child" />
                       </Box>
                     )}
-                    {entityActors.get(parseInt(viewTypeClean, 10)) && (
-                      <EntityListTable
-                        paginate
-                        hasSearch
-                        columns={[
-                          {
-                            id: 'main',
-                            type: 'main',
-                            sort: 'title',
-                            attributes: (showCode || qe(viewTypeClean, ACTORTYPES.COUNTRY))
-                              ? ['code', 'title']
-                              : ['title'],
+                    <EntityListTable
+                      isByOption
+                      hasFilters={hasFilters}
+                      paginate
+                      hasSearch
+                      columns={[
+                        {
+                          id: 'main',
+                          type: 'main',
+                          sort: 'title',
+                          attributes: (showCode || qe(viewTypeClean, ACTORTYPES.COUNTRY))
+                            ? ['code', 'title']
+                            : ['title'],
+                        },
+                        {
+                          id: 'actorActions',
+                          type: 'actorActions',
+                          label: entityTitle.plural,
+                          subject: mapSubject,
+                          actions: mapSubject === 'actors'
+                            ? 'actions'
+                            : 'targetingActions',
+                        },
+                        {
+                          id: 'actorActionsAsMember',
+                          type: 'actorActions',
+                          members: true,
+                          subject: mapSubject,
+                          label: `${entityTitle.plural} as member`,
+                          actions: mapSubject === 'actors'
+                            ? 'actionsMembers'
+                            : 'targetingActionsAsMember',
+                          skip: !(memberOption
+                            && (
+                              (mapSubject === 'actors' && includeActorMembers)
+                              || (mapSubject === 'targets' && includeTargetMembers)
+                            )),
+                        },
+                        {
+                          id: 'actorActionsAsParent',
+                          type: 'actorActions',
+                          children: true,
+                          subject: mapSubject,
+                          label: mapSubject === 'actors'
+                            ? `${entityTitle.plural} by members`
+                            : `${entityTitle.plural} targeting members`,
+                          actions: mapSubject === 'actors'
+                            ? 'actionsAsParent'
+                            : 'targetingActionsAsParent',
+                          skip: !(childOption
+                            && (
+                              (mapSubject === 'actors' && includeActorChildren)
+                              || (mapSubject === 'targets' && includeTargetChildren)
+                            )),
+                        },
+                      ]}
+                      entities={entityActors.get(parseInt(viewTypeClean, 10))}
+                      entityPath={ROUTES.ACTOR}
+                      onEntityClick={onEntityClick}
+                      entityTitle={{
+                        single: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].single),
+                        plural: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].plural),
+                      }}
+                      onResetScroll={this.scrollToTop}
+                      config={{
+                        types: 'actortypes',
+                        clientPath: ROUTES.ACTOR,
+                        views: {
+                          list: {
+                            search: ['code', 'title', 'description'],
                           },
-                          {
-                            id: 'actorActions',
-                            type: 'actorActions',
-                            subject: mapSubject,
-                            actions: mapSubject === 'actors'
-                              ? 'actions'
-                              : 'targetingActions',
-                          },
-                          {
-                            id: 'actorActionsAsMember',
-                            type: 'actorActions',
-                            members: true,
-                            subject: mapSubject,
-                            actions: mapSubject === 'actors'
-                              ? 'actionsMembers'
-                              : 'targetingActionsAsMember',
-                            skip: !(memberOption
-                              && (
-                                (mapSubject === 'actors' && includeActorMembers)
-                                || (mapSubject === 'targets' && includeTargetMembers)
-                              )),
-                          },
-                          {
-                            id: 'actorActionsAsParent',
-                            type: 'actorActions',
-                            children: true,
-                            subject: mapSubject,
-                            actions: mapSubject === 'actors'
-                              ? 'actionsAsParent'
-                              : 'targetingActionsAsParent',
-                            skip: !(childOption
-                              && (
-                                (mapSubject === 'actors' && includeActorChildren)
-                                || (mapSubject === 'targets' && includeTargetChildren)
-                              )),
-                          },
-                        ]}
-                        entities={entityActors.get(parseInt(viewTypeClean, 10))}
-                        entityPath={ROUTES.ACTOR}
-                        onEntityClick={onEntityClick}
-                        entityTitle={{
-                          single: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].single),
-                          plural: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].plural),
-                        }}
-                        onResetScroll={this.scrollToTop}
-                        config={{
-                          types: 'actortypes',
-                          clientPath: ROUTES.ACTOR,
-                          views: {
-                            list: {
-                              search: ['code', 'title', 'description'],
-                            },
-                          },
-                        }}
-                        connections={connections}
-                      />
-                    )}
+                        },
+                      }}
+                      connections={connections}
+                    />
                   </Box>
                 )}
                 {showRelatedUsersForActions && (
                   <Box>
                     <EntityListTable
+                      isByOption
+                      hasFilters={hasFilters}
                       paginate
                       hasSearch
                       columns={[
@@ -778,17 +792,32 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                       connections={connections}
                     />
                   </Box>
+
                 )}
                 {showEntities && (
                   <EntityListTable
+                    hasFilters={hasFilters}
                     paginate
                     hasSearch
                     columns={columns}
                     headerColumnsUtility={headerColumnsUtility}
-                    memberOption={(memberOption || childOption) && <MapOption option={memberOption || childOption} type="member" />}
-                    subjectOptions={subjectOptions && <MapSubjectOptions inList options={subjectOptions} />}
+                    memberOption={(memberOption || childOption) && (
+                      <MapOption
+                        option={memberOption || childOption}
+                        type="member"
+                      />
+                    )}
+                    subjectOptions={config.types === 'actortypes'
+                      && subjectOptions
+                      && (
+                        <MapSubjectOptions
+                          inList
+                          options={subjectOptions}
+                        />
+                      )}
                     listUpdating={listUpdating}
                     entities={entities}
+                    allEntityCount={allEntityCount}
                     errors={errors}
                     taxonomies={taxonomies}
                     actortypes={actortypes}

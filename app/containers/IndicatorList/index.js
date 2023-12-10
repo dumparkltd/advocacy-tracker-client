@@ -121,7 +121,6 @@ export function IndicatorList({
       <EntityList
         entities={entities}
         config={CONFIG}
-        allEntityCount={allEntities && allEntities.size}
         allEntities={allEntities.toList()}
         connections={connections}
         headerOptions={headerOptions}

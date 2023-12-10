@@ -31,6 +31,8 @@ const SortButton = styled(ButtonFlatIconOnly)`
   }
 `;
 
+const Label = styled.label``;
+
 
 export function CellHeaderMain({ column, canEdit }) {
   const sortOrderOption = column.onSort && SORT_ORDER_OPTIONS.find(
@@ -51,9 +53,11 @@ export function CellHeaderMain({ column, canEdit }) {
         </BoxPrint>
       )}
       {canEdit && (
-        <TextPrint as="label" htmlFor="select-all" weight={500} size="small" wordBreak="keep-all">
-          {column.title}
-        </TextPrint>
+        <Label htmlFor="select-all">
+          <TextPrint weight={500} size="small" wordBreak="keep-all">
+            {column.title}
+          </TextPrint>
+        </Label>
       )}
       {!canEdit && (
         <TextPrint weight={500} size="small">

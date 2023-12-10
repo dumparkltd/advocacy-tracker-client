@@ -21,7 +21,9 @@ function ButtonTagFilterWrap({
 }) {
   const isPrintView = usePrint();
   let title = labelLong || label;
-  const myOnClick = onClick || (filter && filter.onClick);
+  const myOnClick = isPrintView
+    ? null
+    : onClick || (filter && filter.onClick);
   if (myOnClick) {
     title = `Remove filter: ${title}`;
   }

@@ -17,10 +17,10 @@ const ButtonTagFilter = styled(Button)`
   white-space: nowrap;
   min-height: 25px;
   &:hover {
-    color: ${({ theme }) => theme.global.colors.text.dark};
+    color: ${({ theme, isPrint }) => isPrint ? theme.global.colors.text.brand : theme.global.colors.text.dark};
     stroke: ${({ theme }) => theme.global.colors.text.dark};
     fill: ${({ theme }) => theme.global.colors.text.dark};
-    background-color: ${({ theme }) => theme.global.colors.highlightHover};
+    background-color: ${({ theme, isPrint }) => isPrint ? 'transparent' : theme.global.colors.highlightHover};
   }
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding:${({ isPrint }) => isPrint ? ' 1px 4px' : '1px 6px'};
