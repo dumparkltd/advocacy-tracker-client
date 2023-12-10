@@ -1,7 +1,8 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
 import {
-  selectActorsWhereQuery,
+  selectActortypeActors,
+  selectAttributeQuery,
   selectWithoutQuery,
   selectAnyQuery,
   selectActionQuery,
@@ -32,6 +33,7 @@ import {
   filterEntitiesWithoutAssociation,
   filterEntitiesWithAnyAssociation,
   filterEntitiesByMultipleConnections,
+  filterEntitiesByAttributes,
   entitiesSetCategoryIds,
 } from 'utils/entities';
 // import { qe } from 'utils/quasi-equals';
@@ -84,7 +86,7 @@ export const selectConnections = createSelector(
 
 const selectActorsWithCategories = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectActorsWhereQuery,
+  selectActortypeActors,
   selectActorCategoriesGroupedByActor,
   selectCategories,
   (ready, entities, associationsGrouped, categories) => {
@@ -267,8 +269,16 @@ export const selectActorsWithConnections = createSelector(
 //     : entities
 // );
 
+const selectActorsWhereQuery = createSelector(
+  selectAttributeQuery,
+  selectActorsWithConnections, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
+);
+
 const selectActorsWithout = createSelector(
-  selectActorsWithConnections,
+  selectActorsWhereQuery,
   selectCategories,
   selectWithoutQuery,
   (entities, categories, query) => query
