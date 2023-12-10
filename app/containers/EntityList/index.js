@@ -33,6 +33,7 @@ import {
   selectIncludeInofficialStatements,
   selectTaxonomiesWithCategories,
   selectIsPrintView,
+  selectSearchQuery,
 } from 'containers/App/selectors';
 
 import {
@@ -277,6 +278,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onEntitiesDelete,
       onUpdateFilters,
       isPrintView,
+      searchQuery,
     } = this.props;
     // detect print to avoid expensive rendering
     const printing = isPrintView || !!(
@@ -468,6 +470,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         )}
         {showList && (
           <EntitiesListView
+            searchQuery={searchQuery}
             isPrintView={isPrintView}
             headerInfo={headerOptions.info}
             listActions={allListActions}
@@ -691,6 +694,7 @@ EntityList.propTypes = {
   onSetFilterMemberOption: PropTypes.func,
   view: PropTypes.string,
   mapSubject: PropTypes.string,
+  searchQuery: PropTypes.string,
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeTargetMembers: PropTypes.func,
@@ -731,6 +735,7 @@ const mapStateToProps = (state) => ({
   includeInofficial: selectIncludeInofficialStatements(state),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   isPrintView: selectIsPrintView(state),
+  searchQuery: selectSearchQuery(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

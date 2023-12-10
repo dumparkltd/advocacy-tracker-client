@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import { Map, List } from 'immutable';
 import { Box, Text } from 'grommet';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import styled from 'styled-components';
 
 import {
   ROUTES,
@@ -32,6 +33,7 @@ import EntityListTable from 'containers/EntityListTable';
 import ButtonPill from 'components/buttons/ButtonPill';
 import ContentHeader from 'containers/ContentHeader';
 import HeaderPrint from 'components/Header/HeaderPrint';
+import TagList from 'components/TagList';
 import PrintHide from 'components/styled/PrintHide';
 import BoxPrint from 'components/styled/BoxPrint';
 
@@ -41,7 +43,11 @@ import { getActiontypeColumns, getActortypeColumns } from 'utils/entities';
 import appMessages from 'containers/App/messages';
 
 import { getActorsForEntities, getUsersForEntities } from './utils';
+import messages from './messages';
 
+const LabelPrint = styled.span`
+  font-size: ${({ theme }) => theme.sizes.print.smaller};
+`;
 const getOwnActivityColumns = (mapSubject, typeId) => {
   let actionTypeIds;
   if (mapSubject === 'actors') {
@@ -157,7 +163,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       headerInfo,
       listActions,
       isPrintView,
+      searchQuery,
     } = this.props;
+
     const { viewType } = this.state;
     let type;
     let hasByTarget;
@@ -573,24 +581,38 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                   info={headerInfo}
                   buttons={listActions}
                   entityIdsSelected={entityIdsSelected}
-                  hasFilters={hasFilters}
-                  filters={filters}
                 />
-                {config.types === 'actiontypes' && subjectOptions && (
+                {isPrintView && (searchQuery || hasFilters) && (
+                  <Box margin={{ vertical: 'small' }}>
+                    <LabelPrint>
+                      {!!searchQuery && !hasFilters && (
+                        <FormattedMessage {...messages.labelPrintKeywords} />
+                      )}
+                      {!searchQuery && hasFilters && (
+                        <FormattedMessage {...messages.labelPrintFilters} />
+                      )}
+                      {!!searchQuery && hasFilters && (
+                        <FormattedMessage {...messages.labelPrintFiltersKeywords} />
+                      )}
+                    </LabelPrint>
+                    <TagList
+                      filters={filters}
+                      searchQuery={searchQuery}
+                      isPrintView
+                      isPrint
+                    />
+                  </Box>
+                )}
+                {config.types === 'actiontypes' && subjectOptions && !isPrintView && (
                   <Box>
-                    {subjectOptions && (
-                      <MapSubjectOptions options={subjectOptions} inList />
-                    )}
+                    <MapSubjectOptions options={subjectOptions} inList />
                   </Box>
                 )}
                 {checkboxOptions && (
                   <Box>
                     {checkboxOptions && checkboxOptions.map(
                       (option, i) => (
-                        <MapOption
-                          key={i}
-                          option={option}
-                        />
+                        <MapOption key={i} option={option} />
                       )
                     )}
                   </Box>
@@ -842,6 +864,7 @@ EntitiesListView.propTypes = {
   typeId: PropTypes.string,
   showCode: PropTypes.bool,
   mapSubject: PropTypes.string,
+  searchQuery: PropTypes.string,
   allEntityCount: PropTypes.number,
   // functions
   onEntityClick: PropTypes.func.isRequired,

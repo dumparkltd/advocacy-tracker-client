@@ -6,7 +6,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
-import { FormattedMessage } from 'react-intl';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
@@ -14,7 +13,6 @@ import { palette } from 'styled-theme';
 import Icon from 'components/Icon';
 import Button from 'components/buttons/Button';
 import DebounceInput from 'react-debounce-input';
-import PrintOnly from 'components/styled/PrintOnly';
 import PrintHide from 'components/styled/PrintHide';
 
 import { selectIsPrintView } from 'containers/App/selectors';
@@ -67,15 +65,6 @@ const Clear = styled(Button)`
   }
 `;
 
-const LabelPrint = styled(PrintOnly)`
-  margin-top: 10px;
-  font-size: ${({ theme }) => theme.sizes.print.smaller};
-`;
-const SearchValuePrint = styled(PrintOnly)`
-  font-size: ${({ theme }) => theme.sizes.print.default};
-  font-weight: bold;
-`;
-
 export class EntityListSearch extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor() {
     super();
@@ -126,16 +115,6 @@ export class EntityListSearch extends React.Component { // eslint-disable-line r
             )}
           </Search>
         </PrintHide>
-        {searchQuery && (
-          <PrintOnly isPrint={isPrint}>
-            <LabelPrint>
-              <FormattedMessage {...messages.labelPrintKeywords} />
-            </LabelPrint>
-            <SearchValuePrint>
-              {searchQuery}
-            </SearchValuePrint>
-          </PrintOnly>
-        )}
       </>
     );
   }
