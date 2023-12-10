@@ -133,7 +133,7 @@ export function PrintUI({
   const {
     printType,
     printTabs,
-    printAllTypes,
+    printActionTypes,
     printSize,
     printOrientation,
     printItems,
@@ -299,7 +299,12 @@ export function PrintUI({
                           </FormFieldWrap>
                         </Field>
                       )}
-                      {printContentOptions.types && (
+                      {(printContentOptions.actionTypes
+                        || (
+                          printContentOptions.actionTypesForArgs
+                          && printContentOptions.actionTypesForArgs(printConfig)
+                        )
+                      ) && (
                         <Field>
                           <FormFieldWrap>
                             <FieldLabel>
@@ -310,18 +315,18 @@ export function PrintUI({
                             <Box direction="row" gap="medium">
                               <RadioButton
                                 name="radio-types-1"
-                                checked={printAllTypes !== 'all'}
+                                checked={printActionTypes !== 'all'}
                                 label={<Label>{intl.formatMessage(messages.typesCurrent)}</Label>}
                                 onChange={() => onPrint({
-                                  printAllTypes: 'current',
+                                  printActionTypes: 'current',
                                 })}
                               />
                               <RadioButton
                                 name="radio-types-2"
-                                checked={printAllTypes === 'all'}
+                                checked={printActionTypes === 'all'}
                                 label={<Label>{intl.formatMessage(messages.typesAll)}</Label>}
                                 onChange={() => onPrint({
-                                  printAllTypes: 'all',
+                                  printActionTypes: 'all',
                                 })}
                               />
                             </Box>

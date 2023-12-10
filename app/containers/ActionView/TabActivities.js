@@ -56,10 +56,9 @@ export function TabActivities({
   actiontypes,
   isAdmin,
   intl,
+  showAllActionTypes,
 }) {
   const actiontypeIds = actiontypes && actiontypes.entrySeq().map(([id]) => id.toString());
-  const activeActiontypeActions = actionsByActiontype && actionsByActiontype.get(parseInt(viewActiontypeId, 10));
-  const typeLabel = intl.formatMessage(appMessages.entities[`actions_${viewActiontypeId}`].plural);
   return (
     <Box>
       {(!actiontypeIds || actiontypeIds.size === 0) && (
@@ -105,47 +104,62 @@ export function TabActivities({
               )}
             </TypeSelectBox>
           </PrintHide>
-          <PrintOnly>
-            <StyledPrint>
-              <Text size="small" style={{ textDecoration: 'underline' }}>{typeLabel}</Text>
-            </StyledPrint>
-          </PrintOnly>
         </>
       )}
-      <Box pad={{ vertical: 'small' }}>
-        <FieldGroup
-          seamless
-          group={{
-            fields: [
-              getActionConnectionField({
-                actions: activeActiontypeActions,
-                taxonomies,
-                onEntityClick,
-                connections: actionConnections,
-                typeid: viewActiontypeId,
-                columns: getActiontypeColumns({
-                  typeId: viewActiontypeId,
-                  isAdmin,
-                }),
-                onCreateOption: () => onCreateOption({
-                  path: API.ACTIONS,
-                  attributes: {
-                    measuretype_id: viewActiontypeId,
-                  },
-                  invalidateEntitiesOnSuccess: API.ACTIONS,
-                  autoUser: true,
-                  connect: {
-                    type: 'subActions',
-                    create: [{
-                      other_measure_id: viewEntity.get('id'),
-                    }],
-                  },
-                }),
-              }),
-            ],
-          }}
-        />
-      </Box>
+      {actiontypes
+      && (viewActiontypeId || showAllActionTypes)
+      && actiontypeIds
+      && actiontypeIds.size > 0
+      && actiontypeIds.filter(
+        (typeId) => showAllActionTypes || qe(typeId, viewActiontypeId)
+      ).map((typeId) => {
+        const activeActiontypeActions = actionsByActiontype
+          && actionsByActiontype.get(parseInt(typeId, 10));
+        const typeLabel = intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural);
+        return (
+          <Box key={typeId} margin={{ bottom: 'small' }}>
+            <PrintOnly>
+              <StyledPrint>
+                <Text size="small" style={{ textDecoration: 'underline' }}>{typeLabel}</Text>
+              </StyledPrint>
+            </PrintOnly>
+            <Box pad={{ vertical: 'small' }}>
+              <FieldGroup
+                seamless
+                group={{
+                  fields: [
+                    getActionConnectionField({
+                      actions: activeActiontypeActions,
+                      taxonomies,
+                      onEntityClick,
+                      connections: actionConnections,
+                      typeid: viewActiontypeId,
+                      columns: getActiontypeColumns({
+                        typeId: viewActiontypeId,
+                        isAdmin,
+                      }),
+                      onCreateOption: () => onCreateOption({
+                        path: API.ACTIONS,
+                        attributes: {
+                          measuretype_id: viewActiontypeId,
+                        },
+                        invalidateEntitiesOnSuccess: API.ACTIONS,
+                        autoUser: true,
+                        connect: {
+                          type: 'subActions',
+                          create: [{
+                            other_measure_id: viewEntity.get('id'),
+                          }],
+                        },
+                      }),
+                    }),
+                  ],
+                }}
+              />
+            </Box>
+          </Box>
+        );
+      })}
     </Box>
   );
 }
@@ -161,6 +175,7 @@ TabActivities.propTypes = {
   actiontypes: PropTypes.instanceOf(Map),
   onCreateOption: PropTypes.func,
   isAdmin: PropTypes.bool,
+  showAllActionTypes: PropTypes.bool,
   intl: intlShape.isRequired,
 };
 

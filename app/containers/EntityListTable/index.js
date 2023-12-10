@@ -27,7 +27,6 @@ import { updateQuery } from 'containers/EntityList/actions';
 
 import SelectReset from 'components/SelectReset';
 import EntityListSearch from 'components/EntityListSearch';
-import BoxPrint from 'components/styled/BoxPrint';
 
 import ToggleAllItems from 'components/fields/ToggleAllItems';
 import appMessages from 'containers/App/messages';
@@ -284,26 +283,27 @@ export function EntityListTable({
   const listEmptyAfterQueryAndErrors = listEmptyAfterQuery
     && (errors && errors.size > 0);
 
+  const hasPageSelect = !isPrintView && entitiesOnPage && entitiesOnPage.length > 0 && paginate;
   return (
     <div>
-      <Box
-        direction="row"
-        align="center"
-        gap="medium"
-        pad={{ vertical: 'small' }}
-        justify={hasSearch ? 'start' : 'end'}
-      >
-        {hasSearch && (
-          <Box flex={{ shrink: 0, grow: 1 }}>
-            <EntityListSearch
-              searchQuery={searchQuery}
-              onSearch={onSearch}
-            />
-          </Box>
-        )}
-        <Box flex={{ shrink: 1, grow: 0 }}>
-          <BoxPrint printHide>
-            {entitiesOnPage.length > 0 && paginate && (
+      {(hasSearch || hasPageSelect) && (
+        <Box
+          direction="row"
+          align="center"
+          gap="medium"
+          pad={{ vertical: 'small' }}
+          justify={hasSearch ? 'start' : 'end'}
+        >
+          {hasSearch && (
+            <Box flex={{ shrink: 0, grow: 1 }}>
+              <EntityListSearch
+                searchQuery={searchQuery}
+                onSearch={onSearch}
+              />
+            </Box>
+          )}
+          {hasPageSelect && (
+            <Box flex={{ shrink: 1, grow: 0 }}>
               <SelectReset
                 value={pageItems === 'all' ? pageItems : pageSize.toString()}
                 label={intl && intl.formatMessage(appMessages.labels.perPage)}
@@ -315,10 +315,10 @@ export function EntityListTable({
                 isReset={false}
                 onChange={onPageItemsSelect}
               />
-            )}
-          </BoxPrint>
+            </Box>
+          )}
         </Box>
-      </Box>
+      )}
       <EntitiesTable
         entities={entitiesOnPage}
         columns={activeColumns}

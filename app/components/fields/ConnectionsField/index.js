@@ -15,7 +15,7 @@ import ButtonFactory from 'components/buttons/ButtonFactory';
 
 
 const StyledFieldWrap = styled(FieldWrap)`
-  padding-top: 15px;
+  padding-top: 5px;
 `;
 
 export function ConnectionsField({ field, intl }) {

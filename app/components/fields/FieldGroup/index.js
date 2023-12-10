@@ -19,6 +19,7 @@ export function FieldGroup({
     && group.fields
     && group.fields.reduce((memo, field) => memo || field, false);
   if (group && (hasFields || group.custom)) {
+    console.log(group);
     return (
       <FieldGroupWrapper
         groupType={group.type}

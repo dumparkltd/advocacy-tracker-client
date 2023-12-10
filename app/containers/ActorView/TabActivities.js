@@ -30,8 +30,6 @@ import {
   selectActiontypeQuery,
 } from 'containers/App/selectors';
 
-import { usePrint } from 'containers/App/PrintContext';
-
 import appMessages from 'containers/App/messages';
 import PrintHide from 'components/styled/PrintHide';
 import PrintOnly from 'components/styled/PrintOnly';
@@ -71,10 +69,9 @@ export function TabActivities(props) {
     actionsViaMembersByActortype,
     actionsAsTargetViaMembersByActortype,
     isAdmin,
-    printArgs,
+    showAllActionTypes,
   } = props;
 
-  const isPrint = usePrint();
   const viewActortypeId = viewEntity.getIn(['attributes', 'actortype_id']).toString();
   // figure out connected action types ##################################################
   const canBeMember = viewActortypeId
@@ -225,11 +222,11 @@ export function TabActivities(props) {
       )}
       {viewEntity
         && actiontypes
-        && activeActiontypeId
+        && (activeActiontypeId || showAllActionTypes)
         && actiontypeIdsForSubjectOptions
         && actiontypeIdsForSubjectOptions.size > 0
         && actiontypeIdsForSubjectOptions.filter(
-          (typeId) => qe(typeId, activeActiontypeId) || (isPrint && printArgs && printArgs.printAllTypes === 'all')
+          (typeId) => showAllActionTypes || qe(typeId, activeActiontypeId)
         ).map((typeId) => {
           const typeLabel = intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural);
           return (
@@ -264,6 +261,7 @@ TabActivities.propTypes = {
   viewEntity: PropTypes.instanceOf(Map),
   viewSubject: PropTypes.string,
   isAdmin: PropTypes.bool,
+  showAllActionTypes: PropTypes.bool,
   taxonomies: PropTypes.instanceOf(Map),
   onSetActiontype: PropTypes.func,
   onEntityClick: PropTypes.func,
@@ -275,7 +273,6 @@ TabActivities.propTypes = {
   actionsAsTargetAsMemberByActortype: PropTypes.instanceOf(Map),
   actionsViaMembersByActortype: PropTypes.instanceOf(Map),
   actionsAsTargetViaMembersByActortype: PropTypes.instanceOf(Map),
-  printArgs: PropTypes.object,
   intl: intlShape,
 };
 

@@ -187,7 +187,11 @@ export function ActionView(props) {
 
   const mySetPrintView = () => onSetPrintView({
     printType: showMap ? PRINT_TYPES.FF : PRINT_TYPES.SINGLE,
-    printContentOptions: { tabs: true },
+    printContentOptions: {
+      tabs: true,
+      actionTypes: viewSubject === 'children',
+      actionTypesForArgs: (args) => args.printTabs === 'all',
+    },
     printMapOptions: showMap ? { markers: true } : null,
     printMapMarkers: true,
     printOrientation: 'portrait',
@@ -288,6 +292,7 @@ export function ActionView(props) {
 
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
   const showAllTabs = isPrintView && printArgs && printArgs.printTabs === 'all';
+  const showAllActionTypes = isPrintView && printArgs.printActionTypes === 'all';
   return (
     <div>
       <Helmet
@@ -419,42 +424,48 @@ export function ActionView(props) {
                       </PrintHide>
                     </>
                     <SubjectTabWrapper>
-                      {(showAllTabs || viewSubject === 'children') && (
-                        <>
-                          <PrintOnly>
-                            <PrintSectionTitleWrapper>
-                              <Text size="large">Child Activities</Text>
-                            </PrintSectionTitleWrapper>
-                          </PrintOnly>
-                          <TabActivities
-                            isAdmin={isAdmin}
-                            viewEntity={viewEntity}
-                            taxonomies={taxonomies}
-                            onEntityClick={onEntityClick}
-                            viewActiontypeId={childActiontypeIds.indexOf(viewActiontypeId) > -1 ? viewActiontypeId : childActiontypeIds[0]}
-                            actiontypes={actiontypes.filter((type) => childActiontypeIds.indexOf(type.get('id')) > -1)}
-                            actionsByActiontype={subActionsByType}
-                          />
-                        </>
-                      )}
-                      {(showAllTabs || viewSubject !== 'children') && (
-                        <>
-                          <PrintOnly>
-                            <PrintSectionTitleWrapper>
-                              <Text size="large">{viewSubject === 'actors' ? 'Actors' : 'Targets'}</Text>
-                            </PrintSectionTitleWrapper>
-                          </PrintOnly>
-                          <TabActors
-                            isAdmin={isAdmin}
-                            hasChildren={hasChildren}
-                            childActionsByActiontype={subActionsByType}
-                            viewEntity={viewEntity}
-                            typeId={typeId.toString()}
-                            viewSubject={viewSubject}
-                            taxonomies={taxonomies}
-                            onEntityClick={onEntityClick}
-                          />
-                        </>
+                      {validViewSubjects.filter(
+                        (vSubject) => showAllTabs || vSubject === viewSubject
+                      ).map(
+                        (vSubject) => vSubject === 'children'
+                          ? (
+                            <span key={vSubject}>
+                              <PrintOnly>
+                                <PrintSectionTitleWrapper>
+                                  <Text size="large">Child Activities</Text>
+                                </PrintSectionTitleWrapper>
+                              </PrintOnly>
+                              <TabActivities
+                                isAdmin={isAdmin}
+                                showAllActionTypes={showAllActionTypes}
+                                viewEntity={viewEntity}
+                                taxonomies={taxonomies}
+                                onEntityClick={onEntityClick}
+                                viewActiontypeId={childActiontypeIds.indexOf(viewActiontypeId) > -1 ? viewActiontypeId : childActiontypeIds[0]}
+                                actiontypes={actiontypes.filter((type) => childActiontypeIds.indexOf(type.get('id')) > -1)}
+                                actionsByActiontype={subActionsByType}
+                              />
+                            </span>
+                          )
+                          : (
+                            <span key={vSubject}>
+                              <PrintOnly>
+                                <PrintSectionTitleWrapper>
+                                  <Text size="large">{subject === 'actors' ? 'Actors' : 'Targets'}</Text>
+                                </PrintSectionTitleWrapper>
+                              </PrintOnly>
+                              <TabActors
+                                isAdmin={isAdmin}
+                                hasChildren={hasChildren}
+                                childActionsByActiontype={subActionsByType}
+                                viewEntity={viewEntity}
+                                typeId={typeId.toString()}
+                                viewSubject={vSubject}
+                                taxonomies={taxonomies}
+                                onEntityClick={onEntityClick}
+                              />
+                            </span>
+                          )
                       )}
                     </SubjectTabWrapper>
                     <Box>
