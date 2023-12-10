@@ -112,7 +112,7 @@ export function EntityListTable({
   onPageSelect,
   printConfig,
   isPrintView,
-  allEntityCount,
+  // allEntityCount,
   isByOption,
 }) {
   if (!columns) return null;
@@ -269,10 +269,11 @@ export function EntityListTable({
       intl,
       entityTitle,
       pageTotal: entityIdsOnPage.length,
-      entitiesTotal: allEntityCount || sortedEntities.length,
+      entitiesTotal: sortedEntities.length,
       selectedTotal: canEdit && entityIdsSelected && entityIdsSelected.size,
       allSelectedOnPage: canEdit && entityIdsOnPage.length === entityIdsSelected.size,
       messages,
+      hasFilters: (searchQuery.length > 0 || hasFilters),
     }),
     intl,
   });
@@ -446,7 +447,7 @@ EntityListTable.propTypes = {
   isPrintView: PropTypes.bool,
   printConfig: PropTypes.object,
   pageItemSelectConfig: PropTypes.object,
-  allEntityCount: PropTypes.number,
+  // allEntityCount: PropTypes.number,
 };
 
 const mapStateToProps = (state) => ({
