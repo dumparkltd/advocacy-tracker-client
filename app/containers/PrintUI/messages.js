@@ -59,7 +59,7 @@ export default defineMessages({
   },
   pagesCurrent: {
     id: 'app.containers.PrintUI.pagesCurrent',
-    defaultMessage: 'As selected',
+    defaultMessage: 'Single page (as selected)',
   },
   tabOption: {
     id: 'app.containers.PrintUI.formatOption',
