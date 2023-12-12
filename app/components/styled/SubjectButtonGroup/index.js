@@ -15,6 +15,12 @@ const SubjectButtonGroup = styled((p) => (
     ? theme.global.colors.border.light
     : 'transparent'
 };
+  overflow-x: scroll;
+  white-space: nowrap; 
+  ::-webkit-scrollbar {
+   padding-top:1px;
+  }
 `;
+
 
 export default SubjectButtonGroup;

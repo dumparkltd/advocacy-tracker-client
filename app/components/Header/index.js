@@ -76,11 +76,14 @@ const LinkPage = styled((p) => <Button plain as="a" justify="center" fill="verti
   width: ${({ wide }) => !wide ? '100%' : 'auto'};
   text-align: center;
   font-size: ${({ theme }) => theme.text.small.size};
-  line-height: ${({ theme }) => theme.text.small.height};
+  line-height: ${({ theme }) => theme.text.small.size};
   font-weight: ${({ wide, active }) => (!wide && active) ? 500 : 300};
   height:${({ theme }) => theme.sizes.header.banner.heightMobile}px;
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     height:${({ theme }) => theme.sizes.header.banner.height}px;
+  }
+  @media (max-width: ${({ theme }) => theme.breakpoints.medium}) {
+  padding-top: 16px;
   }
   &:hover {
     color: ${({ active }) => active ? 'black' : 'white'};
@@ -163,7 +166,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
     } else {
       this.props.onPageLink(path);
     }
-  }
+  };
 
   resize = () => {
     // reset
@@ -204,7 +207,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                     title={appTitle}
                   >
                     <LogoWrap>
-                      <Icon name="logo" size={isMinSize(size, 'medium') ? '72px' : '60px'} />
+                      <Icon name="logo" size={isMinSize(size, 'medium') ? '72px' : '50px'} />
                     </LogoWrap>
                     <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
                       <BrandTitle isDev={IS_DEV}>
