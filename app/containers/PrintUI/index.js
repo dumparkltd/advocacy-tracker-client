@@ -142,6 +142,12 @@ export function PrintUI({
     printMapMarkers,
   } = printConfig;
   const printAllPages = printItems === 'all' || pageItems === 'all';
+  const hasPrintMapOptions = !!printMapOptions && (printMapOptions.markers
+      || (
+        printMapOptions.markersForArgs
+        && printMapOptions.markersForArgs(printConfig)
+      )
+  );
   // qe(printType, PRINT_TYPES.SINGLE)
   //   || (qe(printType, PRINT_TYPES.LIST) && view === 'list');
   return (
@@ -350,7 +356,7 @@ export function PrintUI({
                 </Box>
               </Box>
             )}
-            {!!printMapOptions && (
+            {hasPrintMapOptions && (
               <Box>
                 <FieldGroupLabel>
                   <StyledGroupLabel>
@@ -360,7 +366,12 @@ export function PrintUI({
                 <Box direction="row" fill="horizontal">
                   <Box basis="1/2">
                     <StyledFieldGroupWrapper>
-                      {printMapOptions.markers && (
+                      {(printMapOptions.markers
+                          || (
+                            printMapOptions.markersForArgs
+                            && printMapOptions.markersForArgs(printConfig)
+                          )
+                      ) && (
                         <Field>
                           <FormFieldWrap>
                             <FieldLabel>

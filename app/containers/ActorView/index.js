@@ -108,7 +108,7 @@ export function ActorView({
   intl,
   viewEntity,
   dataReady,
-  isMember,
+  isUserMember,
   onLoadData,
   params,
   handleEdit,
@@ -144,60 +144,8 @@ export function ActorView({
     }
   }, [dataReady]);
 
-  const mySetPrintView = () => onSetPrintView({
-    printType: PRINT_TYPES.SINGLE,
-    printContentOptions: { tabs: true, types: true },
-    printMapOptions: subject !== 'facts' ? { markers: true } : null,
-    printMapMarkers: true,
-    printOrientation: 'portrait',
-    printSize: 'A4',
-  });
-
-  const keydownHandler = (e) => {
-    keydownHandlerPrint(e, mySetPrintView);
-  };
-
-  useEffect(() => {
-    document.addEventListener('keydown', keydownHandler);
-    return () => {
-      document.removeEventListener('keydown', keydownHandler);
-    };
-  }, []);
-
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'actortype_id']);
   const viewActortype = actortypes && actortypes.find((type) => qe(type.get('id'), typeId));
-
-  let buttons = [];
-  if (dataReady) {
-    if (window.print) {
-      buttons = [
-        ...buttons,
-        {
-          type: 'icon',
-          onClick: mySetPrintView,
-          title: 'Print',
-          icon: 'print',
-        },
-      ];
-    }
-    if (isMember) {
-      buttons = [
-        ...buttons,
-        {
-          type: 'edit',
-          onClick: handleEdit,
-        },
-      ];
-    }
-  }
-  const pageTitle = typeId
-    ? intl.formatMessage(appMessages.entities[`actors_${typeId}`].single)
-    : intl.formatMessage(appMessages.entities.actors.single);
-
-  const metaTitle = viewEntity
-    ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
-    : `${pageTitle}: ${params.id}`;
-
   const viewActortypeId = viewActortype && viewActortype.get('id').toString();
   const isTarget = viewActortype && viewActortype.getIn(['attributes', 'is_target']);
   const isActive = viewActortype && viewActortype.getIn(['attributes', 'is_active']);
@@ -228,6 +176,69 @@ export function ActorView({
   }
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
   const showAllTabs = isPrintView && printArgs && printArgs.printTabs === 'all';
+  const showAllActionTypes = isPrintView && printArgs.printActionTypes === 'all';
+  const hasMap = !isCountry && (
+    viewSubject === 'members' || (hasMembers && showAllTabs)
+  );
+
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.SINGLE,
+    printContentOptions: {
+      tabs: true,
+      actionTypes: viewSubject === 'actors' || viewSubject === 'targets',
+      actionTypesForArgs: (args) => args.printTabs === 'all',
+    },
+    printMapOptions: {
+      markers: hasMap,
+      markersForArgs: (args) => args.printTabs === 'all',
+    },
+    printMapMarkers: true,
+    printOrientation: 'portrait',
+    printSize: 'A4',
+  });
+
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
+
+  let buttons = [];
+  if (dataReady) {
+    if (window.print) {
+      buttons = [
+        ...buttons,
+        {
+          type: 'icon',
+          onClick: mySetPrintView,
+          title: 'Print',
+          icon: 'print',
+        },
+      ];
+    }
+    if (isUserMember) {
+      buttons = [
+        ...buttons,
+        {
+          type: 'edit',
+          onClick: handleEdit,
+        },
+      ];
+    }
+  }
+  const pageTitle = typeId
+    ? intl.formatMessage(appMessages.entities[`actors_${typeId}`].single)
+    : intl.formatMessage(appMessages.entities.actors.single);
+
+  const metaTitle = viewEntity
+    ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
+    : `${pageTitle}: ${params.id}`;
+
   return (
     <div>
       <Helmet
@@ -265,7 +276,7 @@ export function ActorView({
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isMember && !isPrintView}>
+                <Main hasAside={isUserMember && !isPrintView}>
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
@@ -275,7 +286,7 @@ export function ActorView({
                           isAdmin,
                         ),
                         checkActorAttribute(typeId, 'title') && getTitleField(viewEntity),
-                        checkActorAttribute(typeId, 'prefix', isMember) && getInfoField(
+                        checkActorAttribute(typeId, 'prefix', isUserMember) && getInfoField(
                           'prefix',
                           viewEntity.getIn(['attributes', 'prefix']),
                         ),
@@ -284,7 +295,7 @@ export function ActorView({
                     }}
                   />
                 </Main>
-                {isMember && !isPrintView && (
+                {isUserMember && !isPrintView && (
                   <Aside>
                     <FieldGroup
                       group={{
@@ -373,6 +384,7 @@ export function ActorView({
                             taxonomies={taxonomies}
                             actionsByActiontype={actionsByActiontype}
                             printArgs={printArgs}
+                            showAllActionTypes={showAllActionTypes}
                           />
                         </>
                       )}
@@ -389,6 +401,7 @@ export function ActorView({
                             onEntityClick={(id, path) => onEntityClick(id, path)}
                             taxonomies={taxonomies}
                             actorConnections={actorConnections}
+                            printArgs={printArgs}
                           />
                         </>
                       )}
@@ -493,7 +506,7 @@ ActorView.propTypes = {
   membersByType: PropTypes.instanceOf(Map),
   associationsByType: PropTypes.instanceOf(Map),
   params: PropTypes.object,
-  isMember: PropTypes.bool,
+  isUserMember: PropTypes.bool,
   intl: intlShape.isRequired,
   subject: PropTypes.string,
   viewActiontypeId: PropTypes.string,
@@ -512,7 +525,7 @@ ActorView.propTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
-  isMember: selectIsUserMember(state),
+  isUserMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   viewTaxonomies: selectViewTaxonomies(state, props.params.id),
