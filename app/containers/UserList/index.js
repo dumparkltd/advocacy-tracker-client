@@ -71,9 +71,9 @@ export function UserList({
 
   const mySetPrintView = () => onSetPrintView({
     printType: PRINT_TYPES.LIST,
-    printContentOptions: { pages: true },
     printOrientation: 'portrait',
     printSize: 'A4',
+    printItems: 'all',
   });
   const keydownHandler = (e) => {
     keydownHandlerPrint(e, mySetPrintView);

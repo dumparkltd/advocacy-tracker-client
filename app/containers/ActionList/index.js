@@ -91,12 +91,12 @@ export function ActionList({
 
   const mySetPrintView = () => onSetPrintView({
     printType: PRINT_TYPES.LIST,
-    printContentOptions: showMap ? null : { pages: true },
     printMapOptions: showMap ? { markers: true } : null,
     printMapMarkers: true,
     fixed: showMap,
     printOrientation: showMap ? 'landscape' : 'portrait',
     printSize: 'A4',
+    printItems: 'all',
   });
 
   const keydownHandler = (e) => {

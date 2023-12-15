@@ -72,9 +72,9 @@ export function ResourceList({
 
   const mySetPrintView = () => onSetPrintView({
     printType: PRINT_TYPES.LIST,
-    printContentOptions: { pages: true },
     printOrientation: 'portrait',
     printSize: 'A4',
+    printItems: 'all',
   });
   const keydownHandler = (e) => {
     keydownHandlerPrint(e, mySetPrintView);
@@ -102,12 +102,7 @@ export function ResourceList({
   if (window.print) {
     headerOptions.actions.push({
       type: 'icon',
-      onClick: () => onSetPrintView({
-        printType: PRINT_TYPES.LIST,
-        printContentOptions: { pages: true },
-        printOrientation: 'portrait',
-        printSize: 'A4',
-      }),
+      onClick: () => mySetPrintView(),
       title: 'Print',
       icon: 'print',
     });
