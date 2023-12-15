@@ -24,6 +24,7 @@ import FieldGroup from 'components/fields/FieldGroup';
 
 // import appMessages from 'containers/App/messages';
 // import ActorMap from './ActorMap';
+import { usePrint } from 'containers/App/PrintContext';
 import MapContainer from 'containers/MapContainer/MapWrapper';
 // import messages from './messages';
 
@@ -61,14 +62,16 @@ const reduceCountryData = ({ features, countries }) => features.reduce(
   },
   [],
 );
-export function TabMembers(props) {
-  const {
-    onEntityClick,
-    membersByType,
-    taxonomies,
-    actorConnections,
-    isAdmin,
-  } = props;
+export function TabMembers({
+  onEntityClick,
+  membersByType,
+  taxonomies,
+  actorConnections,
+  isAdmin,
+  printArgs,
+}) {
+  const isPrintView = usePrint();
+
   const countriesJSON = topojson.feature(
     countriesTopo,
     Object.values(countriesTopo.objects)[0],
@@ -81,10 +84,13 @@ export function TabMembers(props) {
     features: countriesJSON.features,
     countries,
   });
-  const countryPointData = countries && countries.size > 0 && reduceCountryData({
-    features: countryPointsJSON.features,
-    countries,
-  });
+  const showMarkers = !isPrintView || (printArgs && printArgs.printMapMarkers);
+  const countryPointData = (showMarkers && countries && countries.size > 0)
+    ? reduceCountryData({
+      features: countryPointsJSON.features,
+      countries,
+    })
+    : null;
 
   return (
     <Box>
@@ -195,6 +201,7 @@ TabMembers.propTypes = {
   membersByType: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
   actorConnections: PropTypes.instanceOf(Map),
+  printArgs: PropTypes.object,
 };
 
 

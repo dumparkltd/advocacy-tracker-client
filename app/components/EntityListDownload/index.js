@@ -33,7 +33,7 @@ import {
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonSubmit from 'components/buttons/ButtonSubmit';
 import OptionsForActions from './OptionsForActions';

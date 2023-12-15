@@ -51,7 +51,7 @@ import {
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import FormWrapper from './FormWrapper';
 
 import {
@@ -93,7 +93,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
       ['attributes', 'resourcetype_id'],
       typeId,
     ));
-  }
+  };
 
   getHeaderMainFields = (typeId) => {
     const { intl } = this.context;
@@ -126,7 +126,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
         ],
       },
     ]);
-  }
+  };
 
   getBodyMainFields = (
     typeId,
@@ -178,7 +178,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
       }
     }
     return groups;
-  }
+  };
 
   getBodyAsideFields = (typeId) => {
     const { intl } = this.context;

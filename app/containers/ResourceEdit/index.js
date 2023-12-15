@@ -53,7 +53,7 @@ import {
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import FormWrapper from './FormWrapper';
 
 import {
@@ -204,7 +204,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
       }
     }
     return groups;
-  }
+  };
 
   getBodyAsideFields = (entity) => {
     const { intl } = this.context;

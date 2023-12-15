@@ -4,16 +4,20 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { Map, List, fromJS } from 'immutable';
+import { injectIntl, intlShape } from 'react-intl';
 
 import {
   loadEntitiesIfNeeded,
   redirectIfNotPermitted,
+  printView,
 } from 'containers/App/actions';
+
+import { keydownHandlerPrint } from 'utils/print';
 
 import {
   selectReady,
@@ -28,97 +32,115 @@ import {
 
 import appMessages from 'containers/App/messages';
 import { USER_ROLES } from 'themes/config';
+import { PRINT_TYPES } from 'containers/App/constants';
 
 import EntityList from 'containers/EntityList';
 
 import { CONFIG, DEPENDENCIES } from './constants';
+
 import {
   selectUsers,
   selectUsersWithConnections,
 } from './selectors';
 import messages from './messages';
 
-export class UserList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
-  }
+export function UserList({
+  onLoadEntitiesIfNeeded,
+  onRedirectIfNotPermitted,
+  entities,
+  taxonomies,
+  connections,
+  location,
+  dataReady,
+  authReady,
+  actortypes,
+  actiontypes,
+  // isMember,
+  isVisitor,
+  allEntities,
+  onSetPrintView,
+  intl,
+}) {
+  useEffect(() => {
+    if (authReady) onRedirectIfNotPermitted();
+  }, [authReady]);
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    // reload entities if invalidated
-    if (!nextProps.dataReady) {
-      this.props.loadEntitiesIfNeeded();
-    }
-    if (nextProps.authReady && !this.props.authReady) {
-      this.props.redirectIfNotPermitted();
-    }
-  }
+  useEffect(() => {
+    if (!dataReady) onLoadEntitiesIfNeeded();
+  }, [dataReady]);
 
-  render() {
-    const { intl } = this.context;
-    const {
-      dataReady,
-      actortypes,
-      actiontypes,
-      // isMember,
-      isVisitor,
-      allEntities,
-    } = this.props;
-    const type = 'users';
-    const headerOptions = {
-      supTitle: intl.formatMessage(messages.pageTitle),
-      actions: [],
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.LIST,
+    printOrientation: 'portrait',
+    printSize: 'A4',
+    printItems: 'all',
+  });
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
     };
-    if (isVisitor) {
-      headerOptions.actions.push({
-        type: 'bookmarker',
-        title: intl.formatMessage(appMessages.entities[type].plural),
-        entityType: type,
-      });
-    }
-    if (window.print) {
-      headerOptions.actions.push({
-        type: 'icon',
-        onClick: () => window.print(),
-        title: 'Print',
-        icon: 'print',
-      });
-    }
+  });
 
-    return (
-      <div>
-        <Helmet
-          title={intl.formatMessage(messages.pageTitle)}
-          meta={[
-            { name: 'description', content: intl.formatMessage(messages.metaDescription) },
-          ]}
-        />
-        {dataReady && (
-          <EntityList
-            entities={this.props.entities}
-            allEntities={allEntities.toList()}
-            taxonomies={this.props.taxonomies}
-            connections={this.props.connections}
-            config={CONFIG}
-            headerOptions={headerOptions}
-            dataReady={dataReady}
-            includeHeader={false}
-            entityTitle={{
-              single: intl.formatMessage(appMessages.entities.users.single),
-              plural: intl.formatMessage(appMessages.entities.users.plural),
-            }}
-            locationQuery={fromJS(this.props.location.query)}
-            actiontypes={actiontypes}
-            actortypes={actortypes}
-          />
-        )}
-      </div>
-    );
+  const type = 'users';
+  const headerOptions = {
+    supTitle: intl.formatMessage(messages.pageTitle),
+    actions: [],
+  };
+  if (isVisitor) {
+    headerOptions.actions.push({
+      type: 'bookmarker',
+      title: intl.formatMessage(appMessages.entities[type].plural),
+      entityType: type,
+    });
   }
+  if (window.print) {
+    headerOptions.actions.push({
+      type: 'icon',
+      onClick: () => mySetPrintView(),
+      title: 'Print',
+      icon: 'print',
+    });
+  }
+
+  return (
+    <div>
+      <Helmet
+        title={intl.formatMessage(messages.pageTitle)}
+        meta={[
+          { name: 'description', content: intl.formatMessage(messages.metaDescription) },
+        ]}
+      />
+      {dataReady && (
+        <EntityList
+          entities={entities}
+          allEntities={allEntities.toList()}
+          taxonomies={taxonomies}
+          connections={connections}
+          config={CONFIG}
+          headerOptions={headerOptions}
+          dataReady={dataReady}
+          includeHeader={false}
+          entityTitle={{
+            single: intl.formatMessage(appMessages.entities.users.single),
+            plural: intl.formatMessage(appMessages.entities.users.plural),
+          }}
+          locationQuery={fromJS(location.query)}
+          actiontypes={actiontypes}
+          actortypes={actortypes}
+        />
+      )}
+    </div>
+  );
 }
 
 UserList.propTypes = {
-  loadEntitiesIfNeeded: PropTypes.func,
-  redirectIfNotPermitted: PropTypes.func,
+  onLoadEntitiesIfNeeded: PropTypes.func,
+  onRedirectIfNotPermitted: PropTypes.func,
+  onSetPrintView: PropTypes.func,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
@@ -130,10 +152,7 @@ UserList.propTypes = {
   actortypes: PropTypes.instanceOf(Map),
   // isMember: PropTypes.bool,
   isVisitor: PropTypes.bool,
-};
-
-UserList.contextTypes = {
-  intl: PropTypes.object.isRequired,
+  intl: intlShape.isRequired,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -150,13 +169,16 @@ const mapStateToProps = (state, props) => ({
 });
 function mapDispatchToProps(dispatch) {
   return {
-    loadEntitiesIfNeeded: () => {
+    onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
-    redirectIfNotPermitted: () => {
+    onRedirectIfNotPermitted: () => {
       dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
+    },
+    onSetPrintView: (config) => {
+      dispatch(printView(config));
     },
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(UserList);
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(UserList));

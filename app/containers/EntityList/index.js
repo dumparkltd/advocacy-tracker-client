@@ -19,8 +19,6 @@ import Loading from 'components/Loading';
 import Icon from 'components/Icon';
 import EntityListHeader from 'components/EntityListHeader';
 import EntityListDownload from 'components/EntityListDownload';
-import EntityListPrintKey from 'components/EntityListPrintKey';
-import PrintOnly from 'components/styled/PrintOnly';
 
 import {
   selectHasUserRole,
@@ -35,6 +33,8 @@ import {
   selectIncludeTargetChildren,
   selectIncludeInofficialStatements,
   selectTaxonomiesWithCategories,
+  selectIsPrintView,
+  selectSearchQuery,
 } from 'containers/App/selectors';
 
 import {
@@ -101,7 +101,7 @@ const Progress = styled.div`
   bottom: 0;
   box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
   background-color: ${palette('primary', 4)};
-  padding: ${(props) => props.error ? 0 : 40}px;
+  padding: ${({ error }) => error ? 0 : 40}px;
   z-index: 200;
 `;
 
@@ -113,7 +113,7 @@ const ProgressText = styled.div`
   margin-top: -0.5em;
   overflow: hidden;
   @media print {
-    font-size: ${(props) => props.theme.sizes.print.default};
+    font-size: ${({ theme }) => theme.sizes.print.default};
   }
 `;
 
@@ -265,7 +265,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onSelectType,
       onSetView,
       typeId,
-      view,
+      view = 'list',
       onEntitySelectAll,
       dataReady,
       showCode,
@@ -302,13 +302,14 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       associationtypes,
       handleEditSubmit,
       onCreateOption,
-      allEntityCount,
       listActions,
       onEntitiesDelete,
       onUpdateFilters,
+      isPrintView,
+      searchQuery,
     } = this.props;
     // detect print to avoid expensive rendering
-    const printing = !!(
+    const printing = isPrintView || !!(
       typeof window !== 'undefined'
       && window.matchMedia
       && window.matchMedia('print').matches
@@ -328,7 +329,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     const filters = currentFilters(
       {
         config,
-        entities: allEntities,
         taxonomies: allTaxonomies,
         connections,
         connectedTaxonomies,
@@ -526,14 +526,29 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             onSetFilterMemberOption={onSetFilterMemberOption}
             headerActions={headerActions}
             onClearFilters={this.onClearFilters}
+            isPrintView={isPrintView}
+          />
+        )}
+        {headerStyle === 'simple' && (
+          <EntityListHeader
+            headerStyle={headerStyle}
+            dataReady={dataReady}
+            config={config}
+            canEdit={isMember && showList}
+            isMember={isMember}
+            hasUserRole={hasUserRole}
+            headerActions={headerOptions && headerOptions.actions}
+            isPrintView={isPrintView}
           />
         )}
         {showList && (
           <EntitiesListView
+            searchQuery={searchQuery}
+            isPrintView={isPrintView}
             headerInfo={headerOptions.info}
             listActions={allListActions}
             showEntitiesDelete={onEntitiesDelete}
-            allEntityCount={allEntityCount}
+            allEntityCount={allEntities && allEntities.size}
             viewOptions={viewOptions}
             hasHeader={includeHeader}
             headerStyle={headerStyle}
@@ -580,6 +595,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             onDismissError={onDismissError}
             typeId={typeId}
             hasFilters={filters && filters.length > 0}
+            filters={filters}
             showCode={showCode}
             mapSubject={mapSubject}
             onSetMapSubject={onSetMapSubject}
@@ -619,17 +635,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             includeTargetMembers={includeTargetMembers}
             includeActorChildren={includeActorChildren}
             includeTargetChildren={includeTargetChildren}
+            isPrintView={isPrintView}
           />
-        )}
-        {hasList && dataReady && config.taxonomies && (
-          <PrintOnly>
-            <EntityListPrintKey
-              entities={entities}
-              taxonomies={taxonomies}
-              config={config}
-              locationQuery={locationQuery}
-            />
-          </PrintOnly>
         )}
         {isMember && (progress !== null && progress < 100) && (
           <Progress>
@@ -760,6 +767,7 @@ EntityList.propTypes = {
   onSetFilterMemberOption: PropTypes.func,
   view: PropTypes.string,
   mapSubject: PropTypes.string,
+  searchQuery: PropTypes.string,
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeTargetMembers: PropTypes.func,
@@ -771,9 +779,9 @@ EntityList.propTypes = {
   includeActorChildren: PropTypes.bool,
   includeTargetChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
-  allEntityCount: PropTypes.number,
   onEntitiesDelete: PropTypes.func,
   onUpdateFilters: PropTypes.func,
+  isPrintView: PropTypes.bool,
 };
 
 EntityList.contextTypes = {
@@ -798,6 +806,8 @@ const mapStateToProps = (state) => ({
   includeTargetChildren: selectIncludeTargetChildren(state),
   includeInofficial: selectIncludeInofficialStatements(state),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
+  isPrintView: selectIsPrintView(state),
+  searchQuery: selectSearchQuery(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

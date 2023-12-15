@@ -14,8 +14,6 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  Accordion,
-  AccordionPanel,
 } from 'grommet';
 
 import { omit } from 'lodash/object';
@@ -26,7 +24,7 @@ import { lowerCase } from 'utils/string';
 
 import A from 'components/styled/A';
 import Field from 'components/fields/Field';
-import AccordionHeader from 'components/AccordionHeader';
+import Accordion from 'components/Accordion';
 import ViewPanel from 'components/EntityView/ViewPanel';
 import Main from 'components/EntityView/Main';
 
@@ -205,52 +203,47 @@ function ImportEntitiesForm({
                 {progress === null && template.data && (
                   <Box margin={{ vertical: 'small' }}>
                     <Accordion
-                      activeIndex={actives}
-                      onActive={(newActive) => setActive(newActive)}
-                      multiple
-                      animate={false}
-                    >
-                      <AccordionPanel
-                        header={(
-                          <AccordionHeader
-                            title={actives.includes(0)
-                              ? 'Hide field/column overview'
-                              : 'Show field/column overview'
-                            }
-                            open={actives.includes(0)}
-                          />
-                        )}
-                      >
-                        <Box background="light-1" pad="medium">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableCell scope="col" border="bottom">
-                                  <Text size="xsmall" weight={600}>Field/column name</Text>
-                                </TableCell>
-                                <TableCell scope="col" border="bottom">
-                                  <Text size="xsmall" weight={600}>Content/info</Text>
-                                </TableCell>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {template.data && Object.keys(template.data).filter((d) => d.trim() !== '').map(
-                                (d, index) => (
-                                  <TableRow key={index}>
-                                    <TableCell scope="row">
-                                      <Text size="xsmall">{d}</Text>
+                      activePanels={actives}
+                      onActive={(newActives) => setActive(newActives)}
+                      panels={[
+                        {
+                          id: 0,
+                          titleButton: actives.indexOf(0) > -1
+                            ? 'Hide field/column overview'
+                            : 'Show field/column overview',
+                          content: actives.indexOf(0) > -1 && (
+                            <Box background="light-1" pad="medium">
+                              <Table>
+                                <TableHeader>
+                                  <TableRow>
+                                    <TableCell scope="col" border="bottom">
+                                      <Text size="xsmall" weight={600}>Field/column name</Text>
                                     </TableCell>
-                                    <TableCell>
-                                      <Text size="xsmall">{template.data[d]}</Text>
+                                    <TableCell scope="col" border="bottom">
+                                      <Text size="xsmall" weight={600}>Content/info</Text>
                                     </TableCell>
                                   </TableRow>
-                                )
-                              )}
-                            </TableBody>
-                          </Table>
-                        </Box>
-                      </AccordionPanel>
-                    </Accordion>
+                                </TableHeader>
+                                <TableBody>
+                                  {template.data && Object.keys(template.data).filter((d) => d.trim() !== '').map(
+                                    (d, index) => (
+                                      <TableRow key={index}>
+                                        <TableCell scope="row">
+                                          <Text size="xsmall">{d}</Text>
+                                        </TableCell>
+                                        <TableCell>
+                                          <Text size="xsmall">{template.data[d]}</Text>
+                                        </TableCell>
+                                      </TableRow>
+                                    )
+                                  )}
+                                </TableBody>
+                              </Table>
+                            </Box>
+                          ),
+                        },
+                      ]}
+                    />
                   </Box>
                 )}
                 <Field noPadding>

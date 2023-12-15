@@ -18,7 +18,7 @@ import { selectReady } from 'containers/App/selectors';
 import HeaderExplore from 'containers/HeaderExplore';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
-import Content from 'components/styled/Content';
+import ContentSimple from 'components/styled/ContentSimple';
 import CardTeaser from 'components/CardTeaser';
 import Footer from 'containers/Footer';
 import { isMaxSize } from 'utils/responsive';
@@ -50,7 +50,7 @@ export function ActorsOverview({
     <ContainerWrapper bg>
       <HeaderExplore />
       <ViewContainer>
-        <Content>
+        <ContentSimple>
           {Object.keys(ACTORTYPE_NAVGROUPS).map((key) => (
             <Group key={key}>
               <GroupTitle>
@@ -85,7 +85,7 @@ export function ActorsOverview({
               </Box>
             </Group>
           ))}
-        </Content>
+        </ContentSimple>
       </ViewContainer>
       <Footer />
     </ContainerWrapper>

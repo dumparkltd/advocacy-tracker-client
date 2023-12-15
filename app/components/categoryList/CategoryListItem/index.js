@@ -17,6 +17,7 @@ const Styled = styled.button`
   display: block;
   margin-bottom: 2px;
   line-height: 1.428571429;
+  border-top: ${({ isPrint }) => isPrint ? 1 : 0}px solid ${palette('light', 1)};
   &:hover {
     color: ${palette('mainListItemHover', 0)};
     background-color: ${palette('mainListItemHover', 1)};
@@ -42,7 +43,7 @@ const BarWrap = styled.div`
   vertical-align: middle;
   font-size: 0px;
   padding: 4px 6px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     padding-right: ${({ secondary }) => secondary ? 36 : 18}px;
     padding-left: 40px;
   }
@@ -55,14 +56,14 @@ const BarWrap = styled.div`
 `;
 const Bar = styled.div`
   width: ${({ length }) => length}%;
-  background-color: ${(props) => props.theme.global.colors.highlight};
+  background-color: ${(props) => palette(props.palette, props.pIndex || 0)};
   vertical-align: middle;
   display: inline-block;
   position: relative;
-  border-right: ${(props) => props.secondary ? '1px solid' : 0};
+  border-right: ${({ secondary }) => secondary ? '1px solid' : 0};
   border-right-color: ${palette('mainListItem', 1)};
   height: ${({ multiple }) => multiple ? 8 : 16}px;
-  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.xlarge}) {
     height: ${({ multiple }) => multiple ? 12 : 24}px;
   }
   @media print {
@@ -75,7 +76,7 @@ const Bar = styled.div`
       right: 0;
       left: 0;
       z-index: -1;
-      border-bottom: ${({ multiple }) => (multiple ? 8 : 16)}px solid ${(props) => props.theme.global.colors.highlight};
+      border-bottom: ${(props) => (props.multiple ? 8 : 16)}px solid ${(props) => palette(props.palette, props.pIndex || 0)};
     }
   }
 `;
@@ -86,9 +87,9 @@ const Count = styled.div`
   left: 0;
   bottom: 100%;
   padding: 2px 0;
-  color: ${(props) => props.theme.global.colors.highlight};
+  color: ${(props) => palette(props.palette, 0)};
   white-space: nowrap;
-  @media print, (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media print, (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     display: block;
     font-size: ${({ theme, multiple }) => multiple ? theme.sizes.text.default : theme.sizes.text.aaLargeBold};
     font-weight: bold;
@@ -98,19 +99,19 @@ const Count = styled.div`
     bottom: auto;
     left: auto;
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.xlarge}) {
     line-height: ${({ multiple }) => multiple ? 12 : 24}px;
   }
   @media print {
-    font-size: ${(props) => props.theme.sizes.print.default};
+    font-size: ${({ theme }) => theme.sizes.print.default};
     font-weight: regular;
   }
 `;
 const CountSecondary = styled(Count)`
   right: 0;
   top: 100%;
-  color: ${(props) => props.theme.global.colors.highlight};
-  @media print, (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  color: ${(props) => palette(props.palette, 1)};
+  @media print, (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     text-align: left;
     padding: 0 0 0 5px;
     left: 100%;
@@ -121,19 +122,19 @@ const CountSecondary = styled(Count)`
 `;
 const Title = styled.div`
   display: inline-block;
-  padding: 0 4px;
+  padding: ${({ isPrint }) => isPrint ? 0 : '0px 4px'};
   width: 100%;
-  font-size: ${(props) => props.theme.sizes.text.smaller};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: 4px 8px;
-    font-size: ${(props) => props.theme.sizes.text.default};
+  font-size: ${({ theme }) => theme.sizes.text.smaller};
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    padding: ${({ isPrint }) => isPrint ? 0 : '4px 8px'};
+    font-size: ${({ theme }) => theme.sizes.text.default};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
-    padding: 8px 18px;
-    font-size: ${(props) => props.theme.sizes.text.aaLargeBold};
+  @media (min-width: ${({ theme }) => theme.breakpoints.xlarge}) {
+    padding: ${({ isPrint }) => isPrint ? 0 : '8px 18px'};
+    font-size: ${({ theme }) => theme.sizes.text.aaLargeBold};
   }
   @media print {
-    font-size: ${(props) => props.theme.sizes.print.default};
+    font-size: ${({ theme }) => theme.sizes.print.default};
     padding: 0;
   }
 `;
@@ -142,7 +143,7 @@ const StatusWrap = styled.div`
 `;
 const WrapAcceptedBars = styled.span`
   height: ${({ multiple }) => multiple ? 10 : 15}px;
-  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.xlarge}) {
     height: ${({ multiple }) => multiple ? 15 : 25}px;
   }
 `;
@@ -174,7 +175,7 @@ class CategoryListItem extends React.PureComponent { // eslint-disable-line reac
             {accepted}
           </Count>
         </Bar>
-        { noted > 0
+        {noted > 0
           && (
             <Bar
               length={(noted / col.maxCount) * 100}
@@ -213,7 +214,9 @@ class CategoryListItem extends React.PureComponent { // eslint-disable-line reac
   };
 
   render() {
-    const { category, columns, onPageLink } = this.props;
+    const {
+      category, columns, onPageLink, isPrintView,
+    } = this.props;
     // return null;
     const catItem = {
       id: category.get('id'),
@@ -223,6 +226,7 @@ class CategoryListItem extends React.PureComponent { // eslint-disable-line reac
 
     return (
       <Styled
+        isPrint={isPrintView}
         onClick={() => onPageLink(`${ROUTES.CATEGORY}/${catItem.id}`)}
       >
         <TableWrap>
@@ -244,7 +248,7 @@ class CategoryListItem extends React.PureComponent { // eslint-disable-line reac
                   </StatusWrap>
                 )}
                 {col.type === 'title' && (
-                  <Title>
+                  <Title isPrint={isPrintView}>
                     {catItem.title}
                   </Title>
                 )}
@@ -264,6 +268,7 @@ CategoryListItem.propTypes = {
   category: PropTypes.object,
   columns: PropTypes.array,
   onPageLink: PropTypes.func,
+  isPrintView: PropTypes.bool,
 };
 
 CategoryListItem.contextTypes = {

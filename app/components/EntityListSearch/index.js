@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { connect } from 'react-redux';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
@@ -13,7 +13,9 @@ import { palette } from 'styled-theme';
 import Icon from 'components/Icon';
 import Button from 'components/buttons/Button';
 import DebounceInput from 'react-debounce-input';
-import PrintOnly from 'components/styled/PrintOnly';
+import PrintHide from 'components/styled/PrintHide';
+
+import { selectIsPrintView } from 'containers/App/selectors';
 
 import messages from './messages';
 
@@ -24,9 +26,9 @@ const Search = styled.div`
   background-color: ${palette('background', 0)};
   color: ${palette('dark', 2)};
   padding: 2px 7px;
-  border: 1px solid ${(props) => props.active ? palette('light', 4) : palette('light', 2)};
-  box-shadow: 0 0 3px 0 ${(props) => props.active ? palette('dark', 2) : 'transparent'};
-  min-height: ${(props) => props.small ? 30 : 36}px;
+  border: 1px solid ${({ active }) => active ? palette('light', 4) : palette('light', 2)};
+  box-shadow: 0 0 3px 0 ${({ active }) => active ? palette('dark', 2) : 'transparent'};
+  min-height: ${({ small }) => small ? 30 : 36}px;
   border-radius: 5px;
   position: relative;
   @media print {
@@ -55,21 +57,12 @@ const Clear = styled(Button)`
   top: 0;
   right: 0;
   background-color: ${palette('background', 4)};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: ${(props) => props.small ? '4px 6px' : '8px 6px'};
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    padding: ${({ small }) => small ? '4px 6px' : '8px 6px'};
   }
   @media print {
     display: none;
   }
-`;
-
-const LabelPrint = styled(PrintOnly)`
-  margin-top: 10px;
-  font-size: ${(props) => props.theme.sizes.print.smaller};
-`;
-const SearchValuePrint = styled(PrintOnly)`
-  font-size: ${(props) => props.theme.sizes.print.default};
-  font-weight: bold;
 `;
 
 export class EntityListSearch extends React.Component { // eslint-disable-line react/prefer-stateless-function
@@ -85,6 +78,7 @@ export class EntityListSearch extends React.Component { // eslint-disable-line r
       searchQuery,
       onSearch,
       placeholder,
+      isPrint,
     } = this.props;
     const { intl } = this.context;
     // TODO set focus to input when clicking wrapper
@@ -95,38 +89,33 @@ export class EntityListSearch extends React.Component { // eslint-disable-line r
     //   this.inputNode.focus()
     // }}
     return (
-      <Search
-        active={this.state.active}
-        hidePrint={!searchQuery}
-      >
-        <SearchInput
-          id="search"
-          minLength={1}
-          debounceTimeout={500}
-          value={searchQuery || ''}
-          onChange={(e) => onSearch(e.target.value)}
-          onFocus={() => this.setState({ active: true })}
-          onBlur={() => this.setState({ active: false })}
-          placeholder={placeholder || (intl.formatMessage(messages.searchPlaceholderEntities))}
-        />
-        { searchQuery && (
-          <Clear
-            onClick={() => onSearch()}
+      <>
+        <PrintHide>
+          <Search
+            active={this.state.active}
+            printHide={!searchQuery}
+            isPrint={isPrint}
           >
-            <Icon name="removeSmall" />
-          </Clear>
-        )}
-        {searchQuery && (
-          <LabelPrint>
-            <FormattedMessage {...messages.labelPrintKeywords} />
-          </LabelPrint>
-        )}
-        {searchQuery && (
-          <SearchValuePrint>
-            {searchQuery}
-          </SearchValuePrint>
-        )}
-      </Search>
+            <SearchInput
+              id="search"
+              minLength={1}
+              debounceTimeout={500}
+              value={searchQuery || ''}
+              onChange={(e) => onSearch(e.target.value)}
+              onFocus={() => this.setState({ active: true })}
+              onBlur={() => this.setState({ active: false })}
+              placeholder={placeholder || (intl.formatMessage(messages.searchPlaceholderEntities))}
+            />
+            {searchQuery && (
+              <Clear
+                onClick={() => onSearch()}
+              >
+                <Icon name="removeSmall" />
+              </Clear>
+            )}
+          </Search>
+        </PrintHide>
+      </>
     );
   }
 }
@@ -135,10 +124,15 @@ EntityListSearch.propTypes = {
   searchQuery: PropTypes.string,
   placeholder: PropTypes.string,
   onSearch: PropTypes.func,
+  isPrint: PropTypes.bool,
 };
 
 EntityListSearch.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-export default EntityListSearch;
+const mapStateToProps = (state) => ({
+  isPrint: selectIsPrintView(state),
+});
+
+export default connect(mapStateToProps, null)(EntityListSearch);

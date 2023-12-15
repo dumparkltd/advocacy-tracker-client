@@ -13,7 +13,7 @@ import appMessages from 'containers/App/messages';
 
 import PrintHide from 'components/styled/PrintHide';
 import Container from 'components/styled/Container';
-import Content from 'components/styled/Content';
+import Content from 'components/styled/ContentSimple';
 
 import LinkMain from './LinkMain';
 // import messages from './messages';

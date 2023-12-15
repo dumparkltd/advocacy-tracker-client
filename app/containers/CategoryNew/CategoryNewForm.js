@@ -50,7 +50,7 @@ import {
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 
 import { getEntityTitle } from 'utils/entities';
 
@@ -131,7 +131,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
       });
     }
     return groups;
-  }
+  };
 
   getBodyMainFields = () => {
     const { intl } = this.context;
@@ -155,7 +155,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
       ],
     });
     return fields;
-  }
+  };
 
   /* eslint-disable react/destructuring-assignment */
   getTaxTitle = (id) => this.context.intl.formatMessage(appMessages.entities.taxonomies[id].single);

@@ -4,11 +4,12 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { Map, List, fromJS } from 'immutable';
+import { injectIntl, intlShape } from 'react-intl';
 import styled from 'styled-components';
 
 import {
@@ -19,7 +20,7 @@ import {
 } from 'grommet';
 
 import { MailOption, FormClose } from 'grommet-icons';
-import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
+import { loadEntitiesIfNeeded, updatePath, printView } from 'containers/App/actions';
 import {
   selectReady,
   selectActortypeTaxonomiesWithCats,
@@ -32,14 +33,18 @@ import {
   selectMembertypesForActortype,
   selectAssociationtypesForActortype,
   selectParentAssociationtypesForActortype,
+  selectViewQuery,
 } from 'containers/App/selectors';
 
 import { checkActorAttribute } from 'utils/entities';
+import { keydownHandlerPrint } from 'utils/print';
 import { qe } from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
 import { ROUTES, ACTORTYPES } from 'themes/config';
 
+
 import EntityList from 'containers/EntityList';
+import { PRINT_TYPES } from 'containers/App/constants';
 import EmailHelper from './EmailHelper';
 
 import { CONFIG, DEPENDENCIES } from './constants';
@@ -82,197 +87,229 @@ const LayerContent = styled((p) => (
   />
 ))``;
 
-export class ActorList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  constructor() {
-    super();
-    this.state = {
-      emailEntities: null,
-    };
-  }
+const prepareTypeOptions = (
+  types,
+  activeId,
+  intl,
+) => types.toList().toJS().map(
+  (type) => ({
+    value: type.id,
+    label: intl.formatMessage(appMessages.actortypes[type.id]),
+    active: activeId === type.id,
+  })
+);
 
-  UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
-    this.setState({ emailEntities: null });
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    // reload entities if invalidated
-    if (!nextProps.dataReady) {
-      this.props.loadEntitiesIfNeeded();
+const VALID_VIEWS = ['map', 'list'];
+const getView = ({
+  view,
+  hasMapOption,
+}) => {
+  // return default view if view unset, invalid or inconsistent
+  if (
+    !view
+    || VALID_VIEWS.indexOf(view) === -1
+    || (view === 'map' && !hasMapOption)
+  ) {
+    if (hasMapOption) {
+      return 'map';
     }
+    return 'list';
   }
+  return view;
+};
+export function ActorList({
+  dataReady,
+  onLoadEntitiesIfNeeded,
+  entities,
+  allEntities,
+  taxonomies,
+  connections,
+  location,
+  isAdmin,
+  isMember,
+  isVisitor,
+  params, // { id: the action type }
+  actiontypes,
+  actortypes,
+  actiontypesForTarget,
+  membertypes,
+  parentAssociationtypes,
+  associationtypes,
+  onSelectType,
+  handleNew,
+  handleImport,
+  onSetPrintView,
+  view,
+  intl,
+}) {
+  useEffect(() => {
+    if (!dataReady) onLoadEntitiesIfNeeded();
+  }, [dataReady]);
 
-  onSetEmailEntities = (emailEntities) => {
-    this.setState({ emailEntities });
+  const [emailEntities, onSetEmailEntities] = useState(null);
+  const resetEmails = () => onSetEmailEntities(null);
+
+  const typeId = params.id;
+  const type = `actors_${typeId}`;
+  const hasList = CONFIG.views && !!CONFIG.views.list;
+  const hasMapOption = typeId
+    && CONFIG.views
+    && CONFIG.views.map
+    && CONFIG.views.map.types
+    && CONFIG.views.map.types.indexOf(typeId) > -1;
+
+  const cleanView = getView({
+    view,
+    hasMapOption,
+    hasList,
+  });
+  const showMap = cleanView === 'map';
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.LIST,
+    printMapOptions: showMap ? { markers: true } : null,
+    printMapMarkers: true,
+    fixed: showMap,
+    printOrientation: showMap ? 'landscape' : 'portrait',
+    printSize: 'A4',
+    printItems: 'all',
+  });
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
+
+  const headerOptions = {
+    supTitle: intl.formatMessage(messages.pageTitle),
+    actions: [],
+    info: appMessages.actortypes_info[typeId]
+      && intl.formatMessage(appMessages.actiontypes_info[typeId]).trim() !== ''
+      ? {
+        title: 'Please note',
+        content: intl.formatMessage(appMessages.actortypes_info[typeId]),
+      }
+      : null,
+  };
+
+  if (isVisitor) {
+    headerOptions.actions.push({
+      type: 'bookmarker',
+      title: intl.formatMessage(appMessages.entities[type].plural),
+      entityType: type,
+    });
   }
-
-  resetEmails = () => {
-    this.setState({ emailEntities: null });
+  if (window.print) {
+    headerOptions.actions.push({
+      type: 'icon',
+      onClick: mySetPrintView,
+      title: 'Print',
+      icon: 'print',
+    });
   }
-
-  prepareTypeOptions = (types, activeId) => {
-    const { intl } = this.context;
-    return types && types.sort(
-      (a, b) => a.get('id') > b.get('id') ? 1 : -1
-    ).reduce(
-      (memo, type) => [
-        ...memo,
-        {
-          value: type.get('id'),
-          label: intl.formatMessage(appMessages.actortypes[type.get('id')]),
-          active: activeId === type.get('id'),
-        },
-      ],
-      [],
-    );
-  }
-
-  render() {
-    const { intl } = this.context;
-    const {
-      dataReady,
-      entities,
-      allEntities,
-      taxonomies,
-      connections,
-      location,
-      isAdmin,
+  if (isMember) {
+    headerOptions.actions.push({
+      title: 'Create new',
+      onClick: () => handleNew(typeId),
+      icon: 'add',
       isMember,
-      isVisitor,
-      params, // { id: the action type }
-      actiontypes,
-      actortypes,
-      actiontypesForTarget,
-      membertypes,
-      parentAssociationtypes,
-      associationtypes,
-      onSelectType,
-    } = this.props;
-    const typeId = params.id;
-    const type = `actors_${typeId}`;
-    const headerOptions = {
-      supTitle: intl.formatMessage(messages.pageTitle),
-      actions: [],
-      info: appMessages.actortypes_info[typeId]
-        && intl.formatMessage(appMessages.actiontypes_info[typeId]).trim() !== ''
-        ? {
-          title: 'Please note',
-          content: intl.formatMessage(appMessages.actortypes_info[typeId]),
-        }
-        : null,
-    };
-    if (isVisitor) {
-      headerOptions.actions.push({
-        type: 'bookmarker',
-        title: intl.formatMessage(appMessages.entities[type].plural),
-        entityType: type,
-      });
-    }
-    if (window.print) {
-      headerOptions.actions.push({
-        type: 'icon',
-        onClick: () => window.print(),
-        title: 'Print',
-        icon: 'print',
-      });
-    }
-    if (isMember) {
-      headerOptions.actions.push({
-        title: 'Create new',
-        onClick: () => this.props.handleNew(typeId),
-        icon: 'add',
-        isMember,
-      });
-      headerOptions.actions.push({
-        title: intl.formatMessage(appMessages.buttons.import),
-        onClick: () => this.props.handleImport(typeId),
-        icon: 'import',
-        isMember,
-      });
-    }
-    const listActions = [];
-    if (qe(typeId, ACTORTYPES.CONTACT)) {
-      // console.log(noGroupEmails)
-      listActions.push({
-        title: 'Email selected',
-        onClick: (args) => {
-          if (args && args.ids) {
-            const selectedEntities = entities.filter(
-              (entity) => args.ids.includes(entity.get('id'))
-            );
-            this.onSetEmailEntities(selectedEntities);
-          }
-        },
-        icon: <MailOption color="dark" size="xxsmall" />,
-        type: 'listOption',
-        isMember,
-      });
-    }
-
-    return (
-      <div>
-        <Helmet
-          title={`${intl.formatMessage(messages.pageTitle)}`}
-          meta={[
-            { name: 'description', content: intl.formatMessage(messages.metaDescription) },
-          ]}
-        />
-        <EntityList
-          entities={entities}
-          allEntityCount={allEntities && allEntities.size}
-          allEntities={allEntities.toList()}
-          taxonomies={taxonomies}
-          connections={connections}
-          config={CONFIG}
-          headerOptions={headerOptions}
-          dataReady={dataReady}
-          entityTitle={{
-            single: intl.formatMessage(appMessages.entities[type].single),
-            plural: intl.formatMessage(appMessages.entities[type].plural),
-          }}
-          locationQuery={fromJS(location.query)}
-          actortypes={actortypes}
-          actiontypes={actiontypes}
-          actiontypesForTarget={actiontypesForTarget}
-          membertypes={membertypes}
-          parentAssociationtypes={parentAssociationtypes}
-          associationtypes={associationtypes}
-          typeOptions={this.prepareTypeOptions(actortypes, typeId)}
-          onSelectType={onSelectType}
-          typeId={typeId}
-          showCode={checkActorAttribute(typeId, 'code', isAdmin)}
-          listActions={listActions}
-        />
-        {this.state.emailEntities && (
-          <Layer
-            onEsc={this.resetEmails}
-            onClickOutside={this.resetEmails}
-            margin={{ top: 'large' }}
-            position="top"
-            animate={false}
-          >
-            <LayerWrap>
-              <LayerHeader flex={{ grow: 0, shrink: 0 }}>
-                <Box>
-                  <Text weight={600}>{`Email ${this.state.emailEntities.size} selected contacts`}</Text>
-                </Box>
-                <Box flex={{ grow: 0 }}>
-                  <Button plain icon={<FormClose size="medium" />} onClick={() => this.resetEmails()} />
-                </Box>
-              </LayerHeader>
-              <LayerContent flex={{ grow: 1 }}>
-                <EmailHelper entities={this.state.emailEntities} />
-              </LayerContent>
-            </LayerWrap>
-          </Layer>
-        )}
-      </div>
-    );
+    });
+    headerOptions.actions.push({
+      title: intl.formatMessage(appMessages.buttons.import),
+      onClick: () => handleImport(typeId),
+      icon: 'import',
+      isMember,
+    });
   }
+  const listActions = [];
+  if (qe(typeId, ACTORTYPES.CONTACT)) {
+    // console.log(noGroupEmails)
+    listActions.push({
+      title: 'Email selected',
+      onClick: (args) => {
+        if (args && args.ids) {
+          const selectedEntities = entities.filter(
+            (entity) => args.ids.includes(entity.get('id'))
+          );
+          onSetEmailEntities(selectedEntities);
+        }
+      },
+      icon: <MailOption color="dark" size="xxsmall" />,
+      type: 'listOption',
+      isMember,
+    });
+  }
+
+  return (
+    <div>
+      <Helmet
+        title={`${intl.formatMessage(messages.pageTitle)}`}
+        meta={[
+          { name: 'description', content: intl.formatMessage(messages.metaDescription) },
+        ]}
+      />
+      <EntityList
+        entities={entities}
+        allEntities={allEntities.toList()}
+        taxonomies={taxonomies}
+        connections={connections}
+        config={CONFIG}
+        headerOptions={headerOptions}
+        dataReady={dataReady}
+        entityTitle={{
+          single: intl.formatMessage(appMessages.entities[type].single),
+          plural: intl.formatMessage(appMessages.entities[type].plural),
+        }}
+        locationQuery={fromJS(location.query)}
+        actortypes={actortypes}
+        actiontypes={actiontypes}
+        actiontypesForTarget={actiontypesForTarget}
+        membertypes={membertypes}
+        parentAssociationtypes={parentAssociationtypes}
+        associationtypes={associationtypes}
+        typeOptions={prepareTypeOptions(
+          actortypes,
+          typeId,
+          intl,
+        )}
+        onSelectType={onSelectType}
+        typeId={typeId}
+        showCode={checkActorAttribute(typeId, 'code', isAdmin)}
+        listActions={listActions}
+      />
+      {emailEntities && (
+        <Layer
+          onEsc={resetEmails}
+          onClickOutside={resetEmails}
+          margin={{ top: 'large' }}
+          position="top"
+          animate={false}
+        >
+          <LayerWrap>
+            <LayerHeader flex={{ grow: 0, shrink: 0 }}>
+              <Box>
+                <Text weight={600}>{`Email ${emailEntities.size} selected contacts`}</Text>
+              </Box>
+              <Box flex={{ grow: 0 }}>
+                <Button plain icon={<FormClose size="medium" />} onClick={() => resetEmails()} />
+              </Box>
+            </LayerHeader>
+            <LayerContent flex={{ grow: 1 }}>
+              <EmailHelper entities={emailEntities} />
+            </LayerContent>
+          </LayerWrap>
+        </Layer>
+      )}
+    </div>
+  );
 }
 
+
 ActorList.propTypes = {
-  loadEntitiesIfNeeded: PropTypes.func,
+  onLoadEntitiesIfNeeded: PropTypes.func,
   handleNew: PropTypes.func,
   handleImport: PropTypes.func,
   onSelectType: PropTypes.func,
@@ -280,6 +317,7 @@ ActorList.propTypes = {
   isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
   isVisitor: PropTypes.bool,
+  view: PropTypes.string,
   entities: PropTypes.instanceOf(List).isRequired,
   allEntities: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
@@ -292,10 +330,8 @@ ActorList.propTypes = {
   associationtypes: PropTypes.instanceOf(Map),
   location: PropTypes.object,
   params: PropTypes.object,
-};
-
-ActorList.contextTypes = {
-  intl: PropTypes.object.isRequired,
+  onSetPrintView: PropTypes.func,
+  intl: intlShape,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -313,11 +349,12 @@ const mapStateToProps = (state, props) => ({
   associationtypes: selectAssociationtypesForActortype(state, { type: props.params.id }),
   actortypes: selectActortypes(state),
   allEntities: selectActorsWithConnections(state, { type: props.params.id }),
+  view: selectViewQuery(state),
 });
 
 function mapDispatchToProps(dispatch) {
   return {
-    loadEntitiesIfNeeded: () => {
+    onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     handleNew: (typeId) => {
@@ -333,7 +370,10 @@ function mapDispatchToProps(dispatch) {
           : ROUTES.ACTORS
       ));
     },
+    onSetPrintView: (config) => {
+      dispatch(printView(config));
+    },
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(ActorList);
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(ActorList));

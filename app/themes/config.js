@@ -1641,3 +1641,24 @@ export const DEFAULT_ACTIONTYPE = ACTIONTYPES.TASK;
 export const DEFAULT_ACTORTYPE = ACTORTYPES.COUNTRY;
 export const DEFAULT_TAXONOMY = '11';
 export const NO_PARENT_KEY = 'parentUndefined';
+
+export const PRINT = {
+  SIZES: {
+    // actual
+    // A4: { W: 595, H: 842 }, // pt
+    // A3: { W: 842, H: 1190 }, // pt
+    // rendering
+    A4: {
+      portrait: { W: 520, H: 720 }, // pt
+      landscape: { W: 760, H: 500 }, // pt
+      // portrait: { W: 760, H: 1050 }, // pt
+      // landscape: { H: 720, W: 1100 }, // pt
+    },
+    A3: {
+      portrait: { W: 760, H: 1100 }, // pt
+      landscape: { W: 1100, H: 720 }, // pt
+    },
+    portrait: { W: 760, H: 1080 }, // pt
+    landscape: { W: 1100, H: 680 }, // pt
+  },
+};

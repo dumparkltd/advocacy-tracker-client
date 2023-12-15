@@ -34,10 +34,13 @@ import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
 import { hasGroupActors } from 'utils/entities';
 import MapContainer from 'containers/MapContainer';
+import HeaderPrint from 'components/Header/HeaderPrint';
 // import messages from './messages';
 
-const Styled = styled(ContainerWrapper)`
+const Styled = styled((p) => <ContainerWrapper {...p} />)`
   background: white;
+  box-shadow: none;
+  padding: 0;
 `;
 
 export function EntitiesMapActors({
@@ -61,6 +64,7 @@ export function EntitiesMapActors({
   actionActorsByAction,
   membershipsByAssociation,
   actorActionsByAction,
+  isPrintView,
 }) {
   // const { intl } = this.context;
   // let { countries } = this.props;
@@ -70,6 +74,7 @@ export function EntitiesMapActors({
   let typeLabelsFor;
   let indicator = includeActorMembers ? 'actionsTotal' : 'actions';
   let infoTitle;
+  let infoTitlePrint;
   let infoSubTitle;
   let reduceCountryAreas;
   let reducePoints;
@@ -111,14 +116,14 @@ export function EntitiesMapActors({
         label: 'Include activities of groups',
       };
     }
-  // } else if (hasActions && !hasByTarget) { // i.e. institutions
-  //   // showing targeted countries
-  //   mapSubjectClean = 'targets';
-  //   memberOption = {
-  //     active: includeTargetMembers,
-  //     onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-  //     label: 'Include activities targeting regions & groups',
-  //   };
+    // } else if (hasActions && !hasByTarget) { // i.e. institutions
+    //   // showing targeted countries
+    //   mapSubjectClean = 'targets';
+    //   memberOption = {
+    //     active: includeTargetMembers,
+    //     onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
+    //     label: 'Include activities targeting regions & groups',
+    //   };
   } else { // i.e. groups
     mapSubjectClean = 'targets';
     memberOption = {
@@ -227,6 +232,8 @@ export function EntitiesMapActors({
     });
     infoTitle = typeLabels.plural;
     infoSubTitle = `for ${entitiesTotal} ${typeLabelsFor[entitiesTotal === 1 ? 'single' : 'plural']}${hasFilters ? ' (filtered)' : ''}`;
+    const subjectOption = subjectOptions && subjectOptions.find((option) => option.active);
+    infoTitlePrint = subjectOption.title;
   } else if (hasActions) {
     // entities are orgs
     // figure out action ids for each country
@@ -372,12 +379,17 @@ export function EntitiesMapActors({
     };
     infoTitle = `${typeLabels.plural}${hasFilters ? ' (filtered)' : ''}`;
     infoSubTitle = `targeting ${countriesTotal} ${typeLabelsFor[countriesTotal === 1 ? 'single' : 'plural']}`;
+    infoTitlePrint = infoTitle;
   }
 
   return (
-    <Styled headerStyle="types" noOverflow>
+    <Styled headerStyle="types" noOverflow isPrint={isPrintView}>
+      {isPrintView && (
+        <HeaderPrint argsRemove={['subj', 'ac', 'tc', 'mtchm', 'mtch', 'actontype']} />
+      )}
       <MapContainer
         fullMap
+        isPrintView={isPrintView}
         reduceCountryAreas={reduceCountryAreas}
         reducePoints={reducePoints}
         typeLabels={typeLabels}
@@ -389,18 +401,20 @@ export function EntitiesMapActors({
           mapSubject: mapSubjectClean,
           hasPointOption: false,
           hasPointOverlay: true,
+          fitBounds: true,
         }}
         onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
         mapInfo={[{
           id: 'countries',
           title: infoTitle,
+          titlePrint: infoTitlePrint,
           subTitle: infoSubTitle,
           subjectOptions,
           memberOption,
         }]}
       />
-      {viewOptions && viewOptions.length > 1 && (
-        <EntityListViewOptions options={viewOptions} isOnMap />
+      {viewOptions && viewOptions.length > 1 && !isPrintView && (
+        <EntityListViewOptions options={viewOptions} isOnMap isPrintView={isPrintView} />
       )}
     </Styled>
   );
@@ -426,6 +440,7 @@ EntitiesMapActors.propTypes = {
   includeActorMembers: PropTypes.bool,
   includeTargetMembers: PropTypes.bool,
   hasFilters: PropTypes.bool,
+  isPrintView: PropTypes.bool,
   onEntityClick: PropTypes.func,
   intl: intlShape.isRequired,
 };
