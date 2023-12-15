@@ -80,6 +80,8 @@ import {
   SET_INCLUDE_INOFFICAL_STATEMENTS,
   SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
   SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP,
+  PRINT_VIEW,
+  CLOSE_PRINT_VIEW,
 } from './constants';
 
 export function submitInvalid(valid) {
@@ -326,6 +328,19 @@ export function removeEntity(path, id) {
     type: REMOVE_ENTITY,
     path,
     id,
+  };
+}
+
+export function printView(config) {
+  return {
+    type: PRINT_VIEW,
+    config,
+  };
+}
+
+export function closePrintView() {
+  return {
+    type: CLOSE_PRINT_VIEW,
   };
 }
 

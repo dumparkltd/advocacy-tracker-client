@@ -22,7 +22,7 @@ import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import Icon from 'components/Icon';
 import ContentNarrow from 'components/ContentNarrow';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import AuthForm from 'components/forms/AuthForm';
 import A from 'components/styled/A';
 
@@ -90,7 +90,7 @@ export class UserLogin extends React.PureComponent { // eslint-disable-line reac
               </Text>
             </Box>
           )}
-          { this.props.viewDomain.get('form')
+          {this.props.viewDomain.get('form')
             && (
               <AuthForm
                 model="userLogin.form.data"

@@ -50,4 +50,16 @@ export default defineMessages({
     id: 'app.containers.EntityList.filterFormError',
     defaultMessage: 'Errors',
   },
+  labelPrintKeywords: {
+    id: 'app.containers.EntityList.labelPrintKeywords',
+    defaultMessage: 'List filtered by keyword:',
+  },
+  labelPrintFilters: {
+    id: 'app.containers.EntityList.labelPrintFilters',
+    defaultMessage: 'Current filters:',
+  },
+  labelPrintFiltersKeywords: {
+    id: 'app.containers.EntityList.labelPrintFiltersKeywords',
+    defaultMessage: 'Current filters and list keyword search:',
+  },
 });

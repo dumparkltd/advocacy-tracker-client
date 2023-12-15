@@ -50,7 +50,7 @@ import {
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import FormWrapper from './FormWrapper';
 
 import {
@@ -104,7 +104,7 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
         ),
       })
       : Map();
-  }
+  };
 
   getHeaderMainFields = () => {
     const { intl } = this.context;

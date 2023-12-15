@@ -6,34 +6,25 @@ import { FormattedMessage } from 'react-intl';
 
 import FieldWrap from 'components/fields/FieldWrap';
 import Label from 'components/fields/Label';
+
+import { usePrint } from 'containers/App/PrintContext';
 // import appMessages from 'containers/App/messages';
 
 const Markdown = styled(ReactMarkdown)`
-  font-size: ${(props) => props.theme.text.mediumTall.size};
-  line-height: ${(props) => props.theme.text.mediumTall.height};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${(props) => props.theme.text.largeTall.size};
-    line-height: ${(props) => props.theme.text.largeTall.height};
+  font-size: ${({ theme }) => theme.text.mediumTall.size};
+  line-height: ${({ theme }) => theme.text.mediumTall.height};
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    font-size: ${({ theme, isPrint }) => isPrint ? theme.textPrint.mediumTall.size : theme.text.largeTall.size};
+    line-height: ${({ theme }) => theme.text.largeTall.height};
   }
   @media print {
-    font-size: ${(props) => props.theme.sizes.print.markdown};
+    font-size: ${({ theme }) => theme.textPrint.mediumTall.size};
   }
 `;
 
-const RenderLink = ({ href, children }) => {
-  if (!href.startsWith('http')) {
-    return href;
-  }
-  return <a href={href} rel="nofollow noreferrer noopener" target="_blank">{children}</a>;
-};
-
-RenderLink.propTypes = {
-  href: PropTypes.string,
-  children: PropTypes.node,
-};
-
 // TODO also render HTML if not markdown
-function MarkdownField({ field }) {
+export function MarkdownField({ field }) {
+  const isPrint = usePrint();
   return (
     <FieldWrap>
       {field.label
@@ -43,11 +34,7 @@ function MarkdownField({ field }) {
           </Label>
         )
       }
-      <Markdown
-        source={field.value}
-        linkTarget="_blank"
-        className="react-markdown"
-      />
+      <Markdown source={field.value} className="react-markdown" isPrint={isPrint} />
     </FieldWrap>
   );
 }

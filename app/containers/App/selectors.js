@@ -65,7 +65,7 @@ export const selectRequestedAt = createSelector(
 export const selectReady = (state, { path }) => reduce(asArray(path),
   (areReady, readyPath) => areReady && (
     !!state.getIn(['global', 'ready', readyPath])
-      || Object.values(API).indexOf(readyPath) === -1
+    || Object.values(API).indexOf(readyPath) === -1
   ),
   true);
 
@@ -547,6 +547,16 @@ export const selectMapIndicator = createSelector(
   }
 );
 
+export const selectIsPrintView = createSelector(
+  getGlobal,
+  (state) => !!state.get('printConfig')
+);
+
+export const selectPrintConfig = createSelector(
+  getGlobal,
+  (state) => state.get('printConfig') || null
+);
+
 // database ////////////////////////////////////////////////////////////////////////
 
 export const selectEntitiesAll = (state) => state.getIn(['global', 'entities']);
@@ -1009,7 +1019,7 @@ export const selectEntitiesWhere = createSelector(
 );
 
 // filter entities by attributes, using locationQuery
-export const selectEntitiesWhereQuery = createSelector(
+const selectEntitiesWhereQuery = createSelector(
   selectAttributeQuery,
   (state, { path }) => selectEntities(state, path),
   (query, entities) => query
@@ -1255,25 +1265,25 @@ export const selectActionTaxonomies = createSelector(
           tax.get('id'),
         )
       )
-    // ).map(
-    //   (tax) => {
-    //     // connectedActortypes
-    //     const actiontypeIds = actiontypeTaxonomies.reduce(
-    //       (memo, type) => {
-    //         if (
-    //           qe(
-    //             type.getIn(['attributes', 'taxonomy_id']),
-    //             tax.get('id')
-    //           )
-    //         ) {
-    //           return memo.push(type.getIn(['attributes', 'actortype_id']));
-    //         }
-    //         return memo;
-    //       },
-    //       List(),
-    //     );
-    //     return tax.set('actiontypeIds', actiontypeIds);
-    //   }
+      // ).map(
+      //   (tax) => {
+      //     // connectedActortypes
+      //     const actiontypeIds = actiontypeTaxonomies.reduce(
+      //       (memo, type) => {
+      //         if (
+      //           qe(
+      //             type.getIn(['attributes', 'taxonomy_id']),
+      //             tax.get('id')
+      //           )
+      //         ) {
+      //           return memo.push(type.getIn(['attributes', 'actortype_id']));
+      //         }
+      //         return memo;
+      //       },
+      //       List(),
+      //     );
+      //     return tax.set('actiontypeIds', actiontypeIds);
+      //   }
     )
 );
 
@@ -1350,25 +1360,25 @@ export const selectActiontypeTaxonomies = createSelector(
           typeId,
         )
       )
-    // ).map(
-    //   (tax) => {
-    //     // set all actiontypes valid for taxonomy
-    //     const actiontypeIds = actiontypeTaxonomies.reduce(
-    //       (memo, type) => {
-    //         if (
-    //           qe(
-    //             type.getIn(['attributes', 'taxonomy_id']),
-    //             tax.get('id')
-    //           )
-    //         ) {
-    //           return memo.push(type.getIn(['attributes', 'measuretype_id']));
-    //         }
-    //         return memo;
-    //       },
-    //       List(),
-    //     );
-    //     return tax.set('actiontypeIds', actiontypeIds);
-    //   }
+      // ).map(
+      //   (tax) => {
+      //     // set all actiontypes valid for taxonomy
+      //     const actiontypeIds = actiontypeTaxonomies.reduce(
+      //       (memo, type) => {
+      //         if (
+      //           qe(
+      //             type.getIn(['attributes', 'taxonomy_id']),
+      //             tax.get('id')
+      //           )
+      //         ) {
+      //           return memo.push(type.getIn(['attributes', 'measuretype_id']));
+      //         }
+      //         return memo;
+      //       },
+      //       List(),
+      //     );
+      //     return tax.set('actiontypeIds', actiontypeIds);
+      //   }
     )
 );
 

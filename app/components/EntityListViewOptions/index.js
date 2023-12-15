@@ -25,8 +25,8 @@ const ButtonGroup = styled.div`
 `;
 
 const TableCell = styled.span`
-  display: ${(props) => {
-    if (props.hiddenMobile) {
+  display: ${({ hiddenMobile }) => {
+    if (hiddenMobile) {
       return 'none';
     }
     return 'table-cell';

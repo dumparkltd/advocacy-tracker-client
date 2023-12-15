@@ -1,8 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Heading } from 'grommet';
+import { Box, Heading, Text } from 'grommet';
 import { Up, Down } from 'grommet-icons';
 import styled from 'styled-components';
+
+import PrintHide from 'components/styled/PrintHide';
+import PrintOnly from 'components/styled/PrintOnly';
 
 const StyledBox = styled((p) => (
   <Box
@@ -14,9 +17,6 @@ const StyledBox = styled((p) => (
   />
 ))`
   border-bottom: 1px solid;
-  &:hover {
-    opacity: 0.8;
-  }
 `;
 
 function AccordionHeader({ title, open, level = 1 }) {
@@ -34,8 +34,13 @@ function AccordionHeader({ title, open, level = 1 }) {
         </Heading>
       </Box>
       <Box margin={{ left: 'auto' }}>
-        {!open && <Down size="small" />}
-        {open && <Up size="small" />}
+        <PrintHide>
+          {!open && <Down size="small" />}
+          {open && <Up size="small" />}
+        </PrintHide>
+        <PrintOnly>
+          {!open && <Text size="xsmall">(hidden)</Text>}
+        </PrintOnly>
       </Box>
     </StyledBox>
   );

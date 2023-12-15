@@ -42,6 +42,7 @@ const formatKeyLabel = (value, isCount, intl) => {
 export function Gradient({
   config,
   intl,
+  isPrint,
   isCount,
   // unit,
 }) {
@@ -51,6 +52,7 @@ export function Gradient({
       <GradientWrap>
         <KeyGradient
           stops={config.stops}
+          isPrint={isPrint}
         />
       </GradientWrap>
       <GradientLabels>
@@ -74,6 +76,7 @@ export function Gradient({
 Gradient.propTypes = {
   config: PropTypes.object,
   isCount: PropTypes.bool,
+  isPrint: PropTypes.bool,
   // unit: PropTypes.string,
   intl: intlShape.isRequired,
 };

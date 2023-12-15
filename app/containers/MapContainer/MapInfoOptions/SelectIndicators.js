@@ -99,7 +99,7 @@ export function SelectIndicators({ config }) {
       <Box flex={{ shrink: 0 }} pad={{ left: 'ms' }}>
         {!isDefaultOption && (
           <Reset onClick={() => onIndicatorSelect()}>
-            <Icon name="removeSmall" text hidePrint />
+            <Icon name="removeSmall" text printHide />
           </Reset>
         )}
         {isDefaultOption && (

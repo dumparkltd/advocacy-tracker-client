@@ -15,7 +15,8 @@ import A from 'components/styled/A';
 import Icon from 'components/Icon';
 import appMessages from 'containers/App/messages';
 import PrintHide from 'components/styled/PrintHide';
-
+import BoxPrint from 'components/styled/BoxPrint';
+import TextPrint from 'components/styled/TextPrint';
 
 const Styled = styled(PrintHide)`
   position: relative;
@@ -97,105 +98,113 @@ export class EntityListFooter extends React.Component { // eslint-disable-line r
     if (!pager || !pager.pages || pager.pages.length <= 1) {
       return null;
     }
+
     return (
       <Styled>
         <Box fill="horizontal" align="center" pad={{ top: 'large', bottom: 'small' }}>
-          <ListInline>
-            <ListInlineItem>
-              { pager.currentPage > 1 && (
-                <ListInlineItemNav
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onPageSelect(Math.max(1, pager.currentPage - 1));
-                  }}
-                  title={intl && intl.formatMessage(appMessages.buttons.previous)}
-                >
-                  <Icon name="arrowLeft" />
-                </ListInlineItemNav>
-              )}
-              {pager.currentPage === 1 && (
-                <ListInlineItemNavDisabled>
-                  <Icon name="arrowLeft" />
-                </ListInlineItemNavDisabled>
-              )}
-            </ListInlineItem>
-            { pager.pages.indexOf(1) < 0 && (
+          {pager && pager.pages && pager.pages.length > 1 && (
+            <BoxPrint printOnly>
+              <TextPrint size="xsmall">{`Showing page ${pager.currentPage} of ${pager.totalPages} list pages total`}</TextPrint>
+            </BoxPrint>
+          )}
+          <BoxPrint printHide>
+            <ListInline>
               <ListInlineItem>
-                <ListInlineItemLink
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onPageSelect(1);
-                  }}
-                >
-                1
-                </ListInlineItemLink>
+                {pager.currentPage > 1 && (
+                  <ListInlineItemNav
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onPageSelect(Math.max(1, pager.currentPage - 1));
+                    }}
+                    title={intl && intl.formatMessage(appMessages.buttons.previous)}
+                  >
+                    <Icon name="arrowLeft" />
+                  </ListInlineItemNav>
+                )}
+                {pager.currentPage === 1 && (
+                  <ListInlineItemNavDisabled>
+                    <Icon name="arrowLeft" />
+                  </ListInlineItemNavDisabled>
+                )}
               </ListInlineItem>
-            )}
-            { pager.pages.indexOf(2) < 0 && (
-              <ListInlineItem>
-              ...
-              </ListInlineItem>
-            )}
-            { pager.pages.map((page, index) => (
-              <ListInlineItem key={index}>
-                {pager.currentPage !== page && (
+              {pager.pages.indexOf(1) < 0 && (
+                <ListInlineItem>
                   <ListInlineItemLink
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
-                      onPageSelect(page);
+                      onPageSelect(1);
                     }}
                   >
-                    {page}
+                    1
                   </ListInlineItemLink>
-                )}
-                {pager.currentPage === page && (
-                  <ListInlineItemActive>
-                    {page}
-                  </ListInlineItemActive>
-                )}
-              </ListInlineItem>
-            ))}
-            { pager.pages.indexOf(pager.totalPages - 1) < 0 && (
-              <ListInlineItem>
-              ...
-              </ListInlineItem>
-            )}
-            { pager.pages.indexOf(pager.totalPages) < 0 && (
-              <ListInlineItem>
-                <ListInlineItemLink
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onPageSelect(pager.totalPages);
-                  }}
-                >
-                  {pager.totalPages}
-                </ListInlineItemLink>
-              </ListInlineItem>
-            )}
-            <ListInlineItem>
-              { pager.currentPage < pager.totalPages && (
-                <ListInlineItemNav
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onPageSelect(Math.min(pager.totalPages, parseInt(pager.currentPage, 10) + 1));
-                  }}
-                  title={intl && intl.formatMessage(appMessages.buttons.next)}
-                >
-                  <Icon name="arrowRight" />
-                </ListInlineItemNav>
+                </ListInlineItem>
               )}
-              {pager.currentPage === pager.totalPages && (
-                <ListInlineItemNavDisabled>
-                  <Icon name="arrowRight" />
-                </ListInlineItemNavDisabled>
+              {pager.pages.indexOf(2) < 0 && (
+                <ListInlineItem>
+                  ...
+                </ListInlineItem>
               )}
-            </ListInlineItem>
-          </ListInline>
+              {pager.pages.map((page, index) => (
+                <ListInlineItem key={index}>
+                  {pager.currentPage !== page && (
+                    <ListInlineItemLink
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        onPageSelect(page);
+                      }}
+                    >
+                      {page}
+                    </ListInlineItemLink>
+                  )}
+                  {pager.currentPage === page && (
+                    <ListInlineItemActive>
+                      {page}
+                    </ListInlineItemActive>
+                  )}
+                </ListInlineItem>
+              ))}
+              {pager.pages.indexOf(pager.totalPages - 1) < 0 && (
+                <ListInlineItem>
+                  ...
+                </ListInlineItem>
+              )}
+              {pager.pages.indexOf(pager.totalPages) < 0 && (
+                <ListInlineItem>
+                  <ListInlineItemLink
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onPageSelect(pager.totalPages);
+                    }}
+                  >
+                    {pager.totalPages}
+                  </ListInlineItemLink>
+                </ListInlineItem>
+              )}
+              <ListInlineItem>
+                {pager.currentPage < pager.totalPages && (
+                  <ListInlineItemNav
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      onPageSelect(Math.min(pager.totalPages, parseInt(pager.currentPage, 10) + 1));
+                    }}
+                    title={intl && intl.formatMessage(appMessages.buttons.next)}
+                  >
+                    <Icon name="arrowRight" />
+                  </ListInlineItemNav>
+                )}
+                {pager.currentPage === pager.totalPages && (
+                  <ListInlineItemNavDisabled>
+                    <Icon name="arrowRight" />
+                  </ListInlineItemNavDisabled>
+                )}
+              </ListInlineItem>
+            </ListInline>
+          </BoxPrint>
         </Box>
       </Styled>
     );
@@ -204,7 +213,7 @@ export class EntityListFooter extends React.Component { // eslint-disable-line r
 
 EntityListFooter.propTypes = {
   pager: PropTypes.object,
-  pageSize: PropTypes.number,
+  pageSize: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   onPageSelect: PropTypes.func,
 };
 

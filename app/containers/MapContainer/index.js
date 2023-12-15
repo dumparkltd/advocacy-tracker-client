@@ -5,7 +5,8 @@
  */
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
+import { connect } from 'react-redux';
+import styled, { css } from 'styled-components';
 import { Box, Text } from 'grommet';
 
 import * as topojson from 'topojson-client';
@@ -13,6 +14,13 @@ import * as topojson from 'topojson-client';
 
 import countriesTopo from 'data/ne_countries_10m_v5.topo.json';
 import countryPointsJSON from 'data/country-points.json';
+
+
+import {
+  selectPrintConfig,
+} from 'containers/App/selectors';
+
+import { usePrint } from 'containers/App/PrintContext';
 
 // import appMessages from 'containers/App/messages';
 // import { hasGroupActors } from 'utils/entities';
@@ -25,18 +33,39 @@ const MapKeyWrapper = styled((p) => <Box margin={{ horizontal: 'medium', top: 'x
 `;
 // import messages from './messages';
 
-const Styled = styled((p) => <Box {...p} />)`
+const Styled = styled(
+  React.forwardRef((p, ref) => <Box {...p} ref={ref} />)
+)`
   z-index: 0;
+  @media print {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 `;
 const MapTitle = styled((p) => <Box margin={{ horizontal: 'medium', vertical: 'xsmall' }} {...p} />)``;
-const MapOptions = styled((p) => <Box margin={{ horizontal: 'medium', top: 'small' }} {...p} />)``;
-
+const MapOptions = styled((p) => <Box margin={{ horizontal: 'medium', top: 'small' }} {...p} />)`
+${({ isPrint }) => isPrint && css`margin-left: 0`};
+@media print {
+  margin-left: 0;
+}
+`;
 const getMapInnerWrapper = (fullMap) => fullMap
   ? styled.div``
   : styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)`
+    ${({ isPrint }) => isPrint && css`margin-left: 0;`}
+    ${({ isPrint }) => isPrint && css`margin-right: 0;`}
     position: relative;
-    height: 500px;
-`;
+    overflow: hidden;
+    padding-top: ${({ isPrint, orient }) => (isPrint && orient) === 'landscape' ? '50%' : '56.25%'};
+    @media print {
+      margin-left: 0;
+      margin-right: 0;
+      display: block;
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+  `;
+
 export function MapContainer({
   mapKey = {},
   mapInfo,
@@ -46,6 +75,7 @@ export function MapContainer({
   reducePoints,
   reduceCountryAreas,
   fullMap,
+  printArgs,
   // intl,
 }) {
   const {
@@ -88,9 +118,9 @@ export function MapContainer({
   const showPointsOnly = hasPointOption && showAsPoint;
   if (
     reducePoints
-      && indicatorPoints
-      && indicatorPoints !== '0'
-      && (hasPointOverlay || showPointsOnly)
+    && indicatorPoints
+    && indicatorPoints !== '0'
+    && (hasPointOverlay || showPointsOnly)
   ) {
     const ffUnit = unit || circleLayerConfig.unit || '';
     const isPercentage = ffUnit.indexOf('%') > -1;
@@ -155,11 +185,16 @@ export function MapContainer({
       ...mapOptions,
     ];
   }
+  const isPrintView = usePrint();
   const MapInnerWrapper = getMapInnerWrapper(fullMap);
+
   return (
     <Styled>
-      <MapInnerWrapper>
+      <MapInnerWrapper isPrint={isPrintView} orient={printArgs && printArgs.printOrientation}>
         <MapWrapper
+          fullMap={fullMap}
+          isPrintView={isPrintView}
+          printArgs={printArgs}
           scrollWheelZoom={scrollWheelZoom}
           typeLabels={typeLabels}
           includeSecondaryMembers={includeSecondaryMembers}
@@ -179,6 +214,7 @@ export function MapContainer({
           fitBounds={fitBounds}
           projection={projection}
           mapId={mapId}
+          hasInfo={mapInfo && mapInfo.length > 0}
           circleLayerConfig={{
             ...circleLayerConfig,
             rangeMax: minMaxValues && minMaxValues.points && minMaxValues.points.max,
@@ -187,6 +223,7 @@ export function MapContainer({
       </MapInnerWrapper>
       {mapInfo && mapInfo.length > 0 && (
         <MapInfoOptions
+          isPrintView={isPrintView}
           options={mapInfo}
           minMaxValues={minMaxValues}
           countryMapSubject={mapSubject}
@@ -194,12 +231,13 @@ export function MapContainer({
         />
       )}
       {mapKey && Object.keys(mapKey).length > 0 && (
-        <>
+        <MapOptions isPrint={isPrintView}>
           <MapTitle>
             <Text weight={600}>{keyTitle}</Text>
           </MapTitle>
           <MapKeyWrapper>
             <MapKey
+              isPrint={isPrintView}
               mapSubject={mapSubject}
               maxValue={maxValue}
               minValue={minValue}
@@ -210,10 +248,10 @@ export function MapContainer({
               circleLayerConfig={circleLayerConfig}
             />
           </MapKeyWrapper>
-        </>
+        </MapOptions>
       )}
       {allMapOptions && allMapOptions.length > 0 && (
-        <MapOptions>
+        <MapOptions isPrint={isPrintView}>
           {allMapOptions.map(
             (option, id) => (
               <MapOption
@@ -235,9 +273,14 @@ MapContainer.propTypes = {
   reduceCountryAreas: PropTypes.func,
   mapData: PropTypes.object,
   mapKey: PropTypes.object,
+  printArgs: PropTypes.object,
   mapInfo: PropTypes.array,
   mapOptions: PropTypes.array,
   fullMap: PropTypes.bool,
 };
 
-export default MapContainer;
+const mapStateToProps = (state) => ({
+  printArgs: selectPrintConfig(state),
+});
+
+export default connect(mapStateToProps)(MapContainer);

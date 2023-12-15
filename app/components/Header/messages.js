@@ -14,4 +14,12 @@ export default defineMessages({
     id: 'app.components.Header.user',
     defaultMessage: 'User profile',
   },
+  urlLabelPrint: {
+    id: 'app.components.Header.urlLabelPrint',
+    defaultMessage: 'URL:',
+  },
+  dateLabelPrint: {
+    id: 'app.components.Header.dateLabelPrint',
+    defaultMessage: 'Date:',
+  },
 });
