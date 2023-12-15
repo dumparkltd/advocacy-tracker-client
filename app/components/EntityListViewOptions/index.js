@@ -5,9 +5,9 @@ import styled from 'styled-components';
 import ButtonFactory from 'components/buttons/ButtonFactory';
 
 const Styled = styled.div`
-  position: relative;
+  position: ${({ isOnMap }) => isOnMap ? 'absolute' : 'relative'};
   z-index: 20;
-  margin-left: 10px;
+  margin-left: 20px;
   padding: 10px 0;
   display: ${({ isPrint }) => isPrint ? 'none' : 'inline-block'};
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
@@ -37,7 +37,6 @@ const TableCell = styled.span`
   }
 `;
 const ButtonWrap = styled.span`
-  padding: 0 0.1em;
   @media print {
     display: none;
   }
@@ -47,6 +46,7 @@ const ButtonWrap = styled.span`
 class EntityListViewOptions extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   render() {
     const { options, isOnMap, isPrintView } = this.props;
+
     return (
       <Styled isOnMap={isOnMap} isPrint={isPrintView}>
         {options && (

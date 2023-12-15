@@ -16,6 +16,10 @@ const Select = styled(PrintHide)`
   padding-right: 6px;
 `;
 
+const StyledInput = styled.input`
+  accent-color: ${({ theme }) => theme.global.colors.highlight};
+`;
+
 const Link = styled((p) => <Button as="a" plain {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 16px;
@@ -73,7 +77,7 @@ export function CellBodyMain({
       {canEdit && (
         <PrintHide>
           <Select>
-            <input
+            <StyledInput
               type="checkbox"
               checked={entity.selected}
               onChange={(evt) => entity.onSelect(evt.target.checked)}

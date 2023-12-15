@@ -1266,6 +1266,9 @@ export const getActiontypeColumns = ({
   ) {
     const typeColumns = ACTIONTYPES_CONFIG[parseInt(typeId, 10)].columns.filter(
       (col) => {
+        if (!isAdmin && typeof col.adminOnly !== 'undefined') {
+          return !col.adminOnly;
+        }
         if (isSingle && typeof col.showOnSingle !== 'undefined') {
           if (viewSubject && Array.isArray(col.showOnSingle)) {
             return col.showOnSingle.indexOf(viewSubject) > -1;
@@ -1297,6 +1300,7 @@ export const getActortypeColumns = ({
   includeMain = true,
   skipTypeColumns,
   isSingle = true,
+  isAdmin,
 }) => {
   let columns = includeMain
     ? [{
@@ -1313,6 +1317,9 @@ export const getActortypeColumns = ({
   ) {
     const typeColumns = ACTORTYPES_CONFIG[parseInt(typeId, 10)].columns.filter(
       (col) => {
+        if (!isAdmin && typeof col.adminOnly !== 'undefined') {
+          return !col.adminOnly;
+        }
         if (isSingle && typeof col.showOnSingle !== 'undefined') {
           return col.showOnSingle;
         }

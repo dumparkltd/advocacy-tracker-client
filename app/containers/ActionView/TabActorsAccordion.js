@@ -114,6 +114,7 @@ export function TabActorsAccordion({
                                 columns: getActortypeColumns({
                                   typeId: typeid,
                                   showCode: checkActorAttribute(typeid, 'code', isAdmin),
+                                  isAdmin,
                                 }),
                               }),
                             ]),

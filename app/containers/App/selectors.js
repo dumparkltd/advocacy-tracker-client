@@ -1035,6 +1035,93 @@ export const selectEntitiesSearchQuery = createSelector(
     : entities // !search
 );
 
+// filter entities by attributes, using object
+export const selectActorsWhere = createSelector(
+  (state, { where }) => where,
+  selectActortypeActors, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
+);
+
+// filter entities by attributes, using locationQuery
+export const selectActorsWhereQuery = createSelector(
+  selectAttributeQuery,
+  selectActortypeActors, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
+);
+// filter entities by attributes, using locationQuery
+export const selectPagesWhereQuery = createSelector(
+  selectAttributeQuery,
+  selectPages, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
+);
+// filter entities by attributes, using locationQuery
+export const selectResourcesWhereQuery = createSelector(
+  selectAttributeQuery,
+  selectResourcetypeResources, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
+);
+
+// TODO: passing of location query likely not needed if selectSearchQuery changed
+export const selectActorsSearchQuery = createSelector(
+  selectActorsWhereQuery,
+  selectSearchQuery,
+  (state, { searchAttributes }) => searchAttributes,
+  (entities, query, searchAttributes) => query
+    ? filterEntitiesByKeywords(entities, query, searchAttributes)
+    : entities // !search
+);
+export const selectResourcesSearchQuery = createSelector(
+  selectResourcesWhereQuery,
+  selectSearchQuery,
+  (state, { searchAttributes }) => searchAttributes,
+  (entities, query, searchAttributes) => query
+    ? filterEntitiesByKeywords(entities, query, searchAttributes)
+    : entities // !search
+);
+
+// filter entities by attributes, using object
+export const selectActionsWhere = createSelector(
+  (state, { where }) => where,
+  selectActiontypeActions, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
+);
+
+// filter entities by attributes, using locationQuery
+export const selectActionsWhereQuery = createSelector(
+  selectAttributeQuery,
+  selectActiontypeActions, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
+);
+export const selectActionsSearchQuery = createSelector(
+  selectActionsWhereQuery,
+  selectSearchQuery,
+  (state, { searchAttributes }) => searchAttributes,
+  (entities, query, searchAttributes) => query
+    ? filterEntitiesByKeywords(entities, query, searchAttributes)
+    : entities // !search
+);
+
+// filter entities by attributes, using locationQuery
+export const selectIndicatorsWhereQuery = createSelector(
+  selectAttributeQuery,
+  selectIndicators, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
+);
+
 // taxonomies and categories ///////////////////////////////////////////////////
 
 // select all categories
@@ -2042,6 +2129,7 @@ export const selectActorsWithPositions = createSelector(
           }
           return actor
             .set('statements', actorStatements)
+            .set('statementsAsGroup', actorStatementsAsMemberByGroup.flatten(true).toList().toSet())
             .set('indicatorPositions', actorIndicators);
         }
         return actor;

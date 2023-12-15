@@ -609,9 +609,10 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                                 <ButtonFlatIconOnly
                                   onClick={action.onClick && (() => action.onClick())}
                                   title={action.title}
+                                  alt={action.title}
                                   subtle
                                 >
-                                  <Icon name={action.icon} />
+                                  <Icon name={action.icon} title={action.title} />
                                 </ButtonFlatIconOnly>
                               </Box>
                             );
