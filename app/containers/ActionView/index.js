@@ -186,7 +186,7 @@ export function ActionView(props) {
   const showMap = viewSubject === 'actors' || viewSubject === 'targets';
 
   const mySetPrintView = () => onSetPrintView({
-    printType: showMap ? PRINT_TYPES.FF : PRINT_TYPES.SINGLE,
+    printType: PRINT_TYPES.SINGLE,
     printContentOptions: {
       tabs: true,
       actionTypes: viewSubject === 'children',
