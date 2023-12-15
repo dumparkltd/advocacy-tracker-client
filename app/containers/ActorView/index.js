@@ -177,9 +177,7 @@ export function ActorView({
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
   const showAllTabs = isPrintView && printArgs && printArgs.printTabs === 'all';
   const showAllActionTypes = isPrintView && printArgs.printActionTypes === 'all';
-  const hasMap = !isCountry && (
-    viewSubject === 'members' || (hasMembers && showAllTabs)
-  );
+  const hasMap = !isCountry && viewSubject === 'members';
 
   const mySetPrintView = () => onSetPrintView({
     printType: PRINT_TYPES.SINGLE,
@@ -190,7 +188,7 @@ export function ActorView({
     },
     printMapOptions: {
       markers: hasMap,
-      markersForArgs: (args) => args.printTabs === 'all',
+      markersForArgs: (args) => !isCountry && hasMembers && args.printTabs === 'all',
     },
     printMapMarkers: true,
     printOrientation: 'portrait',

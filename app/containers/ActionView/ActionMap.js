@@ -24,6 +24,7 @@ import {
   selectIncludeTargetMembers,
   selectIncludeTargetChildrenOnMap,
   selectIncludeTargetChildrenMembersOnMap,
+  selectPrintConfig,
 } from 'containers/App/selectors';
 
 import {
@@ -40,6 +41,7 @@ import qe from 'utils/quasi-equals';
 // import { hasGroupActors } from 'utils/entities';
 import { scaleColorCount } from 'containers/MapContainer/utils';
 import MapKeySimple from 'containers/MapContainer/MapKeySimple';
+import { usePrint } from 'containers/App/PrintContext';
 import MapContainer from 'containers/MapContainer/MapWrapper';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
@@ -139,9 +141,12 @@ export function ActionMap({
   childActionsByActiontype,
   includeTargetChildrenMembers,
   onSetIncludeTargetChildrenMembers,
+  printArgs,
   // typeId,
   // intl,
 }) {
+  const isPrintView = usePrint();
+
   // const { intl } = this.context;
   // let type;
   const countriesJSON = topojson.feature(
@@ -259,15 +264,18 @@ export function ActionMap({
     mapKeyOptionMap,
     mapSubject,
   });
-  const countryPointData = reduceCountryData({
-    features: countryPointsJSON.features,
-    entities, // actors
-    countriesVia,
-    countriesChildTargets,
-    hasDirectCountries,
-    mapKeyOptionMap,
-    mapSubject,
-  });
+  const showMarkers = !isPrintView || (printArgs && printArgs.printMapMarkers);
+  const countryPointData = showMarkers
+    ? reduceCountryData({
+      features: countryPointsJSON.features,
+      entities, // actors
+      countriesVia,
+      countriesChildTargets,
+      hasDirectCountries,
+      mapKeyOptionMap,
+      mapSubject,
+    })
+    : null;
   let memberOption;
   let mapTitle;
   if (mapSubject === 'targets') {
@@ -369,6 +377,7 @@ ActionMap.propTypes = {
   hasChildTargetOption: PropTypes.bool,
   onActorClick: PropTypes.func,
   mapSubject: PropTypes.string,
+  printArgs: PropTypes.object,
 };
 
 const mapStateToProps = (state) => ({
@@ -377,6 +386,7 @@ const mapStateToProps = (state) => ({
   includeTargetMembers: selectIncludeTargetMembers(state),
   includeTargetChildren: selectIncludeTargetChildrenOnMap(state),
   includeTargetChildrenMembers: selectIncludeTargetChildrenMembersOnMap(state),
+  printArgs: selectPrintConfig(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

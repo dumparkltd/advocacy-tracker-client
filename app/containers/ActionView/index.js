@@ -183,7 +183,8 @@ export function ActionView(props) {
   // const type = `actions_${typeId}`;
   let viewSubject = subject || 'actors';
 
-  const showMap = viewSubject === 'actors' || viewSubject === 'targets';
+  const hasMap = viewSubject === 'actors'
+    || viewSubject === 'targets';
 
   const mySetPrintView = () => onSetPrintView({
     printType: PRINT_TYPES.SINGLE,
@@ -192,7 +193,10 @@ export function ActionView(props) {
       actionTypes: viewSubject === 'children',
       actionTypesForArgs: (args) => args.printTabs === 'all',
     },
-    printMapOptions: showMap ? { markers: true } : null,
+    printMapOptions: {
+      markers: hasMap,
+      markersForArgs: (args) => args.printTabs === 'all',
+    },
     printMapMarkers: true,
     printOrientation: 'portrait',
     printSize: 'A4',
