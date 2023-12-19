@@ -5,7 +5,9 @@
 import {
   call, put, select, takeLatest, takeEvery, race, take, all,
 } from 'redux-saga/effects';
-import { push, replace, goBack } from 'react-router-redux';
+import {
+  push, replace, goBack, LOCATION_CHANGE,
+} from 'react-router-redux';
 import { reduce, keyBy } from 'lodash/collection';
 // import { without } from 'lodash/array';
 
@@ -89,6 +91,7 @@ import {
   recoverError,
   forwardOnAuthenticationChange,
   updatePath,
+  validateToken,
 } from 'containers/App/actions';
 
 import {
@@ -217,6 +220,7 @@ export function* checkRoleSaga({ role }) {
 }
 
 export function* authenticateSaga(payload) {
+  console.log('authenticateSaga');
   const { password, email } = payload.data;
   try {
     yield put(authenticateSending());
@@ -256,6 +260,7 @@ export function* recoverSaga(payload) {
 export function* authChangeSaga() {
   const redirectPathname = yield select(selectRedirectOnAuthSuccessPath);
   const redirectQuery = yield select(selectRedirectOnAuthSuccessSearch);
+  console.log('authChangeSaga', redirectPathname);
   if (redirectPathname) {
     yield put(updatePath(redirectPathname, { replace: true, search: redirectQuery }));
   } else {
@@ -266,6 +271,7 @@ export function* authChangeSaga() {
 
 export function* logoutSaga() {
   try {
+    console.log('logout');
     yield call(apiRequest, 'delete', ENDPOINTS.SIGN_OUT);
     yield call(clearAuthValues);
     yield put(logoutSuccess());
@@ -276,12 +282,17 @@ export function* logoutSaga() {
 }
 
 export function* validateTokenSaga() {
+  const location = yield select(selectLocation);
+  const redirectOnAuthSuccess = location.get('pathname');
+  const redirectOnAuthSuccessSearch = location.get('search');
   try {
     const {
       [KEYS.UID]: uid,
       [KEYS.CLIENT]: client,
       [KEYS.ACCESS_TOKEN]: accessToken,
     } = yield getAuthValues();
+    console.log('validateTokenSaga', redirectOnAuthSuccess);
+    console.log('uid && client && accessToken', uid, client, accessToken);
     if (uid && client && accessToken) {
       yield put(authenticateSending());
       const response = yield call(
@@ -294,16 +305,41 @@ export function* validateTokenSaga() {
         }
       );
       yield put(authenticateSuccess(response.data)); // need to store currentUserData
+    } else {
+      // yield put(logout());
+      console.log('uid not present, resetting');
+      yield call(clearAuthValues);
+      yield put(authenticateReset());
+      // yield put(updatePath(ROUTES.LOGIN, { replace: true }));
+      // forward to login
+      yield put(updatePath(
+        ROUTES.LOGIN,
+        {
+          replace: true,
+          query: [
+            {
+              arg: 'info',
+              value: PARAMS.VALIDATE_TOKEN_FAILED,
+            },
+            {
+              arg: 'redirectOnAuthSuccess',
+              value: redirectOnAuthSuccess,
+            },
+            {
+              arg: 'redirectOnAuthSuccessSearch',
+              value: redirectOnAuthSuccessSearch,
+            },
+          ],
+        },
+      ));
     }
   } catch (err) {
     err.response.json = yield err.response.json();
+    console.log('err', err);
     yield put(authenticateReset());
-    const location = yield select(selectLocation);
-    const redirectOnAuthSuccess = location.get('pathname');
-    const redirectOnAuthSuccessSearch = location.get('search');
     yield call(clearAuthValues);
     yield put(invalidateEntities());
-    // forward to home
+    // forward to login
     yield put(updatePath(
       ROUTES.LOGIN,
       {
@@ -1216,6 +1252,19 @@ export function* closeEntitySaga({ path }) {
   );
 }
 
+export function* locationChangeSaga() {
+  const previousPath = yield select(selectPreviousPathname);
+  const currentPath = yield select(selectCurrentPathname);
+  console.log('locationChangeSaga', previousPath, currentPath);
+  if (
+    previousPath !== currentPath
+    && currentPath !== ROUTES.LOGOUT
+    && currentPath !== ROUTES.LOGIN
+  ) {
+    yield put(validateToken());
+  }
+}
+
 /**
  * Root saga manages watcher lifecycle
  */
@@ -1263,4 +1312,5 @@ export default function* rootSaga() {
   yield takeEvery(DISMISS_QUERY_MESSAGES, dismissQueryMessagesSaga);
 
   yield takeEvery(CLOSE_ENTITY, closeEntitySaga);
+  yield takeLatest(LOCATION_CHANGE, locationChangeSaga);
 }

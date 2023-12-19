@@ -46,7 +46,7 @@ export class UserLogin extends React.PureComponent { // eslint-disable-line reac
   render() {
     const { intl } = this.context;
     const { isUserAuthenticating, authError } = this.props;
-
+    console.log('isUserAuthenticating', isUserAuthenticating);
     return (
       <div>
         <Helmet
