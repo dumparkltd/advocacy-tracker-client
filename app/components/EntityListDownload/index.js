@@ -918,15 +918,15 @@ export function EntityListDownload({
               <Box direction="row" align="center">
                 <Select>
                   <StyledInput
-                    id="check-keyword"
+                    id="check-filter-keyword"
                     type="checkbox"
                     checked={ignoreSearch}
                     onChange={(evt) => setIgnoreSearch(evt.target.checked)}
                   />
                 </Select>
               </Box>
-              <Text size="small" as="label" htmlFor="check-timestamp">
-              Ignore search keyword
+              <Text size="small" as="label" htmlFor="check-filter-keyword">
+                Ignore search keyword
               </Text>
             </Box>
           )}
@@ -936,15 +936,15 @@ export function EntityListDownload({
               <Box direction="row" align="center">
                 <Select>
                   <StyledInput
-                    id="check-search-selection"
+                    id="check-filter-selection"
                     type="checkbox"
                     checked={ignoreSelection}
                     onChange={(evt) => setIgnoreSelection(evt.target.checked)}
                   />
                 </Select>
               </Box>
-              <Text size="small" as="label" htmlFor="check-timestamp">
-              Ignore selected items
+              <Text size="small" as="label" htmlFor="check-filter-selection">
+                Ignore selected items
               </Text>
             </Box>
           )}
