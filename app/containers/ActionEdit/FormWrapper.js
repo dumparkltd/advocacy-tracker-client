@@ -74,7 +74,7 @@ FormWrapper.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
-  handleDelete: PropTypes.func.isRequired,
+  handleDelete: PropTypes.func,
   viewDomain: PropTypes.object,
   fields: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
   onErrorDismiss: PropTypes.func.isRequired,
