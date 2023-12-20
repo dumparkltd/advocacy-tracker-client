@@ -36,6 +36,7 @@ import Content from 'components/Content';
 import ContentHeader from 'components/ContentHeader';
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonSubmit from 'components/buttons/ButtonSubmit';
+import { filterEntitiesByKeywords } from 'utils/entities';
 import OptionsForActions from './OptionsForActions';
 import OptionsForActors from './OptionsForActors';
 import OptionsForIndicators from './OptionsForIndicators';
@@ -49,6 +50,7 @@ import {
   getDateSuffix,
   // getTaxonomies,
 } from './utils';
+
 
 const Footer = styled.div`
   width: 100%;
@@ -457,12 +459,22 @@ export function EntityListDownload({
   }, []);
 
   // filter out list items according to keyword search or selection
-  let filteredEntities = entities;
+  let searchedEntities = entities;
   if (hasSearchQuery && !ignoreSearch) {
-    filteredEntities = filteredEntities.filter((entity) => entity.getIn(['attributes', 'title']).toLowerCase().includes(searchQuery.toLowerCase()));
+    const searchAttributes = (
+      config.views
+      && config.views.list
+      && config.views.list.search
+    ) || ['title'];
+
+    searchedEntities = filterEntitiesByKeywords(
+      searchedEntities,
+      searchQuery,
+      searchAttributes,
+    );
   }
   if (hasSelectedEntities && !ignoreSelection) {
-    filteredEntities = filteredEntities.filter((entity) => entityIdsSelected.includes(entity.get('id')));
+    searchedEntities = searchedEntities.filter((entity) => entityIdsSelected.includes(entity.get('id')));
   }
 
   let relationships = connections;
@@ -651,7 +663,7 @@ export function EntityListDownload({
         ];
       }
       csvData = prepareDataForActions({
-        entities: filteredEntities,
+        entities: searchedEntities,
         relationships,
         attributes,
         taxonomies,
@@ -761,7 +773,7 @@ export function EntityListDownload({
         ];
       }
       csvData = prepareDataForActors({
-        entities: filteredEntities,
+        entities: searchedEntities,
         relationships,
         attributes,
         taxonomies,
@@ -800,7 +812,7 @@ export function EntityListDownload({
         ];
       }
       csvData = prepareDataForIndicators({
-        entities: filteredEntities,
+        entities: searchedEntities,
         relationships,
         attributes,
         includeSupport,
