@@ -50,7 +50,6 @@ import {
   // getTaxonomies,
 } from './utils';
 
-
 const Footer = styled.div`
   width: 100%;
 `;
@@ -88,7 +87,6 @@ const TextInput = styled(DebounceInput)`
   &:focus {
     outline: none;
   }
-
 `;
 
 const StyledInput = styled.input`
@@ -110,11 +108,14 @@ export function EntityListDownload({
   typeNames,
   intl,
   isAdmin,
+  searchQuery,
+  entityIdsSelected,
 }) {
-  // console.log('connections', connections && connections.toJS())
   const [typeTitle, setTypeTitle] = useState('entities');
   const [csvFilename, setCSVFilename] = useState('csv');
   const [csvSuffix, setCSVSuffix] = useState(true);
+  const [ignoreSearch, setIgnoreSearch] = useState(false);
+  const [ignoreSelection, setIgnoreSelection] = useState(false);
   const [includeUsers, setIncludeUsers] = useState(false);
   const [attributes, setAttributes] = useState({});
   const [taxonomyColumns, setTaxonomies] = useState({});
@@ -139,6 +140,10 @@ export function EntityListDownload({
   const hasAttributes = !!config.attributes;
   const hasTaxonomies = !!config.taxonomies;
   let hasUsers;
+
+  // check if should keep prefiltered search options
+  const hasSearchQuery = !!searchQuery;
+  const hasSelectedEntities = entityIdsSelected && entityIdsSelected.size > 0;
 
   // check action relationships
   let hasActors;
@@ -451,6 +456,15 @@ export function EntityListDownload({
     setCSVFilename(snakeCase(title));
   }, []);
 
+  // filter out list items according to keyword search or selection
+  let filteredEntities = entities;
+  if (hasSearchQuery && !ignoreSearch) {
+    filteredEntities = filteredEntities.filter((entity) => entity.getIn(['attributes', 'title']).toLowerCase().includes(searchQuery.toLowerCase()));
+  }
+  if (hasSelectedEntities && !ignoreSelection) {
+    filteredEntities = filteredEntities.filter((entity) => entityIdsSelected.includes(entity.get('id')));
+  }
+
   let relationships = connections;
 
   // figure out columns
@@ -637,7 +651,7 @@ export function EntityListDownload({
         ];
       }
       csvData = prepareDataForActions({
-        entities,
+        entities: filteredEntities,
         relationships,
         attributes,
         taxonomies,
@@ -747,7 +761,7 @@ export function EntityListDownload({
         ];
       }
       csvData = prepareDataForActors({
-        entities,
+        entities: filteredEntities,
         relationships,
         attributes,
         taxonomies,
@@ -786,14 +800,13 @@ export function EntityListDownload({
         ];
       }
       csvData = prepareDataForIndicators({
-        entities,
+        entities: filteredEntities,
         relationships,
         attributes,
         includeSupport,
       });
     }
   }
-  // console.log('entities', entities && entities.toJS())
   const csvDateSuffix = `_${getDateSuffix()}`;
   return (
     <Content inModal>
@@ -887,6 +900,42 @@ export function EntityListDownload({
             setIncludeSupport={setIncludeSupport}
           />
         )}
+        {hasSearchQuery
+          && (
+            <Box direction="row" align="center" fill={false}>
+              <Box direction="row" align="center">
+                <Select>
+                  <StyledInput
+                    id="check-keyword"
+                    type="checkbox"
+                    checked={ignoreSearch}
+                    onChange={(evt) => setIgnoreSearch(evt.target.checked)}
+                  />
+                </Select>
+              </Box>
+              <Text size="small" as="label" htmlFor="check-timestamp">
+              Ignore search keyword
+              </Text>
+            </Box>
+          )}
+        {hasSelectedEntities
+          && (
+            <Box direction="row" align="center" fill={false}>
+              <Box direction="row" align="center">
+                <Select>
+                  <StyledInput
+                    id="check-search-selection"
+                    type="checkbox"
+                    checked={ignoreSelection}
+                    onChange={(evt) => setIgnoreSelection(evt.target.checked)}
+                  />
+                </Select>
+              </Box>
+              <Text size="small" as="label" htmlFor="check-timestamp">
+              Ignore selected items
+              </Text>
+            </Box>
+          )}
         <Box direction="row" gap="medium" align="center" margin={{ top: 'xlarge' }}>
           <Box direction="row" gap="small" align="center" fill={false}>
             <OptionLabel htmlFor="input-filename">
@@ -959,6 +1008,8 @@ EntityListDownload.propTypes = {
   connections: PropTypes.instanceOf(Map),
   onClose: PropTypes.func,
   isAdmin: PropTypes.bool,
+  searchQuery: PropTypes.string,
+  entityIdsSelected: PropTypes.object,
   intl: intlShape,
 };
 

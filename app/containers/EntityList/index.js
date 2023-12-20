@@ -469,6 +469,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 ).toJS(),
               }}
               isAdmin={isAdmin}
+              searchQuery={locationQuery.get('search')}
+              entityIdsSelected={entityIdsSelected}
             />
           </ReactModal>
         )}
