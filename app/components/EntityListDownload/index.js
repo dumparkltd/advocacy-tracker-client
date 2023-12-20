@@ -112,6 +112,7 @@ export function EntityListDownload({
   isAdmin,
   searchQuery,
   entityIdsSelected,
+  mapSubject,
 }) {
   const [typeTitle, setTypeTitle] = useState('entities');
   const [csvFilename, setCSVFilename] = useState('csv');
@@ -144,7 +145,7 @@ export function EntityListDownload({
   let hasUsers;
 
   // check if should keep prefiltered search options
-  const hasSearchQuery = !!searchQuery;
+  const hasSearchQuery = !!searchQuery && typeof mapSubject === 'undefined';
   const hasSelectedEntities = entityIdsSelected && entityIdsSelected.size > 0;
 
   // check action relationships
@@ -1022,6 +1023,7 @@ EntityListDownload.propTypes = {
   isAdmin: PropTypes.bool,
   searchQuery: PropTypes.string,
   entityIdsSelected: PropTypes.object,
+  mapSubject: PropTypes.string,
   intl: intlShape,
 };
 
