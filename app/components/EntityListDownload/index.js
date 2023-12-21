@@ -19,6 +19,8 @@ import {
   Text,
 } from 'grommet';
 
+import qe from 'utils/quasi-equals';
+
 import appMessages from 'containers/App/messages';
 import { CONTENT_MODAL } from 'containers/App/constants';
 import {
@@ -113,6 +115,7 @@ export function EntityListDownload({
   searchQuery,
   entityIdsSelected,
   mapSubject,
+  defaultMapSubject,
 }) {
   const [typeTitle, setTypeTitle] = useState('entities');
   const [csvFilename, setCSVFilename] = useState('csv');
@@ -143,11 +146,6 @@ export function EntityListDownload({
   const hasAttributes = !!config.attributes;
   const hasTaxonomies = !!config.taxonomies;
   let hasUsers;
-
-  // check if should keep prefiltered search options
-  const hasSearchQuery = !!searchQuery && typeof mapSubject === 'undefined';
-  const hasSelectedEntities = entityIdsSelected && entityIdsSelected.size > 0;
-
   // check action relationships
   let hasActors;
   let hasTargets;
@@ -459,6 +457,10 @@ export function EntityListDownload({
     setCSVFilename(snakeCase(title));
   }, []);
 
+  // check if should keep prefiltered search options
+  const isDefaultMapSubject = (defaultMapSubject && qe(mapSubject, defaultMapSubject)) || typeof mapSubject === 'undefined';
+  const hasSearchQuery = !!searchQuery && isDefaultMapSubject;
+  const hasSelectedEntities = entityIdsSelected && entityIdsSelected.size > 0;
   // filter out list items according to keyword search or selection
   let searchedEntities = entities;
   if (hasSearchQuery && !ignoreSearch) {
@@ -1024,6 +1026,7 @@ EntityListDownload.propTypes = {
   searchQuery: PropTypes.string,
   entityIdsSelected: PropTypes.object,
   mapSubject: PropTypes.string,
+  defaultMapSubject: PropTypes.string,
   intl: intlShape,
 };
 

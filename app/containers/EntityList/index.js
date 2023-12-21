@@ -438,6 +438,13 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         },
       ];
     }
+    let defaultMapSubject;
+
+    if (config.types === 'actortypes') {
+      defaultMapSubject = 'actors';
+    } else if (config.types === 'actiontypes') {
+      defaultMapSubject = 'actions';
+    }
     return (
       <div>
         {config.downloadCSV && this.state.downloadActive && (
@@ -472,6 +479,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               searchQuery={locationQuery.get('search')}
               entityIdsSelected={entityIdsSelected}
               mapSubject={mapSubject}
+              defaultMapSubject={defaultMapSubject}
             />
           </ReactModal>
         )}
