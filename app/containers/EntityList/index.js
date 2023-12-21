@@ -476,7 +476,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 ).toJS(),
               }}
               isAdmin={isAdmin}
-              searchQuery={locationQuery.get('search')}
+              searchQuery={showList ? locationQuery.get('search') : null}
               entityIdsSelected={entityIdsSelected}
               mapSubject={mapSubject}
               defaultMapSubject={defaultMapSubject}
