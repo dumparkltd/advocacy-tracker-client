@@ -821,7 +821,7 @@ export function EntityListDownload({
   return (
     <Content inModal>
       <ContentHeader
-        title="Download CSV"
+        title={intl.formatMessage(messages.downloadCsvTitle)}
         type={CONTENT_MODAL}
         buttons={[{
           type: 'cancel',
@@ -831,10 +831,15 @@ export function EntityListDownload({
       <Main margin={{ bottom: 'large' }}>
         <Box margin={{ bottom: 'large' }} gap="small">
           <Text size="xxlarge">
-            <strong>{`Export ${typeTitle} as CSV`}</strong>
+            <strong>
+              <FormattedMessage
+                {...messages.exportAsTitle}
+                values={{ typeTitle }}
+              />
+            </strong>
           </Text>
           <Text>
-            Please select the attributes, categories and/or connections you would like to include
+            <FormattedMessage {...messages.exportDescription} />
           </Text>
         </Box>
         {config.types === 'actiontypes' && (
@@ -924,7 +929,7 @@ export function EntityListDownload({
                 </Select>
               </Box>
               <Text size="small" as="label" htmlFor="check-filter-keyword">
-                Ignore search keyword
+                <FormattedMessage {...messages.ignoreKeyword} />
               </Text>
             </Box>
           )}
@@ -942,14 +947,14 @@ export function EntityListDownload({
                 </Select>
               </Box>
               <Text size="small" as="label" htmlFor="check-filter-selection">
-                Ignore selected items
+                <FormattedMessage {...messages.ignoreSelected} />
               </Text>
             </Box>
           )}
         <Box direction="row" gap="medium" align="center" margin={{ top: 'xlarge' }}>
           <Box direction="row" gap="small" align="center" fill={false}>
             <OptionLabel htmlFor="input-filename">
-              Enter filename
+              <FormattedMessage {...messages.filenameLabel} />
             </OptionLabel>
             <Box direction="row" align="center">
               <TextInput
@@ -976,7 +981,7 @@ export function EntityListDownload({
               </Select>
             </Box>
             <Text size="small" as="label" htmlFor="check-timestamp">
-              Include timestamp
+              <FormattedMessage {...messages.includeTimestamp} />
             </Text>
           </Box>
         </Box>
