@@ -452,6 +452,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     const isSearchQueryActiveForDownload = !!locationQuery.get('search')
       && showList
       && isDefaultMapSubject;
+    const isSelectionActiveForDownload = showList && entityIdsSelected && entityIdsSelected.length > 0;
     return (
       <div>
         {config.downloadCSV && this.state.downloadActive && (
@@ -484,7 +485,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               }}
               isAdmin={isAdmin}
               searchQuery={isSearchQueryActiveForDownload ? locationQuery.get('search') : null}
-              entityIdsSelected={entityIdsSelected}
+              entityIdsSelected={isSelectionActiveForDownload ? entityIdsSelected : null}
             />
           </ReactModal>
         )}
