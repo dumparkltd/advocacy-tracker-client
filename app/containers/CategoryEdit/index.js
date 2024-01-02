@@ -59,6 +59,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectIsUserMember,
   selectSessionUserId,
 } from 'containers/App/selectors';
 
@@ -239,6 +240,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
       viewEntity,
       dataReady,
       isAdmin,
+      isUserMember,
       viewDomainPage,
       parentOptions,
       parentTaxonomy,
@@ -262,6 +264,12 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
       });
     }
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+
+    // user can delete content
+    // if they are admins or
+    // if they are at least members and its their own content
+    const canDelete = isAdmin
+      || (isUserMember && viewEntity && qe(myId, viewEntity.getIn(['attributes', 'created_by_id'])));
 
     return (
       <div>
@@ -309,7 +317,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={() => handleCancel(reference)}
                 handleUpdate={handleUpdate}
-                handleDelete={() => isAdmin
+                handleDelete={() => canDelete
                   ? handleDelete(viewEntity.getIn(['attributes', 'taxonomy_id']))
                   : null
                 }
@@ -358,6 +366,7 @@ CategoryEdit.propTypes = {
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isUserMember: PropTypes.bool,
   params: PropTypes.object,
   parentOptions: PropTypes.object,
   parentTaxonomy: PropTypes.object,
@@ -377,6 +386,7 @@ CategoryEdit.contextTypes = {
 
 const mapStateToProps = (state, props) => ({
   isAdmin: selectIsUserAdmin(state),
+  isUserMember: selectIsUserMember(state),
   viewDomainPage: selectDomainPage(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
