@@ -360,7 +360,7 @@ CategoryEdit.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
-  handleDelete: PropTypes.func.isRequired,
+  handleDelete: PropTypes.func,
   viewDomainPage: PropTypes.object,
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
