@@ -55,6 +55,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectIsUserMember,
   selectSessionUserId,
   selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
@@ -246,6 +247,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
       actionsByActiontype,
       onCreateOption,
       isAdmin,
+      isUserMember,
       myId,
       onErrorDismiss,
       onServerErrorDismiss,
@@ -261,6 +263,13 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
 
     const type = intl.formatMessage(appMessages.entities.indicators.single);
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+
+    // user can delete content
+    // if they are admins or
+    // if they are at least members and its their own content
+    const canDelete = isAdmin
+      || (isUserMember && viewEntity && qe(myId, viewEntity.getIn(['attributes', 'created_by_id'])));
+
     return (
       <div>
         <Helmet
@@ -304,7 +313,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={handleCancel}
                 handleUpdate={handleUpdate}
-                handleDelete={isAdmin ? handleDelete : null}
+                handleDelete={canDelete ? handleDelete : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
                 fields={dataReady && {
@@ -344,12 +353,13 @@ IndicatorEdit.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
-  handleDelete: PropTypes.func.isRequired,
+  handleDelete: PropTypes.func,
   viewDomainPage: PropTypes.object,
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isUserMember: PropTypes.bool,
   params: PropTypes.object,
   actionsByActiontype: PropTypes.object,
   onCreateOption: PropTypes.func,
@@ -365,6 +375,7 @@ IndicatorEdit.contextTypes = {
 const mapStateToProps = (state, props) => ({
   viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
+  isUserMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),
