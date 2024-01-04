@@ -77,6 +77,7 @@ export const selectActionsByType = createSelector(
   ) => {
     if (!ready) return Map();
     return actions && actions
+      .filter((action) => !!action)
       .map((action) => setActionConnections({
         action,
         actionConnections,

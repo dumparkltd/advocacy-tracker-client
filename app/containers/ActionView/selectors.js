@@ -146,6 +146,7 @@ export const selectTopActionsByActiontype = createSelector(
   ) => {
     if (!ready) return Map();
     return actions && actions
+      .filter((action) => !!action)
       .map((action) => setActionConnections({
         action,
         actionConnections,
@@ -190,6 +191,7 @@ export const selectSubActionsByActiontype = createSelector(
   ) => {
     if (!ready) return Map();
     return actions && actions
+      .filter((action) => !!action)
       .map(
         (action) => {
           let result = setActionConnections({
@@ -290,6 +292,7 @@ export const selectActorsByType = createSelector(
   ) => {
     if (!ready) return Map();
     const actorsWithConnections = actors && actors
+      .filter((actor) => !!actor)
       .map((actor) => setActorConnections({
         actor,
         actorConnections,
@@ -363,6 +366,7 @@ export const selectTargetsByType = createSelector(
   ) => {
     if (!ready) return Map();
     return targets && targets
+      .filter((actor) => !!actor)
       .map((actor) => setActorConnections({
         actor,
         actorConnections,
