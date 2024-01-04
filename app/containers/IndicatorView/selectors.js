@@ -99,6 +99,9 @@ export const selectActionsByType = createSelector(
     let actionsWithConnections = actions && actions
       .filter(
         (action) => {
+          if (!action) {
+            return false;
+          }
           if (includeInofficial) {
             return true;
           }

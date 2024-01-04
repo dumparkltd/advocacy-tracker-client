@@ -247,6 +247,7 @@ export const selectActionsByType = createSelector(
   ) => {
     if (!ready) return Map();
     return actions && actions
+      .filter((action) => !!action)
       .map((action) => setActionConnections({
         action,
         actionConnections,
@@ -282,6 +283,7 @@ export const selectActorsByType = createSelector(
   ) => {
     if (!ready) return Map();
     return actors && actors
+      .filter((actor) => !!actor)
       .map((actor) => setActorConnections({
         actor,
         actorConnections,
