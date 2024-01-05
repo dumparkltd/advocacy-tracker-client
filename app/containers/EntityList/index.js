@@ -438,21 +438,10 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         },
       ];
     }
-    let defaultMapSubject;
-
-    if (config.types === 'actortypes') {
-      defaultMapSubject = 'actors';
-    } else if (config.types === 'actiontypes') {
-      defaultMapSubject = 'actions';
-    }
-    // we assume the default map subject when it is undefined
-    const isDefaultMapSubject = typeof mapSubject === 'undefined'
-      || (defaultMapSubject && qe(mapSubject, defaultMapSubject));
     // we only consider the search query for download when we are looking at the list and when we have the default map subject selected
-    const isSearchQueryActiveForDownload = !!locationQuery.get('search')
-      && showList
-      && isDefaultMapSubject;
-    const isSelectionActiveForDownload = showList && entityIdsSelected && entityIdsSelected.length > 0;
+    const isSearchQueryActiveForDownload = !!locationQuery.get('search') && showList;
+    const isSelectionActiveForDownload = showList && entityIdsSelected && entityIdsSelected.size > 0;
+
     return (
       <div>
         {config.downloadCSV && this.state.downloadActive && (
