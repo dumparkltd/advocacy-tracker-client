@@ -43,6 +43,10 @@ export default defineMessages({
   },
   exportAsTitle: {
     id: 'app.components.EntityListDownload.exportAsTitle',
-    defaultMessage: 'Export {typeTitle} as CSV',
+    defaultMessage: 'Export {count} {typeTitle} as CSV',
+  },
+  exportAsTitleNone: {
+    id: 'app.components.EntityListDownload.exportAsTitleNone',
+    defaultMessage: 'No {typeTitle} with current selection or search',
   },
 });

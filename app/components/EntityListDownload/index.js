@@ -14,9 +14,11 @@ import { snakeCase } from 'lodash/string';
 import styled from 'styled-components';
 import { List, Map } from 'immutable';
 import CsvDownloader from 'react-csv-downloader';
+
 import {
   Box,
   Text,
+  ResponsiveContext,
 } from 'grommet';
 
 import appMessages from 'containers/App/messages';
@@ -37,6 +39,8 @@ import ContentHeader from 'components/ContentHeader';
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonSubmit from 'components/buttons/ButtonSubmit';
 import { filterEntitiesByKeywords } from 'utils/entities';
+import { isMinSize } from 'utils/responsive';
+
 import OptionsForActions from './OptionsForActions';
 import OptionsForActors from './OptionsForActors';
 import OptionsForIndicators from './OptionsForIndicators';
@@ -437,25 +441,12 @@ export function EntityListDownload({
     hasMembers,
     hasAssociations,
   ]);
-  // set initial csv file name
-  useEffect(() => {
-    let title = 'unspecified';
-    if (config.types === 'actiontypes') {
-      title = intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural);
-    }
-    if (config.types === 'actortypes') {
-      title = intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural);
-    }
-    if (config.types === 'indicators') {
-      title = intl.formatMessage(appMessages.entities.indicators.plural);
-    }
-    setTypeTitle(title);
-    setCSVFilename(snakeCase(title));
-  }, []);
 
+  const totalCount = entities ? entities.size : 0;
   // check if should keep prefiltered search options
   const hasSearchQuery = !!searchQuery;
-  const hasSelectedEntities = entityIdsSelected && entityIdsSelected.size > 0;
+  const selectedCount = entityIdsSelected ? entityIdsSelected.size : 0;
+  const hasSelectedEntities = entityIdsSelected && selectedCount > 0;
   // filter out list items according to keyword search or selection
   let searchedEntities = entities;
   if (hasSearchQuery && !ignoreSearch) {
@@ -474,12 +465,33 @@ export function EntityListDownload({
   if (hasSelectedEntities && !ignoreSelection) {
     searchedEntities = searchedEntities.filter((entity) => entityIdsSelected.includes(entity.get('id')));
   }
+  const count = searchedEntities.size;
+
+  // set initial csv file name
+  useEffect(() => {
+    let title = 'unspecified';
+    let tTitle = 'unspecified';
+    if (config.types === 'actiontypes') {
+      title = intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural);
+      tTitle = count !== 1 ? title : intl.formatMessage(appMessages.entities[`actions_${typeId}`].single);
+    }
+    if (config.types === 'actortypes') {
+      title = intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural);
+      tTitle = count !== 1 ? title : intl.formatMessage(appMessages.entities[`actors_${typeId}`].single);
+    }
+    if (config.types === 'indicators') {
+      title = intl.formatMessage(appMessages.entities.indicators.plural);
+      tTitle = count !== 1 ? title : intl.formatMessage(appMessages.entities.indicators.single);
+    }
+    setTypeTitle(tTitle);
+    setCSVFilename(snakeCase(title));
+  }, [count]);
 
   let relationships = connections;
 
   // figure out columns
   let csvColumns = [{ id: 'id' }];
-  if (hasAttributes) {
+  if (hasAttributes && count > 0) {
     csvColumns = Object.keys(attributes).reduce((memo, attKey) => {
       if (attributes[attKey].active) {
         let displayName = attributes[attKey].column;
@@ -494,7 +506,7 @@ export function EntityListDownload({
       return memo;
     }, csvColumns);
   }
-  if (hasTaxonomies) {
+  if (hasTaxonomies && count > 0) {
     csvColumns = Object.keys(taxonomyColumns).reduce((memo, taxId) => {
       if (taxonomyColumns[taxId].active) {
         let displayName = taxonomyColumns[taxId].column;
@@ -510,7 +522,7 @@ export function EntityListDownload({
     }, csvColumns);
   }
   let csvData;
-  if (entities) {
+  if (entities && count > 0) {
     // for actions ///////////////////////////////////////////////////////////////
     if (config.types === 'actiontypes') {
       if (hasActors) {
@@ -818,6 +830,7 @@ export function EntityListDownload({
     }
   }
   const csvDateSuffix = `_${getDateSuffix()}`;
+  const size = React.useContext(ResponsiveContext);
   return (
     <Content inModal>
       <ContentHeader
@@ -829,186 +842,208 @@ export function EntityListDownload({
         }]}
       />
       <Main margin={{ bottom: 'large' }}>
-        <Box margin={{ bottom: 'large' }} gap="small">
-          <Text size="xxlarge">
-            <strong>
-              <FormattedMessage
-                {...messages.exportAsTitle}
-                values={{ typeTitle }}
-              />
-            </strong>
-          </Text>
-          <Text>
-            <FormattedMessage {...messages.exportDescription} />
+        <Box margin={{ bottom: 'small' }}>
+          <Text size="xxlarge" weight={700}>
+            {count > 0 && (
+              <FormattedMessage {...messages.exportAsTitle} values={{ typeTitle, count }} />
+            )}
+            {count === 0 && (
+              <FormattedMessage {...messages.exportAsTitleNone} values={{ typeTitle }} />
+            )}
           </Text>
         </Box>
-        {config.types === 'actiontypes' && (
-          <OptionsForActions
-            typeTitle={typeTitle}
-            hasActors={hasActors}
-            hasTargets={hasTargets}
-            hasParentActions={hasParentActions}
-            hasChildActions={hasChildActions}
-            hasResources={hasResources}
-            hasUsers={hasUsers}
-            hasIndicators={hasIndicators}
-            hasAttributes={hasAttributes}
-            hasTaxonomies={hasTaxonomies}
-            actorsAsRows={actorsAsRows}
-            setActorsAsRows={setActorsAsRows}
-            indicatorsAsRows={indicatorsAsRows}
-            setIndicatorsAsRows={setIndicatorsAsRows}
-            indicatorsActive={indicatorsActive}
-            setIndicatorsActive={setIndicatorsActive}
-            includeUsers={includeUsers}
-            setIncludeUsers={setIncludeUsers}
-            attributes={attributes}
-            setAttributes={setAttributes}
-            taxonomyColumns={taxonomyColumns}
-            setTaxonomies={setTaxonomies}
-            actortypes={actortypes}
-            setActortypes={setActortypes}
-            targettypes={targettypes}
-            setTargettypes={setTargettypes}
-            parenttypes={parenttypes}
-            setParenttypes={setParenttypes}
-            childtypes={childtypes}
-            setChildtypes={setChildtypes}
-            resourcetypes={resourcetypes}
-            setResourcetypes={setResourcetypes}
-          />
-        )}
-        {config.types === 'actortypes' && (
-          <OptionsForActors
-            typeTitle={typeTitle}
-            hasActions={hasActions}
-            actionsAsRows={actionsAsRows}
-            setActionsAsRows={setActionsAsRows}
-            actiontypes={actiontypes}
-            setActiontypes={setActiontypes}
-            hasActionsAsTarget={hasActionsAsTarget}
-            actiontypesAsTarget={actiontypesAsTarget}
-            setActiontypesAsTarget={setActiontypesAsTarget}
-            hasMembers={hasMembers}
-            membertypes={membertypes}
-            setMembertypes={setMembertypes}
-            hasAssociations={hasAssociations}
-            associationtypes={associationtypes}
-            setAssociationtypes={setAssociationtypes}
-            hasUsers={hasUsers}
-            includeUsers={includeUsers}
-            setIncludeUsers={setIncludeUsers}
-            hasAttributes={hasAttributes}
-            attributes={attributes}
-            setAttributes={setAttributes}
-            hasTaxonomies={hasTaxonomies}
-            setTaxonomies={setTaxonomies}
-            taxonomyColumns={taxonomyColumns}
-          />
-        )}
-        {config.types === 'indicators' && (
-          <OptionsForIndicators
-            hasAttributes={hasAttributes}
-            attributes={attributes}
-            setAttributes={setAttributes}
-            includeSupport={includeSupport}
-            setIncludeSupport={setIncludeSupport}
-          />
-        )}
-        {hasSearchQuery
-          && (
-            <Box direction="row" align="center" fill={false}>
-              <Box direction="row" align="center">
-                <Select>
-                  <StyledInput
-                    id="check-filter-keyword"
-                    type="checkbox"
-                    checked={ignoreSearch}
-                    onChange={(evt) => setIgnoreSearch(evt.target.checked)}
-                  />
-                </Select>
+        {(hasSearchQuery || hasSelectedEntities) && (
+          <Box margin={{ bottom: 'large' }}>
+            {hasSearchQuery && (
+              <Box direction="row" align="center" fill={false}>
+                <Box direction="row" align="center">
+                  <Select>
+                    <StyledInput
+                      id="check-filter-keyword"
+                      type="checkbox"
+                      checked={ignoreSearch}
+                      onChange={(evt) => setIgnoreSearch(evt.target.checked)}
+                    />
+                  </Select>
+                </Box>
+                <Text size="small" as="label" htmlFor="check-filter-keyword">
+                  <FormattedMessage {...messages.ignoreKeyword} values={{ searchQuery }} />
+                </Text>
               </Box>
-              <Text size="small" as="label" htmlFor="check-filter-keyword">
-                <FormattedMessage {...messages.ignoreKeyword} />
-              </Text>
-            </Box>
-          )}
-        {hasSelectedEntities
-          && (
-            <Box direction="row" align="center" fill={false}>
-              <Box direction="row" align="center">
-                <Select>
-                  <StyledInput
-                    id="check-filter-selection"
-                    type="checkbox"
-                    checked={ignoreSelection}
-                    onChange={(evt) => setIgnoreSelection(evt.target.checked)}
-                  />
-                </Select>
+            )}
+            {hasSelectedEntities && (
+              <Box direction="row" align="center" fill={false}>
+                <Box direction="row" align="center">
+                  <Select>
+                    <StyledInput
+                      id="check-filter-selection"
+                      type="checkbox"
+                      checked={ignoreSelection}
+                      onChange={(evt) => setIgnoreSelection(evt.target.checked)}
+                    />
+                  </Select>
+                </Box>
+                <Text size="small" as="label" htmlFor="check-filter-selection">
+                  <FormattedMessage {...messages.ignoreSelected} values={{ selectedCount, totalCount }} />
+                </Text>
               </Box>
-              <Text size="small" as="label" htmlFor="check-filter-selection">
-                <FormattedMessage {...messages.ignoreSelected} />
-              </Text>
-            </Box>
-          )}
-        <Box direction="row" gap="medium" align="center" margin={{ top: 'xlarge' }}>
-          <Box direction="row" gap="small" align="center" fill={false}>
-            <OptionLabel htmlFor="input-filename">
-              <FormattedMessage {...messages.filenameLabel} />
-            </OptionLabel>
-            <Box direction="row" align="center">
-              <TextInput
-                minLength={1}
-                debounceTimeout={500}
-                value={csvFilename}
-                onChange={(evt) => setCSVFilename(evt.target.value)}
-                style={{ maxWidth: '250px', textAlign: 'right' }}
-              />
+            )}
+          </Box>
+        )}
+        {count > 0 && (
+          <>
+            <Box margin={{ bottom: 'large' }} gap="small">
               <Text>
-                {`${csvSuffix ? csvDateSuffix : ''}.csv`}
+                <FormattedMessage {...messages.exportDescription} />
               </Text>
             </Box>
-          </Box>
-          <Box direction="row" align="center" fill={false}>
-            <Box direction="row" align="center">
-              <Select>
-                <StyledInput
-                  id="check-timestamp"
-                  type="checkbox"
-                  checked={csvSuffix}
-                  onChange={(evt) => setCSVSuffix(evt.target.checked)}
-                />
-              </Select>
-            </Box>
-            <Text size="small" as="label" htmlFor="check-timestamp">
-              <FormattedMessage {...messages.includeTimestamp} />
-            </Text>
-          </Box>
-        </Box>
-      </Main>
-      <Footer>
-        <Box direction="row" justify="end">
-          <StyledButtonCancel type="button" onClick={() => onClose()}>
-            <FormattedMessage {...appMessages.buttons.cancel} />
-          </StyledButtonCancel>
-          <CsvDownloader
-            datas={csvData}
-            columns={csvColumns}
-            filename={`${csvFilename}${csvSuffix ? csvDateSuffix : ''}`}
-            bom={false}
-          >
-            <ButtonSubmit
-              type="button"
-              onClick={(evt) => {
-                evt.preventDefault();
-                onClose();
-              }}
+            {config.types === 'actiontypes' && (
+              <OptionsForActions
+                typeTitle={typeTitle}
+                hasActors={hasActors}
+                hasTargets={hasTargets}
+                hasParentActions={hasParentActions}
+                hasChildActions={hasChildActions}
+                hasResources={hasResources}
+                hasUsers={hasUsers}
+                hasIndicators={hasIndicators}
+                hasAttributes={hasAttributes}
+                hasTaxonomies={hasTaxonomies}
+                actorsAsRows={actorsAsRows}
+                setActorsAsRows={setActorsAsRows}
+                indicatorsAsRows={indicatorsAsRows}
+                setIndicatorsAsRows={setIndicatorsAsRows}
+                indicatorsActive={indicatorsActive}
+                setIndicatorsActive={setIndicatorsActive}
+                includeUsers={includeUsers}
+                setIncludeUsers={setIncludeUsers}
+                attributes={attributes}
+                setAttributes={setAttributes}
+                taxonomyColumns={taxonomyColumns}
+                setTaxonomies={setTaxonomies}
+                actortypes={actortypes}
+                setActortypes={setActortypes}
+                targettypes={targettypes}
+                setTargettypes={setTargettypes}
+                parenttypes={parenttypes}
+                setParenttypes={setParenttypes}
+                childtypes={childtypes}
+                setChildtypes={setChildtypes}
+                resourcetypes={resourcetypes}
+                setResourcetypes={setResourcetypes}
+              />
+            )}
+            {config.types === 'actortypes' && (
+              <OptionsForActors
+                typeTitle={typeTitle}
+                hasActions={hasActions}
+                actionsAsRows={actionsAsRows}
+                setActionsAsRows={setActionsAsRows}
+                actiontypes={actiontypes}
+                setActiontypes={setActiontypes}
+                hasActionsAsTarget={hasActionsAsTarget}
+                actiontypesAsTarget={actiontypesAsTarget}
+                setActiontypesAsTarget={setActiontypesAsTarget}
+                hasMembers={hasMembers}
+                membertypes={membertypes}
+                setMembertypes={setMembertypes}
+                hasAssociations={hasAssociations}
+                associationtypes={associationtypes}
+                setAssociationtypes={setAssociationtypes}
+                hasUsers={hasUsers}
+                includeUsers={includeUsers}
+                setIncludeUsers={setIncludeUsers}
+                hasAttributes={hasAttributes}
+                attributes={attributes}
+                setAttributes={setAttributes}
+                hasTaxonomies={hasTaxonomies}
+                setTaxonomies={setTaxonomies}
+                taxonomyColumns={taxonomyColumns}
+              />
+            )}
+            {config.types === 'indicators' && (
+              <OptionsForIndicators
+                hasAttributes={hasAttributes}
+                attributes={attributes}
+                setAttributes={setAttributes}
+                includeSupport={includeSupport}
+                setIncludeSupport={setIncludeSupport}
+              />
+            )}
+            <Box
+              gap="small"
+              margin={{ top: 'xlarge' }}
             >
-              <FormattedMessage {...messages.buttonDownload} />
-            </ButtonSubmit>
-          </CsvDownloader>
-        </Box>
-      </Footer>
+              <Box
+                direction={(isMinSize(size, 'medium') || !csvSuffix) ? 'row' : 'column'}
+                align={(isMinSize(size, 'medium') || !csvSuffix) ? 'center' : 'start'}
+                gap="small"
+                fill={false}
+              >
+                <OptionLabel htmlFor="input-filename">
+                  <FormattedMessage {...messages.filenameLabel} />
+                </OptionLabel>
+                <Box
+                  direction={(isMinSize(size, 'medium') || !csvSuffix) ? 'row' : 'column'}
+                  align={(isMinSize(size, 'medium') || !csvSuffix) ? 'center' : 'start'}
+                  gap={(isMinSize(size, 'medium') || !csvSuffix) ? 'none' : 'small'}
+                >
+                  <TextInput
+                    minLength={1}
+                    debounceTimeout={500}
+                    value={csvFilename}
+                    onChange={(evt) => setCSVFilename(evt.target.value)}
+                    style={{ maxWidth: '250px', textAlign: isMinSize(size, 'medium') ? 'right' : 'left' }}
+                  />
+                  <Text size="xsmall">
+                    {`${csvSuffix ? csvDateSuffix : ''}.csv`}
+                  </Text>
+                </Box>
+              </Box>
+              <Box direction="row" align="center" fill={false}>
+                <Box direction="row" align="center">
+                  <Select>
+                    <StyledInput
+                      id="check-timestamp"
+                      type="checkbox"
+                      checked={csvSuffix}
+                      onChange={(evt) => setCSVSuffix(evt.target.checked)}
+                    />
+                  </Select>
+                </Box>
+                <Text size="small" as="label" htmlFor="check-timestamp">
+                  <FormattedMessage {...messages.includeTimestamp} />
+                </Text>
+              </Box>
+            </Box>
+          </>
+        )}
+      </Main>
+      {count > 0 && (
+        <Footer>
+          <Box direction="row" justify="end">
+            <StyledButtonCancel type="button" onClick={() => onClose()}>
+              <FormattedMessage {...appMessages.buttons.cancel} />
+            </StyledButtonCancel>
+            <CsvDownloader
+              datas={csvData}
+              columns={csvColumns}
+              filename={`${csvFilename}${csvSuffix ? csvDateSuffix : ''}`}
+              bom={false}
+            >
+              <ButtonSubmit
+                type="button"
+                onClick={(evt) => {
+                  evt.preventDefault();
+                  onClose();
+                }}
+              >
+                <FormattedMessage {...messages.buttonDownload} />
+              </ButtonSubmit>
+            </CsvDownloader>
+          </Box>
+        </Footer>
+      )}
     </Content>
   );
 }
