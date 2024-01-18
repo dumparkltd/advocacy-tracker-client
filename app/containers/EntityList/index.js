@@ -438,6 +438,10 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         },
       ];
     }
+    // we only consider the search query for download when we are looking at the list and when we have the default map subject selected
+    const isSearchQueryActiveForDownload = !!locationQuery.get('search') && showList;
+    const isSelectionActiveForDownload = showList && entityIdsSelected && entityIdsSelected.size > 0;
+
     return (
       <div>
         {config.downloadCSV && this.state.downloadActive && (
@@ -469,6 +473,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 ).toJS(),
               }}
               isAdmin={isAdmin}
+              searchQuery={isSearchQueryActiveForDownload ? locationQuery.get('search') : null}
+              entityIdsSelected={isSelectionActiveForDownload ? entityIdsSelected : null}
             />
           </ReactModal>
         )}
