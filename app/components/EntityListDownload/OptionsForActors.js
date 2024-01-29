@@ -10,8 +10,12 @@ import PropTypes from 'prop-types';
 import { Box, Text } from 'grommet';
 import { lowerCase } from 'utils/string';
 
-import OptionGroup from './OptionGroup';
 
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+
+import appMessages from 'containers/App/messages';
+import OptionGroup from './OptionGroup';
+import messages from './messages';
 export function OptionsForActors({
   hasActions,
   actionsAsRows,
@@ -37,6 +41,7 @@ export function OptionsForActors({
   setTaxonomies,
   taxonomyColumns,
   typeTitle,
+  intl,
 }) {
   const [expandGroup, setExpandGroup] = useState(null);
 
@@ -71,16 +76,16 @@ export function OptionsForActors({
       {hasAttributes && (
         <OptionGroup
           groupId="attributes"
-          label="Attributes"
+          label={intl.formatMessage(appMessages.nav.attributes)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeAttributeCount}
           optionCount={Object.keys(attributes).length}
-          intro="The resulting CSV file will have one column for each attribute selected"
+          intro={intl.formatMessage(messages.optionGroups.introLabels.attributes)}
           options={attributes}
           optionListLabels={{
-            attributes: 'Select attributes',
-            columns: 'Customise column name',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.attributes),
+            columns: intl.formatMessage(messages.optionGroups.listLabelColumns),
           }}
           onSetOptions={(options) => setAttributes(options)}
           editColumnNames
@@ -89,16 +94,16 @@ export function OptionsForActors({
       {hasTaxonomies && (
         <OptionGroup
           groupId="taxonomies"
-          label="Categories"
+          label={intl.formatMessage(appMessages.nav.taxonomies)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeTaxonomyCount}
           optionCount={Object.keys(taxonomyColumns).length}
-          intro="The resulting CSV file will have one column for each category group (taxonomy) selected"
+          intro={intl.formatMessage(messages.optionGroups.introLabels.categories)}
           options={taxonomyColumns}
           optionListLabels={{
-            attributes: 'Select category groups',
-            columns: 'Customise column name',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.category),
+            columns: intl.formatMessage(messages.optionGroups.listLabelColumns),
           }}
           onSetOptions={(options) => setTaxonomies(options)}
           editColumnNames
@@ -107,7 +112,7 @@ export function OptionsForActors({
       {hasActions && (
         <OptionGroup
           groupId="actions"
-          label="Activities"
+          label={intl.formatMessage(messages.optionGroups.label.actionsAsTarget)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeActiontypeCount}
@@ -115,39 +120,44 @@ export function OptionsForActors({
           introNode={(
             <Box gap="small">
               <Text size="small">
-                By default, the resulting CSV file will have one column for each type of activity selected.
-                Alternatively you can chose to include activities as rows, resulting in one row per actor and activity
+                <FormattedMessage {...messages.optionGroups.introNode.actions.default} />
               </Text>
               {hasAssociations && (
                 <Text size="small">
-                  {`Please note that activities of other associated actors (the ${lowerCase(typeTitle)} are members of) are not included.`}
+                  <FormattedMessage
+                    {...messages.optionGroups.introNode.actions.hasAssociations}
+                    value={{ typeTitle: lowerCase(typeTitle) }}
+                  />
                 </Text>
               )}
               {!hasAssociations && hasMembers && (
                 <Text size="small">
-                  {`Please note that activities of ${lowerCase(typeTitle)} members are not included.`}
+                  <FormattedMessage
+                    {...messages.optionGroups.introNode.actions.hasMembersNoAssociation}
+                    value={{ typeTitle: lowerCase(typeTitle) }}
+                  />
                 </Text>
               )}
             </Box>
           )}
           options={actiontypes}
           optionListLabels={{
-            attributes: 'Select activity types',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.activities),
           }}
           onSetOptions={(options) => setActiontypes(options)}
           onSetAsRows={(val) => setActionsAsRows(val)}
           asRows={actionsAsRows}
           asRowsDisabled={activeActiontypeCount === 0}
           asRowsLabels={{
-            columns: 'Include activities as columns (one column for each activity type)',
-            rows: 'Include activities as rows (one row for each actor and activity)',
+            columns: intl.formatMessage(messages.optionGroups.asRowsLabels.activityColumns),
+            rows: intl.formatMessage(messages.optionGroups.asRowsLabels.activityRows),
           }}
         />
       )}
       {hasActionsAsTarget && (
         <OptionGroup
           groupId="actions-as-target"
-          label="Activities as target"
+          label={intl.formatMessage(messages.optionGroups.label.actionsAsTarget)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeActiontypeAsTargetCount}
@@ -155,23 +165,29 @@ export function OptionsForActors({
           introNode={(
             <Box gap="small">
               <Text size="small">
-                By default, the resulting CSV file will have one column for each type of activity selected.
+                <FormattedMessage {...messages.optionGroups.introNode.actionAsTarget.default} />
               </Text>
               {hasAssociations && (
                 <Text size="small">
-                  {`Please note that activities targeting associated actors (the ${lowerCase(typeTitle)} are members of) are not included.`}
+                  <FormattedMessage
+                    {...messages.optionGroups.introNode.actionAsTarget.hasAssociations}
+                    value={{ typeTitle: lowerCase(typeTitle) }}
+                  />
                 </Text>
               )}
               {!hasAssociations && hasMembers && (
                 <Text size="small">
-                  {`Please note that activities targeting ${lowerCase(typeTitle)} members are not included.`}
+                  <FormattedMessage
+                    {...messages.optionGroups.introNode.actionAsTarget.hasMembersNoAssociation}
+                    value={{ typeTitle: lowerCase(typeTitle) }}
+                  />
                 </Text>
               )}
             </Box>
           )}
           options={actiontypesAsTarget}
           optionListLabels={{
-            attributes: 'Select activity types',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.actionsAsTarget),
           }}
           onSetOptions={(options) => setActiontypesAsTarget(options)}
         />
@@ -179,15 +195,15 @@ export function OptionsForActors({
       {hasAssociations && (
         <OptionGroup
           groupId="associations"
-          label="Memberships"
+          label={intl.formatMessage(messages.optionGroups.label.associations)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeAssociationtypeCount}
           optionCount={Object.keys(associationtypes).length}
-          intro="By default, the resulting CSV file will have one column for each type of association selected."
+          intro={intl.formatMessage(messages.optionGroups.introLabels.associations)}
           options={associationtypes}
           optionListLabels={{
-            attributes: 'Select association types',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.associations),
           }}
           onSetOptions={(options) => setAssociationtypes(options)}
         />
@@ -195,15 +211,15 @@ export function OptionsForActors({
       {hasMembers && (
         <OptionGroup
           groupId="members"
-          label="Members"
+          label={intl.formatMessage(messages.optionGroups.label.members)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeMembertypeCount}
           optionCount={Object.keys(membertypes).length}
-          intro="By default, the resulting CSV file will have one column for each type of member selected."
+          intro={intl.formatMessage(messages.optionGroups.introLabels.members)}
           options={membertypes}
           optionListLabels={{
-            attributes: 'Select member types',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.members),
           }}
           onSetOptions={(options) => setMembertypes(options)}
         />
@@ -211,14 +227,14 @@ export function OptionsForActors({
       {hasUsers && (
         <OptionGroup
           groupId="users"
-          label="Users"
+          label={intl.formatMessage(appMessages.entities.users.plural)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={includeUsers ? 1 : 0}
           optionCount={1}
           active={includeUsers}
           onSetActive={(val) => setIncludeUsers(val)}
-          onActiveLabel="Include assigned users"
+          onActiveLabel={intl.formatMessage(messages.optionGroups.onActiveUserLabel)}
         />
       )}
     </Box>
@@ -229,6 +245,7 @@ OptionsForActors.propTypes = {
   hasUsers: PropTypes.bool,
   includeUsers: PropTypes.bool,
   setIncludeUsers: PropTypes.func,
+  intl: intlShape.isRequired,
   // attributes
   attributes: PropTypes.object,
   hasAttributes: PropTypes.bool,
@@ -258,4 +275,4 @@ OptionsForActors.propTypes = {
   typeTitle: PropTypes.string,
 };
 
-export default OptionsForActors;
+export default injectIntl(OptionsForActors);

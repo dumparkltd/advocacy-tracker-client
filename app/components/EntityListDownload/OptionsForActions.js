@@ -12,7 +12,11 @@ import {
   Text,
 } from 'grommet';
 
+import appMessages from 'containers/App/messages';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import OptionGroup from './OptionGroup';
+
+import messages from './messages';
 
 export function OptionsForActions({
   actorsAsRows,
@@ -46,6 +50,7 @@ export function OptionsForActions({
   hasResources,
   hasUsers,
   hasIndicators,
+  intl,
 }) {
   const [expandGroup, setExpandGroup] = useState(null);
 
@@ -84,16 +89,16 @@ export function OptionsForActions({
       {hasAttributes && (
         <OptionGroup
           groupId="attributes"
-          label="Attributes"
+          label={intl.formatMessage(appMessages.nav.attributes)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeAttributeCount}
           optionCount={Object.keys(attributes).length}
-          intro="The resulting CSV file will have one column for each attribute selected"
+          intro={intl.formatMessage(messages.optionGroups.introLabels.attributes)}
           options={attributes}
           optionListLabels={{
-            attributes: 'Select attributes',
-            columns: 'Customise column name',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.attributes),
+            columns: intl.formatMessage(messages.optionGroups.listLabelColumns),
           }}
           onSetOptions={(options) => setAttributes(options)}
           editColumnNames
@@ -102,16 +107,16 @@ export function OptionsForActions({
       {hasTaxonomies && (
         <OptionGroup
           groupId="taxonomies"
-          label="Categories"
+          label={intl.formatMessage(appMessages.nav.taxonomies)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeTaxonomyCount}
           optionCount={Object.keys(taxonomyColumns).length}
-          intro="The resulting CSV file will have one column for each category group (taxonomy) selected"
+          intro={intl.formatMessage(messages.optionGroups.introLabels.categories)}
           options={taxonomyColumns}
           optionListLabels={{
-            attributes: 'Select category groups',
-            columns: 'Customise column name',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.category),
+            columns: intl.formatMessage(messages.optionGroups.listLabelColumns),
           }}
           onSetOptions={(options) => setTaxonomies(options)}
           editColumnNames
@@ -120,7 +125,7 @@ export function OptionsForActions({
       {hasActors && (
         <OptionGroup
           groupId="actors"
-          label="Actors"
+          label={intl.formatMessage(appMessages.nav.actors)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeActortypeCount}
@@ -128,40 +133,40 @@ export function OptionsForActions({
           introNode={(
             <Box gap="small">
               <Text size="small">
-                By default, the resulting CSV file will have one column for each type of actor selected.
-                {(!indicatorsAsRows || !indicatorsActive) && ' Alternatively you can chose to include actors as rows, resulting in one row per activity and actor.'}
-                {indicatorsAsRows && indicatorsActive && ' Alternatively you can chose to include actors as rows, resulting in one row per activity, topic and actor.'}
+                <FormattedMessage {...messages.optionGroups.introNode.actors.default} />
+                {(!indicatorsAsRows || !indicatorsActive) && <FormattedMessage {...messages.optionGroups.introNode.actors.noIndicatorInactiveAsRows} />}
+                {indicatorsAsRows && indicatorsActive && <FormattedMessage {...messages.optionGroups.introNode.actors.indicatorActiveAsRows} />}
               </Text>
             </Box>
           )}
           options={actortypes}
           optionListLabels={{
-            attributes: 'Select actor types',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.actors),
           }}
           onSetOptions={(options) => setActortypes(options)}
           onSetAsRows={(val) => setActorsAsRows(val)}
           asRows={actorsAsRows}
           asRowsDisabled={activeActortypeCount === 0}
           asRowsLabels={{
-            columns: 'Include actors as columns (one column for each actor type)',
+            columns: intl.formatMessage(messages.optionGroups.listLabelAttributes.actors),
             rows: indicatorsAsRows
-              ? 'Include actors as rows (one row for each activity, topic and actor)'
-              : 'Include actors as rows (one row for each activity and actor)',
+              ? intl.formatMessage(messages.optionGroups.asRowsLabels.actorRowsAsIndicator)
+              : intl.formatMessage(messages.optionGroups.asRowsLabels.actorsRows),
           }}
         />
       )}
       {hasTargets && (
         <OptionGroup
           groupId="targets"
-          label="Targets"
+          label={intl.formatMessage(appMessages.nav.targets)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeTargettypeCount}
           optionCount={Object.keys(targettypes).length}
-          intro="By default, the resulting CSV file will have one column for each type of target selected"
+          intro={intl.formatMessage(messages.optionGroups.introLabels.targets)}
           options={targettypes}
           optionListLabels={{
-            attributes: 'Select target types',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.types),
           }}
           onSetOptions={(options) => setTargettypes(options)}
         />
@@ -169,15 +174,15 @@ export function OptionsForActions({
       {hasParentActions && (
         <OptionGroup
           groupId="parents"
-          label="Parent activities"
+          label={intl.formatMessage(appMessages.nav.parents)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeParenttypeCount}
           optionCount={Object.keys(parenttypes).length}
-          intro="By default, the resulting CSV file will have one column for each type of parent activity selected."
+          intro={intl.formatMessage(messages.optionGroups.introLabels.parents)}
           options={parenttypes}
           optionListLabels={{
-            attributes: 'Select parent activity types',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.parents),
           }}
           onSetOptions={(options) => setParenttypes(options)}
         />
@@ -185,15 +190,15 @@ export function OptionsForActions({
       {hasChildActions && (
         <OptionGroup
           groupId="children"
-          label="Child activities"
+          label={intl.formatMessage(appMessages.nav.children)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeChildtypeCount}
           optionCount={Object.keys(childtypes).length}
-          intro="By default, the resulting CSV file will have one column for each type of child activity selected."
+          intro={intl.formatMessage(messages.optionGroups.introLabels.children)}
           options={childtypes}
           optionListLabels={{
-            attributes: 'Select child activity types',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.children),
           }}
           onSetOptions={(options) => setChildtypes(options)}
         />
@@ -201,15 +206,15 @@ export function OptionsForActions({
       {hasResources && (
         <OptionGroup
           groupId="resources"
-          label="Resources"
+          label={intl.formatMessage(appMessages.nav.resources)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeResourcetypeCount}
           optionCount={Object.keys(resourcetypes).length}
-          intro="By default, the resulting CSV file will have one column for each type of resource selected."
+          intro={intl.formatMessage(messages.optionGroups.introLabels.resources)}
           options={resourcetypes}
           optionListLabels={{
-            attributes: 'Select resource types',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.resources),
           }}
           onSetOptions={(options) => setResourcetypes(options)}
         />
@@ -217,7 +222,7 @@ export function OptionsForActions({
       {hasIndicators && (
         <OptionGroup
           groupId="indicators"
-          label="Topics"
+          label={intl.formatMessage(messages.optionGroups.label.topics)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={indicatorsActive ? 1 : 0}
@@ -225,37 +230,37 @@ export function OptionsForActions({
           introNode={(
             <Box gap="xsmall">
               <Text size="small">
-                By default, the resulting CSV file will have one column for each topic.
-                {!actorsAsRows && ' Alternatively you can chose to include topics as rows, resulting in one row per activity and topic'}
-                {actorsAsRows && ' Alternatively you can chose to include topics as rows, resulting in one row per activity, actor and topic'}
+                <FormattedMessage {...messages.optionGroups.introNode.indicators.default} />
+                {!actorsAsRows && <FormattedMessage {...messages.optionGroups.introNode.indicators.notActorAsRows} />}
+                {actorsAsRows && <FormattedMessage {...messages.optionGroups.introNode.indicators.actorAsRows} />}
               </Text>
             </Box>
           )}
           active={indicatorsActive}
           onSetActive={(val) => setIndicatorsActive(val)}
-          onActiveLabel="Include topics"
+          onActiveLabel={intl.formatMessage(messages.optionGroups.activeLabels.topics)}
           onSetAsRows={(val) => setIndicatorsAsRows(val)}
           asRows={indicatorsAsRows}
           asRowsDisabled={!indicatorsActive}
           asRowsLabels={{
-            columns: 'Include topics as columns (one column for each topic)',
+            columns: intl.formatMessage(messages.optionGroups.asRowsLabels.topicColumns),
             rows: actorsAsRows
-              ? 'Include topics as rows (one row for each activity, actor and topic)'
-              : 'Include topics as rows (one row for each activity and topic)',
+              ? intl.formatMessage(messages.optionGroups.asRowsLabels.indicatorRowsActorAsRow)
+              : intl.formatMessage(messages.optionGroups.asRowsLabels.indicatorRows),
           }}
         />
       )}
       {hasUsers && (
         <OptionGroup
           groupId="users"
-          label="Users"
+          label={intl.formatMessage(appMessages.entities.users.plural)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={includeUsers ? 1 : 0}
           optionCount={1}
           active={includeUsers}
           onSetActive={(val) => setIncludeUsers(val)}
-          onActiveLabel="Include users"
+          onActiveLabel={intl.formatMessage(messages.optionGroups.activeLabels.users)}
         />
       )}
     </Box>
@@ -263,6 +268,7 @@ export function OptionsForActions({
 }
 
 OptionsForActions.propTypes = {
+  intl: intlShape.isRequired,
   actorsAsRows: PropTypes.bool,
   setActorsAsRows: PropTypes.func,
   indicatorsAsRows: PropTypes.bool,
@@ -296,4 +302,4 @@ OptionsForActions.propTypes = {
   hasTaxonomies: PropTypes.bool,
 };
 
-export default OptionsForActions;
+export default injectIntl(OptionsForActions);
