@@ -104,7 +104,6 @@ export default defineMessages({
       attributes: {
         id: 'app.components.EntityListDownload.optionGroups.introLabels.attributes',
         defaultMessage: 'The resulting CSV file will have one column for each attribute selected',
-
       },
       associations: {
         id: 'app.components.EntityListDownload.optionGroups.introLabels.associations',
@@ -134,6 +133,10 @@ export default defineMessages({
         id: 'app.components.EntityListDownload.optionGroups.introLabels.resources',
         defaultMessage: 'By default, the resulting CSV file will have one column for each type of resource selected.',
       },
+      support: {
+        id: 'app.components.EntityListDownload.optionGroups.introLabels.support',
+        defaultMessage: 'Please note that the values may include indirect support inferred from group statements (depending on the list option selected)',
+      },
     },
     activeLabels: {
       topics: {
@@ -161,6 +164,10 @@ export default defineMessages({
       members: {
         id: 'app.components.EntityListDownload.optionGroups.label.members',
         defaultMessage: 'Members',
+      },
+      support: {
+        id: 'app.components.EntityListDownload.optionGroups.label.support',
+        defaultMessage: 'Support',
       },
       topics: {
         id: 'app.components.EntityListDownload.optionGroups.label.topics',
@@ -262,6 +269,10 @@ export default defineMessages({
     onActiveUserLabel: {
       id: 'app.components.EntityListDownload.optionGroups.onActiveUserLabel',
       defaultMessage: 'Include assigned users',
+    },
+    onActiveSupportLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.onActiveSupportLabel',
+      defaultMessage: 'Include country numbers by level of support',
     },
   },
 

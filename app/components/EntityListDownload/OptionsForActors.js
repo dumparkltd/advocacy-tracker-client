@@ -14,8 +14,9 @@ import { lowerCase } from 'utils/string';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 
 import appMessages from 'containers/App/messages';
-import OptionGroup from './OptionGroup';
 import messages from './messages';
+
+import OptionGroup from './OptionGroup';
 export function OptionsForActors({
   hasActions,
   actionsAsRows,
