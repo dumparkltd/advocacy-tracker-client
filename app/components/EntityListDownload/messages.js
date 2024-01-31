@@ -54,104 +54,54 @@ export default defineMessages({
       id: 'app.components.EntityListDownload.optionGroups.listLabelColumns',
       defaultMessage: 'Customise column name',
     },
+    listLabelTypes: {
+      id: 'app.components.EntityListDownload.optionGroups.listLabelTypes',
+      defaultMessage: 'Select {type} types',
+    },
+    listLabelGroups: {
+      id: 'app.components.EntityListDownload.optionGroups.listLabelGroups',
+      defaultMessage: 'Select {type} groups',
+    },
+    listLabelActivity: {
+      id: 'app.components.EntityListDownload.optionGroups.listLabelActivity',
+      defaultMessage: 'Select {type} activity types',
+    },
     listLabelAttributes: {
-      activities: {
-        id: 'app.components.EntityListDownload.optionGroups.listLabelAttributes.activities',
-        defaultMessage: 'Select activity types',
-      },
-      actionAsTarget: {
-        id: 'app.components.EntityListDownload.optionGroups.listLabelAttributes.actionAsTarget',
-        defaultMessage: 'Select activity types',
-      },
-      actors: {
-        id: 'app.components.EntityListDownload.optionGroups.listLabelAttributes.actors',
-        defaultMessage: 'Select actor types',
-      },
-      associations: {
-        id: 'app.components.EntityListDownload.optionGroups.listLabelAttributes.associations',
-        defaultMessage: 'Select association types',
-      },
-      attributes: {
-        id: 'app.components.EntityListDownload.optionGroups.listLabelAttributes.attributes',
-        defaultMessage: 'Select attributes',
-      },
-      category: {
-        id: 'app.components.EntityListDownload.optionGroups.listLabelAttributes.category',
-        defaultMessage: 'Select category groups',
-      },
-      types: {
-        id: 'app.components.EntityListDownload.optionGroups.listLabelAttributes.types',
-        defaultMessage: 'Select target types',
-      },
-      parents: {
-        id: 'app.components.EntityListDownload.optionGroups.listLabelAttributes.parents',
-        defaultMessage: 'Select parent activity types',
-      },
-      children: {
-        id: 'app.components.EntityListDownload.optionGroups.listLabelAttributes.children',
-        defaultMessage: 'Select child activity types',
-      },
-      resources: {
-        id: 'app.components.EntityListDownload.optionGroups.listLabelAttributes.resources',
-        defaultMessage: 'Select resource types',
-      },
-      members: {
-        id: 'app.components.EntityListDownload.optionGroups.listLabelAttributes.members',
-        defaultMessage: 'Select member types',
-      },
+      id: 'app.components.EntityListDownload.optionGroups.listLabelAttributes',
+      defaultMessage: 'Select {type}',
     },
-    introLabels: {
-      attributes: {
-        id: 'app.components.EntityListDownload.optionGroups.introLabels.attributes',
-        defaultMessage: 'The resulting CSV file will have one column for each attribute selected',
-      },
-      associations: {
-        id: 'app.components.EntityListDownload.optionGroups.introLabels.associations',
-        defaultMessage: 'The resulting CSV file will have one column for each attribute selected',
-      },
-      categories: {
-        id: 'app.components.EntityListDownload.optionGroups.introLabels.categories',
-        defaultMessage: 'The resulting CSV file will have one column for each category group (taxonomy) selected',
-      },
-      members: {
-        id: 'app.components.EntityListDownload.optionGroups.introLabels.members',
-        defaultMessage: 'By default, the resulting CSV file will have one column for each type of member selected.',
-      },
-      targets: {
-        id: 'app.components.EntityListDownload.optionGroups.introLabels.targets',
-        defaultMessage: 'By default, the resulting CSV file will have one column for each type of target selected',
-      },
-      parents: {
-        id: 'app.components.EntityListDownload.optionGroups.introLabels.parents',
-        defaultMessage: 'By default, the resulting CSV file will have one column for each type of parent activity selected.',
-      },
-      children: {
-        id: 'app.components.EntityListDownload.optionGroups.introLabels.children',
-        defaultMessage: 'By default, the resulting CSV file will have one column for each type of child activity selected.',
-      },
-      resources: {
-        id: 'app.components.EntityListDownload.optionGroups.introLabels.resources',
-        defaultMessage: 'By default, the resulting CSV file will have one column for each type of resource selected.',
-      },
-      support: {
-        id: 'app.components.EntityListDownload.optionGroups.introLabels.support',
-        defaultMessage: 'Please note that the values may include indirect support inferred from group statements (depending on the list option selected)',
-      },
+    listLabelCategories: {
+      id: 'app.components.EntityListDownload.optionGroups.listLabelCategories',
+      defaultMessage: 'Select category groups',
     },
-    activeLabels: {
-      topics: {
-        id: 'app.components.EntityListDownload.optionGroups.activeLabels.topics',
-        defaultMessage: 'Include topics',
-      },
-      users: {
-        id: 'app.components.EntityListDownload.optionGroups.activeLabels.users',
-        defaultMessage: 'Include users',
-      },
+    introLabelTaxonomy: {
+      id: 'app.components.EntityListDownload.introLabelTaxonomy',
+      defaultMessage: 'The resulting CSV file will have one column for each category group (taxonomy) selected',
+    },
+    introLabelDefault: {
+      id: 'app.components.EntityListDownload.introLabelDefault',
+      defaultMessage: 'The resulting CSV file will have one column for each {type} selected',
+    },
+    introLabelActivity: {
+      id: 'app.components.EntityListDownload.optionGroups.introLabelActivity',
+      defaultMessage: 'By default, the resulting CSV file will have one column for each type of {type} activity selected.',
+    },
+    introLabelGroups: {
+      id: 'app.components.EntityListDownload.optionGroups.introLabelGroups',
+      defaultMessage: 'By default, the resulting CSV file will have one column for each type of {type} selected.',
+    },
+    introLabelSupport: {
+      id: 'app.components.EntityListDownload.optionGroups.introLabelSupport',
+      defaultMessage: 'Please note that the values may include indirect support inferred from group statements (depending on the list option selected)',
     },
     label: {
       actionAsTarget: {
         id: 'app.components.EntityListDownload.optionGroups.label.actionAsTarget',
         defaultMessage: 'Activities as target',
+      },
+      attribute: {
+        id: 'app.components.EntityListDownload.optionGroups.label.attribute',
+        defaultMessage: 'attribute',
       },
       activities: {
         id: 'app.components.EntityListDownload.optionGroups.label.activities',
@@ -174,97 +124,49 @@ export default defineMessages({
         defaultMessage: 'Topics',
       },
     },
-    asRowsLabels: {
-      actorColumns: {
-        id: 'app.components.EntityListDownload.optionGroups.asRowsLabels.actorColumns',
-        defaultMessage: 'Include topics as columns (one column for each topic)',
-      },
-      topicColumns: {
-        id: 'app.components.EntityListDownload.optionGroups.asRowsLabels.topicColumns',
-        defaultMessage: 'Include topics as columns (one column for each topic)',
-      },
-      activityColumns: {
-        id: 'app.components.EntityListDownload.optionGroups.asRowsLabels.activityColumns',
-        defaultMessage: 'Include activities as columns (one column for each activity type)',
-      },
-      actorRowsAsIndicator: {
-        id: 'app.components.EntityListDownload.optionGroups.asRowsLabels.indicatorAsRowsActor',
-        defaultMessage: 'Include actors as rows (one row for each activity, topic and actor)',
-      },
-      actorRows: {
-        id: 'app.components.EntityListDownload.optionGroups.asRowsLabels.actorRows',
-        defaultMessage: 'Include actors as rows (one row for each activity and actor)',
-      },
-      activityRows: {
-        id: 'app.components.EntityListDownload.optionGroups.asRowsLabels.activityRows',
-        defaultMessage: 'Include activities as rows (one row for each actor and activity)',
-      },
-      indicatorRowsActorAsRow: {
-        id: 'app.components.EntityListDownload.optionGroups.asRowsLabels.indicatorRows',
-        defaultMessage: 'Include topics as rows (one row for each activity, actor and topic)',
-      },
-      indicatorRows: {
-        id: 'app.components.EntityListDownload.optionGroups.asRowsLabels.indicatorRows',
-        defaultMessage: 'Include topics as rows (one row for each activity and topic)',
-      },
+
+    asRowsLabelColumn: {
+      id: 'app.components.EntityListDownload.optionGroups.asRowsLabelColumn',
+      defaultMessage: 'Include {type}s as columns (one column for each {type})',
     },
-    introNode: {
-      actors: {
-        default: {
-          id: 'app.components.EntityListDownload.optionGroups.introNode.actors.default',
-          defaultMessage: 'By default, the resulting CSV file will have one column for each type of actor selected.',
-        },
-        indicatorActiveAsRows: {
-          id: 'app.components.EntityListDownload.optionGroups.introNode.actors.indicatorActiveAsRows',
-          defaultMessage: ' Alternatively you can chose to include actors as rows, resulting in one row per activity, topic and actor.',
-        },
-        noIndicatorInactiveAsRows: {
-          id: 'app.components.EntityListDownload.optionGroups.introNode.actors.indicatorInactiveAsRows',
-          defaultMessage: ' Alternatively you can chose to include actors as rows, resulting in one row per activity and actor.',
-        },
-      },
-      actions: {
-        default: {
-          id: 'app.components.EntityListDownload.optionGroups.introNode.actions.default',
-          defaultMessage: 'By default, the resulting CSV file will have one column for each type of activity selected.',
-        },
-        hasAssociations: {
-          id: 'app.components.EntityListDownload.optionGroups.introNode.actions.hasAssociations',
-          defaultMessage: ' Please note that activities of other associated actors (the {typeTitle} are members of) are not included.',
-        },
-        hasMembersNoAssociation: {
-          id: 'app.components.EntityListDownload.optionGroups.introNode.actions.hasMembersNoAssociation',
-          defaultMessage: ' Please note that activities of {typeTitle} members are not included.',
-        },
-      },
-      actionAsTarget: {
-        default: {
-          id: 'app.components.EntityListDownload.optionGroups.introNode.actionAsTarget.defualt',
-          defaultMessage: 'By default, the resulting CSV file will have one column for each type of activity selected.',
-        },
-        hasAssociations: {
-          id: 'app.components.EntityListDownload.optionGroups.introNode.actionAsTarget.hasAssociations',
-          defaultMessage: ' Please note that activities targeting associated actors (the {typeTitle} are members of) are not included.',
-        },
-        hasMembersNoAssociation: {
-          id: 'app.components.EntityListDownload.optionGroups.introNode.actionAsTarget.hasMembersNoAssociation',
-          defaultMessage: ' Please note that activities targeting {typeTitle} members are not included.',
-        },
-      },
-      indicators: {
-        default: {
-          id: 'app.components.EntityListDownload.optionGroups.introNode.indicators.defualt',
-          defaultMessage: 'By default, the resulting CSV file will have one column for each topic.',
-        },
-        actorsAsRow: {
-          id: 'app.components.EntityListDownload.optionGroups.introNode.indicators.actorsAsRow',
-          defaultMessage: ' Alternatively you can chose to include topics as rows, resulting in one row per activity, actor and topic',
-        },
-        notActorAsRows: {
-          id: 'app.components.EntityListDownload.optionGroups.introNode.indicators.notActorAsRows',
-          defaultMessage: ' Alternatively you can chose to include topics as rows, resulting in one row per activity and topic',
-        },
-      },
+    asRowsLabelsActivity: {
+      id: 'app.components.EntityListDownload.optionGroups.asRowsLabels',
+      defaultMessage: 'Include activities as {type} (one column for each activity type)',
+    },
+    asRowsLabelsAsRow: {
+      id: 'app.components.EntityListDownload.optionGroups.asRowsLabelsAsRow',
+      defaultMessage: 'Include {type}s as rows (one row for each activity, actor and {type})',
+    },
+    asRowsLabels: {
+      id: 'app.components.EntityListDownload.optionGroups.asRowsLabels',
+      defaultMessage: 'Include {type}s as rows (one row for each activity and {type})',
+    },
+
+    introNodeDefault: {
+      id: 'app.components.EntityListDownload.optionGroups.introNodeDefault',
+      defaultMessage: 'By default, the resulting CSV file will have one column for each type of {type} selected.',
+    },
+    introNodeTypeAsRows: {
+      id: 'app.components.EntityListDownload.optionGroups.introNodeTypeAsRows',
+      defaultMessage: ' Alternatively you can chose to include {type} as rows, resulting in one row per activity, topic and actor.',
+    },
+    introNodeTypeNotAsRows: {
+      id: 'app.components.EntityListDownload.optionGroups.introNode.introNodeTypeNotAsRows',
+      defaultMessage: ' Alternatively you can chose to include {type}s as rows, resulting in one row per activity and {type}.',
+    },
+    introNodeHasMembersNoAssociation: {
+      id: 'app.components.EntityListDownload.optionGroups.introNode.introNodeHasMembersNoAssociation',
+      defaultMessage: ' Please note that activities targeting {type} members are not included.',
+    },
+    introNodeHasAssociations: {
+      id: 'app.components.EntityListDownload.optionGroups.introNodeHasAssociations',
+      defaultMessage: ' Please note that activities of other associated actors (the {type} are members of) are not included.',
+    },
+
+
+    onActiveLabelDefault: {
+      id: 'app.components.EntityListDownload.optionGroups.onActiveLabelDefault',
+      defaultMessage: 'Include {type}',
     },
     onActiveUserLabel: {
       id: 'app.components.EntityListDownload.optionGroups.onActiveUserLabel',

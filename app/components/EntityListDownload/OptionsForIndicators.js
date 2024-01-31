@@ -7,12 +7,11 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  Box,
-  // Text,
-} from 'grommet';
+import { Box } from 'grommet';
 
 import { injectIntl, intlShape } from 'react-intl';
+
+import { lowerCase } from 'utils/string';
 
 import appMessages from 'containers/App/messages';
 import OptionGroup from './OptionGroup';
@@ -44,10 +43,12 @@ export function OptionsForIndicators({
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeAttributeCount}
           optionCount={Object.keys(attributes).length}
-          intro={intl.formatMessage(messages.optionGroups.introLabels.attributes)}
+          intro={intl.formatMessage(messages.optionGroups.introLabelDefault,
+            { type: 'attribute' })}
           options={attributes}
           optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.attributes),
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes,
+              { type: lowerCase(intl.formatMessage(appMessages.nav.attributes)) }),
             columns: intl.formatMessage(messages.optionGroups.listLabelColumns),
           }}
           onSetOptions={(options) => setAttributes(options)}
@@ -62,7 +63,7 @@ export function OptionsForIndicators({
         activeOptionCount={includeSupport ? 1 : 0}
         optionCount={1}
         active={includeSupport}
-        intro={intl.formatMessage(messages.optionGroups.introLabels.support)}
+        intro={intl.formatMessage(messages.optionGroups.introLabelSupport)}
         onSetActive={(val) => setIncludeSupport(val)}
         onActiveLabel={intl.formatMessage(messages.optionGroups.onActiveSupportLabel)}
       />

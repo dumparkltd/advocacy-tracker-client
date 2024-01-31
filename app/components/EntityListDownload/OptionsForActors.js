@@ -82,10 +82,12 @@ export function OptionsForActors({
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeAttributeCount}
           optionCount={Object.keys(attributes).length}
-          intro={intl.formatMessage(messages.optionGroups.introLabels.attributes)}
+          intro={intl.formatMessage(messages.optionGroups.introLabelDefault,
+            { type: 'attribute' })}
           options={attributes}
           optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.attributes),
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes,
+              { type: lowerCase(intl.formatMessage(appMessages.nav.attributes)) }),
             columns: intl.formatMessage(messages.optionGroups.listLabelColumns),
           }}
           onSetOptions={(options) => setAttributes(options)}
@@ -100,10 +102,10 @@ export function OptionsForActors({
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeTaxonomyCount}
           optionCount={Object.keys(taxonomyColumns).length}
-          intro={intl.formatMessage(messages.optionGroups.introLabels.categories)}
+          intro={intl.formatMessage(messages.optionGroups.introLabelTaxonomy)}
           options={taxonomyColumns}
           optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.category),
+            attributes: intl.formatMessage(messages.optionGroups.listLabelCategories),
             columns: intl.formatMessage(messages.optionGroups.listLabelColumns),
           }}
           onSetOptions={(options) => setTaxonomies(options)}
@@ -113,7 +115,7 @@ export function OptionsForActors({
       {hasActions && (
         <OptionGroup
           groupId="actions"
-          label={intl.formatMessage(messages.optionGroups.label.actionsAsTarget)}
+          label={intl.formatMessage(appMessages.nav.actions)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeActiontypeCount}
@@ -121,21 +123,24 @@ export function OptionsForActors({
           introNode={(
             <Box gap="small">
               <Text size="small">
-                <FormattedMessage {...messages.optionGroups.introNode.actions.default} />
+                <FormattedMessage
+                  {...messages.optionGroups.introNodeDefault}
+                  values={{ type: intl.formatMessage(appMessages.nav.actions) }}
+                />
               </Text>
               {hasAssociations && (
                 <Text size="small">
                   <FormattedMessage
-                    {...messages.optionGroups.introNode.actions.hasAssociations}
-                    value={{ typeTitle: lowerCase(typeTitle) }}
+                    {...messages.optionGroups.introNodeHasAssociations}
+                    values={{ type: lowerCase(typeTitle) }}
                   />
                 </Text>
               )}
               {!hasAssociations && hasMembers && (
                 <Text size="small">
                   <FormattedMessage
-                    {...messages.optionGroups.introNode.actions.hasMembersNoAssociation}
-                    value={{ typeTitle: lowerCase(typeTitle) }}
+                    {...messages.optionGroups.introNodeHasMembersNoAssociation}
+                    values={{ type: lowerCase(typeTitle) }}
                   />
                 </Text>
               )}
@@ -143,22 +148,22 @@ export function OptionsForActors({
           )}
           options={actiontypes}
           optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.activities),
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes, { type: 'activity' }),
           }}
           onSetOptions={(options) => setActiontypes(options)}
           onSetAsRows={(val) => setActionsAsRows(val)}
           asRows={actionsAsRows}
           asRowsDisabled={activeActiontypeCount === 0}
           asRowsLabels={{
-            columns: intl.formatMessage(messages.optionGroups.asRowsLabels.activityColumns),
-            rows: intl.formatMessage(messages.optionGroups.asRowsLabels.activityRows),
+            columns: intl.formatMessage(messages.optionGroups.asRowsLabelsActivity, { type: 'columns' }),
+            rows: intl.formatMessage(messages.optionGroups.asRowsLabelsActivity, { type: 'rows' }),
           }}
         />
       )}
       {hasActionsAsTarget && (
         <OptionGroup
           groupId="actions-as-target"
-          label={intl.formatMessage(messages.optionGroups.label.actionsAsTarget)}
+          label={intl.formatMessage(messages.optionGroups.label.actionAsTarget)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeActiontypeAsTargetCount}
@@ -166,21 +171,24 @@ export function OptionsForActors({
           introNode={(
             <Box gap="small">
               <Text size="small">
-                <FormattedMessage {...messages.optionGroups.introNode.actionAsTarget.default} />
+                <FormattedMessage
+                  {...messages.optionGroups.introNodeDefault}
+                  values={{ type: 'activity' }}
+                />
               </Text>
               {hasAssociations && (
                 <Text size="small">
                   <FormattedMessage
-                    {...messages.optionGroups.introNode.actionAsTarget.hasAssociations}
-                    value={{ typeTitle: lowerCase(typeTitle) }}
+                    {...messages.optionGroups.introNodeHasAssociations}
+                    values={{ type: lowerCase(typeTitle) }}
                   />
                 </Text>
               )}
               {!hasAssociations && hasMembers && (
                 <Text size="small">
                   <FormattedMessage
-                    {...messages.optionGroups.introNode.actionAsTarget.hasMembersNoAssociation}
-                    value={{ typeTitle: lowerCase(typeTitle) }}
+                    {...messages.optionGroups.introNodeHasMembersNoAssociation}
+                    values={{ type: lowerCase(typeTitle) }}
                   />
                 </Text>
               )}
@@ -188,7 +196,7 @@ export function OptionsForActors({
           )}
           options={actiontypesAsTarget}
           optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.actionsAsTarget),
+            attributes: intl.formatMessage(messages.optionGroups.listLabelTypes, { type: 'activity' }),
           }}
           onSetOptions={(options) => setActiontypesAsTarget(options)}
         />
@@ -201,10 +209,11 @@ export function OptionsForActors({
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeAssociationtypeCount}
           optionCount={Object.keys(associationtypes).length}
-          intro={intl.formatMessage(messages.optionGroups.introLabels.associations)}
+          intro={intl.formatMessage(messages.optionGroups.introLabelDefault,
+            { type: 'association' })}
           options={associationtypes}
           optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.associations),
+            attributes: intl.formatMessage(messages.optionGroups.listLabelTypes, { type: 'association' }),
           }}
           onSetOptions={(options) => setAssociationtypes(options)}
         />
@@ -217,10 +226,10 @@ export function OptionsForActors({
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeMembertypeCount}
           optionCount={Object.keys(membertypes).length}
-          intro={intl.formatMessage(messages.optionGroups.introLabels.members)}
+          intro={intl.formatMessage(messages.optionGroups.introLabelGroups, { type: 'member' })}
           options={membertypes}
           optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes.members),
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes, { type: 'member' }),
           }}
           onSetOptions={(options) => setMembertypes(options)}
         />
