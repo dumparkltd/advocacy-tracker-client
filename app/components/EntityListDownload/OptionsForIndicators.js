@@ -44,7 +44,7 @@ export function OptionsForIndicators({
           activeOptionCount={activeAttributeCount}
           optionCount={Object.keys(attributes).length}
           intro={intl.formatMessage(messages.optionGroups.introLabelDefault,
-            { type: 'attribute' })}
+            { type: intl.formatMessage(messages.optionGroups.attributeLabel) })}
           options={attributes}
           optionListLabels={{
             attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes,
@@ -57,7 +57,7 @@ export function OptionsForIndicators({
       )}
       <OptionGroup
         groupId="support"
-        label={intl.formatMessage(messages.optionGroups.label.support)}
+        label={intl.formatMessage(messages.optionGroups.supportLabel)}
         expandedId={expandGroup}
         onExpandGroup={(val) => setExpandGroup(val)}
         activeOptionCount={includeSupport ? 1 : 0}

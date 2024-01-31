@@ -94,43 +94,64 @@ export default defineMessages({
       id: 'app.components.EntityListDownload.optionGroups.introLabelSupport',
       defaultMessage: 'Please note that the values may include indirect support inferred from group statements (depending on the list option selected)',
     },
-    label: {
-      actionAsTarget: {
-        id: 'app.components.EntityListDownload.optionGroups.label.actionAsTarget',
-        defaultMessage: 'Activities as target',
-      },
-      attribute: {
-        id: 'app.components.EntityListDownload.optionGroups.label.attribute',
-        defaultMessage: 'attribute',
-      },
-      activities: {
-        id: 'app.components.EntityListDownload.optionGroups.label.activities',
-        defaultMessage: 'Activities',
-      },
-      associations: {
-        id: 'app.components.EntityListDownload.optionGroups.label.associations',
-        defaultMessage: 'Memberships',
-      },
-      members: {
-        id: 'app.components.EntityListDownload.optionGroups.label.members',
-        defaultMessage: 'Members',
-      },
-      support: {
-        id: 'app.components.EntityListDownload.optionGroups.label.support',
-        defaultMessage: 'Support',
-      },
-      topics: {
-        id: 'app.components.EntityListDownload.optionGroups.label.topics',
-        defaultMessage: 'Topics',
-      },
+    attributeLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.attributeLabel',
+      defaultMessage: 'attribute',
     },
-
+    topicLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.topicLabel',
+      defaultMessage: 'topic',
+    },
+    topicsLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.topicsLabel',
+      defaultMessage: 'Topics',
+    },
+    supportLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.supportLabel',
+      defaultMessage: 'Support',
+    },
+    actionAsTargetLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.actionAsTargetLabel',
+      defaultMessage: 'Activities as target',
+    },
+    associationsLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.associationsLabel',
+      defaultMessage: 'Memberships',
+    },
+    membersLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.membersLabel',
+      defaultMessage: 'Members',
+    },
+    actorLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.actorLabel',
+      defaultMessage: 'actor',
+    },
+    parentLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.parentLabel',
+      defaultMessage: 'parent',
+    },
+    childLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.childLabel',
+      defaultMessage: 'child',
+    },
+    activityLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.activityLabel',
+      defaultMessage: 'activity',
+    },
+    associationLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.associationLabel',
+      defaultMessage: 'association',
+    },
+    memberLabel: {
+      id: 'app.components.EntityListDownload.optionGroups.memberLabel',
+      defaultMessage: 'member',
+    },
     asRowsLabelColumn: {
       id: 'app.components.EntityListDownload.optionGroups.asRowsLabelColumn',
       defaultMessage: 'Include {type}s as columns (one column for each {type})',
     },
     asRowsLabelsActivity: {
-      id: 'app.components.EntityListDownload.optionGroups.asRowsLabels',
+      id: 'app.components.EntityListDownload.optionGroups.asRowsLabelsActivity',
       defaultMessage: 'Include activities as {type} (one column for each activity type)',
     },
     asRowsLabelsAsRow: {
@@ -141,10 +162,13 @@ export default defineMessages({
       id: 'app.components.EntityListDownload.optionGroups.asRowsLabels',
       defaultMessage: 'Include {type}s as rows (one row for each activity and {type})',
     },
-
     introNodeDefault: {
       id: 'app.components.EntityListDownload.optionGroups.introNodeDefault',
-      defaultMessage: 'By default, the resulting CSV file will have one column for each type of {type} selected.',
+      defaultMessage: 'By default, the resulting CSV file will have one column for each type of {type} selected. ',
+    },
+    introNodeAlternativeActor: {
+      id: 'app.components.EntityListDownload.optionGroups.introNodeAlternativeActor',
+      defaultMessage: 'Alternatively you can chose to include activities as rows, resulting in one row per actor and activity.',
     },
     introNodeTypeAsRows: {
       id: 'app.components.EntityListDownload.optionGroups.introNodeTypeAsRows',
@@ -162,8 +186,6 @@ export default defineMessages({
       id: 'app.components.EntityListDownload.optionGroups.introNodeHasAssociations',
       defaultMessage: ' Please note that activities of other associated actors (the {type} are members of) are not included.',
     },
-
-
     onActiveLabelDefault: {
       id: 'app.components.EntityListDownload.optionGroups.onActiveLabelDefault',
       defaultMessage: 'Include {type}',
@@ -177,5 +199,4 @@ export default defineMessages({
       defaultMessage: 'Include country numbers by level of support',
     },
   },
-
 });

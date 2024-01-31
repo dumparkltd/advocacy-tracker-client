@@ -83,7 +83,7 @@ export function OptionsForActors({
           activeOptionCount={activeAttributeCount}
           optionCount={Object.keys(attributes).length}
           intro={intl.formatMessage(messages.optionGroups.introLabelDefault,
-            { type: 'attribute' })}
+            { type: intl.formatMessage(messages.optionGroups.attributeLabel) })}
           options={attributes}
           optionListLabels={{
             attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes,
@@ -125,8 +125,9 @@ export function OptionsForActors({
               <Text size="small">
                 <FormattedMessage
                   {...messages.optionGroups.introNodeDefault}
-                  values={{ type: intl.formatMessage(appMessages.nav.actions) }}
+                  values={{ type: lowerCase(intl.formatMessage(appMessages.nav.actions)) }}
                 />
+                <FormattedMessage {...messages.optionGroups.introNodeAlternativeActor} />
               </Text>
               {hasAssociations && (
                 <Text size="small">
@@ -148,7 +149,8 @@ export function OptionsForActors({
           )}
           options={actiontypes}
           optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes, { type: 'activity' }),
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes,
+              { type: intl.formatMessage(messages.optionGroups.activityLabel) }),
           }}
           onSetOptions={(options) => setActiontypes(options)}
           onSetAsRows={(val) => setActionsAsRows(val)}
@@ -163,7 +165,7 @@ export function OptionsForActors({
       {hasActionsAsTarget && (
         <OptionGroup
           groupId="actions-as-target"
-          label={intl.formatMessage(messages.optionGroups.label.actionAsTarget)}
+          label={intl.formatMessage(messages.optionGroups.actionAsTargetLabel)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeActiontypeAsTargetCount}
@@ -173,7 +175,7 @@ export function OptionsForActors({
               <Text size="small">
                 <FormattedMessage
                   {...messages.optionGroups.introNodeDefault}
-                  values={{ type: 'activity' }}
+                  values={{ type: intl.formatMessage(messages.optionGroups.activityLabel) }}
                 />
               </Text>
               {hasAssociations && (
@@ -196,7 +198,8 @@ export function OptionsForActors({
           )}
           options={actiontypesAsTarget}
           optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelTypes, { type: 'activity' }),
+            attributes: intl.formatMessage(messages.optionGroups.listLabelTypes,
+              { type: intl.formatMessage(messages.optionGroups.activityLabel) }),
           }}
           onSetOptions={(options) => setActiontypesAsTarget(options)}
         />
@@ -204,16 +207,17 @@ export function OptionsForActors({
       {hasAssociations && (
         <OptionGroup
           groupId="associations"
-          label={intl.formatMessage(messages.optionGroups.label.associations)}
+          label={intl.formatMessage(messages.optionGroups.associationsLabel)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeAssociationtypeCount}
           optionCount={Object.keys(associationtypes).length}
           intro={intl.formatMessage(messages.optionGroups.introLabelDefault,
-            { type: 'association' })}
+            { type: intl.formatMessage(messages.optionGroups.associationLabel) })}
           options={associationtypes}
           optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelTypes, { type: 'association' }),
+            attributes: intl.formatMessage(messages.optionGroups.listLabelTypes,
+              { type: intl.formatMessage(messages.optionGroups.associationLabel) }),
           }}
           onSetOptions={(options) => setAssociationtypes(options)}
         />
@@ -221,15 +225,17 @@ export function OptionsForActors({
       {hasMembers && (
         <OptionGroup
           groupId="members"
-          label={intl.formatMessage(messages.optionGroups.label.members)}
+          label={intl.formatMessage(messages.optionGroups.membersLabel)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeMembertypeCount}
           optionCount={Object.keys(membertypes).length}
-          intro={intl.formatMessage(messages.optionGroups.introLabelGroups, { type: 'member' })}
+          intro={intl.formatMessage(messages.optionGroups.introLabelGroups,
+            { type: intl.formatMessage(messages.optionGroups.memberLabel) })}
           options={membertypes}
           optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes, { type: 'member' }),
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes,
+              { type: intl.formatMessage(messages.optionGroups.memberLabel) }),
           }}
           onSetOptions={(options) => setMembertypes(options)}
         />

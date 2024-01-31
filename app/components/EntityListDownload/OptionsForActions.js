@@ -96,7 +96,7 @@ export function OptionsForActions({
           activeOptionCount={activeAttributeCount}
           optionCount={Object.keys(attributes).length}
           intro={intl.formatMessage(messages.optionGroups.introLabelDefault,
-            { type: 'attribute' })}
+            { type: intl.formatMessage(messages.optionGroups.attributeLabel) })}
           options={attributes}
           optionListLabels={{
             attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes,
@@ -137,7 +137,7 @@ export function OptionsForActions({
             <Box gap="small">
               <Text size="small">
                 <FormattedMessage
-                  {...messages.optionGroups.introNode.default}
+                  {...messages.optionGroups.introNodeDefault}
                   values={{ type: lowerCase(intl.formatMessage(appMessages.nav.actors)) }}
                 />
                 {(!indicatorsAsRows || !indicatorsActive)
@@ -162,17 +162,20 @@ export function OptionsForActions({
           options={actortypes}
           optionListLabels={{
             attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes,
-              { type: 'actor' }),
+              { type: intl.formatMessage(messages.optionGroups.actorLabel) }),
           }}
           onSetOptions={(options) => setActortypes(options)}
           onSetAsRows={(val) => setActorsAsRows(val)}
           asRows={actorsAsRows}
           asRowsDisabled={activeActortypeCount === 0}
           asRowsLabels={{
-            columns: intl.formatMessage(messages.optionGroups.asRowsLabelColumn, { type: 'actor' }),
+            columns: intl.formatMessage(messages.optionGroups.asRowsLabelColumn,
+              { type: intl.formatMessage(messages.optionGroups.actorLabel) }),
             rows: indicatorsAsRows
-              ? intl.formatMessage(messages.optionGroups.asRowsLabelsAsRow, { type: 'actor' })
-              : intl.formatMessage(messages.optionGroups.asRowsLabels, { type: 'actor' }),
+              ? intl.formatMessage(messages.optionGroups.asRowsLabelsAsRow,
+                { type: intl.formatMessage(messages.optionGroups.actorLabel) })
+              : intl.formatMessage(messages.optionGroups.asRowsLabels,
+                { type: intl.formatMessage(messages.optionGroups.actorLabel) }),
           }}
         />
       )}
@@ -202,11 +205,12 @@ export function OptionsForActions({
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeParenttypeCount}
           optionCount={Object.keys(parenttypes).length}
-          intro={intl.formatMessage(messages.optionGroups.introLabelActivity, { type: 'parent' })}
+          intro={intl.formatMessage(messages.optionGroups.introLabelActivity,
+            { type: intl.formatMessage(messages.optionGroups.parentLabel) })}
           options={parenttypes}
           optionListLabels={{
             attributes: intl.formatMessage(messages.optionGroups.listLabelActivity,
-              { type: 'parent' }),
+              { type: intl.formatMessage(messages.optionGroups.parentLabel) }),
           }}
           onSetOptions={(options) => setParenttypes(options)}
         />
@@ -219,11 +223,12 @@ export function OptionsForActions({
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeChildtypeCount}
           optionCount={Object.keys(childtypes).length}
-          intro={intl.formatMessage(messages.optionGroups.introLabelActivity, { type: 'child' })}
+          intro={intl.formatMessage(messages.optionGroups.introLabelActivity,
+            { type: intl.formatMessage(messages.optionGroups.childLabel) })}
           options={childtypes}
           optionListLabels={{
             attributes: intl.formatMessage(messages.optionGroups.listLabelActivity,
-              { type: 'child' }),
+              { type: intl.formatMessage(messages.optionGroups.childLabel) }),
           }}
           onSetOptions={(options) => setChildtypes(options)}
         />
@@ -249,7 +254,7 @@ export function OptionsForActions({
       {hasIndicators && (
         <OptionGroup
           groupId="indicators"
-          label={intl.formatMessage(messages.optionGroups.label.topics)}
+          label={intl.formatMessage(messages.optionGroups.topicsLabel)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={indicatorsActive ? 1 : 0}
@@ -258,26 +263,41 @@ export function OptionsForActions({
             <Box gap="xsmall">
               <Text size="small">
                 <FormattedMessage
-                  {...messages.optionGroups.introNode.default}
-                  values={{ type: intl.formatMessage(messages.optionGroups.label.topics) }}
+                  {...messages.optionGroups.introNodeDefault}
+                  values={{ type: intl.formatMessage(messages.optionGroups.topicLabel) }}
                 />
-                {!actorsAsRows && <FormattedMessage {...messages.optionGroups.introNodeTypeAsRows} />}
-                {actorsAsRows && <FormattedMessage {...messages.optionGroups.introNode.indicators.actorAsRows} />}
+                {!actorsAsRows
+                  && (
+                    <FormattedMessage
+                      {...messages.optionGroups.introNodeTypeNotAsRows}
+                      values={{ type: intl.formatMessage(messages.optionGroups.topicLabel) }}
+                    />
+                  )}
+                {actorsAsRows
+                  && (
+                    <FormattedMessage
+                      {...messages.optionGroups.introNodeTypeAsRows}
+                      values={{ type: intl.formatMessage(messages.optionGroups.topicLabel) }}
+                    />
+                  )}
               </Text>
             </Box>
           )}
           active={indicatorsActive}
           onSetActive={(val) => setIndicatorsActive(val)}
           onActiveLabel={intl.formatMessage(messages.optionGroups.onActiveLabelDefault,
-            { type: lowerCase(intl.formatMessage(messages.optionGroups.label.topics)) })}
+            { type: intl.formatMessage(messages.optionGroups.topicLabel) })}
           onSetAsRows={(val) => setIndicatorsAsRows(val)}
           asRows={indicatorsAsRows}
           asRowsDisabled={!indicatorsActive}
           asRowsLabels={{
-            columns: intl.formatMessage(messages.optionGroups.asRowsLabelColumn, { type: 'topic' }),
+            columns: intl.formatMessage(messages.optionGroups.asRowsLabelColumn,
+              { type: intl.formatMessage(messages.optionGroups.topicLabel) }),
             rows: actorsAsRows
-              ? intl.formatMessage(messages.optionGroups.asRowsLabelsAsRow, { type: 'topic' })
-              : intl.formatMessage(messages.optionGroups.asRowsLabels, { type: 'topic' }),
+              ? intl.formatMessage(messages.optionGroups.asRowsLabelsAsRow,
+                { type: intl.formatMessage(messages.optionGroups.topicLabel) })
+              : intl.formatMessage(messages.optionGroups.asRowsLabels,
+                { type: intl.formatMessage(messages.optionGroups.topicLabel) }),
           }}
         />
       )}
