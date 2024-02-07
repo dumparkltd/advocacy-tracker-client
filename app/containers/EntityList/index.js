@@ -9,7 +9,7 @@ import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { Text } from 'grommet';
+import { Text, Box } from 'grommet';
 import { Edit } from 'grommet-icons';
 import { Map, List, fromJS } from 'immutable';
 import ReactModal from 'react-modal';
@@ -35,6 +35,7 @@ import {
   selectTaxonomiesWithCategories,
   selectIsPrintView,
   selectSearchQuery,
+  selectSessionUserId,
 } from 'containers/App/selectors';
 
 import {
@@ -307,6 +308,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onUpdateFilters,
       isPrintView,
       searchQuery,
+      currentUserId,
     } = this.props;
     // detect print to avoid expensive rendering
     const printing = isPrintView || !!(
@@ -377,7 +379,13 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     let allListActions;
     if (hasSelected) {
       allListActions = listActions || [];
-      if (config.batchDelete && isAdmin) {
+      if (config.batchDelete && isMember) {
+        const destroyableEntityIdsSelected = isAdmin
+          ? entityIdsSelected
+          : entityIdsSelected.filter((id) => {
+            const entity = entities.find((e) => qe(e.get('id'), id));
+            return entity && qe(entity.getIn(['attributes', 'created_by_id']), currentUserId);
+          });
         if (!this.state.deleteConfirm) {
           allListActions = [
             {
@@ -395,16 +403,26 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               onClick: (evt) => this.onHideDeleteConfirm(evt),
               type: 'listOption',
               warning: (
-                <Text size="small" color="danger">
-                  {`Really delete ${entityIdsSelected.size} selected? This action cannot be undone.`}
-                </Text>
+                <Box align="end">
+                  <Text size="small" color="danger">
+                    {`Really delete ${destroyableEntityIdsSelected.size} selected?`}
+                  </Text>
+                  <Text size="small" color="danger">
+                    This action cannot be undone.
+                  </Text>
+                  {!isAdmin && destroyableEntityIdsSelected.size !== entityIdsSelected.size && (
+                    <Text size="xsmall" color="dark" style={{ fontStyle: 'italic' }}>
+                      {`Note: Excluding ${entityIdsSelected.size - destroyableEntityIdsSelected.size} items lacking permission`}
+                    </Text>
+                  )}
+                </Box>
               ),
             },
             {
               title: 'Confirm',
               onClick: (evt) => {
                 this.onHideDeleteConfirm(evt);
-                onEntitiesDelete(config.serverPath, entityIdsSelected);
+                onEntitiesDelete(config.serverPath, destroyableEntityIdsSelected);
                 onEntitySelectAll([]);
               },
               type: 'listOption',
@@ -788,6 +806,7 @@ EntityList.propTypes = {
   onEntitiesDelete: PropTypes.func,
   onUpdateFilters: PropTypes.func,
   isPrintView: PropTypes.bool,
+  currentUserId: PropTypes.string,
 };
 
 EntityList.contextTypes = {
@@ -814,6 +833,7 @@ const mapStateToProps = (state) => ({
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   isPrintView: selectIsPrintView(state),
   searchQuery: selectSearchQuery(state),
+  currentUserId: selectSessionUserId(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
