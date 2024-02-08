@@ -9,7 +9,6 @@ import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { Text, Box } from 'grommet';
 import { Edit } from 'grommet-icons';
 import { Map, List, fromJS } from 'immutable';
 import ReactModal from 'react-modal';
@@ -19,6 +18,7 @@ import Loading from 'components/Loading';
 import Icon from 'components/Icon';
 import EntityListHeader from 'components/EntityListHeader';
 import EntityListDownload from 'components/EntityListDownload';
+import EntityListDelete from 'components/EntityListDelete';
 
 import {
   selectHasUserRole,
@@ -377,72 +377,39 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     }
     const hasSelected = dataReady && canEdit && entityIdsSelected && entityIdsSelected.size > 0;
     let allListActions;
+    let destroyableEntityIdsSelected;
     if (hasSelected) {
       allListActions = listActions || [];
       if (config.batchDelete && isMember) {
-        const destroyableEntityIdsSelected = isAdmin
+        destroyableEntityIdsSelected = isAdmin
           ? entityIdsSelected
           : entityIdsSelected.filter((id) => {
             const entity = entities.find((e) => qe(e.get('id'), id));
             return entity && qe(entity.getIn(['attributes', 'created_by_id']), currentUserId);
           });
-        if (!this.state.deleteConfirm) {
-          allListActions = [
-            {
-              title: 'Delete selected',
-              onClick: (evt) => this.onShowDeleteConfirm(evt),
-              icon: <Icon name="trash" size="22px" />,
-              type: 'listOption',
-            },
-            ...allListActions,
-          ];
-        } else {
-          allListActions = [
-            {
-              title: 'Cancel',
-              onClick: (evt) => this.onHideDeleteConfirm(evt),
-              type: 'listOption',
-              warning: (
-                <Box align="end">
-                  <Text size="small" color="danger">
-                    {`Really delete ${destroyableEntityIdsSelected.size} selected?`}
-                  </Text>
-                  <Text size="small" color="danger">
-                    This action cannot be undone.
-                  </Text>
-                  {!isAdmin && destroyableEntityIdsSelected.size !== entityIdsSelected.size && (
-                    <Text size="xsmall" color="dark" style={{ fontStyle: 'italic' }}>
-                      {`Note: Excluding ${entityIdsSelected.size - destroyableEntityIdsSelected.size} items lacking permission`}
-                    </Text>
-                  )}
-                </Box>
-              ),
-            },
-            {
-              title: 'Confirm',
-              onClick: (evt) => {
-                this.onHideDeleteConfirm(evt);
-                onEntitiesDelete(config.serverPath, destroyableEntityIdsSelected);
-                onEntitySelectAll([]);
-              },
-              type: 'listOption',
-            },
-          ];
-        }
-      }
-      if (!isAdmin || !this.state.deleteConfirm || !config.batchDelete) {
         allListActions = [
-          ...allListActions,
           {
-            title: 'Edit selected',
-            onClick: (evt) => this.onShowEditOptions(evt),
-            icon: <Edit color="white" size="xxsmall" />,
+            title: 'Delete selected',
+            onClick: (evt) => this.onShowDeleteConfirm(evt),
+            icon: <Icon name="trash" size="22px" />,
             type: 'listOption',
-            active: true,
-            isMember,
           },
+          ...allListActions,
         ];
       }
+      // if (!isAdmin || !this.state.deleteConfirm || !config.batchDelete) {
+      allListActions = [
+        ...allListActions,
+        {
+          title: 'Edit selected',
+          onClick: (evt) => this.onShowEditOptions(evt),
+          icon: <Edit color="white" size="xxsmall" />,
+          type: 'listOption',
+          active: true,
+          isMember,
+        },
+      ];
+      // }
     }
     let headerActions = headerOptions ? headerOptions.actions : [];
     if (config.downloadCSV) {
@@ -462,6 +429,30 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
 
     return (
       <div>
+        {config.batchDelete && this.state.deleteConfirm && entityIdsSelected && (
+          <ReactModal
+            isOpen
+            contentLabel="test"
+            onRequestClose={() => this.onHideDeleteConfirm()}
+            className="download-csv-modal"
+            overlayClassName="download-csv-modal-overlay"
+            style={{
+              overlay: { zIndex: 99999999 },
+            }}
+            appElement={document.getElementById('app')}
+          >
+            <EntityListDelete
+              selectedCount={entityIdsSelected.size}
+              destroyableCount={destroyableEntityIdsSelected.size}
+              onCancel={() => this.onHideDeleteConfirm()}
+              onConfirm={(evt) => {
+                this.onHideDeleteConfirm(evt);
+                onEntitiesDelete(config.serverPath, destroyableEntityIdsSelected);
+                onEntitySelectAll([]);
+              }}
+            />
+          </ReactModal>
+        )}
         {config.downloadCSV && this.state.downloadActive && (
           <ReactModal
             isOpen
