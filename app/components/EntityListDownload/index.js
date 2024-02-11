@@ -448,7 +448,7 @@ export function EntityListDownload({
   const selectedCount = entityIdsSelected ? entityIdsSelected.size : 0;
   const hasSelectedEntities = entityIdsSelected && selectedCount > 0;
   // filter out list items according to keyword search or selection
-  let searchedEntities = entities;
+  let entitiesToExport = entities;
   if (hasSearchQuery && !ignoreSearch) {
     const searchAttributes = (
       config.views
@@ -456,16 +456,16 @@ export function EntityListDownload({
       && config.views.list.search
     ) || ['title'];
 
-    searchedEntities = filterEntitiesByKeywords(
-      searchedEntities,
+    entitiesToExport = filterEntitiesByKeywords(
+      entitiesToExport,
       searchQuery,
       searchAttributes,
     );
   }
   if (hasSelectedEntities && !ignoreSelection) {
-    searchedEntities = searchedEntities.filter((entity) => entityIdsSelected.includes(entity.get('id')));
+    entitiesToExport = entitiesToExport.filter((entity) => entityIdsSelected.includes(entity.get('id')));
   }
-  const count = searchedEntities.size;
+  const count = entitiesToExport.size;
 
   // set initial csv file name
   useEffect(() => {
@@ -673,7 +673,7 @@ export function EntityListDownload({
         ];
       }
       csvData = prepareDataForActions({
-        entities: searchedEntities,
+        entities: entitiesToExport,
         relationships,
         attributes,
         taxonomies,
@@ -783,7 +783,7 @@ export function EntityListDownload({
         ];
       }
       csvData = prepareDataForActors({
-        entities: searchedEntities,
+        entities: entitiesToExport,
         relationships,
         attributes,
         taxonomies,
@@ -822,7 +822,7 @@ export function EntityListDownload({
         ];
       }
       csvData = prepareDataForIndicators({
-        entities: searchedEntities,
+        entities: entitiesToExport,
         relationships,
         attributes,
         includeSupport,
