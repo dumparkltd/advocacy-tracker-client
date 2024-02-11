@@ -6,7 +6,7 @@ import {
   call, put, select, takeLatest, takeEvery, race, take, all,
 } from 'redux-saga/effects';
 import {
-  push, replace, goBack, LOCATION_CHANGE,
+  push, replace, goBack,
 } from 'react-router-redux';
 import { reduce, keyBy } from 'lodash/collection';
 // import { without } from 'lodash/array';
@@ -275,7 +275,7 @@ export function* logoutSaga() {
     yield call(apiRequest, 'delete', ENDPOINTS.SIGN_OUT);
     yield call(clearAuthValues);
     yield put(logoutSuccess());
-    yield put(updatePath(ROUTES.LOGIN, { replace: true }));
+    yield put(updatePath('/', { replace: true }));
   } catch (err) {
     yield put(authenticateError(err));
   }
@@ -305,33 +305,6 @@ export function* validateTokenSaga() {
         }
       );
       yield put(authenticateSuccess(response.data)); // need to store currentUserData
-    } else {
-      // yield put(logout());
-      console.log('uid not present, resetting');
-      yield call(clearAuthValues);
-      yield put(authenticateReset());
-      // yield put(updatePath(ROUTES.LOGIN, { replace: true }));
-      // forward to login
-      yield put(updatePath(
-        ROUTES.LOGIN,
-        {
-          replace: true,
-          query: [
-            {
-              arg: 'info',
-              value: PARAMS.VALIDATE_TOKEN_FAILED,
-            },
-            {
-              arg: 'redirectOnAuthSuccess',
-              value: redirectOnAuthSuccess,
-            },
-            {
-              arg: 'redirectOnAuthSuccessSearch',
-              value: redirectOnAuthSuccessSearch,
-            },
-          ],
-        },
-      ));
     }
   } catch (err) {
     err.response.json = yield err.response.json();
@@ -436,6 +409,7 @@ function* createConnectionsSaga({
 export function* saveEntitySaga({ data }, updateClient = true, multiple = false) {
   const dataTS = stampPayload(data, 'save');
   try {
+    yield put(validateToken());
     yield put(saveSending(dataTS));
     // update entity attributes
     const entityUpdated = yield call(updateEntityRequest, data.path, data.entity);
@@ -618,6 +592,7 @@ export function* saveMultipleEntitiesSaga({ path, data, invalidateEntitiesPaths 
 export function* deleteEntitySaga({ data }, updateClient = true, multiple = false) {
   const dataTS = stampPayload(data, 'delete');
   try {
+    yield put(validateToken());
     yield put(deleteSending(dataTS));
     yield call(deleteEntityRequest, data.path, data.id);
     if (!multiple && data.redirect !== false) {
@@ -665,6 +640,7 @@ export function* deleteMultipleEntitiesSaga({ path, data, invalidateEntitiesPath
 export function* newEntitySaga({ data }, updateClient = true, multiple = false) {
   const dataTS = stampPayload(data, 'new');
   try {
+    yield put(validateToken());
     yield put(saveSending(dataTS));
     // update entity attributes
     // on the server
@@ -852,6 +828,7 @@ export function* saveConnectionsSaga({ data }) {
   )) {
     const dataTS = stampPayload(data);
     try {
+      yield put(validateToken());
       yield put(saveSending(dataTS));
       // on the server
       const connectionsUpdated = yield call(updateAssociationsRequest, data.path, data.updates);
@@ -1252,19 +1229,19 @@ export function* closeEntitySaga({ path }) {
   );
 }
 
-export function* locationChangeSaga() {
-  const previousPath = yield select(selectPreviousPathname);
-  const currentPath = yield select(selectCurrentPathname);
-  console.log('locationChangeSaga', previousPath, currentPath);
-  if (
-    previousPath !== currentPath
-    && currentPath !== ROUTES.LOGOUT
-    && currentPath !== ROUTES.LOGIN
-  ) {
-    console.log('locationChangeSaga - validateToken');
-    yield put(validateToken());
-  }
-}
+// export function* locationChangeSaga() {
+//   const previousPath = yield select(selectPreviousPathname);
+//   const currentPath = yield select(selectCurrentPathname);
+//   console.log('locationChangeSaga', previousPath, currentPath);
+//   if (
+//     previousPath !== currentPath
+//     && currentPath !== ROUTES.LOGOUT
+//     && currentPath !== ROUTES.LOGIN
+//   ) {
+//     console.log('locationChangeSaga - validateToken')
+//     yield put(validateToken());
+//   }
+// }
 
 /**
  * Root saga manages watcher lifecycle
@@ -1313,5 +1290,5 @@ export default function* rootSaga() {
   yield takeEvery(DISMISS_QUERY_MESSAGES, dismissQueryMessagesSaga);
 
   yield takeEvery(CLOSE_ENTITY, closeEntitySaga);
-  yield takeLatest(LOCATION_CHANGE, locationChangeSaga);
+  // yield takeLatest(LOCATION_CHANGE, locationChangeSaga);
 }
