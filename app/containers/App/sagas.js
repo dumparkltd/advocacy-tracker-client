@@ -902,7 +902,6 @@ const getNextQuery = (query, extend, location) => {
           (qv) => qv && qe(qv.toString().split('>')[0], val.split('>')[0])
         );
 
-<<<<<<< HEAD
         // add if not already present - no need to add if already included
         if (!isAlreadyIncluded) {
           if (isAdding) {
@@ -912,13 +911,6 @@ const getNextQuery = (query, extend, location) => {
           }
         // remove if present
         } else if (isAlreadyIncluded && extend && isRemoving) {
-=======
-        // add if not already present
-        if (param.add && !isIncluded) {
-          queryUpdated[param.arg].push(param.value);
-          // remove if present
-        } else if (extend && param.remove && param.value && isIncluded) {
->>>>>>> master
           queryUpdated[param.arg] = queryUpdated[param.arg].filter(
             (qv) => !qe(qv.toString().split('>')[0], val.split('>')[0])
           );
@@ -931,21 +923,9 @@ const getNextQuery = (query, extend, location) => {
             delete queryUpdated[param.arg];
           }
         }
-<<<<<<< HEAD
       }
     // if replacing
     } else if (hasQueryArg && isReplacing && hasValue) {
-=======
-        // if single value set
-        // add if not already present and convert to array
-      }
-      // if (extend && param.remove && (!param.value || (param.value && queryUpdated[param.arg] === param.value.toString()))) {
-      //   console.log('remove')
-      //   delete queryUpdated[param.arg];
-      // }
-      // if set and removing
-    } else if (queryUpdated[param.arg] && param.value && param.replace) {
->>>>>>> master
       // only replace the previous value if defined
       if (param.prevValue && queryUpdated[param.arg]) {
         queryUpdated[param.arg] = asArray(queryUpdated[param.arg]).map(
@@ -965,15 +945,9 @@ const getNextQuery = (query, extend, location) => {
       ) {
         delete queryUpdated[param.arg];
       }
-<<<<<<< HEAD
     // if not set or replacing with new value
     } else if (hasValue && !isRemoving) {
       queryUpdated[param.arg] = val;
-=======
-      // if not set or replacing with new value
-    } else if (typeof param.value !== 'undefined' && !param.remove) {
-      queryUpdated[param.arg] = param.value;
->>>>>>> master
     }
     return queryUpdated;
   }, queryPrevious);
