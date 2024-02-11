@@ -220,7 +220,7 @@ export function* checkRoleSaga({ role }) {
 }
 
 export function* authenticateSaga(payload) {
-  console.log('authenticateSaga');
+  // console.log('authenticateSaga');
   const { password, email } = payload.data;
   try {
     yield put(authenticateSending());
@@ -260,7 +260,7 @@ export function* recoverSaga(payload) {
 export function* authChangeSaga() {
   const redirectPathname = yield select(selectRedirectOnAuthSuccessPath);
   const redirectQuery = yield select(selectRedirectOnAuthSuccessSearch);
-  console.log('authChangeSaga', redirectPathname);
+  // console.log('authChangeSaga', redirectPathname);
   if (redirectPathname) {
     yield put(updatePath(redirectPathname, { replace: true, search: redirectQuery }));
   } else {
@@ -271,7 +271,7 @@ export function* authChangeSaga() {
 
 export function* logoutSaga() {
   try {
-    console.log('logout');
+    // console.log('logout');
     yield call(apiRequest, 'delete', ENDPOINTS.SIGN_OUT);
     yield call(clearAuthValues);
     yield put(logoutSuccess());
@@ -291,8 +291,8 @@ export function* validateTokenSaga() {
       [KEYS.CLIENT]: client,
       [KEYS.ACCESS_TOKEN]: accessToken,
     } = yield getAuthValues();
-    console.log('validateTokenSaga', redirectOnAuthSuccess);
-    console.log('uid && client && accessToken', uid, client, accessToken);
+    // console.log('validateTokenSaga', redirectOnAuthSuccess);
+    // console.log('uid && client && accessToken', uid, client, accessToken);
     if (uid && client && accessToken) {
       yield put(authenticateSending());
       const response = yield call(
@@ -335,7 +335,7 @@ export function* validateTokenSaga() {
     }
   } catch (err) {
     err.response.json = yield err.response.json();
-    console.log('err', err);
+    // console.log('err', err);
     yield put(authenticateReset());
     yield call(clearAuthValues);
     yield put(invalidateEntities());
@@ -1261,6 +1261,7 @@ export function* locationChangeSaga() {
     && currentPath !== ROUTES.LOGOUT
     && currentPath !== ROUTES.LOGIN
   ) {
+    console.log('locationChangeSaga - validateToken');
     yield put(validateToken());
   }
 }

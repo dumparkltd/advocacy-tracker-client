@@ -77,7 +77,7 @@ function appReducer(state = initialState, payload) {
         .setIn(['user', 'isSignedIn'], false);
     }
     case AUTHENTICATE_RESET:
-      console.log('AUTHENTICATE_RESET');
+      // console.log('AUTHENTICATE_RESET');
       return state
         .setIn(['auth', 'sending'], false)
         .setIn(['auth', 'error'], false)

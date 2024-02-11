@@ -362,7 +362,7 @@ export function entitiesReady(path, time) {
  * @param  {boolean} sending True means we're sending a request, false means we're not
  */
 export function authenticateSending(sending) {
-  console.log('authenticateSending');
+  // console.log('authenticateSending');
   return {
     type: AUTHENTICATE_SENDING,
     sending,
@@ -411,7 +411,7 @@ export function recoverPassword(data) {
  * @return {object}      An action object with a type of AUTHENTICATE_SUCCESS passing the user
  */
 export function authenticateSuccess(user) {
-  console.log('authenticateSuccess');
+  // console.log('authenticateSuccess');
   return {
     type: AUTHENTICATE_SUCCESS,
     user,
@@ -445,7 +445,7 @@ export function logoutSuccess() {
 }
 
 export function validateToken() {
-  console.log('validateToken');
+  // console.log('validateToken');
   return {
     type: VALIDATE_TOKEN,
   };

@@ -73,7 +73,7 @@ const Main = styled.div`
 
 class App extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
-    console.log('App/UNSAFE_componentWillMount', 'validateToken');
+    // console.log('App/UNSAFE_componentWillMount', 'validateToken');
     this.props.validateToken();
     this.props.loadEntitiesIfNeeded();
   }
