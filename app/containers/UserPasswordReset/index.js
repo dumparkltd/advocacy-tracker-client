@@ -18,7 +18,7 @@ import {
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import ContentNarrow from 'components/ContentNarrow';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import AuthForm from 'components/forms/AuthForm';
 
 import { updatePath } from 'containers/App/actions';
@@ -58,7 +58,7 @@ export class UserPasswordReset extends React.PureComponent { // eslint-disable-l
           {resetSending
             && <Loading />
           }
-          { this.props.viewDomain.get('form')
+          {this.props.viewDomain.get('form')
             && (
               <AuthForm
                 model="userPasswordReset.form.data"

@@ -44,7 +44,7 @@ import {
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import ImportEntitiesForm from 'components/forms/ImportEntitiesForm';
 
 import appMessages from 'containers/App/messages';
@@ -332,9 +332,9 @@ function mapDispatchToProps(dispatch, { params }) {
                             connectionId = category ? category.get('id') : 'INVALID';
                           } else if (connections) {
                             const connection = connections.get(relConfig.lookup.table)
-                            && connections.get(relConfig.lookup.table).find(
-                              (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
-                            );
+                              && connections.get(relConfig.lookup.table).find(
+                                (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
+                              );
                             connectionId = connection ? connection.get('id') : 'INVALID';
                           }
                         }

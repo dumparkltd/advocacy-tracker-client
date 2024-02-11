@@ -1,4 +1,4 @@
-import { createGlobalStyle } from 'styled-components';
+import { createGlobalStyle, css } from 'styled-components';
 import WWFFontWoff from './fonts/wwf-webfont.woff';
 import WWFFontTTF from './fonts/wwf-webfont.ttf';
 import WWFFontEOT from './fonts/wwf-webfont.eot';
@@ -180,6 +180,7 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 
+  .download-csv-modal,
   .new-entity-modal {
     position: absolute;
     top: 10px;
@@ -196,6 +197,7 @@ const GlobalStyle = createGlobalStyle`
     max-width: 1122px;
   }
   @media (min-width: 769px) {
+    .download-csv-modal,
     .new-entity-modal {
       padding: 20px;
       top: 40px;
@@ -205,6 +207,7 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 
+  .download-csv-modal-overlay,
   .new-entity-modal-overlay {
     position: fixed;
     top: 0;
@@ -293,7 +296,70 @@ const GlobalStyle = createGlobalStyle`
         }
       }
     }
+    .leaflet-control-container {
+      display: none;
+    }
   }
+  ${({ isPrint }) => isPrint && css`
+  body {
+    font-size: 10pt;
+  }
+  button, input, select, textarea {
+    font-size: 10pt;
+    page-break-inside: avoid;
+  }
+  a {
+    page-break-inside: avoid;
+  }
+  #app {
+    background-color: white;
+  }
+  h1 {
+    font-size: 20pt;
+  }
+  h2 {
+    font-size: 16pt;
+  }
+  h3 {
+    font-size: 13pt;
+  }
+  h4 {
+    font-size: 11pt;
+  }
+  h5 {
+    font-size: 10pt;
+  }
+  h6 {
+    font-size: 9pt;
+  }
+  blockquote {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+    page-break-inside: avoid;
+  }
+  img {
+    page-break-inside: avoid;
+    page-break-after: avoid;
+  }
+  table, pre {
+    page-break-inside: avoid;
+  }
+  ul, ol, dl {
+    page-break-before: avoid;
+  }
+  .content-page {
+    .react-markdown {
+      p {
+        font-size: 10pt;
+        &:first-child{
+          font-size: 12pt;
+        }
+      }
+    }
+  }
+`}
 `;
 
 export default GlobalStyle;

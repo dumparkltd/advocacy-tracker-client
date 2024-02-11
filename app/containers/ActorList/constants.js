@@ -32,6 +32,7 @@ export const CONFIG = {
   types: 'actortypes',
   serverPath: API.ACTORS,
   clientPath: ROUTES.ACTOR,
+  downloadCSV: true,
   batchDelete: true,
   hasMemberOption: [
     ACTORTYPES.CONTACT,

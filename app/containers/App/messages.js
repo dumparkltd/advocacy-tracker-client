@@ -989,35 +989,33 @@ export default defineMessages({
         defaultMessage: 'No category manager assigned',
       },
     },
-    meta: {
-      title: {
-        id: 'app.containers.App.attributes.meta.title',
-        defaultMessage: 'Meta',
-      },
-      updated_by_id: {
-        id: 'app.containers.App.attributes.meta.updated_by_id',
-        defaultMessage: 'Updated by',
-      },
-      created_by_id: {
-        id: 'app.containers.App.attributes.meta.created_by_id',
-        defaultMessage: 'Created by',
-      },
-      updated_at: {
-        id: 'app.containers.App.attributes.meta.updated_at',
-        defaultMessage: 'Last updated',
-      },
-      relationship_updated_at: {
-        id: 'app.containers.App.attributes.meta.relationship_updated_at',
-        defaultMessage: 'Connections last updated',
-      },
-      relationship_updated_by_id: {
-        id: 'app.containers.App.attributes.meta.relationship_updated_by_id',
-        defaultMessage: 'Connections updated by',
-      },
-      created_at: {
-        id: 'app.containers.App.attributes.meta.created_at',
-        defaultMessage: 'Created',
-      },
+    metaTitle: {
+      id: 'app.containers.App.attributes.metaTitle',
+      defaultMessage: 'Meta',
+    },
+    updated_by_id: {
+      id: 'app.containers.App.attributes.updated_by_id',
+      defaultMessage: 'Updated by',
+    },
+    updated_at: {
+      id: 'app.containers.App.attributes.updated_at',
+      defaultMessage: 'Last updated',
+    },
+    created_by_id: {
+      id: 'app.containers.App.attributes.created_by_id',
+      defaultMessage: 'Created by',
+    },
+    created_at: {
+      id: 'app.containers.App.attributes.created_at',
+      defaultMessage: 'Created',
+    },
+    relationship_updated_by_id: {
+      id: 'app.containers.App.attributes.relationship_updated_by_id',
+      defaultMessage: 'Connections updated by',
+    },
+    relationship_updated_at: {
+      id: 'app.containers.App.attributes.relationship_updated_at',
+      defaultMessage: 'Connections last updated at',
     },
     publication_date: {
       id: 'app.containers.App.attributes.publication_date',

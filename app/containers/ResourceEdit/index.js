@@ -48,12 +48,13 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectIsUserMember,
   selectSessionUserId,
   selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import FormWrapper from './FormWrapper';
 
 import {
@@ -204,7 +205,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
       }
     }
     return groups;
-  }
+  };
 
   getBodyAsideFields = (entity) => {
     const { intl } = this.context;
@@ -237,6 +238,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
       actionsByActiontype,
       onCreateOption,
       isAdmin,
+      isUserMember,
       myId,
       onErrorDismiss,
       onServerErrorDismiss,
@@ -257,6 +259,12 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
       appMessages.entities[typeId ? `resources_${typeId}` : 'resources'].single
     );
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+
+    // user can delete content
+    // if they are admins or
+    // if they are at least members and its their own content
+    const canDelete = isAdmin
+      || (isUserMember && viewEntity && qe(myId, viewEntity.getIn(['attributes', 'created_by_id'])));
 
     return (
       <div>
@@ -301,7 +309,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={handleCancel}
                 handleUpdate={handleUpdate}
-                handleDelete={isAdmin ? () => handleDelete(typeId) : null}
+                handleDelete={canDelete ? () => handleDelete(typeId) : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
                 fields={dataReady && {
@@ -341,12 +349,13 @@ ResourceEdit.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
-  handleDelete: PropTypes.func.isRequired,
+  handleDelete: PropTypes.func,
   viewDomainPage: PropTypes.object,
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isUserMember: PropTypes.bool,
   params: PropTypes.object,
   actionsByActiontype: PropTypes.object,
   onCreateOption: PropTypes.func,
@@ -362,6 +371,7 @@ ResourceEdit.contextTypes = {
 const mapStateToProps = (state, props) => ({
   viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
+  isUserMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),

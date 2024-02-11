@@ -4,43 +4,52 @@ import { Box, Text } from 'grommet';
 import { FormClose } from 'grommet-icons';
 
 import Dot from 'components/styled/Dot';
-
+import PrintHide from 'components/styled/PrintHide';
+import { usePrint } from 'containers/App/PrintContext';
+import ButtonTagFilter from '../ButtonTagFilter';
 import ButtonTagFilterInverse from '../ButtonTagFilterInverse';
+
 
 function ButtonTagFilterWrap({
   filter,
   label,
   labelLong,
   onClick,
+  isInverse,
   showConnectedAttributes = true,
   // level = 1,
 }) {
-  if (!filter) return null;
+  const isPrintView = usePrint();
   let title = labelLong || label;
-  const hasOnClick = onClick || filter.onClick;
-  if (hasOnClick) {
+  const myOnClick = isPrintView
+    ? null
+    : onClick || (filter && filter.onClick);
+  if (myOnClick) {
     title = `Remove filter: ${title}`;
   }
-  if (filter.connectedAttributes) {
+  if (filter && filter.connectedAttributes) {
     title = filter.connectedAttributes.reduce(
       (memo, att, i) => `${memo}${i !== 0 ? ',' : ''} "${att.label || att.value}"`,
       `${title} >`,
     );
   }
+
+  const ButtonTag = isPrintView || isInverse ? ButtonTagFilterInverse : ButtonTagFilter;
   return (
-    <ButtonTagFilterInverse
-      onClick={onClick || filter.onClick}
-      disabled={!hasOnClick}
+    <ButtonTag
+      isPrint={isPrintView}
+      onClick={myOnClick}
+      disabled={!myOnClick}
       title={title}
     >
       <Box direction="row" gap="xsmall" align="center">
-        {filter.dot && (
+        {filter && filter.dot && (
           <Dot color={filter.dot} />
         )}
         <Text size="small">
-          { label }
+          {label}
         </Text>
-        {showConnectedAttributes && filter.connectedAttributes && (
+        {showConnectedAttributes && filter && filter.connectedAttributes && (
           <Box direction="row" gap="hair" align="center">
             {filter.connectedAttributes.map(
               (att) => (
@@ -49,11 +58,13 @@ function ButtonTagFilterWrap({
             )}
           </Box>
         )}
-        {hasOnClick && (
-          <FormClose size="xsmall" color="inherit" />
+        {myOnClick && (
+          <PrintHide>
+            <FormClose size="xsmall" color="inherit" />
+          </PrintHide>
         )}
       </Box>
-    </ButtonTagFilterInverse>
+    </ButtonTag>
   );
 }
 
@@ -63,6 +74,7 @@ ButtonTagFilterWrap.propTypes = {
   labelLong: PropTypes.string,
   label: PropTypes.string,
   showConnectedAttributes: PropTypes.bool,
+  isInverse: PropTypes.bool,
   // level: PropTypes.number,
 };
 

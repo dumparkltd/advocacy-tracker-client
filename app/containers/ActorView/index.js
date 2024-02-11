@@ -30,6 +30,7 @@ import {
   getUserConnectionField,
 } from 'utils/fields';
 import qe from 'utils/quasi-equals';
+import { keydownHandlerPrint } from 'utils/print';
 
 import { getEntityTitleTruncated, checkActorAttribute } from 'utils/entities';
 
@@ -38,9 +39,10 @@ import {
   updatePath,
   closeEntity,
   setSubject,
+  printView,
 } from 'containers/App/actions';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
+import { CONTENT_SINGLE, PRINT_TYPES } from 'containers/App/constants';
 import {
   ROUTES,
   ACTORTYPES,
@@ -73,9 +75,15 @@ import {
   selectSubjectQuery,
   selectActortypes,
   selectUserConnections,
+  selectIsPrintView,
+  selectPrintConfig,
 } from 'containers/App/selectors';
+import styled from 'styled-components';
 
 import appMessages from 'containers/App/messages';
+import HeaderPrint from 'components/Header/HeaderPrint';
+import PrintOnly from 'components/styled/PrintOnly';
+import PrintHide from 'components/styled/PrintHide';
 import messages from './messages';
 import TabActivities from './TabActivities';
 import TabMembers from './TabMembers';
@@ -93,32 +101,37 @@ import {
 
 import { DEPENDENCIES } from './constants';
 
-export function ActorView(props) {
-  const {
-    intl,
-    viewEntity,
-    dataReady,
-    isMember,
-    onLoadData,
-    params,
-    handleEdit,
-    handleClose,
-    handleTypeClick,
-    viewTaxonomies,
-    associationsByType,
-    onEntityClick,
-    subject,
-    onSetSubject,
-    membersByType,
-    actortypes,
-    taxonomies,
-    actorConnections,
-    actionsByActiontype,
-    users,
-    userConnections,
-    isAdmin,
-    myId,
-  } = props;
+const PrintSectionTitleWrapper = styled(
+  (p) => <Box margin={{ top: 'large', bottom: 'small' }} pad={{ bottom: 'small' }} border="bottom" {...p} />
+)``;
+export function ActorView({
+  intl,
+  viewEntity,
+  dataReady,
+  isUserMember,
+  onLoadData,
+  params,
+  handleEdit,
+  handleClose,
+  handleTypeClick,
+  viewTaxonomies,
+  associationsByType,
+  onEntityClick,
+  onSetSubject,
+  membersByType,
+  actortypes,
+  taxonomies,
+  actorConnections,
+  actionsByActiontype,
+  users,
+  userConnections,
+  isAdmin,
+  myId,
+  isPrintView,
+  onSetPrintView,
+  printArgs,
+  subject,
+}) {
   useEffect(() => {
     // kick off loading of data
     onLoadData();
@@ -133,36 +146,6 @@ export function ActorView(props) {
 
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'actortype_id']);
   const viewActortype = actortypes && actortypes.find((type) => qe(type.get('id'), typeId));
-
-  let buttons = [];
-  if (dataReady) {
-    buttons = [
-      ...buttons,
-      {
-        type: 'icon',
-        onClick: () => window.print(),
-        title: 'Print',
-        icon: 'print',
-      },
-    ];
-    if (isMember) {
-      buttons = [
-        ...buttons,
-        {
-          type: 'edit',
-          onClick: handleEdit,
-        },
-      ];
-    }
-  }
-  const pageTitle = typeId
-    ? intl.formatMessage(appMessages.entities[`actors_${typeId}`].single)
-    : intl.formatMessage(appMessages.entities.actors.single);
-
-  const metaTitle = viewEntity
-    ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
-    : `${pageTitle}: ${params.id}`;
-
   const viewActortypeId = viewActortype && viewActortype.get('id').toString();
   const isTarget = viewActortype && viewActortype.getIn(['attributes', 'is_target']);
   const isActive = viewActortype && viewActortype.getIn(['attributes', 'is_active']);
@@ -192,6 +175,67 @@ export function ActorView(props) {
     viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
   }
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+  const showAllTabs = isPrintView && printArgs && printArgs.printTabs === 'all';
+  const showAllActionTypes = isPrintView && printArgs.printActionTypes === 'all';
+  const hasMap = !isCountry && viewSubject === 'members';
+
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.SINGLE,
+    printContentOptions: {
+      tabs: true,
+      actionTypes: viewSubject === 'actors' || viewSubject === 'targets',
+      actionTypesForArgs: (args) => args.printTabs === 'all',
+    },
+    printMapOptions: {
+      markers: hasMap,
+      markersForArgs: (args) => !isCountry && hasMembers && args.printTabs === 'all',
+    },
+    printMapMarkers: true,
+    printOrientation: 'portrait',
+    printSize: 'A4',
+  });
+
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
+
+  let buttons = [];
+  if (dataReady) {
+    if (window.print) {
+      buttons = [
+        ...buttons,
+        {
+          type: 'icon',
+          onClick: mySetPrintView,
+          title: 'Print',
+          icon: 'print',
+        },
+      ];
+    }
+    if (isUserMember) {
+      buttons = [
+        ...buttons,
+        {
+          type: 'edit',
+          onClick: handleEdit,
+        },
+      ];
+    }
+  }
+  const pageTitle = typeId
+    ? intl.formatMessage(appMessages.entities[`actors_${typeId}`].single)
+    : intl.formatMessage(appMessages.entities.actors.single);
+
+  const metaTitle = viewEntity
+    ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
+    : `${pageTitle}: ${params.id}`;
 
   return (
     <div>
@@ -201,20 +245,24 @@ export function ActorView(props) {
           { name: 'description', content: intl.formatMessage(messages.metaDescription) },
         ]}
       />
-      <Content isSingle>
-        { !dataReady
+      <Content isSingle isPrintView={isPrintView}>
+        {!dataReady
           && <Loading />
         }
-        { !viewEntity && dataReady
+        {!viewEntity && dataReady
           && (
             <div>
               <FormattedMessage {...messages.notFound} />
             </div>
           )
         }
-        { viewEntity && dataReady && (
-          <ViewWrapper>
+        {viewEntity && dataReady && (
+          <ViewWrapper isPrint={isPrintView}>
+            {isPrintView && (
+              <HeaderPrint argsKeep={['am', 'tm', 'subj', 'actiontype', 'inofficial']} />
+            )}
             <ViewHeader
+              isPrintView={isPrintView}
               title={typeId
                 ? intl.formatMessage(appMessages.actortypes[typeId])
                 : intl.formatMessage(appMessages.entities.actors.plural)
@@ -226,7 +274,7 @@ export function ActorView(props) {
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isMember}>
+                <Main hasAside={isUserMember && !isPrintView}>
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
@@ -236,7 +284,7 @@ export function ActorView(props) {
                           isAdmin,
                         ),
                         checkActorAttribute(typeId, 'title') && getTitleField(viewEntity),
-                        checkActorAttribute(typeId, 'prefix', isMember) && getInfoField(
+                        checkActorAttribute(typeId, 'prefix', isUserMember) && getInfoField(
                           'prefix',
                           viewEntity.getIn(['attributes', 'prefix']),
                         ),
@@ -245,7 +293,7 @@ export function ActorView(props) {
                     }}
                   />
                 </Main>
-                {isMember && (
+                {isUserMember && !isPrintView && (
                   <Aside>
                     <FieldGroup
                       group={{
@@ -275,75 +323,101 @@ export function ActorView(props) {
                     group={{
                       fields: [
                         checkActorAttribute(typeId, 'description')
-                          && getMarkdownField(viewEntity, 'description', true),
+                        && getMarkdownField(viewEntity, 'description', true),
                         checkActorAttribute(typeId, 'activity_summary')
-                          && getMarkdownField(viewEntity, 'activity_summary', true),
+                        && getMarkdownField(viewEntity, 'activity_summary', true),
                       ],
                     }}
                   />
                   <Box>
-                    <SubjectButtonGroup>
-                      {isActive && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('actors')}
-                          active={viewSubject === 'actors'}
-                        >
-                          <Text size="large">Activities</Text>
-                        </SubjectButton>
-                      )}
-                      {isTarget && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('targets')}
-                          active={viewSubject === 'targets'}
-                        >
-                          <Text size="large">Targeted by</Text>
-                        </SubjectButton>
-                      )}
-                      {hasMembers && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('members')}
-                          active={viewSubject === 'members'}
-                        >
-                          <Text size="large">Members</Text>
-                        </SubjectButton>
-                      )}
-                      {hasStatements && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('topics')}
-                          active={viewSubject === 'topics'}
-                        >
-                          <Text size="large">Positions</Text>
-                        </SubjectButton>
-                      )}
-                    </SubjectButtonGroup>
+                    <PrintHide>
+                      <SubjectButtonGroup>
+                        {isActive && (
+                          <SubjectButton
+                            onClick={() => onSetSubject('actors')}
+                            active={viewSubject === 'actors'}
+                          >
+                            <Text size="large">Activities</Text>
+                          </SubjectButton>
+                        )}
+                        {isTarget && (
+                          <SubjectButton
+                            onClick={() => onSetSubject('targets')}
+                            active={viewSubject === 'targets'}
+                          >
+                            <Text size="large">Targeted by</Text>
+                          </SubjectButton>
+                        )}
+                        {hasMembers && (
+                          <SubjectButton
+                            onClick={() => onSetSubject('members')}
+                            active={viewSubject === 'members'}
+                          >
+                            <Text size="large">Members</Text>
+                          </SubjectButton>
+                        )}
+                        {hasStatements && (
+                          <SubjectButton
+                            onClick={() => onSetSubject('topics')}
+                            active={viewSubject === 'topics'}
+                          >
+                            <Text size="large">Positions</Text>
+                          </SubjectButton>
+                        )}
+                      </SubjectButtonGroup>
+                    </PrintHide>
                     <SubjectTabWrapper>
-                      {viewSubject === 'members' && hasMembers && (
-                        <TabMembers
-                          isAdmin={isAdmin}
-                          membersByType={membersByType}
-                          onEntityClick={(id, path) => onEntityClick(id, path)}
-                          taxonomies={taxonomies}
-                          actorConnections={actorConnections}
-                        />
+                      {(showAllTabs || viewSubject === 'actors' || viewSubject === 'targets') && (
+                        <>
+                          <PrintOnly>
+                            <PrintSectionTitleWrapper>
+                              <Text size="large">{viewSubject === 'actors' ? 'Activities' : 'Targeted By'}</Text>
+                            </PrintSectionTitleWrapper>
+                          </PrintOnly>
+                          <TabActivities
+                            isAdmin={isAdmin}
+                            viewEntity={viewEntity}
+                            onEntityClick={onEntityClick}
+                            viewSubject={viewSubject}
+                            taxonomies={taxonomies}
+                            actionsByActiontype={actionsByActiontype}
+                            printArgs={printArgs}
+                            showAllActionTypes={showAllActionTypes}
+                          />
+                        </>
                       )}
-                      {viewSubject === 'topics' && hasStatements && (
-                        <TabStatements
-                          isAdmin={isAdmin}
-                          viewEntity={viewEntity}
-                          onEntityClick={(id, path) => onEntityClick(id, path)}
-                          statements={actionsByActiontype && actionsByActiontype.get(parseInt(ACTIONTYPES.EXPRESS, 10))}
-                          associationsByType={associationsByType}
-                        />
+                      {(showAllTabs || viewSubject === 'members') && hasMembers && (
+                        <>
+                          <PrintOnly>
+                            <PrintSectionTitleWrapper>
+                              <Text size="large">Members</Text>
+                            </PrintSectionTitleWrapper>
+                          </PrintOnly>
+                          <TabMembers
+                            isAdmin={isAdmin}
+                            membersByType={membersByType}
+                            onEntityClick={(id, path) => onEntityClick(id, path)}
+                            taxonomies={taxonomies}
+                            actorConnections={actorConnections}
+                            printArgs={printArgs}
+                          />
+                        </>
                       )}
-                      {(viewSubject === 'actors' || viewSubject === 'targets') && (
-                        <TabActivities
-                          isAdmin={isAdmin}
-                          viewEntity={viewEntity}
-                          onEntityClick={onEntityClick}
-                          viewSubject={viewSubject}
-                          taxonomies={taxonomies}
-                          actionsByActiontype={actionsByActiontype}
-                        />
+                      {(showAllTabs || viewSubject === 'topics') && hasStatements && (
+                        <>
+                          <PrintOnly>
+                            <PrintSectionTitleWrapper>
+                              <Text size="large">Topics</Text>
+                            </PrintSectionTitleWrapper>
+                          </PrintOnly>
+                          <TabStatements
+                            isAdmin={isAdmin}
+                            viewEntity={viewEntity}
+                            onEntityClick={(id, path) => onEntityClick(id, path)}
+                            statements={actionsByActiontype && actionsByActiontype.get(parseInt(ACTIONTYPES.EXPRESS, 10))}
+                            associationsByType={associationsByType}
+                          />
+                        </>
                       )}
                     </SubjectTabWrapper>
                   </Box>
@@ -363,8 +437,8 @@ export function ActorView(props) {
                       ],
                     }}
                   />
-                  {isCountry && (
-                    <CountryMap actor={viewEntity} />
+                  {isCountry && !isPrintView && (
+                    <CountryMap actor={viewEntity} printArgs={printArgs} />
                   )}
                   <FieldGroup
                     aside
@@ -374,7 +448,7 @@ export function ActorView(props) {
                         checkActorAttribute(typeId, 'phone') && getTextField(viewEntity, 'phone'),
                         checkActorAttribute(typeId, 'address') && getTextField(viewEntity, 'address'),
                         checkActorAttribute(typeId, 'url')
-                          && getLinkField(viewEntity),
+                        && getLinkField(viewEntity),
                       ],
                     }}
                   />
@@ -430,7 +504,7 @@ ActorView.propTypes = {
   membersByType: PropTypes.instanceOf(Map),
   associationsByType: PropTypes.instanceOf(Map),
   params: PropTypes.object,
-  isMember: PropTypes.bool,
+  isUserMember: PropTypes.bool,
   intl: intlShape.isRequired,
   subject: PropTypes.string,
   viewActiontypeId: PropTypes.string,
@@ -443,10 +517,13 @@ ActorView.propTypes = {
   users: PropTypes.object,
   isAdmin: PropTypes.bool,
   myId: PropTypes.string,
+  isPrintView: PropTypes.bool,
+  onSetPrintView: PropTypes.func,
+  printArgs: PropTypes.object,
 };
 
 const mapStateToProps = (state, props) => ({
-  isMember: selectIsUserMember(state),
+  isUserMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   viewTaxonomies: selectViewTaxonomies(state, props.params.id),
@@ -461,6 +538,8 @@ const mapStateToProps = (state, props) => ({
   userConnections: selectUserConnections(state),
   isAdmin: selectIsUserAdmin(state),
   myId: selectSessionUserId(state),
+  isPrintView: selectIsPrintView(state),
+  printArgs: selectPrintConfig(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -482,6 +561,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetSubject: (type) => {
       dispatch(setSubject(type));
+    },
+    onSetPrintView: (config) => {
+      dispatch(printView(config));
     },
   };
 }

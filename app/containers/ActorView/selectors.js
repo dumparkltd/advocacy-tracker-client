@@ -144,7 +144,7 @@ export const selectActionsWith = createSelector(
 
     const actionsWithConnections = actions && actions
       .filter(
-        (action) => validActiontypeIds.indexOf(action.getIn(['attributes', 'measuretype_id']).toString()) > -1
+        (action) => !!action && validActiontypeIds.indexOf(action.getIn(['attributes', 'measuretype_id']).toString()) > -1
       )
       .map((action) => setActionConnections({
         action,
@@ -214,6 +214,7 @@ export const selectActionsAsTargetByType = createSelector(
   ) => {
     if (!ready) return Map();
     return actions && actions
+      .filter((action) => !!action)
       .map((action) => setActionConnections({
         action,
         actionConnections,
@@ -283,6 +284,7 @@ export const selectMembersByType = createSelector(
   ) => {
     if (!ready) return Map();
     return actors && actors
+      .filter((actor) => !!actor)
       .map((actor) => setActorConnections({
         actor,
         actorConnections,
@@ -375,6 +377,7 @@ export const selectActionsAsMemberByActortype = createSelector(
   ) => {
     if (!ready || !associations) return Map();
     return associations
+      .filter((actor) => !!actor)
       .map(
         (actor) => setActorConnections({ actor, actorActions: actorActionsByActor, actorConnections })
       )
@@ -441,6 +444,7 @@ export const selectActionsAsTargetAsMemberByActortype = createSelector(
   ) => {
     if (!ready || !associations) return Map();
     return associations
+      .filter((actor) => !!actor)
       .map(
         (actor) => setActorConnections({ actor, actionActors: actionActorsByActor, actorConnections })
       )
@@ -512,6 +516,7 @@ export const selectActionsViaMembersByActortype = createSelector(
   ) => {
     if (!ready || !members) return Map();
     return members
+      .filter((actor) => !!actor)
       .map(
         (actor) => setActorConnections({ actor, actorActions: actorActionsByActor, actorConnections })
       )
@@ -580,6 +585,7 @@ export const selectActionsAsTargetViaMembersByActortype = createSelector(
   ) => {
     if (!ready || !members) return Map();
     return members
+      .filter((actor) => !!actor)
       .map(
         (actor) => setActorConnections({ actor, actionActors: actionActorsByActor, actorConnections })
       )

@@ -2,7 +2,8 @@ import { createSelector } from 'reselect';
 import { Map } from 'immutable';
 
 import {
-  selectActionsWhereQuery,
+  selectActiontypeActions,
+  selectAttributeQuery,
   selectWithoutQuery,
   selectAnyQuery,
   selectActorQuery,
@@ -48,6 +49,7 @@ import {
   filterEntitiesByConnectionAttributes,
   filterEntitiesWithoutAssociation,
   filterEntitiesWithAnyAssociation,
+  filterEntitiesByAttributes,
   entitiesSetCategoryIds,
 } from 'utils/entities';
 import qe from 'utils/quasi-equals';
@@ -112,7 +114,7 @@ export const selectConnections = createSelector(
 // nest category ids
 const selectActionsWithCategories = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectActionsWhereQuery,
+  selectActiontypeActions,
   selectActionCategoriesGroupedByAction,
   selectCategories,
   (ready, entities, associationsGrouped, categories) => {
@@ -413,8 +415,16 @@ export const selectActionsWithConnections = createSelector(
   }
 );
 
+const selectActionsWhereQuery = createSelector(
+  selectAttributeQuery,
+  selectActionsWithConnections, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
+);
+
 const selectActionsWithout = createSelector(
-  selectActionsWithConnections,
+  selectActionsWhereQuery,
   selectCategories,
   selectWithoutQuery,
   selectIncludeMembersForFiltering,

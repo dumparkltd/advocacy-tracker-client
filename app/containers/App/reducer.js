@@ -11,7 +11,7 @@
  */
 
 import { fromJS } from 'immutable';
-
+import { LOCATION_CHANGE } from 'react-router-redux';
 import { checkResponseError } from 'utils/request';
 import { isSignedIn } from 'utils/api-request';
 import qe from 'utils/quasi-equals';
@@ -34,6 +34,8 @@ import {
   ENTITIES_REQUESTED,
   INVALIDATE_ENTITIES,
   OPEN_NEW_ENTITY_MODAL,
+  PRINT_VIEW,
+  CLOSE_PRINT_VIEW,
 } from './constants';
 
 // The initial state of the App
@@ -58,6 +60,7 @@ const initialState = fromJS({
     isSignedIn: isSignedIn(),
   },
   newEntityModal: null,
+  printConfig: null,
 });
 
 function appReducer(state = initialState, payload) {
@@ -154,6 +157,20 @@ function appReducer(state = initialState, payload) {
         .set('entities', fromJS(initialState.toJS().entities));
     case OPEN_NEW_ENTITY_MODAL:
       return state.set('newEntityModal', fromJS(payload.args));
+    case PRINT_VIEW:
+      return state.set(
+        'printConfig', {
+          ...state.get('printConfig'),
+          ...payload.config,
+        }
+      );
+    case CLOSE_PRINT_VIEW:
+      return state.set('printConfig', null);
+    case LOCATION_CHANGE:
+      // console.log('LOCATION_CHANGE', payload.payload, payload && payload.action === 'POP')
+      return (payload && payload.payload && payload.payload.action === 'POP')
+        ? state.set('printConfig', null)
+        : state;
     default:
       return state;
   }

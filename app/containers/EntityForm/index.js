@@ -282,7 +282,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       {
         group.fields.map((field, i) => field
           ? (
-            <Field labelledGroup={!!group.label} key={i}>
+            <Field labelledGroup={!!group.label} key={i} printHide={field.printHide}>
               {this.renderFormField(
                 field,
                 false,

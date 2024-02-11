@@ -9,28 +9,28 @@ const SVG = styled.svg`
     }
     return 'none';
   }} !important;
-  bottom: ${(props) => props.text ? 0.1 : 0}em;
+  bottom: ${({ text }) => text ? 0.1 : 0}em;
   position: relative;
-  display: inline-block;
+  display: ${({ printHide }) => printHide ? 'none' : 'inline-block'};
   vertical-align: middle;
-  margin-right: ${(props) => props.textLeft ? (parseFloat(props.size) / 4) + props.size.split(/[0-9]+/)[1] : 0};
-  margin-left: ${(props) => props.textRight ? (parseFloat(props.size) / 4) + props.size.split(/[0-9]+/)[1] : 0};
-  width: ${(props) => (props.sizes && props.sizes.mobile) ? props.sizes.mobile : props.size};
-  height: ${(props) => (props.sizes && props.sizes.mobile) ? props.sizes.mobile : props.size};
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
-    width: ${(props) => (props.sizes && props.sizes.small) ? props.sizes.small : props.size};
-    height: ${(props) => (props.sizes && props.sizes.small) ? props.sizes.small : props.size};
+  margin-right: ${({ size, textLeft }) => textLeft ? (parseFloat(size) / 4) + size.split(/[0-9]+/)[1] : 0};
+  margin-left: ${({ size, textRight }) => textRight ? (parseFloat(size) / 4) + size.split(/[0-9]+/)[1] : 0};
+  width: ${({ sizes, size }) => (sizes && sizes.mobile) ? sizes.mobile : size};
+  height: ${({ sizes, size }) => (sizes && sizes.mobile) ? sizes.mobile : size};
+  @media (min-width: ${({ theme }) => theme && theme.breakpoints ? theme.breakpoints.medium : '769px'}) {
+    width: ${({ sizes, size }) => (sizes && sizes.small) ? sizes.small : size};
+    height:${({ sizes, size }) => (sizes && sizes.small) ? sizes.small : size};
   }
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.large : '993px'}) {
-    width: ${(props) => (props.sizes && props.sizes.medium) ? props.sizes.medium : props.size};
-    height: ${(props) => (props.sizes && props.sizes.medium) ? props.sizes.medium : props.size};
+  @media (min-width:${({ theme }) => theme && theme.breakpoints ? theme.breakpoints.large : '993px'}) {
+    width: ${({ sizes, size }) => (sizes && sizes.medium) ? sizes.medium : size};
+    height: ${({ sizes, size }) => (sizes && sizes.medium) ? sizes.medium : size};
   }
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.xlarge : '1200px'}) {
-    width: ${(props) => (props.sizes && props.sizes.large) ? props.sizes.large : props.size};
-    height: ${(props) => (props.sizes && props.sizes.large) ? props.sizes.large : props.size};
+  @media (min-width: ${({ theme }) => theme && theme.breakpoints ? theme.breakpoints.xlarge : '1200px'}) {
+    width: ${({ sizes, size }) => (sizes && sizes.large) ? sizes.large : size};
+    height: ${({ sizes, size }) => (sizes && sizes.large) ? sizes.large : size};
   }
   @media print {
-    display: ${({ hidePrint }) => (hidePrint ? 'none' : 'inline-block')};
+    display: ${({ printHide }) => printHide ? 'none' : 'inline-block'};
   }
 `;
 

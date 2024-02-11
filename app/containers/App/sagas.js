@@ -142,12 +142,12 @@ const autoRestart = (generator, handleError, maxTries = MAX_LOAD_ATTEMPTS) => fu
     }
   }
 };
-  /**
-   * Generator function. Load data error handler:
-   * - Record load error
-   *
-   * @param {object} payload {key: data set key}
-   */
+/**
+ * Generator function. Load data error handler:
+ * - Record load error
+ *
+ * @param {object} payload {key: data set key}
+ */
 function* loadEntitiesErrorHandler(err, { path }) {
   // console.log('handle loading error', path)
   yield put(entitiesLoadingError(err, path));
@@ -902,6 +902,7 @@ const getNextQuery = (query, extend, location) => {
           (qv) => qv && qe(qv.toString().split('>')[0], val.split('>')[0])
         );
 
+<<<<<<< HEAD
         // add if not already present - no need to add if already included
         if (!isAlreadyIncluded) {
           if (isAdding) {
@@ -911,6 +912,13 @@ const getNextQuery = (query, extend, location) => {
           }
         // remove if present
         } else if (isAlreadyIncluded && extend && isRemoving) {
+=======
+        // add if not already present
+        if (param.add && !isIncluded) {
+          queryUpdated[param.arg].push(param.value);
+          // remove if present
+        } else if (extend && param.remove && param.value && isIncluded) {
+>>>>>>> master
           queryUpdated[param.arg] = queryUpdated[param.arg].filter(
             (qv) => !qe(qv.toString().split('>')[0], val.split('>')[0])
           );
@@ -923,9 +931,21 @@ const getNextQuery = (query, extend, location) => {
             delete queryUpdated[param.arg];
           }
         }
+<<<<<<< HEAD
       }
     // if replacing
     } else if (hasQueryArg && isReplacing && hasValue) {
+=======
+        // if single value set
+        // add if not already present and convert to array
+      }
+      // if (extend && param.remove && (!param.value || (param.value && queryUpdated[param.arg] === param.value.toString()))) {
+      //   console.log('remove')
+      //   delete queryUpdated[param.arg];
+      // }
+      // if set and removing
+    } else if (queryUpdated[param.arg] && param.value && param.replace) {
+>>>>>>> master
       // only replace the previous value if defined
       if (param.prevValue && queryUpdated[param.arg]) {
         queryUpdated[param.arg] = asArray(queryUpdated[param.arg]).map(
@@ -945,9 +965,15 @@ const getNextQuery = (query, extend, location) => {
       ) {
         delete queryUpdated[param.arg];
       }
+<<<<<<< HEAD
     // if not set or replacing with new value
     } else if (hasValue && !isRemoving) {
       queryUpdated[param.arg] = val;
+=======
+      // if not set or replacing with new value
+    } else if (typeof param.value !== 'undefined' && !param.remove) {
+      queryUpdated[param.arg] = param.value;
+>>>>>>> master
     }
     return queryUpdated;
   }, queryPrevious);
@@ -1159,6 +1185,64 @@ export function* setIncludeInofficialStatementsSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
+/* export function* printViewSaga({ config }) {
+  const location = yield select(selectLocation);
+  let queryArgs = [];
+  if (config.pages) {
+    queryArgs = [
+      {
+        arg: 'items',
+        value: config.pages,
+        replace: true,
+      },
+      ...queryArgs,
+    ];
+  }
+  if (config.printTabs) {
+    queryArgs = [
+      {
+        arg: 'ptabs',
+        value: config.printTabs,
+        replace: true,
+      },
+      ...queryArgs,
+    ];
+  }
+  if (config.printSize) {
+    queryArgs = [
+      {
+        arg: 'psize',
+        value: config.printSize,
+        replace: true,
+      },
+      ...queryArgs,
+    ];
+  }
+  if (config.printOrientation) {
+    queryArgs = [
+      {
+        arg: 'porient',
+        value: config.printOrientation,
+        replace: true,
+      },
+      ...queryArgs,
+    ];
+  }
+  const queryNext = getNextQuery(
+    [
+      {
+        arg: 'print',
+        value: '1',
+        replace: true,
+      },
+      ...queryArgs,
+    ],
+    true, // extend
+    location,
+  );
+  const url = `${location.get('pathname')}?${getNextQueryString(queryNext)}`;
+  window.open(url, '_blank').focus();
+} */
 export function* openBookmarkSaga({ bookmark }) {
   const path = bookmark.getIn(['attributes', 'view', 'path']);
   const queryString = getNextQueryString(
@@ -1286,7 +1370,9 @@ export default function* rootSaga() {
   yield takeEvery(SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP, setIncludeTargetChildrenMembersOnMapSaga);
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
   yield takeEvery(SET_INCLUDE_INOFFICAL_STATEMENTS, setIncludeInofficialStatementsSaga);
+  // yield takeEvery(PRINT_VIEW, printViewSaga);
   yield takeEvery(OPEN_BOOKMARK, openBookmarkSaga);
+
   yield takeEvery(DISMISS_QUERY_MESSAGES, dismissQueryMessagesSaga);
 
   yield takeEvery(CLOSE_ENTITY, closeEntitySaga);

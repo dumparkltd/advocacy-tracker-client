@@ -3,7 +3,7 @@ import { Map } from 'immutable';
 
 import {
   selectEntities,
-  selectEntitiesSearchQuery,
+  selectAttributeQuery,
   selectWithoutQuery,
   selectActorQuery,
   selectActionQuery,
@@ -26,6 +26,7 @@ import {
   filterEntitiesByConnection,
   filterEntitiesByCategories,
   filterEntitiesWithoutAssociation,
+  filterEntitiesByAttributes,
   entitiesSetCategoryIds,
 } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
@@ -86,11 +87,7 @@ const getHighestUserRoleId = (roleIds) => roleIds.reduce(
 
 export const selectUsersWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  (state, locationQuery) => selectEntitiesSearchQuery(state, {
-    path: API.USERS,
-    searchAttributes: CONFIG.views.list.search || ['name'],
-    locationQuery,
-  }),
+  (state) => selectEntities(state, API.USERS),
   (state) => selectEntities(state, API.USER_CATEGORIES),
   (state) => selectEntities(state, API.USER_ROLES),
   selectConnections,
@@ -182,8 +179,17 @@ export const selectUsersWithConnections = createSelector(
     return entities;
   }
 );
+
+const selectUsersWhereQuery = createSelector(
+  selectAttributeQuery,
+  selectUsersWithConnections, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
+);
+
 const selectUsersWithout = createSelector(
-  selectUsersWithConnections,
+  selectUsersWhereQuery,
   selectCategories,
   selectWithoutQuery,
   (entities, categories, query) => query
