@@ -20,6 +20,7 @@ export const INVALIDATE_ENTITIES = 'impactoss/App/INVALIDATE_ENTITIES';
 export const RESET_PROGRESS = 'impactoss/App/RESET_PROGRESS';
 
 export const AUTHENTICATE_SENDING = 'impactoss/App/AUTHENTICATE_SENDING';
+export const AUTHENTICATE_RESET = 'impactoss/App/AUTHENTICATE_RESET';
 export const AUTHENTICATE = 'impactoss/App/AUTHENTICATE';
 export const RESET_PASSWORD = 'impactoss/App/RESET_PASSWORD';
 export const RECOVER_PASSWORD = 'impactoss/App/RECOVER_PASSWORD';

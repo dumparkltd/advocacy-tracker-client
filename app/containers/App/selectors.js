@@ -84,6 +84,11 @@ export const selectIsAuthenticating = createSelector(
   (globalState) => globalState.getIn(['auth', 'sending'])
 );
 
+export const selectAuthError = createSelector(
+  getGlobal,
+  (globalState) => globalState.getIn(['auth', 'error'])
+);
+
 const selectReadyUserRoles = (state) => !!state.getIn(['global', 'ready', 'user_roles']);
 
 export const selectReadyForAuthCheck = createSelector(
