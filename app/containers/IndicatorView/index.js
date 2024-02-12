@@ -4,12 +4,13 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { Box, Text } from 'grommet';
+import styled from 'styled-components';
 
 import {
   getTitleField,
@@ -22,6 +23,7 @@ import {
 // import { qe } from 'utils/quasi-equals';
 import { getEntityTitleTruncated } from 'utils/entities';
 import qe from 'utils/quasi-equals';
+import { keydownHandlerPrint } from 'utils/print';
 
 import {
   loadEntitiesIfNeeded,
@@ -30,6 +32,7 @@ import {
   setSubject,
   setIncludeActorMembers,
   setIncludeInofficialStatements,
+  printView,
 } from 'containers/App/actions';
 
 import {
@@ -40,6 +43,8 @@ import {
   selectSubjectQuery,
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
+  selectIsPrintView,
+  selectPrintConfig,
 } from 'containers/App/selectors';
 
 import {
@@ -58,8 +63,12 @@ import ViewPanelInside from 'components/EntityView/ViewPanelInside';
 import FieldGroup from 'components/fields/FieldGroup';
 import SubjectButton from 'components/styled/SubjectButton';
 import SubjectButtonGroup from 'components/styled/SubjectButtonGroup';
+import HeaderPrint from 'components/Header/HeaderPrint';
+import PrintOnly from 'components/styled/PrintOnly';
+import PrintHide from 'components/styled/PrintHide';
 
 import appMessages from 'containers/App/messages';
+import { PRINT_TYPES } from 'containers/App/constants';
 import CountryMap from './CountryMap';
 import Actors from './Actors';
 import Statements from './Statements';
@@ -72,157 +81,175 @@ import {
 
 import { DEPENDENCIES } from './constants';
 
-export class IndicatorView extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
-  UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
+const PrintSectionTitleWrapper = styled(
+  (p) => <Box margin={{ top: 'large', bottom: 'small' }} pad={{ bottom: 'small' }} border="bottom" {...p} />
+)``;
+export function IndicatorView({
+  viewEntity,
+  dataReady,
+  isMember,
+  isAdmin,
+  myId,
+  onEntityClick,
+  handleEdit,
+  handleClose,
+  actorsByActortype,
+  intl,
+  onSetSubject,
+  subject,
+  onSetIncludeInofficial,
+  includeInofficial,
+  onSetIncludeActorMembers,
+  includeActorMembers,
+  onLoadEntitiesIfNeeded,
+  params,
+  onSetPrintView,
+  isPrintView,
+  printArgs,
+}) {
+  useEffect(() => {
+    if (!dataReady) onLoadEntitiesIfNeeded();
+  }, [dataReady]);
+
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.SINGLE,
+    printContentOptions: { tabs: true, types: false },
+    printMapOptions: { markers: true },
+    printMapMarkers: true,
+    printOrientation: 'portrait',
+    printSize: 'A4',
+  });
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
+  const countries = actorsByActortype && actorsByActortype.get(parseInt(ACTORTYPES.COUNTRY, 10));
+  // view subject
+  let viewSubject = subject || 'statements';
+  const validViewSubjects = ['statements', 'actors'];
+  if (validViewSubjects.indexOf(viewSubject) === -1) {
+    viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    // reload entities if invalidated
-    if (!nextProps.dataReady) {
-      this.props.loadEntitiesIfNeeded();
-    }
-  }
-
-  render() {
-    const {
-      viewEntity,
-      dataReady,
-      isMember,
-      isAdmin,
-      myId,
-      onEntityClick,
-      handleEdit,
-      handleClose,
-      actorsByActortype,
-      intl,
-      onSetSubject,
-      subject,
-      onSetIncludeInofficial,
-      includeInofficial,
-      onSetIncludeActorMembers,
-      includeActorMembers,
-    } = this.props;
-
-    const countries = actorsByActortype && actorsByActortype.get(parseInt(ACTORTYPES.COUNTRY, 10));
-    // view subject
-    let viewSubject = subject || 'statements';
-    const validViewSubjects = ['statements', 'actors'];
-    if (validViewSubjects.indexOf(viewSubject) === -1) {
-      viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
-    }
-    let buttons = [];
-    if (dataReady) {
+  let buttons = [];
+  if (dataReady) {
+    buttons = [
+      ...buttons,
+      {
+        type: 'icon',
+        onClick: () => mySetPrintView(),
+        title: 'Print',
+        icon: 'print',
+      },
+    ];
+    if (isMember) {
       buttons = [
         ...buttons,
         {
-          type: 'icon',
-          onClick: () => window.print(),
-          title: 'Print',
-          icon: 'print',
+          type: 'edit',
+          onClick: handleEdit,
         },
       ];
-      if (isMember) {
-        buttons = [
-          ...buttons,
-          {
-            type: 'edit',
-            onClick: handleEdit,
-          },
-        ];
-      }
     }
-    const pageTitle = intl.formatMessage(appMessages.entities.indicators.single);
+  }
+  const pageTitle = intl.formatMessage(appMessages.entities.indicators.single);
 
-    const metaTitle = viewEntity
-      ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
-      : `${pageTitle}: ${this.props.params.id}`;
-    const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+  const metaTitle = viewEntity
+    ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
+    : `${pageTitle}: ${params.id}`;
+  const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
 
-    return (
-      <div>
-        <Helmet
-          title={metaTitle}
-          meta={[
-            { name: 'description', content: intl.formatMessage(messages.metaDescription) },
-          ]}
-        />
-        <Content isSingle>
-          { !dataReady && <Loading /> }
-          { !viewEntity && dataReady && (
-            <div>
-              <FormattedMessage {...messages.notFound} />
-            </div>
-          )}
-          { viewEntity && dataReady && (
-            <ViewWrapper>
-              <ViewHeader
-                title={intl.formatMessage(appMessages.entities.indicators.plural)}
-                buttons={buttons}
-                onClose={() => handleClose()}
-                onTypeClick={() => handleClose()}
-              />
-              <ViewPanel>
-                <ViewPanelInside>
-                  <Main hasAside={isMember}>
-                    <FieldGroup
-                      group={{ // fieldGroup
-                        fields: [
-                          getReferenceField(
-                            viewEntity,
-                            'code',
-                            isAdmin,
-                          ),
-                          getTitleField(viewEntity),
-                        ],
-                      }}
-                    />
-                  </Main>
-                  {isMember && (
-                    <Aside>
-                      <FieldGroup
-                        group={{
-                          fields: [
-                            getStatusField(viewEntity),
-                            (isAdmin || isMine) && getStatusFieldIf({
-                              entity: viewEntity,
-                              attribute: 'private',
-                            }),
-                            isAdmin && getStatusFieldIf({
-                              entity: viewEntity,
-                              attribute: 'is_archive',
-                            }),
-                            getMetaField(viewEntity, true),
-                          ],
-                        }}
-                        aside
-                      />
-                    </Aside>
-                  )}
-                </ViewPanelInside>
-              </ViewPanel>
-              <ViewPanel>
-                <ViewPanelInside>
-                  <Main bottom>
+  return (
+    <div>
+      <Helmet
+        title={metaTitle}
+        meta={[
+          { name: 'description', content: intl.formatMessage(messages.metaDescription) },
+        ]}
+      />
+      <Content isSingle>
+        {!dataReady && <Loading />}
+        {!viewEntity && dataReady && (
+          <div>
+            <FormattedMessage {...messages.notFound} />
+          </div>
+        )}
+        {viewEntity && dataReady && (
+          <ViewWrapper>
+            {isPrintView && (<HeaderPrint />)}
+            <ViewHeader
+              title={intl.formatMessage(appMessages.entities.indicators.plural)}
+              buttons={buttons}
+              onClose={() => handleClose()}
+              onTypeClick={() => handleClose()}
+            />
+            <ViewPanel>
+              <ViewPanelInside>
+                <Main hasAside={isMember && !isPrintView}>
+                  <FieldGroup
+                    group={{ // fieldGroup
+                      fields: [
+                        getReferenceField(
+                          viewEntity,
+                          'code',
+                          isAdmin,
+                        ),
+                        getTitleField(viewEntity),
+                      ],
+                    }}
+                  />
+                </Main>
+                {isMember && (
+                  <Aside>
                     <FieldGroup
                       group={{
                         fields: [
-                          getMarkdownField(viewEntity, 'description', true),
+                          getStatusField(viewEntity),
+                          (isAdmin || isMine) && getStatusFieldIf({
+                            entity: viewEntity,
+                            attribute: 'private',
+                          }),
+                          isAdmin && getStatusFieldIf({
+                            entity: viewEntity,
+                            attribute: 'is_archive',
+                          }),
+                          getMetaField(viewEntity, true),
                         ],
                       }}
+                      aside
                     />
-                    <Box pad={{ vertical: 'small' }}>
-                      <CountryMap
-                        countries={countries}
-                        indicatorId={viewEntity.get('id')}
-                        onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
-                        includeInofficial={includeInofficial}
-                        onSetIncludeInofficial={onSetIncludeInofficial}
-                        includeActorMembers={includeActorMembers}
-                        onSetIncludeActorMembers={onSetIncludeActorMembers}
-                      />
-                    </Box>
-                    <Box margin={{ vertical: 'large' }}>
+                  </Aside>
+                )}
+              </ViewPanelInside>
+            </ViewPanel>
+            <ViewPanel>
+              <ViewPanelInside>
+                <Main bottom>
+                  <FieldGroup
+                    group={{
+                      fields: [
+                        getMarkdownField(viewEntity, 'description', true),
+                      ],
+                    }}
+                  />
+                  <Box pad={{ vertical: 'small' }}>
+                    <CountryMap
+                      countries={countries}
+                      indicatorId={viewEntity.get('id')}
+                      onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+                      includeInofficial={includeInofficial}
+                      onSetIncludeInofficial={onSetIncludeInofficial}
+                      includeActorMembers={includeActorMembers}
+                      onSetIncludeActorMembers={onSetIncludeActorMembers}
+                    />
+                  </Box>
+                  <Box margin={{ vertical: 'large' }}>
+                    <PrintHide>
                       <SubjectButtonGroup margin={{ horizontal: 'medium' }}>
                         <SubjectButton
                           onClick={() => onSetSubject('statements')}
@@ -237,36 +264,59 @@ export class IndicatorView extends React.PureComponent { // eslint-disable-line 
                           <Text size="large">Countries & other actors</Text>
                         </SubjectButton>
                       </SubjectButtonGroup>
-                      {viewSubject === 'statements' && (
+                    </PrintHide>
+                    {(viewSubject === 'statements' || (isPrintView && printArgs && printArgs.printTabs === 'all')) && (
+                      <>
+                        {' '}
+                        {isPrintView
+                        && (
+                          <PrintOnly>
+                            <PrintSectionTitleWrapper>
+                              <Text size="large">Statements</Text>
+                            </PrintSectionTitleWrapper>
+                          </PrintOnly>
+                        )}
                         <Statements
                           viewEntity={viewEntity}
                         />
-                      )}
-                      {viewSubject === 'actors' && (
+                      </>
+                    )}
+                    {(viewSubject === 'actors' || (isPrintView && printArgs && printArgs.printTabs === 'all')) && (
+                      <>
+                        {' '}
+                        {isPrintView
+                        && (
+                          <PrintOnly>
+                            <PrintSectionTitleWrapper>
+                              <Text size="large">Countries & other actors</Text>
+                            </PrintSectionTitleWrapper>
+                          </PrintOnly>
+                        )}
                         <Actors
                           viewEntity={viewEntity}
                           isAdmin={isAdmin}
                         />
-                      )}
-                    </Box>
-                  </Main>
-                </ViewPanelInside>
-              </ViewPanel>
-            </ViewWrapper>
-          )}
-        </Content>
-      </div>
-    );
-  }
+                      </>
+                    )}
+                  </Box>
+                </Main>
+              </ViewPanelInside>
+            </ViewPanel>
+          </ViewWrapper>
+        )}
+      </Content>
+    </div>
+  );
 }
 
 IndicatorView.propTypes = {
   viewEntity: PropTypes.object,
-  loadEntitiesIfNeeded: PropTypes.func,
+  onLoadEntitiesIfNeeded: PropTypes.func,
   dataReady: PropTypes.bool,
   handleEdit: PropTypes.func,
   handleClose: PropTypes.func,
   onEntityClick: PropTypes.func,
+  onSetPrintView: PropTypes.func,
   actorsByActortype: PropTypes.object,
   params: PropTypes.object,
   myId: PropTypes.string,
@@ -278,6 +328,8 @@ IndicatorView.propTypes = {
   includeInofficial: PropTypes.bool,
   onSetIncludeActorMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
+  isPrintView: PropTypes.bool,
+  printArgs: PropTypes.object,
   intl: intlShape,
 };
 
@@ -291,11 +343,13 @@ const mapStateToProps = (state, props) => ({
   subject: selectSubjectQuery(state),
   includeInofficial: selectIncludeInofficialStatements(state),
   includeActorMembers: selectIncludeActorMembers(state),
+  isPrintView: selectIsPrintView(state),
+  printArgs: selectPrintConfig(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
   return {
-    loadEntitiesIfNeeded: () => {
+    onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     handleEdit: () => {
@@ -316,8 +370,10 @@ function mapDispatchToProps(dispatch, props) {
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));
     },
+    onSetPrintView: (config) => {
+      dispatch(printView(config));
+    },
   };
 }
-
 
 export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(IndicatorView));

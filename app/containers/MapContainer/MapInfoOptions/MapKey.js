@@ -16,6 +16,7 @@ export function MapKey({
   unit,
   type = 'gradient',
   circleLayerConfig,
+  isPrint,
   config,
 }) {
   const stops = maxValue && mapSubject && MAP_OPTIONS.GRADIENT[mapSubject];
@@ -28,6 +29,7 @@ export function MapKey({
         <Gradient
           unit={unit}
           isCount={!isIndicator}
+          isPrint={isPrint}
           config={{
             range: [minVal, maxValue],
             stops: stops.map((color, i) => ({
@@ -67,6 +69,7 @@ MapKey.propTypes = {
   minValue: PropTypes.number,
   maxBinValue: PropTypes.number,
   isIndicator: PropTypes.bool,
+  isPrint: PropTypes.bool,
   config: PropTypes.object,
   circleLayerConfig: PropTypes.object,
 };

@@ -19,7 +19,7 @@ import {
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import ContentNarrow from 'components/ContentNarrow';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import AuthForm from 'components/forms/AuthForm';
 
 import { updatePath } from 'containers/App/actions';
@@ -61,7 +61,7 @@ export class UserPassword extends React.PureComponent { // eslint-disable-line r
           {passwordSending
             && <Loading />
           }
-          { this.props.userPassword.get('form')
+          {this.props.userPassword.get('form')
             && (
               <AuthForm
                 model="userPassword.form.data"

@@ -56,7 +56,7 @@ import { ROUTES, USER_ROLES, ACTORTYPES } from 'themes/config';
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import EntityForm from 'containers/EntityForm';
 
 import appMessages from 'containers/App/messages';
@@ -135,7 +135,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
         )
         : Map(),
     });
-  }
+  };
 
   getHeaderMainFields = () => {
     const { intl } = this.context;
@@ -347,7 +347,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
               scrollContainer={this.scrollContainer.current}
             />
           )}
-          { saveSending
+          {saveSending
             && <Loading />
           }
         </Content>
@@ -438,8 +438,8 @@ function mapDispatchToProps(dispatch) {
         );
       saveData = saveData.set('userRoles', Map({
         delete: roles.reduce((memo, role) => role.get('associated')
-            && !newRoleIds.includes(role.get('id'))
-            && !newRoleIds.includes(parseInt(role.get('id'), 10))
+          && !newRoleIds.includes(role.get('id'))
+          && !newRoleIds.includes(parseInt(role.get('id'), 10))
           ? memo.push(role.getIn(['associated', 'id']))
           : memo,
         List()),

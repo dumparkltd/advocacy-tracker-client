@@ -1,6 +1,6 @@
 {
   "name": "advocacy-tracker-client",
-  "version": "1.1.7",
+  "version": "1.2.1",
   "description": "Integrated Management and Planning of ACTions Open Source Software",
   "repository": {
     "type": "git",
@@ -51,7 +51,6 @@
   ],
   "lint-staged": {
     "*.js": [
-      "npm run lint:eslint:fix",
       "git add --force"
     ],
     "*.json": [

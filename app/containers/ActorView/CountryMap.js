@@ -6,8 +6,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Map } from 'immutable';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Box } from 'grommet';
+import { usePrint } from 'containers/App/PrintContext';
 
 import * as topojson from 'topojson-client';
 // import { FormattedMessage } from 'react-intl';
@@ -20,19 +21,40 @@ import qe from 'utils/quasi-equals';
 import MapContainer from 'containers/MapContainer/MapWrapper';
 // import messages from './messages';
 
-const Styled = styled((p) => <Box margin={{ horizontal: 'small' }} {...p} />)`
+const Styled = styled((p) => <Box {...p} />)`
   z-index: 0;
+  position: relative;
+  @media print {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 `;
-const MapWrapper = styled((p) => <Box {...p} />)`
+const MapWrapper = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)`
+  ${({ isPrint }) => isPrint && css`margin-right: 0;`}
   position: relative;
   height: 300px;
   background: #F9F9FA;
+  overflow: hidden;
+  border: 1px solid #f6f7f9;
+  padding-top: ${({ isPrint, orient }) => {
+    if (isPrint) return orient === 'landscape' ? '77%' : '111%';
+    return '88%';
+  }};
+
+  @media print {
+    margin-right: 0;
+    display: block;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 `;
 
 export function CountryMap({
   actor,
+  printArgs,
   // intl,
 }) {
+  const isPrint = usePrint();
   const countriesJSON = topojson.feature(
     countriesTopo,
     Object.values(countriesTopo.objects)[0],
@@ -52,7 +74,10 @@ export function CountryMap({
   );
   return (
     <Styled hasHeader noOverflow>
-      <MapWrapper>
+      <MapWrapper
+        isPrint={isPrint}
+        orient={printArgs && printArgs.printOrientation}
+      >
         <MapContainer
           mapId="ll-map-country"
           countryData={countryData}
@@ -60,6 +85,7 @@ export function CountryMap({
           styleType="country"
           fitBounds
           projection="gall-peters"
+          printArgs={printArgs}
         />
       </MapWrapper>
     </Styled>
@@ -68,6 +94,7 @@ export function CountryMap({
 
 CountryMap.propTypes = {
   actor: PropTypes.instanceOf(Map), // the current actor (ie country)
+  printArgs: PropTypes.object,
 };
 
 

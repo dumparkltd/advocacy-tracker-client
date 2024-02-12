@@ -20,6 +20,8 @@ import {
   selectActortypes,
   selectCategories,
   selectResources,
+  selectIsPrintView,
+  selectPrintConfig,
 } from 'containers/App/selectors';
 import { updateQuery } from 'containers/EntityList/actions';
 
@@ -77,7 +79,7 @@ export function EntityListTable({
   onEntitySelect,
   entityTitle,
   onEntitySelectAll,
-  entities,
+  entities = List(),
   errors,
   categories,
   connections,
@@ -92,6 +94,7 @@ export function EntityListTable({
   pageItems,
   pageNo,
   intl,
+  hasFilters = false,
   searchQuery = '',
   onSearch,
   hasSearch,
@@ -106,6 +109,10 @@ export function EntityListTable({
   includeChildren,
   onPageItemsSelect,
   onPageSelect,
+  printConfig,
+  isPrintView,
+  // allEntityCount,
+  isByOption,
 }) {
   if (!columns) return null;
   const sortColumn = columns.find((c) => !!c.sortDefault);
@@ -141,7 +148,7 @@ export function EntityListTable({
       searchAttributes,
     );
   }
-  const activeColumns = columns.filter((col) => !col.skip);
+  const activeColumns = columns.filter((col) => !col.skip && !(isPrintView && col.printHideOnSingle));
   // warning converting List to Array
   const entityRows = prepareEntityRows({
     entities: searchedEntities,
@@ -160,6 +167,8 @@ export function EntityListTable({
     resources,
     includeMembers,
     includeChildren,
+    isPrintView,
+    printConfig,
   });
   const columnMaxValues = getColumnMaxValues(
     entityRows,
@@ -216,18 +225,16 @@ export function EntityListTable({
   let pager;
   const isSortedOrPaged = !!pageNo || !!pageItems || !!cleanSortBy || !!cleanSortOrder;
   if (paginate) {
-    if (pageItems) {
-      if (pageItems === 'all') {
-        pageSize = sortedEntities.length;
-      } else {
-        pageSize = Math.min(
+    if (pageItems === 'all' || (isPrintView && printConfig && printConfig.printItems === 'all')) {
+      pageSize = sortedEntities.length;
+    } else {
+      pageSize = pageItems
+        ? Math.min(
           (pageItems && parseInt(pageItems, 10)),
           PAGE_SIZE_MAX
-        );
-      }
-    } else {
-      pageSize = Math.min(PAGE_SIZE, PAGE_SIZE_MAX);
+        ) : Math.min(PAGE_SIZE, PAGE_SIZE_MAX);
     }
+
     // grouping and paging
     // if grouping required
     if (sortedEntities.length > pageSize) {
@@ -265,42 +272,53 @@ export function EntityListTable({
       selectedTotal: canEdit && entityIdsSelected && entityIdsSelected.size,
       allSelectedOnPage: canEdit && entityIdsOnPage.length === entityIdsSelected.size,
       messages,
+      hasFilters: (searchQuery.length > 0 || hasFilters),
     }),
     intl,
   });
+
+  const listEmpty = searchedEntities.size === 0;
+  const listEmptyAfterQuery = listEmpty
+    && (searchQuery.length > 0 || hasFilters);
+  const listEmptyAfterQueryAndErrors = listEmptyAfterQuery
+    && (errors && errors.size > 0);
+
+  const hasPageSelect = !isPrintView && entitiesOnPage && entitiesOnPage.length > 0 && paginate;
   return (
     <div>
-      <Box
-        direction="row"
-        align="center"
-        gap="medium"
-        pad={{ vertical: 'small' }}
-        justify={hasSearch ? 'start' : 'end'}
-      >
-        {hasSearch && (
-          <Box flex={{ shrink: 0, grow: 1 }}>
-            <EntityListSearch
-              searchQuery={searchQuery}
-              onSearch={onSearch}
-            />
-          </Box>
-        )}
-        <Box flex={{ shrink: 1, grow: 0 }}>
-          {entitiesOnPage.length > 0 && paginate && (
-            <SelectReset
-              value={pageItems === 'all' ? pageItems : pageSize.toString()}
-              label={intl && intl.formatMessage(appMessages.labels.perPage)}
-              index="page-select"
-              options={PAGE_ITEM_OPTIONS && PAGE_ITEM_OPTIONS.map((option) => ({
-                value: option.value.toString(),
-                label: option.value.toString(),
-              }))}
-              isReset={false}
-              onChange={onPageItemsSelect}
-            />
+      {(hasSearch || hasPageSelect) && (
+        <Box
+          direction="row"
+          align="center"
+          gap="medium"
+          pad={{ vertical: 'small' }}
+          justify={hasSearch ? 'start' : 'end'}
+        >
+          {hasSearch && (
+            <Box flex={{ shrink: 0, grow: 1 }}>
+              <EntityListSearch
+                searchQuery={searchQuery}
+                onSearch={onSearch}
+              />
+            </Box>
+          )}
+          {hasPageSelect && (
+            <Box flex={{ shrink: 1, grow: 0 }}>
+              <SelectReset
+                value={pageItems === 'all' ? pageItems : pageSize.toString()}
+                label={intl && intl.formatMessage(appMessages.labels.perPage)}
+                index="page-select"
+                options={PAGE_ITEM_OPTIONS && PAGE_ITEM_OPTIONS.map((option) => ({
+                  value: option.value.toString(),
+                  label: option.value.toString(),
+                }))}
+                isReset={false}
+                onChange={onPageItemsSelect}
+              />
+            </Box>
           )}
         </Box>
-      </Box>
+      )}
       <EntitiesTable
         entities={entitiesOnPage}
         columns={activeColumns}
@@ -312,38 +330,31 @@ export function EntityListTable({
         memberOption={memberOption}
         subjectOptions={subjectOptions}
         inSingleView={inSingleView}
+        isPrintView={isPrintView}
       />
       <ListEntitiesMain>
-        {entityIdsOnPage.length === 0
-          && isSortedOrPaged
-          && (!errors || errors.size === 0)
-          && (
-            <ListEntitiesEmpty>
-              <FormattedMessage {...messages.listEmptyAfterQuery} />
-            </ListEntitiesEmpty>
-          )
-        }
-        {entityIdsOnPage.length === 0
-          && !isSortedOrPaged
-          && (!errors || errors.size === 0)
-          && (
-            <ListEntitiesEmpty>
-              <FormattedMessage {...messages.listEmpty} />
-            </ListEntitiesEmpty>
-          )
-        }
-        {entityIdsOnPage.length === 0
-          && isSortedOrPaged
-          && errorsWithoutEntities
-          && errorsWithoutEntities.size > 0
-          && errors
-          && errors.size > 0
-          && (
-            <ListEntitiesEmpty>
-              <FormattedMessage {...messages.listEmptyAfterQueryAndErrors} />
-            </ListEntitiesEmpty>
-          )
-        }
+        {listEmpty && (
+          <ListEntitiesEmpty>
+            {!listEmptyAfterQuery && (
+              <FormattedMessage
+                {...messages[isByOption ? 'listEmptyByOption' : 'listEmpty']}
+                values={{ title: entityTitle.plural }}
+              />
+            )}
+            {listEmptyAfterQuery && !listEmptyAfterQueryAndErrors && (
+              <FormattedMessage
+                {...messages.listEmptyAfterQuery}
+                values={{ title: entityTitle.plural }}
+              />
+            )}
+            {listEmptyAfterQuery && listEmptyAfterQueryAndErrors && (
+              <FormattedMessage
+                {...messages.listEmptyAfterQueryAndErrors}
+                values={{ title: entityTitle.plural }}
+              />
+            )}
+          </ListEntitiesEmpty>
+        )}
         {errorsWithoutEntities
           && errorsWithoutEntities.size > 0
           && !isSortedOrPaged
@@ -368,7 +379,8 @@ export function EntityListTable({
       {entitiesOnPage.length > 0 && paginate && (
         <EntityListFooter
           pager={pager}
-          pageSize={pageSize}
+          isPrintView={isPrintView}
+          pageSize={(pageItems === 'all' || (isPrintView && printConfig.printItems === 'all')) ? 'all' : pageSize}
           onPageSelect={onPageSelect}
         />
       )}
@@ -423,6 +435,7 @@ EntityListTable.propTypes = {
   pageItems: PropTypes.string,
   pageNo: PropTypes.string,
   searchQuery: PropTypes.string,
+  hasFilters: PropTypes.bool,
   onSearch: PropTypes.func,
   hasSearch: PropTypes.bool,
   label: PropTypes.string,
@@ -430,7 +443,11 @@ EntityListTable.propTypes = {
   subjectOptions: PropTypes.node,
   includeMembers: PropTypes.bool,
   includeChildren: PropTypes.bool,
+  isByOption: PropTypes.bool,
+  isPrintView: PropTypes.bool,
+  printConfig: PropTypes.object,
   pageItemSelectConfig: PropTypes.object,
+  // allEntityCount: PropTypes.number,
 };
 
 const mapStateToProps = (state) => ({
@@ -442,6 +459,8 @@ const mapStateToProps = (state) => ({
   actortypes: selectActortypes(state),
   categories: selectCategories(state),
   resources: selectResources(state),
+  isPrintView: selectIsPrintView(state),
+  printConfig: selectPrintConfig(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

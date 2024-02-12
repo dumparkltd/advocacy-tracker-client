@@ -11,6 +11,7 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import styled from 'styled-components';
 import { actions as formActions } from 'react-redux-form/immutable';
+import { Text, Box } from 'grommet';
 
 import {
   getEmailField,
@@ -21,18 +22,17 @@ import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import Icon from 'components/Icon';
 import ContentNarrow from 'components/ContentNarrow';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import AuthForm from 'components/forms/AuthForm';
 import A from 'components/styled/A';
 
-import { selectQueryMessages } from 'containers/App/selectors';
+import { selectQueryMessages, selectIsAuthenticating, selectAuthError } from 'containers/App/selectors';
 import { updatePath, dismissQueryMessages } from 'containers/App/actions';
 
-import { ROUTES } from 'themes/config';
+import { ROUTES, IS_DEV } from 'themes/config';
 import messages from './messages';
 
 import { login } from './actions';
-import { selectDomain } from './selectors';
 
 const BottomLinks = styled.div`
   padding: 2em 0;
@@ -45,8 +45,7 @@ export class UserLogin extends React.PureComponent { // eslint-disable-line reac
 
   render() {
     const { intl } = this.context;
-    const { authError, authSending } = this.props.viewDomain.get('page').toJS();
-
+    const { isUserAuthenticating, authError } = this.props;
     return (
       <div>
         <Helmet
@@ -62,41 +61,48 @@ export class UserLogin extends React.PureComponent { // eslint-disable-line reac
           <ContentHeader
             title={intl.formatMessage(messages.pageTitle)}
           />
+          {IS_DEV && (
+            <Box margin={{ bottom: 'medium' }}>
+              <Text>
+                <FormattedMessage {...messages.devNote} />
+              </Text>
+            </Box>
+          )}
           {this.props.queryMessages.info
             && (
-              <Messages
-                type="info"
-                onDismiss={this.props.onDismissQueryMessages}
-                messageKey={this.props.queryMessages.info}
-              />
+              <Box margin={{ bottom: 'medium' }}>
+                <Messages
+                  type="info"
+                  onDismiss={this.props.onDismissQueryMessages}
+                  messageKey={this.props.queryMessages.info}
+                />
+              </Box>
             )
           }
           {authError
             && (
-              <Messages
-                type="error"
-                messages={authError.messages}
-              />
+              <Box margin={{ bottom: 'medium' }}>
+                <Messages
+                  type="error"
+                  messages={authError.messages}
+                />
+              </Box>
             )
           }
-          {authSending
-            && <Loading />
+          {isUserAuthenticating
+            && <Box margin={{ bottom: 'medium' }}><Loading /></Box>
           }
-          { this.props.viewDomain.get('form')
-            && (
-              <AuthForm
-                model="userLogin.form.data"
-                sending={authSending}
-                handleSubmit={(formData) => this.props.handleSubmit(formData)}
-                handleCancel={this.props.handleCancel}
-                labels={{ submit: intl.formatMessage(messages.submit) }}
-                fields={[
-                  getEmailField(intl.formatMessage, true, '.email'),
-                  getPasswordField(intl.formatMessage, '.password'),
-                ]}
-              />
-            )
-          }
+          <AuthForm
+            model="userLogin.form.data"
+            sending={isUserAuthenticating}
+            handleSubmit={(formData) => this.props.handleSubmit(formData)}
+            handleCancel={this.props.handleCancel}
+            labels={{ submit: intl.formatMessage(messages.submit) }}
+            fields={[
+              getEmailField(intl.formatMessage, true, '.email'),
+              getPasswordField(intl.formatMessage, '.password'),
+            ]}
+          />
           <BottomLinks>
             <p>
               <FormattedMessage {...messages.registerLinkBefore} />
@@ -131,13 +137,17 @@ export class UserLogin extends React.PureComponent { // eslint-disable-line reac
 }
 
 UserLogin.propTypes = {
-  viewDomain: PropTypes.object.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleLink: PropTypes.func.isRequired,
   initialiseForm: PropTypes.func,
   onDismissQueryMessages: PropTypes.func,
   queryMessages: PropTypes.object,
+  isUserAuthenticating: PropTypes.bool,
+  authError: PropTypes.oneOfType([
+    PropTypes.object,
+    PropTypes.bool,
+  ]),
 };
 
 UserLogin.contextTypes = {
@@ -145,8 +155,9 @@ UserLogin.contextTypes = {
 };
 
 const mapStateToProps = (state) => ({
-  viewDomain: selectDomain(state),
   queryMessages: selectQueryMessages(state),
+  isUserAuthenticating: selectIsAuthenticating(state),
+  authError: selectAuthError(state),
 });
 
 export function mapDispatchToProps(dispatch) {

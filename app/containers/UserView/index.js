@@ -31,9 +31,10 @@ import {
   setSubject,
   setActiontype,
   openNewEntityModal,
+  printView,
 } from 'containers/App/actions';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
+import { CONTENT_SINGLE, PRINT_TYPES } from 'containers/App/constants';
 import {
   USER_ROLES,
   ROUTES,
@@ -51,6 +52,7 @@ import ViewPanelInside from 'components/EntityView/ViewPanelInside';
 import FieldGroup from 'components/fields/FieldGroup';
 import SubjectButton from 'components/styled/SubjectButton';
 import SubjectButtonGroup from 'components/styled/SubjectButtonGroup';
+import HeaderPrint from 'components/Header/HeaderPrint';
 
 import {
   selectReady,
@@ -65,10 +67,12 @@ import {
   selectActortypes,
   selectActiontypes,
   selectTaxonomiesWithCategories,
+  selectIsPrintView,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
 
+import { keydownHandlerPrint } from 'utils/print';
 import Activities from './Activities';
 import messages from './messages';
 
@@ -79,7 +83,9 @@ import {
   selectActorsByType,
 } from './selectors';
 
+
 import { DEPENDENCIES } from './constants';
+
 
 // only show the highest rated role (lower role ids means higher)
 // const getHighestUserRoleId = (user) => user
@@ -117,6 +123,8 @@ export function UserView({
   actiontypes,
   onCreateOption,
   isAdmin,
+  onSetPrintView,
+  isPrintView,
 }) {
   useEffect(() => {
     // kick off loading of data
@@ -129,6 +137,21 @@ export function UserView({
       onLoadData();
     }
   }, [dataReady]);
+
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.SINGLE,
+    printOrientation: 'portrait',
+    printSize: 'A4',
+  });
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
 
   const pageTitle = intl.formatMessage(
     isMember ? messages.pageTitleBack : messages.pageTitle
@@ -148,7 +171,7 @@ export function UserView({
   if (dataReady) {
     buttons.push({
       type: 'icon',
-      onClick: () => window.print(),
+      onClick: () => mySetPrintView(),
       title: 'Print',
       icon: 'print',
     });
@@ -174,7 +197,6 @@ export function UserView({
       onClick: () => handleEdit(userId),
     });
   }
-
   return (
     <div>
       <Helmet
@@ -192,6 +214,7 @@ export function UserView({
         )}
         {user && dataReady && (
           <ViewWrapper>
+            {isPrintView && (<HeaderPrint />)}
             <ViewHeader
               title={pageTitle}
               type={CONTENT_SINGLE}
@@ -201,8 +224,9 @@ export function UserView({
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isMember}>
+                <Main hasAside={isMember && !isPrintView}>
                   <FieldGroup
+                    aside={!isPrintView}
                     group={{ // fieldGroup
                       fields: [
                         getTitleField(user, isMember, 'name', appMessages.attributes.name),
@@ -219,7 +243,7 @@ export function UserView({
                           getMetaField(user, true),
                         ],
                       }}
-                      aside
+                      aside={!isPrintView}
                     />
                   </Aside>
                 )}
@@ -227,7 +251,7 @@ export function UserView({
             </ViewPanel>
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside bottom>
+                <Main hasAside={!isPrintView} bottom>
                   {isMember && (
                     <Box>
                       <SubjectButtonGroup>
@@ -257,10 +281,12 @@ export function UserView({
                           actionsByActiontype={actionsByActiontype}
                           actiontypes={actiontypes}
                           isAdmin={isAdmin}
+                          isPrint={isPrintView}
                         />
                       )}
                       {viewSubject === 'uactors' && actorsByActortype && (
                         <FieldGroup
+                          aside={!isPrintView}
                           group={{
                             fields: actorsByActortype.reduce(
                               (memo, actors, typeid) => memo.concat([
@@ -273,6 +299,7 @@ export function UserView({
                                   columns: getActortypeColumns({
                                     typeId: typeid,
                                     showCode: isAdmin || qe(typeid, ACTORTYPES.COUNTRY),
+                                    isAdmin,
                                   }),
                                 }),
                               ]),
@@ -291,7 +318,7 @@ export function UserView({
                         getEmailField(user),
                       ],
                     }}
-                    aside
+                    aside={!isPrintView}
                   />
                   {isMember && (
                     <FieldGroup
@@ -300,7 +327,7 @@ export function UserView({
                           getTaxonomyFields(taxonomies),
                         ],
                       }}
-                      aside
+                      aside={!isPrintView}
                     />
                   )}
                 </Aside>
@@ -335,11 +362,13 @@ UserView.propTypes = {
   onSetActiontype: PropTypes.func,
   isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isPrintView: PropTypes.bool,
   sessionUserId: PropTypes.string,
   viewActiontypeId: PropTypes.string,
   intl: intlShape,
   subject: PropTypes.string,
   onSetSubject: PropTypes.func,
+  onSetPrintView: PropTypes.func,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -360,6 +389,7 @@ const mapStateToProps = (state, props) => ({
   viewActiontypeId: selectActiontypeQuery(state),
   actortypes: selectActortypes(state),
   actiontypes: selectActiontypes(state),
+  isPrintView: selectIsPrintView(state),
 });
 
 function mapDispatchToProps(dispatch) {
@@ -390,6 +420,9 @@ function mapDispatchToProps(dispatch) {
     },
     onCreateOption: (args) => {
       dispatch(openNewEntityModal(args));
+    },
+    onSetPrintView: (config) => {
+      dispatch(printView(config));
     },
   };
 }

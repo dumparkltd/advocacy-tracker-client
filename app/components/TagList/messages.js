@@ -15,7 +15,7 @@ export default defineMessages({
   },
   labelPrintFilters: {
     id: 'app.components.TagSearch.labelPrintFilters',
-    defaultMessage: 'Filters:',
+    defaultMessage: 'Current Filters:',
   },
   labelPrintKeywords: {
     id: 'app.components.TagSearch.labelPrintKeywords',

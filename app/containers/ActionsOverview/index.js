@@ -18,7 +18,7 @@ import { selectReady } from 'containers/App/selectors';
 import HeaderExplore from 'containers/HeaderExplore';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
-import Content from 'components/styled/Content';
+import ContentSimple from 'components/styled/ContentSimple';
 import CardTeaser from 'components/CardTeaser';
 import Footer from 'containers/Footer';
 
@@ -52,7 +52,7 @@ export function ActionsOverview({
     <ContainerWrapper bg>
       <HeaderExplore />
       <ViewContainer>
-        <Content>
+        <ContentSimple>
           {Object.keys(ACTIONTYPE_NAVGROUPS).map((key) => (
             <Group key={key}>
               <GroupTitle>
@@ -87,7 +87,7 @@ export function ActionsOverview({
               </Box>
             </Group>
           ))}
-        </Content>
+        </ContentSimple>
       </ViewContainer>
       <Footer />
     </ContainerWrapper>

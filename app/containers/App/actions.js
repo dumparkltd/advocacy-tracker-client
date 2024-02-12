@@ -19,6 +19,7 @@ import {
   AUTHENTICATE_SENDING,
   AUTHENTICATE,
   AUTHENTICATE_SUCCESS,
+  AUTHENTICATE_RESET,
   AUTHENTICATE_ERROR,
   SET_AUTHENTICATION_STATE,
   LOAD_ENTITIES_IF_NEEDED,
@@ -80,6 +81,8 @@ import {
   SET_INCLUDE_INOFFICAL_STATEMENTS,
   SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
   SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP,
+  PRINT_VIEW,
+  CLOSE_PRINT_VIEW,
 } from './constants';
 
 export function submitInvalid(valid) {
@@ -329,6 +332,19 @@ export function removeEntity(path, id) {
   };
 }
 
+export function printView(config) {
+  return {
+    type: PRINT_VIEW,
+    config,
+  };
+}
+
+export function closePrintView() {
+  return {
+    type: CLOSE_PRINT_VIEW,
+  };
+}
+
 /**
  * Sets the authentication state of the application
  * @param  {boolean} newAuthState True means a user is logged in, false means no user is logged in
@@ -361,9 +377,15 @@ export function entitiesReady(path, time) {
  * @param  {boolean} sending True means we're sending a request, false means we're not
  */
 export function authenticateSending(sending) {
+  // console.log('authenticateSending');
   return {
     type: AUTHENTICATE_SENDING,
     sending,
+  };
+}
+export function authenticateReset() {
+  return {
+    type: AUTHENTICATE_RESET,
   };
 }
 
@@ -404,6 +426,7 @@ export function recoverPassword(data) {
  * @return {object}      An action object with a type of AUTHENTICATE_SUCCESS passing the user
  */
 export function authenticateSuccess(user) {
+  // console.log('authenticateSuccess');
   return {
     type: AUTHENTICATE_SUCCESS,
     user,
@@ -437,6 +460,7 @@ export function logoutSuccess() {
 }
 
 export function validateToken() {
+  // console.log('validateToken');
   return {
     type: VALIDATE_TOKEN,
   };

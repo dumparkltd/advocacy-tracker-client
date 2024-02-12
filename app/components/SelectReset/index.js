@@ -18,18 +18,18 @@ const Label = styled.label`
   padding: 0 0.5em 0 0;
   vertical-align: middle;
   display: inline-block;
-  font-size: ${(props) => props.theme.text.small.size};
+  font-size: ${({ theme }) => theme.text.small.size};
   @media print {
-    font-size: ${(props) => props.theme.sizes.print.smaller};
+    font-size: ${({ theme }) => theme.sizes.print.smaller};
   }
 `;
 const Styled = styled.span`;
   @media print {
-    display: ${({ hidePrint }) => (hidePrint ? 'none' : 'inline')};
+    display: ${({ printHide }) => printHide ? 'none' : 'inline'};
   }
 `;
 const Select = styled.select`
-  font-weight: ${(props) => props.active ? 500 : 'normal'};
+  font-weight: ${({ active }) => active ? 500 : 'normal'};
   vertical-align: middle;
   display: inline-block;
   cursor: pointer;
@@ -38,13 +38,13 @@ const Select = styled.select`
     text-overflow: '';
     text-indent: 0.01px; /* Removes default arrow from firefox */
     text-overflow: "";  /* Removes default arrow from firefox */
-    font-size: ${(props) => props.theme.sizes.print.small};
+    font-size: ${({ theme }) => theme.sizes.print.small};
   }
 `;
 // border-bottom: 1px dotted #ccc;
 const Option = styled.option`
-  color: ${(props) => props.active && (!props.isPlaceholder) ? palette('text', 2) : palette('text', 0)};
-  background-color: ${(props) => props.active && (!props.isPlaceholder) ? palette('primary', 1) : palette('background', 0)};
+  color: ${({ active, isPlaceholder }) => active && (!isPlaceholder) ? palette('text', 2) : palette('text', 0)};
+  background-color: ${({ active, isPlaceholder }) => active && (!isPlaceholder) ? palette('primary', 1) : palette('background', 0)};
 `;
 const Reset = styled(ButtonSimple)`
   padding: 0 0.5em 0 0;
@@ -55,11 +55,11 @@ const Reset = styled(ButtonSimple)`
   }
   margin-right: 20px;
   font-weight: 500;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     padding: 0 0.5em 0 0;
   }
   @media print {
-    font-size: ${(props) => props.theme.sizes.print.small};
+    font-size: ${({ theme }) => theme.sizes.print.small};
   }
 `;
 
@@ -73,16 +73,16 @@ export class SelectReset extends React.PureComponent { // eslint-disable-line re
       options,
       isReset,
       index,
-      hidePrint,
+      printHide,
     } = this.props;
     const optionActive = find(options, (option) => option.value === value);
 
     return (
-      <Styled hidePrint={hidePrint}>
+      <Styled printHide={printHide}>
         {label
-          && <Label htmlFor={index}>{ label }</Label>
+          && <Label htmlFor={index}>{label}</Label>
         }
-        { (!isReset || optionActive.value === emptyValue)
+        {(!isReset || optionActive.value === emptyValue)
           && (
             <Select
               id={index}
@@ -90,7 +90,7 @@ export class SelectReset extends React.PureComponent { // eslint-disable-line re
               value={value}
               active={false}
             >
-              { options.map((option, i) => (
+              {options.map((option, i) => (
                 <Option
                   key={i}
                   value={option.value}
@@ -104,11 +104,11 @@ export class SelectReset extends React.PureComponent { // eslint-disable-line re
             </Select>
           )
         }
-        { isReset && optionActive.value !== emptyValue
+        {isReset && optionActive.value !== emptyValue
           && (
             <Reset onClick={() => onChange(emptyValue)}>
               {optionActive.label}
-              <Icon name="removeSmall" text textRight hidePrint />
+              <Icon name="removeSmall" text textRight printHide />
             </Reset>
           )
         }
@@ -125,7 +125,7 @@ SelectReset.propTypes = {
   options: PropTypes.array,
   onChange: PropTypes.func,
   isReset: PropTypes.bool,
-  hidePrint: PropTypes.bool,
+  printHide: PropTypes.bool,
 };
 
 SelectReset.contextTypes = {

@@ -1,21 +1,28 @@
+import React from 'react';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 
+import { usePrint } from 'containers/App/PrintContext';
+
 import Section from './Section';
 
-const Main = styled(Section)`
+const Styled = styled(Section)`
   border-color: ${palette('light', 1)};
   border-width: 1px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    border-right-style: ${(props) => props.hasAside ? 'solid' : 'none'};
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    border-right-style: ${({ hasAside, isPrint }) => (hasAside && !isPrint) ? 'solid' : 'none'};
     display: table-cell;
-    width: ${(props) => props.hasAside ? '70%' : '100%'};
+    width: ${({ hasAside }) => hasAside ? '70%' : '100%'};
   }
   @media print {
-    display: ${({ hasAside, bottom }) => (hasAside && !bottom) ? 'table-cell' : 'block'};
-    width: ${({ hasAside, bottom }) => (hasAside && !bottom) ? '70%' : '100%'};
+    display: ${({ hasAside }) => hasAside ? 'table-cell' : 'block'};
+    width: ${({ hasAside }) => hasAside ? '70%' : '100%'};
     border-right-style: none;
   }
 `;
 
+export function Main(props) {
+  const isPrint = usePrint();
+  return <Styled isPrint={isPrint} {...props} />;
+}
 export default Main;

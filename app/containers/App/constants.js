@@ -20,6 +20,7 @@ export const INVALIDATE_ENTITIES = 'impactoss/App/INVALIDATE_ENTITIES';
 export const RESET_PROGRESS = 'impactoss/App/RESET_PROGRESS';
 
 export const AUTHENTICATE_SENDING = 'impactoss/App/AUTHENTICATE_SENDING';
+export const AUTHENTICATE_RESET = 'impactoss/App/AUTHENTICATE_RESET';
 export const AUTHENTICATE = 'impactoss/App/AUTHENTICATE';
 export const RESET_PASSWORD = 'impactoss/App/RESET_PASSWORD';
 export const RECOVER_PASSWORD = 'impactoss/App/RECOVER_PASSWORD';
@@ -88,6 +89,8 @@ export const SET_INCLUDE_TARGET_CHILDREN_ON_MAP = 'impactoss/App/SET_INCLUDE_TAR
 export const SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP = 'impactoss/App/SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP';
 export const SET_INCLUDE_MEMBERS_FORFILTERS = 'impactoss/App/SET_INCLUDE_MEMBERS_FORFILTERS';
 export const SET_INCLUDE_INOFFICAL_STATEMENTS = 'impactoss/App/SET_INCLUDE_INOFFICAL_STATEMENTS';
+export const PRINT_VIEW = 'impactoss/App/PRINT_VIEW';
+export const CLOSE_PRINT_VIEW = 'impactoss/App/CLOSE_PRINT_VIEW';
 
 export const FILTERS_PANEL = 'filters';
 export const EDIT_PANEL = 'edit';
@@ -133,4 +136,9 @@ export const VIEWPORTS = {
   SMALL: 2,
   MEDIUM: 3,
   LARGE: 4,
+};
+
+export const PRINT_TYPES = {
+  LIST: 1,
+  SINGLE: 2,
 };

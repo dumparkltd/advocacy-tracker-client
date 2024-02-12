@@ -2,7 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { Box } from 'grommet';
 
-const SubjectButtonGroup = styled((p) => (
+import { usePrint } from 'containers/App/PrintContext';
+
+const Styled = styled((p) => (
   <Box
     direction="row"
     gap="small"
@@ -16,11 +18,16 @@ const SubjectButtonGroup = styled((p) => (
     : 'transparent'
 };
   overflow-x: scroll;
-  white-space: nowrap; 
+  white-space: nowrap;
   ::-webkit-scrollbar {
    padding-top:1px;
   }
+  margin-left: ${({ isPrint }) => isPrint ? 0 : 'medium'};
 `;
+export function SubjectButtonGroup(props) {
+  const isPrint = usePrint();
+  return <Styled isPrint={isPrint} {...props} />;
+}
 
 
 export default SubjectButtonGroup;

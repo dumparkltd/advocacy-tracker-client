@@ -58,12 +58,13 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectIsUserMember,
   selectSessionUserId,
   selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import FormWrapper from './FormWrapper';
 
 import {
@@ -279,7 +280,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       }
     }
     return groups;
-  }
+  };
 
   getBodyAsideFields = (
     entity,
@@ -362,6 +363,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       userOptions,
       onCreateOption,
       isAdmin,
+      isUserMember,
       myId,
       onErrorDismiss,
       onServerErrorDismiss,
@@ -382,7 +384,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       appMessages.entities[typeId ? `actors_${typeId}` : 'actors'].single
     );
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
-
+    const canDelete = isAdmin || (isUserMember && isMine);
     return (
       <div>
         <Helmet
@@ -431,7 +433,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={handleCancel}
                 handleUpdate={handleUpdate}
-                handleDelete={isAdmin ? () => handleDelete(typeId) : null}
+                handleDelete={canDelete ? () => handleDelete(typeId) : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
                 fields={dataReady && {
@@ -485,6 +487,7 @@ ActorEdit.propTypes = {
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isUserMember: PropTypes.bool,
   params: PropTypes.object,
   taxonomies: PropTypes.object,
   actionsByActiontype: PropTypes.object,
@@ -505,6 +508,7 @@ ActorEdit.contextTypes = {
 const mapStateToProps = (state, props) => ({
   viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
+  isUserMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),

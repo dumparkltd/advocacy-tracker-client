@@ -61,7 +61,7 @@ import {
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 
 import FormWrapper from './FormWrapper';
 
@@ -121,7 +121,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
         }])
       )
       : dataWithType;
-  }
+  };
 
   getHeaderMainFields = (typeId, isAdmin) => {
     const { intl } = this.context;
@@ -166,7 +166,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
         ],
       },
     ]);
-  }
+  };
 
   getBodyMainFields = (
     typeId,
@@ -245,7 +245,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       }
     }
     return groups;
-  }
+  };
 
   getBodyAsideFields = (
     typeId,
@@ -533,7 +533,7 @@ function mapDispatchToProps(
           .map(getCheckedValuesFromOptions)
           .valueSeq()
           .flatten(true);
-          // .filter((id) => !validCategories || validCategories.includes(id));
+        // .filter((id) => !validCategories || validCategories.includes(id));
         // const categoryIds =
         saveData = saveData.set(
           'actorCategories',

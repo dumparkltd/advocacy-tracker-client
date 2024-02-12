@@ -47,6 +47,7 @@ export const CONFIG = {
     ACTIONTYPES.OP,
     ACTIONTYPES.AP,
   ],
+  downloadCSV: true,
   batchDelete: true,
   views: {
     list: {
@@ -72,18 +73,6 @@ export const CONFIG = {
     invalidateEntitiesPaths: [API.CATEGORIES, API.ACTIONS],
     // defaultGroupAttribute: 'groups_actions_default',
   },
-  // connectedTaxonomies: { // filter by each category
-  //   query: 'catx',
-  //   search: true,
-  //   exclude: 'tags_actions',
-  //   connections: [
-  //     {
-  //       path: API.ACTORS, // filter by actor connection
-  //       message: 'entities.actors.plural',
-  //       key: 'actor_id',
-  //     },
-  //   ],
-  // },
   connections: { // filter by associated entity
     // filter by associated actor
     actors: {

@@ -16,11 +16,12 @@ import { Box, Text } from 'grommet';
 import Header from 'components/Header';
 import Overlay from 'components/InfoOverlay/Overlay';
 import EntityNew from 'containers/EntityNew';
+import PrintUI from 'containers/PrintUI';
 
 import { getAuthValues } from 'utils/api-request';
 
 import { sortEntities } from 'utils/sort';
-import { ROUTES, API } from 'themes/config';
+import { ROUTES, API, PRINT } from 'themes/config';
 
 import {
   selectIsSignedIn,
@@ -31,6 +32,8 @@ import {
   selectEntitiesWhere,
   selectNewEntityModal,
   selectIsAuthenticating,
+  selectIsPrintView,
+  selectPrintConfig,
 } from './selectors';
 
 import {
@@ -42,37 +45,139 @@ import {
   saveErrorDismiss,
 } from './actions';
 
+import { PrintContext } from './PrintContext';
+
 import { DEPENDENCIES } from './constants';
 
 import messages from './messages';
 
 const Main = styled.div`
-  position: ${(props) => props.isHome ? 'relative' : 'absolute'};
-  top: ${(props) => props.isHome
+  position: ${({ isHome, isPrintView }) => {
+    if (isPrintView) {
+      return 'absolute';
+    }
+    if (isHome) {
+      return 'absolute';
+    }
+    return 'absolute';
+  }};
+  top: ${({ isHome, theme }) => isHome
     ? 0
-    : props.theme.sizes.header.banner.heightMobile
+    : theme.sizes.header.banner.heightMobile
 }px;
   left: 0;
   right: 0;
   bottom:0;
-  background-color: transparent;
-  overflow: hidden;
-
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    top: ${(props) => props.isHome
+  overflow: ${({ isPrint }) => isPrint ? 'auto' : 'hidden'};
+  width: auto;
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    top: ${({ isHome, theme }) => isHome
     ? 0
-    : props.theme.sizes.header.banner.height
+    : theme.sizes.header.banner.height
 }px;
   }
   @media print {
-    background: white;
+    background: transparent;
     position: static;
+    overflow: hidden;
   }
 `;
-// overflow: ${(props) => props.isHome ? 'auto' : 'hidden'};
+// A4 595 × 842
+// A3 842 x 1190
+/* eslint-disable prefer-template */
+const getPrintHeight = ({
+  isPrint,
+  size, orient,
+  fixed,
+}) => {
+  if (fixed && isPrint) {
+    return PRINT.SIZES[size][orient].H + 'pt';
+  }
+  if (isPrint) {
+    return 'auto';
+  }
+  return '100%';
+};
+
+const getPrintWidth = ({
+  isPrint,
+  orient,
+  size,
+}) => {
+  if (isPrint) {
+    return PRINT.SIZES[size][orient].W + 'pt';
+  }
+  return '100%';
+};
+
+const PrintWrapperInner = styled.div`
+  position: ${({ isPrint, fixed }) => (isPrint && fixed) ? 'absolute' : 'static'};
+  top: ${({ isPrint }) => isPrint ? 20 : 0}px;
+  bottom: ${({ isPrint, fixed }) => {
+    if (isPrint && fixed) {
+      return '20px';
+    }
+    if (isPrint) {
+      return 'auto';
+    }
+    return 0;
+  }};
+  right: ${({ isPrint }) => isPrint ? 20 : 0}px;
+  left: ${({ isPrint }) => isPrint ? 20 : 0}px;
+  @media print {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: ${({
+    isPrint, orient, size, fixed,
+  }) => fixed ? getPrintWidth({ size, orient, isPrint }) : '100%'};
+    height: ${({
+    isPrint, size, orient, fixed,
+  }) => getPrintHeight({
+    isPrint, size, orient, fixed,
+  })};
+  }
+`;
+const PrintWrapper = styled.div`
+  position: relative;
+  margin-bottom: ${({ isPrint }) => isPrint ? '140px' : '0px'};
+  margin-right: ${({ isPrint }) => isPrint ? 'auto' : '0px'};
+  margin-left: ${({ isPrint }) => isPrint ? 'auto' : '0px'};
+  bottom: ${({ isPrint, fixed }) => {
+    if (isPrint && fixed) {
+      return 0;
+    }
+    if (isPrint) {
+      return 'auto';
+    }
+    return 0;
+  }};
+  width: ${({ isPrint, size, orient }) => getPrintWidth({ isPrint, size, orient })};
+  height: ${({
+    isPrint, size, orient, fixed,
+  }) => getPrintHeight({
+    isPrint, size, orient, fixed,
+  })};
+  min-height: ${({ isPrint, size, orient }) => isPrint ? getPrintHeight({
+    isPrint, size, orient, fixed: true,
+  }) : 'auto'};
+  box-shadow: ${({ isPrint }) => isPrint ? '0px 0px 5px 0px rgb(0 0 0 / 50%)' : 'none'};
+  padding: ${({ isPrint }) => isPrint ? 20 : 0}px;
+  @media print {
+    position: static;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    bottom: 0;
+    background: transparent;
+  }
+`;
 
 class App extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
+    // console.log('App/UNSAFE_componentWillMount', 'validateToken');
     this.props.validateToken();
     this.props.loadEntitiesIfNeeded();
   }
@@ -137,12 +242,12 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           title: intl.formatMessage(messages.nav.taxonomies),
           isAdmin: true,
           active: currentPath.startsWith(ROUTES.CATEGORY)
-          || currentPath.startsWith(ROUTES.TAXONOMIES),
+            || currentPath.startsWith(ROUTES.TAXONOMIES),
         },
       ]);
     }
     return navItems;
-  }
+  };
 
   render() {
     const {
@@ -156,7 +261,10 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       user,
       children,
       isUserAuthenticating,
+      isPrintView,
+      printArgs,
     } = this.props;
+
     const { intl } = this.context;
     const title = intl.formatMessage(messages.app.title);
     const isHome = location.pathname === '/';
@@ -170,6 +278,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       const authValues = getAuthValues();
       authUID = authValues && authValues.uid;
     }
+
     return (
       <div id="app">
         <Helmet titleTemplate={`%s - ${title}`} defaultTitle={title} />
@@ -177,6 +286,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           <Header
             isSignedIn={isUserSignedIn}
             isVisitor={isVisitor}
+            isPrintView={isPrintView}
             user={user}
             pages={pages && this.preparePageMenuPages(pages, location.pathname)}
             navItems={this.prepareMainMenuItems(
@@ -198,8 +308,25 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             currentPath={location.pathname}
           />
         )}
-        <Main isHome={isHomeOrAuth}>
-          {React.Children.toArray(children)}
+        <Main isHome={isHomeOrAuth} isPrint={isPrintView}>
+          {isPrintView && (<PrintUI />)}
+          <PrintWrapper
+            isPrint={isPrintView}
+            fixed={printArgs && printArgs.fixed ? printArgs.fixed : false}
+            orient={printArgs && printArgs.printOrientation ? printArgs.printOrientation : 'portrait'}
+            size={printArgs && printArgs.printSize ? printArgs.printSize : 'A4'}
+          >
+            <PrintWrapperInner
+              isPrint={isPrintView}
+              fixed={printArgs && printArgs.fixed ? printArgs.fixed : false}
+              orient={printArgs && printArgs.printOrientation ? printArgs.printOrientation : 'portrait'}
+              size={printArgs && printArgs.printSize ? printArgs.printSize : 'A4'}
+            >
+              <PrintContext.Provider value={isPrintView}>
+                {React.Children.toArray(children)}
+              </PrintContext.Provider>
+            </PrintWrapperInner>
+          </PrintWrapper>
         </Main>
         {newEntityModal && (
           <ReactModal
@@ -231,7 +358,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             />
           </ReactModal>
         )}
-        {isUserAuthenticating && !isAuth && (
+        {isUserAuthenticating && !isAuth && !isUserSignedIn && (
           <Overlay
             title={intl.formatMessage(messages.labels.userLoading)}
             content={(
@@ -254,7 +381,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             loading
           />
         )}
-        <GlobalStyle />
+        <GlobalStyle isPrint={isPrintView} />
       </div>
     );
   }
@@ -274,6 +401,8 @@ App.propTypes = {
   location: PropTypes.object.isRequired,
   newEntityModal: PropTypes.object,
   onCloseModal: PropTypes.func,
+  isPrintView: PropTypes.bool,
+  printArgs: PropTypes.object,
 };
 App.contextTypes = {
   intl: PropTypes.object.isRequired,
@@ -286,6 +415,8 @@ const mapStateToProps = (state) => ({
   isUserSignedIn: selectIsSignedIn(state),
   isUserAuthenticating: selectIsAuthenticating(state),
   user: selectSessionUserAttributes(state),
+  isPrintView: selectIsPrintView(state),
+  printArgs: selectPrintConfig(state),
   pages: selectEntitiesWhere(state, {
     path: API.PAGES,
     where: { draft: false },

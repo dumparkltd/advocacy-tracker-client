@@ -5,11 +5,18 @@ import { Box, Text, Button } from 'grommet';
 import { FormNext, FormClose } from 'grommet-icons';
 import { ROUTES } from 'themes/config';
 
+import PrintHide from 'components/styled/PrintHide';
+
 import asArray from 'utils/as-array';
 
 const Root = styled.div`
   position: absolute;
-  top: ${({ position }) => position ? position.y : 50}px;
+  top: ${({ position, isPrint }) => {
+    if (isPrint) {
+      return 0;
+    }
+    return position ? position.y : 50;
+  }}px;
   left: 0;
   right: 0;
   z-index: 2501;
@@ -20,6 +27,16 @@ const Root = styled.div`
     top: ${({ position }) => position ? position.y : 0}px;
     right: ${({ position }) => position ? 'auto' : '0px'};
     left: ${({ position }) => position ? position.x : 'auto'};
+  }
+  width: ${({ isPrint, orient }) => {
+    if (isPrint) return orient === 'portrait' ? '33%' : '25%';
+    return 'auto';
+  }};
+  @media print {
+    left: auto;
+    top: 0;
+    bottom: 0;
+    width: ${({ orient }) => orient === 'portrait' ? 33 : 25}%;
   }
 `;
 
@@ -40,9 +57,13 @@ const Main = styled.div`
   max-height: ${({ h }) => h}px;
   @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
     height: auto;
-    min-width: 290px;
-    max-width: 310px;
+    min-width: ${({ isPrint }) => isPrint ? 'auto' : '290px'};
+    max-width: ${({ isPrint }) => isPrint ? 'auto' : '310px'};
     pointer-events: all;
+  }
+  @media print {
+    min-width: auto;
+    width: 100%;
   }
 `;
 
@@ -86,12 +107,20 @@ const Tooltip = ({
   mapRef,
   onFeatureClick,
   isLocationData,
+  printArgs,
+  isPrintView,
 }) => (
-  <Root position={position}>
+  <Root
+    position={position}
+    isPrint={isPrintView}
+    orient={printArgs && printArgs.printOrientation}
+  >
     <Anchor dirLeft={direction && direction.x === 'left'} xy={{ x: 0, y: 0 }}>
       <Main
         dirLeft={direction && direction.x === 'left'}
         h={mapRef && mapRef.current ? mapRef.current.clientHeight : 300}
+        isPrint={isPrintView}
+        orient={printArgs && printArgs.printOrientation}
       >
         <Box gap="xsmall">
           {features.map((feature, i) => (
@@ -100,11 +129,13 @@ const Tooltip = ({
                 <Box>
                   <TTTitle>{feature.title}</TTTitle>
                 </Box>
-                <Button
-                  plain
-                  icon={<FormClose size="small" />}
-                  onClick={() => onClose(feature.id)}
-                />
+                <PrintHide>
+                  <Button
+                    plain
+                    icon={<FormClose size="small" />}
+                    onClick={() => onClose(feature.id)}
+                  />
+                </PrintHide>
               </Box>
               {feature.content && (
                 <Box>
@@ -113,25 +144,27 @@ const Tooltip = ({
                   )}
                 </Box>
               )}
-              {onFeatureClick && feature.id && (
-                <ButtonWrap>
-                  <CountryButton
-                    as="a"
-                    plain
-                    href={`${ROUTES.ACTOR}/${feature.id}`}
-                    onClick={(evt) => {
-                      if (evt && evt.preventDefault) evt.preventDefault();
-                      if (evt && evt.stopPropagation) evt.stopPropagation();
-                      onFeatureClick(feature.id);
-                    }}
-                  >
-                    <Box direction="row" align="center">
-                      <Text size="small">{isLocationData ? 'Location details' : 'Country details'}</Text>
-                      <FormNext size="xsmall" style={{ stroke: 'inherit', fill: 'inherit' }} />
-                    </Box>
-                  </CountryButton>
-                </ButtonWrap>
-              )}
+              <PrintHide>
+                {onFeatureClick && feature.id && (
+                  <ButtonWrap>
+                    <CountryButton
+                      as="a"
+                      plain
+                      href={`${ROUTES.ACTOR}/${feature.id}`}
+                      onClick={(evt) => {
+                        if (evt && evt.preventDefault) evt.preventDefault();
+                        if (evt && evt.stopPropagation) evt.stopPropagation();
+                        onFeatureClick(feature.id);
+                      }}
+                    >
+                      <Box direction="row" align="center">
+                        <Text size="small">{isLocationData ? 'Location details' : 'Country details'}</Text>
+                        <FormNext size="xsmall" style={{ stroke: 'inherit', fill: 'inherit' }} />
+                      </Box>
+                    </CountryButton>
+                  </ButtonWrap>
+                )}
+              </PrintHide>
             </Feature>
           ))}
         </Box>
@@ -142,9 +175,11 @@ const Tooltip = ({
 
 Tooltip.propTypes = {
   isLocationData: PropTypes.bool,
+  isPrintView: PropTypes.bool,
   position: PropTypes.object,
   direction: PropTypes.object, // x, y
   mapRef: PropTypes.object,
+  printArgs: PropTypes.object,
   features: PropTypes.array,
   onClose: PropTypes.func,
   onFeatureClick: PropTypes.func,

@@ -9,6 +9,8 @@ import {
   Drop,
 } from 'grommet';
 
+// import PrintHide from 'components/styled/PrintHide';
+
 import { TEXT_TRUNCATE } from 'themes/config';
 import Icon from 'components/Icon';
 import qe from 'utils/quasi-equals';
@@ -98,7 +100,7 @@ export function SelectIndicators({ config }) {
       <Box flex={{ shrink: 0 }} pad={{ left: 'ms' }}>
         {!isNoneOption && (
           <Reset onClick={() => onUpdateFFIndicator()}>
-            <Icon name="removeSmall" text hidePrint />
+            <Icon name="removeSmall" text printHide />
           </Reset>
         )}
         {isNoneOption && (

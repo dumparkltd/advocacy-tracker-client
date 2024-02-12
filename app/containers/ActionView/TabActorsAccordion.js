@@ -7,11 +7,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { intlShape, injectIntl } from 'react-intl';
-import {
-  Box,
-  Accordion,
-  AccordionPanel,
-} from 'grommet';
+import { Box } from 'grommet';
 import {
   getActorConnectionField,
 } from 'utils/fields';
@@ -20,7 +16,7 @@ import { checkActorAttribute, getActortypeColumns } from 'utils/entities';
 import { lowerCase } from 'utils/string';
 
 import FieldGroup from 'components/fields/FieldGroup';
-import AccordionHeader from 'components/AccordionHeader';
+import Accordion from 'components/Accordion';
 import A from 'components/styled/A';
 
 import appMessages from 'containers/App/messages';
@@ -95,96 +91,92 @@ export function TabActorsAccordion({
         )}
         {hasChildTargets && (
           <Accordion
-            activeIndex={actives}
-            onActive={(newActive) => setActive(newActive)}
-            multiple
-            animate={false}
-          >
-            {actorsByType && (
-              <AccordionPanel
-                header={(
-                  <AccordionHeader
-                    title="Direct targets"
-                    open={actives.includes(0)}
-                  />
-                )}
-              >
-                <Box pad={{ vertical: 'small' }}>
-                  <FieldGroup
-                    seamless
-                    group={{
-                      fields: actorsByType.reduce(
-                        (memo, actors, typeid) => memo.concat([
-                          getActorConnectionField({
-                            actors,
-                            taxonomies,
-                            onEntityClick,
-                            connections: actorConnections,
-                            typeid,
-                            columns: getActortypeColumns({
-                              typeId: typeid,
-                              showCode: checkActorAttribute(typeid, 'code', isAdmin),
-                            }),
-                          }),
-                        ]),
-                        [],
-                      ),
-                    }}
-                  />
-                </Box>
-              </AccordionPanel>
-            )}
-            {hasChildTargets && (
-              <AccordionPanel
-                header={(
-                  <AccordionHeader
-                    title="Indirect targets (from child activities)"
-                    open={actives.includes(1)}
-                  />
-                )}
-              >
-                {childActionsByActiontype.flatten(true).entrySeq().map(
-                  ([childId, childAction]) => {
-                    const actorIdsByType = childAction.get('targetsByType');
-                    if (!actorIdsByType) return null;
-                    const typeid = childAction.getIn(['attributes', 'measuretype_id']);
-                    const actiontypeLabel = getTypeLabel(
-                      typeid,
-                      0,
-                      intl,
-                    );
-                    return (
-                      <TabActorsAccordionChildTargets
-                        key={childId}
-                        targetIds={actorIdsByType.flatten(true)}
-                        title={(
-                          <div>
-                            {`As parent of ${actiontypeLabel}: `}
-                            <A
-                              weight={600}
-                              href={getActionLink(childAction)}
-                              onClick={getActionOnClick(childAction, onEntityClick)}
-                              title={childAction.getIn(['attributes', 'title'])}
-                            >
-                              {childAction.getIn(['attributes', 'title'])}
-                            </A>
-                          </div>
-                        )}
-                        taxonomies={taxonomies}
-                        onEntityClick={onEntityClick}
-                        actorConnections={actorConnections}
-                        getActortypeColumns={(actortypeid) => getActortypeColumns({
-                          typeId: actortypeid,
-                          showCode: checkActorAttribute(actortypeid, 'code', isAdmin),
-                        })}
-                        isAdmin={isAdmin}
+            activePanels={actives}
+            onActive={(newActives) => setActive(newActives)}
+            options={[
+              actorsByType
+                ? {
+                  id: 0,
+                  titleButton: 'Direct targets',
+                  content: actives.indexOf(0) > -1 && (
+                    <Box pad={{ vertical: 'small' }}>
+                      <FieldGroup
+                        seamless
+                        group={{
+                          fields: actorsByType.reduce(
+                            (memo, actors, typeid) => memo.concat([
+                              getActorConnectionField({
+                                actors,
+                                taxonomies,
+                                onEntityClick,
+                                connections: actorConnections,
+                                typeid,
+                                columns: getActortypeColumns({
+                                  typeId: typeid,
+                                  showCode: checkActorAttribute(typeid, 'code', isAdmin),
+                                  isAdmin,
+                                }),
+                              }),
+                            ]),
+                            [],
+                          ),
+                        }}
                       />
-                    );
-                  }
-                )}
-              </AccordionPanel>
-            )}
-          </Accordion>
+                    </Box>
+                  ),
+                }
+                : null,
+              hasChildTargets
+                ? {
+                  id: 1,
+                  titleButton: 'Indirect targets (from child activities)',
+                  content: actives.indexOf(1) > -1 && (
+                    <div>
+                      {childActionsByActiontype.flatten(true).entrySeq().map(
+                        ([childId, childAction]) => {
+                          const actorIdsByType = childAction.get('targetsByType');
+                          if (!actorIdsByType) return null;
+                          const typeid = childAction.getIn(['attributes', 'measuretype_id']);
+                          const actiontypeLabel = getTypeLabel(
+                            typeid,
+                            0,
+                            intl,
+                          );
+                          return (
+                            <TabActorsAccordionChildTargets
+                              key={childId}
+                              targetIds={actorIdsByType.flatten(true)}
+                              title={(
+                                <div>
+                                  {`As parent of ${actiontypeLabel}: `}
+                                  <A
+                                    weight={600}
+                                    href={getActionLink(childAction)}
+                                    onClick={getActionOnClick(childAction, onEntityClick)}
+                                    title={childAction.getIn(['attributes', 'title'])}
+                                  >
+                                    {childAction.getIn(['attributes', 'title'])}
+                                  </A>
+                                </div>
+                              )}
+                              taxonomies={taxonomies}
+                              onEntityClick={onEntityClick}
+                              actorConnections={actorConnections}
+                              getActortypeColumns={(actortypeid) => getActortypeColumns({
+                                typeId: actortypeid,
+                                showCode: checkActorAttribute(actortypeid, 'code', isAdmin),
+                              })}
+                              isAdmin={isAdmin}
+                            />
+                          );
+                        }
+                      )}
+                    </div>
+                  ),
+                }
+                : null,
+            ]}
+          />
         )}
       </Box>
     </>

@@ -37,7 +37,7 @@ import {
 
 // import Loading from 'components/Loading';
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 import ImportEntitiesForm from 'components/forms/ImportEntitiesForm';
 
 import appMessages from 'containers/App/messages';

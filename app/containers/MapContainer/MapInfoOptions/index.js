@@ -4,6 +4,7 @@ import styled from 'styled-components';
 // import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import { Box, Text, Button } from 'grommet';
 import InfoOverlay from 'components/InfoOverlay';
+import PrintHide from 'components/styled/PrintHide';
 
 import qe from 'utils/quasi-equals';
 
@@ -21,17 +22,28 @@ const SubTitle = styled((p) => <Text size="small" {...p} />)``;
 const Styled = styled.div`
   position: absolute;
   z-index: 50;
-  bottom: 10px;
-  width: 100%;
-  height: ${({ hasTabs }) => hasTabs ? 260 : 220}px;
+  bottom: ${({ isPrint }) => isPrint ? 0 : 10}px;
+  width: ${({ isPrint }) => isPrint ? 'auto' : '100%'};
+  background: ${({ isPrint }) => isPrint ? 'white' : 'transparent'};
+  height: ${({ hasTabs, isPrint }) => {
+    if (isPrint) return '160px;';
+    if (hasTabs) return '260px;';
+    return '220px;';
+  }}
   left: 0;
-  @media (min-width: ${({ theme }) => theme.breakpoints.ms}) {
-  max-width: 320px;
-  }
   @media (max-width: ${({ theme }) => theme.breakpoints.ms}) {
     width: calc(100% - 20px);
     left: 10px;
     bottom: 30px;
+  }
+  @media (min-width: ${({ theme }) => theme.breakpoints.ms}) {
+    max-width: 320px;
+  }
+  @media (min-width: 370px) {
+    max-width: 420px;
+    width: 100%;
+    left: ${({ isPrint }) => isPrint ? 0 : 10}px;
+    bottom: ${({ isPrint }) => isPrint ? 0 : 30}px;
   }
 `;
 const IndicatorButton = styled((p) => <Button plain {...p} />)`
@@ -79,6 +91,7 @@ export function MapInfoOptions({
   countryMapSubject,
   minMaxValues,
   circleLayerConfig,
+  isPrintView,
 }) {
   if (!options) return null;
   const [tab, setTab] = useState(options[0].id);
@@ -132,14 +145,14 @@ export function MapInfoOptions({
     );
   }
   return (
-    <Styled hasTabs={options.length > 1 || activeOption.indicatorOptions}>
+    <Styled hasTabs={options.length > 1 || activeOption.indicatorOptions} isPrint={isPrintView}>
       <Pane>
         {options.length > 1 && (
           <Box fill="horizontal" direction="row" style={{ zIndex: 1 }}>
             {renderTabs(true)}
           </Box>
         )}
-        <Box flex={{ grow: 1 }} direction="row" elevation="medium" background="white" style={{ zIndex: 2 }} />
+        <Box flex={{ grow: 1 }} direction="row" elevation={isPrintView ? 'none' : 'medium'} background="white" style={{ zIndex: 2 }} />
       </Pane>
       <Pane>
         {options.length > 1 && (
@@ -245,10 +258,12 @@ export function MapInfoOptions({
           )}
           {activeOption.id === 'countries' && activeOption.indicatorOptions && (
             <Box fill="horizontal">
-              <Box pad={{ bottom: 'ms' }} gap="xxsmall">
-                <SubTitle>Select a topic to view country positions</SubTitle>
-                <SelectIndicators config={activeOption} />
-              </Box>
+              <PrintHide>
+                <Box pad={{ bottom: 'ms' }} gap="xxsmall">
+                  <SubTitle>Select a topic to view country positions</SubTitle>
+                  <SelectIndicators config={activeOption} />
+                </Box>
+              </PrintHide>
               {activeIndicatorOption.id === 'all'
                 && minMaxValues.countries
                 && minMaxValues.countries.max > 0 && (
@@ -331,6 +346,7 @@ MapInfoOptions.propTypes = {
   minMaxValues: PropTypes.object,
   circleLayerConfig: PropTypes.object,
   countryMapSubject: PropTypes.string,
+  isPrintView: PropTypes.bool,
 };
 
 export default MapInfoOptions;

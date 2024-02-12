@@ -51,7 +51,6 @@ export const currentFilterArgs = (config, locationQuery) => {
 export const currentFilters = (
   {
     config,
-    entities,
     taxonomies,
     connections,
     connectedTaxonomies,
@@ -107,7 +106,6 @@ export const currentFilters = (
   }
   if (config.attributes) {
     filterTags = filterTags.concat(getCurrentAttributeFilters(
-      entities,
       config.attributes.options,
       locationQuery,
       onTagClick,
@@ -184,7 +182,7 @@ const getCurrentTaxonomyFilters = (
               label: getCategoryLabel(category),
               type: 'taxonomies',
               id: taxonomy.get('id'),
-              group: intl.formatMessage(appMessages.nav.taxonomies),
+              groupLabel: intl.formatMessage(appMessages.nav.taxonomies),
               inverse: true,
               onClick: () => onClick({
                 value,
@@ -216,7 +214,7 @@ const getCurrentTaxonomyFilters = (
               },
             ],
             type: 'taxonomies',
-            group: intl.formatMessage(appMessages.nav.taxonomies),
+            groupLabel: intl.formatMessage(appMessages.nav.taxonomies),
             id: taxonomy.get('id'),
             onClick: () => onClick({
               value,
@@ -247,7 +245,7 @@ const getCurrentTaxonomyFilters = (
               },
             ],
             type: 'taxonomies',
-            group: intl.formatMessage(appMessages.nav.taxonomies),
+            groupLabel: intl.formatMessage(appMessages.nav.taxonomies),
             id: taxonomy.get('id'),
             onClick: () => onClick({
               value,
@@ -349,7 +347,7 @@ const getCurrentConnectionFilters = (
           label: getConnectionLabel(connection, value, !isCodePublic, labels, intl),
           labelLong: getConnectionLabel(connection, value, true, labels, intl),
           type: option.entityType,
-          group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
+          groupLabel: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
           connectedAttributes,
           connectionAttributeName,
           query,
@@ -383,7 +381,7 @@ const getCurrentConnectionFilters = (
               },
               { label: option.label },
             ],
-            group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
+            groupLabel: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
             type: option.entityType,
             onClick: () => onClick({
               value: queryValue,
@@ -413,7 +411,7 @@ const getCurrentConnectionFilters = (
               },
               { label: option.label },
             ],
-            group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
+            groupLabel: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
             type: option.entityType,
             onClick: () => onClick({
               value: queryValue,
@@ -450,7 +448,7 @@ const getCurrentConnectionFilters = (
               },
               { label: option.label },
             ],
-            group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
+            groupLabel: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
             type: option.entityType,
             query: 'without',
             onClick: () => onClick({
@@ -486,7 +484,7 @@ const getCurrentConnectionFilters = (
               },
               { label: option.label },
             ],
-            group: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
+            groupLabel: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
             type: option.entityType,
             query: 'any',
             onClick: () => onClick({
@@ -547,7 +545,6 @@ const getCurrentConnectionAttributeFilters = (
 };
 
 const getCurrentAttributeFilters = (
-  entities,
   attributeFiltersOptions,
   locationQuery,
   onClick,
@@ -563,42 +560,7 @@ const getCurrentAttributeFilters = (
         asList(locationQueryValue).forEach((queryValue) => {
           const [qAttribute, value] = queryValue.split(':');
           if (qAttribute === option.attribute && value) {
-            if (option.reference) {
-              // without
-              if (value === 'null') {
-                tags.push({
-                  labels: [
-                    { label: withoutLabel },
-                    { appMessage: !!option.message, label: option.message || option.label, lowerCase: true },
-                  ],
-                  type: 'attributes',
-                  group: intl.formatMessage(appMessages.nav.attributes),
-                  onClick: () => onClick({
-                    value: queryValue,
-                    query: 'where',
-                    checked: false,
-                  }),
-                });
-              } else {
-                const referenceEntity = entities.find((entity) => qe(entity.getIn(['attributes', option.attribute]), value));
-                const label = referenceEntity && referenceEntity.getIn([option.reference.key, 'attributes', option.reference.label]);
-                tags.push({
-                  labels: label
-                    ? [{ label }]
-                    : [
-                      { appMessage: !!option.message, label: option.message || option.label, postfix: ':' },
-                      { label: value },
-                    ],
-                  type: 'attributes',
-                  group: intl.formatMessage(appMessages.nav.attributes),
-                  onClick: () => onClick({
-                    value: queryValue,
-                    query: 'where',
-                    checked: false,
-                  }),
-                });
-              }
-            } else if (option.options) {
+            if (option.options) {
               const attribute = find(option.options, (o) => o.value.toString() === value.toString());
               let label = attribute ? attribute.message : upperFirst(value);
               label = truncateText(label, TEXT_TRUNCATE.ATTRIBUTE_TAG);
@@ -608,7 +570,8 @@ const getCurrentAttributeFilters = (
                   label,
                 }],
                 type: 'attributes',
-                group: intl.formatMessage(appMessages.nav.attributes),
+                groupId: 'attributes',
+                groupLabel: intl.formatMessage(appMessages.nav.attributes),
                 onClick: () => onClick({
                   value: queryValue,
                   query: 'where',

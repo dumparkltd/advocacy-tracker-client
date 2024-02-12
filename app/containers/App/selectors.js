@@ -65,7 +65,7 @@ export const selectRequestedAt = createSelector(
 export const selectReady = (state, { path }) => reduce(asArray(path),
   (areReady, readyPath) => areReady && (
     !!state.getIn(['global', 'ready', readyPath])
-      || Object.values(API).indexOf(readyPath) === -1
+    || Object.values(API).indexOf(readyPath) === -1
   ),
   true);
 
@@ -82,6 +82,11 @@ export const selectNewEntityModal = createSelector(
 export const selectIsAuthenticating = createSelector(
   getGlobal,
   (globalState) => globalState.getIn(['auth', 'sending'])
+);
+
+export const selectAuthError = createSelector(
+  getGlobal,
+  (globalState) => globalState.getIn(['auth', 'error'])
 );
 
 const selectReadyUserRoles = (state) => !!state.getIn(['global', 'ready', 'user_roles']);
@@ -547,6 +552,16 @@ export const selectMapIndicator = createSelector(
   }
 );
 
+export const selectIsPrintView = createSelector(
+  getGlobal,
+  (state) => !!state.get('printConfig')
+);
+
+export const selectPrintConfig = createSelector(
+  getGlobal,
+  (state) => state.get('printConfig') || null
+);
+
 // database ////////////////////////////////////////////////////////////////////////
 
 export const selectEntitiesAll = (state) => state.getIn(['global', 'entities']);
@@ -1009,7 +1024,7 @@ export const selectEntitiesWhere = createSelector(
 );
 
 // filter entities by attributes, using locationQuery
-export const selectEntitiesWhereQuery = createSelector(
+const selectEntitiesWhereQuery = createSelector(
   selectAttributeQuery,
   (state, { path }) => selectEntities(state, path),
   (query, entities) => query
@@ -1101,6 +1116,15 @@ export const selectActionsSearchQuery = createSelector(
   (entities, query, searchAttributes) => query
     ? filterEntitiesByKeywords(entities, query, searchAttributes)
     : entities // !search
+);
+
+// filter entities by attributes, using locationQuery
+export const selectIndicatorsWhereQuery = createSelector(
+  selectAttributeQuery,
+  selectIndicators, // type should be optional
+  (query, entities) => query
+    ? filterEntitiesByAttributes(entities, query)
+    : entities
 );
 
 // taxonomies and categories ///////////////////////////////////////////////////
@@ -1246,25 +1270,25 @@ export const selectActionTaxonomies = createSelector(
           tax.get('id'),
         )
       )
-    // ).map(
-    //   (tax) => {
-    //     // connectedActortypes
-    //     const actiontypeIds = actiontypeTaxonomies.reduce(
-    //       (memo, type) => {
-    //         if (
-    //           qe(
-    //             type.getIn(['attributes', 'taxonomy_id']),
-    //             tax.get('id')
-    //           )
-    //         ) {
-    //           return memo.push(type.getIn(['attributes', 'actortype_id']));
-    //         }
-    //         return memo;
-    //       },
-    //       List(),
-    //     );
-    //     return tax.set('actiontypeIds', actiontypeIds);
-    //   }
+      // ).map(
+      //   (tax) => {
+      //     // connectedActortypes
+      //     const actiontypeIds = actiontypeTaxonomies.reduce(
+      //       (memo, type) => {
+      //         if (
+      //           qe(
+      //             type.getIn(['attributes', 'taxonomy_id']),
+      //             tax.get('id')
+      //           )
+      //         ) {
+      //           return memo.push(type.getIn(['attributes', 'actortype_id']));
+      //         }
+      //         return memo;
+      //       },
+      //       List(),
+      //     );
+      //     return tax.set('actiontypeIds', actiontypeIds);
+      //   }
     )
 );
 
@@ -1341,25 +1365,25 @@ export const selectActiontypeTaxonomies = createSelector(
           typeId,
         )
       )
-    // ).map(
-    //   (tax) => {
-    //     // set all actiontypes valid for taxonomy
-    //     const actiontypeIds = actiontypeTaxonomies.reduce(
-    //       (memo, type) => {
-    //         if (
-    //           qe(
-    //             type.getIn(['attributes', 'taxonomy_id']),
-    //             tax.get('id')
-    //           )
-    //         ) {
-    //           return memo.push(type.getIn(['attributes', 'measuretype_id']));
-    //         }
-    //         return memo;
-    //       },
-    //       List(),
-    //     );
-    //     return tax.set('actiontypeIds', actiontypeIds);
-    //   }
+      // ).map(
+      //   (tax) => {
+      //     // set all actiontypes valid for taxonomy
+      //     const actiontypeIds = actiontypeTaxonomies.reduce(
+      //       (memo, type) => {
+      //         if (
+      //           qe(
+      //             type.getIn(['attributes', 'taxonomy_id']),
+      //             tax.get('id')
+      //           )
+      //         ) {
+      //           return memo.push(type.getIn(['attributes', 'measuretype_id']));
+      //         }
+      //         return memo;
+      //       },
+      //       List(),
+      //     );
+      //     return tax.set('actiontypeIds', actiontypeIds);
+      //   }
     )
 );
 
@@ -2110,6 +2134,7 @@ export const selectActorsWithPositions = createSelector(
           }
           return actor
             .set('statements', actorStatements)
+            .set('statementsAsGroup', actorStatementsAsMemberByGroup.flatten(true).toList().toSet())
             .set('indicatorPositions', actorIndicators);
         }
         return actor;

@@ -13,8 +13,4 @@ export default defineMessages({
     id: 'app.components.EntityListSearch.searchPlaceholderMultiSelect',
     defaultMessage: 'Filter options by reference or title',
   },
-  labelPrintKeywords: {
-    id: 'app.components.EntityListSearch.labelPrintKeywords',
-    defaultMessage: 'Keyword search:',
-  },
 });

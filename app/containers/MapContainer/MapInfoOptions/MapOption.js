@@ -5,8 +5,15 @@ import styled from 'styled-components';
 import { Box, Text } from 'grommet';
 import InfoOverlay from 'components/InfoOverlay';
 
+import { usePrint } from 'containers/App/PrintContext';
+
 const Styled = styled((p) => <Box direction="row" align="center" gap="small" {...p} />)`
   padding: ${({ plain }) => plain ? 0 : 5}px 0;
+  display: ${({ isPrint, active, printHide }) => (isPrint && (!active || printHide)) ? 'none' : 'flex'};
+  pointer-events: ${({ isPrint }) => isPrint ? 'none' : 'all'};
+  @media print {
+    display: ${({ active, printHide }) => (active && !printHide) ? 'flex' : 'none'};
+  }
 `;
 
 export function MapOption({
@@ -15,11 +22,12 @@ export function MapOption({
   plain,
 }) {
   const {
-    active, onClick, label, id = 0, info,
+    active, onClick, label, id = 0, info, printHide,
   } = option;
   const optionType = option.type || type;
+  const isPrint = usePrint();
   return (
-    <Styled plain={plain}>
+    <Styled plain={plain} isPrint={isPrint} printHide={printHide}>
       <input
         id={`map-${optionType}-${id}`}
         type="checkbox"

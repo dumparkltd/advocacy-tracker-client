@@ -33,6 +33,7 @@ import {
 
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import EntityListViewOptions from 'components/EntityListViewOptions';
+import HeaderPrint from 'components/Header/HeaderPrint';
 
 import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
@@ -77,6 +78,7 @@ export function EntitiesMapActions({
   onSetMapIndicator,
   catQuery,
   onUpdateQuery,
+  isPrintView,
 }) {
   let subjectOptions = [];
   let indicatorOptions;
@@ -469,6 +471,7 @@ export function EntitiesMapActions({
       id: 'countries',
       title: infoTitle,
       subTitle: infoSubTitle,
+      titlePrint: infoTitle,
       infoOptions,
       subjectOptions,
       indicatorOptions,
@@ -476,7 +479,10 @@ export function EntitiesMapActions({
     }];
   }
   return (
-    <Styled headerStyle="types" noOverflow>
+    <Styled headerStyle="types" noOverflow isPrint={isPrintView}>
+      {isPrintView && (
+        <HeaderPrint argsRemove={['msubj', 'subj', 'ac', 'tc', 'mtchm', 'mtch', 'actontype']} />
+      )}
       <MapContainer
         fullMap
         reduceCountryAreas={reduceCountryAreas}
@@ -502,7 +508,7 @@ export function EntitiesMapActions({
         mapInfo={mapInfo}
       />
       {viewOptions && viewOptions.length > 1 && (
-        <EntityListViewOptions options={viewOptions} isOnMap />
+        <EntityListViewOptions options={viewOptions} isOnMap isPrintView={isPrintView} />
       )}
     </Styled>
   );
@@ -530,6 +536,7 @@ EntitiesMapActions.propTypes = {
   onSetIncludeTargetMembers: PropTypes.func,
   includeTargetMembers: PropTypes.bool,
   hasFilters: PropTypes.bool,
+  isPrintView: PropTypes.bool,
   onEntityClick: PropTypes.func,
   onSetMapIndicator: PropTypes.func,
   onUpdateQuery: PropTypes.func,

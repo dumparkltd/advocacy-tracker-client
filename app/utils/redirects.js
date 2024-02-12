@@ -33,6 +33,7 @@ export function hasRoleRequired(roleIds, roleRequired) {
 
 function redirectIfSignedIn(store, replacePath) {
   return (nextState, replace) => {
+    // console.log('redirectIfSignedIn', replacePath, selectIsSignedIn(store.getState()));
     if (selectIsSignedIn(store.getState())) {
       if (replacePath) {
         replace(replacePath);
@@ -45,6 +46,7 @@ function redirectIfSignedIn(store, replacePath) {
 
 function redirectIfNotSignedIn(store, info = PARAMS.NOT_SIGNED_IN) {
   return (nextState, replace) => {
+    // console.log('redirectIfNotSignedIn');
     if (!selectIsSignedIn(store.getState())) {
       replaceIfNotSignedIn(nextState.location, replace, info);
     }
@@ -53,11 +55,15 @@ function redirectIfNotSignedIn(store, info = PARAMS.NOT_SIGNED_IN) {
 
 function redirectIfNotPermitted(store, roleRequired, replacePath) {
   return (nextState, replace) => {
+    // console.log('redirectIfNotPermitted');
     if (!selectIsSignedIn(store.getState())) {
+      // console.log('redirectIfNotPermitted replaceIfNotSignedIn');
       replaceIfNotSignedIn(nextState.location, replace, PARAMS.NOT_SIGNED_IN, replacePath);
     } else if (selectReadyForAuthCheck(store.getState()) && !hasRoleRequired(selectSessionUserRoles(store.getState()), roleRequired)) {
+      // console.log('replaceUnauthorised');
       replaceUnauthorised(replace, replacePath);
     }
+    // console.log('redirectIfNotPermitted else (not redirecting)');
   };
 }
 function redirect(store, replacePath) {

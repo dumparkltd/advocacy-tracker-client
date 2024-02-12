@@ -29,7 +29,7 @@ import Footer from 'containers/Footer';
 
 import appMessages from 'containers/App/messages';
 
-import { ROUTES } from 'themes/config';
+import { ROUTES, IS_DEV } from 'themes/config';
 
 import { DEPENDENCIES } from './constants';
 
@@ -75,27 +75,6 @@ const Title = styled.h1`
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.home.print.title};
-  }
-`;
-
-const Claim = styled.p`
-  color: ${({ theme }) => theme.global.colors.text.brand};
-  font-family: ${(props) => props.theme.fonts.claim};
-  font-size: ${(props) => props.theme.sizes.home.text.claimMobile};
-  font-weight: 100;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 20px;
-  margin-bottom: 0px;
-  line-height: 1.3;
-  font-size: ${({ theme }) => theme.text.large.size};
-  line-height: ${({ theme }) => theme.text.large.size.height};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${({ theme }) => theme.text.xlarge.size};
-    line-height: ${({ theme }) => theme.text.xlarge.size.height};
-  }
-  @media print {
-    font-size: ${(props) => props.theme.sizes.home.print.claim};
   }
 `;
 
@@ -169,9 +148,6 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
               <Row>
                 <GridSpace lg={1 / 8} />
                 <Grid lg={3 / 4} sm={1}>
-                  <Claim>
-                    <FormattedMessage {...appMessages.app.claim} />
-                  </Claim>
                   <Title>
                     <FormattedMessage {...appMessages.app.title} />
                   </Title>
@@ -180,7 +156,7 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
               <Row>
                 <GridSpace lg={1 / 6} sm={1 / 8} />
                 <Grid lg={2 / 3} sm={3 / 4} xs={1}>
-                  <Intro source={intl.formatMessage(messages.intro)} />
+                  <Intro source={intl.formatMessage(messages.intro, { isDev: IS_DEV })} />
                 </Grid>
               </Row>
               <HomeActions>

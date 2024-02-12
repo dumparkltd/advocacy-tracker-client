@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Text, Button } from 'grommet';
 import PrintHide from 'components/styled/PrintHide';
+
 import styled from 'styled-components';
 import { injectIntl, intlShape } from 'react-intl';
 
@@ -13,6 +14,10 @@ const Select = styled(PrintHide)`
   width: 20px;
   text-align: center;
   padding-right: 6px;
+`;
+
+const StyledInput = styled.input`
+  accent-color: ${({ theme }) => theme.global.colors.highlight};
 `;
 
 const Link = styled((p) => <Button as="a" plain {...p} />)`
@@ -70,13 +75,15 @@ export function CellBodyMain({
   return (
     <Box direction="row" align="center" justify="start">
       {canEdit && (
-        <Select>
-          <input
-            type="checkbox"
-            checked={entity.selected}
-            onChange={(evt) => entity.onSelect(evt.target.checked)}
-          />
-        </Select>
+        <PrintHide>
+          <Select>
+            <StyledInput
+              type="checkbox"
+              checked={entity.selected}
+              onChange={(evt) => entity.onSelect(evt.target.checked)}
+            />
+          </Select>
+        </PrintHide>
       )}
       <Box gap="xsmall">
         {meta.length > 0 && (

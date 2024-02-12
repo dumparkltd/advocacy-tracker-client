@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import { Map, List } from 'immutable';
 import { Box, Text } from 'grommet';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import styled from 'styled-components';
 
 import {
   ROUTES,
@@ -15,6 +16,7 @@ import {
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPES_CONFIG,
+  USER_ACTIONTYPES,
   MEMBERSHIPS,
   ACTION_INDICATOR_SUPPORTLEVELS,
   // ACTIONTYPES,
@@ -23,22 +25,31 @@ import { CONTENT_LIST } from 'containers/App/constants';
 import { jumpToComponent } from 'utils/scroll-to-component';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
-import Content from 'components/styled/Content';
+import Content from 'components/styled/ContentSimple';
 import Loading from 'components/Loading';
 import EntityListViewOptions from 'components/EntityListViewOptions';
+import ButtonPill from 'components/buttons/ButtonPill';
+import HeaderPrint from 'components/Header/HeaderPrint';
+import TagList from 'components/TagList';
+import PrintHide from 'components/styled/PrintHide';
+import BoxPrint from 'components/styled/BoxPrint';
+
 import MapSubjectOptions from 'containers/MapContainer/MapInfoOptions/MapSubjectOptions';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 import EntityListTable from 'containers/EntityListTable';
-import ButtonPill from 'components/buttons/ButtonPill';
+import ContentHeader from 'containers/ContentHeader';
 
-import ContentHeader from 'components/ContentHeader';
 import qe from 'utils/quasi-equals';
 import { lowerCase } from 'utils/string';
 import { getActiontypeColumns, getActortypeColumns } from 'utils/entities';
 import appMessages from 'containers/App/messages';
 
 import { getActorsForEntities, getUsersForEntities } from './utils';
+import messages from './messages';
 
+const LabelPrint = styled.span`
+  font-size: ${({ theme }) => theme.sizes.print.smaller};
+`;
 const getOwnActivityColumns = (mapSubject, typeId) => {
   let actionTypeIds;
   if (mapSubject === 'actors') {
@@ -68,7 +79,6 @@ const getOwnActivityColumns = (mapSubject, typeId) => {
       }
     );
   }
-
   return actionTypeIds.map(
     (id) => ({
       id: `action_${id}`,
@@ -104,11 +114,11 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       this.ScrollReference.current,
       this.ScrollContainer.current
     );
-  }
+  };
 
   setType = (type) => {
     this.setState({ viewType: type });
-  }
+  };
 
   render() {
     const {
@@ -126,6 +136,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       headerStyle,
       viewOptions,
       hasFilters,
+      filters,
       showCode,
       entityIdsSelected,
       listUpdating,
@@ -152,11 +163,16 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       allEntityCount,
       headerInfo,
       listActions,
+      isPrintView,
+      searchQuery,
+      isAdmin,
     } = this.props;
+
     const { viewType } = this.state;
     let type;
     let hasByTarget;
     let hasByActor;
+    let hasByUser;
     let isTarget;
     let isActive;
     let subjectOptions = [];
@@ -173,22 +189,28 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     let relatedTargettypes;
     let viewTypeClean = viewType;
 
+    let headerTitle = entityTitle.plural;
     // ACTIONS =================================================================
     if (config.types === 'actiontypes' && dataReady) {
       columns = getActiontypeColumns({
         typeId,
         showCode,
         isSingle: false,
+        isAdmin,
       });
       type = actiontypes.find((at) => qe(at.get('id'), typeId));
       // hasByTarget = type.getIn(['attributes', 'has_target']);
       hasByActor = ACTIONTYPE_ACTORTYPES[typeId] && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
       hasByTarget = ACTIONTYPE_TARGETTYPES[typeId] && ACTIONTYPE_TARGETTYPES[typeId].length > 0;
+      hasByUser = isAdmin && USER_ACTIONTYPES && USER_ACTIONTYPES.indexOf(typeId) > -1;
       // console.log(typeId, type.get('id'), ACTIONTYPE_ACTORTYPES, ACTIONTYPE_ACTORTYPES[typeId], hasByActor, hasByTarget)
       if (!hasByTarget && mapSubject === 'targets') {
         mapSubjectClean = null;
       }
       if (!hasByActor && mapSubject === 'actors') {
+        mapSubjectClean = null;
+      }
+      if (!hasByUser && mapSubject === 'users') {
         mapSubjectClean = null;
       }
       subjectOptions = [
@@ -211,6 +233,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             disabled: mapSubjectClean === 'actors',
           },
         ];
+        if (mapSubjectClean === 'actors') {
+          headerTitle = `${headerTitle} by actor`;
+        }
       }
       if (hasByTarget) {
         subjectOptions = [
@@ -223,17 +248,25 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             disabled: mapSubjectClean === 'targets',
           },
         ];
+        if (mapSubjectClean === 'targets') {
+          headerTitle = `${headerTitle} by target`;
+        }
       }
-      subjectOptions = [
-        ...subjectOptions,
-        {
-          type: 'secondary',
-          title: 'By user',
-          onClick: () => onSetMapSubject('users'),
-          active: mapSubjectClean === 'users',
-          disabled: mapSubjectClean === 'users',
-        },
-      ];
+      if (hasByUser) {
+        subjectOptions = [
+          ...subjectOptions,
+          {
+            type: 'secondary',
+            title: 'By user',
+            onClick: () => onSetMapSubject('users'),
+            active: mapSubjectClean === 'users',
+            disabled: mapSubjectClean === 'users',
+          },
+        ];
+        if (mapSubjectClean === 'users') {
+          headerTitle = `${headerTitle} by user`;
+        }
+      }
       if (mapSubjectClean === 'actors' || mapSubjectClean === 'targets') {
         if (mapSubjectClean === 'actors') {
           relatedActortypes = ACTIONTYPE_ACTORTYPES[typeId]
@@ -328,6 +361,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       isActive = type.getIn(['attributes', 'is_active']);
       if (isTarget && isActive) {
         mapSubjectClean = mapSubject || 'actors';
+        if (mapSubjectClean === 'users') {
+          mapSubjectClean = 'actors';
+        }
       } else if (isTarget && !isActive) {
         mapSubjectClean = 'targets';
       } else if (!isTarget && isActive) {
@@ -348,6 +384,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         showCode,
         includeMain: false,
         isSingle: false,
+        isAdmin,
       });
       columns = [
         {
@@ -376,7 +413,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           ...subjectOptions,
           {
             type: 'secondary',
-            title: 'As actors',
+            title: isPrintView ? 'Activities' : 'As actors',
             onClick: () => onSetMapSubject('actors'),
             active: mapSubjectClean === 'actors',
             disabled: mapSubjectClean === 'actors',
@@ -388,7 +425,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           ...subjectOptions,
           {
             type: 'secondary',
-            title: 'As targets',
+            title: isPrintView ? 'Activities targeted by' : 'As targets',
             onClick: () => onSetMapSubject('targets'),
             active: mapSubjectClean === 'targets',
             disabled: mapSubjectClean === 'targets',
@@ -464,6 +501,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {
           id: 'statements', // one row per type,
           type: 'indicatorActions', // one row per type,
+          title: intl.formatMessage(appMessages.actiontypes[1]),
         },
         {
           id: 'support', // one row per type,
@@ -499,6 +537,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         },
       ];
     } else if (config.types === 'users' && dataReady) {
+      mapSubjectClean = 'actors';
       columns = [
         {
           id: 'main',
@@ -529,62 +568,83 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         },
       ];
     }
-    let headerTitle;
-    let headerSubTitle;
-    if (entityTitle) {
-      headerTitle = entities
-        ? `${entities.size} ${entities.size === 1 ? entityTitle.single : entityTitle.plural}`
-        : entityTitle.plural;
-    }
-    if (hasFilters) {
-      headerSubTitle = `of ${allEntityCount} total`;
-    }
+    // let headerSubTitle = `${allEntityCount} ${allEntityCount === 1 ? entityTitle.single : entityTitle.plural} in database`;
+    // if (entities && hasFilters) {
+    //   headerSubTitle = `Showing ${entities.size} of ${headerSubTitle}`;
+    // }
 
     const showRelatedActorsForActions = !!entityActors;
     const showRelatedUsersForActions = !!entityUsers;
     const showEntities = !showRelatedActorsForActions && !showRelatedUsersForActions;
 
     return (
-      <ContainerWrapper headerStyle={headerStyle} ref={this.ScrollContainer}>
-        {dataReady && viewOptions && viewOptions.length > 1 && (
-          <EntityListViewOptions options={viewOptions} />
+      <ContainerWrapper headerStyle={headerStyle} ref={this.ScrollContainer} isPrintView={isPrintView}>
+        {isPrintView && (
+          <HeaderPrint argsRemove={['subj', 'ac', 'tc', 'mtchm', 'mtch', 'actontype']} />
         )}
-        <Container ref={this.ScrollReference}>
-          <Content>
+        {dataReady && viewOptions && viewOptions.length > 1 && (
+          <PrintHide>
+            <EntityListViewOptions options={viewOptions} isPrintView={isPrintView} />
+          </PrintHide>
+        )}
+        <Container ref={this.ScrollReference} isPrint={isPrintView}>
+          <Content isPrint={isPrintView}>
             {!dataReady && <Loading />}
             {dataReady && (
               <div>
                 <ContentHeader
                   type={CONTENT_LIST}
                   title={headerTitle}
-                  subTitle={headerSubTitle}
                   hasViewOptions={viewOptions && viewOptions.length > 1}
                   info={headerInfo}
                   buttons={listActions}
                   entityIdsSelected={entityIdsSelected}
                 />
-                {config.types === 'actiontypes' && subjectOptions && (
+                {isPrintView && (searchQuery || hasFilters) && (
+                  <Box margin={{ vertical: 'small' }}>
+                    <LabelPrint>
+                      {!!searchQuery && !hasFilters && (
+                        <FormattedMessage {...messages.labelPrintKeywords} />
+                      )}
+                      {!searchQuery && hasFilters && (
+                        <FormattedMessage {...messages.labelPrintFilters} />
+                      )}
+                      {!!searchQuery && hasFilters && (
+                        <FormattedMessage {...messages.labelPrintFiltersKeywords} />
+                      )}
+                    </LabelPrint>
+                    <TagList
+                      filters={filters}
+                      searchQuery={searchQuery}
+                      isPrintView
+                      isPrint
+                    />
+                  </Box>
+                )}
+                {config.types === 'actiontypes' && subjectOptions && !isPrintView && (
                   <Box>
-                    {subjectOptions && (
-                      <MapSubjectOptions options={subjectOptions} />
-                    )}
+                    <MapSubjectOptions options={subjectOptions} inList />
                   </Box>
                 )}
                 {checkboxOptions && (
                   <Box>
                     {checkboxOptions && checkboxOptions.map(
                       (option, i) => (
-                        <MapOption
-                          key={i}
-                          option={option}
-                        />
+                        <MapOption key={i} option={option} />
                       )
                     )}
                   </Box>
                 )}
                 {showRelatedActorsForActions && (
                   <Box>
-                    <Box direction="row" gap="xsmall" margin={{ vertical: 'small' }} wrap>
+                    <BoxPrint
+                      isPrint={isPrintView}
+                      printHide
+                      direction="row"
+                      gap="xsmall"
+                      margin={{ vertical: 'small' }}
+                      wrap
+                    >
                       {mapSubject === 'actors'
                         && relatedActortypes
                         && relatedActortypes.map(
@@ -615,7 +675,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                             </ButtonPill>
                           )
                         )}
-                    </Box>
+                    </BoxPrint>
                     {memberOption && (
                       <Box>
                         <MapOption option={memberOption} type="member" />
@@ -626,81 +686,88 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                         <MapOption option={childOption} type="child" />
                       </Box>
                     )}
-                    {entityActors.get(parseInt(viewTypeClean, 10)) && (
-                      <EntityListTable
-                        paginate
-                        hasSearch
-                        columns={[
-                          {
-                            id: 'main',
-                            type: 'main',
-                            sort: 'title',
-                            attributes: (showCode || qe(viewTypeClean, ACTORTYPES.COUNTRY))
-                              ? ['code', 'title']
-                              : ['title'],
+                    <EntityListTable
+                      isByOption
+                      hasFilters={hasFilters}
+                      paginate
+                      hasSearch
+                      columns={[
+                        {
+                          id: 'main',
+                          type: 'main',
+                          sort: 'title',
+                          attributes: (showCode || qe(viewTypeClean, ACTORTYPES.COUNTRY))
+                            ? ['code', 'title']
+                            : ['title'],
+                        },
+                        {
+                          id: 'actorActions',
+                          type: 'actorActions',
+                          label: entityTitle.plural,
+                          subject: mapSubject,
+                          actions: mapSubject === 'actors'
+                            ? 'actions'
+                            : 'targetingActions',
+                        },
+                        {
+                          id: 'actorActionsAsMember',
+                          type: 'actorActions',
+                          members: true,
+                          subject: mapSubject,
+                          label: `${entityTitle.plural} as member`,
+                          actions: mapSubject === 'actors'
+                            ? 'actionsMembers'
+                            : 'targetingActionsAsMember',
+                          skip: !(memberOption
+                            && (
+                              (mapSubject === 'actors' && includeActorMembers)
+                              || (mapSubject === 'targets' && includeTargetMembers)
+                            )),
+                        },
+                        {
+                          id: 'actorActionsAsParent',
+                          type: 'actorActions',
+                          children: true,
+                          subject: mapSubject,
+                          label: mapSubject === 'actors'
+                            ? `${entityTitle.plural} by members`
+                            : `${entityTitle.plural} targeting members`,
+                          actions: mapSubject === 'actors'
+                            ? 'actionsAsParent'
+                            : 'targetingActionsAsParent',
+                          skip: !(childOption
+                            && (
+                              (mapSubject === 'actors' && includeActorChildren)
+                              || (mapSubject === 'targets' && includeTargetChildren)
+                            )),
+                        },
+                      ]}
+                      entities={entityActors.get(parseInt(viewTypeClean, 10))}
+                      entityPath={ROUTES.ACTOR}
+                      onEntityClick={onEntityClick}
+                      entityTitle={{
+                        single: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].single),
+                        plural: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].plural),
+                      }}
+                      onResetScroll={this.scrollToTop}
+                      config={{
+                        types: 'actortypes',
+                        clientPath: ROUTES.ACTOR,
+                        views: {
+                          list: {
+                            search: ['code', 'title', 'description'],
                           },
-                          {
-                            id: 'actorActions',
-                            type: 'actorActions',
-                            subject: mapSubject,
-                            actions: mapSubject === 'actors'
-                              ? 'actions'
-                              : 'targetingActions',
-                          },
-                          {
-                            id: 'actorActionsAsMember',
-                            type: 'actorActions',
-                            members: true,
-                            subject: mapSubject,
-                            actions: mapSubject === 'actors'
-                              ? 'actionsMembers'
-                              : 'targetingActionsAsMember',
-                            skip: !(memberOption
-                              && (
-                                (mapSubject === 'actors' && includeActorMembers)
-                                || (mapSubject === 'targets' && includeTargetMembers)
-                              )),
-                          },
-                          {
-                            id: 'actorActionsAsParent',
-                            type: 'actorActions',
-                            children: true,
-                            subject: mapSubject,
-                            actions: mapSubject === 'actors'
-                              ? 'actionsAsParent'
-                              : 'targetingActionsAsParent',
-                            skip: !(childOption
-                              && (
-                                (mapSubject === 'actors' && includeActorChildren)
-                                || (mapSubject === 'targets' && includeTargetChildren)
-                              )),
-                          },
-                        ]}
-                        entities={entityActors.get(parseInt(viewTypeClean, 10))}
-                        entityPath={ROUTES.ACTOR}
-                        onEntityClick={onEntityClick}
-                        entityTitle={{
-                          single: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].single),
-                          plural: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].plural),
-                        }}
-                        onResetScroll={this.scrollToTop}
-                        config={{
-                          types: 'actortypes',
-                          clientPath: ROUTES.ACTOR,
-                          views: {
-                            list: {
-                              search: ['code', 'title', 'description'],
-                            },
-                          },
-                        }}
-                        connections={connections}
-                      />
-                    )}
+                        },
+                      }}
+                      connections={connections}
+                    />
                   </Box>
                 )}
                 {showRelatedUsersForActions && (
                   <Box>
                     <EntityListTable
+                      isByOption
+                      hasFilters={hasFilters}
                       paginate
                       hasSearch
                       columns={[
@@ -736,17 +803,32 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                       connections={connections}
                     />
                   </Box>
+
                 )}
                 {showEntities && (
                   <EntityListTable
+                    hasFilters={hasFilters}
                     paginate
                     hasSearch
                     columns={columns}
                     headerColumnsUtility={headerColumnsUtility}
-                    memberOption={(memberOption || childOption) && <MapOption option={memberOption || childOption} type="member" />}
-                    subjectOptions={subjectOptions && <MapSubjectOptions inList options={subjectOptions} />}
+                    memberOption={(memberOption || childOption) && (
+                      <MapOption
+                        option={memberOption || childOption}
+                        type="member"
+                      />
+                    )}
+                    subjectOptions={config.types === 'actortypes'
+                      && subjectOptions
+                      && (
+                        <MapSubjectOptions
+                          inList
+                          options={subjectOptions}
+                        />
+                      )}
                     listUpdating={listUpdating}
                     entities={entities}
+                    allEntityCount={allEntityCount}
                     errors={errors}
                     taxonomies={taxonomies}
                     actortypes={actortypes}
@@ -804,8 +886,10 @@ EntitiesListView.propTypes = {
   headerInfo: PropTypes.object,
   listActions: PropTypes.array,
   checkboxOptions: PropTypes.array,
+  filters: PropTypes.array,
   intl: intlShape.isRequired,
   // primitive
+  isPrintView: PropTypes.bool,
   dataReady: PropTypes.bool,
   isMember: PropTypes.bool,
   isVisitor: PropTypes.bool,
@@ -815,11 +899,13 @@ EntitiesListView.propTypes = {
   includeTargetChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
   listUpdating: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   headerStyle: PropTypes.string,
   hasFilters: PropTypes.bool,
   typeId: PropTypes.string,
   showCode: PropTypes.bool,
   mapSubject: PropTypes.string,
+  searchQuery: PropTypes.string,
   allEntityCount: PropTypes.number,
   // functions
   onEntityClick: PropTypes.func.isRequired,

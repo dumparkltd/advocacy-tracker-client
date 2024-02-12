@@ -67,13 +67,14 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectIsUserMember,
   selectSessionUserId,
   selectActionIndicatorsForAction,
   selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
-import ContentHeader from 'components/ContentHeader';
+import ContentHeader from 'containers/ContentHeader';
 
 import appMessages from 'containers/App/messages';
 import FormWrapper from './FormWrapper';
@@ -170,7 +171,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           : Map(),
       })
       : Map();
-  }
+  };
 
   getHeaderMainFields = (entity, isAdmin) => {
     const { intl } = this.context;
@@ -467,6 +468,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       indicatorOptions,
       userOptions,
       isAdmin,
+      isUserMember,
       myId,
       onErrorDismiss,
       onServerErrorDismiss,
@@ -489,6 +491,11 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       : intl.formatMessage(appMessages.entities.actions.single);
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
 
+    // user can delete content
+    // if they are admins or
+    // if they are at least members and its their own content
+    const canDelete = isAdmin
+      || (isUserMember && viewEntity && qe(myId, viewEntity.getIn(['attributes', 'created_by_id'])));
     return (
       <div>
         <Helmet
@@ -541,7 +548,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={handleCancel}
                 handleUpdate={handleUpdate}
-                handleDelete={isAdmin ? () => handleDelete(typeId) : null}
+                handleDelete={canDelete ? () => handleDelete(typeId) : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
                 fields={dataReady && {
@@ -598,6 +605,7 @@ ActionEdit.propTypes = {
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isUserMember: PropTypes.bool,
   params: PropTypes.object,
   taxonomies: PropTypes.object,
   topActionsByActiontype: PropTypes.object,
@@ -622,6 +630,7 @@ ActionEdit.contextTypes = {
 const mapStateToProps = (state, { params }) => ({
   viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
+  isUserMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, params.id),

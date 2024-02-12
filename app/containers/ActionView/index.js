@@ -10,6 +10,7 @@ import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { Box, Text } from 'grommet';
+import styled from 'styled-components';
 
 import {
   getTitleField,
@@ -35,11 +36,14 @@ import {
   checkActionAttribute,
 } from 'utils/entities';
 
+import { keydownHandlerPrint } from 'utils/print';
+
 import {
   loadEntitiesIfNeeded,
   updatePath,
   closeEntity,
   setSubject,
+  printView,
 } from 'containers/App/actions';
 
 import {
@@ -51,6 +55,8 @@ import {
   INDICATOR_ACTIONTYPES,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
+
+import { PRINT_TYPES } from 'containers/App/constants';
 
 import Loading from 'components/Loading';
 import Content from 'components/Content';
@@ -64,6 +70,9 @@ import FieldGroup from 'components/fields/FieldGroup';
 import SubjectButton from 'components/styled/SubjectButton';
 import SubjectButtonGroup from 'components/styled/SubjectButtonGroup';
 import SubjectTabWrapper from 'components/styled/SubjectTabWrapper';
+import HeaderPrint from 'components/Header/HeaderPrint';
+import PrintHide from 'components/styled/PrintHide';
+import PrintOnly from 'components/styled/PrintOnly';
 
 import {
   selectReady,
@@ -76,6 +85,8 @@ import {
   selectUserConnections,
   selectActiontypeQuery,
   selectSessionUserId,
+  selectIsPrintView,
+  selectPrintConfig,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -83,6 +94,7 @@ import messages from './messages';
 
 import TabActivities from './TabActivities';
 import TabActors from './TabActors';
+
 
 import {
   selectViewEntity,
@@ -95,6 +107,10 @@ import {
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
+
+const PrintSectionTitleWrapper = styled(
+  (p) => <Box margin={{ top: 'large', bottom: 'small' }} pad={{ bottom: 'small' }} border="bottom" {...p} />
+)``;
 
 const getIndicatorColumns = (viewEntity, intl, isAdmin) => {
   let columns = [{
@@ -119,7 +135,6 @@ const getIndicatorColumns = (viewEntity, intl, isAdmin) => {
   }
   return columns;
 };
-
 export function ActionView(props) {
   const {
     viewEntity,
@@ -136,6 +151,9 @@ export function ActionView(props) {
     onLoadData,
     subject,
     onSetSubject,
+    onSetPrintView,
+    isPrintView,
+    printArgs,
     intl,
     handleEdit,
     handleClose,
@@ -162,6 +180,39 @@ export function ActionView(props) {
   }, [dataReady]);
 
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
+  // const type = `actions_${typeId}`;
+  let viewSubject = subject || 'actors';
+
+  const hasMap = viewSubject === 'actors'
+    || viewSubject === 'targets';
+
+  const mySetPrintView = () => onSetPrintView({
+    printType: PRINT_TYPES.SINGLE,
+    printContentOptions: {
+      tabs: true,
+      actionTypes: viewSubject === 'children',
+      actionTypesForArgs: (args) => args.printTabs === 'all',
+    },
+    printMapOptions: {
+      markers: hasMap,
+      markersForArgs: (args) => args.printTabs === 'all',
+    },
+    printMapMarkers: true,
+    printOrientation: 'portrait',
+    printSize: 'A4',
+  });
+
+  const keydownHandler = (e) => {
+    keydownHandlerPrint(e, mySetPrintView);
+  };
+  useEffect(() => {
+    document.addEventListener('keydown', keydownHandler);
+    return () => {
+      document.removeEventListener('keydown', keydownHandler);
+    };
+  }, []);
+
+  // const typeId = viewEntity && viewEntity.getIn(['attributes', 'measuretype_id']);
   // const viewActivitytype = activitytypes && activitytypes.find((type) => qe(type.get('id'), typeId));
 
   let buttons = [];
@@ -170,7 +221,7 @@ export function ActionView(props) {
       ...buttons,
       {
         type: 'icon',
-        onClick: () => window.print(),
+        onClick: () => mySetPrintView(),
         title: 'Print',
         icon: 'print',
       },
@@ -209,7 +260,6 @@ export function ActionView(props) {
 
   const hasIndicators = typeId && INDICATOR_ACTIONTYPES.indexOf(typeId.toString()) > -1;
 
-  let viewSubject = subject || 'actors';
   const validViewSubjects = [];
   if (hasActor) {
     validViewSubjects.push('actors');
@@ -223,7 +273,6 @@ export function ActionView(props) {
   if (validViewSubjects.indexOf(viewSubject) === -1) {
     viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
   }
-
   // check date comment for date spceficity
   // const DATE_SPECIFICITIES = ['y', 'm', 'd'];
   const dateSpecificity = 'd';
@@ -246,7 +295,8 @@ export function ActionView(props) {
   }
 
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
-
+  const showAllTabs = isPrintView && printArgs && printArgs.printTabs === 'all';
+  const showAllActionTypes = isPrintView && printArgs.printActionTypes === 'all';
   return (
     <div>
       <Helmet
@@ -255,16 +305,18 @@ export function ActionView(props) {
           { name: 'description', content: intl.formatMessage(messages.metaDescription) },
         ]}
       />
-      <Content isSingle>
-        { !dataReady && <Loading /> }
-        { !viewEntity && dataReady && (
+      <Content isSingle isPrint={isPrintView}>
+        {!dataReady && <Loading />}
+        {!viewEntity && dataReady && (
           <div>
             <FormattedMessage {...messages.notFound} />
           </div>
         )}
-        { viewEntity && dataReady && (
-          <ViewWrapper>
+        {viewEntity && dataReady && (
+          <ViewWrapper isPrint={isPrintView}>
+            {isPrintView && <HeaderPrint argsKeep={['am', 'tm', 'mtchm', 'subj', 'mtch', 'ac', 'tc']} />}
             <ViewHeader
+              isPrintView={isPrintView}
               title={typeId
                 ? intl.formatMessage(appMessages.actiontypes[typeId])
                 : intl.formatMessage(appMessages.entities.actions.plural)
@@ -275,7 +327,7 @@ export function ActionView(props) {
             />
             <ViewPanel>
               <ViewPanelInside>
-                <Main hasAside={isMember}>
+                <Main hasAside={isMember && !isPrintView}>
                   <FieldGroup
                     group={{ // fieldGroup
                       fields: [
@@ -320,11 +372,11 @@ export function ActionView(props) {
                     group={{
                       fields: [
                         checkActionAttribute(typeId, 'description')
-                          && getMarkdownField(viewEntity, 'description', true),
+                        && getMarkdownField(viewEntity, 'description', true),
                         checkActionAttribute(typeId, 'comment')
-                          && getMarkdownField(viewEntity, 'comment', true),
+                        && getMarkdownField(viewEntity, 'comment', true),
                         checkActionAttribute(typeId, 'status_comment')
-                          && getMarkdownField(viewEntity, 'status_comment', true),
+                        && getMarkdownField(viewEntity, 'status_comment', true),
                       ],
                     }}
                   />
@@ -345,55 +397,79 @@ export function ActionView(props) {
                     />
                   )}
                   <Box>
-                    <SubjectButtonGroup>
-                      {hasActor && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('actors')}
-                          active={viewSubject === 'actors'}
-                        >
-                          <Text size="large">Actors</Text>
-                        </SubjectButton>
-                      )}
-                      {hasTarget && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('targets')}
-                          active={viewSubject === 'targets'}
-                        >
-                          <Text size="large">Targets</Text>
-                        </SubjectButton>
-                      )}
-                      {hasChildren && (
-                        <SubjectButton
-                          onClick={() => onSetSubject('children')}
-                          active={viewSubject === 'children'}
-                        >
-                          <Text size="large">Child activities</Text>
-                        </SubjectButton>
-                      )}
-                    </SubjectButtonGroup>
+                    <>
+                      <PrintHide>
+                        <SubjectButtonGroup>
+                          {hasActor && (
+                            <SubjectButton
+                              onClick={() => onSetSubject('actors')}
+                              active={viewSubject === 'actors'}
+                            >
+                              <Text size="large">Actors</Text>
+                            </SubjectButton>
+                          )}
+                          {hasTarget && (
+                            <SubjectButton
+                              onClick={() => onSetSubject('targets')}
+                              active={viewSubject === 'targets'}
+                            >
+                              <Text size="large">Targets</Text>
+                            </SubjectButton>
+                          )}
+                          {hasChildren && (
+                            <SubjectButton
+                              onClick={() => onSetSubject('children')}
+                              active={viewSubject === 'children'}
+                            >
+                              <Text size="large">Child activities</Text>
+                            </SubjectButton>
+                          )}
+                        </SubjectButtonGroup>
+                      </PrintHide>
+                    </>
                     <SubjectTabWrapper>
-                      {viewSubject === 'children' && (
-                        <TabActivities
-                          isAdmin={isAdmin}
-                          viewEntity={viewEntity}
-                          taxonomies={taxonomies}
-                          onEntityClick={onEntityClick}
-                          viewActiontypeId={childActiontypeIds.indexOf(viewActiontypeId) > -1 ? viewActiontypeId : childActiontypeIds[0]}
-                          actiontypes={actiontypes.filter((type) => childActiontypeIds.indexOf(type.get('id')) > -1)}
-                          actionsByActiontype={subActionsByType}
-                        />
-                      )}
-                      {viewSubject !== 'children' && (
-                        <TabActors
-                          isAdmin={isAdmin}
-                          hasChildren={hasChildren}
-                          childActionsByActiontype={subActionsByType}
-                          viewEntity={viewEntity}
-                          typeId={typeId.toString()}
-                          viewSubject={viewSubject}
-                          taxonomies={taxonomies}
-                          onEntityClick={onEntityClick}
-                        />
+                      {validViewSubjects.filter(
+                        (vSubject) => showAllTabs || vSubject === viewSubject
+                      ).map(
+                        (vSubject) => vSubject === 'children'
+                          ? (
+                            <span key={vSubject}>
+                              <PrintOnly>
+                                <PrintSectionTitleWrapper>
+                                  <Text size="large">Child Activities</Text>
+                                </PrintSectionTitleWrapper>
+                              </PrintOnly>
+                              <TabActivities
+                                isAdmin={isAdmin}
+                                showAllActionTypes={showAllActionTypes}
+                                viewEntity={viewEntity}
+                                taxonomies={taxonomies}
+                                onEntityClick={onEntityClick}
+                                viewActiontypeId={childActiontypeIds.indexOf(viewActiontypeId) > -1 ? viewActiontypeId : childActiontypeIds[0]}
+                                actiontypes={actiontypes.filter((type) => childActiontypeIds.indexOf(type.get('id')) > -1)}
+                                actionsByActiontype={subActionsByType}
+                              />
+                            </span>
+                          )
+                          : (
+                            <span key={vSubject}>
+                              <PrintOnly>
+                                <PrintSectionTitleWrapper>
+                                  <Text size="large">{subject === 'actors' ? 'Actors' : 'Targets'}</Text>
+                                </PrintSectionTitleWrapper>
+                              </PrintOnly>
+                              <TabActors
+                                isAdmin={isAdmin}
+                                hasChildren={hasChildren}
+                                childActionsByActiontype={subActionsByType}
+                                viewEntity={viewEntity}
+                                typeId={typeId.toString()}
+                                viewSubject={vSubject}
+                                taxonomies={taxonomies}
+                                onEntityClick={onEntityClick}
+                              />
+                            </span>
+                          )
                       )}
                     </SubjectTabWrapper>
                     <Box>
@@ -463,20 +539,20 @@ export function ActionView(props) {
                       type: 'dark',
                       fields: [
                         checkActionAttribute(typeId, 'date_start')
-                          && getDateField(
-                            viewEntity,
-                            'date_start',
-                            {
-                              specificity: dateSpecificity,
-                              attributeLabel: datesEqual ? 'date' : 'date_start',
-                            }
-                          ),
+                        && getDateField(
+                          viewEntity,
+                          'date_start',
+                          {
+                            specificity: dateSpecificity,
+                            attributeLabel: datesEqual ? 'date' : 'date_start',
+                          }
+                        ),
                         !datesEqual
-                          && checkActionAttribute(typeId, 'date_end')
-                          && getDateField(viewEntity, 'date_end', { specificity: dateSpecificity }),
+                        && checkActionAttribute(typeId, 'date_end')
+                        && getDateField(viewEntity, 'date_end', { specificity: dateSpecificity }),
                         !dateSpecificity
-                          && checkActionAttribute(typeId, 'date_comment')
-                          && getTextField(viewEntity, 'date_comment'),
+                        && checkActionAttribute(typeId, 'date_comment')
+                        && getTextField(viewEntity, 'date_comment'),
                       ],
                     }}
                   />
@@ -539,6 +615,7 @@ ActionView.propTypes = {
   onEntityClick: PropTypes.func,
   isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isPrintView: PropTypes.bool,
   myId: PropTypes.string,
   viewTaxonomies: PropTypes.object,
   taxonomies: PropTypes.object,
@@ -549,6 +626,7 @@ ActionView.propTypes = {
   subActionsByType: PropTypes.object,
   topActionsByType: PropTypes.object,
   onSetSubject: PropTypes.func,
+  onSetPrintView: PropTypes.func,
   intl: intlShape.isRequired,
   subject: PropTypes.string,
   // indicatorConnections: PropTypes.object,
@@ -557,6 +635,7 @@ ActionView.propTypes = {
   users: PropTypes.object,
   viewActiontypeId: PropTypes.string,
   actiontypes: PropTypes.object,
+  printArgs: PropTypes.object,
 };
 
 const mapStateToProps = (state, props) => ({
@@ -578,6 +657,8 @@ const mapStateToProps = (state, props) => ({
   actiontypes: selectActiontypes(state),
   isAdmin: selectIsUserAdmin(state),
   myId: selectSessionUserId(state),
+  isPrintView: selectIsPrintView(state),
+  printArgs: selectPrintConfig(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -599,6 +680,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetSubject: (type) => {
       dispatch(setSubject(type));
+    },
+    onSetPrintView: (config) => {
+      dispatch(printView(config));
     },
   };
 }
