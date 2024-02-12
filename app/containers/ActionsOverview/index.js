@@ -48,7 +48,6 @@ export function ActionsOverview({
     onLoadData();
   }, []);
   const size = React.useContext(ResponsiveContext);
-  console.log('dataReady', dataReady, DEPENDENCIES)
   return (
     <ContainerWrapper bg>
       <HeaderExplore />
