@@ -185,7 +185,7 @@ export default defineMessages({
       defaultMessage: 'Update activities',
     },
     'connections-action-indicators': {
-      id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-indicators',
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-action-indicators',
       defaultMessage: 'Update country positions',
     },
     'connections-action-users': {
@@ -205,7 +205,7 @@ export default defineMessages({
       defaultMessage: 'Update actor assignments',
     },
     'connections-user-roles': {
-      id: 'app.components.EntityListHeader.editGroupLabel.connections-user-actors',
+      id: 'app.components.EntityListHeader.editGroupLabel.connections-user-roles',
       defaultMessage: 'Update user role',
     },
     'connections-action-parents': {
