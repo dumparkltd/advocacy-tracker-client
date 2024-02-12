@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import styled from 'styled-components';
-// import { injectIntl, intlShape } from 'react-intl';
+import { injectIntl, intlShape } from 'react-intl';
 import { FormattedMessage } from 'react-intl';
 import { Box, Text } from 'grommet';
 
@@ -19,6 +19,8 @@ import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonSubmit from 'components/buttons/ButtonSubmit';
+
+import messages from './messages';
 
 const Main = styled.div`
   padding: 0 0 10px;
@@ -46,30 +48,36 @@ export function EntityListDelete({
   destroyableCount,
   onCancel,
   onConfirm,
-  // intl,
+  intl,
 }) {
   return (
     <Content inModal>
       <ContentHeader
-        title="Delete selected"
+        title={intl.formatMessage(messages.title)}
         type={CONTENT_MODAL}
       />
       <Main margin={{ bottom: 'large' }}>
         {destroyableCount > 0 && (
           <Box gap="xsmall">
-            <Text size="medium" color="danger" weight="700">
-              {`Really delete ${destroyableCount} selected? This action cannot be undone.`}
+            <Text size="medium" color="danger" weight={700}>
+              <FormattedMessage
+                {...messages.confirm}
+                values={{ destroyableCount }}
+              />
             </Text>
             {destroyableCount !== selectedCount && (
               <Text size="small" color="dark" style={{ fontStyle: 'italic' }}>
-                {`Note: Excluding ${selectedCount - destroyableCount} items that you do not have permission to delete`}
+                <FormattedMessage
+                  {...messages.excludingNote}
+                  values={{ excludingCount: selectedCount - destroyableCount }}
+                />
               </Text>
             )}
           </Box>
         )}
         {destroyableCount === 0 && (
           <Text>
-            {'You don\'t have sufficient permission to delete any selected items. (Only Administrators can delete items they did not create)'}
+            <FormattedMessage {...messages.notAuthorizedNote} />
           </Text>
         )}
       </Main>
@@ -86,7 +94,7 @@ export function EntityListDelete({
                 onConfirm();
               }}
             >
-              Delete
+              <FormattedMessage {...messages.deleteButton} />
             </ButtonSubmit>
           )}
         </Box>
@@ -100,8 +108,7 @@ EntityListDelete.propTypes = {
   destroyableCount: PropTypes.number,
   onCancel: PropTypes.func,
   onConfirm: PropTypes.func,
-  // intl: intlShape,
+  intl: intlShape,
 };
 
-// export default injectIntl(EntityListDelete);
-export default EntityListDelete;
+export default injectIntl(EntityListDelete);

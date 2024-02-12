@@ -432,10 +432,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         {config.batchDelete && this.state.deleteConfirm && entityIdsSelectedFiltered && (
           <ReactModal
             isOpen
-            contentLabel="test"
             onRequestClose={() => this.onHideDeleteConfirm()}
-            className="download-csv-modal"
-            overlayClassName="download-csv-modal-overlay"
+            className="delete-csv-modal"
+            overlayClassName="delete-csv-modal-overlay"
             style={{
               overlay: { zIndex: 99999999 },
             }}
@@ -456,7 +455,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         {config.downloadCSV && this.state.downloadActive && (
           <ReactModal
             isOpen
-            contentLabel="test"
             onRequestClose={() => this.onDownloadDismiss()}
             className="download-csv-modal"
             overlayClassName="download-csv-modal-overlay"
