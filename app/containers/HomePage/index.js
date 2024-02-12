@@ -37,6 +37,10 @@ import messages from './messages';
 
 const Styled = styled.div`
   background: ${({ theme }) => theme.global.colors.background};
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  overflow: hidden auto;
 `;
 const SectionTop = styled.div`
   min-height: 90vH;
@@ -49,9 +53,9 @@ const SectionTop = styled.div`
 const SectionWrapper = styled.div`
   display: ${(props) => props.hasBrand ? 'block' : 'table-cell'};
   vertical-align: ${(props) => props.hasBrand ? 'baseline' : 'middle'};
-  padding-bottom: 3em;
+  padding-bottom: 1em;
   @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
-    padding-bottom: 6em;
+    padding-bottom: 3em;
   }
 `;
 
@@ -63,7 +67,7 @@ const HomeActions = styled.div`
   }
 `;
 const Title = styled.h1`
-  margin: 5px 0 20px;
+  margin: 40px 0 20px;
   color: ${({ theme }) => theme.global.colors.brand};
   font-family: ${(props) => props.theme.fonts.title};
   font-weight: 400;

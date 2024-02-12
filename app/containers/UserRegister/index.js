@@ -61,7 +61,7 @@ export class UserRegister extends React.PureComponent { // eslint-disable-line r
             },
           ]}
         />
-        <ContentNarrow withoutHeaderNav>
+        <ContentNarrow>
           <ContentHeader
             title={intl.formatMessage(messages.pageTitle)}
           />

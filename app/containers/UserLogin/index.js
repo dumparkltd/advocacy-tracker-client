@@ -57,7 +57,7 @@ export class UserLogin extends React.PureComponent { // eslint-disable-line reac
             },
           ]}
         />
-        <ContentNarrow withoutHeaderNav>
+        <ContentNarrow>
           <ContentHeader
             title={intl.formatMessage(messages.pageTitle)}
           />
