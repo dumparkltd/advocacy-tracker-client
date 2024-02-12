@@ -155,6 +155,9 @@ const GlobalStyle = createGlobalStyle`
     hr {
       opacity: 0.3;
     }
+    a {
+      text-decoration: underline;
+    }
   }
 
   .content-page {
