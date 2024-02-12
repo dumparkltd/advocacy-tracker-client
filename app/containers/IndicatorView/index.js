@@ -204,7 +204,7 @@ export function IndicatorView({
                     }}
                   />
                 </Main>
-                {isMember && (
+                {isMember && !isPrintView && (
                   <Aside>
                     <FieldGroup
                       group={{

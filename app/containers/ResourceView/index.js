@@ -47,6 +47,7 @@ import {
   selectActionConnections,
   selectIsUserAdmin,
   selectSessionUserId,
+  selectIsPrintView,
   // selectActiveResourcetypes,
 } from 'containers/App/selectors';
 
@@ -168,6 +169,7 @@ export function ResourceView({
   isAdmin,
   params,
   myId,
+  isPrintView,
   onSetPrintView,
   intl,
 }) {
@@ -258,7 +260,7 @@ export function ResourceView({
               fields={{
                 header: {
                   main: getHeaderMainFields(viewEntity),
-                  aside: isMember && getHeaderAsideFields(viewEntity, isAdmin, isMine),
+                  aside: isMember && !isPrintView && getHeaderAsideFields(viewEntity, isAdmin, isMine),
                 },
                 body: {
                   main: getBodyMainFields(
@@ -308,6 +310,7 @@ const mapStateToProps = (state, props) => ({
   actionConnections: selectActionConnections(state),
   isAdmin: selectIsUserAdmin(state),
   myId: selectSessionUserId(state),
+  isPrintView: selectIsPrintView(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

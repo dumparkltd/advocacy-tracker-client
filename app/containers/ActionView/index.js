@@ -341,7 +341,7 @@ export function ActionView(props) {
                     }}
                   />
                 </Main>
-                {isMember && (
+                {isMember && !isPrintView && (
                   <Aside>
                     <FieldGroup
                       group={{
