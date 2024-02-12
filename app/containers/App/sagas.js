@@ -229,7 +229,9 @@ export function* authenticateSaga(payload) {
     yield put(invalidateEntities()); // important invalidate before forward to allow for reloading of entities
     yield put(forwardOnAuthenticationChange());
   } catch (err) {
-    err.response.json = yield err.response.json();
+    if (err.response) {
+      err.response.json = yield err.response.json();
+    }
     yield put(authenticateError(err));
   }
 }
@@ -252,7 +254,9 @@ export function* recoverSaga(payload) {
       }
     ));
   } catch (err) {
-    err.response.json = yield err.response.json();
+    if (err.response) {
+      err.response.json = yield err.response.json();
+    }
     yield put(recoverError(err));
   }
 }
@@ -307,7 +311,9 @@ export function* validateTokenSaga() {
       yield put(authenticateSuccess(response.data)); // need to store currentUserData
     }
   } catch (err) {
-    err.response.json = yield err.response.json();
+    // if (err.response) {
+    //   err.response.json = yield err.response.json();
+    // }
     // console.log('err', err);
     yield put(authenticateReset());
     yield call(clearAuthValues);
@@ -560,8 +566,10 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
       );
     }
   } catch (err) {
-    err.response.json = yield err.response.json();
-    yield put(saveError(err, dataTS));
+    if (err.response) {
+      err.response.json = yield err.response.json();
+      yield put(saveError(err, dataTS));
+    }
     if (updateClient) {
       yield put(invalidateEntities(data.path));
     }
@@ -606,8 +614,10 @@ export function* deleteEntitySaga({ data }, updateClient = true, multiple = fals
     }
     yield put(deleteSuccess(dataTS));
   } catch (err) {
-    err.response.json = yield err.response.json();
-    yield put(deleteError(err, dataTS));
+    if (err.response) {
+      err.response.json = yield err.response.json();
+      yield put(deleteError(err, dataTS));
+    }
     if (updateClient) {
       yield put(invalidateEntities(data.path));
     }
@@ -788,8 +798,8 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
   } catch (err) {
     if (err.response) {
       err.response.json = yield err.response.json && err.response.json();
+      yield put(saveError(err, dataTS));
     }
-    yield put(saveError(err, dataTS));
     if (updateClient) {
       yield put(invalidateEntities(data.path));
     }
@@ -836,8 +846,10 @@ export function* saveConnectionsSaga({ data }) {
       yield put(updateConnections(data.path, connectionsUpdated));
       yield put(saveSuccess(dataTS));
     } catch (err) {
-      err.response.json = yield err.response && err.response.json && err.response.json();
-      yield put(saveError(err, dataTS));
+      if (err.response) {
+        err.response.json = yield err.response && err.response.json && err.response.json();
+        yield put(saveError(err, dataTS));
+      }
       yield put(invalidateEntities(data.path));
     }
   }
