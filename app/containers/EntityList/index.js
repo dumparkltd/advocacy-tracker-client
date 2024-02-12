@@ -375,15 +375,15 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         },
       ];
     }
-    const hasSelected = dataReady && canEdit && entityIdsSelected && entityIdsSelected.size > 0;
+    const hasSelected = dataReady && canEdit && entityIdsSelectedFiltered && entityIdsSelectedFiltered.size > 0;
     let allListActions;
     let destroyableEntityIdsSelected;
     if (hasSelected) {
       allListActions = listActions || [];
       if (config.batchDelete && isMember) {
         destroyableEntityIdsSelected = isAdmin
-          ? entityIdsSelected
-          : entityIdsSelected.filter((id) => {
+          ? entityIdsSelectedFiltered
+          : entityIdsSelectedFiltered.filter((id) => {
             const entity = entities.find((e) => qe(e.get('id'), id));
             return entity && qe(entity.getIn(['attributes', 'created_by_id']), currentUserId);
           });
@@ -425,11 +425,11 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     }
     // we only consider the search query for download when we are looking at the list and when we have the default map subject selected
     const isSearchQueryActiveForDownload = !!locationQuery.get('search') && showList;
-    const isSelectionActiveForDownload = showList && entityIdsSelected && entityIdsSelected.size > 0;
+    const isSelectionActiveForDownload = showList && entityIdsSelectedFiltered && entityIdsSelectedFiltered.size > 0;
 
     return (
       <div>
-        {config.batchDelete && this.state.deleteConfirm && entityIdsSelected && (
+        {config.batchDelete && this.state.deleteConfirm && entityIdsSelectedFiltered && (
           <ReactModal
             isOpen
             contentLabel="test"
@@ -442,7 +442,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             appElement={document.getElementById('app')}
           >
             <EntityListDelete
-              selectedCount={entityIdsSelected.size}
+              selectedCount={entityIdsSelectedFiltered.size}
               destroyableCount={destroyableEntityIdsSelected.size}
               onCancel={() => this.onHideDeleteConfirm()}
               onConfirm={(evt) => {
@@ -483,7 +483,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               }}
               isAdmin={isAdmin}
               searchQuery={isSearchQueryActiveForDownload ? locationQuery.get('search') : null}
-              entityIdsSelected={isSelectionActiveForDownload ? entityIdsSelected : null}
+              entityIdsSelected={isSelectionActiveForDownload ? entityIdsSelectedFiltered : null}
             />
           </ReactModal>
         )}
@@ -495,7 +495,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             listUpdating={progress !== null && progress >= 0 && progress < 100}
             entities={entities}
             allEntities={allEntities}
-            entityIdsSelected={entityIdsSelected}
+            entityIdsSelected={entityIdsSelectedFiltered}
             taxonomies={taxonomies}
             actortypes={actortypes}
             parentActortypes={parentActortypes}
@@ -519,7 +519,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               (associations, activeEditOption) => handleEditSubmit(
                 associations,
                 activeEditOption,
-                entityIdsSelected,
+                entityIdsSelectedFiltered,
                 viewDomain.get('errors'),
                 connections,
               )}
@@ -590,7 +590,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
 
             onEntitySelect={(id, checked) => {
               // reset when unchecking last selected item
-              if (!checked && !this.state.visibleEditOptions && entityIdsSelected.size === 1) {
+              if (!checked && !this.state.visibleEditOptions && entityIdsSelectedFiltered.size === 1) {
                 this.onResetEditOptions();
               }
               this.onHideDeleteConfirm();
