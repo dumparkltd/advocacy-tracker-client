@@ -18,7 +18,7 @@ import countriesTopo from 'data/ne_countries_10m_v5.topo.json';
 // import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
 // import { hasGroupActors } from 'utils/entities';
-import MapContainer from 'containers/MapContainer/MapWrapper';
+import MapWrapper from 'containers/MapContainer/MapWrapper';
 // import messages from './messages';
 
 const Styled = styled((p) => <Box {...p} />)`
@@ -29,7 +29,7 @@ const Styled = styled((p) => <Box {...p} />)`
     break-inside: avoid;
   }
 `;
-const MapWrapper = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)`
+const MapOuterWrapper = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)`
   ${({ isPrint }) => isPrint && css`margin-right: 0;`}
   position: relative;
   height: 300px;
@@ -74,11 +74,11 @@ export function CountryMap({
   );
   return (
     <Styled hasHeader noOverflow>
-      <MapWrapper
+      <MapOuterWrapper
         isPrint={isPrint}
         orient={printArgs && printArgs.printOrientation}
       >
-        <MapContainer
+        <MapWrapper
           mapId="ll-map-country"
           countryData={countryData}
           countryFeatures={countriesJSON.features}
@@ -87,7 +87,7 @@ export function CountryMap({
           projection="gall-peters"
           printArgs={printArgs}
         />
-      </MapWrapper>
+      </MapOuterWrapper>
     </Styled>
   );
 }

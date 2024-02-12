@@ -42,7 +42,7 @@ import qe from 'utils/quasi-equals';
 import { scaleColorCount } from 'containers/MapContainer/utils';
 import MapKeySimple from 'containers/MapContainer/MapKeySimple';
 import { usePrint } from 'containers/App/PrintContext';
-import MapContainer from 'containers/MapContainer/MapWrapper';
+import MapWrapper from 'containers/MapContainer/MapWrapper';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
 // import messages from './messages';
@@ -52,10 +52,14 @@ const Styled = styled((p) => <Box {...p} />)`
 `;
 const MapTitle = styled((p) => <Box margin={{ vertical: 'xsmall' }} {...p} />)``;
 const MapOptions = Box;
-const MapWrapper = styled((p) => <Box {...p} />)`
+const MapOuterWrapper = styled((p) => <Box {...p} />)`
   position: relative;
   height: 400px;
   background: #F9F9FA;
+  @media print {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 `;
 const MAX_VALUE_COUNTRIES = 100;
 
@@ -311,8 +315,8 @@ export function ActionMap({
   });
   return (
     <Styled hasHeader noOverflow>
-      <MapWrapper>
-        <MapContainer
+      <MapOuterWrapper>
+        <MapWrapper
           countryData={countryData}
           countryPointData={countryPointData}
           countryFeatures={countriesJSON.features}
@@ -328,7 +332,7 @@ export function ActionMap({
           projection="gall-peters"
           mapId="ll-action-map"
         />
-      </MapWrapper>
+      </MapOuterWrapper>
       {mapTitle && (
         <Box>
           <MapTitle>

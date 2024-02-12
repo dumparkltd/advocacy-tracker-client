@@ -554,7 +554,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             isPrintView={isPrintView}
           />
         )}
-        <Loading loading={!dataReady} />
+        {!isPrintView && (
+          <Loading loading={!dataReady} />
+        )}
         {showList && dataReady && (
           <EntitiesListView
             searchQuery={searchQuery}
