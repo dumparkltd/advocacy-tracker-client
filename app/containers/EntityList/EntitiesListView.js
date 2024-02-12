@@ -124,7 +124,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     const {
       config,
       entityTitle,
-      dataReady,
       isMember,
       isVisitor,
       taxonomies,
@@ -191,7 +190,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
 
     let headerTitle = entityTitle.plural;
     // ACTIONS =================================================================
-    if (config.types === 'actiontypes' && dataReady) {
+    if (config.types === 'actiontypes') {
       columns = getActiontypeColumns({
         typeId,
         showCode,
@@ -355,7 +354,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
 
       // ACTORS ================================================================
       //
-    } else if (config.types === 'actortypes' && dataReady) {
+    } else if (config.types === 'actortypes') {
       type = actortypes.find((at) => qe(at.get('id'), typeId));
       isTarget = type.getIn(['attributes', 'is_target']);
       isActive = type.getIn(['attributes', 'is_active']);
@@ -476,7 +475,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
 
       // RESOURCES ================================================================
       //
-    } else if (config.types === 'resourcetypes' && dataReady) {
+    } else if (config.types === 'resourcetypes') {
       type = resourcetypes.find((at) => qe(at.get('id'), typeId));
       columns = [
         {
@@ -490,7 +489,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           type: 'resourceActions',
         },
       ];
-    } else if (config.types === 'indicators' && dataReady) {
+    } else if (config.types === 'indicators') {
       columns = [
         {
           id: 'main',
@@ -536,7 +535,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           type: 'inoffical',
         },
       ];
-    } else if (config.types === 'users' && dataReady) {
+    } else if (config.types === 'users') {
       mapSubjectClean = 'actors';
       columns = [
         {
@@ -558,7 +557,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           type: 'userActors',
         },
       ];
-    } else if (config.types === 'pages' && dataReady) {
+    } else if (config.types === 'pages') {
       columns = [
         {
           id: 'main',
@@ -582,285 +581,281 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {isPrintView && (
           <HeaderPrint argsRemove={['subj', 'ac', 'tc', 'mtchm', 'mtch', 'actontype']} />
         )}
-        {dataReady && viewOptions && viewOptions.length > 1 && (
+        {viewOptions && viewOptions.length > 1 && (
           <PrintHide>
             <EntityListViewOptions options={viewOptions} isPrintView={isPrintView} />
           </PrintHide>
         )}
         <Container ref={this.ScrollReference} isPrint={isPrintView}>
           <Content isPrint={isPrintView}>
-            {!dataReady && <Loading />}
-            {dataReady && (
-              <div>
-                <ContentHeader
-                  type={CONTENT_LIST}
-                  title={headerTitle}
-                  hasViewOptions={viewOptions && viewOptions.length > 1}
-                  info={headerInfo}
-                  buttons={listActions}
-                  entityIdsSelected={entityIdsSelected}
-                />
-                {isPrintView && (searchQuery || hasFilters) && (
-                  <Box margin={{ vertical: 'small' }}>
-                    <LabelPrint>
-                      {!!searchQuery && !hasFilters && (
-                        <FormattedMessage {...messages.labelPrintKeywords} />
-                      )}
-                      {!searchQuery && hasFilters && (
-                        <FormattedMessage {...messages.labelPrintFilters} />
-                      )}
-                      {!!searchQuery && hasFilters && (
-                        <FormattedMessage {...messages.labelPrintFiltersKeywords} />
-                      )}
-                    </LabelPrint>
-                    <TagList
-                      filters={filters}
-                      searchQuery={searchQuery}
-                      isPrintView
-                      isPrint
-                    />
-                  </Box>
-                )}
-                {config.types === 'actiontypes' && subjectOptions && !isPrintView && (
-                  <Box>
-                    <MapSubjectOptions options={subjectOptions} inList />
-                  </Box>
-                )}
-                {checkboxOptions && (
-                  <Box>
-                    {checkboxOptions && checkboxOptions.map(
-                      (option, i) => (
-                        <MapOption key={i} option={option} />
-                      )
+            <div>
+              <ContentHeader
+                type={CONTENT_LIST}
+                title={headerTitle}
+                hasViewOptions={viewOptions && viewOptions.length > 1}
+                info={headerInfo}
+                buttons={listActions}
+                entityIdsSelected={entityIdsSelected}
+              />
+              {isPrintView && (searchQuery || hasFilters) && (
+                <Box margin={{ vertical: 'small' }}>
+                  <LabelPrint>
+                    {!!searchQuery && !hasFilters && (
+                      <FormattedMessage {...messages.labelPrintKeywords} />
                     )}
-                  </Box>
-                )}
-                {showRelatedActorsForActions && (
-                  <Box>
-                    <BoxPrint
-                      isPrint={isPrintView}
-                      printHide
-                      direction="row"
-                      gap="xsmall"
-                      margin={{ vertical: 'small' }}
-                      wrap
-                    >
-                      {mapSubject === 'actors'
-                        && relatedActortypes
-                        && relatedActortypes.map(
-                          (actortypeId) => (
-                            <ButtonPill
-                              key={actortypeId}
-                              onClick={() => this.setType(actortypeId)}
-                              active={qe(viewTypeClean, actortypeId)}
-                            >
-                              <Text size="small">
-                                <FormattedMessage {...appMessages.entities[`actors_${actortypeId}`].pluralShort} />
-                              </Text>
-                            </ButtonPill>
-                          )
-                        )}
-                      {mapSubject === 'targets'
-                        && relatedTargettypes
-                        && relatedTargettypes.map(
-                          (actortypeId) => (
-                            <ButtonPill
-                              key={actortypeId}
-                              onClick={() => this.setType(actortypeId)}
-                              active={qe(viewTypeClean, actortypeId)}
-                            >
-                              <Text size="small">
-                                <FormattedMessage {...appMessages.entities[`actors_${actortypeId}`].pluralShort} />
-                              </Text>
-                            </ButtonPill>
-                          )
-                        )}
-                    </BoxPrint>
-                    {memberOption && (
-                      <Box>
-                        <MapOption option={memberOption} type="member" />
-                      </Box>
+                    {!searchQuery && hasFilters && (
+                      <FormattedMessage {...messages.labelPrintFilters} />
                     )}
-                    {childOption && (
-                      <Box>
-                        <MapOption option={childOption} type="child" />
-                      </Box>
+                    {!!searchQuery && hasFilters && (
+                      <FormattedMessage {...messages.labelPrintFiltersKeywords} />
                     )}
-                    <EntityListTable
-                      isByOption
-                      hasFilters={hasFilters}
-                      paginate
-                      hasSearch
-                      columns={[
-                        {
-                          id: 'main',
-                          type: 'main',
-                          sort: 'title',
-                          attributes: (showCode || qe(viewTypeClean, ACTORTYPES.COUNTRY))
-                            ? ['code', 'title']
-                            : ['title'],
-                        },
-                        {
-                          id: 'actorActions',
-                          type: 'actorActions',
-                          label: entityTitle.plural,
-                          subject: mapSubject,
-                          actions: mapSubject === 'actors'
-                            ? 'actions'
-                            : 'targetingActions',
-                        },
-                        {
-                          id: 'actorActionsAsMember',
-                          type: 'actorActions',
-                          members: true,
-                          subject: mapSubject,
-                          label: `${entityTitle.plural} as member`,
-                          actions: mapSubject === 'actors'
-                            ? 'actionsMembers'
-                            : 'targetingActionsAsMember',
-                          skip: !(memberOption
-                            && (
-                              (mapSubject === 'actors' && includeActorMembers)
-                              || (mapSubject === 'targets' && includeTargetMembers)
-                            )),
-                        },
-                        {
-                          id: 'actorActionsAsParent',
-                          type: 'actorActions',
-                          children: true,
-                          subject: mapSubject,
-                          label: mapSubject === 'actors'
-                            ? `${entityTitle.plural} by members`
-                            : `${entityTitle.plural} targeting members`,
-                          actions: mapSubject === 'actors'
-                            ? 'actionsAsParent'
-                            : 'targetingActionsAsParent',
-                          skip: !(childOption
-                            && (
-                              (mapSubject === 'actors' && includeActorChildren)
-                              || (mapSubject === 'targets' && includeTargetChildren)
-                            )),
-                        },
-                      ]}
-                      entities={entityActors.get(parseInt(viewTypeClean, 10))}
-                      entityPath={ROUTES.ACTOR}
-                      onEntityClick={onEntityClick}
-                      entityTitle={{
-                        single: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].single),
-                        plural: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].plural),
-                      }}
-                      onResetScroll={this.scrollToTop}
-                      config={{
-                        types: 'actortypes',
-                        clientPath: ROUTES.ACTOR,
-                        views: {
-                          list: {
-                            search: ['code', 'title', 'description'],
-                          },
-                        },
-                      }}
-                      connections={connections}
-                    />
-                  </Box>
-                )}
-                {showRelatedUsersForActions && (
-                  <Box>
-                    <EntityListTable
-                      isByOption
-                      hasFilters={hasFilters}
-                      paginate
-                      hasSearch
-                      columns={[
-                        {
-                          id: 'main',
-                          type: 'main',
-                          sort: 'title',
-                          attributes: ['name'],
-                        },
-                        {
-                          id: 'userActions',
-                          type: 'userActions',
-                          actiontype_id: viewTypeClean,
-                          title: userEntityColumnTitle,
-                        },
-                      ]}
-                      entities={entityUsers}
-                      entityPath={ROUTES.USER}
-                      onEntityClick={onEntityClick}
-                      entityTitle={{
-                        single: intl.formatMessage(appMessages.entities.users.single),
-                        plural: intl.formatMessage(appMessages.entities.users.plural),
-                      }}
-                      onResetScroll={this.scrollToTop}
-                      config={{
-                        clientPath: ROUTES.USER,
-                        views: {
-                          list: {
-                            search: ['name', 'description'],
-                          },
-                        },
-                      }}
-                      connections={connections}
-                    />
-                  </Box>
-
-                )}
-                {showEntities && (
+                  </LabelPrint>
+                  <TagList
+                    filters={filters}
+                    searchQuery={searchQuery}
+                    isPrintView
+                    isPrint
+                  />
+                </Box>
+              )}
+              {config.types === 'actiontypes' && subjectOptions && !isPrintView && (
+                <Box>
+                  <MapSubjectOptions options={subjectOptions} inList />
+                </Box>
+              )}
+              {checkboxOptions && (
+                <Box>
+                  {checkboxOptions && checkboxOptions.map(
+                    (option, i) => (
+                      <MapOption key={i} option={option} />
+                    )
+                  )}
+                </Box>
+              )}
+              {showRelatedActorsForActions && (
+                <Box>
+                  <BoxPrint
+                    isPrint={isPrintView}
+                    printHide
+                    direction="row"
+                    gap="xsmall"
+                    margin={{ vertical: 'small' }}
+                    wrap
+                  >
+                    {mapSubject === 'actors'
+                      && relatedActortypes
+                      && relatedActortypes.map(
+                        (actortypeId) => (
+                          <ButtonPill
+                            key={actortypeId}
+                            onClick={() => this.setType(actortypeId)}
+                            active={qe(viewTypeClean, actortypeId)}
+                          >
+                            <Text size="small">
+                              <FormattedMessage {...appMessages.entities[`actors_${actortypeId}`].pluralShort} />
+                            </Text>
+                          </ButtonPill>
+                        )
+                      )}
+                    {mapSubject === 'targets'
+                      && relatedTargettypes
+                      && relatedTargettypes.map(
+                        (actortypeId) => (
+                          <ButtonPill
+                            key={actortypeId}
+                            onClick={() => this.setType(actortypeId)}
+                            active={qe(viewTypeClean, actortypeId)}
+                          >
+                            <Text size="small">
+                              <FormattedMessage {...appMessages.entities[`actors_${actortypeId}`].pluralShort} />
+                            </Text>
+                          </ButtonPill>
+                        )
+                      )}
+                  </BoxPrint>
+                  {memberOption && (
+                    <Box>
+                      <MapOption option={memberOption} type="member" />
+                    </Box>
+                  )}
+                  {childOption && (
+                    <Box>
+                      <MapOption option={childOption} type="child" />
+                    </Box>
+                  )}
                   <EntityListTable
+                    isByOption
                     hasFilters={hasFilters}
                     paginate
                     hasSearch
-                    columns={columns}
-                    headerColumnsUtility={headerColumnsUtility}
-                    memberOption={(memberOption || childOption) && (
-                      <MapOption
-                        option={memberOption || childOption}
-                        type="member"
+                    columns={[
+                      {
+                        id: 'main',
+                        type: 'main',
+                        sort: 'title',
+                        attributes: (showCode || qe(viewTypeClean, ACTORTYPES.COUNTRY))
+                          ? ['code', 'title']
+                          : ['title'],
+                      },
+                      {
+                        id: 'actorActions',
+                        type: 'actorActions',
+                        label: entityTitle.plural,
+                        subject: mapSubject,
+                        actions: mapSubject === 'actors'
+                          ? 'actions'
+                          : 'targetingActions',
+                      },
+                      {
+                        id: 'actorActionsAsMember',
+                        type: 'actorActions',
+                        members: true,
+                        subject: mapSubject,
+                        label: `${entityTitle.plural} as member`,
+                        actions: mapSubject === 'actors'
+                          ? 'actionsMembers'
+                          : 'targetingActionsAsMember',
+                        skip: !(memberOption
+                          && (
+                            (mapSubject === 'actors' && includeActorMembers)
+                            || (mapSubject === 'targets' && includeTargetMembers)
+                          )),
+                      },
+                      {
+                        id: 'actorActionsAsParent',
+                        type: 'actorActions',
+                        children: true,
+                        subject: mapSubject,
+                        label: mapSubject === 'actors'
+                          ? `${entityTitle.plural} by members`
+                          : `${entityTitle.plural} targeting members`,
+                        actions: mapSubject === 'actors'
+                          ? 'actionsAsParent'
+                          : 'targetingActionsAsParent',
+                        skip: !(childOption
+                          && (
+                            (mapSubject === 'actors' && includeActorChildren)
+                            || (mapSubject === 'targets' && includeTargetChildren)
+                          )),
+                      },
+                    ]}
+                    entities={entityActors.get(parseInt(viewTypeClean, 10))}
+                    entityPath={ROUTES.ACTOR}
+                    onEntityClick={onEntityClick}
+                    entityTitle={{
+                      single: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].single),
+                      plural: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].plural),
+                    }}
+                    onResetScroll={this.scrollToTop}
+                    config={{
+                      types: 'actortypes',
+                      clientPath: ROUTES.ACTOR,
+                      views: {
+                        list: {
+                          search: ['code', 'title', 'description'],
+                        },
+                      },
+                    }}
+                    connections={connections}
+                  />
+                </Box>
+              )}
+              {showRelatedUsersForActions && (
+                <Box>
+                  <EntityListTable
+                    isByOption
+                    hasFilters={hasFilters}
+                    paginate
+                    hasSearch
+                    columns={[
+                      {
+                        id: 'main',
+                        type: 'main',
+                        sort: 'title',
+                        attributes: ['name'],
+                      },
+                      {
+                        id: 'userActions',
+                        type: 'userActions',
+                        actiontype_id: viewTypeClean,
+                        title: userEntityColumnTitle,
+                      },
+                    ]}
+                    entities={entityUsers}
+                    entityPath={ROUTES.USER}
+                    onEntityClick={onEntityClick}
+                    entityTitle={{
+                      single: intl.formatMessage(appMessages.entities.users.single),
+                      plural: intl.formatMessage(appMessages.entities.users.plural),
+                    }}
+                    onResetScroll={this.scrollToTop}
+                    config={{
+                      clientPath: ROUTES.USER,
+                      views: {
+                        list: {
+                          search: ['name', 'description'],
+                        },
+                      },
+                    }}
+                    connections={connections}
+                  />
+                </Box>
+
+              )}
+              {showEntities && (
+                <EntityListTable
+                  hasFilters={hasFilters}
+                  paginate
+                  hasSearch
+                  columns={columns}
+                  headerColumnsUtility={headerColumnsUtility}
+                  memberOption={(memberOption || childOption) && (
+                    <MapOption
+                      option={memberOption || childOption}
+                      type="member"
+                    />
+                  )}
+                  subjectOptions={config.types === 'actortypes'
+                    && subjectOptions
+                    && (
+                      <MapSubjectOptions
+                        inList
+                        options={subjectOptions}
                       />
                     )}
-                    subjectOptions={config.types === 'actortypes'
-                      && subjectOptions
-                      && (
-                        <MapSubjectOptions
-                          inList
-                          options={subjectOptions}
-                        />
-                      )}
-                    listUpdating={listUpdating}
-                    entities={entities}
-                    allEntityCount={allEntityCount}
-                    errors={errors}
-                    taxonomies={taxonomies}
-                    actortypes={actortypes}
-                    connections={connections}
-                    connectedTaxonomies={connectedTaxonomies}
-                    entityIdsSelected={entityIdsSelected}
-                    config={config}
-                    entityTitle={entityTitle}
+                  listUpdating={listUpdating}
+                  entities={entities}
+                  allEntityCount={allEntityCount}
+                  errors={errors}
+                  taxonomies={taxonomies}
+                  actortypes={actortypes}
+                  connections={connections}
+                  connectedTaxonomies={connectedTaxonomies}
+                  entityIdsSelected={entityIdsSelected}
+                  config={config}
+                  entityTitle={entityTitle}
 
-                    dataReady={dataReady}
-                    canEdit={isMember}
-                    isVisitor={isVisitor}
+                  canEdit={isMember}
+                  isVisitor={isVisitor}
 
-                    onEntitySelect={onEntitySelect}
-                    onEntitySelectAll={onEntitySelectAll}
-                    onResetScroll={this.scrollToTop}
-                    onEntityClick={onEntityClick}
-                    onDismissError={onDismissError}
-                    typeId={typeId}
-                    showCode={showCode}
-                    includeMembers={mapSubjectClean === 'actors'
-                      ? includeActorMembers
-                      : includeTargetMembers
-                    }
-                    includeChildren={mapSubjectClean === 'actors'
-                      ? includeActorChildren
-                      : includeTargetChildren
-                    }
-                  />
-                )}
-              </div>
-            )}
+                  onEntitySelect={onEntitySelect}
+                  onEntitySelectAll={onEntitySelectAll}
+                  onResetScroll={this.scrollToTop}
+                  onEntityClick={onEntityClick}
+                  onDismissError={onDismissError}
+                  typeId={typeId}
+                  showCode={showCode}
+                  includeMembers={mapSubjectClean === 'actors'
+                    ? includeActorMembers
+                    : includeTargetMembers
+                  }
+                  includeChildren={mapSubjectClean === 'actors'
+                    ? includeActorChildren
+                    : includeTargetChildren
+                  }
+                />
+              )}
+            </div>
           </Content>
         </Container>
       </ContainerWrapper>
@@ -890,7 +885,6 @@ EntitiesListView.propTypes = {
   intl: intlShape.isRequired,
   // primitive
   isPrintView: PropTypes.bool,
-  dataReady: PropTypes.bool,
   isMember: PropTypes.bool,
   isVisitor: PropTypes.bool,
   includeActorMembers: PropTypes.bool,

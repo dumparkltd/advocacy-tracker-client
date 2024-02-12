@@ -8,7 +8,8 @@ import styled from 'styled-components';
 
 import { isMinSize } from 'utils/responsive';
 
-const Styled = styled((p) => <Box {...p} />)``;
+const Styled = styled((p) => <Box {...p} />)`
+`;
 const CardLink = styled((p) => <Button plain as="a" fill="vertical" {...p} />)`
   padding: 20px 15px;
   min-height: ${({ prim }) => prim ? 180 : 0}px;
@@ -31,14 +32,20 @@ export function CardTeaser({
   path,
   count,
   title,
-  // dataReady
+  dataReady,
   description,
   basis,
 }) {
   const size = React.useContext(ResponsiveContext);
   return (
-    <Styled elevation="small" background="white" basis={basis || 'full'}>
+    <Styled
+      elevation="small"
+      background="white"
+      basis={basis || 'full'}
+      dataReady={dataReady}
+    >
       <CardLink
+        disabled={!dataReady}
         prim={primary && isMinSize(size, 'large')}
         href={`${path}`}
         onClick={onClick}

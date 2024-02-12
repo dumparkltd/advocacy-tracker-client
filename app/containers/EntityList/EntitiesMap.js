@@ -33,7 +33,6 @@ const LoadingWrap = styled.div`
 
 
 export function EntitiesMap({
-  dataReady,
   viewOptions,
   config,
   entities,
@@ -51,57 +50,51 @@ export function EntitiesMap({
   hasFilters,
   isPrintView,
 }) {
-  if (dataReady) {
-    // actors ===================================================
-    if (config.types === 'actortypes') {
-      return (
-        <EntitiesMapActors
-          isPrintView={isPrintView}
-          entities={entities}
-          actortypes={actortypes}
-          actiontypes={actiontypes}
-          viewOptions={viewOptions}
-          typeId={typeId}
-          mapSubject={mapSubject}
-          onSetMapSubject={onSetMapSubject}
-          onSetIncludeActorMembers={onSetIncludeActorMembers}
-          onSetIncludeTargetMembers={onSetIncludeTargetMembers}
-          includeActorMembers={includeActorMembers}
-          includeTargetMembers={includeTargetMembers}
-          hasFilters={hasFilters}
-          onEntityClick={onEntityClick}
-        />
-      );
-    }
-
-    // actions ===================================================
-    if (config.types === 'actiontypes') {
-      return (
-        <EntitiesMapActions
-          isPrintView={isPrintView}
-          entities={entities}
-          actortypes={actortypes}
-          actiontypes={actiontypes}
-          targettypes={targettypes}
-          viewOptions={viewOptions}
-          typeId={typeId}
-          mapSubject={mapSubject}
-          onSetMapSubject={onSetMapSubject}
-          onSetIncludeActorMembers={onSetIncludeActorMembers}
-          onSetIncludeTargetMembers={onSetIncludeTargetMembers}
-          includeActorMembers={includeActorMembers}
-          includeTargetMembers={includeTargetMembers}
-          hasFilters={hasFilters}
-          onEntityClick={onEntityClick}
-        />
-      );
-    }
+  // actors ===================================================
+  if (config.types === 'actortypes') {
+    return (
+      <EntitiesMapActors
+        isPrintView={isPrintView}
+        entities={entities}
+        actortypes={actortypes}
+        actiontypes={actiontypes}
+        viewOptions={viewOptions}
+        typeId={typeId}
+        mapSubject={mapSubject}
+        onSetMapSubject={onSetMapSubject}
+        onSetIncludeActorMembers={onSetIncludeActorMembers}
+        onSetIncludeTargetMembers={onSetIncludeTargetMembers}
+        includeActorMembers={includeActorMembers}
+        includeTargetMembers={includeTargetMembers}
+        hasFilters={hasFilters}
+        onEntityClick={onEntityClick}
+      />
+    );
   }
-  return (
-    <LoadingWrap>
-      <Loading />
-    </LoadingWrap>
-  );
+
+  // actions ===================================================
+  if (config.types === 'actiontypes') {
+    return (
+      <EntitiesMapActions
+        isPrintView={isPrintView}
+        entities={entities}
+        actortypes={actortypes}
+        actiontypes={actiontypes}
+        targettypes={targettypes}
+        viewOptions={viewOptions}
+        typeId={typeId}
+        mapSubject={mapSubject}
+        onSetMapSubject={onSetMapSubject}
+        onSetIncludeActorMembers={onSetIncludeActorMembers}
+        onSetIncludeTargetMembers={onSetIncludeTargetMembers}
+        includeActorMembers={includeActorMembers}
+        includeTargetMembers={includeTargetMembers}
+        hasFilters={hasFilters}
+        onEntityClick={onEntityClick}
+      />
+    );
+  }
+  return (<div></div>);
 }
 
 EntitiesMap.propTypes = {
@@ -114,7 +107,6 @@ EntitiesMap.propTypes = {
   // object/arrays
   viewOptions: PropTypes.array,
   // primitive
-  dataReady: PropTypes.bool,
   typeId: PropTypes.string,
   mapSubject: PropTypes.string,
   onSetMapSubject: PropTypes.func,

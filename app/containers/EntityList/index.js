@@ -554,7 +554,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             isPrintView={isPrintView}
           />
         )}
-        {showList && (
+        <Loading loading={!dataReady} />
+        {showList && dataReady && (
           <EntitiesListView
             searchQuery={searchQuery}
             isPrintView={isPrintView}
@@ -581,7 +582,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             headerColumnsUtility={headerColumnsUtility}
             entityTitle={entityTitle}
 
-            dataReady={dataReady}
             isMember={isMember}
             isAdmin={isAdmin}
             isVisitor={hasUserRole[USER_ROLES.VISITOR.value]}
@@ -624,7 +624,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             includeInofficial={includeInofficial}
           />
         )}
-        {showMap && (
+        {showMap && dataReady && (
           <EntitiesMap
             viewOptions={viewOptions}
             entities={entities}

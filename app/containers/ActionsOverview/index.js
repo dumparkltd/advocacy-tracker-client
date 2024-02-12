@@ -14,13 +14,14 @@ import appMessages from 'containers/App/messages';
 import { ROUTES, ACTIONTYPE_NAVGROUPS } from 'themes/config';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import { selectReady } from 'containers/App/selectors';
-
 import HeaderExplore from 'containers/HeaderExplore';
+import Footer from 'containers/Footer';
+
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
 import ContentSimple from 'components/styled/ContentSimple';
 import CardTeaser from 'components/CardTeaser';
-import Footer from 'containers/Footer';
+import Loading from 'components/Loading';
 
 import { isMaxSize } from 'utils/responsive';
 import { selectActiontypesWithActionCount } from './selectors';
@@ -47,10 +48,11 @@ export function ActionsOverview({
     onLoadData();
   }, []);
   const size = React.useContext(ResponsiveContext);
-
+  console.log('dataReady', dataReady, DEPENDENCIES)
   return (
     <ContainerWrapper bg>
       <HeaderExplore />
+      <Loading loading={!dataReady} />
       <ViewContainer>
         <ContentSimple>
           {Object.keys(ACTIONTYPE_NAVGROUPS).map((key) => (
@@ -71,7 +73,7 @@ export function ActionsOverview({
                       path={path}
                       onClick={(evt) => {
                         if (evt && evt.preventDefault) evt.preventDefault();
-                        onUpdatePath(path);
+                        if (dataReady) onUpdatePath(path);
                       }}
                       dataReady={dataReady}
                       count={count}
@@ -103,7 +105,7 @@ ActionsOverview.propTypes = {
 };
 
 const mapStateToProps = createStructuredSelector({
-  dataReady: (state) => selectReady(state, DEPENDENCIES),
+  dataReady: (state) => selectReady(state, { path: DEPENDENCIES }),
   types: (state) => selectActiontypesWithActionCount(state),
 });
 
