@@ -205,7 +205,7 @@ function ImportEntitiesForm({
                     <Accordion
                       activePanels={actives}
                       onActive={(newActives) => setActive(newActives)}
-                      panels={[
+                      options={[
                         {
                           id: 0,
                           titleButton: actives.indexOf(0) > -1
