@@ -155,6 +155,9 @@ const GlobalStyle = createGlobalStyle`
     hr {
       opacity: 0.3;
     }
+    a {
+      text-decoration: underline;
+    }
   }
 
   .content-page {
@@ -180,6 +183,7 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 
+  .delete-csv-modal,
   .download-csv-modal,
   .new-entity-modal {
     position: absolute;
@@ -197,6 +201,7 @@ const GlobalStyle = createGlobalStyle`
     max-width: 1122px;
   }
   @media (min-width: 769px) {
+    .delete-csv-modal,
     .download-csv-modal,
     .new-entity-modal {
       padding: 20px;
@@ -207,6 +212,7 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 
+  .delete-csv-modal-overlay,
   .download-csv-modal-overlay,
   .new-entity-modal-overlay {
     position: fixed;

@@ -49,7 +49,7 @@ ${({ isPrint }) => isPrint && css`margin-left: 0`};
   margin-left: 0;
 }
 `;
-const getMapInnerWrapper = (fullMap) => fullMap
+const getMapOuterWrapper = (fullMap) => fullMap
   ? styled.div``
   : styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)`
     ${({ isPrint }) => isPrint && css`margin-left: 0;`}
@@ -186,11 +186,11 @@ export function MapContainer({
     ];
   }
   const isPrintView = usePrint();
-  const MapInnerWrapper = getMapInnerWrapper(fullMap);
+  const MapOuterWrapper = getMapOuterWrapper(fullMap);
 
   return (
     <Styled>
-      <MapInnerWrapper isPrint={isPrintView} orient={printArgs && printArgs.printOrientation}>
+      <MapOuterWrapper isPrint={isPrintView} orient={printArgs && printArgs.printOrientation}>
         <MapWrapper
           fullMap={fullMap}
           isPrintView={isPrintView}
@@ -220,7 +220,7 @@ export function MapContainer({
             rangeMax: minMaxValues && minMaxValues.points && minMaxValues.points.max,
           }}
         />
-      </MapInnerWrapper>
+      </MapOuterWrapper>
       {mapInfo && mapInfo.length > 0 && (
         <MapInfoOptions
           isPrintView={isPrintView}

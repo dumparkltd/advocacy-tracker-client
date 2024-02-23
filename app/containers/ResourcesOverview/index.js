@@ -15,11 +15,14 @@ import { usePrint } from 'containers/App/PrintContext';
 import { ROUTES, RESOURCETYPE_NAVGROUPS } from 'themes/config';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import { selectReady } from 'containers/App/selectors';
+import Footer from 'containers/Footer';
+
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
 import ContentSimple from 'components/styled/ContentSimple';
 import CardTeaser from 'components/CardTeaser';
-import Footer from 'containers/Footer';
+import Loading from 'components/Loading';
+
 import { isMaxSize } from 'utils/responsive';
 
 import { selectResourcetypesWithResourceCount } from './selectors';
@@ -49,6 +52,7 @@ export function ResourcesOverview({
   const isPrint = usePrint();
   return (
     <ContainerWrapper bg>
+      <Loading loading={!dataReady} />
       <ViewContainer isPrint={isPrint}>
         <ContentSimple>
           {Object.keys(RESOURCETYPE_NAVGROUPS).map((key) => (
@@ -69,7 +73,7 @@ export function ResourcesOverview({
                       path={path}
                       onClick={(evt) => {
                         if (evt && evt.preventDefault) evt.preventDefault();
-                        onUpdatePath(path);
+                        if (dataReady) onUpdatePath(path);
                       }}
                       dataReady={dataReady}
                       count={count}
@@ -101,7 +105,7 @@ ResourcesOverview.propTypes = {
 };
 
 const mapStateToProps = createStructuredSelector({
-  dataReady: (state) => selectReady(state, DEPENDENCIES),
+  dataReady: (state) => selectReady(state, { path: DEPENDENCIES}),
   types: (state) => selectResourcetypesWithResourceCount(state),
 });
 

@@ -16,8 +16,9 @@ const Wrapper = styled((p) => <Box {...p} />)`
 
 class ContentNarrow extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   render() {
+    const { isStatic, withoutHeaderNav } = this.props;
     return (
-      <Content isStatic>
+      <Content withoutHeaderNav={withoutHeaderNav} isStatic={isStatic}>
         <Box align="center" fill="horizontal">
           <Wrapper>
             {this.props.children}
@@ -30,6 +31,8 @@ class ContentNarrow extends React.PureComponent { // eslint-disable-line react/p
 
 ContentNarrow.propTypes = {
   children: PropTypes.node,
+  isStatic: PropTypes.bool,
+  withoutHeaderNav: PropTypes.bool,
 };
 
 export default ContentNarrow;

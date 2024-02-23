@@ -33,6 +33,10 @@ const MapOuterWrapper = styled((p) => <Box margin={{ horizontal: 'medium' }} {..
   position: relative;
   height: 400px;
   background: #F9F9FA;
+  @media print {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 `;
 const MapTitle = styled((p) => <Box margin={{ vertical: 'xsmall' }} {...p} />)``;
 const MapOptions = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)``;

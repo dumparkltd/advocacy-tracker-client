@@ -9,7 +9,6 @@ import { FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { Text } from 'grommet';
 import { Edit } from 'grommet-icons';
 import { Map, List, fromJS } from 'immutable';
 import ReactModal from 'react-modal';
@@ -19,6 +18,7 @@ import Loading from 'components/Loading';
 import Icon from 'components/Icon';
 import EntityListHeader from 'components/EntityListHeader';
 import EntityListDownload from 'components/EntityListDownload';
+import EntityListDelete from 'components/EntityListDelete';
 
 import {
   selectHasUserRole,
@@ -35,6 +35,7 @@ import {
   selectTaxonomiesWithCategories,
   selectIsPrintView,
   selectSearchQuery,
+  selectSessionUserId,
 } from 'containers/App/selectors';
 
 import {
@@ -307,6 +308,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onUpdateFilters,
       isPrintView,
       searchQuery,
+      currentUserId,
     } = this.props;
     // detect print to avoid expensive rendering
     const printing = isPrintView || !!(
@@ -373,58 +375,41 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         },
       ];
     }
-    const hasSelected = dataReady && canEdit && entityIdsSelected && entityIdsSelected.size > 0;
+    const hasSelected = dataReady && canEdit && entityIdsSelectedFiltered && entityIdsSelectedFiltered.size > 0;
     let allListActions;
+    let destroyableEntityIdsSelected;
     if (hasSelected) {
       allListActions = listActions || [];
-      if (config.batchDelete && isAdmin) {
-        if (!this.state.deleteConfirm) {
-          allListActions = [
-            {
-              title: 'Delete selected',
-              onClick: (evt) => this.onShowDeleteConfirm(evt),
-              icon: <Icon name="trash" size="22px" />,
-              type: 'listOption',
-            },
-            ...allListActions,
-          ];
-        } else {
-          allListActions = [
-            {
-              title: 'Cancel',
-              onClick: (evt) => this.onHideDeleteConfirm(evt),
-              type: 'listOption',
-              warning: (
-                <Text size="small" color="danger">
-                  {`Really delete ${entityIdsSelected.size} selected? This action cannot be undone.`}
-                </Text>
-              ),
-            },
-            {
-              title: 'Confirm',
-              onClick: (evt) => {
-                this.onHideDeleteConfirm(evt);
-                onEntitiesDelete(config.serverPath, entityIdsSelected);
-                onEntitySelectAll([]);
-              },
-              type: 'listOption',
-            },
-          ];
-        }
-      }
-      if (!isAdmin || !this.state.deleteConfirm || !config.batchDelete) {
+      if (config.batchDelete && isMember) {
+        destroyableEntityIdsSelected = isAdmin
+          ? entityIdsSelectedFiltered
+          : entityIdsSelectedFiltered.filter((id) => {
+            const entity = entities.find((e) => qe(e.get('id'), id));
+            return entity && qe(entity.getIn(['attributes', 'created_by_id']), currentUserId);
+          });
         allListActions = [
-          ...allListActions,
           {
-            title: 'Edit selected',
-            onClick: (evt) => this.onShowEditOptions(evt),
-            icon: <Edit color="white" size="xxsmall" />,
+            title: 'Delete selected',
+            onClick: (evt) => this.onShowDeleteConfirm(evt),
+            icon: <Icon name="trash" size="22px" />,
             type: 'listOption',
-            active: true,
-            isMember,
           },
+          ...allListActions,
         ];
       }
+      // if (!isAdmin || !this.state.deleteConfirm || !config.batchDelete) {
+      allListActions = [
+        ...allListActions,
+        {
+          title: 'Edit selected',
+          onClick: (evt) => this.onShowEditOptions(evt),
+          icon: <Edit color="white" size="xxsmall" />,
+          type: 'listOption',
+          active: true,
+          isMember,
+        },
+      ];
+      // }
     }
     let headerActions = headerOptions ? headerOptions.actions : [];
     if (config.downloadCSV) {
@@ -438,12 +423,38 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         },
       ];
     }
+    // we only consider the search query for download when we are looking at the list and when we have the default map subject selected
+    const isSearchQueryActiveForDownload = !!locationQuery.get('search') && showList;
+    const isSelectionActiveForDownload = showList && entityIdsSelectedFiltered && entityIdsSelectedFiltered.size > 0;
+
     return (
       <div>
+        {config.batchDelete && this.state.deleteConfirm && entityIdsSelectedFiltered && (
+          <ReactModal
+            isOpen
+            onRequestClose={() => this.onHideDeleteConfirm()}
+            className="delete-csv-modal"
+            overlayClassName="delete-csv-modal-overlay"
+            style={{
+              overlay: { zIndex: 99999999 },
+            }}
+            appElement={document.getElementById('app')}
+          >
+            <EntityListDelete
+              selectedCount={entityIdsSelectedFiltered.size}
+              destroyableCount={destroyableEntityIdsSelected.size}
+              onCancel={() => this.onHideDeleteConfirm()}
+              onConfirm={(evt) => {
+                this.onHideDeleteConfirm(evt);
+                onEntitiesDelete(config.serverPath, destroyableEntityIdsSelected);
+                onEntitySelectAll([]);
+              }}
+            />
+          </ReactModal>
+        )}
         {config.downloadCSV && this.state.downloadActive && (
           <ReactModal
             isOpen
-            contentLabel="test"
             onRequestClose={() => this.onDownloadDismiss()}
             className="download-csv-modal"
             overlayClassName="download-csv-modal-overlay"
@@ -469,6 +480,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 ).toJS(),
               }}
               isAdmin={isAdmin}
+              searchQuery={isSearchQueryActiveForDownload ? locationQuery.get('search') : null}
+              entityIdsSelected={isSelectionActiveForDownload ? entityIdsSelectedFiltered : null}
             />
           </ReactModal>
         )}
@@ -480,7 +493,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             listUpdating={progress !== null && progress >= 0 && progress < 100}
             entities={entities}
             allEntities={allEntities}
-            entityIdsSelected={entityIdsSelected}
+            entityIdsSelected={entityIdsSelectedFiltered}
             taxonomies={taxonomies}
             actortypes={actortypes}
             parentActortypes={parentActortypes}
@@ -504,7 +517,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               (associations, activeEditOption) => handleEditSubmit(
                 associations,
                 activeEditOption,
-                entityIdsSelected,
+                entityIdsSelectedFiltered,
                 viewDomain.get('errors'),
                 connections,
               )}
@@ -541,7 +554,10 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             isPrintView={isPrintView}
           />
         )}
-        {showList && (
+        {!isPrintView && (
+          <Loading loading={!dataReady} />
+        )}
+        {showList && dataReady && (
           <EntitiesListView
             searchQuery={searchQuery}
             isPrintView={isPrintView}
@@ -568,14 +584,13 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             headerColumnsUtility={headerColumnsUtility}
             entityTitle={entityTitle}
 
-            dataReady={dataReady}
             isMember={isMember}
             isAdmin={isAdmin}
             isVisitor={hasUserRole[USER_ROLES.VISITOR.value]}
 
             onEntitySelect={(id, checked) => {
               // reset when unchecking last selected item
-              if (!checked && !this.state.visibleEditOptions && entityIdsSelected.size === 1) {
+              if (!checked && !this.state.visibleEditOptions && entityIdsSelectedFiltered.size === 1) {
                 this.onResetEditOptions();
               }
               this.onHideDeleteConfirm();
@@ -611,7 +626,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             includeInofficial={includeInofficial}
           />
         )}
-        {showMap && (
+        {showMap && dataReady && (
           <EntitiesMap
             viewOptions={viewOptions}
             entities={entities}
@@ -782,6 +797,7 @@ EntityList.propTypes = {
   onEntitiesDelete: PropTypes.func,
   onUpdateFilters: PropTypes.func,
   isPrintView: PropTypes.bool,
+  currentUserId: PropTypes.string,
 };
 
 EntityList.contextTypes = {
@@ -808,6 +824,7 @@ const mapStateToProps = (state) => ({
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   isPrintView: selectIsPrintView(state),
   searchQuery: selectSearchQuery(state),
+  currentUserId: selectSessionUserId(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

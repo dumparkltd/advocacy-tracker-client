@@ -52,15 +52,7 @@ import { DEPENDENCIES } from './constants';
 import messages from './messages';
 
 const Main = styled.div`
-  position: ${({ isHome, isPrintView }) => {
-    if (isPrintView) {
-      return 'absolute';
-    }
-    if (isHome) {
-      return 'absolute';
-    }
-    return 'absolute';
-  }};
+  position: absolute;
   top: ${({ isHome, theme }) => isHome
     ? 0
     : theme.sizes.header.banner.heightMobile
@@ -177,6 +169,7 @@ const PrintWrapper = styled.div`
 
 class App extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
+    // console.log('App/UNSAFE_componentWillMount', 'validateToken');
     this.props.validateToken();
     this.props.loadEntitiesIfNeeded();
   }
@@ -271,7 +264,6 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       || location.pathname.startsWith(ROUTES.REGISTER)
       || location.pathname.startsWith(ROUTES.LOGOUT)
       || location.pathname.startsWith(ROUTES.UNAUTHORISED);
-    const isHomeOrAuth = isHome || isAuth;
     let authUID;
     if (isUserAuthenticating) {
       const authValues = getAuthValues();
@@ -307,7 +299,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             currentPath={location.pathname}
           />
         )}
-        <Main isHome={isHomeOrAuth} isPrint={isPrintView}>
+        <Main isHome={isHome} isPrint={isPrintView}>
           {isPrintView && (<PrintUI />)}
           <PrintWrapper
             isPrint={isPrintView}
@@ -357,7 +349,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             />
           </ReactModal>
         )}
-        {isUserAuthenticating && !isAuth && (
+        {isUserAuthenticating && !isAuth && !isUserSignedIn && (
           <Overlay
             title={intl.formatMessage(messages.labels.userLoading)}
             content={(

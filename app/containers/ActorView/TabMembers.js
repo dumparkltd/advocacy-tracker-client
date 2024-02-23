@@ -25,15 +25,17 @@ import FieldGroup from 'components/fields/FieldGroup';
 // import appMessages from 'containers/App/messages';
 // import ActorMap from './ActorMap';
 import { usePrint } from 'containers/App/PrintContext';
-import MapContainer from 'containers/MapContainer/MapWrapper';
+import MapWrapper from 'containers/MapContainer/MapWrapper';
 // import messages from './messages';
 
 const MapOuterWrapper = styled((p) => <Box {...p} />)`
-  z-index: 0;
-`;
-const MapWrapper = styled((p) => <Box {...p} />)`
   position: relative;
+  z-index: 0;
   height: 400px;
+  @media print {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
 `;
 const reduceCountryData = ({ features, countries }) => features.reduce(
   (memo, feature) => {
@@ -103,18 +105,16 @@ export function TabMembers({
       )}
       {countries && countries.size > 0 && (
         <Box>
-          <MapOuterWrapper hasHeader noOverflow>
-            <MapWrapper>
-              <MapContainer
-                countryData={countryData}
-                countryPointData={countryPointData}
-                countryFeatures={countriesJSON.features}
-                styleType="members"
-                onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
-                fitBounds
-                projection="gall-peters"
-              />
-            </MapWrapper>
+          <MapOuterWrapper>
+            <MapWrapper
+              countryData={countryData}
+              countryPointData={countryPointData}
+              countryFeatures={countriesJSON.features}
+              styleType="members"
+              onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+              fitBounds
+              projection="gall-peters"
+            />
           </MapOuterWrapper>
           <FieldGroup
             seamless
