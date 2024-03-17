@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
+import asList from 'utils/as-list';
 import {
   selectActortypeActors,
   selectAttributeQuery,
@@ -25,9 +26,12 @@ import {
   selectUserActorsGroupedByActor,
   selectUsers,
   selectIncludeMembersForFiltering,
+  selectIncludeActorMembers,
+  selectIncludeActorChildren,
 } from 'containers/App/selectors';
 
 import {
+  checkQuery,
   filterEntitiesByConnection,
   filterEntitiesByCategories,
   filterEntitiesWithoutAssociation,
@@ -296,9 +300,43 @@ const selectActorsAny = createSelector(
 const selectActorsByActions = createSelector(
   selectActorsAny,
   selectActionQuery,
-  (entities, query) => query
-    ? filterEntitiesByConnection(entities, query, 'actions')
-    : entities
+  selectIncludeActorMembers,
+  selectIncludeActorChildren,
+  (entities, query, includeActorMembersQuery, includeActorChildrenQuery) => {
+    console.log(entities && entities.toJS(), includeActorMembersQuery, includeActorChildrenQuery)
+    return query && entities
+      ? entities.filter(
+        (entity) => {
+          let pass = asList(query).some(
+            (queryValue) => checkQuery({
+              entity,
+              queryValue,
+              path: 'actions',
+            })
+          );
+          if (!pass && includeActorMembersQuery) {
+            pass = asList(query).some(
+              (queryValue) => checkQuery({
+                entity,
+                queryValue,
+                path: 'actionsAsMembers',
+              })
+            );
+          }
+          if (!pass && includeActorChildrenQuery) {
+            pass = asList(query).some(
+              (queryValue) => checkQuery({
+                entity,
+                queryValue,
+                path: 'actionsAsParent',
+              })
+            );
+          }
+          return pass;
+        }
+      )
+      : entities;
+  }
 );
 const selectActorsByTargeted = createSelector(
   selectActorsByActions,

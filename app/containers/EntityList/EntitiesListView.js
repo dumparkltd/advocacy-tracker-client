@@ -26,7 +26,6 @@ import { jumpToComponent } from 'utils/scroll-to-component';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
 import Content from 'components/styled/ContentSimple';
-import Loading from 'components/Loading';
 import EntityListViewOptions from 'components/EntityListViewOptions';
 import ButtonPill from 'components/buttons/ButtonPill';
 import HeaderPrint from 'components/Header/HeaderPrint';
