@@ -104,6 +104,7 @@ export function EntityListTable({
   taxonomies,
   resources,
   memberOption,
+  childOption,
   subjectOptions,
   includeMembers,
   includeChildren,
@@ -328,6 +329,7 @@ export function EntityListTable({
         columnMaxValues={columnMaxValues}
         headerColumnsUtility={headerColumnsUtility}
         memberOption={memberOption}
+        childOption={childOption}
         subjectOptions={subjectOptions}
         inSingleView={inSingleView}
         isPrintView={isPrintView}
@@ -440,6 +442,7 @@ EntityListTable.propTypes = {
   hasSearch: PropTypes.bool,
   label: PropTypes.string,
   memberOption: PropTypes.node,
+  childOption: PropTypes.node,
   subjectOptions: PropTypes.node,
   includeMembers: PropTypes.bool,
   includeChildren: PropTypes.bool,

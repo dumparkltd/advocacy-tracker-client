@@ -781,6 +781,39 @@ export const selectTargettypesForActiontype = createSelector(
     );
   }
 );
+export const selectParentTargettypesForActiontype = createSelector(
+  selectTargettypesForActiontype,
+  selectActortypes,
+  // selectIncludeMembersForFiltering,
+  (directTargettypes, actortypes) => {
+    if (!directTargettypes) return null;
+    const directTargettypeIds = directTargettypes.map((type) => type.get('id')).toList().toArray();
+    const parentTargettypeIds = directTargettypeIds.reduce(
+      (memo, targettypeId) => {
+        const parentIds = MEMBERSHIPS[targettypeId].filter(
+          (parentId) => memo.indexOf(parentId) === -1 && directTargettypeIds.indexOf(parentId) === -1
+        );
+        return [
+          ...memo,
+          ...parentIds,
+        ];
+      },
+      [],
+    );
+    return actortypes.filter(
+      (actortype) => {
+        const id = actortype.get('id');
+        const isDirect = directTargettypeIds.indexOf(id) > -1;
+        if (isDirect) {
+          return false;
+        }
+        return isDirect ? false : parentTargettypeIds.indexOf(id) > -1;
+      }
+    ).map(
+      (type) => type.set('viaMember', true)
+    );
+  }
+);
 export const selectMembertypesForActortype = createSelector(
   (state, { type }) => type,
   selectActortypes,

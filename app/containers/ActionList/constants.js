@@ -39,7 +39,7 @@ export const CONFIG = {
   types: 'actiontypes',
   serverPath: API.ACTIONS,
   clientPath: ROUTES.ACTION,
-  hasMemberOption: [
+  hasMemberFilterOption: [
     ACTIONTYPES.EXPRESS,
     ACTIONTYPES.TASK,
     ACTIONTYPES.INTERACTION,

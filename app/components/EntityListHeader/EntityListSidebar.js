@@ -117,7 +117,7 @@ export class EntityListSidebar extends React.Component { // eslint-disable-line 
       onHideSidebar,
       onHideOptions,
       onUpdateQuery,
-      memberOption,
+      filteringOptions,
     } = this.props;
     const { intl } = this.context;
     return (
@@ -132,11 +132,20 @@ export class EntityListSidebar extends React.Component { // eslint-disable-line 
                   <Icon name="close" />
                 </Button>
               </Box>
-              {memberOption && (
-                <Box margin={{ top: 'small' }}>
-                  <MapOption option={memberOption} type="members" />
-                </Box>
-              )}
+              {filteringOptions && filteringOptions.map((option) => {
+                const o = {
+                  ...option,
+                  onClick: () => {
+                    onHideOptions();
+                    option.onClick();
+                  },
+                };
+                return (
+                  <Box margin={{ top: 'small' }} key={option.key}>
+                    <MapOption option={o} type="members" />
+                  </Box>
+                );
+              })}
             </SidebarHeader>
             <div>
               { (!isEditPanel || (isEditPanel && hasSelected && hasEntities)) && (
@@ -171,7 +180,7 @@ EntityListSidebar.propTypes = {
   onHideOptions: PropTypes.func,
   setActiveOption: PropTypes.func,
   onUpdateQuery: PropTypes.func,
-  memberOption: PropTypes.object,
+  filteringOptions: PropTypes.array,
 };
 
 EntityListSidebar.contextTypes = {

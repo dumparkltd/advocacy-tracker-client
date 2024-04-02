@@ -636,7 +636,7 @@ export const prepareEntityRows = ({
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: temp && temp.size,
+                value: relatedEntities && relatedEntities.size,
                 tooltip: relatedEntities && relatedEntities.size > 0
                   && relatedEntities.groupBy((t) => t.getIn(['attributes', 'measuretype_id'])),
               },

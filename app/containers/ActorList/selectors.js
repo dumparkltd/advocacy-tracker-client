@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect';
 import { Map } from 'immutable';
 import asList from 'utils/as-list';
+
 import {
   selectActortypeActors,
   selectAttributeQuery,
@@ -28,6 +29,8 @@ import {
   selectIncludeMembersForFiltering,
   selectIncludeActorMembers,
   selectIncludeActorChildren,
+  selectIncludeTargetMembers,
+  selectIncludeTargetChildren,
 } from 'containers/App/selectors';
 
 import {
@@ -302,47 +305,75 @@ const selectActorsByActions = createSelector(
   selectActionQuery,
   selectIncludeActorMembers,
   selectIncludeActorChildren,
-  (entities, query, includeActorMembersQuery, includeActorChildrenQuery) => {
-    console.log(entities && entities.toJS(), includeActorMembersQuery, includeActorChildrenQuery)
-    return query && entities
-      ? entities.filter(
-        (entity) => {
-          let pass = asList(query).some(
+  (entities, query, includeActorMembersQuery, includeActorChildrenQuery) => query && entities
+    ? entities.filter(
+      (entity) => {
+        let pass = asList(query).some(
+          (queryValue) => checkQuery({
+            entity,
+            queryValue,
+            path: 'actions',
+          })
+        );
+        if (!pass && includeActorMembersQuery) {
+          pass = asList(query).some(
             (queryValue) => checkQuery({
               entity,
               queryValue,
-              path: 'actions',
+              path: 'actionsAsMembers',
             })
           );
-          if (!pass && includeActorMembersQuery) {
-            pass = asList(query).some(
-              (queryValue) => checkQuery({
-                entity,
-                queryValue,
-                path: 'actionsAsMembers',
-              })
-            );
-          }
-          if (!pass && includeActorChildrenQuery) {
-            pass = asList(query).some(
-              (queryValue) => checkQuery({
-                entity,
-                queryValue,
-                path: 'actionsAsParent',
-              })
-            );
-          }
-          return pass;
         }
-      )
-      : entities;
-  }
+        if (!pass && includeActorChildrenQuery) {
+          pass = asList(query).some(
+            (queryValue) => checkQuery({
+              entity,
+              queryValue,
+              path: 'actionsAsParent',
+            })
+          );
+        }
+        return pass;
+      }
+    )
+    : entities
 );
 const selectActorsByTargeted = createSelector(
   selectActorsByActions,
   selectTargetingQuery,
-  (entities, query) => query
-    ? filterEntitiesByConnection(entities, query, 'targetingActions')
+  selectIncludeTargetMembers,
+  selectIncludeTargetChildren,
+  (entities, query, includeTargetMembersQuery, includeTargetChildrenQuery) => query && entities
+    ? entities.filter(
+      (entity) => {
+        let pass = asList(query).some(
+          (queryValue) => checkQuery({
+            entity,
+            queryValue,
+            path: 'targetingActions',
+          })
+        );
+        if (!pass && includeTargetMembersQuery) {
+          pass = asList(query).some(
+            (queryValue) => checkQuery({
+              entity,
+              queryValue,
+              path: 'targetingActionsAsMember',
+            })
+          );
+        }
+        if (!pass && includeTargetChildrenQuery) {
+          pass = asList(query).some(
+            (queryValue) => checkQuery({
+              entity,
+              queryValue,
+              path: 'targetingActionsAsParent',
+            })
+          );
+        }
+        return pass;
+      }
+    )
     : entities
 );
 
