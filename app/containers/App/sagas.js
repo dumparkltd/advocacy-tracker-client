@@ -870,7 +870,7 @@ const getNextQuery = (query, extend, location) => {
     const isReplacing = !!param.replace;
     const isRemoving = !!param.remove;
     const isAdding = !!param.add;
-    const hasValue = !!param.value;
+    const hasValue = typeof param.value !== 'undefined';
     // console.log('hasQueryArg', hasQueryArg);
     // console.log('isReplacing', isReplacing);
     // console.log('isRemoving', isRemoving);

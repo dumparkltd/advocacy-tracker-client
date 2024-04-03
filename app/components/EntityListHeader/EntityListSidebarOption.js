@@ -44,7 +44,7 @@ function EntityListSidebarOption({
   let label = option.get('message')
     ? appMessage(intl, option.get('message'))
     : option.get('label');
-  label = option.get('memberType') ? `${label} (via members only)` : label;
+  label = option.get('memberType') ? `${label} (via member countries only)` : label;
   return (
     <Styled active={option.get('active')} disabled={option.get('disabled')}>
       <StyledButton

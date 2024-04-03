@@ -34,8 +34,18 @@ export const CONFIG = {
   clientPath: ROUTES.ACTOR,
   downloadCSV: true,
   batchDelete: true,
+  includeMembersWhenFiltering: [
+    ACTORTYPES.CONTACT,
+  ],
   hasMemberOption: [
     ACTORTYPES.CONTACT,
+    ACTORTYPES.COUNTRY,
+    ACTORTYPES.ORG,
+  ],
+  hasChildOption: [
+    ACTORTYPES.GROUP,
+    ACTORTYPES.COUNTRY,
+    ACTORTYPES.REGION,
   ],
   views: {
     list: {

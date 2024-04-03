@@ -268,7 +268,7 @@ export const filterEntitiesByConnectedCategories = (
     )
 );
 
-const checkQuery = ({
+export const checkQuery = ({
   queryValue,
   path,
   connectionAttribute,
