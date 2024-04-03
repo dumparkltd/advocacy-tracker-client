@@ -317,7 +317,7 @@ export const makeFilterGroups = ({
                 label = appMessage(intl, msg);
               }
               if (type.get('viaMember')) {
-                label = `${label} (via members only)`;
+                label = `${label} (via member countries only)`;
               }
               return memo.concat({
                 id, // filterOptionId

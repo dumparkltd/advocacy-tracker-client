@@ -11,7 +11,12 @@ import Helmet from 'react-helmet';
 import { List, Map, fromJS } from 'immutable';
 import { injectIntl, intlShape } from 'react-intl';
 
-import { loadEntitiesIfNeeded, updatePath, printView } from 'containers/App/actions';
+import {
+  loadEntitiesIfNeeded,
+  updatePath,
+  printView,
+  setIncludeMembersForFiltering,
+} from 'containers/App/actions';
 import {
   selectReady,
   selectActiontypeTaxonomiesWithCats,
@@ -21,9 +26,11 @@ import {
   selectActiontypes,
   selectActortypesForActiontype,
   selectParentActortypesForActiontype,
+  selectParentTargettypesForActiontype,
   selectTargettypesForActiontype,
   selectResourcetypesForActiontype,
   selectViewQuery,
+  selectIncludeMembersForFiltering,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -66,6 +73,7 @@ export function ActionList({
   actiontypes,
   actortypes,
   parentActortypes,
+  parentTargettypes,
   targettypes,
   resourcetypes,
   onSelectType,
@@ -74,6 +82,8 @@ export function ActionList({
   handleImport,
   view,
   intl,
+  onSetFilterMemberOption,
+  includeMembersWhenFiltering,
 }) {
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
@@ -150,6 +160,29 @@ export function ActionList({
       isMember,
     });
   }
+  const hasMemberFilterOption = (CONFIG.hasMemberFilterOption && CONFIG.hasMemberFilterOption.indexOf(typeId) > -1);
+  const filterActortypes = hasMemberFilterOption && parentActortypes
+    ? actortypes.merge(parentActortypes)
+    : actortypes;
+  const filterTargettypes = hasMemberFilterOption && parentTargettypes
+    ? targettypes.merge(parentTargettypes)
+    : targettypes;
+  // console.log('filterActortypes', filterActortypes && filterActortypes.toJS())
+  // console.log('parentActortypes', parentActortypes && parentActortypes.toJS())
+  // console.log('actortypes', actortypes && actortypes.toJS())
+  // console.log('targettypes', targettypes && targettypes.toJS())
+  let filteringOptions;
+  if (hasMemberFilterOption && onSetFilterMemberOption) {
+    filteringOptions = [{
+      key: 'filter-member-option',
+      active: !!includeMembersWhenFiltering,
+      label: 'Also consider members when filtering by region or group',
+      info: 'When enabled and when filtering by region or group, the list will also include activities associated with any members of those regions or groups',
+      onClick: () => {
+        onSetFilterMemberOption(!includeMembersWhenFiltering);
+      },
+    }];
+  }
   return (
     <div>
       <Helmet
@@ -172,14 +205,17 @@ export function ActionList({
         }}
         locationQuery={fromJS(location.query)}
         actortypes={actortypes}
-        parentActortypes={parentActortypes}
-        actiontypes={actiontypes}
+        filterActortypes={filterActortypes}
         targettypes={targettypes}
+        filterTargettypes={filterTargettypes}
+        actiontypes={actiontypes}
         resourcetypes={resourcetypes}
         typeOptions={prepareTypeOptions(actiontypes, typeId, intl)}
         onSelectType={onSelectType}
         typeId={typeId}
         showCode={checkActionAttribute(typeId, 'code', isAdmin)}
+        includeMembersWhenFiltering={includeMembersWhenFiltering}
+        filteringOptions={filteringOptions}
       />
     </div>
   );
@@ -193,11 +229,13 @@ ActionList.propTypes = {
   connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
   parentActortypes: PropTypes.instanceOf(Map),
+  parentTargettypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   targettypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   allEntities: PropTypes.instanceOf(Map),
   onLoadEntitiesIfNeeded: PropTypes.func,
+  onSetFilterMemberOption: PropTypes.func,
   handleNew: PropTypes.func,
   handleImport: PropTypes.func,
   onSelectType: PropTypes.func,
@@ -205,6 +243,7 @@ ActionList.propTypes = {
   location: PropTypes.object,
   isVisitor: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  includeMembersWhenFiltering: PropTypes.bool,
   params: PropTypes.object,
   view: PropTypes.string,
   intl: intlShape,
@@ -221,10 +260,12 @@ const mapStateToProps = (state, props) => ({
   actiontypes: selectActiontypes(state),
   actortypes: selectActortypesForActiontype(state, { type: props.params.id }),
   parentActortypes: selectParentActortypesForActiontype(state, { type: props.params.id }),
+  parentTargettypes: selectParentTargettypesForActiontype(state, { type: props.params.id }),
   targettypes: selectTargettypesForActiontype(state, { type: props.params.id }),
   resourcetypes: selectResourcetypesForActiontype(state, { type: props.params.id }),
   allEntities: selectActionsWithConnections(state, { type: props.params.id }),
   view: selectViewQuery(state),
+  includeMembersWhenFiltering: selectIncludeMembersForFiltering(state),
 });
 function mapDispatchToProps(dispatch) {
   return {
@@ -246,6 +287,9 @@ function mapDispatchToProps(dispatch) {
     },
     onSetPrintView: (config) => {
       dispatch(printView(config));
+    },
+    onSetFilterMemberOption: (view) => {
+      dispatch(setIncludeMembersForFiltering(view));
     },
   };
 }

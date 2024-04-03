@@ -54,7 +54,16 @@ const getColWidth = ({
     return col.type === 'main' ? 50 : 50;
   }
   if (count > 2) {
-    return col.type === 'main' ? 35 : (65 / (count - 1)) * colSpan;
+    if (col.type === 'main') {
+      return 35;
+    }
+    if (col.isSingleActionColumn) {
+      return 25;
+    }
+    if (col.hasSingleActionColumn) {
+      return (40 / (count - 2)) * colSpan;
+    }
+    return (65 / (count - 1)) * colSpan;
   }
   // if (count === 4) {
   //   return col.type === 'main' ? 30 : (70 / (count - 1)) * colSpan;
@@ -138,6 +147,7 @@ export function EntitiesTable({
   columnMaxValues,
   headerColumnsUtility,
   memberOption,
+  childOption,
   subjectOptions,
   inSingleView,
   isPrintView,
@@ -173,6 +183,11 @@ export function EntitiesTable({
                           {memberOption && (
                             <Box>
                               {memberOption}
+                            </Box>
+                          )}
+                          {childOption && (
+                            <Box>
+                              {childOption}
                             </Box>
                           )}
                         </Box>
@@ -358,6 +373,7 @@ EntitiesTable.propTypes = {
   isPrintView: PropTypes.bool,
   onEntityClick: PropTypes.func,
   memberOption: PropTypes.node,
+  childOption: PropTypes.node,
   subjectOptions: PropTypes.node,
 };
 

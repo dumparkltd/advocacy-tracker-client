@@ -55,7 +55,7 @@ function InfoOverlay({
   const infoRef = useRef(null);
   const [info, showInfo] = useState(false);
   return (
-    <PrintHide>
+    <PrintHide displayProp={inline ? 'inline' : 'block'}>
       <Box
         as={inline ? 'span' : 'div'}
         fill={false}

@@ -301,13 +301,14 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       connections,
       entityIdsSelected,
       actortypes,
-      parentActortypes,
+      filterActortypes,
       actiontypes,
       resourcetypes,
       targettypes,
+      filterTargettypes,
       actiontypesForTarget,
       membertypes,
-      parentAssociationtypes,
+      filterAssociationtypes,
       associationtypes,
       currentFilters,
       onShowFilters,
@@ -321,8 +322,12 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       dataReady,
       typeId,
       onUpdateQuery,
-      includeMembers,
-      onSetFilterMemberOption,
+      includeMembersWhenFiltering,
+      includeActorMembers,
+      includeTargetMembers,
+      includeActorChildren,
+      includeTargetChildren,
+      filteringOptions,
       headerActions,
       isAdmin,
       onClearFilters,
@@ -336,27 +341,20 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     const formModel = showFilters ? FILTER_FORM_MODEL : EDIT_FORM_MODEL;
 
     let panelGroups = null;
-
     let formOptions = null;
-    const hasMemberOption = (config.hasMemberOption && config.hasMemberOption.indexOf(typeId) > -1);
-
     if (dataReady && showFilters) {
       panelGroups = makeFilterGroups({
         config,
         taxonomies,
         connectedTaxonomies,
         hasUserRole,
-        actortypes: (hasMemberOption && actortypes && parentActortypes)
-          ? actortypes.merge(parentActortypes)
-          : actortypes,
+        actortypes: filterActortypes || actortypes,
         resourcetypes,
         actiontypes,
-        targettypes,
+        targettypes: filterTargettypes || targettypes,
         actiontypesForTarget,
         membertypes,
-        associationtypes: (hasMemberOption && associationtypes && parentAssociationtypes)
-          ? associationtypes.merge(parentAssociationtypes)
-          : associationtypes,
+        associationtypes: filterAssociationtypes || associationtypes,
         activeFilterOption: activeOption,
         currentFilters,
         typeId,
@@ -369,7 +367,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           connectedTaxonomies: intl.formatMessage(messages.filterGroupLabel.connectedTaxonomies),
           taxonomies: (taxId) => this.context.intl.formatMessage(appMessages.entities.taxonomies[taxId].plural),
         },
-        includeMembers,
+        includeMembers: includeMembersWhenFiltering,
       });
       panelGroups = Object.keys(panelGroups).reduce(
         (memo, groupId) => {
@@ -423,7 +421,11 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
             without: intl.formatMessage(messages.filterFormWithoutPrefix),
             any: intl.formatMessage(messages.filterFormAnyPrefix),
           },
-          includeMembers,
+          includeMembers: includeMembersWhenFiltering,
+          includeActorMembers,
+          includeTargetMembers,
+          includeActorChildren,
+          includeTargetChildren,
         });
       }
     } else if (dataReady && showEditOptions && hasSelected) {
@@ -700,19 +702,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     this.onHideForm();
                     onUpdateQuery(args);
                   }}
-                  memberOption={hasMemberOption
-                    ? {
-                      key: 'filter-member-option',
-                      active: !!includeMembers,
-                      label: 'Also consider members when filtering by region or group',
-                      info: 'When enabled and when filtering by region or group, the list will also include activities associated with any members of those regions or groups',
-                      onClick: () => {
-                        this.onHideForm();
-                        onSetFilterMemberOption(!includeMembers);
-                      },
-                    }
-                    : null
-                  }
+                  filteringOptions={filteringOptions}
                 />
               )}
               {showEditOptions && (
@@ -764,12 +754,13 @@ EntityListHeader.propTypes = {
   entityIdsSelected: PropTypes.instanceOf(List),
   taxonomies: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
-  parentActortypes: PropTypes.instanceOf(Map),
+  filterActortypes: PropTypes.instanceOf(Map),
+  filterTargettypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   targettypes: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
-  parentAssociationtypes: PropTypes.instanceOf(Map),
+  filterAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
   actiontypesForTarget: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
@@ -792,11 +783,15 @@ EntityListHeader.propTypes = {
   canEdit: PropTypes.bool,
   dataReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
-  includeMembers: PropTypes.bool,
+  includeMembersWhenFiltering: PropTypes.bool,
+  includeActorMembers: PropTypes.bool,
+  includeTargetMembers: PropTypes.bool,
+  includeActorChildren: PropTypes.bool,
+  includeTargetChildren: PropTypes.bool,
+  filteringOptions: PropTypes.array,
   isPrintView: PropTypes.bool,
   typeOptions: PropTypes.array,
   onSelectType: PropTypes.func,
-  onSetFilterMemberOption: PropTypes.func,
   onClearFilters: PropTypes.func,
   typeId: PropTypes.string,
   headerActions: PropTypes.array,
