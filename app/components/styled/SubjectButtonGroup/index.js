@@ -17,11 +17,17 @@ const Styled = styled((p) => (
     ? theme.global.colors.border.light
     : 'transparent'
 };
+  overflow-x: scroll;
+  white-space: nowrap;
+  ::-webkit-scrollbar {
+   padding-top:1px;
+  }
   margin-left: ${({ isPrint }) => isPrint ? 0 : 'medium'};
 `;
 export function SubjectButtonGroup(props) {
   const isPrint = usePrint();
   return <Styled isPrint={isPrint} {...props} />;
 }
+
 
 export default SubjectButtonGroup;

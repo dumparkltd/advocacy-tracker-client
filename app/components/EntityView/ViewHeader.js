@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box, Button, Text } from 'grommet';
+import {
+  Box, Button, Text, ResponsiveContext,
+} from 'grommet';
 import { LinkPrevious } from 'grommet-icons';
 import ButtonFactory from 'components/buttons/ButtonFactory';
 import PrintHide from 'components/styled/PrintHide';
@@ -9,6 +11,8 @@ import PrintOnly from 'components/styled/PrintOnly';
 
 import { usePrint } from 'containers/App/PrintContext';
 import { CONTENT_PAGE } from 'containers/App/constants';
+
+import { isMaxSize } from 'utils/responsive';
 
 import ViewPanel from './ViewPanel';
 import ViewPanelInside from './ViewPanelInside';
@@ -20,6 +24,13 @@ const Styled = styled.div`
     padding-top: 40pt;
   }
 `;
+
+const StyledButtonBox = styled((p) => <Box {...p} />)`
+  @media (max-width: ${({ theme }) => theme.breakpoints.ms}){
+    max-width:100px
+  }
+`;
+
 const Between = styled((p) => <Box plain {...p} />)`
   flex: 0 0 auto;
   align-self: stretch;
@@ -57,6 +68,7 @@ function ViewHeader({
   onTypeClick,
   type,
 }) {
+  const size = useContext(ResponsiveContext);
   const isPrintView = usePrint();
   return (
     <Styled isPrint={isPrintView} isPage={type === CONTENT_PAGE}>
@@ -75,7 +87,7 @@ function ViewHeader({
                 justify="between"
               >
                 {type !== CONTENT_PAGE && (
-                  <Box direction="row" align="center" gap="small">
+                  <Box direction="row" align="center" gap="xsmall">
                     {onClose && (
                       <MyButton onClick={onClose} title="Back to previous view">
                         <Box pad="xsmall">
@@ -110,12 +122,12 @@ function ViewHeader({
                   </Box>
                 )}
                 {buttons && buttons.length > 0 && (
-                  <Box direction="row" align="center" gap="small">
+                  <Box direction="row" align="center" gap={isMaxSize(size, 'ms') ? '0px' : 'small'}>
                     {buttons.map(
                       (button, i) => (
-                        <Box pad="xsmall" key={i}>
+                        <StyledButtonBox gap={isMaxSize(size, 'ms') ? '0px' : 'small'} key={i}>
                           <ButtonFactory button={button} />
-                        </Box>
+                        </StyledButtonBox>
                       )
                     )}
                   </Box>
