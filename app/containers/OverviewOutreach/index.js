@@ -11,11 +11,11 @@ import styled from 'styled-components';
 
 import appMessages from 'containers/App/messages';
 
-import { ROUTES, ACTORTYPE_NAVGROUPS } from 'themes/config';
+import { ROUTES, ACTIONTYPE_NAVGROUPS, OUTREACH_ACTIONTYPES } from 'themes/config';
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
 import { selectReady } from 'containers/App/selectors';
-import Footer from 'containers/Footer';
 import HeaderExplore from 'containers/HeaderExplore';
+import Footer from 'containers/Footer';
 
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
@@ -24,7 +24,7 @@ import CardTeaser from 'components/CardTeaser';
 import Loading from 'components/Loading';
 
 import { isMaxSize } from 'utils/responsive';
-import { selectActortypesWithActorCount } from './selectors';
+import { selectActiontypesWithActionCount } from './selectors';
 import { DEPENDENCIES } from './constants';
 
 
@@ -40,7 +40,7 @@ const ViewContainer = styled(Container)`
     min-height: 50vH;
   }
 `;
-export function ActorsOverview({
+export function OverviewOutreach({
   onLoadData, types, onUpdatePath, intl, dataReady,
 }) {
   useEffect(() => {
@@ -48,22 +48,39 @@ export function ActorsOverview({
     onLoadData();
   }, []);
   const size = React.useContext(ResponsiveContext);
+  let navItems = [
+    {
+      path: ROUTES.OUTREACH,
+      active: true,
+      title: 'Overview',
+    },
+  ];
+  navItems = OUTREACH_ACTIONTYPES.reduce(
+    (memo, typeId) => [
+      ...memo,
+      {
+        path: `${ROUTES.ACTIONS}/${typeId}`,
+        title: intl.formatMessage(appMessages.actiontypes_short[typeId]),
+      },
+    ],
+    navItems,
+  );
   return (
     <ContainerWrapper bg>
-      <HeaderExplore />
+      <HeaderExplore navItems={navItems} />
       <Loading loading={!dataReady} />
       <ViewContainer>
         <ContentSimple>
-          {Object.keys(ACTORTYPE_NAVGROUPS).map((key) => (
+          {Object.keys(ACTIONTYPE_NAVGROUPS).map((key) => (
             <Group key={key}>
               <GroupTitle>
-                <FormattedMessage {...appMessages.actortypeGroups[key]} />
+                <FormattedMessage {...appMessages.actiontypeGroups[key]} />
               </GroupTitle>
               <Box direction={isMaxSize(size, 'medium') ? 'column' : 'row'} gap="small">
-                {ACTORTYPE_NAVGROUPS[key].types.map((typeId) => {
-                  const path = `${ROUTES.ACTORS}/${typeId}`;
+                {ACTIONTYPE_NAVGROUPS[key].types.map((typeId) => {
+                  const path = `${ROUTES.ACTIONS}/${typeId}`;
                   const count = types.getIn([typeId, 'count']) ? parseInt(types.getIn([typeId, 'count']), 10) : 0;
-                  const { primary } = ACTORTYPE_NAVGROUPS[key];
+                  const { primary } = ACTIONTYPE_NAVGROUPS[key];
                   return (
                     <CardTeaser
                       key={typeId}
@@ -77,10 +94,10 @@ export function ActorsOverview({
                       dataReady={dataReady}
                       count={count}
                       title={
-                        intl.formatMessage(appMessages.actortypes_long[typeId])
+                        intl.formatMessage(appMessages.actiontypes_long[typeId])
                       }
                       description={
-                        intl.formatMessage(appMessages.actortypes_about[typeId])
+                        intl.formatMessage(appMessages.actiontypes_about[typeId])
                       }
                     />
                   );
@@ -95,7 +112,7 @@ export function ActorsOverview({
   );
 }
 
-ActorsOverview.propTypes = {
+OverviewOutreach.propTypes = {
   intl: intlShape.isRequired,
   dataReady: PropTypes.bool,
   onLoadData: PropTypes.func.isRequired,
@@ -104,8 +121,8 @@ ActorsOverview.propTypes = {
 };
 
 const mapStateToProps = createStructuredSelector({
-  dataReady: (state) => selectReady(state, { path: DEPENDENCIES}),
-  types: (state) => selectActortypesWithActorCount(state),
+  dataReady: (state) => selectReady(state, { path: DEPENDENCIES }),
+  types: (state) => selectActiontypesWithActionCount(state),
 });
 
 export function mapDispatchToProps(dispatch) {
@@ -124,4 +141,4 @@ const withConnect = connect(
   mapDispatchToProps,
 );
 
-export default compose(withConnect)(injectIntl(ActorsOverview));
+export default compose(withConnect)(injectIntl(OverviewOutreach));

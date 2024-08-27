@@ -21,12 +21,18 @@ import PrintUI from 'containers/PrintUI';
 import { getAuthValues } from 'utils/api-request';
 
 import { sortEntities } from 'utils/sort';
-import { ROUTES, API, PRINT } from 'themes/config';
+import {
+  ROUTES,
+  API,
+  PRINT,
+  ACTIONTYPES,
+  ACTORTYPES,
+} from 'themes/config';
 
 import {
   selectIsSignedIn,
   selectIsUserMember,
-  selectIsUserVisitor,
+  // selectIsUserVisitor,
   selectSessionUserAttributes,
   selectReady,
   selectEntitiesWhere,
@@ -194,61 +200,193 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     }))
     .toArray();
 
-  prepareMainMenuItems = (
-    isMember,
-    isVisitor,
-    currentPath,
-  ) => {
+  prepareMainMenuItems = (currentPath) => {
+    const { intl } = this.context;
+    return [
+      {
+        path: ROUTES.POSITIONS,
+        title: intl.formatMessage(messages.nav.positions),
+        active: currentPath && (
+          currentPath.startsWith(ROUTES.POSITIONS)
+          || currentPath.startsWith(`${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`)
+        ),
+      },
+      {
+        path: ROUTES.ACTORS,
+        title: intl.formatMessage(messages.nav.actors),
+        active: currentPath && currentPath.startsWith(ROUTES.ACTORS),
+      },
+      {
+        path: ROUTES.OUTREACH,
+        title: intl.formatMessage(messages.nav.outreach),
+        active: currentPath && (
+          currentPath.startsWith(ROUTES.OUTREACH)
+          || (
+            currentPath.startsWith(ROUTES.ACTIONS)
+            && !currentPath.startsWith(`${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`)
+          )
+        ),
+      },
+      {
+        path: ROUTES.MYSTUFF,
+        title: intl.formatMessage(messages.nav.mystuff),
+        active: currentPath && currentPath.startsWith(ROUTES.MYSTUFF),
+      },
+      {
+        path: ROUTES.SEARCH,
+        title: intl.formatMessage(messages.nav.search),
+        active: currentPath.startsWith(ROUTES.SEARCH),
+        icon: 'search',
+      },
+      // {
+      //   path: ROUTES.RESOURCES,
+      //   title: intl.formatMessage(messages.nav.resources),
+      //   active: currentPath && currentPath.startsWith(ROUTES.RESOURCE),
+      // },
+    ];
+  }
+
+  prepareUserMenuItems = (currentPath, user, isSignedIn) => {
     const { intl } = this.context;
     let navItems = [];
-    if (isVisitor) {
-      navItems = navItems.concat([
+    if (user) {
+      const userPath = `${ROUTES.USERS}/${user.id}`;
+      navItems = [
+        ...navItems,
         {
-          path: ROUTES.INDICATORS,
-          title: intl.formatMessage(messages.nav.indicators),
-          active: currentPath && currentPath.startsWith(ROUTES.INDICATOR),
+          path: userPath,
+          active: currentPath === userPath,
+          title: 'Profile',
         },
-        {
-          path: ROUTES.RESOURCES,
-          title: intl.formatMessage(messages.nav.resources),
-          active: currentPath && currentPath.startsWith(ROUTES.RESOURCE),
-        },
-      ]);
+      ];
     }
-    if (isMember) {
-      navItems = navItems.concat([
+    if (isSignedIn) {
+      navItems = [
+        ...navItems,
         {
-          path: ROUTES.USERS,
-          title: intl.formatMessage(messages.nav.users),
-          isAdmin: true,
-          active: currentPath === ROUTES.USERS,
+          path: ROUTES.LOGOUT,
+          active: currentPath === ROUTES.LOGOUT,
+          title: intl.formatMessage(messages.nav.logout),
+        },
+      ];
+    } else {
+      navItems = [
+        ...navItems,
+        {
+          path: ROUTES.REGISTER,
+          active: currentPath === ROUTES.REGISTER,
+          title: intl.formatMessage(messages.nav.register),
         },
         {
-          path: ROUTES.PAGES,
-          title: intl.formatMessage(messages.nav.pages),
-          isAdmin: true,
-          active: currentPath === ROUTES.PAGES,
+          path: ROUTES.LOGIN,
+          active: currentPath === ROUTES.LOGIN,
+          title: intl.formatMessage(messages.nav.login),
         },
-        {
-          path: ROUTES.TAXONOMIES,
-          title: intl.formatMessage(messages.nav.taxonomies),
-          isAdmin: true,
-          active: currentPath.startsWith(ROUTES.CATEGORY)
-            || currentPath.startsWith(ROUTES.TAXONOMIES),
-        },
-      ]);
+      ];
     }
     return navItems;
-  };
+  }
+
+  prepareOtherMenuItems = (currentPath) => {
+    const { intl } = this.context;
+    return [
+      {
+        path: ROUTES.RESOURCES,
+        title: intl.formatMessage(messages.nav.resources),
+        active: currentPath && currentPath.startsWith(ROUTES.RESOURCE),
+      },
+      {
+        path: ROUTES.USERS,
+        title: intl.formatMessage(messages.nav.users),
+        isAdmin: true,
+        active: currentPath === ROUTES.USERS,
+      },
+      {
+        path: ROUTES.PAGES,
+        title: intl.formatMessage(messages.nav.pages),
+        isAdmin: true,
+        active: currentPath === ROUTES.PAGES,
+      },
+      {
+        path: ROUTES.TAXONOMIES,
+        title: intl.formatMessage(messages.nav.taxonomies),
+        isAdmin: true,
+        active: currentPath.startsWith(ROUTES.CATEGORY)
+          || currentPath.startsWith(ROUTES.TAXONOMIES),
+      },
+    ];
+  }
+
+  prepareCreateMenuItems = () => {
+    const { intl } = this.context;
+    return [
+      {
+        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.INTERACTION}`].single),
+      },
+      {
+        path: `${ROUTES.ACTORS}/${ACTORTYPES.CONTACT}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.CONTACT}`].single),
+      },
+      {
+        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.EXPRESS}`].single),
+      },
+      {
+        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EVENT}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.EVENT}`].single),
+      },
+      {
+        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.TASK}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.TASK}`].single),
+      },
+      {
+        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.OP}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.OP}`].single),
+      },
+      {
+        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.AP}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.AP}`].single),
+      },
+      {
+        path: `${ROUTES.ACTORS}/${ACTORTYPES.ORG}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.ORG}`].single),
+      },
+      {
+        path: `${ROUTES.ACTORS}/${ACTORTYPES.GROUP}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.GROUP}`].single),
+      },
+      {
+        path: `${ROUTES.RESOURCES}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities.resources.single),
+      },
+      {
+        path: `${ROUTES.INDICATORS}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities.indicators.single),
+      },
+      {
+        path: `${ROUTES.ACTORS}/${ACTORTYPES.REG}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.REG}`].single),
+      },
+      {
+        path: `${ROUTES.ACTORS}${ACTORTYPES.COUNTRY}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.COUNTRY}`].single),
+      },
+      {
+        path: `${ROUTES.PAGES}${ROUTES.NEW}`,
+        title: intl.formatMessage(messages.entities.pages.single),
+      },
+    ];
+  }
 
   render() {
     const {
       pages,
       onPageLink,
       isUserSignedIn,
-      isMember,
-      isVisitor,
       location,
+      isMember,
+      // isVisitor,
       newEntityModal,
       user,
       children,
@@ -275,28 +413,17 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
         <Helmet titleTemplate={`%s - ${title}`} defaultTitle={title} />
         {!isHome && (
           <Header
-            isSignedIn={isUserSignedIn}
-            isVisitor={isVisitor}
-            isPrintView={isPrintView}
-            user={user}
-            pages={pages && this.preparePageMenuPages(pages, location.pathname)}
-            navItems={this.prepareMainMenuItems(
-              isUserSignedIn && isMember,
-              isUserSignedIn && isVisitor,
-              location.pathname,
-            )}
-            search={!isUserSignedIn
-              ? null
-              : {
-                path: ROUTES.SEARCH,
-                title: intl.formatMessage(messages.nav.search),
-                active: location.pathname.startsWith(ROUTES.SEARCH),
-                icon: 'search',
-              }
-            }
-            onPageLink={onPageLink}
-            isAuth={isAuth}
             currentPath={location.pathname}
+            isAuth={isAuth}
+            isPrintView={isPrintView}
+            navItems={{
+              main: this.prepareMainMenuItems(location.pathname),
+              user: this.prepareUserMenuItems(location.pathname, user, isUserSignedIn),
+              pages: this.preparePageMenuPages(pages, location.pathname),
+              other: this.prepareOtherMenuItems(location.pathname),
+              create: isMember && this.prepareCreateMenuItems(),
+            }}
+            onPageLink={onPageLink}
           />
         )}
         <Main isHome={isHome} isPrint={isPrintView}>
@@ -383,7 +510,7 @@ App.propTypes = {
   isUserSignedIn: PropTypes.bool,
   isUserAuthenticating: PropTypes.bool,
   isMember: PropTypes.bool,
-  isVisitor: PropTypes.bool,
+  // isVisitor: PropTypes.bool,
   user: PropTypes.object,
   pages: PropTypes.object,
   validateToken: PropTypes.func,
@@ -402,7 +529,7 @@ App.contextTypes = {
 const mapStateToProps = (state) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   isMember: selectIsUserMember(state),
-  isVisitor: selectIsUserVisitor(state),
+  // isVisitor: selectIsUserVisitor(state),
   isUserSignedIn: selectIsSignedIn(state),
   isUserAuthenticating: selectIsAuthenticating(state),
   user: selectSessionUserAttributes(state),

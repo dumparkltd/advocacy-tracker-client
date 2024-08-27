@@ -39,8 +39,9 @@ import { PRINT_TYPES } from 'containers/App/constants';
 import { checkActionAttribute } from 'utils/entities';
 import { keydownHandlerPrint } from 'utils/print';
 
-import { ROUTES } from 'themes/config';
+import { ROUTES, ACTIONTYPES, OUTREACH_ACTIONTYPES } from 'themes/config';
 
+import HeaderExplore from 'containers/HeaderExplore';
 import EntityList from 'containers/EntityList';
 import { CONFIG, DEPENDENCIES } from './constants';
 import {
@@ -50,13 +51,6 @@ import {
 } from './selectors';
 
 import messages from './messages';
-
-
-const prepareTypeOptions = (types, activeId, intl) => types.toList().toJS().map((type) => ({
-  value: type.id,
-  label: intl.formatMessage(appMessages.actiontypes[type.id]),
-  active: activeId === type.id,
-}));
 
 export function ActionList({
   onLoadEntitiesIfNeeded,
@@ -76,7 +70,6 @@ export function ActionList({
   parentTargettypes,
   targettypes,
   resourcetypes,
-  onSelectType,
   onSetPrintView,
   handleNew,
   handleImport,
@@ -183,6 +176,43 @@ export function ActionList({
       },
     }];
   }
+
+  let navItems;
+  if (OUTREACH_ACTIONTYPES.indexOf(typeId) > -1) {
+    navItems = [
+      {
+        path: ROUTES.OUTREACH,
+        title: 'Overview',
+      },
+    ];
+    navItems = OUTREACH_ACTIONTYPES.reduce(
+      (memo, actionTypeId) => [
+        ...memo,
+        {
+          path: `${ROUTES.ACTIONS}/${actionTypeId}`,
+          title: intl.formatMessage(appMessages.actiontypes_short[actionTypeId]),
+          active: location.pathname && location.pathname.startsWith(`${ROUTES.ACTIONS}/${actionTypeId}`),
+        },
+      ],
+      navItems,
+    );
+  } else {
+    navItems = [
+      {
+        path: ROUTES.POSITIONS,
+        title: 'Overview',
+      },
+      {
+        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`,
+        title: intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`].plural),
+        active: true,
+      },
+      {
+        path: ROUTES.INDICATORS,
+        title: intl.formatMessage(appMessages.entities.indicators.plural),
+      },
+    ];
+  }
   return (
     <div>
       <Helmet
@@ -191,6 +221,7 @@ export function ActionList({
           { name: 'description', content: intl.formatMessage(messages.metaDescription) },
         ]}
       />
+      <HeaderExplore navItems={navItems} />
       <EntityList
         entities={entities}
         allEntities={allEntities.toList()}
@@ -210,8 +241,6 @@ export function ActionList({
         filterTargettypes={filterTargettypes}
         actiontypes={actiontypes}
         resourcetypes={resourcetypes}
-        typeOptions={prepareTypeOptions(actiontypes, typeId, intl)}
-        onSelectType={onSelectType}
         typeId={typeId}
         showCode={checkActionAttribute(typeId, 'code', isAdmin)}
         includeMembersWhenFiltering={includeMembersWhenFiltering}
@@ -238,7 +267,6 @@ ActionList.propTypes = {
   onSetFilterMemberOption: PropTypes.func,
   handleNew: PropTypes.func,
   handleImport: PropTypes.func,
-  onSelectType: PropTypes.func,
   onSetPrintView: PropTypes.func,
   location: PropTypes.object,
   isVisitor: PropTypes.bool,
@@ -277,13 +305,6 @@ function mapDispatchToProps(dispatch) {
     },
     handleImport: (typeId) => {
       dispatch(updatePath(`${ROUTES.ACTIONS}/${typeId}${ROUTES.IMPORT}`));
-    },
-    onSelectType: (typeId) => {
-      dispatch(updatePath(
-        typeId && typeId !== ''
-          ? `${ROUTES.ACTIONS}/${typeId}`
-          : ROUTES.ACTIONS
-      ));
     },
     onSetPrintView: (config) => {
       dispatch(printView(config));

@@ -25,11 +25,12 @@ import {
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
-import { ROUTES } from 'themes/config';
+import { ROUTES, RESOURCETYPES } from 'themes/config';
 import { PRINT_TYPES } from 'containers/App/constants';
 
 import { keydownHandlerPrint } from 'utils/print';
 
+import HeaderExplore from 'containers/HeaderExplore';
 import EntityList from 'containers/EntityList';
 
 import { CONFIG, DEPENDENCIES } from './constants';
@@ -125,6 +126,13 @@ export function ResourceList({
   }
 
   // connectedTaxonomies={connectedTaxonomies}
+  const navItems = Object.values(RESOURCETYPES).map(
+    (resourceTypeId) => ({
+      path: `${ROUTES.RESOURCES}/${resourceTypeId}`,
+      title: intl.formatMessage(appMessages.resourcetypes[resourceTypeId]),
+      active: location.pathname && location.pathname.startsWith(`${ROUTES.RESOURCES}/${resourceTypeId}`),
+    })
+  );
   return (
     <div>
       <Helmet
@@ -133,6 +141,7 @@ export function ResourceList({
           { name: 'description', content: intl.formatMessage(messages.metaDescription) },
         ]}
       />
+      <HeaderExplore navItems={navItems} />
       <EntityList
         entities={entities}
         allEntities={allEntities.toList()}

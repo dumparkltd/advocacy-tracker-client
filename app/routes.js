@@ -278,12 +278,12 @@ export default function createRoutes(store) {
         importModules.catch(errorLoading);
       },
     }, {
-      path: ROUTES.ACTIONS,
+      path: ROUTES.OUTREACH,
       name: 'actiontypes',
       onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
-          import('containers/ActionsOverview'),
+          import('containers/OverviewOutreach'),
         ]);
 
         const renderRoute = loadModule(cb);
@@ -357,7 +357,7 @@ export default function createRoutes(store) {
       onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
-          import('containers/ActorsOverview'),
+          import('containers/OverviewActors'),
         ]);
 
         const renderRoute = loadModule(cb);
@@ -820,6 +820,40 @@ export default function createRoutes(store) {
         importModules.then(([reducer, sagas, component]) => {
           injectReducer('pageEdit', reducer.default);
           injectSagas(sagas.default);
+          renderRoute(component);
+        });
+
+        importModules.catch(errorLoading);
+      },
+    }, {
+      path: `${ROUTES.POSITIONS}`,
+      name: 'positions',
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
+      getComponent(nextState, cb) {
+        const importModules = Promise.all([
+          import('containers/OverviewPositions'),
+        ]);
+
+        const renderRoute = loadModule(cb);
+
+        importModules.then(([component]) => {
+          renderRoute(component);
+        });
+
+        importModules.catch(errorLoading);
+      },
+    }, {
+      path: `${ROUTES.MYSTUFF}`,
+      name: 'positions',
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
+      getComponent(nextState, cb) {
+        const importModules = Promise.all([
+          import('containers/OverviewMyStuff'),
+        ]);
+
+        const renderRoute = loadModule(cb);
+
+        importModules.then(([component]) => {
           renderRoute(component);
         });
 

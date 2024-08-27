@@ -45,6 +45,7 @@ import appMessages from 'containers/App/messages';
 import { ROUTES, ACTORTYPES } from 'themes/config';
 
 
+import HeaderExplore from 'containers/HeaderExplore';
 import EntityList from 'containers/EntityList';
 import { PRINT_TYPES } from 'containers/App/constants';
 import EmailHelper from './EmailHelper';
@@ -250,6 +251,24 @@ export function ActorList({
   const filterAssociationtypes = includeMembersWhenFiltering && parentAssociationtypes
     ? associationtypes.merge(parentAssociationtypes)
     : associationtypes;
+
+  let navItems = [
+    {
+      path: ROUTES.ACTORS,
+      title: 'Overview',
+    },
+  ];
+  navItems = Object.values(ACTORTYPES).reduce(
+    (memo, actortypeId) => [
+      ...memo,
+      {
+        path: `${ROUTES.ACTORS}/${actortypeId}`,
+        title: intl.formatMessage(appMessages.actortypes_short[actortypeId]),
+        active: location.pathname && location.pathname.startsWith(`${ROUTES.ACTORS}/${actortypeId}`),
+      },
+    ],
+    navItems,
+  );
   return (
     <div>
       <Helmet
@@ -258,6 +277,7 @@ export function ActorList({
           { name: 'description', content: intl.formatMessage(messages.metaDescription) },
         ]}
       />
+      <HeaderExplore navItems={navItems} />
       <EntityList
         entities={entities}
         allEntities={allEntities.toList()}

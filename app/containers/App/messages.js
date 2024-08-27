@@ -1165,6 +1165,18 @@ export default defineMessages({
       id: 'app.containers.App.nav.register',
       defaultMessage: 'Register',
     },
+    positions: {
+      id: 'app.containers.App.nav.positions',
+      defaultMessage: 'Positions',
+    },
+    outreach: {
+      id: 'app.containers.App.nav.outreach',
+      defaultMessage: 'Outreach',
+    },
+    mystuff: {
+      id: 'app.containers.App.nav.mystuff',
+      defaultMessage: 'My stuff',
+    },
   },
   entities: {
     showAll: {
