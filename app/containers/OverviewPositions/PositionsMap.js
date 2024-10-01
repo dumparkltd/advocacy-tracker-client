@@ -5,7 +5,9 @@ import { compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { FormattedMessage } from 'react-intl';
 import { qe } from 'utils/quasi-equals';
-import { Box, Text, Heading } from 'grommet';
+import {
+  Box, Text, Heading, Button,
+} from 'grommet';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
@@ -24,16 +26,23 @@ const SubTitle = styled((p) => <Heading level="3" {...p} />)`
   font-weight: bold;
 `;
 
-const IndicatorList = styled((p) => <Box {...p} />)`
+const IndicatorPanel = styled((p) => <Box {...p} />)`
   border-right: 1px solid ${palette('light', 2)};
+  width: 200px;
 `;
 const MapContainerWrapper = styled((p) => <Box {...p} />)``;
-const IndicatorListItem = styled((p) => <Box {...p} />)`
+const IndicatorList = styled((p) => <Box {...p} />)``;
+const IndicatorPanelHeader = styled((p) => <Box {...p} />)`
+  border-bottom: 1px solid ${palette('light', 2)};
+  width: 100%;
+  position: relative;
+`;
+const IndicatorSelectButton = styled((p) => <Button plain {...p} />)`
   border-bottom: 1px solid ${palette('light', 2)};
   width: 100%;
   background: ${({ active }) => (active ? palette('primary', 1) : 'white')};
   position: relative;
-
+  padding: ${({ theme }) => theme.global.edgeSize.small};
   &:focus {
     outline: none;
     box-shadow: none;
@@ -70,7 +79,6 @@ const IndicatorListTitle = styled((p) => <Text size="small" {...p} />)`
   font-style: italic;
 `;
 const IndicatorLabel = styled((p) => <Text size="small" {...p} />)`
-  width: 90%;
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -83,6 +91,10 @@ export function PositionsMap({
   onSetMapIndicator,
 }) {
   // const size = React.useContext(ResponsiveContext);
+  let activeId = currentIndicatorId;
+  if (indicators && (!activeId || activeId === '')) {
+    activeId = indicators.first().get('id');
+  }
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
       <Box pad={{ top: 'small', bottom: 'xsmall' }}>
@@ -96,11 +108,8 @@ export function PositionsMap({
         basis="full"
         direction="row"
       >
-        <IndicatorList
-          flex={{ shrink: 0 }}
-          basis="30%"
-        >
-          <IndicatorListItem
+        <IndicatorPanel>
+          <IndicatorPanelHeader
             pad={{
               vertical: 'small',
               horizontal: 'xsmall',
@@ -109,27 +118,25 @@ export function PositionsMap({
             <IndicatorListTitle>
               <FormattedMessage {...messages.indicatorListTitle} />
             </IndicatorListTitle>
-          </IndicatorListItem>
-          {indicators && indicators.entrySeq().map(([id, indicator]) => {
-            const active = qe(currentIndicatorId, id);
-            return (
-              <IndicatorListItem
-                pad={{
-                  vertical: 'small',
-                  horizontal: 'small',
-                }}
-                active={active}
-                key={id}
-                id={id}
-                onClick={() => onSetMapIndicator(id)}
-              >
-                <IndicatorLabel active={active}>
-                  {indicator.getIn(['attributes', 'title'])}
-                </IndicatorLabel>
-              </IndicatorListItem>
-            );
-          })}
-        </IndicatorList>
+          </IndicatorPanelHeader>
+          <IndicatorList>
+            {indicators && indicators.entrySeq().map(([id, indicator]) => {
+              const active = qe(activeId, id);
+              return (
+                <IndicatorSelectButton
+                  active={active}
+                  key={id}
+                  id={id}
+                  onClick={() => onSetMapIndicator(id)}
+                >
+                  <IndicatorLabel active={active}>
+                    {indicator.getIn(['attributes', 'title'])}
+                  </IndicatorLabel>
+                </IndicatorSelectButton>
+              );
+            })}
+          </IndicatorList>
+        </IndicatorPanel>
         <MapContainerWrapper flex={{ grow: 1 }}>
           MAP
         </MapContainerWrapper>

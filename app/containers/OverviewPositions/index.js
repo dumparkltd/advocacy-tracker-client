@@ -41,12 +41,6 @@ const TitleMedium = styled((p) => <Heading level="2" {...p} />)`
   text-transform: uppercase;
   font-weight: bold;
 `;
-const SubTitle = styled((p) => <Heading level="3" {...p} />)`
-  color: black;
-  text-transform: uppercase;
-  font-weight: bold;
-`;
-
 export function OverviewPositions({
   onLoadData,
   intl,
@@ -83,11 +77,6 @@ export function OverviewPositions({
             <TitleMedium>
               <FormattedMessage {...messages.pageTitle} />
             </TitleMedium>
-          </Box>
-          <Box pad={{ top: 'small', bottom: 'xsmall' }}>
-            <SubTitle>
-              <FormattedMessage {...messages.subTitle} />
-            </SubTitle>
           </Box>
           {dataReady && <PositionsMap />}
         </ContentSimple>
