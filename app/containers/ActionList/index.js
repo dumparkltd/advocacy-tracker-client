@@ -179,12 +179,7 @@ export function ActionList({
 
   let navItems;
   if (OUTREACH_ACTIONTYPES.indexOf(typeId) > -1) {
-    navItems = [
-      {
-        path: ROUTES.OUTREACH,
-        title: 'Overview',
-      },
-    ];
+    navItems = [];
     navItems = OUTREACH_ACTIONTYPES.reduce(
       (memo, actionTypeId) => [
         ...memo,

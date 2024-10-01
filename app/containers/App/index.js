@@ -212,12 +212,12 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
         ),
       },
       {
-        path: ROUTES.ACTORS,
+        path: `${ROUTES.ACTORS}/${ACTORTYPES.COUNTRY}`,
         title: intl.formatMessage(messages.nav.actors),
         active: currentPath && currentPath.startsWith(ROUTES.ACTORS),
       },
       {
-        path: ROUTES.OUTREACH,
+        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}`,
         title: intl.formatMessage(messages.nav.outreach),
         active: currentPath && (
           currentPath.startsWith(ROUTES.OUTREACH)
@@ -228,9 +228,9 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
         ),
       },
       {
-        path: ROUTES.MYSTUFF,
+        path: ROUTES.BOOKMARKS,
         title: intl.formatMessage(messages.nav.mystuff),
-        active: currentPath && currentPath.startsWith(ROUTES.MYSTUFF),
+        active: currentPath && currentPath.startsWith(ROUTES.BOOKMARKS),
       },
       {
         path: ROUTES.SEARCH,

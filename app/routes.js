@@ -278,23 +278,6 @@ export default function createRoutes(store) {
         importModules.catch(errorLoading);
       },
     }, {
-      path: ROUTES.OUTREACH,
-      name: 'actiontypes',
-      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
-      getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          import('containers/OverviewOutreach'),
-        ]);
-
-        const renderRoute = loadModule(cb);
-
-        importModules.then(([component]) => {
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
-      },
-    }, {
       path: `${ROUTES.ACTIONS}${ROUTES.ID}${ROUTES.NEW}`, // the type id
       name: 'actionNew',
       onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
@@ -346,23 +329,6 @@ export default function createRoutes(store) {
         importModules.then(([reducer, sagas, component]) => {
           injectReducer('actionEdit', reducer.default);
           injectSagas(sagas.default);
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
-      },
-    }, {
-      path: `${ROUTES.ACTORS}`,
-      name: 'actortypes',
-      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
-      getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          import('containers/OverviewActors'),
-        ]);
-
-        const renderRoute = loadModule(cb);
-
-        importModules.then(([component]) => {
           renderRoute(component);
         });
 
@@ -832,23 +798,6 @@ export default function createRoutes(store) {
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/OverviewPositions'),
-        ]);
-
-        const renderRoute = loadModule(cb);
-
-        importModules.then(([component]) => {
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
-      },
-    }, {
-      path: `${ROUTES.MYSTUFF}`,
-      name: 'positions',
-      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
-      getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          import('containers/OverviewMyStuff'),
         ]);
 
         const renderRoute = loadModule(cb);

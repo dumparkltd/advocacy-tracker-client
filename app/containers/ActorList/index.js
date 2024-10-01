@@ -252,12 +252,7 @@ export function ActorList({
     ? associationtypes.merge(parentAssociationtypes)
     : associationtypes;
 
-  let navItems = [
-    {
-      path: ROUTES.ACTORS,
-      title: 'Overview',
-    },
-  ];
+  let navItems = [];
   navItems = Object.values(ACTORTYPES).reduce(
     (memo, actortypeId) => [
       ...memo,
