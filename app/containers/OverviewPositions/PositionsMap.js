@@ -1,22 +1,46 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { FormattedMessage } from 'react-intl';
-import { qe } from 'utils/quasi-equals';
+import styled from 'styled-components';
+import { palette } from 'styled-theme';
 import {
   Box, Text, Heading, Button,
 } from 'grommet';
 
-import styled from 'styled-components';
-import { palette } from 'styled-theme';
+import { API } from 'themes/config';
+import { qe } from 'utils/quasi-equals';
 
-import { setMapIndicator } from 'containers/App/actions';
-
-import { selectIndicators, selectMapIndicator } from 'containers/App/selectors';
+import Loading from 'components/Loading';
+import { loadEntitiesIfNeeded, setMapIndicator } from 'containers/App/actions';
+import {
+  selectReady,
+  selectIndicators,
+  selectMapIndicator,
+} from 'containers/App/selectors';
 
 import messages from './messages';
+
+const DEPENDENCIES = [
+  API.ACTIONS,
+  API.ACTORS,
+  API.ACTION_ACTORS,
+  API.ACTOR_ACTIONS,
+  API.ACTION_CATEGORIES,
+  API.ACTOR_CATEGORIES,
+  API.ACTIONTYPES,
+  API.ACTORTYPES,
+  API.ACTIONTYPE_TAXONOMIES,
+  API.ACTORTYPE_TAXONOMIES,
+  API.INDICATORS,
+  API.TAXONOMIES,
+  API.CATEGORIES,
+  API.USERS,
+  API.USER_ROLES,
+];
+
 
 const StyledCard = styled((p) => <Box {...p} />)``;
 
@@ -89,10 +113,16 @@ export function PositionsMap({
   indicators,
   currentIndicatorId,
   onSetMapIndicator,
+  onLoadData,
+  dataReady,
 }) {
+  useEffect(() => {
+    // kick off loading of data
+    onLoadData();
+  }, []);
   // const size = React.useContext(ResponsiveContext);
   let activeId = currentIndicatorId;
-  if (indicators && (!activeId || activeId === '')) {
+  if (dataReady && indicators && (!activeId || activeId === '')) {
     activeId = indicators.first().get('id');
   }
   return (
@@ -102,56 +132,63 @@ export function PositionsMap({
           <FormattedMessage {...messages.subTitle} />
         </SubTitle>
       </Box>
-      <StyledCard
-        elevation="small"
-        background="white"
-        basis="full"
-        direction="row"
-      >
-        <IndicatorPanel>
-          <IndicatorPanelHeader
-            pad={{
-              vertical: 'small',
-              horizontal: 'xsmall',
-            }}
-          >
-            <IndicatorListTitle>
-              <FormattedMessage {...messages.indicatorListTitle} />
-            </IndicatorListTitle>
-          </IndicatorPanelHeader>
-          <IndicatorList>
-            {indicators && indicators.entrySeq().map(([id, indicator]) => {
-              const active = qe(activeId, id);
-              return (
-                <IndicatorSelectButton
-                  active={active}
-                  key={id}
-                  id={id}
-                  onClick={() => onSetMapIndicator(id)}
-                >
-                  <IndicatorLabel active={active}>
-                    {indicator.getIn(['attributes', 'title'])}
-                  </IndicatorLabel>
-                </IndicatorSelectButton>
-              );
-            })}
-          </IndicatorList>
-        </IndicatorPanel>
-        <MapContainerWrapper flex={{ grow: 1 }}>
-          MAP
-        </MapContainerWrapper>
-      </StyledCard>
+      <Loading loading={!dataReady} />
+      {dataReady && (
+        <StyledCard
+          elevation="small"
+          background="white"
+          basis="full"
+          direction="row"
+        >
+          <IndicatorPanel>
+            <IndicatorPanelHeader
+              pad={{
+                vertical: 'small',
+                horizontal: 'xsmall',
+              }}
+            >
+              <IndicatorListTitle>
+                <FormattedMessage {...messages.indicatorListTitle} />
+              </IndicatorListTitle>
+            </IndicatorPanelHeader>
+            <IndicatorList>
+              {indicators && indicators.entrySeq().map(([id, indicator]) => {
+                const active = qe(activeId, id);
+                return (
+                  <IndicatorSelectButton
+                    active={active}
+                    key={id}
+                    id={id}
+                    onClick={() => onSetMapIndicator(id)}
+                  >
+                    <IndicatorLabel active={active}>
+                      {indicator.getIn(['attributes', 'title'])}
+                    </IndicatorLabel>
+                  </IndicatorSelectButton>
+                );
+              })}
+            </IndicatorList>
+          </IndicatorPanel>
+          <MapContainerWrapper flex={{ grow: 1 }}>
+            MAP
+          </MapContainerWrapper>
+        </StyledCard>
+      )}
     </Box>
   );
 }
 
 PositionsMap.propTypes = {
+  dataReady: PropTypes.bool,
+  onLoadData: PropTypes.func.isRequired,
   indicators: PropTypes.object,
   currentIndicatorId: PropTypes.string,
   onSetMapIndicator: PropTypes.func,
+
 };
 
 const mapStateToProps = createStructuredSelector({
+  dataReady: (state) => selectReady(state, { path: DEPENDENCIES }),
   currentIndicatorId: (state) => selectMapIndicator(state),
   indicators: (state) => selectIndicators(state),
 });
@@ -159,6 +196,9 @@ const mapStateToProps = createStructuredSelector({
 
 export function mapDispatchToProps(dispatch) {
   return {
+    onLoadData: () => {
+      DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
+    },
     onSetMapIndicator: (value) => dispatch(setMapIndicator(value)),
   };
 }
