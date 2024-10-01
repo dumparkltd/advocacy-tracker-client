@@ -110,8 +110,8 @@ export const ACTORTYPES = {
 };
 
 export const RESOURCETYPES = {
-  REF: '1',
   WEB: '2',
+  REF: '1',
   DOC: '3',
 };
 

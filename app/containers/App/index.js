@@ -27,6 +27,7 @@ import {
   PRINT,
   ACTIONTYPES,
   ACTORTYPES,
+  RESOURCETYPES,
 } from 'themes/config';
 
 import {
@@ -291,7 +292,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     const { intl } = this.context;
     return [
       {
-        path: ROUTES.RESOURCES,
+        path: `${ROUTES.RESOURCES}/${RESOURCETYPES.WEB}`,
         title: intl.formatMessage(messages.nav.resources),
         active: currentPath && currentPath.startsWith(ROUTES.RESOURCE),
       },
