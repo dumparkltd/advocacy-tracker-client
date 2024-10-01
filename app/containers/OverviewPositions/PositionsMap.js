@@ -13,7 +13,6 @@ import {
 import { API } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
-import Loading from 'components/Loading';
 import { loadEntitiesIfNeeded, setMapIndicator } from 'containers/App/actions';
 import {
   selectReady,
@@ -21,22 +20,24 @@ import {
   selectMapIndicator,
 } from 'containers/App/selectors';
 
+import Loading from 'components/Loading';
+
 import messages from './messages';
 
 const DEPENDENCIES = [
-  API.ACTIONS,
-  API.ACTORS,
-  API.ACTION_ACTORS,
-  API.ACTOR_ACTIONS,
-  API.ACTION_CATEGORIES,
-  API.ACTOR_CATEGORIES,
-  API.ACTIONTYPES,
-  API.ACTORTYPES,
-  API.ACTIONTYPE_TAXONOMIES,
-  API.ACTORTYPE_TAXONOMIES,
+  // API.ACTIONS,
+  // API.ACTORS,
+  // API.ACTION_ACTORS,
+  // API.ACTOR_ACTIONS,
+  // API.ACTION_CATEGORIES,
+  // API.ACTOR_CATEGORIES,
+  // API.ACTIONTYPES,
+  // API.ACTORTYPES,
+  // API.ACTIONTYPE_TAXONOMIES,
+  // API.ACTORTYPE_TAXONOMIES,
   API.INDICATORS,
-  API.TAXONOMIES,
-  API.CATEGORIES,
+  // API.TAXONOMIES,
+  // API.CATEGORIES,
   API.USERS,
   API.USER_ROLES,
 ];
@@ -50,7 +51,7 @@ const SubTitle = styled((p) => <Heading level="3" {...p} />)`
   font-weight: bold;
 `;
 
-const IndicatorPanel = styled((p) => <Box {...p} />)`
+const IndicatorSidePanel = styled((p) => <Box {...p} />)`
   border-right: 1px solid ${palette('light', 2)};
   width: 200px;
 `;
@@ -140,7 +141,7 @@ export function PositionsMap({
           basis="full"
           direction="row"
         >
-          <IndicatorPanel>
+          <IndicatorSidePanel>
             <IndicatorPanelHeader
               pad={{
                 vertical: 'small',
@@ -160,6 +161,7 @@ export function PositionsMap({
                     key={id}
                     id={id}
                     onClick={() => onSetMapIndicator(id)}
+                    title={indicator.getIn(['attributes', 'title'])}
                   >
                     <IndicatorLabel active={active}>
                       {indicator.getIn(['attributes', 'title'])}
@@ -168,7 +170,7 @@ export function PositionsMap({
                 );
               })}
             </IndicatorList>
-          </IndicatorPanel>
+          </IndicatorSidePanel>
           <MapContainerWrapper flex={{ grow: 1 }}>
             MAP
           </MapContainerWrapper>

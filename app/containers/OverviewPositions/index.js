@@ -1,23 +1,21 @@
 import React from 'react';
 // import PropTypes from 'prop-types';
 import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
-import { Box, Heading } from 'grommet';
-
 import styled from 'styled-components';
-
-import appMessages from 'containers/App/messages';
+import { Box, Heading } from 'grommet';
 
 import { ROUTES, ACTIONTYPES } from 'themes/config';
 
 import HeaderExplore from 'containers/HeaderExplore';
 import Footer from 'containers/Footer';
-
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
 import ContentSimple from 'components/styled/ContentSimple';
-import PositionsMap from './PositionsMap';
 
+import appMessages from 'containers/App/messages';
 import messages from './messages';
+
+import PositionsMap from './PositionsMap';
 
 const ViewContainer = styled(Container)`
   min-height: 80vH;

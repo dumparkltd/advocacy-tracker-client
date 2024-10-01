@@ -6,31 +6,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Map, List } from 'immutable';
-import styled from 'styled-components';
 import { connect } from 'react-redux';
 
 import {
   selectMapIndicator,
 } from 'containers/App/selectors';
 
-import Loading from 'components/Loading';
-
 import EntitiesMapActors from './EntitiesMapActors';
 import EntitiesMapActions from './EntitiesMapActions';
 // import messages from './messages';
-
-const LoadingWrap = styled.div`
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  background: white;
-  z-index: 999;
-  pointer-events: none;
-  background: none;
-`;
-
 
 export function EntitiesMap({
   viewOptions,
