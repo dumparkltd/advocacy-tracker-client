@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
-import { createStructuredSelector } from 'reselect';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
@@ -16,7 +15,6 @@ import {
 } from 'grommet';
 
 import {
-  API,
   ACTORTYPES,
   ROUTES,
   ACTION_INDICATOR_SUPPORTLEVELS,
@@ -40,39 +38,17 @@ import {
   selectIncludeActorMembers,
   selectCategoryQuery,
 } from 'containers/App/selectors';
-import { selectViewActions } from 'containers/ActionList/selectors';
 
 import appMessages from 'containers/App/messages';
 import Loading from 'components/Loading';
 import MapContainer from 'containers/MapContainer';
 
+import { DEPENDENCIES } from './constants';
+import { selectViewActions } from './selectors';
+
 import QuickFilters from './QuickFilters';
 import messages from './messages';
 
-const DEPENDENCIES = [
-  API.ACTORS,
-  API.ACTIONS,
-  API.RESOURCES,
-  API.ACTION_ACTIONS,
-  API.ACTOR_ACTIONS,
-  API.ACTION_ACTORS,
-  API.ACTION_RESOURCES,
-  API.ACTOR_CATEGORIES,
-  API.ACTION_CATEGORIES,
-  API.ACTORTYPES,
-  API.ACTIONTYPES,
-  API.RESOURCETYPES,
-  API.ACTORTYPE_TAXONOMIES,
-  API.ACTIONTYPE_TAXONOMIES,
-  API.TAXONOMIES,
-  API.CATEGORIES,
-  API.MEMBERSHIPS,
-  API.USERS,
-  API.USER_ACTIONS,
-  API.USER_ROLES,
-  API.INDICATORS,
-  API.ACTION_INDICATORS,
-];
 
 const StyledCard = styled((p) => <Box {...p} />)``;
 const IndicatorSidePanel = styled((p) => <Box {...p} />)`
@@ -338,17 +314,14 @@ PositionsMap.propTypes = {
   intl: intlShape.isRequired,
 };
 
-const structuredSelector = createStructuredSelector({
-  dataReady: (state) => selectReady(state, { path: DEPENDENCIES }),
-  entities: (state) => selectViewActions(state, { type: ACTIONTYPES.EXPRESS }),
-  indicators: (state) => selectIndicators(state),
-  mapIndicator: (state) => selectMapIndicator(state),
-  currentIndicatorId: (state) => selectMapIndicator(state),
-  catQuery: (state) => selectCategoryQuery(state),
-  includeActorMembers: (state) => selectIncludeActorMembers(state),
-});
 const mapStateToProps = (state, { includeActorMembers }) => ({
-  ...structuredSelector(state),
+  dataReady: selectReady(state, { path: DEPENDENCIES }),
+  entities: selectViewActions(state, { type: ACTIONTYPES.EXPRESS }),
+  indicators: selectIndicators(state),
+  mapIndicator: selectMapIndicator(state),
+  currentIndicatorId: selectMapIndicator(state),
+  catQuery: selectCategoryQuery(state),
+  includeActorMembers: selectIncludeActorMembers(state),
   countries: selectActorsWithPositions(state, { includeActorMembers, type: ACTORTYPES.COUNTRY }),
 });
 
