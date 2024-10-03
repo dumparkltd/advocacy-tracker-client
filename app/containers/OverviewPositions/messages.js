@@ -1,7 +1,7 @@
 /*
  * OverviewPositions Messages
  *
- * 
+ *
  */
 import { defineMessages } from 'react-intl';
 
@@ -12,10 +12,26 @@ export default defineMessages({
   },
   subTitle: {
     id: 'app.containers.OverviewPositions.subTitle',
-    defaultMessage: 'Country Position By Topic'
+    defaultMessage: 'Country Position By Topic',
   },
   indicatorListTitle: {
     id: 'app.containers.OverviewPositions.indicatorListTitle',
-    defaultMessage: 'Select a topic'
-  }
+    defaultMessage: 'Select a topic',
+  },
+  supportLevelTitle: {
+    id: 'app.containers.OverviewPositions.supportLevelTitle',
+    defaultMessage: 'UN Member States\' level of support',
+  },
+  supportLevelHint: {
+    id: 'app.containers.OverviewPositions.supportLevelHint',
+    defaultMessage: 'Click to highlight',
+  },
+  includeActorMembers: {
+    id: 'app.containers.OverviewPositions.includeActorMembers',
+    defaultMessage: 'Include positions of groups (countries are member of)',
+  },
+  isOfficialFiltered: {
+    id: 'app.containers.OverviewPositions.isOfficialFiltered',
+    defaultMessage: 'Only show "official" statements (Level of Authority)',
+  },
 });
