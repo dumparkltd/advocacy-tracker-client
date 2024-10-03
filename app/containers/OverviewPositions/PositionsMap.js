@@ -46,7 +46,7 @@ import appMessages from 'containers/App/messages';
 import Loading from 'components/Loading';
 import MapContainer from 'containers/MapContainer';
 
-import FilterOptions from './FilterOptions';
+import QuickFilters from './QuickFilters';
 import messages from './messages';
 
 const DEPENDENCIES = [
@@ -288,7 +288,6 @@ export function PositionsMap({
             </Box>
             <Box>
               <MapContainer
-                //fullMap
                 reduceCountryAreas={reduceCountryAreas}
                 typeLabels={typeLabels}
                 mapData={{
@@ -308,7 +307,7 @@ export function PositionsMap({
                 onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
               />
             </Box>
-            <FilterOptions
+            <QuickFilters
               onSetIncludeActorMembers={onSetIncludeActorMembers}
               onUpdateQuery={onUpdateQuery}
               supportLevels={supportLevels}
