@@ -1,18 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
+import { qe } from 'utils/quasi-equals';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
+
 import {
   Box, Button, Text, Heading,
 } from 'grommet';
 
-import {
-  OFFICIAL_STATEMENT_CATEGORY_ID,
-} from 'themes/config';
-
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+
+import Dot from 'components/styled/Dot';
 
 import messages from './messages';
 
@@ -29,23 +29,19 @@ const Hint = styled((p) => <Text {...p} />)`
   font-style: italic;
 `;
 const StyledTag = styled((p) => <Button {...p} />)`
-  color: black;
-  background: transparent;
+  color: ${({ selected }) => selected ? 'white' : 'black'};
+  background: ${({ selected }) => selected ? palette('primary', 1) : 'transparent'};
   border: 1px solid ${palette('light', 4)};
 `;
-const StyledTagCircle = styled(({ color }) => (
-  <svg width="20" height="20">
-    <circle cx="10" cy="10" r="10" fill={color} />
-  </svg>
-))``;
 
 const QuickFilters = ({
   intl,
-  onSetIncludeActorMembers,
+  onSetisActorMembers,
   onUpdateQuery,
-  includeActorMembers,
+  isActorMembers,
   supportLevels,
   isOfficialFiltered,
+  activeSupportLevels,
 }) => (
   <Box direction="column">
     <SupportLevelTitleWrapper
@@ -67,21 +63,34 @@ const QuickFilters = ({
         direction="row"
         gap={{ row: 'small', column: 'small' }}
       >
-        {supportLevels.map((tag) => (
-          <StyledTag
-            pad="xsmall"
-            key={tag.value}
-            label={tag.label}
-            icon={<StyledTagCircle color={tag.color} />}
-          />
-        ))}
+        {supportLevels.map((tag) => {
+          const isSelected = activeSupportLevels
+            && activeSupportLevels.find((level) => qe(level, tag.value));
+          return (
+            <StyledTag
+              pad={{ horizontal: 'small', vertical: 'none' }}
+              key={tag.value}
+              label={tag.label}
+              selected={isSelected}
+              onClick={() => onUpdateQuery([{
+                arg: 'support',
+                value: tag.value,
+                add: !isSelected ? tag.value : false,
+                remove: isSelected ? tag.value : false,
+                replace: false,
+                multipleAttributeValues: true,
+              }])}
+              icon={<Dot color={tag.color} />}
+            />
+          );
+        })}
       </TagWrapper>
       <MapOptionsWrapper direction="column">
         <MapOption
           option={{
-            active: includeActorMembers,
-            onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-            label: intl.formatMessage(messages.includeActorMembers),
+            active: isActorMembers,
+            onClick: () => onSetisActorMembers(isActorMembers ? '0' : '1'),
+            label: intl.formatMessage(messages.isActorMembers),
           }}
         />
         <MapOption
@@ -89,11 +98,11 @@ const QuickFilters = ({
             active: isOfficialFiltered,
             label: intl.formatMessage(messages.isOfficialFiltered),
             onClick: () => onUpdateQuery([{
-              arg: 'cat',
-              value: OFFICIAL_STATEMENT_CATEGORY_ID,
+              arg: 'inofficial',
+              value: isOfficialFiltered ? '0' : '1',
               add: !isOfficialFiltered,
               remove: isOfficialFiltered,
-              replace: false,
+              replace: true,
               multipleAttributeValues: false,
             }]),
           }}
@@ -106,10 +115,11 @@ const QuickFilters = ({
 QuickFilters.propTypes = {
   intl: intlShape.isRequired,
   supportLevels: PropTypes.array,
-  onSetIncludeActorMembers: PropTypes.func,
+  activeSupportLevels: PropTypes.object,
+  onSetisActorMembers: PropTypes.func,
   onUpdateQuery: PropTypes.func,
   isPositionIndicator: PropTypes.bool,
-  includeActorMembers: PropTypes.bool,
+  isActorMembers: PropTypes.bool,
   isOfficialFiltered: PropTypes.bool,
 };
 export default injectIntl(QuickFilters);

@@ -766,7 +766,7 @@
   "app.containers.OverviewPositions.indicatorListTitle": "Select a topic",
   "app.containers.OverviewPositions.supportLevelTitle": "UN Member States' level of support",
   "app.containers.OverviewPositions.supportLevelHint": "Click to highlight",
-  "app.containers.OverviewPositions.includeActorMembers": "Include positions of groups (countries are member of)",
+  "app.containers.OverviewPositions.isActorMembers": "Include positions of groups (countries are member of)",
   "app.containers.OverviewPositions.isOfficialFiltered": "Only show \"official\" statements (Level of Authority)",
   "app.containers.PageEdit.pageTitle": "Edit Page",
   "app.containers.PageEdit.metaDescription": "Edit Page page description",

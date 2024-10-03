@@ -26,8 +26,8 @@ export default defineMessages({
     id: 'app.containers.OverviewPositions.supportLevelHint',
     defaultMessage: 'Click to highlight',
   },
-  includeActorMembers: {
-    id: 'app.containers.OverviewPositions.includeActorMembers',
+  isActorMembers: {
+    id: 'app.containers.OverviewPositions.isActorMembers',
     defaultMessage: 'Include positions of groups (countries are member of)',
   },
   isOfficialFiltered: {

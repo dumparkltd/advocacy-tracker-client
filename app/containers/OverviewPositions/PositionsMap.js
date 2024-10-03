@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { List } from 'immutable';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
@@ -19,7 +20,6 @@ import {
   ROUTES,
   ACTION_INDICATOR_SUPPORTLEVELS,
   ACTIONTYPES,
-  OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
@@ -36,7 +36,8 @@ import {
   selectMapIndicator,
   selectActorsWithPositions,
   selectIncludeActorMembers,
-  selectCategoryQuery,
+  selectIncludeInofficialStatements,
+  selectSupportQuery,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -125,7 +126,8 @@ export function PositionsMap({
   onSetMapIndicator,
   onSetIncludeActorMembers,
   includeActorMembers,
-  catQuery,
+  includeInofficialStatements,
+  supportQuery,
   onUpdateQuery,
   mapIndicator,
   onLoadData,
@@ -148,6 +150,11 @@ export function PositionsMap({
       (connection) => qe(connection.get('indicator_id'), mapIndicator)
     )
   );
+
+  const activeSupportLevels = (!supportQuery || typeof supportQuery === 'object')
+    ? supportQuery
+    // is string (1 selected)
+    : List([supportQuery]);
 
   const reduceCountryAreas = (features) => features.reduce((memo, feature) => {
     const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
@@ -201,11 +208,6 @@ export function PositionsMap({
       ...level,
       label: intl.formatMessage(appMessages.supportlevels[level.value]),
     }));
-
-  const isOfficialFiltered = typeof catQuery === 'object'
-    ? catQuery.includes(OFFICIAL_STATEMENT_CATEGORY_ID.toString())
-    // string
-    : qe(catQuery, OFFICIAL_STATEMENT_CATEGORY_ID);
 
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
@@ -284,11 +286,12 @@ export function PositionsMap({
               />
             </Box>
             <QuickFilters
-              onSetIncludeActorMembers={onSetIncludeActorMembers}
+              onSetisActorMembers={onSetIncludeActorMembers}
+              isActorMembers={includeActorMembers}
               onUpdateQuery={onUpdateQuery}
               supportLevels={supportLevels}
-              isOfficialFiltered={isOfficialFiltered}
-              includeActorMembers={includeActorMembers}
+              activeSupportLevels={activeSupportLevels}
+              isOfficialFiltered={includeInofficialStatements}
             />
           </MapContainerWrapper>
         </StyledCard>
@@ -305,8 +308,12 @@ PositionsMap.propTypes = {
   onEntityClick: PropTypes.func,
   countries: PropTypes.object,
   onUpdateQuery: PropTypes.func,
+  supportQuery: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.instanceOf(List),
+  ]),
   includeActorMembers: PropTypes.bool,
-  catQuery: PropTypes.string,
+  includeInofficialStatements: PropTypes.bool,
   mapIndicator: PropTypes.string,
   currentIndicatorId: PropTypes.string,
   indicators: PropTypes.object,
@@ -320,7 +327,8 @@ const mapStateToProps = (state, { includeActorMembers }) => ({
   indicators: selectIndicators(state),
   mapIndicator: selectMapIndicator(state),
   currentIndicatorId: selectMapIndicator(state),
-  catQuery: selectCategoryQuery(state),
+  includeInofficialStatements: selectIncludeInofficialStatements(state),
+  supportQuery: selectSupportQuery(state),
   includeActorMembers: selectIncludeActorMembers(state),
   countries: selectActorsWithPositions(state, { includeActorMembers, type: ACTORTYPES.COUNTRY }),
 });

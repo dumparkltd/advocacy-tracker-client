@@ -551,7 +551,15 @@ export const selectMapIndicator = createSelector(
     return null; // default
   }
 );
-
+export const selectSupportQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('support')) {
+      return locationQuery.get('support');
+    }
+    return null; // default
+  }
+);
 export const selectIsPrintView = createSelector(
   getGlobal,
   (state) => !!state.get('printConfig')
