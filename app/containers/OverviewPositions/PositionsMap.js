@@ -178,11 +178,28 @@ export function PositionsMap({
             (entity) => qe(entity.get('id'), position.get('measure_id'))
           )
         );
-      const countryPosition = countryPositions && countryPositions.first();
+
+      const countryPosition = countryPositions
+        && countryPositions.sortBy((item) => new Date(item.get('created_at'))).last();
       const statement = countryPosition && countryPosition.get('measure');
       const level = countryPosition
         && parseInt(countryPosition.get('supportlevel_id'), 10);
-      const values = statement ? { [mapIndicator]: level || 0 } : {};
+
+      let values;
+      // no active support levels selected
+      if (!activeSupportLevels) {
+        values = statement ? { [mapIndicator]: level || 0 } : {};
+      } else {
+        // active support levels
+        // eslint-disable-next-line no-lonely-if
+        if (activeSupportLevels.find((activeLevel) => qe(activeLevel, level))) {
+          values = statement ? { [mapIndicator]: level || 0 } : {};
+        } else {
+          values = statement ? { [mapIndicator]: 0 } : {};
+        }
+      }
+
+
       return [
         ...memo,
         {
