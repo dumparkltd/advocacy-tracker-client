@@ -235,65 +235,65 @@ export function PositionsMap({
 
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
-      <Loading loading={!dataReady} />
       <Box pad={{ top: 'small', bottom: 'xsmall' }}>
         <SubTitle>
           <FormattedMessage {...messages.subTitle} />
         </SubTitle>
       </Box>
-      {dataReady && (
-        <StyledCard
-          elevation="small"
-          background="white"
-          direction="row"
-          flex="grow"
-          fill
+      <StyledCard
+        elevation="small"
+        background="white"
+        direction="row"
+        flex="grow"
+        fill
+      >
+        {size !== 'small' && (
+          <IndicatorSidePanel>
+            <IndicatorPanelHeader
+              pad={{
+                vertical: 'small',
+                horizontal: 'xsmall',
+              }}
+            >
+              <IndicatorListTitle>
+                <FormattedMessage {...messages.indicatorListTitle} />
+              </IndicatorListTitle>
+            </IndicatorPanelHeader>
+            <IndicatorList>
+              {dataReady && indicators && indicators.entrySeq().map(([id, indicator]) => {
+                const active = qe(activeId, id);
+                return (
+                  <IndicatorSelectButton
+                    active={active}
+                    key={id}
+                    onClick={() => onSetMapIndicator(id)}
+                    title={indicator.getIn(['attributes', 'title'])}
+                  >
+                    <IndicatorLabel active={active}>
+                      {indicator.getIn(['attributes', 'title'])}
+                    </IndicatorLabel>
+                  </IndicatorSelectButton>
+                );
+              })}
+            </IndicatorList>
+          </IndicatorSidePanel>
+        )}
+        <MapContainerWrapper
+          direction="column"
+          fill="horizontal"
+          pad={{ horizontal: 'medium', bottom: 'medium' }}
+          flex={{ grow: 1, shrink: 1 }}
         >
-          {size !== 'small' && (
-            <IndicatorSidePanel>
-              <IndicatorPanelHeader
-                pad={{
-                  vertical: 'small',
-                  horizontal: 'xsmall',
-                }}
-              >
-                <IndicatorListTitle>
-                  <FormattedMessage {...messages.indicatorListTitle} />
-                </IndicatorListTitle>
-              </IndicatorPanelHeader>
-              <IndicatorList>
-                {indicators && indicators.entrySeq().map(([id, indicator]) => {
-                  const active = qe(activeId, id);
-                  return (
-                    <IndicatorSelectButton
-                      active={active}
-                      key={id}
-                      onClick={() => onSetMapIndicator(id)}
-                      title={indicator.getIn(['attributes', 'title'])}
-                    >
-                      <IndicatorLabel active={active}>
-                        {indicator.getIn(['attributes', 'title'])}
-                      </IndicatorLabel>
-                    </IndicatorSelectButton>
-                  );
-                })}
-              </IndicatorList>
-            </IndicatorSidePanel>
-          )}
-          <MapContainerWrapper
-            direction="column"
-            fill="horizontal"
-            margin={{ horizontal: 'medium', bottom: 'medium' }}
-            flex={{ grow: 1, shrink: 1 }}
-          >
-            <Box>
-              {size !== 'small' && (
-                <MapTitle>
-                  {indicators.getIn([activeId, 'attributes', 'title'])}
-                </MapTitle>
-              )}
-            </Box>
-            <Box>
+          <Loading loading={!dataReady} />
+          <Box>
+            {dataReady && size !== 'small' && (
+              <MapTitle>
+                {indicators.getIn([activeId, 'attributes', 'title'])}
+              </MapTitle>
+            )}
+          </Box>
+          <Box>
+            {dataReady && (
               <MapContainer
                 reduceCountryAreas={reduceCountryAreas}
                 typeLabels={typeLabels}
@@ -313,7 +313,9 @@ export function PositionsMap({
                 }}
                 onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
               />
-            </Box>
+            )}
+          </Box>
+          {dataReady && (
             <QuickFilters
               onSetisActorMembers={onSetIncludeActorMembers}
               isActorMembers={includeActorMembers}
@@ -322,9 +324,9 @@ export function PositionsMap({
               activeSupportLevels={activeSupportLevels}
               isOfficialFiltered={includeInofficialStatements}
             />
-          </MapContainerWrapper>
-        </StyledCard>
-      )}
+          )}
+        </MapContainerWrapper>
+      </StyledCard>
     </Box>
   );
 }
