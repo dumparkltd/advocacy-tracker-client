@@ -30,12 +30,6 @@ const TitleMedium = styled((p) => <Heading level="2" {...p} />)`
   font-weight: bold;
 `;
 
-const SubTitle = styled((p) => <Heading level="3" {...p} />)`
-  color: black;
-  text-transform: uppercase;
-  font-weight: bold;
-`;
-
 export function OverviewPositions({ intl }) {
   return (
     <ContainerWrapper bg>
@@ -62,11 +56,6 @@ export function OverviewPositions({ intl }) {
             <TitleMedium>
               <FormattedMessage {...messages.pageTitle} />
             </TitleMedium>
-          </Box>
-          <Box pad={{ top: 'small', bottom: 'xsmall' }}>
-            <SubTitle>
-              <FormattedMessage {...messages.subTitle} />
-            </SubTitle>
           </Box>
           <PositionsMap />
         </ContentSimple>

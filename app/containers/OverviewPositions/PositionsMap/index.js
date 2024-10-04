@@ -115,6 +115,13 @@ const MapTitle = styled((p) => <Heading level="3" {...p} />)`
   color: black;
   font-weight: bold;
 `;
+
+const SubTitle = styled((p) => <Heading level="3" {...p} />)`
+  color: black;
+  text-transform: uppercase;
+  font-weight: bold;
+`;
+
 /* const MapSubTitle = styled((p) => <Heading level="4" {...p} />)`
   color: black;
   font-weight: bold; */
@@ -229,6 +236,11 @@ export function PositionsMap({
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
       <Loading loading={!dataReady} />
+      <Box pad={{ top: 'small', bottom: 'xsmall' }}>
+        <SubTitle>
+          <FormattedMessage {...messages.subTitle} />
+        </SubTitle>
+      </Box>
       {dataReady && (
         <StyledCard
           elevation="small"
