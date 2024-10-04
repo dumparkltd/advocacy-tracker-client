@@ -40,7 +40,7 @@ const QuickFilters = ({
   onUpdateQuery,
   isActorMembers,
   supportLevels,
-  isOfficialFiltered,
+  includeInofficialStatements,
   activeSupportLevels,
 }) => (
   <Box direction="column">
@@ -63,7 +63,7 @@ const QuickFilters = ({
         direction="row"
         gap={{ row: 'small', column: 'small' }}
       >
-        {supportLevels.map((tag) => {
+        {supportLevels && supportLevels.map((tag) => {
           const isSelected = activeSupportLevels
             && activeSupportLevels.find((level) => qe(level, tag.value));
           return (
@@ -88,6 +88,7 @@ const QuickFilters = ({
       <MapOptionsWrapper direction="column">
         <MapOption
           option={{
+            id: '0',
             active: isActorMembers,
             onClick: () => onSetisActorMembers(isActorMembers ? '0' : '1'),
             label: intl.formatMessage(messages.isActorMembers),
@@ -95,13 +96,12 @@ const QuickFilters = ({
         />
         <MapOption
           option={{
-            active: isOfficialFiltered,
+            id: '1',
+            active: !includeInofficialStatements,
             label: intl.formatMessage(messages.isOfficialFiltered),
             onClick: () => onUpdateQuery([{
               arg: 'inofficial',
-              value: isOfficialFiltered ? '0' : '1',
-              add: !isOfficialFiltered,
-              remove: isOfficialFiltered,
+              value: includeInofficialStatements ? 'false' : null,
               replace: true,
               multipleAttributeValues: false,
             }]),
@@ -120,6 +120,6 @@ QuickFilters.propTypes = {
   onUpdateQuery: PropTypes.func,
   isPositionIndicator: PropTypes.bool,
   isActorMembers: PropTypes.bool,
-  isOfficialFiltered: PropTypes.bool,
+  includeInofficialStatements: PropTypes.bool,
 };
 export default injectIntl(QuickFilters);

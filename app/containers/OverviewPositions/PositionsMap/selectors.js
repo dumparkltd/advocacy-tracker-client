@@ -10,6 +10,7 @@ import {
   selectActors,
   // selectActortypes,
   selectReady,
+  selectActorActionsMembersGroupedByAction,
   selectActorActionsGroupedByAction, // active
   selectActionIndicatorsGroupedByAction,
   selectActionIndicatorsGroupedByActionAttributes,
@@ -64,6 +65,7 @@ export const selectActionsWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectActiontypeActions,
   selectConnections,
+  selectActorActionsMembersGroupedByAction,
   selectActorActionsGroupedByAction,
   selectActorActionsAssociationsGroupedByAction,
   selectActionIndicatorsGroupedByAction,
@@ -73,6 +75,7 @@ export const selectActionsWithConnections = createSelector(
     entities,
     connections,
     actorConnectionsGrouped,
+    actorMemberConnectionsGrouped,
     actorAssociationConnectionsGrouped,
     indicatorAssociationsGrouped,
     indicatorAssociationsFullGrouped,
@@ -96,7 +99,24 @@ export const selectActionsWithConnections = createSelector(
               'actortype_id',
             ])
           ).sortBy((val, key) => key);
-
+          // actors as members
+          let entityActorsMembers = actorMemberConnectionsGrouped.get(parseInt(entity.get('id'), 10));
+          if (entityActorsMembers) {
+            entityActorsMembers = entityActorsMembers.toSet().toMap();
+          }
+          const entityActorsMembersByActortype = entityActorsMembers && entityActorsMembers.filter(
+            (actorId) => connections.getIn([
+              API.ACTORS,
+              actorId.toString(),
+            ])
+          ).groupBy(
+            (actorId) => connections.getIn([
+              API.ACTORS,
+              actorId.toString(),
+              'attributes',
+              'actortype_id',
+            ])
+          ).sortBy((val, key) => key);
           // actors as parents
           let entityActorsAssociations = actorAssociationConnectionsGrouped.get(parseInt(entity.get('id'), 10));
           if (entityActorsAssociations) {
@@ -131,6 +151,9 @@ export const selectActionsWithConnections = createSelector(
             // indirectly connected actors (group, region, class a directly connected actor belongs to)
             .set('actorsAssociations', entityActorsAssociations)
             .set('actorsAssociationsByType', entityActorsAssociationsByActortype)
+            // indirectly connected actors (member of a directly connected group)
+            .set('actorsMembers', entityActorsMembers)
+            .set('actorsMembersByType', entityActorsMembersByActortype)
             .set('indicators', entityIndicators)
             .set('indicatorConnections', entityIndicatorConnections);
         }

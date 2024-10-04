@@ -136,7 +136,6 @@ export function PositionsMap({
   includeInofficialStatements,
   supportQuery,
   onUpdateQuery,
-  mapIndicator,
   onLoadData,
   onEntityClick,
   dataReady,
@@ -148,9 +147,9 @@ export function PositionsMap({
   }, []);
 
   const size = React.useContext(ResponsiveContext);
-  let activeId = currentIndicatorId;
-  if (dataReady && indicators && (!activeId || activeId === '')) {
-    activeId = indicators.first().get('id');
+  let mapIndicator = currentIndicatorId;
+  if (dataReady && indicators && (!mapIndicator || mapIndicator === '')) {
+    mapIndicator = indicators.first().get('id');
   }
   const indicatorEntities = entities.filter(
     (entity) => entity.get('indicatorConnections') && entity.get('indicatorConnections').some(
@@ -162,7 +161,6 @@ export function PositionsMap({
     ? supportQuery
     // is string (1 selected)
     : List([supportQuery]);
-
   const reduceCountryAreas = (features) => features.reduce((memo, feature) => {
     const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
     if (country) {
@@ -261,15 +259,15 @@ export function PositionsMap({
             </IndicatorPanelHeader>
             <IndicatorList>
               {dataReady && indicators && indicators.entrySeq().map(([id, indicator]) => {
-                const active = qe(activeId, id);
+                const isActive = qe(mapIndicator, id);
                 return (
                   <IndicatorSelectButton
-                    active={active}
+                    active={isActive}
                     key={id}
                     onClick={() => onSetMapIndicator(id)}
                     title={indicator.getIn(['attributes', 'title'])}
                   >
-                    <IndicatorLabel active={active}>
+                    <IndicatorLabel active={isActive}>
                       {indicator.getIn(['attributes', 'title'])}
                     </IndicatorLabel>
                   </IndicatorSelectButton>
@@ -288,7 +286,7 @@ export function PositionsMap({
           <Box>
             {dataReady && size !== 'small' && (
               <MapTitle>
-                {indicators.getIn([activeId, 'attributes', 'title'])}
+                {indicators.getIn([mapIndicator, 'attributes', 'title'])}
               </MapTitle>
             )}
           </Box>
@@ -299,7 +297,7 @@ export function PositionsMap({
                 typeLabels={typeLabels}
                 mapData={{
                   typeLabels,
-                  indicator: activeId,
+                  indicator: mapIndicator,
                   includeSecondaryMembers: true,
                   scrollWheelZoom: true,
                   hasPointOption: false,
@@ -322,7 +320,7 @@ export function PositionsMap({
               onUpdateQuery={onUpdateQuery}
               supportLevels={supportLevels}
               activeSupportLevels={activeSupportLevels}
-              isOfficialFiltered={includeInofficialStatements}
+              includeInofficialStatements={includeInofficialStatements}
             />
           )}
         </MapContainerWrapper>
@@ -356,7 +354,6 @@ const mapStateToProps = (state, { includeActorMembers }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   entities: selectViewActions(state, { type: ACTIONTYPES.EXPRESS }),
   indicators: selectIndicators(state),
-  mapIndicator: selectMapIndicator(state),
   currentIndicatorId: selectMapIndicator(state),
   includeInofficialStatements: selectIncludeInofficialStatements(state),
   supportQuery: selectSupportQuery(state),
