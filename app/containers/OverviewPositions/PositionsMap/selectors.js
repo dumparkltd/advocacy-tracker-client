@@ -21,13 +21,8 @@ import {
 } from 'containers/App/selectors';
 
 import {
-  // filterEntitiesByAttributes,
   filterEntitiesByConnection,
   filterEntitiesByMultipleConnections,
-  // filterEntitiesByConnectedCategories,
-  // filterEntitiesByConnectionAttributes,
-  // filterEntitiesWithoutAssociation,
-  // filterEntitiesWithAnyAssociation,
   filterEntitiesByAttributes,
 } from 'utils/entities';
 
@@ -58,15 +53,14 @@ export const selectConnections = createSelector(
   }
 );
 
-
 // nest connected actor ids
 // nest connected actor ids by actortype
 export const selectActionsWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectActiontypeActions,
   selectConnections,
-  selectActorActionsMembersGroupedByAction,
   selectActorActionsGroupedByAction,
+  selectActorActionsMembersGroupedByAction,
   selectActorActionsAssociationsGroupedByAction,
   selectActionIndicatorsGroupedByAction,
   selectActionIndicatorsGroupedByActionAttributes,
