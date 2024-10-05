@@ -33,6 +33,12 @@ const StyledTag = styled((p) => <Button {...p} />)`
   background: ${({ selected }) => selected ? palette('primary', 1) : 'transparent'};
   border: 1px solid ${palette('light', 4)};
 `;
+const ResetLevelsButton = styled((p) => <Button plain {...p} />)`
+  color: ${palette('primary', 1)};
+  font-family: ${({ theme }) => theme.fonts.title};
+  text-transform: uppercase;
+  font-weight: 600;
+`;
 
 const QuickFilters = ({
   intl,
@@ -56,19 +62,31 @@ const QuickFilters = ({
       <Hint>
         <FormattedMessage {...messages.supportLevelHint} />
       </Hint>
+      {activeSupportLevels
+        && (
+          <ResetLevelsButton
+            onClick={() => onUpdateQuery([{
+              arg: 'support',
+              value: null,
+              replace: true,
+            }])}
+          >
+            <FormattedMessage {...messages.reset} />
+          </ResetLevelsButton>
+        )}
     </SupportLevelTitleWrapper>
     <Box direction="row">
       <TagWrapper
         wrap
         direction="row"
-        gap={{ row: 'small', column: 'small' }}
+        gap={{ row: 'small', column: 'xsmall' }}
       >
         {supportLevels && supportLevels.map((tag) => {
           const isSelected = activeSupportLevels
             && activeSupportLevels.find((level) => qe(level, tag.value));
           return (
             <StyledTag
-              pad={{ horizontal: 'small', vertical: 'none' }}
+              pad={{ horizontal: 'xsmall', vertical: 'xsmall' }}
               key={tag.value}
               label={tag.label}
               selected={isSelected}
@@ -80,7 +98,7 @@ const QuickFilters = ({
                 replace: false,
                 multipleAttributeValues: true,
               }])}
-              icon={<Dot color={tag.color} />}
+              icon={(<Dot size="18px" color={tag.color} />)}
             />
           );
         })}

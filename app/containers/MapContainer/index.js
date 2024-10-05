@@ -51,7 +51,12 @@ ${({ isPrint }) => isPrint && css`margin-left: 0`};
 `;
 const getMapOuterWrapper = (fullMap) => fullMap
   ? styled.div``
-  : styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)`
+  : styled(({ isOverviewMap, ...rest }) => (
+    <Box
+      margin={isOverviewMap ? { right: 'medium' } : { horizontal: 'medium' }}
+      {...rest}
+    />
+  ))`
     ${({ isPrint }) => isPrint && css`margin-left: 0;`}
     ${({ isPrint }) => isPrint && css`margin-right: 0;`}
     position: relative;
@@ -75,6 +80,7 @@ export function MapContainer({
   reducePoints,
   reduceCountryAreas,
   fullMap,
+  isOverviewMap,
   printArgs,
   // intl,
 }) {
@@ -190,7 +196,11 @@ export function MapContainer({
 
   return (
     <Styled>
-      <MapOuterWrapper isPrint={isPrintView} orient={printArgs && printArgs.printOrientation}>
+      <MapOuterWrapper
+        isPrint={isPrintView}
+        orient={printArgs && printArgs.printOrientation}
+        isOverviewMap={isOverviewMap}
+      >
         <MapWrapper
           fullMap={fullMap}
           isPrintView={isPrintView}
@@ -277,6 +287,7 @@ MapContainer.propTypes = {
   mapInfo: PropTypes.array,
   mapOptions: PropTypes.array,
   fullMap: PropTypes.bool,
+  isOverviewMapMap: PropTypes.bool,
 };
 
 const mapStateToProps = (state) => ({

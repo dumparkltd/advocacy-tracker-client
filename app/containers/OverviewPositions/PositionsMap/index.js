@@ -7,6 +7,7 @@ import { List } from 'immutable';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
+
 import {
   Box,
   Text,
@@ -43,6 +44,8 @@ import {
 import appMessages from 'containers/App/messages';
 import Loading from 'components/Loading';
 import MapContainer from 'containers/MapContainer';
+import SelectIndicators from 'containers/MapContainer/MapInfoOptions/SelectIndicators';
+import Icon from 'components/Icon';
 
 import { DEPENDENCIES } from './constants';
 import { selectViewActions } from './selectors';
@@ -55,8 +58,14 @@ const StyledCard = styled((p) => <Box {...p} />)``;
 const IndicatorSidePanel = styled((p) => <Box {...p} />)`
   border-right: 1px solid ${palette('light', 2)};
   width: 200px;
+  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
+   width: 325px;
+  }
+  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
+   width: 350px;
+  }
 `;
-const MapContainerWrapper = styled((p) => <Box {...p} />)``;
+const OverviewContentWrapper = styled((p) => <Box {...p} />)``;
 const IndicatorList = styled((p) => <Box {...p} />)``;
 const IndicatorPanelHeader = styled((p) => <Box {...p} />)`
   border-bottom: 1px solid ${palette('light', 2)};
@@ -121,7 +130,34 @@ const SubTitle = styled((p) => <Heading level="3" {...p} />)`
   text-transform: uppercase;
   font-weight: bold;
 `;
-
+const TopicsButton = styled((p) => (
+  <Button
+    pad={{ vertical: 'small', horizontal: 'medium' }}
+    {...p}
+  />
+))`
+  font-family: ${({ theme }) => theme.fonts.title};
+  color: ${palette('primary', 1)};
+  text-transform: uppercase;
+  border: none;
+  path {
+    stroke: ${palette('primary', 1)}; 
+    stroke-width: 4px;
+  }
+`;
+const GlobalRulesButton = styled((p) => (
+  <Button
+    pad={{ vertical: 'small', horizontal: 'medium' }}
+    {...p}
+  />
+))`
+  font-family: ${({ theme }) => theme.fonts.title};
+  color: white;
+  text-transform: uppercase;
+  background: ${palette('primary', 1)};
+  border-radius: 0;
+  border: none;
+`;
 /* const MapSubTitle = styled((p) => <Heading level="4" {...p} />)`
   color: black;
   font-weight: bold; */
@@ -151,16 +187,17 @@ export function PositionsMap({
   if (dataReady && indicators && (!mapIndicator || mapIndicator === '')) {
     mapIndicator = indicators.first().get('id');
   }
+  const activeSupportLevels = (!supportQuery || typeof supportQuery === 'object')
+    ? supportQuery
+    // is string (1 selected)
+    : List([supportQuery]);
+
   const indicatorEntities = entities.filter(
     (entity) => entity.get('indicatorConnections') && entity.get('indicatorConnections').some(
       (connection) => qe(connection.get('indicator_id'), mapIndicator)
     )
   );
 
-  const activeSupportLevels = (!supportQuery || typeof supportQuery === 'object')
-    ? supportQuery
-    // is string (1 selected)
-    : List([supportQuery]);
   const reduceCountryAreas = (features) => features.reduce((memo, feature) => {
     const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
     if (country) {
@@ -178,14 +215,15 @@ export function PositionsMap({
       }
       const countryPositions = hasActiveStatements
         && country.get('indicatorPositions')
-        && country.getIn(['indicatorPositions', mapIndicator.toString()]).filter(
-          (position) => indicatorEntities.some(
+        && country.getIn(['indicatorPositions', mapIndicator.toString()])
+          .filter((position) => indicatorEntities.some(
             (entity) => qe(entity.get('id'), position.get('measure_id'))
-          )
-        );
+          ));
 
       const countryPosition = countryPositions
-        && countryPositions.sortBy((item) => new Date(item.get('created_at'))).last();
+        && countryPositions
+          .sortBy((item) => new Date(item.get('created_at')))
+          .last();
       const statement = countryPosition && countryPosition.get('measure');
       const level = countryPosition
         && parseInt(countryPosition.get('supportlevel_id'), 10);
@@ -231,6 +269,16 @@ export function PositionsMap({
       label: intl.formatMessage(appMessages.supportlevels[level.value]),
     }));
 
+  const indicatorOptions = indicators
+    && indicators
+      .entrySeq()
+      .map(([id, indicator]) => ({
+        key: id,
+        active: qe(mapIndicator, id),
+        label: indicator.getIn(['attributes', 'title']),
+        onClick: () => onSetMapIndicator(id),
+      }));
+
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
       <Box pad={{ top: 'small', bottom: 'xsmall' }}>
@@ -241,7 +289,7 @@ export function PositionsMap({
       <StyledCard
         elevation="small"
         background="white"
-        direction="row"
+        direction={size !== 'small' ? 'row' : 'column'}
         flex="grow"
         fill
       >
@@ -258,28 +306,43 @@ export function PositionsMap({
               </IndicatorListTitle>
             </IndicatorPanelHeader>
             <IndicatorList>
-              {dataReady && indicators && indicators.entrySeq().map(([id, indicator]) => {
-                const isActive = qe(mapIndicator, id);
-                return (
-                  <IndicatorSelectButton
-                    active={isActive}
-                    key={id}
-                    onClick={() => onSetMapIndicator(id)}
-                    title={indicator.getIn(['attributes', 'title'])}
-                  >
-                    <IndicatorLabel active={isActive}>
-                      {indicator.getIn(['attributes', 'title'])}
-                    </IndicatorLabel>
-                  </IndicatorSelectButton>
-                );
-              })}
+              {dataReady && indicatorOptions && indicatorOptions.map((indicator) => (
+                <IndicatorSelectButton
+                  active={indicator.active}
+                  key={indicator.key}
+                  onClick={() => indicator.onClick(indicator.id)}
+                  title={indicator.label}
+                >
+                  <IndicatorLabel active={indicator.active}>
+                    {indicator.label}
+                  </IndicatorLabel>
+                </IndicatorSelectButton>
+              ))}
             </IndicatorList>
           </IndicatorSidePanel>
         )}
-        <MapContainerWrapper
+        {size === 'small'
+          && dataReady
+          && indicatorOptions
+          && (
+            <Box pad="small">
+              <SelectIndicators
+                config={{
+                  onIndicatorSelect: (id) => onSetMapIndicator(id),
+                  indicatorOptions,
+                  dropAlign: {
+                    top: 'bottom',
+                    left: 'left',
+                  },
+                }}
+              />
+            </Box>
+          )
+        }
+        <OverviewContentWrapper
           direction="column"
           fill="horizontal"
-          pad={{ horizontal: 'medium', bottom: 'medium' }}
+          pad={{ horizontal: 'medium', bottom: 'none' }}
           flex={{ grow: 1, shrink: 1 }}
         >
           <Loading loading={!dataReady} />
@@ -293,6 +356,7 @@ export function PositionsMap({
           <Box>
             {dataReady && (
               <MapContainer
+                isOverviewMap
                 reduceCountryAreas={reduceCountryAreas}
                 typeLabels={typeLabels}
                 mapData={{
@@ -323,7 +387,43 @@ export function PositionsMap({
               includeInofficialStatements={includeInofficialStatements}
             />
           )}
-        </MapContainerWrapper>
+          <Box
+            direction="row"
+            justify="end"
+            pad={{ top: 'small' }}
+            gap="none"
+          >
+            <TopicsButton
+              reverse
+              gap="xsmall"
+              justify="center"
+              label={(
+                <Text
+                  size="large"
+                  color={palette('primary', 1)}
+                >
+                  {intl.formatMessage(messages.allTopics)}
+                </Text>
+              )}
+              icon={(
+                <Icon
+                  name="arrowRight"
+                  size="10px"
+                  hasStroke
+                />
+              )}
+            />
+            <GlobalRulesButton
+              label={(
+                <Text
+                  size="large"
+                >
+                  {intl.formatMessage(messages.globalRules)}
+                </Text>
+              )}
+            />
+          </Box>
+        </OverviewContentWrapper>
       </StyledCard>
     </Box>
   );
