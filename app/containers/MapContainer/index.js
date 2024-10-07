@@ -287,7 +287,7 @@ MapContainer.propTypes = {
   mapInfo: PropTypes.array,
   mapOptions: PropTypes.array,
   fullMap: PropTypes.bool,
-  isOverviewMapMap: PropTypes.bool,
+  isOverviewMap: PropTypes.bool,
 };
 
 const mapStateToProps = (state) => ({

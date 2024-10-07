@@ -42,4 +42,8 @@ export default defineMessages({
     id: 'app.containers.PositionsMap.reset',
     defaultMessage: 'Reset',
   },
+  searchPlaceholder: {
+    id: 'app.components.CardTeaser.searchPlaceholder',
+    defaultMessage: 'Search country',
+  },
 });

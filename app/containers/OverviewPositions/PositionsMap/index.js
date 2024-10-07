@@ -51,6 +51,8 @@ import { DEPENDENCIES } from './constants';
 import { selectViewActions } from './selectors';
 
 import QuickFilters from './QuickFilters';
+import Search from './Search';
+
 import messages from './messages';
 
 
@@ -119,16 +121,27 @@ const IndicatorLabel = styled((p) => <Text size="small" {...p} />)`
   text-overflow: ellipsis;
   color: ${({ active }) => active ? 'white' : 'black'};
 `;
-
+const MapWrapper = styled((p) => <Box {...p} />)`
+  position: relative;
+`;
+const SearchWrapper = styled((p) => <Box {...p} />)`
+  position: absolute;
+  z-index: 100;
+  right: 12px;
+  top: 12px;
+  width: ${({ theme }) => theme.sizes.mapSearchBar.width}px;
+`;
 const MapTitle = styled((p) => <Heading level="3" {...p} />)`
   color: black;
   font-weight: bold;
 `;
-
 const SubTitle = styled((p) => <Heading level="3" {...p} />)`
   color: black;
   text-transform: uppercase;
   font-weight: bold;
+`;
+const TopicsButtonLabel = styled((p) => <Text size="large" {...p} />)`
+  color: ${palette('primary', 1)};
 `;
 const TopicsButton = styled((p) => (
   <Button
@@ -137,11 +150,9 @@ const TopicsButton = styled((p) => (
   />
 ))`
   font-family: ${({ theme }) => theme.fonts.title};
-  color: ${palette('primary', 1)};
   text-transform: uppercase;
   border: none;
   path {
-    stroke: ${palette('primary', 1)}; 
     stroke-width: 4px;
   }
 `;
@@ -353,7 +364,18 @@ export function PositionsMap({
               </MapTitle>
             )}
           </Box>
-          <Box>
+          <MapWrapper>
+            {size !== 'small' && dataReady
+              && (
+                <SearchWrapper>
+                  <Search
+                    options={countries}
+                    onSelect={() => { }}
+                    placeholder={intl.formatMessage(messages.searchPlaceholder)}
+                  />
+                </SearchWrapper>
+              )
+            }
             {dataReady && (
               <MapContainer
                 isOverviewMap
@@ -376,7 +398,7 @@ export function PositionsMap({
                 onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
               />
             )}
-          </Box>
+          </MapWrapper>
           {dataReady && (
             <QuickFilters
               onSetisActorMembers={onSetIncludeActorMembers}
@@ -398,26 +420,23 @@ export function PositionsMap({
               gap="xsmall"
               justify="center"
               label={(
-                <Text
-                  size="large"
-                  color={palette('primary', 1)}
-                >
+                <TopicsButtonLabel>
                   {intl.formatMessage(messages.allTopics)}
-                </Text>
+                </TopicsButtonLabel>
               )}
               icon={(
                 <Icon
                   name="arrowRight"
                   size="10px"
+                  palette="primary"
+                  paletteIndex={0}
                   hasStroke
                 />
               )}
             />
             <GlobalRulesButton
               label={(
-                <Text
-                  size="large"
-                >
+                <Text size="large">
                   {intl.formatMessage(messages.globalRules)}
                 </Text>
               )}
