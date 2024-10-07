@@ -142,6 +142,9 @@ const SubTitle = styled((p) => <Heading level="3" {...p} />)`
 `;
 const TopicsButtonLabel = styled((p) => <Text size="large" {...p} />)`
   color: ${palette('primary', 1)};
+    &:hover {    
+    color: ${palette('primary', 0)};
+  }
 `;
 const TopicsButton = styled((p) => (
   <Button
@@ -155,6 +158,10 @@ const TopicsButton = styled((p) => (
   path {
     stroke-width: 4px;
   }
+  &:hover {
+    border: none;
+    box-shadow: none;
+  }
 `;
 const GlobalRulesButton = styled((p) => (
   <Button
@@ -167,7 +174,11 @@ const GlobalRulesButton = styled((p) => (
   text-transform: uppercase;
   background: ${palette('primary', 1)};
   border-radius: 0;
-  border: none;
+  border: 1px solid transparent;
+  &:hover {
+    box-shadow: none;
+    background: ${palette('primary', 0)};
+  }
 `;
 /* const MapSubTitle = styled((p) => <Heading level="4" {...p} />)`
   color: black;
@@ -365,7 +376,7 @@ export function PositionsMap({
             )}
           </Box>
           <MapWrapper>
-            {size !== 'small' && dataReady
+            {dataReady
               && (
                 <SearchWrapper>
                   <Search
@@ -417,7 +428,7 @@ export function PositionsMap({
           >
             <TopicsButton
               reverse
-              gap="xsmall"
+              gap="none"
               justify="center"
               label={(
                 <TopicsButtonLabel>
@@ -425,13 +436,15 @@ export function PositionsMap({
                 </TopicsButtonLabel>
               )}
               icon={(
-                <Icon
-                  name="arrowRight"
-                  size="10px"
-                  palette="primary"
-                  paletteIndex={0}
-                  hasStroke
-                />
+                <Box margin={{ top: '3px', left: '2px' }}>
+                  <Icon
+                    name="arrowRight"
+                    size="10px"
+                    palette="primary"
+                    paletteIndex={1}
+                    hasStroke
+                  />
+                </Box>
               )}
             />
             <GlobalRulesButton

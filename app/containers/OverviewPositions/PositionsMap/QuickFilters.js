@@ -16,10 +16,10 @@ import Dot from 'components/styled/Dot';
 
 import messages from './messages';
 
-const MapOptionsWrapper = styled((p) => <Box {...p} />)``;
-const TagWrapper = styled((p) => <Box {...p} />)``;
-const SupportLevelTitleWrapper = styled((p) => <Box {...p} />)``;
-const SupportLevelTitle = styled((p) => <Heading level="4" {...p} />)`
+const InputSelectWrapper = styled((p) => <Box {...p} />)``;
+const SupportTagsWrapper = styled((p) => <Box {...p} />)``;
+const SupportTagsSubHeaderWrapper = styled((p) => <Box {...p} />)``;
+const SupportTagsTitle = styled((p) => <Heading level="5" {...p} />)`
   color: black;
   font-weight: bold;
 `;
@@ -28,16 +28,24 @@ const Hint = styled((p) => <Text {...p} />)`
   font-weight: 300;
   font-style: italic;
 `;
-const StyledTag = styled((p) => <Button {...p} />)`
+const StyledTag = styled((p) => <Button {...p} gap="5px" />)`
   color: ${({ selected }) => selected ? 'white' : 'black'};
   background: ${({ selected }) => selected ? palette('primary', 1) : 'transparent'};
-  border: 1px solid ${palette('light', 4)};
+  border: 1px solid ${({ selected }) => selected ? palette('primary', 1) : palette('light', 4)};
+  padding: 3px 5px;
+  &:hover {
+    box-shadow: none;
+    border: 1px solid ${({ selected }) => selected ? palette('primary', 0) : palette('dark', 3)};
+  }
 `;
-const ResetLevelsButton = styled((p) => <Button plain {...p} />)`
+const ResetSuportTagsButton = styled((p) => <Button plain {...p} />)`
   color: ${palette('primary', 1)};
   font-family: ${({ theme }) => theme.fonts.title};
   text-transform: uppercase;
   font-weight: 600;
+  &:hover {
+    color: ${palette('primary', 0)};
+  }
 `;
 
 const QuickFilters = ({
@@ -49,22 +57,27 @@ const QuickFilters = ({
   includeInofficialStatements,
   activeSupportLevels,
 }) => (
-  <Box direction="column">
-    <SupportLevelTitleWrapper
-      direction="row"
-      gap="small"
-      align="center"
-      margin={{ vertical: 'small' }}
-    >
-      <SupportLevelTitle margin="none">
-        <FormattedMessage {...messages.supportLevelTitle} />
-      </SupportLevelTitle>
-      <Hint>
-        <FormattedMessage {...messages.supportLevelHint} />
-      </Hint>
-      {activeSupportLevels
+  <Box direction="row" gap="small">
+    <Box direction="column">
+      <SupportTagsSubHeaderWrapper
+        height="xxsmall"
+        direction="row"
+        gap="xsmall"
+        align="center"
+        justify="between"
+        margin={{ vertical: 'small' }}
+      >
+        <Box direction="row" justify="start" gap="small">
+          <SupportTagsTitle margin="none">
+            <FormattedMessage {...messages.supportLevelTitle} />
+          </SupportTagsTitle>
+          <Hint>
+            <FormattedMessage {...messages.supportLevelHint} />
+          </Hint>
+        </Box>
+        {activeSupportLevels
         && (
-          <ResetLevelsButton
+          <ResetSuportTagsButton
             onClick={() => onUpdateQuery([{
               arg: 'support',
               value: null,
@@ -72,11 +85,10 @@ const QuickFilters = ({
             }])}
           >
             <FormattedMessage {...messages.reset} />
-          </ResetLevelsButton>
+          </ResetSuportTagsButton>
         )}
-    </SupportLevelTitleWrapper>
-    <Box direction="row">
-      <TagWrapper
+      </SupportTagsSubHeaderWrapper>
+      <SupportTagsWrapper
         wrap
         direction="row"
         gap={{ row: 'small', column: 'xsmall' }}
@@ -86,9 +98,9 @@ const QuickFilters = ({
             && activeSupportLevels.find((level) => qe(level, tag.value));
           return (
             <StyledTag
-              pad={{ horizontal: 'xsmall', vertical: 'xsmall' }}
               key={tag.value}
               label={tag.label}
+              size="small"
               selected={isSelected}
               onClick={() => onUpdateQuery([{
                 arg: 'support',
@@ -102,31 +114,32 @@ const QuickFilters = ({
             />
           );
         })}
-      </TagWrapper>
-      <MapOptionsWrapper direction="column">
-        <MapOption
-          option={{
-            id: '0',
-            active: isActorMembers,
-            onClick: () => onSetisActorMembers(isActorMembers ? '0' : '1'),
-            label: intl.formatMessage(messages.isActorMembers),
-          }}
-        />
-        <MapOption
-          option={{
-            id: '1',
-            active: !includeInofficialStatements,
-            label: intl.formatMessage(messages.isOfficialFiltered),
-            onClick: () => onUpdateQuery([{
-              arg: 'inofficial',
-              value: includeInofficialStatements ? 'false' : null,
-              replace: true,
-              multipleAttributeValues: false,
-            }]),
-          }}
-        />
-      </MapOptionsWrapper>
+      </SupportTagsWrapper>
     </Box>
+    <InputSelectWrapper direction="column">
+      <Box height="xxsmall" />
+      <MapOption
+        option={{
+          id: '0',
+          active: isActorMembers,
+          onClick: () => onSetisActorMembers(isActorMembers ? '0' : '1'),
+          label: intl.formatMessage(messages.isActorMembers),
+        }}
+      />
+      <MapOption
+        option={{
+          id: '1',
+          active: !includeInofficialStatements,
+          label: intl.formatMessage(messages.isOfficialFiltered),
+          onClick: () => onUpdateQuery([{
+            arg: 'inofficial',
+            value: includeInofficialStatements ? 'false' : null,
+            replace: true,
+            multipleAttributeValues: false,
+          }]),
+        }}
+      />
+    </InputSelectWrapper>
   </Box>
 );
 

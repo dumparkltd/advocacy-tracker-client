@@ -5,14 +5,13 @@
  */
 
 import React, {
-  useState, useRef, useEffect, forwardRef,
+  useState, useRef, useEffect, forwardRef, useContext,
 } from 'react';
 import PropTypes from 'prop-types';
 import { palette } from 'styled-theme';
 import styled from 'styled-components';
 
-import { Box, Button } from 'grommet';
-// import { Search as SearchIcon } from 'grommet-icons';
+import { Box, Button, ThemeContext } from 'grommet';
 
 import PrintHide from 'components/styled/PrintHide';
 import Keyboard from 'components/Keyboard';
@@ -32,7 +31,6 @@ const SearchButton = styled(
   background: ${palette('light', 1)};
   border-top-right-radius: 999px;
   border-bottom-right-radius: 999px;
-  border: 1px solid ${palette('light', 3)};
   border-left: 0px;
   padding-left: 13px;
   height: ${({ theme }) => theme.sizes.mapSearchBar.height}px;
@@ -47,7 +45,8 @@ const ClearButton = styled((p) => <Button {...p} />)`
   cursor: ${({ onClick }) => onClick ? 'pointer' : 'auto'};
   height: ${({ theme }) => theme.sizes.mapSearchBar.height}px;
   width: ${({ theme }) => theme.sizes.mapSearchBar.height}px;
-  border: 1px solid ${palette('light', 3)};
+  border-left: 1px solid ${palette('light', 3)};
+  border-right: 1px solid ${palette('light', 3)};
   background-color: ${palette('light', 1)};
   &:focus-visible {
     z-index: 1;
@@ -55,12 +54,6 @@ const ClearButton = styled((p) => <Button {...p} />)`
     box-shadow: none;
   }
 `;
-/* const StyledSearchIcon = styled((p) => <SearchIcon size="small" {...p} />)`
-  path {
-    stroke-width: 1px;
-    stroke-color: ${palette('dark', 2)};
-  }
-`; */
 const StyledArrowIcon = styled((p) => (
   <Icon
     name="arrowDown"
@@ -70,14 +63,7 @@ const StyledArrowIcon = styled((p) => (
     hasStroke
     {...p}
   />
-))`
-  path {
-    stroke-width: 4px;
-  }
-  &:hover {
-    stroke: ${palette('dark', 2)};
-  }
-`;
+))``;
 const StyledCloseIcon = styled((p) => (
   <Icon
     name="close"
@@ -87,25 +73,19 @@ const StyledCloseIcon = styled((p) => (
     hasStroke
     {...p}
   />
-))`
-  path {
-    stroke-width: 4px;
-  }
-  &:hover {
-    stroke: ${palette('dark', 2)};
-  }
-`;
+))``;
 const Styled = styled((p) => <Box {...p} />)`
   width: 100%;
   position: relative;
 `;
 // eslint-disable-next-line react/no-multi-comp
-const StyledSearchBox = styled(forwardRef((p, ref) => <Box {...p} ref={ref} />))`
+const StyledSearchBox = styled(forwardRef((p, ref) => <Box {...p} ref={ref} pad={{ left: 'small' }} />))`
   border-radius: 999px;
   outline: 2px solid ${({ active }) => active ? palette('primary', 0) : 'transparent'};
   outline-offset: 2px;
+  background: white;
+  border: solid 1px ${palette('light', 3)};
 `;
-
 const DropDown = styled.div`
   display: none;
   background: white;
@@ -125,6 +105,7 @@ export function Search({
   onSelect,
   placeholder,
 }) {
+  const theme = useContext(ThemeContext);
   const searchRef = useRef(null);
   const textInputRef = useRef(null);
   const textInputWrapperRef = useRef(null);
@@ -210,6 +191,11 @@ export function Search({
     sortedOptions = options ? prepOptions(options, search) : [];
   }
   const searchHasResults = sortedOptions.size > 0 && search.length > 1;
+  const searchIconSize = theme
+    && theme.sizes
+    && theme.sizes.mapSearchBar
+    && theme.sizes.mapSearchBar.searchIconSize
+    ? theme.sizes.mapSearchBar.searchIconSize : 0;
 
   return (
     <Styled
@@ -222,6 +208,12 @@ export function Search({
         active={textInputFocused}
       >
         <>
+          <Icon
+            size={`${searchIconSize}px`}
+            name="search"
+            palette="dark"
+            paletteIndex={3}
+          />
           <Box
             width="large"
             fill="horizontal"
@@ -246,7 +238,6 @@ export function Search({
               spanStyle={{ width: 'inherit' }}
             >
               <TextInput
-                plain
                 value={search}
                 ref={textInputRef}
                 onChange={(evt) => {
@@ -255,7 +246,7 @@ export function Search({
                     setActiveResult(activeResetIndex);
                   }
                 }}
-                // icon={<StyledSearchIcon />}
+
                 placeholder={placeholder}
               />
             </Keyboard>
@@ -322,7 +313,8 @@ export function Search({
               activeResetIndex={activeResetIndex}
               options={sortedOptions}
               maxResult={sortedOptions.size}
-              dropdownWidth={textInputWrapperRef.current.clientWidth}
+              dropdownWidth={textInputWrapperRef.current.clientWidth
+                + searchIconSize}
               focusTextInput={() => setFocusByRef(textInputRef)}
               focus={dropFocused}
               setFocus={onDropFocused}

@@ -9,12 +9,7 @@ export default styled(forwardRef((p, ref) => <TextInput {...p} ref={ref} />))`
   font-size: ${({ theme }) => theme.text.small.size};
   background-color: white;
   color: ${palette('dark', 2)};
-  border-top-left-radius: 999px;
-  border-bottom-left-radius: 999px;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  border: solid 1px ${palette('light', 3)};
-  border-right: 0px;
+  border: none;
   height: ${({ theme }) => theme.sizes.mapSearchBar.height}px;
   &:focus {
     outline: none;
