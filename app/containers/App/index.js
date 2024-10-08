@@ -209,23 +209,21 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
         title: intl.formatMessage(messages.nav.positions),
         active: currentPath && (
           currentPath.startsWith(ROUTES.POSITIONS)
+          || currentPath.startsWith(ROUTES.INDICATORS)
           || currentPath.startsWith(`${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`)
         ),
       },
       {
-        path: `${ROUTES.ACTORS}/${ACTORTYPES.COUNTRY}`,
+        path: ROUTES.ACTORS,
         title: intl.formatMessage(messages.nav.actors),
         active: currentPath && currentPath.startsWith(ROUTES.ACTORS),
       },
       {
-        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}`,
+        path: ROUTES.ACTIONS,
         title: intl.formatMessage(messages.nav.outreach),
         active: currentPath && (
-          currentPath.startsWith(ROUTES.OUTREACH)
-          || (
-            currentPath.startsWith(ROUTES.ACTIONS)
-            && !currentPath.startsWith(`${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`)
-          )
+          currentPath.startsWith(ROUTES.ACTIONS)
+          && !currentPath.startsWith(`${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`)
         ),
       },
       {

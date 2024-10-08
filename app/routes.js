@@ -5,7 +5,13 @@
 import { getAsyncInjectors } from 'utils/asyncInjectors';
 import { getRedirects } from 'utils/redirects';
 
-import { ROUTES, USER_ROLES, DEFAULT_TAXONOMY } from 'themes/config';
+import {
+  ROUTES,
+  USER_ROLES,
+  ACTORTYPES,
+  ACTIONTYPES,
+  DEFAULT_TAXONOMY,
+} from 'themes/config';
 
 const errorLoading = (err) => {
   console.error('Dynamic page loading failed', err); // eslint-disable-line no-console
@@ -29,7 +35,7 @@ export default function createRoutes(store) {
     {
       path: '/',
       name: 'home',
-      onEnter: redirectIfSignedIn(ROUTES.ACTIONS),
+      onEnter: redirectIfSignedIn(ROUTES.POSITIONS),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/HomePage'),
@@ -43,6 +49,15 @@ export default function createRoutes(store) {
 
         importModules.catch(errorLoading);
       },
+    }, {
+      path: ROUTES.ACTIONS,
+      name: 'actiontypes',
+      onEnter: redirectIfSignedIn(`${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}`),
+    }, {
+    }, {
+      path: ROUTES.ACTORS,
+      name: 'actiontypes',
+      onEnter: redirectIfSignedIn(`${ROUTES.ACTORS}/${ACTORTYPES.COUNTRY}`),
     }, {
       path: ROUTES.LOGOUT,
       name: 'userLogout',
