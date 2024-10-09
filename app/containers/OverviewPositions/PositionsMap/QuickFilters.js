@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
-import { qe } from 'utils/quasi-equals';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
@@ -47,7 +46,10 @@ const ResetSuportTagsButton = styled((p) => <Button plain {...p} />)`
     color: ${palette('primary', 0)};
   }
 `;
-
+// gap={{ row: 'small', column: 'xsmall' }}
+// const actives = supportLevels
+//   && supportLevels.filter((level) => level.active);
+// console.log(actives)
 const QuickFilters = ({
   intl,
   onSetisActorMembers,
@@ -55,7 +57,6 @@ const QuickFilters = ({
   isActorMembers,
   supportLevels,
   includeInofficialStatements,
-  activeSupportLevels,
 }) => (
   <Box direction="row" gap="small">
     <Box direction="column">
@@ -75,8 +76,7 @@ const QuickFilters = ({
             <FormattedMessage {...messages.supportLevelHint} />
           </Hint>
         </Box>
-        {activeSupportLevels
-        && (
+        {supportLevels.find((level) => level.active) && (
           <ResetSuportTagsButton
             onClick={() => onUpdateQuery([{
               arg: 'support',
@@ -91,29 +91,24 @@ const QuickFilters = ({
       <SupportTagsWrapper
         wrap
         direction="row"
-        gap={{ row: 'small', column: 'xsmall' }}
       >
-        {supportLevels && supportLevels.map((tag) => {
-          const isSelected = activeSupportLevels
-            && activeSupportLevels.find((level) => qe(level, tag.value));
-          return (
-            <StyledTag
-              key={tag.value}
-              label={tag.label}
-              size="small"
-              selected={isSelected}
-              onClick={() => onUpdateQuery([{
-                arg: 'support',
-                value: tag.value,
-                add: !isSelected ? tag.value : false,
-                remove: isSelected ? tag.value : false,
-                replace: false,
-                multipleAttributeValues: true,
-              }])}
-              icon={(<Dot size="18px" color={tag.color} />)}
-            />
-          );
-        })}
+        {supportLevels && supportLevels.map((tag) => (
+          <StyledTag
+            key={tag.value}
+            label={tag.label}
+            size="small"
+            selected={tag.active}
+            onClick={() => onUpdateQuery([{
+              arg: 'support',
+              value: tag.value,
+              add: !tag.active ? tag.value : false,
+              remove: tag.active ? tag.value : false,
+              replace: false,
+              multipleAttributeValues: true,
+            }])}
+            icon={(<Dot size="18px" color={tag.color} />)}
+          />
+        ))}
       </SupportTagsWrapper>
     </Box>
     <InputSelectWrapper direction="column">
@@ -146,7 +141,6 @@ const QuickFilters = ({
 QuickFilters.propTypes = {
   intl: intlShape.isRequired,
   supportLevels: PropTypes.array,
-  activeSupportLevels: PropTypes.object,
   onSetisActorMembers: PropTypes.func,
   onUpdateQuery: PropTypes.func,
   isPositionIndicator: PropTypes.bool,

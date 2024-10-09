@@ -22,7 +22,8 @@ import {
   ACTION_INDICATOR_SUPPORTLEVELS,
   ACTIONTYPES,
 } from 'themes/config';
-import { qe } from 'utils/quasi-equals';
+import qe from 'utils/quasi-equals';
+import asList from 'utils/as-list';
 
 import {
   loadEntitiesIfNeeded,
@@ -34,7 +35,6 @@ import {
 import {
   selectReady,
   selectIndicators,
-  selectMapIndicator,
   selectActorsWithPositions,
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
@@ -48,7 +48,7 @@ import SelectIndicators from 'containers/MapContainer/MapInfoOptions/SelectIndic
 import Icon from 'components/Icon';
 
 import { DEPENDENCIES } from './constants';
-import { selectViewActions } from './selectors';
+import { selectIndicatorId } from './selectors';
 
 import QuickFilters from './QuickFilters';
 import Search from './Search';
@@ -142,7 +142,7 @@ const SubTitle = styled((p) => <Heading level="3" {...p} />)`
 `;
 const TopicsButtonLabel = styled((p) => <Text size="large" {...p} />)`
   color: ${palette('primary', 1)};
-    &:hover {    
+    &:hover {
     color: ${palette('primary', 0)};
   }
 `;
@@ -186,7 +186,6 @@ const GlobalRulesButton = styled((p) => (
 export function PositionsMap({
   indicators,
   countries,
-  entities,
   currentIndicatorId,
   onSetMapIndicator,
   onSetIncludeActorMembers,
@@ -205,65 +204,20 @@ export function PositionsMap({
   }, []);
 
   const size = React.useContext(ResponsiveContext);
-  let mapIndicator = currentIndicatorId;
-  if (dataReady && indicators && (!mapIndicator || mapIndicator === '')) {
-    mapIndicator = indicators.first().get('id');
-  }
-  const activeSupportLevels = (!supportQuery || typeof supportQuery === 'object')
-    ? supportQuery
-    // is string (1 selected)
-    : List([supportQuery]);
 
-  const indicatorEntities = entities.filter(
-    (entity) => entity.get('indicatorConnections') && entity.get('indicatorConnections').some(
-      (connection) => qe(connection.get('indicator_id'), mapIndicator)
-    )
-  );
-
+  const supportQueryAsList = supportQuery
+    ? asList(supportQuery)
+    : List([]);
+console.log(supportQuery)
   const reduceCountryAreas = (features) => features.reduce((memo, feature) => {
     const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
     if (country) {
-      let hasActiveStatements = indicatorEntities.some(
-        (entity) => entity.get('actors') && entity.get('actors').some(
-          (actorId) => qe(actorId, country.get('id'))
-        )
-      );
-      if (!hasActiveStatements && includeActorMembers) {
-        hasActiveStatements = indicatorEntities.some(
-          (entity) => entity.get('actorsMembers') && entity.get('actorsMembers').some(
-            (actorId) => qe(actorId, country.get('id'))
-          )
-        );
-      }
-      const countryPositions = hasActiveStatements
-        && country.get('indicatorPositions')
-        && country.getIn(['indicatorPositions', mapIndicator.toString()])
-          .filter((position) => indicatorEntities.some(
-            (entity) => qe(entity.get('id'), position.get('measure_id'))
-          ));
+      const countryPosition = country.get('indicatorPositions')
+        && country.getIn(['indicatorPositions', currentIndicatorId.toString()]).first();
 
-      const countryPosition = countryPositions
-        && countryPositions
-          .sortBy((item) => new Date(item.get('created_at')))
-          .last();
       const statement = countryPosition && countryPosition.get('measure');
       const level = countryPosition
         && parseInt(countryPosition.get('supportlevel_id'), 10);
-
-      let values;
-      // no active support levels selected
-      if (!activeSupportLevels) {
-        values = statement ? { [mapIndicator]: level || 0 } : {};
-      } else {
-        // active support levels
-        // eslint-disable-next-line no-lonely-if
-        if (activeSupportLevels.find((activeLevel) => qe(activeLevel, level))) {
-          values = statement ? { [mapIndicator]: level || 0 } : {};
-        } else {
-          values = statement ? { [mapIndicator]: 0 } : {};
-        }
-      }
-
 
       return [
         ...memo,
@@ -271,7 +225,7 @@ export function PositionsMap({
           ...feature,
           id: country.get('id'),
           attributes: country.get('attributes').toJS(),
-          values,
+          values: statement ? { [currentIndicatorId]: level || 0 } : {},
         },
       ];
     }
@@ -283,11 +237,15 @@ export function PositionsMap({
     plural: intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`].plural),
   };
 
-  const supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
-    .sort((a, b) => a.order > b.order ? 1 : -1)
-    .filter((level) => !qe(level.value, 0))
+  let supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+    .filter((level) => !qe(level.value, 0)) // exclude 0
+    .sort((a, b) => a.order > b.order ? 1 : -1);
+
+  supportLevels = supportLevels
     .map((level) => ({
       ...level,
+      active: supportQuery
+        && supportQueryAsList.includes(level.value),
       label: intl.formatMessage(appMessages.supportlevels[level.value]),
     }));
 
@@ -296,7 +254,7 @@ export function PositionsMap({
       .entrySeq()
       .map(([id, indicator]) => ({
         key: id,
-        active: qe(mapIndicator, id),
+        active: qe(currentIndicatorId, id),
         label: indicator.getIn(['attributes', 'title']),
         onClick: () => onSetMapIndicator(id),
       }));
@@ -371,7 +329,7 @@ export function PositionsMap({
           <Box>
             {dataReady && size !== 'small' && (
               <MapTitle>
-                {indicators.getIn([mapIndicator, 'attributes', 'title'])}
+                {indicators.getIn([currentIndicatorId.toString(), 'attributes', 'title'])}
               </MapTitle>
             )}
           </Box>
@@ -394,13 +352,17 @@ export function PositionsMap({
                 typeLabels={typeLabels}
                 mapData={{
                   typeLabels,
-                  indicator: mapIndicator,
+                  indicator: currentIndicatorId.toString(),
                   includeSecondaryMembers: true,
                   scrollWheelZoom: true,
                   hasPointOption: false,
                   hasPointOverlay: true,
                   valueToStyle: (value) => {
-                    const pos = ACTION_INDICATOR_SUPPORTLEVELS[value || 0];
+                    let val = value.toString() || '0';
+                    if (supportQuery && !supportQueryAsList.includes(val)) {
+                      val = '0';
+                    }
+                    const pos = ACTION_INDICATOR_SUPPORTLEVELS[val];
                     return ({
                       fillColor: pos.color,
                     });
@@ -416,7 +378,6 @@ export function PositionsMap({
               isActorMembers={includeActorMembers}
               onUpdateQuery={onUpdateQuery}
               supportLevels={supportLevels}
-              activeSupportLevels={activeSupportLevels}
               includeInofficialStatements={includeInofficialStatements}
             />
           )}
@@ -475,18 +436,15 @@ PositionsMap.propTypes = {
   ]),
   includeActorMembers: PropTypes.bool,
   includeInofficialStatements: PropTypes.bool,
-  mapIndicator: PropTypes.string,
-  currentIndicatorId: PropTypes.string,
+  currentIndicatorId: PropTypes.number,
   indicators: PropTypes.object,
-  entities: PropTypes.object,
   intl: intlShape.isRequired,
 };
 
 const mapStateToProps = (state, { includeActorMembers }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
-  entities: selectViewActions(state, { type: ACTIONTYPES.EXPRESS }),
   indicators: selectIndicators(state),
-  currentIndicatorId: selectMapIndicator(state),
+  currentIndicatorId: selectIndicatorId(state),
   includeInofficialStatements: selectIncludeInofficialStatements(state),
   supportQuery: selectSupportQuery(state),
   includeActorMembers: selectIncludeActorMembers(state),
