@@ -67,7 +67,7 @@
   "app.components.EntityListMain.printHintKey": "Please refer to the end of this document for an overview of categories and tags",
   "app.components.EntityListHeader.header.filter": "Add filter",
   "app.components.EntityListHeader.header.edit": "Edit selected items",
-  "app.components.EntityListHeader.listOptions.showFilter": "Add filter",
+  "app.components.EntityListHeader.listOptions.showFilter": "Filter",
   "app.components.EntityListHeader.listOptions.showEditOptions": "Edit selected",
   "app.components.EntityListHeader.groupExpand.show": "Hide group",
   "app.components.EntityListHeader.groupExpand.hide": "Hide group",

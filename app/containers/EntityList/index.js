@@ -540,6 +540,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             includeActorChildren={includeActorChildren}
             includeTargetChildren={includeTargetChildren}
             headerActions={headerActions}
+            viewOptions={viewOptions}
+            isOnMap={showMap}
             onClearFilters={this.onClearFilters}
             isPrintView={isPrintView}
           />

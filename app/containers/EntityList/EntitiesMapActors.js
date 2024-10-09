@@ -28,7 +28,6 @@ import {
 } from 'containers/App/selectors';
 
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
-import EntityListViewOptions from 'components/EntityListViewOptions';
 
 import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
@@ -44,7 +43,6 @@ const Styled = styled((p) => <ContainerWrapper {...p} />)`
 `;
 
 export function EntitiesMapActors({
-  viewOptions,
   entities,
   actortypes,
   actiontypes,
@@ -383,7 +381,7 @@ export function EntitiesMapActors({
   }
 
   return (
-    <Styled headerStyle="types" noOverflow isPrint={isPrintView}>
+    <Styled headerStyle="types" isPrint={isPrintView} noOverflow isOnMap>
       {isPrintView && (
         <HeaderPrint argsRemove={['subj', 'ac', 'tc', 'mtchm', 'mtch', 'actontype']} />
       )}
@@ -413,9 +411,6 @@ export function EntitiesMapActors({
           memberOption,
         }]}
       />
-      {viewOptions && viewOptions.length > 1 && !isPrintView && (
-        <EntityListViewOptions options={viewOptions} isOnMap isPrintView={isPrintView} />
-      )}
     </Styled>
   );
 }
@@ -431,7 +426,6 @@ EntitiesMapActors.propTypes = {
   actionActorsByAction: PropTypes.instanceOf(Map),
   actorActionsByAction: PropTypes.instanceOf(Map),
   membershipsByAssociation: PropTypes.instanceOf(Map),
-  viewOptions: PropTypes.array,
   typeId: PropTypes.string,
   mapSubject: PropTypes.string,
   onSetMapSubject: PropTypes.func,

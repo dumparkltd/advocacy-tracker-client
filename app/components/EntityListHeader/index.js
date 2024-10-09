@@ -12,7 +12,7 @@ import { palette } from 'styled-theme';
 import {
   Box, Text, Button, ResponsiveContext,
 } from 'grommet';
-import { Add, Multiple } from 'grommet-icons';
+import { Multiple } from 'grommet-icons';
 
 import { isEqual } from 'lodash/lang';
 import { isMinSize } from 'utils/responsive';
@@ -22,10 +22,10 @@ import { FILTER_FORM_MODEL, EDIT_FORM_MODEL } from 'containers/EntityListForm/co
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import Bookmarker from 'containers/Bookmarker';
 
+import EntityListViewOptions from 'components/EntityListViewOptions';
 import EntityListForm from 'containers/EntityListForm';
 import appMessages from 'containers/App/messages';
 import PrintHide from 'components/styled/PrintHide';
-import TagList from 'components/TagList';
 import Icon from 'components/Icon';
 
 import EntityListSidebar from './EntityListSidebar';
@@ -55,18 +55,27 @@ const TheHeader = styled((p) => <Box direction="row" {...p} />)`
 `;
 const HeaderSection = styled((p) => <Box direction="row" {...p} />)`
   position: relative;
-  border-right: 1px solid ${({ noBorder }) => noBorder ? 'transparent' : palette('light', 4)};
-  height: 100%;
-  padding: 2px 5px;
   flex: ${({ grow }) => grow ? '1' : '0'} ${({ shrink = '1' }) => shrink ? '1' : '0'} auto;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    padding: 2px 10px;
+`;
+const FilterButton = styled((p) => <Button {...p} />)`
+  color: ${palette('buttonFlat', 1)};
+  background: ${palette('primary', 1)};
+  color: white;
+  border-radius: 999px;
+  box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.2);
+  border: none;
+  font-family: ${({ theme }) => theme.fonts.title};
+  text-transform: uppercase;
+  &:hover {
+    box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.2);
+    background: ${palette('primary', 0)};
   }
 `;
-const ButtonOptions = styled((p) => <Button plain {...p} />)`
-  color: ${palette('buttonFlat', 1)};
+const HeaderActionsWrapper = styled((p) => <Box {...p} />)`
+  background: white;
+  border-radius: 999px;
+  box-shadow: ${({ isOnMap }) => isOnMap ? '0px 0px 5px 0px rgba(0,0,0,0.2)' : 'none'};
 `;
-
 const STATE_INITIAL = {
   activeOption: null,
   showTypes: false,
@@ -253,9 +262,10 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       includeTargetChildren,
       filteringOptions,
       headerActions,
+      viewOptions,
       isAdmin,
-      onClearFilters,
       isPrintView,
+      isOnMap,
       intl,
     } = this.props;
     const { activeOption } = this.state;
@@ -393,65 +403,53 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
         });
       }
     }
-
     const managerActions = canEdit && headerActions && headerActions.filter(
       (action) => action.isMember
     );
     const normalActions = headerActions && headerActions.filter(
       (action) => !action.isMember
     );
-
     return (
       <ResponsiveContext.Consumer>
-        {(size) => {
-          const iconSize = isMinSize(size, 'medium') ? 'xxsmall' : 'small';
-          return (
-            <Styled isPrint={isPrintView}>
-              <TheHeader align="center">
-                <HeaderSection
-                  grow
-                  align="center"
-                  gap="medium"
-                  justify="start"
-                  overflow={{ horizontal: 'auto' }}
-                >
-                  {dataReady && currentFilters && isMinSize(size, 'large') && (
-                    <TagList
-                      filters={currentFilters}
-                      onClear={onClearFilters}
-                      groupDropdownThreshold={isMinSize(size, 'xlarge') ? 3 : 2}
-                    />
-                  )}
-                </HeaderSection>
-                {dataReady && isMinSize(size, 'small') && (
-                  <HeaderSection align="center">
-                    <ButtonOptions
-                      onClick={onShowFilters}
-                      label={(
-                        <Box direction="row" gap="small" align="center">
-                          <Box>{<Icon name="filter" text />}</Box>
-                          {isMinSize(size, 'medium') && (
-                            <Text>{intl.formatMessage(messages.listOptions.showFilter)}</Text>
-                          )}
-                        </Box>
-                      )}
-                    />
-                  </HeaderSection>
-                )}
-                {normalActions && (
-                  <HeaderSection noBorder={!canEdit}>
-                    <Box
+        {(size) => (
+          <Styled isPrint={isPrintView}>
+            <TheHeader
+              margin={{ top: 'xsmall', bottom: 'xsmall' }}
+              pad={{ top: 'small' }}
+              align="center"
+              justify="between"
+            >
+              <HeaderSection align="start" justify="start">
+                <PrintHide>
+                  {viewOptions && viewOptions.length > 1
+                    && (
+                      <EntityListViewOptions
+                        options={viewOptions}
+                        isPrintView={isPrintView}
+                        isOnMap={isOnMap}
+                      />
+                    )}
+                </PrintHide>
+              </HeaderSection>
+              <Box direction="row" gap="small">
+                {(normalActions || managerActions) && (
+                  <HeaderSection>
+                    <HeaderActionsWrapper
                       fill="vertical"
                       direction="row"
                       align="center"
-                      pad={{ vertical: 'xsmall' }}
+                      pad={{ vertical: 'xsmall', horizontal: 'small' }}
+                      isOnMap={isOnMap}
                     >
-                      {normalActions.map(
+                      {normalActions && normalActions.map(
                         (action, i) => {
                           if (action.type === 'bookmarker') {
                             return (
                               <Box key={i}>
-                                <Bookmarker viewTitle={action.title} type={action.entityType} />
+                                <Bookmarker
+                                  viewTitle={action.title}
+                                  type={action.entityType}
+                                />
                               </Box>
                             );
                           }
@@ -472,128 +470,103 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                           return null;
                         }
                       )}
-                    </Box>
-                  </HeaderSection>
-                )}
-                {isMinSize(size, 'small') && canEdit && managerActions && managerActions.length > 0 && (
-                  <HeaderSection noBorder>
-                    <Box
-                      fill="vertical"
-                      pad={{ top: 'xsmall', bottom: 'xxsmall' }}
-                      align={isMinSize(size, 'medium') ? 'start' : 'center'}
-                      justify="center"
-                      gap={isMinSize(size, 'medium') ? 'xsmall' : 'small'}
-                      direction={isMinSize(size, 'medium') ? 'column' : 'row'}
-                    >
                       {managerActions && managerActions.map(
                         (action, i) => {
-                          if (action.icon === 'add') {
+                          if (action.icon === 'import') {
                             return (
-                              <ButtonOptions
-                                key={i}
-                                onClick={action.onClick}
-                                label={(
-                                  <Box direction="row" gap="small" align="center">
-                                    <Box>
-                                      <Add color="dark-3" size={iconSize} />
-                                    </Box>
-                                    {isMinSize(size, 'medium') && (
-                                      <Text color="dark-3" size="small">{action.title}</Text>
-                                    )}
-                                  </Box>
-                                )}
-                              />
-                            );
-                          }
-                          if (isMinSize(size, 'medium')) {
-                            if (action.icon === 'import' && isMinSize(size, 'medium')) {
-                              return (
-                                <ButtonOptions
-                                  key={i}
-                                  onClick={action.onClick}
-                                  label={(
-                                    <Box direction="row" gap="small" align="center">
-                                      <Box>
-                                        <Multiple color="dark-3" size={iconSize} />
-                                      </Box>
-                                      <Text color="dark-3" size="small">{action.title}</Text>
-                                    </Box>
-                                  )}
-                                />
-                              );
-                            }
-                            return (
-                              <ButtonOptions
-                                key={i}
-                                onClick={action.onClick}
-                                label={(
-                                  <Box direction="row" gap="small">
-                                    <Text color="dark-3" size="small">{action.title}</Text>
-                                  </Box>
-                                )}
-                              />
+                              <Box key={i}>
+                                <ButtonFlatIconOnly
+                                  onClick={action.onClick && (() => action.onClick())}
+                                  title={action.title}
+                                  alt={action.title}
+                                  subtle
+                                >
+                                  <Multiple size="small" color={palette('dark', 3)} />
+                                </ButtonFlatIconOnly>
+                              </Box>
                             );
                           }
                           return null;
                         }
                       )}
-                    </Box>
+                    </HeaderActionsWrapper>
                   </HeaderSection>
                 )}
-              </TheHeader>
-              {showFilters && (
-                <EntityListSidebar
-                  hasEntities={allEntities && allEntities.size > 0}
-                  panelGroups={panelGroups}
-                  onHideSidebar={onHideFilters}
-                  onHideOptions={this.onHideForm}
-                  setActiveOption={this.onSetActiveOption}
-                  onUpdateQuery={(args) => {
-                    this.onHideForm();
-                    onUpdateQuery(args);
-                  }}
-                  filteringOptions={filteringOptions}
-                />
-              )}
-              {showEditOptions && (
-                <EntityListSidebar
-                  isEditPanel
-                  hasEntities={entities && entities.size > 0}
-                  hasSelected={hasSelected}
-                  panelGroups={panelGroups}
-                  onHideSidebar={onHideEditOptions}
-                  setActiveOption={this.onSetActiveOption}
-                />
-              )}
-              {activeOption && formOptions && (
-                <EntityListForm
-                  model={formModel}
-                  activeOptionId={`${activeOption.group}-${activeOption.optionId}`}
-                  formOptions={formOptions}
-                  buttons={showEditOptions
-                    ? this.getFormButtons(activeOption, intl)
-                    : this.getFilterFormButtons()
+                {dataReady && isMinSize(size, 'small') && (
+                  <HeaderSection align="center">
+                    <FilterButton
+                      onClick={onShowFilters}
+                      pad={{ vertical: 'xsmall', horizontal: 'medium' }}
+                      label={(
+                        <Box direction="row" gap="small" align="center">
+                          {isMinSize(size, 'medium')
+                            && (
+                              <Text>
+                                {intl.formatMessage(messages.listOptions.showFilter)}
+                              </Text>
+                            )}
+                          <Box>
+                            <Icon name="filter" text />
+                          </Box>
+                        </Box>
+                      )}
+                    />
+                  </HeaderSection>
+                )}
+              </Box>
+            </TheHeader>
+            {showFilters && (
+              <EntityListSidebar
+                hasEntities={allEntities && allEntities.size > 0}
+                panelGroups={panelGroups}
+                onHideSidebar={onHideFilters}
+                onHideOptions={this.onHideForm}
+                setActiveOption={this.onSetActiveOption}
+                onUpdateQuery={(args) => {
+                  this.onHideForm();
+                  onUpdateQuery(args);
+                }}
+                filteringOptions={filteringOptions}
+              />
+            )}
+            {showEditOptions && (
+              <EntityListSidebar
+                isEditPanel
+                hasEntities={entities && entities.size > 0}
+                hasSelected={hasSelected}
+                panelGroups={panelGroups}
+                onHideSidebar={onHideEditOptions}
+                setActiveOption={this.onSetActiveOption}
+              />
+            )}
+            {activeOption && formOptions && (
+              <EntityListForm
+                model={formModel}
+                activeOptionId={`${activeOption.group}-${activeOption.optionId}`}
+                formOptions={formOptions}
+                buttons={showEditOptions
+                  ? this.getFormButtons(activeOption, intl)
+                  : this.getFilterFormButtons()
+                }
+                onCancel={this.onHideForm}
+                showNew={showEditOptions}
+                showCancelButton={showFilters}
+                onSubmit={showEditOptions
+                  ? (associations) => {
+                    // close and reset option panel
+                    this.setState({ activeOption: null });
+                    onUpdate(associations, activeOption);
                   }
-                  onCancel={this.onHideForm}
-                  showNew={showEditOptions}
-                  showCancelButton={showFilters}
-                  onSubmit={showEditOptions
-                    ? (associations) => {
-                      // close and reset option panel
-                      this.setState({ activeOption: null });
-                      onUpdate(associations, activeOption);
-                    }
-                    : (filterOptions) => {
-                      // close and reset option panel
-                      this.setState({ activeOption: null });
-                      onUpdateFilters(filterOptions && filterOptions.get('values'), activeOption);
-                    }
+                  : (filterOptions) => {
+                    // close and reset option panel
+                    this.setState({ activeOption: null });
+                    onUpdateFilters(filterOptions && filterOptions.get('values'), activeOption);
                   }
-                />
-              )}
-            </Styled>
-          );
-        }}
+                }
+              />
+            )}
+          </Styled>
+        )}
       </ResponsiveContext.Consumer>
     );
   }
@@ -639,9 +612,10 @@ EntityListHeader.propTypes = {
   includeTargetChildren: PropTypes.bool,
   filteringOptions: PropTypes.array,
   isPrintView: PropTypes.bool,
-  onClearFilters: PropTypes.func,
+  isOnMap: PropTypes.bool,
   typeId: PropTypes.string,
   headerActions: PropTypes.array,
+  viewOptions: PropTypes.array,
   intl: intlShape.isRequired,
 };
 
