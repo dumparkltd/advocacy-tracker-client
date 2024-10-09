@@ -139,7 +139,6 @@ export function ActorList({
   parentAssociationtypes,
   associationtypes,
   onSelectType,
-  handleNew,
   handleImport,
   onSetPrintView,
   view,
@@ -216,12 +215,6 @@ export function ActorList({
     });
   }
   if (isMember) {
-    headerOptions.actions.push({
-      title: 'Create new',
-      onClick: () => handleNew(typeId),
-      icon: 'add',
-      isMember,
-    });
     headerOptions.actions.push({
       title: intl.formatMessage(appMessages.buttons.import),
       onClick: () => handleImport(typeId),
@@ -333,7 +326,6 @@ export function ActorList({
 
 ActorList.propTypes = {
   onLoadEntitiesIfNeeded: PropTypes.func,
-  handleNew: PropTypes.func,
   handleImport: PropTypes.func,
   onSelectType: PropTypes.func,
   dataReady: PropTypes.bool,
@@ -383,9 +375,6 @@ function mapDispatchToProps(dispatch) {
   return {
     onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
-    },
-    handleNew: (typeId) => {
-      dispatch(updatePath(`${ROUTES.ACTORS}/${typeId}${ROUTES.NEW}`, { replace: true }));
     },
     handleImport: (typeId) => {
       dispatch(updatePath(`${ROUTES.ACTORS}/${typeId}${ROUTES.IMPORT}`));

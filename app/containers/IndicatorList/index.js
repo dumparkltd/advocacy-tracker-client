@@ -44,7 +44,6 @@ import messages from './messages';
 export function IndicatorList({
   onLoadEntitiesIfNeeded,
   onSetPrintView,
-  handleNew,
   handleImport,
   dataReady,
   entities,
@@ -99,12 +98,6 @@ export function IndicatorList({
   }
   if (isMember) {
     headerOptions.actions.push({
-      title: 'Create new',
-      onClick: () => handleNew(),
-      icon: 'add',
-      isMember,
-    });
-    headerOptions.actions.push({
       title: intl.formatMessage(appMessages.buttons.import),
       onClick: () => handleImport(),
       icon: 'import',
@@ -157,7 +150,6 @@ export function IndicatorList({
 IndicatorList.propTypes = {
   onLoadEntitiesIfNeeded: PropTypes.func,
   onSetPrintView: PropTypes.func,
-  handleNew: PropTypes.func,
   handleImport: PropTypes.func,
   dataReady: PropTypes.bool,
   isMember: PropTypes.bool,
@@ -185,9 +177,6 @@ function mapDispatchToProps(dispatch) {
   return {
     onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
-    },
-    handleNew: () => {
-      dispatch(updatePath(`${ROUTES.INDICATORS}${ROUTES.NEW}`, { replace: true }));
     },
     handleImport: () => {
       dispatch(updatePath(`${ROUTES.INDICATORS}${ROUTES.IMPORT}`));
