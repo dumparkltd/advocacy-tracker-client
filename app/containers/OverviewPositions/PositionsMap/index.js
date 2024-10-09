@@ -208,7 +208,6 @@ export function PositionsMap({
   const supportQueryAsList = supportQuery
     ? asList(supportQuery)
     : List([]);
-console.log(supportQuery)
   const reduceCountryAreas = (features) => features.reduce((memo, feature) => {
     const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
     if (country) {
