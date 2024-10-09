@@ -60,7 +60,9 @@ const ListEntitiesMain = styled.div`
   padding-top: 0.5em;
 `;
 const ListEntitiesEmpty = styled.div``;
-
+const EntityListSearchWrapper = styled((p) => <Box {...p} />)`
+  width: 500px;
+`;
 const CONNECTIONMAX = 5;
 const PAGE_SIZE = 20;
 const PAGE_SIZE_MAX = 100;
@@ -289,22 +291,14 @@ export function EntityListTable({
     <div>
       {(hasSearch || hasPageSelect) && (
         <Box
-          direction="row"
-          align="center"
-          gap="medium"
+          direction="column"
+          align="end"
+          gap="small"
           pad={{ vertical: 'small' }}
           justify={hasSearch ? 'start' : 'end'}
         >
-          {hasSearch && (
-            <Box flex={{ shrink: 0, grow: 1 }}>
-              <EntityListSearch
-                searchQuery={searchQuery}
-                onSearch={onSearch}
-              />
-            </Box>
-          )}
           {hasPageSelect && (
-            <Box flex={{ shrink: 1, grow: 0 }}>
+            <Box>
               <SelectReset
                 value={pageItems === 'all' ? pageItems : pageSize.toString()}
                 label={intl && intl.formatMessage(appMessages.labels.perPage)}
@@ -317,6 +311,11 @@ export function EntityListTable({
                 onChange={onPageItemsSelect}
               />
             </Box>
+          )}
+          {hasSearch && (
+            <EntityListSearchWrapper>
+              <EntityListSearch searchQuery={searchQuery} onSearch={onSearch} />
+            </EntityListSearchWrapper>
           )}
         </Box>
       )}
