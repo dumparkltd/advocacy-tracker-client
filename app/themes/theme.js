@@ -352,6 +352,11 @@ theme.sizes = {
       large: 10,
     },
   },
+  mapSearchBar: {
+    height: 40,
+    width: 250,
+    searchIconSize: 26,
+  },
   home: {
     // px or em
     text: {

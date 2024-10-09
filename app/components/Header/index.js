@@ -67,35 +67,53 @@ const Styled = styled.div`
   }
 `;
 
-const LinkPage = styled((p) => <Button plain as="a" justify="center" fill="vertical" {...p} />)`
+const LinkMenu = styled((p) => <Button plain as="a" justify="center" fill="vertical" {...p} />)`
   color: ${({ active }) => active ? 'black' : 'white'};
-  background-color: ${({ active }) => active ? '#f0f0f0' : 'transparent'};
+  background-color: ${({ active }) => active ? 'white' : 'transparent'};
+  text-transform: uppercase;
+  font-family: ${({ theme }) => theme.fonts.title};
+  font-size: ${({ theme }) => theme.text.large.size};
+  line-height: ${({ theme }) => theme.text.large.size};
+
   padding-right: 12px;
   padding-left: 12px;
-  padding-top: 16px;
-  padding-bottom: ${({ wide }) => !wide ? 16 : 0}px;
-  width: ${({ wide }) => !wide ? '100%' : 'auto'};
+  padding-top: 22px;
+  padding-bottom: 0px;
   text-align: center;
   font-size: ${({ theme }) => theme.text.small.size};
   line-height: ${({ theme }) => theme.text.small.height};
-  font-weight: ${({ wide, active }) => (!wide && active) ? 500 : 300};
-  height:${({ theme }) => theme.sizes.header.banner.heightMobile}px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    height:${({ theme }) => theme.sizes.header.banner.height}px;
-    padding-top: 22px;
-  }
+  font-weight: 300;
+  height:${({ theme }) => theme.sizes.header.banner.height}px;
   &:hover {
     color: ${({ active }) => active ? 'black' : 'white'};
     background-color: ${({ active }) => active ? '#f0f0f0' : '#282a2c'};
   }
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    font-size: ${({ theme }) => theme.text.xlarge.size};
+    line-height: ${({ theme }) => theme.text.xlarge.size};
+  }
+  @media print {
+    font-size: ${({ theme }) => theme.sizes.header.print.title};
+  }
 `;
-const LinkAccount = LinkPage;
-
+const LinkInHiddenMenu = styled((p) => <Button plain as="a" {...p} />)`
+  color: black;
+  background-color: ${({ active }) => active ? '#f0f0f0' : 'transparent'};
+  padding: 12px;
+  width: 100%;
+  font-size: ${({ theme }) => theme.text.small.size};
+  line-height: ${({ theme }) => theme.text.small.height};
+  font-weight: ${({ active }) => active ? 500 : 300};
+  &:hover {
+    color: black;
+    background-color: #dddddd;
+  }
+`;
 
 const ToggleMenu = styled((p) => <Button plain as="a" {...p} />)`
   display: block;
   z-index: 300;
-  background-color: transparent;
+  background-color: black;
   color: white;
   &:hover {
     color: white;
@@ -103,24 +121,24 @@ const ToggleMenu = styled((p) => <Button plain as="a" {...p} />)`
   }
 `;
 
-const Section = styled((p) => <Box {...p} />)`
-  border-right: 1px solid ${({ wide }) => wide ? '#282a2c' : 'transparent'};
-  border-bottom: 1px solid ${({ wide }) => !wide ? '#282a2c' : 'transparent'};
-  &:last-child {
-    border-color: transparent;
+const Section = styled((p) => <Box margin={{ top: 'medium' }} {...p} />)``;
+const HiddenMenu = styled((p) => <Box {...p} printHide />)`
+  position: absolute;
+  left: auto;
+  right: 0;
+  width: 100%;
+  top: ${({ theme }) => theme.sizes.header.banner.heightMobile}px;
+  background: white;
+  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
+    top: ${({ theme }) => theme.sizes.header.banner.height}px;
+    width: 300px;
   }
-`;
-const MainMenu = styled((p) => <Box {...p} printHide />)`
-  position: ${({ wide }) => !wide ? 'absolute' : 'static'};
-  left: ${({ wide }) => !wide ? 0 : 'auto'};
-  right: ${({ wide }) => !wide ? 0 : 'auto'};
-  width: ${({ wide }) => !wide ? '100%' : 'auto'};
-  top: ${({ wide, theme }) => !wide ? theme.sizes.header.banner.heightMobile : 0}px;
-  background: black;
 `;
 
 const STATE_INITIAL = {
   showMenu: false,
+  showUserMenu: false,
+  showCreateMenu: false,
 };
 
 class Header extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
@@ -145,12 +163,44 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
 
   onShowMenu = (evt) => {
     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ showMenu: true });
+    this.setState({
+      showMenu: true,
+      showUserMenu: false,
+      showCreateMenu: false,
+    });
   };
 
   onHideMenu = (evt) => {
     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
     this.setState({ showMenu: false });
+  };
+
+  onShowUserMenu = (evt) => {
+    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+    this.setState({
+      showUserMenu: true,
+      showCreateMenu: false,
+      showMenu: false,
+    });
+  };
+
+  onHideUserMenu = (evt) => {
+    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+    this.setState({ showUserMenu: false });
+  };
+
+  onShowCreateMenu = (evt) => {
+    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+    this.setState({
+      showCreateMenu: true,
+      showUserMenu: false,
+      showMenu: false,
+    });
+  };
+
+  onHideCreateMenu = (evt) => {
+    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+    this.setState({ showCreateMenu: false });
   };
 
   onClick = (evt, path, currentPath) => {
@@ -174,19 +224,11 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
   };
 
   render() {
-    const {
-      isAuth,
-      navItems,
-      search,
-      isSignedIn,
-      user,
-      currentPath,
-      isVisitor,
-      isPrintView,
-    } = this.props;
+    const { isAuth, navItems, isPrintView } = this.props;
     const { intl } = this.context;
     const appTitle = `${intl.formatMessage(appMessages.app.title)} - ${intl.formatMessage(appMessages.app.claim)}`;
-    const userPath = user ? `${ROUTES.USERS}/${user.id}` : '';
+    // const userPath = user ? `${ROUTES.USERS}/${user.id}` : '';
+    // console.log('navItems', navItems);
     return (
       <ResponsiveContext.Consumer>
         {(size) => {
@@ -200,7 +242,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
               hasBrand
               isPrint={isPrintView}
             >
-              <Box direction="row" fill>
+              <Box direction="row" fill justify="between">
                 <Box>
                   <Brand
                     as={isPrintView ? 'div' : 'a'}
@@ -223,9 +265,176 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                     </Box>
                   </Brand>
                 </Box>
+                {wide
+                  && navItems
+                  && navItems.main
+                  && navItems.main.length > 0
+                  && (
+                    <Box direction="row" flex={{ grow: 1 }}>
+                      {navItems.main.map((item, i) => (
+                        <LinkMenu
+                          flex={{ shrink: 0 }}
+                          key={i}
+                          href={item.path}
+                          active={item.active}
+                          onClick={(evt) => {
+                            evt.stopPropagation();
+                            this.onClick(evt, item.path);
+                          }}
+                        >
+                          {item.title}
+                        </LinkMenu>
+                      ))}
+                    </Box>
+                  )}
                 {!isPrintView && (
-                  <>
-                    {!wide && !this.state.showMenu && (
+                  <Box direction="row">
+                    {navItems
+                      && navItems.create
+                      && navItems.create.length > 0
+                      && (
+                        <>
+                          {!this.state.showCreateMenu && (
+                            <BoxPrint
+                              printHide
+                              flex={{ grow: 1 }}
+                              direction="row"
+                              align="center"
+                              justify="end"
+                              pad={{ right: 'small' }}
+                            >
+                              <ToggleMenu
+                                onClick={this.onShowCreateMenu}
+                              >
+                                <ScreenReaderOnly>
+                                  <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
+                                </ScreenReaderOnly>
+                                <Icon name="menu" hasStroke size="39px" />
+                              </ToggleMenu>
+                            </BoxPrint>
+                          )}
+                          {this.state.showCreateMenu && (
+                            <Box
+                              flex={{ grow: 1 }}
+                              direction="row"
+                              align="center"
+                              justify="end"
+                              pad={{ right: 'small' }}
+                            >
+                              <ToggleMenu
+                                onClick={this.onHideCreateMenu}
+                              >
+                                <ScreenReaderOnly>
+                                  <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
+                                </ScreenReaderOnly>
+                                <Icon name="close" size="39px" />
+                              </ToggleMenu>
+                            </Box>
+                          )}
+                          {this.state.showCreateMenu && (
+                            <HiddenMenu
+                              flex={{ grow: 1 }}
+                              direction="column"
+                              align="start"
+                              justify="start"
+                              wide={false}
+                              elevation="medium"
+                            >
+                              <Section
+                                fill="horizontal"
+                                align="start"
+                                justify="start"
+                              >
+                                {navItems.create.map((item, i) => (
+                                  <LinkInHiddenMenu
+                                    key={i}
+                                    href={item.path}
+                                    active={item.active}
+                                    onClick={(evt) => {
+                                      evt.stopPropagation();
+                                      this.onHideCreateMenu();
+                                      this.onClick(evt, item.path);
+                                    }}
+                                  >
+                                    {`New ${item.title}`}
+                                  </LinkInHiddenMenu>
+                                ))}
+                              </Section>
+                            </HiddenMenu>
+                          )}
+                        </>
+                      )}
+                    {!this.state.showUserMenu && (
+                      <BoxPrint
+                        printHide
+                        flex={{ grow: 1 }}
+                        direction="row"
+                        align="center"
+                        justify="end"
+                        pad={{ right: 'small' }}
+                      >
+                        <ToggleMenu
+                          onClick={this.onShowUserMenu}
+                        >
+                          <ScreenReaderOnly>
+                            <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
+                          </ScreenReaderOnly>
+                          <Icon name="menu" hasStroke size="39px" />
+                        </ToggleMenu>
+                      </BoxPrint>
+                    )}
+                    {this.state.showUserMenu && (
+                      <Box
+                        flex={{ grow: 1 }}
+                        direction="row"
+                        align="center"
+                        justify="end"
+                        pad={{ right: 'small' }}
+                      >
+                        <ToggleMenu
+                          onClick={this.onHideUserMenu}
+                        >
+                          <ScreenReaderOnly>
+                            <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
+                          </ScreenReaderOnly>
+                          <Icon name="close" size="39px" />
+                        </ToggleMenu>
+                      </Box>
+                    )}
+                    {this.state.showUserMenu && (
+                      <HiddenMenu
+                        flex={{ grow: 1 }}
+                        direction="column"
+                        align="start"
+                        justify="start"
+                        wide={false}
+                        elevation="medium"
+                      >
+                        {navItems && navItems.user && navItems.user.length > 0 && (
+                          <Section
+                            fill="horizontal"
+                            align="start"
+                            justify="start"
+                          >
+                            {navItems.user.map((item, i) => (
+                              <LinkInHiddenMenu
+                                key={i}
+                                href={item.path}
+                                active={item.active}
+                                onClick={(evt) => {
+                                  evt.stopPropagation();
+                                  this.onHideUserMenu();
+                                  this.onClick(evt, item.path);
+                                }}
+                              >
+                                {item.title}
+                              </LinkInHiddenMenu>
+                            ))}
+                          </Section>
+                        )}
+                      </HiddenMenu>
+                    )}
+                    {!this.state.showMenu && (
                       <BoxPrint
                         printHide
                         flex={{ grow: 1 }}
@@ -244,8 +453,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                         </ToggleMenu>
                       </BoxPrint>
                     )}
-
-                    {!wide && this.state.showMenu && (
+                    {this.state.showMenu && (
                       <Box
                         flex={{ grow: 1 }}
                         direction="row"
@@ -263,68 +471,64 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                         </ToggleMenu>
                       </Box>
                     )}
-                    {(wide || this.state.showMenu) && (
-                      <MainMenu
+                    {this.state.showMenu && (
+                      <HiddenMenu
                         flex={{ grow: 1 }}
-                        direction={wide ? 'row' : 'column'}
-                        align={wide ? 'center' : 'end'}
-                        justify={wide ? 'end' : 'center'}
-                        wide={wide}
-                        elevation={wide ? 'none' : 'medium'}
+                        direction="column"
+                        align="start"
+                        justify="start"
+                        wide={false}
+                        elevation="medium"
                       >
-                        {search && (
+                        {!wide && navItems && navItems.main && navItems.main.length > 0 && (
                           <Section
-                            fill={wide ? 'vertical' : 'horizontal'}
-                            justify={wide ? 'center' : 'end'}
-                            align={wide ? 'end' : 'center'}
-                            direction={wide ? 'row' : 'column'}
-                            wide={wide}
+                            fill="horizontal"
+                            align="start"
+                            justify="start"
                           >
-                            <LinkPage
-                              href={search.path}
-                              active={search.active}
-                              onClick={(evt) => this.onClick(evt, search.path)}
-                              title={search.title}
-                              wide={wide}
-                            >
-                              {search.title}
-                              {search.icon
-                                && <Icon title={search.title} name={search.icon} text textRight size="1em" />
-                              }
-                            </LinkPage>
+                            {navItems.main.map((item, i) => (
+                              <LinkInHiddenMenu
+                                key={i}
+                                href={item.path}
+                                active={item.active}
+                                onClick={(evt) => {
+                                  evt.stopPropagation();
+                                  this.onHideMenu();
+                                  this.onClick(evt, item.path);
+                                }}
+                              >
+                                {item.title}
+                              </LinkInHiddenMenu>
+                            ))}
                           </Section>
                         )}
-                        {this.props.pages && this.props.pages.length > 0 && (
+                        {navItems && navItems.pages && navItems.pages.length > 0 && (
                           <Section
-                            fill={wide ? 'vertical' : 'horizontal'}
-                            justify={wide ? 'center' : 'end'}
-                            align={wide ? 'end' : 'center'}
-                            direction={wide ? 'row' : 'column'}
-                            wide={wide}
+                            fill="horizontal"
+                            align="start"
+                            justify="start"
                           >
-                            {this.props.pages.map((page, i) => (
-                              <LinkPage
+                            {navItems.pages.map((page, i) => (
+                              <LinkInHiddenMenu
                                 key={i}
                                 href={page.path}
-                                active={page.active || this.props.currentPath === page.path}
+                                active={page.active}
                                 onClick={(evt) => this.onClick(evt, page.path)}
                                 wide={wide}
                               >
                                 {page.title}
-                              </LinkPage>
+                              </LinkInHiddenMenu>
                             ))}
                           </Section>
                         )}
-                        {navItems && navItems.length > 0 && (
+                        {navItems && navItems.other && navItems.other.length > 0 && (
                           <Section
-                            fill={wide ? 'vertical' : 'horizontal'}
-                            justify={wide ? 'center' : 'end'}
-                            align={wide ? 'end' : 'center'}
-                            direction={wide ? 'row' : 'column'}
-                            wide={wide}
+                            fill="horizontal"
+                            align="start"
+                            justify="start"
                           >
-                            {navItems.map((item, i) => (
-                              <LinkPage
+                            {navItems.other.map((item, i) => (
+                              <LinkInHiddenMenu
                                 key={i}
                                 href={item.path}
                                 active={item.active}
@@ -336,71 +540,13 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                                 wide={wide}
                               >
                                 {item.title}
-                              </LinkPage>
+                              </LinkInHiddenMenu>
                             ))}
                           </Section>
                         )}
-                        <Section
-                          fill={wide ? 'vertical' : 'horizontal'}
-                          justify={wide ? 'center' : 'end'}
-                          align={wide ? 'end' : 'center'}
-                          direction={wide ? 'row' : 'column'}
-                          wide={wide}
-                        >
-                          {isSignedIn && isVisitor && (
-                            <LinkAccount
-                              href={ROUTES.BOOKMARKS}
-                              active={currentPath === ROUTES.BOOKMARKS}
-                              onClick={(evt) => this.onClick(evt, ROUTES.BOOKMARKS)}
-                              wide={wide}
-                            >
-                              <FormattedMessage {...appMessages.nav.bookmarks} />
-                            </LinkAccount>
-                          )}
-                          {isSignedIn && user && (
-                            <LinkAccount
-                              href={userPath}
-                              active={currentPath === userPath}
-                              onClick={(evt) => this.onClick(evt, userPath)}
-                              wide={wide}
-                            >
-                              Profile
-                            </LinkAccount>
-                          )}
-                          {isSignedIn && (
-                            <LinkAccount
-                              href={ROUTES.LOGOUT}
-                              active={currentPath === ROUTES.LOGOUT}
-                              onClick={(evt) => this.onClick(evt, ROUTES.LOGOUT)}
-                              wide={wide}
-                            >
-                              <FormattedMessage {...appMessages.nav.logout} />
-                            </LinkAccount>
-                          )}
-                          {!isSignedIn && (
-                            <LinkAccount
-                              href={ROUTES.REGISTER}
-                              active={currentPath === ROUTES.REGISTER}
-                              onClick={(evt) => this.onClick(evt, ROUTES.REGISTER, currentPath)}
-                              wide={wide}
-                            >
-                              <FormattedMessage {...appMessages.nav.register} />
-                            </LinkAccount>
-                          )}
-                          {!isSignedIn && (
-                            <LinkAccount
-                              href={ROUTES.LOGIN}
-                              active={currentPath === ROUTES.LOGIN}
-                              onClick={(evt) => this.onClick(evt, ROUTES.LOGIN, currentPath)}
-                              wide={wide}
-                            >
-                              <FormattedMessage {...appMessages.nav.login} />
-                            </LinkAccount>
-                          )}
-                        </Section>
-                      </MainMenu>
+                      </HiddenMenu>
                     )}
-                  </>
+                  </Box>
                 )}
               </Box>
             </Styled>
@@ -411,21 +557,76 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
   }
 }
 
+// {!wide && (
+//   <Section
+//     fill="horizontal"
+//     direction="column"
+//     align="start"
+//     justify="start"
+//     wide={false}
+//   >
+//     {isSignedIn && isVisitor && (
+//       <LinkAccount
+//         href={ROUTES.BOOKMARKS}
+//         active={currentPath === ROUTES.BOOKMARKS}
+//         onClick={(evt) => this.onClick(evt, ROUTES.BOOKMARKS)}
+//         wide={wide}
+//       >
+//         <FormattedMessage {...appMessages.nav.bookmarks} />
+//       </LinkAccount>
+//     )}
+//     {isSignedIn && user && (
+//       <LinkAccount
+//         href={userPath}
+//         active={currentPath === userPath}
+//         onClick={(evt) => this.onClick(evt, userPath)}
+//         wide={wide}
+//       >
+//         Profile
+//       </LinkAccount>
+//     )}
+//     {isSignedIn && (
+//       <LinkAccount
+//         href={ROUTES.LOGOUT}
+//         active={currentPath === ROUTES.LOGOUT}
+//         onClick={(evt) => this.onClick(evt, ROUTES.LOGOUT)}
+//         wide={wide}
+//       >
+//         <FormattedMessage {...appMessages.nav.logout} />
+//       </LinkAccount>
+//     )}
+//     {!isSignedIn && (
+//       <LinkAccount
+//         href={ROUTES.REGISTER}
+//         active={currentPath === ROUTES.REGISTER}
+//         onClick={(evt) => this.onClick(evt, ROUTES.REGISTER, currentPath)}
+//         wide={wide}
+//       >
+//         <FormattedMessage {...appMessages.nav.register} />
+//       </LinkAccount>
+//     )}
+//     {!isSignedIn && (
+//       <LinkAccount
+//         href={ROUTES.LOGIN}
+//         active={currentPath === ROUTES.LOGIN}
+//         onClick={(evt) => this.onClick(evt, ROUTES.LOGIN, currentPath)}
+//         wide={wide}
+//       >
+//         <FormattedMessage {...appMessages.nav.login} />
+//       </LinkAccount>
+//     )}
+//   </Section>
+// )}
+
 Header.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 
 Header.propTypes = {
-  isSignedIn: PropTypes.bool,
-  user: PropTypes.object,
-  currentPath: PropTypes.string,
-  pages: PropTypes.array,
-  navItems: PropTypes.array,
+  navItems: PropTypes.object,
   onPageLink: PropTypes.func.isRequired,
   isAuth: PropTypes.bool, // not shown on home page
   theme: PropTypes.object.isRequired,
-  search: PropTypes.object,
-  isVisitor: PropTypes.bool,
   isPrintView: PropTypes.bool,
 };
 

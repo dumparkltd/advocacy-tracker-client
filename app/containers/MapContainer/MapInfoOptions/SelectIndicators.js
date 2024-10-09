@@ -57,6 +57,7 @@ export function SelectIndicators({ config }) {
   const {
     onIndicatorSelect,
     indicatorOptions,
+    dropAlign,
   } = config;
   const [showOptions, setShowOptions] = useState(false);
   const buttonRef = useRef();
@@ -110,13 +111,16 @@ export function SelectIndicators({ config }) {
         <Drop
           target={buttonRef.current}
           stretch
-          align={{ bottom: 'top', left: 'left' }}
+          align={dropAlign || { bottom: 'top', left: 'left' }}
           onClickOutside={() => setShowOptions(false)}
         >
-          <Box pad={{ vertical: 'xsmall' }}>
+          <Box
+            key="key"
+            pad={{ vertical: 'xsmall' }}
+          >
             {indicatorOptions && indicatorOptions.map(
               (o) => (
-                <Box key={o.value} flex={{ shrink: 0 }}>
+                <Box key={o.key} flex={{ shrink: 0 }}>
                   <OptionButton
                     active={o.active}
                     isDefaultOption={o.id === 'all'}

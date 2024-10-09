@@ -26,8 +26,9 @@ import {
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
-import { ROUTES } from 'themes/config';
+import { ROUTES, ACTIONTYPES } from 'themes/config';
 
+import HeaderExplore from 'containers/HeaderExplore';
 import EntityList from 'containers/EntityList';
 
 import { PRINT_TYPES } from 'containers/App/constants';
@@ -110,6 +111,21 @@ export function IndicatorList({
       isMember,
     });
   }
+  const navItems = [
+    {
+      path: ROUTES.POSITIONS,
+      title: 'Overview',
+    },
+    {
+      path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`,
+      title: intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`].plural),
+    },
+    {
+      path: ROUTES.INDICATORS,
+      title: intl.formatMessage(appMessages.entities.indicators.plural),
+      active: true,
+    },
+  ];
   return (
     <div>
       <Helmet
@@ -118,6 +134,7 @@ export function IndicatorList({
           { name: 'description', content: intl.formatMessage(messages.metaDescription) },
         ]}
       />
+      <HeaderExplore navItems={navItems} />
       <EntityList
         entities={entities}
         config={CONFIG}

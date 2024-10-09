@@ -3,13 +3,8 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 // import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
-import { palette } from 'styled-theme';
 
-import { ROUTES } from 'themes/config';
-
-import { selectCurrentPathname } from 'containers/App/selectors';
 import { updatePath } from 'containers/App/actions';
-import appMessages from 'containers/App/messages';
 
 import PrintHide from 'components/styled/PrintHide';
 import Container from 'components/styled/Container';
@@ -19,7 +14,7 @@ import LinkMain from './LinkMain';
 // import messages from './messages';
 
 const Styled = styled.div`
-  background-color: ${palette('primary', 3)};
+  background-color: white;
   box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
   position: relative;
   padding: 20px 0 0;
@@ -32,18 +27,7 @@ const Styled = styled.div`
   }
 `;
 
-const LinkTitle = styled.div`
-  font-weight: 500;
-  font-size: ${({ theme }) => theme.text.small.size};
-  line-height: ${({ theme }) => theme.text.small.height};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${({ theme }) => theme.text.medium.size};
-    line-height: ${({ theme }) => theme.text.medium.height};
-  }
-  @media print {
-    font-size: ${(props) => props.theme.sizes.print.default};
-  }
-`;
+const LinkTitle = styled.div``;
 
 const NavMain = styled(PrintHide)`
   white-space: nowrap;
@@ -54,26 +38,8 @@ const StyledContainer = styled(Container)`
 `;
 class HeaderExplore extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   render() {
-    const { onPageLink, currentPath } = this.props;
-    const { intl } = this.context;
+    const { onPageLink, navItems } = this.props;
 
-    const navItems = [
-      {
-        path: ROUTES.ACTIONS,
-        title: intl.formatMessage(appMessages.nav.actions),
-        active: currentPath && currentPath === ROUTES.ACTIONS,
-      },
-      {
-        path: ROUTES.ACTORS,
-        title: intl.formatMessage(appMessages.nav.actors),
-        active: currentPath && currentPath === ROUTES.ACTORS,
-      },
-      // {
-      //   path: ROUTES.INDICATORS,
-      //   title: intl.formatMessage(appMessages.nav.indicators),
-      //   active: currentPath && currentPath === ROUTES.INDICATORS,
-      // },
-    ];
     return (
       <Styled>
         <StyledContainer>
@@ -104,16 +70,11 @@ class HeaderExplore extends React.PureComponent { // eslint-disable-line react/p
 
 HeaderExplore.propTypes = {
   onPageLink: PropTypes.func.isRequired,
-  currentPath: PropTypes.string,
+  navItems: PropTypes.array,
 };
-
-HeaderExplore.contextTypes = {
-  intl: PropTypes.object.isRequired,
-};
-
-const mapStateToProps = (state) => ({
-  currentPath: selectCurrentPathname(state),
-});
+// const mapStateToProps = (state) => ({
+//   currentPath: selectCurrentPathname(state),
+// });
 
 
 export function mapDispatchToProps(dispatch) {
@@ -125,4 +86,4 @@ export function mapDispatchToProps(dispatch) {
 }
 
 
-export default connect(mapStateToProps, mapDispatchToProps)(HeaderExplore);
+export default connect(null, mapDispatchToProps)(HeaderExplore);

@@ -5,7 +5,13 @@
 import { getAsyncInjectors } from 'utils/asyncInjectors';
 import { getRedirects } from 'utils/redirects';
 
-import { ROUTES, USER_ROLES, DEFAULT_TAXONOMY } from 'themes/config';
+import {
+  ROUTES,
+  USER_ROLES,
+  ACTORTYPES,
+  ACTIONTYPES,
+  DEFAULT_TAXONOMY,
+} from 'themes/config';
 
 const errorLoading = (err) => {
   console.error('Dynamic page loading failed', err); // eslint-disable-line no-console
@@ -29,7 +35,7 @@ export default function createRoutes(store) {
     {
       path: '/',
       name: 'home',
-      onEnter: redirectIfSignedIn(ROUTES.ACTIONS),
+      onEnter: redirectIfSignedIn(ROUTES.POSITIONS),
       getComponent(nextState, cb) {
         const importModules = Promise.all([
           import('containers/HomePage'),
@@ -43,6 +49,15 @@ export default function createRoutes(store) {
 
         importModules.catch(errorLoading);
       },
+    }, {
+      path: ROUTES.ACTIONS,
+      name: 'actiontypes',
+      onEnter: redirectIfSignedIn(`${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}`),
+    }, {
+    }, {
+      path: ROUTES.ACTORS,
+      name: 'actiontypes',
+      onEnter: redirectIfSignedIn(`${ROUTES.ACTORS}/${ACTORTYPES.COUNTRY}`),
     }, {
       path: ROUTES.LOGOUT,
       name: 'userLogout',
@@ -278,23 +293,6 @@ export default function createRoutes(store) {
         importModules.catch(errorLoading);
       },
     }, {
-      path: ROUTES.ACTIONS,
-      name: 'actiontypes',
-      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
-      getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          import('containers/ActionsOverview'),
-        ]);
-
-        const renderRoute = loadModule(cb);
-
-        importModules.then(([component]) => {
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
-      },
-    }, {
       path: `${ROUTES.ACTIONS}${ROUTES.ID}${ROUTES.NEW}`, // the type id
       name: 'actionNew',
       onEnter: redirectIfNotPermitted(USER_ROLES.MEMBER.value),
@@ -346,23 +344,6 @@ export default function createRoutes(store) {
         importModules.then(([reducer, sagas, component]) => {
           injectReducer('actionEdit', reducer.default);
           injectSagas(sagas.default);
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
-      },
-    }, {
-      path: `${ROUTES.ACTORS}`,
-      name: 'actortypes',
-      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
-      getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          import('containers/ActorsOverview'),
-        ]);
-
-        const renderRoute = loadModule(cb);
-
-        importModules.then(([component]) => {
           renderRoute(component);
         });
 
@@ -479,23 +460,6 @@ export default function createRoutes(store) {
         importModules.then(([reducer, sagas, component]) => {
           injectReducer('resourceImport', reducer.default);
           injectSagas(sagas.default);
-          renderRoute(component);
-        });
-
-        importModules.catch(errorLoading);
-      },
-    }, {
-      path: ROUTES.RESOURCES,
-      name: 'resources',
-      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
-      getComponent(nextState, cb) {
-        const importModules = Promise.all([
-          import('containers/ResourcesOverview'),
-        ]);
-
-        const renderRoute = loadModule(cb);
-
-        importModules.then(([component]) => {
           renderRoute(component);
         });
 
@@ -820,6 +784,23 @@ export default function createRoutes(store) {
         importModules.then(([reducer, sagas, component]) => {
           injectReducer('pageEdit', reducer.default);
           injectSagas(sagas.default);
+          renderRoute(component);
+        });
+
+        importModules.catch(errorLoading);
+      },
+    }, {
+      path: `${ROUTES.POSITIONS}`,
+      name: 'positions',
+      onEnter: redirectIfNotPermitted(USER_ROLES.VISITOR.value),
+      getComponent(nextState, cb) {
+        const importModules = Promise.all([
+          import('containers/OverviewPositions'),
+        ]);
+
+        const renderRoute = loadModule(cb);
+
+        importModules.then(([component]) => {
           renderRoute(component);
         });
 

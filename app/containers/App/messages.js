@@ -23,23 +23,23 @@ export default defineMessages({
     },
     1: {
       id: 'app.containers.App.supportlevels.1',
-      defaultMessage: '1 - Strong support',
+      defaultMessage: 'Strong support',
     },
     2: {
       id: 'app.containers.App.supportlevels.2',
-      defaultMessage: '2 - Quite positive',
+      defaultMessage: 'Quite positive',
     },
     3: {
       id: 'app.containers.App.supportlevels.3',
-      defaultMessage: '3 - On the fence',
+      defaultMessage: 'On the fence',
     },
     4: {
       id: 'app.containers.App.supportlevels.4',
-      defaultMessage: '4 - Rather sceptical',
+      defaultMessage: 'Rather sceptical',
     },
     5: {
       id: 'app.containers.App.supportlevels.5',
-      defaultMessage: '5 - Opponent',
+      defaultMessage: 'Opponent',
     },
     99: {
       id: 'app.containers.App.supportlevels.99',
@@ -1164,6 +1164,18 @@ export default defineMessages({
     register: {
       id: 'app.containers.App.nav.register',
       defaultMessage: 'Register',
+    },
+    positions: {
+      id: 'app.containers.App.nav.positions',
+      defaultMessage: 'Positions',
+    },
+    outreach: {
+      id: 'app.containers.App.nav.outreach',
+      defaultMessage: 'Outreach',
+    },
+    mystuff: {
+      id: 'app.containers.App.nav.mystuff',
+      defaultMessage: 'My stuff',
     },
   },
   entities: {

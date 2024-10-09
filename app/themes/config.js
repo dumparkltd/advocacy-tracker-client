@@ -55,6 +55,9 @@ export const ROUTES = {
   CATEGORY: '/category',
   PAGES: '/pages',
   SEARCH: '/search',
+  POSITIONS: '/positions',
+  // OUTREACH: '/outreach',
+  MYSTUFF: '/mystuff',
 };
 
 // Server endpoints for database tables **************************
@@ -100,15 +103,15 @@ export const ACTIONTYPES = {
 
 export const ACTORTYPES = {
   COUNTRY: '1',
-  ORG: '2',
   CONTACT: '3',
-  REG: '4',
+  ORG: '2',
   GROUP: '5',
+  REG: '4',
 };
 
 export const RESOURCETYPES = {
-  REF: '1',
   WEB: '2',
+  REF: '1',
   DOC: '3',
 };
 
@@ -250,6 +253,13 @@ export const MAP_OPTIONS = {
   },
 };
 
+export const OUTREACH_ACTIONTYPES = [
+  ACTIONTYPES.INTERACTION,
+  ACTIONTYPES.TASK,
+  ACTIONTYPES.OP,
+  ACTIONTYPES.AP,
+  ACTIONTYPES.EVENT,
+];
 export const ACTIONTYPE_NAVGROUPS = {
   // Plans & Tasks
   1: {
