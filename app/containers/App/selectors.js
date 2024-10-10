@@ -14,6 +14,7 @@ import { Map, List } from 'immutable';
 
 import asArray from 'utils/as-array';
 import asList from 'utils/as-list';
+import isDate from 'utils/is-date';
 import { sortEntities } from 'utils/sort';
 
 import {
@@ -2130,11 +2131,19 @@ export const selectActorsWithPositions = createSelector(
                 ).sort(
                   // sort: first check for dates, then use higher level of suuport
                   (a, b) => {
-                    const aDate = a.getIn(['measure', 'date_start']);
-                    const bDate = b.getIn(['measure', 'date_start']);
+                    let aDate = a.getIn(['measure', 'date_start']);
+                    let bDate = b.getIn(['measure', 'date_start']);
                     /* eslint-disable no-restricted-globals */
-                    const aIsDate = new Date(aDate) instanceof Date && !isNaN(new Date(aDate));
-                    const bIsDate = new Date(bDate) instanceof Date && !isNaN(new Date(bDate));
+                    let aIsDate = aDate && isDate(aDate);
+                    let bIsDate = bDate && isDate(bDate);
+                    if (!aIsDate) {
+                      aDate = a.getIn(['measure', 'created_at']);
+                      aIsDate = new Date(aDate) instanceof Date && !isNaN(new Date(aDate));
+                    }
+                    if (!bIsDate) {
+                      bDate = b.getIn(['measure', 'created_at']);
+                      bIsDate = new Date(bDate) instanceof Date && !isNaN(new Date(bDate));
+                    }
                     /* eslint-enable no-restricted-globals */
                     if (aIsDate && bIsDate) {
                       // check for support level if dates equals

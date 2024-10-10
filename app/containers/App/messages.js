@@ -1009,6 +1009,10 @@ export default defineMessages({
       id: 'app.containers.App.attributes.created_at',
       defaultMessage: 'Created',
     },
+    created_at_fallback: {
+      id: 'app.containers.App.attributes.created_at_fallback',
+      defaultMessage: 'Date (derived from "created at")',
+    },
     relationship_updated_by_id: {
       id: 'app.containers.App.attributes.relationship_updated_by_id',
       defaultMessage: 'Connections updated by',
