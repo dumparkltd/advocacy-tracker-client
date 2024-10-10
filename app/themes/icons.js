@@ -45,9 +45,9 @@ const icons = {
     ],
   },
   menu: {
-    size: 30,
+    size: 40,
     paths: [
-      'M4 7h22M4 15h22M4 23h22',
+      'M6,10h28v3H6v-3ZM6,18.5h28v3H6v-3ZM6,27h28v3H6v-3Z',
     ],
   },
   placeholder: {
@@ -101,7 +101,6 @@ const icons = {
       'M18.86,8.38l-7.07,7.07-1.41,1.41L6.14,12.62l1.41-1.41L10.38,14,17.45,7Z',
     ],
   },
-
   // Icons 16px
   dropdownOpen: {
     size: 16,
@@ -236,6 +235,13 @@ const icons = {
       'M24,28h6V24H24ZM6,14H34V33H6ZM8.09,31H31.91V16H8.09Z',
     ],
   },
+  profile: {
+    size: 40,
+    path: [
+      'M20,20c2.21,0,4-1.79,4-4s-1.79-4-4-4-4,1.79-4,4,1.79,4,4,4ZM20,22c-2.67,0-8,1.34-8,4v2h16v-2c0-2.66-5.33-4-8-4Z',
+    ],
+  },
+
 };
 
 export default icons;
