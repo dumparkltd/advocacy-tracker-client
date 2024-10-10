@@ -1,7 +1,7 @@
 import { STATES as CHECKBOX_STATES } from 'components/forms/IndeterminateCheckbox';
 import { Map } from 'immutable';
 import isNumber from 'utils/is-number';
-import { formatNumber } from 'utils/fields';
+import { formatNumber, checkEmpty } from 'utils/fields';
 import qe from 'utils/quasi-equals';
 import appMessage from 'utils/app-message';
 import { lowerCase } from 'utils/string';
@@ -358,6 +358,14 @@ export const prepareEntityRows = ({
         let relatedEntityIds;
         let temp;
         let attribute;
+        let value;
+        let formattedDate;
+        if (col.attribute) {
+          value = entity.getIn(['attributes', col.attribute]);
+          if (!checkEmpty(value) && col.fallbackAttribute) {
+            value = entity.getIn(['attributes', col.fallbackAttribute]);
+          }
+        }
         // console.log(col)
         switch (col.type) {
           case 'main':
@@ -389,34 +397,33 @@ export const prepareEntityRows = ({
           case 'attribute':
             return {
               ...memoEntity,
-              [col.id]: {
-                ...col,
-                value: entity.getIn(['attributes', col.attribute]),
-              },
+              [col.id]: { ...col, value },
             };
           case 'amount':
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: isNumber(entity.getIn(['attributes', col.attribute]))
-                  && formatNumber(
-                    entity.getIn(['attributes', col.attribute]), { intl },
-                  ),
+                value: isNumber(value) && formatNumber(value, { intl }),
                 draft: entity.getIn(['attributes', 'draft']),
                 sortValue: entity.getIn(['attributes', col.sort])
                   && parseFloat(entity.getIn(['attributes', col.sort]), 10),
               },
             };
           case 'date':
+            if (value) {
+              formattedDate = !checkEmpty(entity.getIn(['attributes', col.attribute]))
+              && col.fallbackAttribute
+                ? `${intl.formatDate(value)} *`
+                : intl.formatDate(value);
+            }
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: entity.getIn(['attributes', col.attribute])
-                  && intl.formatDate(entity.getIn(['attributes', col.attribute])),
+                value: formattedDate,
                 draft: entity.getIn(['attributes', 'draft']),
-                sortValue: entity.getIn(['attributes', col.attribute]),
+                sortValue: value,
               },
             };
           case 'actionsSimple':
