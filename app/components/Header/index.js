@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styled, { withTheme } from 'styled-components';
 import {
-  Box, Button, ResponsiveContext, Heading,
+  Box, ResponsiveContext, Heading,
 } from 'grommet';
 import { ROUTES, IS_DEV } from 'themes/config';
 import { isMinSize } from 'utils/responsive';
@@ -16,16 +16,14 @@ import BoxPrint from 'components/styled/BoxPrint';
 
 import Brand from './Brand';
 import LogoWrap from './LogoWrap';
+import ToggleButton from './ToggleMenus/ToggleButton';
+import ToggleButtonCreate from './ToggleMenus/ToggleButtonCreate';
+import LinkMenu from './ToggleMenus/LinkMenu';
+import ToggleCreateMenu from './ToggleCreateMenu';
+import ToggleUserMenu from './ToggleUserMenu';
+import ToggleMainMenu from './ToggleMainMenu';
 
-// const Claim = styled((p) => <Text {...p} />)`
-//   font-family: ${({ theme }) => theme.fonts.title};
-//   font-size: ${({ theme }) => theme.text.xxsmall.size};
-//   line-height: ${({ theme }) => theme.text.xxsmall.size};
-//   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-//     font-size: ${({ theme }) => theme.text.xsmall.size};
-//     line-height: ${({ theme }) => theme.text.xsmall.size};
-//   }
-// `;
+
 const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
   margin: 0;
   font-family: ${({ theme }) => theme.fonts.title};
@@ -41,7 +39,6 @@ const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
     font-size: ${({ theme }) => theme.sizes.header.print.title};
   }
 `;
-
 const Styled = styled.div`
   position: ${({ sticky, fixed }) => {
     if (fixed) {
@@ -66,75 +63,6 @@ const Styled = styled.div`
     background: white;
   }
 `;
-
-const LinkMenu = styled((p) => <Button plain as="a" justify="center" fill="vertical" {...p} />)`
-  color: ${({ active }) => active ? 'black' : 'white'};
-  background-color: ${({ active }) => active ? 'white' : 'transparent'};
-  text-transform: uppercase;
-  font-family: ${({ theme }) => theme.fonts.title};
-  font-size: ${({ theme }) => theme.text.large.size};
-  line-height: ${({ theme }) => theme.text.large.size};
-
-  padding-right: 12px;
-  padding-left: 12px;
-  padding-top: 22px;
-  padding-bottom: 0px;
-  text-align: center;
-  font-size: ${({ theme }) => theme.text.small.size};
-  line-height: ${({ theme }) => theme.text.small.height};
-  font-weight: 300;
-  height:${({ theme }) => theme.sizes.header.banner.height}px;
-  &:hover {
-    color: ${({ active }) => active ? 'black' : 'white'};
-    background-color: ${({ active }) => active ? '#f0f0f0' : '#282a2c'};
-  }
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    font-size: ${({ theme }) => theme.text.xlarge.size};
-    line-height: ${({ theme }) => theme.text.xlarge.size};
-  }
-  @media print {
-    font-size: ${({ theme }) => theme.sizes.header.print.title};
-  }
-`;
-const LinkInHiddenMenu = styled((p) => <Button plain as="a" {...p} />)`
-  color: black;
-  background-color: ${({ active }) => active ? '#f0f0f0' : 'transparent'};
-  padding: 12px;
-  width: 100%;
-  font-size: ${({ theme }) => theme.text.small.size};
-  line-height: ${({ theme }) => theme.text.small.height};
-  font-weight: ${({ active }) => active ? 500 : 300};
-  &:hover {
-    color: black;
-    background-color: #dddddd;
-  }
-`;
-
-const ToggleMenu = styled((p) => <Button plain as="a" {...p} />)`
-  display: block;
-  z-index: 300;
-  background-color: black;
-  color: white;
-  &:hover {
-    color: white;
-    opacity: 0.9;
-  }
-`;
-
-const Section = styled((p) => <Box margin={{ top: 'medium' }} {...p} />)``;
-const HiddenMenu = styled((p) => <Box {...p} printHide />)`
-  position: absolute;
-  left: auto;
-  right: 0;
-  width: 100%;
-  top: ${({ theme }) => theme.sizes.header.banner.heightMobile}px;
-  background: white;
-  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
-    top: ${({ theme }) => theme.sizes.header.banner.height}px;
-    width: 300px;
-  }
-`;
-
 const STATE_INITIAL = {
   showMenu: false,
   showUserMenu: false,
@@ -303,64 +231,22 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                               justify="end"
                               pad={{ right: 'small' }}
                             >
-                              <ToggleMenu
-                                onClick={this.onShowCreateMenu}
-                              >
+                              <ToggleButtonCreate onClick={this.onShowCreateMenu} showMenu={false}>
                                 <ScreenReaderOnly>
                                   <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
                                 </ScreenReaderOnly>
-                                <Icon name="menu" hasStroke size="39px" />
-                              </ToggleMenu>
+                                <Icon name="add" size="39px" />
+                              </ToggleButtonCreate>
                             </BoxPrint>
                           )}
                           {this.state.showCreateMenu && (
-                            <Box
-                              flex={{ grow: 1 }}
-                              direction="row"
-                              align="center"
-                              justify="end"
-                              pad={{ right: 'small' }}
-                            >
-                              <ToggleMenu
-                                onClick={this.onHideCreateMenu}
-                              >
-                                <ScreenReaderOnly>
-                                  <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
-                                </ScreenReaderOnly>
-                                <Icon name="close" size="39px" />
-                              </ToggleMenu>
-                            </Box>
-                          )}
-                          {this.state.showCreateMenu && (
-                            <HiddenMenu
-                              flex={{ grow: 1 }}
-                              direction="column"
-                              align="start"
-                              justify="start"
-                              wide={false}
-                              elevation="medium"
-                            >
-                              <Section
-                                fill="horizontal"
-                                align="start"
-                                justify="start"
-                              >
-                                {navItems.create.map((item, i) => (
-                                  <LinkInHiddenMenu
-                                    key={i}
-                                    href={item.path}
-                                    active={item.active}
-                                    onClick={(evt) => {
-                                      evt.stopPropagation();
-                                      this.onHideCreateMenu();
-                                      this.onClick(evt, item.path);
-                                    }}
-                                  >
-                                    {`New ${item.title}`}
-                                  </LinkInHiddenMenu>
-                                ))}
-                              </Section>
-                            </HiddenMenu>
+                            <ToggleCreateMenu
+                              onHideMenu={this.onHideCreateMenu}
+                              navItems={navItems && navItems.create}
+                              onClick={this.onClick}
+                              toggleMenuLength={navItems}
+                              wide={wide}
+                            />
                           )}
                         </>
                       )}
@@ -373,66 +259,24 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                         justify="end"
                         pad={{ right: 'small' }}
                       >
-                        <ToggleMenu
+                        <ToggleButton
                           onClick={this.onShowUserMenu}
                         >
                           <ScreenReaderOnly>
                             <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
                           </ScreenReaderOnly>
-                          <Icon name="menu" hasStroke size="39px" />
-                        </ToggleMenu>
+                          <Icon name="profile" hasStroke size="39px" />
+                        </ToggleButton>
                       </BoxPrint>
                     )}
                     {this.state.showUserMenu && (
-                      <Box
-                        flex={{ grow: 1 }}
-                        direction="row"
-                        align="center"
-                        justify="end"
-                        pad={{ right: 'small' }}
-                      >
-                        <ToggleMenu
-                          onClick={this.onHideUserMenu}
-                        >
-                          <ScreenReaderOnly>
-                            <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
-                          </ScreenReaderOnly>
-                          <Icon name="close" size="39px" />
-                        </ToggleMenu>
-                      </Box>
-                    )}
-                    {this.state.showUserMenu && (
-                      <HiddenMenu
-                        flex={{ grow: 1 }}
-                        direction="column"
-                        align="start"
-                        justify="start"
-                        wide={false}
-                        elevation="medium"
-                      >
-                        {navItems && navItems.user && navItems.user.length > 0 && (
-                          <Section
-                            fill="horizontal"
-                            align="start"
-                            justify="start"
-                          >
-                            {navItems.user.map((item, i) => (
-                              <LinkInHiddenMenu
-                                key={i}
-                                href={item.path}
-                                active={item.active}
-                                onClick={(evt) => {
-                                  evt.stopPropagation();
-                                  this.onHideUserMenu();
-                                  this.onClick(evt, item.path);
-                                }}
-                              >
-                                {item.title}
-                              </LinkInHiddenMenu>
-                            ))}
-                          </Section>
-                        )}
-                      </HiddenMenu>
+                      <ToggleUserMenu
+                        navItems={navItems}
+                        showMenu={this.state.showUserMenu}
+                        onShowMenu={this.onShowUserMenu}
+                        onHideMenu={this.onHideUserMenu}
+                        onClick={this.onClick}
+                      />
                     )}
                     {!this.state.showMenu && (
                       <BoxPrint
@@ -443,108 +287,23 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                         justify="end"
                         pad={{ right: 'small' }}
                       >
-                        <ToggleMenu
+                        <ToggleButton
                           onClick={this.onShowMenu}
                         >
                           <ScreenReaderOnly>
                             <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
                           </ScreenReaderOnly>
                           <Icon name="menu" hasStroke size="39px" />
-                        </ToggleMenu>
+                        </ToggleButton>
                       </BoxPrint>
                     )}
                     {this.state.showMenu && (
-                      <Box
-                        flex={{ grow: 1 }}
-                        direction="row"
-                        align="center"
-                        justify="end"
-                        pad={{ right: 'small' }}
-                      >
-                        <ToggleMenu
-                          onClick={this.onHideMenu}
-                        >
-                          <ScreenReaderOnly>
-                            <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
-                          </ScreenReaderOnly>
-                          <Icon name="close" size="39px" />
-                        </ToggleMenu>
-                      </Box>
-                    )}
-                    {this.state.showMenu && (
-                      <HiddenMenu
-                        flex={{ grow: 1 }}
-                        direction="column"
-                        align="start"
-                        justify="start"
-                        wide={false}
-                        elevation="medium"
-                      >
-                        {!wide && navItems && navItems.main && navItems.main.length > 0 && (
-                          <Section
-                            fill="horizontal"
-                            align="start"
-                            justify="start"
-                          >
-                            {navItems.main.map((item, i) => (
-                              <LinkInHiddenMenu
-                                key={i}
-                                href={item.path}
-                                active={item.active}
-                                onClick={(evt) => {
-                                  evt.stopPropagation();
-                                  this.onHideMenu();
-                                  this.onClick(evt, item.path);
-                                }}
-                              >
-                                {item.title}
-                              </LinkInHiddenMenu>
-                            ))}
-                          </Section>
-                        )}
-                        {navItems && navItems.pages && navItems.pages.length > 0 && (
-                          <Section
-                            fill="horizontal"
-                            align="start"
-                            justify="start"
-                          >
-                            {navItems.pages.map((page, i) => (
-                              <LinkInHiddenMenu
-                                key={i}
-                                href={page.path}
-                                active={page.active}
-                                onClick={(evt) => this.onClick(evt, page.path)}
-                                wide={wide}
-                              >
-                                {page.title}
-                              </LinkInHiddenMenu>
-                            ))}
-                          </Section>
-                        )}
-                        {navItems && navItems.other && navItems.other.length > 0 && (
-                          <Section
-                            fill="horizontal"
-                            align="start"
-                            justify="start"
-                          >
-                            {navItems.other.map((item, i) => (
-                              <LinkInHiddenMenu
-                                key={i}
-                                href={item.path}
-                                active={item.active}
-                                onClick={(evt) => {
-                                  evt.stopPropagation();
-                                  this.onHideMenu();
-                                  this.onClick(evt, item.path);
-                                }}
-                                wide={wide}
-                              >
-                                {item.title}
-                              </LinkInHiddenMenu>
-                            ))}
-                          </Section>
-                        )}
-                      </HiddenMenu>
+                      <ToggleMainMenu
+                        onClick={this.onClick}
+                        onHideMenu={this.onHideMenu}
+                        navItems={navItems}
+                        wide={wide}
+                      />
                     )}
                   </Box>
                 )}
