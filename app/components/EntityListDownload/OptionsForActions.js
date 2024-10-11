@@ -286,7 +286,7 @@ export function OptionsForActions({
           active={indicatorsActive}
           onSetActive={(val) => setIndicatorsActive(val)}
           onActiveLabel={intl.formatMessage(messages.optionGroups.onActiveLabelDefault,
-            { type: intl.formatMessage(messages.optionGroups.topicLabel) })}
+            { type: intl.formatMessage(messages.optionGroups.topicsLabel) })}
           onSetAsRows={(val) => setIndicatorsAsRows(val)}
           asRows={indicatorsAsRows}
           asRowsDisabled={!indicatorsActive}
