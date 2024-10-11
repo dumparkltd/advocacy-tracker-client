@@ -33,7 +33,7 @@ export const formatNumber = (value, args = {}) => {
   return formatted;
 };
 
-const checkEmpty = (
+export const checkEmpty = (
   val
 ) => typeof val !== 'undefined' && val !== null && val.toString().trim().length > 0;
 
@@ -272,11 +272,19 @@ export const getDateField = (
     emptyMessage,
     specificity,
     attributeLabel,
+    fallbackAttribute,
+    fallbackAttributeLabel,
   } = args;
-  return (showEmpty || checkEmpty(entity.getIn(['attributes', attribute]))) && ({
+  let value = entity.getIn(['attributes', attribute]);
+  let label = appMessages.attributes[attributeLabel || attribute];
+  if (!checkEmpty(value) && fallbackAttribute) {
+    value = entity.getIn(['attributes', fallbackAttribute]);
+    label = appMessages.attributes[fallbackAttributeLabel || attribute];
+  }
+  return (showEmpty || checkEmpty(value)) && ({
     type: 'date',
-    value: !!entity.getIn(['attributes', attribute]) && entity.getIn(['attributes', attribute]),
-    label: appMessages.attributes[attributeLabel || attribute],
+    value: !!value && value,
+    label,
     showEmpty: showEmpty && (emptyMessage || appMessages.attributes[`${attribute}_empty`]),
     specificity,
   });

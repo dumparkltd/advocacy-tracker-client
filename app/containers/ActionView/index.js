@@ -49,6 +49,7 @@ import {
 import {
   // ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG, ACTORTYPES, RESOURCE_FIELDS,
   ROUTES,
+  ACTIONTYPES,
   ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_ACTIONTYPES,
@@ -545,7 +546,9 @@ export function ActionView(props) {
                           {
                             specificity: dateSpecificity,
                             attributeLabel: datesEqual ? 'date' : 'date_start',
-                          }
+                            fallbackAttribute: qe(typeId, ACTIONTYPES.EXPRESS) ? 'created_at' : null,
+                            fallbackAttributeLabel: 'created_at_fallback',
+                          },
                         ),
                         !datesEqual
                         && checkActionAttribute(typeId, 'date_end')
