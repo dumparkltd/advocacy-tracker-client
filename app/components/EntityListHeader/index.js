@@ -62,12 +62,12 @@ const FilterButton = styled((p) => <Button {...p} />)`
   background: ${palette('primary', 1)};
   color: white;
   border-radius: 999px;
-  box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
   border: none;
   font-family: ${({ theme }) => theme.fonts.title};
   text-transform: uppercase;
   &:hover {
-    box-shadow: 0px 0px 2px 0px rgba(0,0,0,0.2);
+    box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
     background: ${palette('primary', 0)};
   }
 `;

@@ -381,7 +381,7 @@ export function EntitiesMapActors({
   }
 
   return (
-    <Styled headerStyle="types" isPrint={isPrintView} noOverflow isOnMap>
+    <Styled headerStyle="types" isPrint={isPrintView} noOverflow>
       {isPrintView && (
         <HeaderPrint argsRemove={['subj', 'ac', 'tc', 'mtchm', 'mtch', 'actontype']} />
       )}

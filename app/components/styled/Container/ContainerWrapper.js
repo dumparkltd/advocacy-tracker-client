@@ -2,20 +2,11 @@ import styled from 'styled-components';
 import React from 'react';
 import { usePrint } from 'containers/App/PrintContext';
 const Styled = styled.div`
-  position: ${({
-    isStatic, isPrint, headerStyle, isOnMap,
-  }) => {
-    if (isPrint || isStatic) {
-      return 'static';
-    }
-    if (headerStyle === 'types' && !isOnMap) {
-      return 'relative';
-    }
-    return 'absolute';
-  }};
-  top: ${({ headerStyle, isOnMap, theme }) => {
-    if (headerStyle === 'types' && isOnMap) {
-      return theme.sizes.headerList.banner.height;
+  position: ${({ isStatic, isPrint }) => (isPrint || isStatic) ? 'static' : 'absolute'};
+  top: ${({ headerStyle, theme }) => {
+    if (headerStyle === 'types') {
+      // to fix: add dynamic headerexplore height
+      return theme.sizes.headerList.banner.height + 60;
     }
     if (headerStyle === 'simple') {
       return 40;
