@@ -359,7 +359,7 @@ export const prepareEntityRows = ({
         let temp;
         let attribute;
         let value;
-        let formattedDate;
+        // let formattedDate;
         if (col.attribute) {
           value = entity.getIn(['attributes', col.attribute]);
           if (!checkEmpty(value) && col.fallbackAttribute) {
@@ -411,17 +411,11 @@ export const prepareEntityRows = ({
               },
             };
           case 'date':
-            if (value) {
-              formattedDate = !checkEmpty(entity.getIn(['attributes', col.attribute]))
-              && col.fallbackAttribute
-                ? `${intl.formatDate(value)} *`
-                : intl.formatDate(value);
-            }
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: formattedDate,
+                value: value && intl.formatDate(value),
                 draft: entity.getIn(['attributes', 'draft']),
                 sortValue: value,
               },
