@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { palette } from 'styled-theme';
 import { Box, Button } from 'grommet';
 
 // import ButtonFactory from 'components/buttons/ButtonFactory';
@@ -29,6 +30,12 @@ const TypeButton = styled((p) => <Button plain {...p} />)`
   background: none;
 `;
 
+const StyledTextPrint = styled((p) => <TextPrint {...p} />)`
+  text-transform: uppercase;
+  font-weight: 600;
+  color: ${({ active }) => active ? palette('text', 0) : palette('text', 1)}
+`;
+
 function MapSubjectOptions({ options, inList, align = 'start' }) {
   const isPrint = usePrint();
   const optionActiveForPrint = isPrint && options
@@ -46,13 +53,17 @@ function MapSubjectOptions({ options, inList, align = 'start' }) {
               options.map((option, i) => option && (
                 <Box key={i}>
                   <TypeButton
+                    as={option.onClick ? 'button' : 'div'}
                     active={option.active}
                     onClick={option.onClick}
                     inList={inList}
                   >
-                    <TextPrint size={inList ? 'medium' : 'large'}>
+                    <StyledTextPrint
+                      size={inList ? 'medium' : 'large'}
+                      active={option.active}
+                    >
                       {option.title}
-                    </TextPrint>
+                    </StyledTextPrint>
                   </TypeButton>
                 </Box>
               ))
@@ -63,9 +74,9 @@ function MapSubjectOptions({ options, inList, align = 'start' }) {
       <PrintOnly>
         {optionActiveForPrint && (
           <Box direction="row" gap="small" justify={align}>
-            <TextPrint size={inList ? 'medium' : 'large'}>
+            <StyledTextPrint size={inList ? 'medium' : 'large'}>
               {optionActiveForPrint.title}
-            </TextPrint>
+            </StyledTextPrint>
           </Box>
         )}
       </PrintOnly>

@@ -407,7 +407,6 @@ EntityListTable.propTypes = {
   isPrintView: PropTypes.bool,
   printConfig: PropTypes.object,
   pageItemSelectConfig: PropTypes.object,
-  // allEntityCount: PropTypes.number,
 };
 
 const mapStateToProps = (state) => ({

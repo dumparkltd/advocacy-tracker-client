@@ -27,9 +27,7 @@ import {
   selectViewQuery,
   selectMapSubjectQuery,
   selectIncludeActorMembers,
-  selectIncludeTargetMembers,
   selectIncludeActorChildren,
-  selectIncludeTargetChildren,
   selectIncludeInofficialStatements,
   selectTaxonomiesWithCategories,
   selectIsPrintView,
@@ -44,9 +42,7 @@ import {
   updateRouteQuery,
   setMapSubject,
   setIncludeActorMembers,
-  setIncludeTargetMembers,
   setIncludeActorChildren,
-  setIncludeTargetChildren,
   setIncludeInofficialStatements,
   saveMultipleEntities,
   newMultipleEntities,
@@ -258,10 +254,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       actortypes,
       filterActortypes,
       actiontypes,
-      targettypes,
-      filterTargettypes,
       resourcetypes,
-      typeOptions,
       onSelectType,
       onSetView,
       typeId,
@@ -275,14 +268,10 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       mapSubject,
       onSetMapSubject,
       onSetIncludeActorMembers,
-      onSetIncludeTargetMembers,
       onSetIncludeActorChildren,
-      onSetIncludeTargetChildren,
       onSetIncludeInofficial,
       includeActorMembers,
-      includeTargetMembers,
       includeActorChildren,
-      includeTargetChildren,
       includeInofficial,
       headerOptions,
       taxonomies,
@@ -295,7 +284,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onDismissError,
       onEntityClick,
       onResetProgress,
-      actiontypesForTarget,
       membertypes,
       filterAssociationtypes,
       associationtypes,
@@ -496,9 +484,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             filterActortypes={filterActortypes}
             resourcetypes={resourcetypes}
             actiontypes={actiontypes}
-            targettypes={targettypes}
-            filterTargettypes={filterTargettypes}
-            actiontypesForTarget={actiontypesForTarget}
             membertypes={membertypes}
             filterAssociationtypes={filterAssociationtypes}
             connections={connections}
@@ -530,15 +515,12 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               onEntitySelectAll([]);
               onSelectType(type);
             }}
-            typeOptions={typeOptions}
             hasFilters={filters && filters.length > 0}
             onUpdateQuery={onUpdateQuery}
             filteringOptions={filteringOptions}
             includeMembersWhenFiltering={includeMembersWhenFiltering}
             includeActorMembers={includeActorMembers}
-            includeTargetMembers={includeTargetMembers}
             includeActorChildren={includeActorChildren}
-            includeTargetChildren={includeTargetChildren}
             headerActions={headerActions}
             viewOptions={viewOptions}
             isOnMap={showMap}
@@ -578,7 +560,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             taxonomies={taxonomies}
             actortypes={actortypes}
             actiontypes={actiontypes}
-            targettypes={targettypes}
             resourcetypes={resourcetypes}
             connections={connections}
             connectedTaxonomies={connectedTaxonomies}
@@ -618,14 +599,10 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             mapSubject={mapSubject}
             onSetMapSubject={onSetMapSubject}
             onSetIncludeActorMembers={onSetIncludeActorMembers}
-            onSetIncludeTargetMembers={onSetIncludeTargetMembers}
             onSetIncludeActorChildren={onSetIncludeActorChildren}
-            onSetIncludeTargetChildren={onSetIncludeTargetChildren}
             onSetIncludeInofficial={onSetIncludeInofficial}
             includeActorMembers={includeActorMembers}
-            includeTargetMembers={includeTargetMembers}
             includeActorChildren={includeActorChildren}
-            includeTargetChildren={includeTargetChildren}
             includeInofficial={includeInofficial}
           />
         )}
@@ -635,7 +612,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             entities={entities}
             actortypes={actortypes}
             actiontypes={actiontypes}
-            targettypes={targettypes}
             config={config}
             dataReady={dataReady}
             onEntityClick={(id, path) => onEntityClick(
@@ -646,13 +622,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             mapSubject={mapSubject}
             onSetMapSubject={onSetMapSubject}
             onSetIncludeActorMembers={onSetIncludeActorMembers}
-            onSetIncludeTargetMembers={onSetIncludeTargetMembers}
             onSetIncludeActorChildren={onSetIncludeActorChildren}
-            onSetIncludeTargetChildren={onSetIncludeTargetChildren}
             includeActorMembers={includeActorMembers}
-            includeTargetMembers={includeTargetMembers}
             includeActorChildren={includeActorChildren}
-            includeTargetChildren={includeTargetChildren}
             isPrintView={isPrintView}
           />
         )}
@@ -738,9 +710,6 @@ EntityList.propTypes = {
   filterActortypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
-  targettypes: PropTypes.instanceOf(Map),
-  filterTargettypes: PropTypes.instanceOf(Map),
-  actiontypesForTarget: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
   filterAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
@@ -778,7 +747,6 @@ EntityList.propTypes = {
   headerStyle: PropTypes.string,
   showCode: PropTypes.bool,
   includeMembersWhenFiltering: PropTypes.bool,
-  typeOptions: PropTypes.array,
   listActions: PropTypes.array,
   onSelectType: PropTypes.func,
   onSetView: PropTypes.func,
@@ -788,14 +756,10 @@ EntityList.propTypes = {
   searchQuery: PropTypes.string,
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
-  onSetIncludeTargetMembers: PropTypes.func,
   onSetIncludeActorChildren: PropTypes.func,
-  onSetIncludeTargetChildren: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
   includeActorMembers: PropTypes.bool,
-  includeTargetMembers: PropTypes.bool,
   includeActorChildren: PropTypes.bool,
-  includeTargetChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
   onEntitiesDelete: PropTypes.func,
   onUpdateFilters: PropTypes.func,
@@ -821,8 +785,6 @@ const mapStateToProps = (state) => ({
   mapSubject: selectMapSubjectQuery(state),
   includeActorMembers: selectIncludeActorMembers(state),
   includeActorChildren: selectIncludeActorChildren(state),
-  includeTargetMembers: selectIncludeTargetMembers(state),
-  includeTargetChildren: selectIncludeTargetChildren(state),
   includeInofficial: selectIncludeInofficialStatements(state),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   isPrintView: selectIsPrintView(state),
@@ -884,14 +846,8 @@ function mapDispatchToProps(dispatch, props) {
     onSetMapSubject: (subject) => {
       dispatch(setMapSubject(subject));
     },
-    onSetIncludeTargetMembers: (active) => {
-      dispatch(setIncludeTargetMembers(active));
-    },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));
-    },
-    onSetIncludeTargetChildren: (active) => {
-      dispatch(setIncludeTargetChildren(active));
     },
     onSetIncludeActorChildren: (active) => {
       dispatch(setIncludeActorChildren(active));
@@ -980,7 +936,6 @@ function mapDispatchToProps(dispatch, props) {
                 break;
               case ('actions'):
               case ('actors'):
-              case ('targets'):
               case ('members'):
               case ('associations'):
               case ('resources'):

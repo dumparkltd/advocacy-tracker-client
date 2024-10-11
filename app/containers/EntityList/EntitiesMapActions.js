@@ -62,7 +62,6 @@ export function EntitiesMapActions({
   targettypes,
   typeId,
   mapSubject,
-  onSetMapSubject,
   onSetIncludeActorMembers,
   includeActorMembers,
   onSetIncludeTargetMembers,
@@ -78,7 +77,6 @@ export function EntitiesMapActions({
   onUpdateQuery,
   isPrintView,
 }) {
-  let subjectOptions = [];
   let indicatorOptions;
   let infoOptions = [];
   let indicator = includeActorMembers ? 'actionsTotal' : 'actions';
@@ -111,16 +109,6 @@ export function EntitiesMapActions({
     if (!hasByTarget) {
       mapSubjectClean = 'actors';
     }
-    if (!isStatements) {
-      subjectOptions = [
-        {
-          title: qe(ACTIONTYPES.DONOR, typeId) ? 'By donor' : 'By actor',
-          onClick: () => onSetMapSubject('actors'),
-          active: mapSubjectClean === 'actors',
-          disabled: mapSubjectClean === 'actors',
-        },
-      ];
-    }
   }
   if (!isStatements && hasByTarget) {
     if (!hasActions) {
@@ -129,16 +117,6 @@ export function EntitiesMapActions({
     if (mapSubjectClean === 'targets') {
       indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';
     }
-    // cleanMapSubject = mapSubject;
-    subjectOptions = [
-      ...subjectOptions,
-      {
-        title: qe(ACTIONTYPES.DONOR, typeId) ? 'By recipient' : 'By target',
-        onClick: () => onSetMapSubject('targets'),
-        active: mapSubjectClean === 'targets',
-        disabled: mapSubjectClean === 'targets',
-      },
-    ];
   }
   if (mapSubjectClean === 'targets') {
     // note this should always be true!
@@ -471,7 +449,6 @@ export function EntitiesMapActions({
       subTitle: infoSubTitle,
       titlePrint: infoTitle,
       infoOptions,
-      subjectOptions,
       indicatorOptions,
       onIndicatorSelect: onSetMapIndicator,
     }];
@@ -529,7 +506,6 @@ EntitiesMapActions.propTypes = {
     PropTypes.string,
     PropTypes.instanceOf(List),
   ]),
-  onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   onSetIncludeTargetMembers: PropTypes.func,

@@ -179,7 +179,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     let relatedTargettypes;
     let viewTypeClean = viewType;
 
-    let headerTitle = entityTitle.plural;
+    const primaryEntityCount = entities && entities.size;
+
+    const headerTitle = entityTitle.plural;
     // ACTIONS =================================================================
     if (config.types === 'actiontypes') {
       columns = getActiontypeColumns({
@@ -206,56 +208,39 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       subjectOptions = [
         {
           type: 'secondary',
-          title: 'Activities',
+          title: `${primaryEntityCount} ${headerTitle}`,
           onClick: () => onSetMapSubject(),
           active: !mapSubjectClean,
           disabled: !mapSubjectClean,
         },
       ];
-      if (hasByActor) {
+      if (hasByActor || hasByTarget) {
         subjectOptions = [
           ...subjectOptions,
           {
             type: 'secondary',
-            title: 'By actor',
-            onClick: () => onSetMapSubject('actors'),
-            active: mapSubjectClean === 'actors',
-            disabled: mapSubjectClean === 'actors',
+            title: 'by stakeholder',
+            onClick: () => onSetMapSubject(hasByActor ? 'actors' : 'targets'),
+            active: hasByActor
+              ? mapSubjectClean === 'actors'
+              : mapSubjectClean === 'targets',
+            disabled: hasByActor
+              ? mapSubjectClean === 'actors'
+              : mapSubjectClean === 'targets',
           },
         ];
-        if (mapSubjectClean === 'actors') {
-          headerTitle = `${headerTitle} by actor`;
-        }
-      }
-      if (hasByTarget) {
-        subjectOptions = [
-          ...subjectOptions,
-          {
-            type: 'secondary',
-            title: 'By target',
-            onClick: () => onSetMapSubject('targets'),
-            active: mapSubjectClean === 'targets',
-            disabled: mapSubjectClean === 'targets',
-          },
-        ];
-        if (mapSubjectClean === 'targets') {
-          headerTitle = `${headerTitle} by target`;
-        }
       }
       if (hasByUser) {
         subjectOptions = [
           ...subjectOptions,
           {
             type: 'secondary',
-            title: 'By user',
+            title: 'by user',
             onClick: () => onSetMapSubject('users'),
             active: mapSubjectClean === 'users',
             disabled: mapSubjectClean === 'users',
           },
         ];
-        if (mapSubjectClean === 'users') {
-          headerTitle = `${headerTitle} by user`;
-        }
       }
       if (mapSubjectClean === 'actors' || mapSubjectClean === 'targets') {
         if (mapSubjectClean === 'actors') {
@@ -372,7 +357,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       } else if (!isTarget && isActive) {
         mapSubjectClean = 'actors';
       }
-      subjectOptions = [];
       const canBeMember = Object.keys(MEMBERSHIPS).indexOf(typeId) > -1
         && MEMBERSHIPS[typeId].length > 0;
       const canHaveMembers = Object.keys(MEMBERSHIPS).some(
@@ -406,31 +390,13 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           isSingleActionColumn: actionColumns.length === 1,
         })),
       ];
-
-      if (isActive) {
-        subjectOptions = [
-          ...subjectOptions,
-          {
-            type: 'secondary',
-            title: isPrintView ? 'Activities' : 'As actors',
-            onClick: () => onSetMapSubject('actors'),
-            active: mapSubjectClean === 'actors',
-            disabled: mapSubjectClean === 'actors',
-          },
-        ];
-      }
-      if (isTarget) {
-        subjectOptions = [
-          ...subjectOptions,
-          {
-            type: 'secondary',
-            title: isPrintView ? 'Actors targeted by' : 'As targets',
-            onClick: () => onSetMapSubject('targets'),
-            active: mapSubjectClean === 'targets',
-            disabled: mapSubjectClean === 'targets',
-          },
-        ];
-      }
+      subjectOptions = [
+        {
+          type: 'secondary',
+          title: `${primaryEntityCount} ${headerTitle}`,
+          active: true,
+        },
+      ];
 
       if (mapSubjectClean === 'targets') {
         if (canBeMember) {
@@ -530,6 +496,13 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         },
       ];
     } else if (config.types === 'indicators') {
+      subjectOptions = [
+        {
+          type: 'secondary',
+          title: `${primaryEntityCount} ${headerTitle}`,
+          active: true,
+        },
+      ];
       columns = [
         {
           id: 'main',
@@ -634,7 +607,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                 entityIdsSelected={entityIdsSelected}
               />
               {(searchQuery || hasFilters) && (
-                <Box margin={{ vertical: 'small' }}>
+                <Box margin={{ bottom: 'small' }}>
                   {isPrintView && (
                     <LabelPrint>
                       {!!searchQuery && !hasFilters && (

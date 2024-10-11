@@ -48,7 +48,6 @@ export function EntitiesMapActors({
   actiontypes,
   typeId,
   mapSubject,
-  onSetMapSubject,
   onSetIncludeActorMembers,
   onSetIncludeTargetMembers,
   includeActorMembers,
@@ -66,7 +65,6 @@ export function EntitiesMapActors({
 }) {
   // const { intl } = this.context;
   // let { countries } = this.props;
-  let subjectOptions = [];
   let memberOption;
   let typeLabels;
   let typeLabelsFor;
@@ -86,20 +84,6 @@ export function EntitiesMapActors({
     if (mapSubjectClean === 'targets') {
       indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';
     }
-    subjectOptions = [
-      {
-        title: 'As actors',
-        onClick: () => onSetMapSubject('actors'),
-        active: mapSubjectClean === 'actors',
-        disabled: mapSubjectClean === 'actors',
-      },
-      {
-        title: 'As targets',
-        onClick: () => onSetMapSubject('targets'),
-        active: mapSubjectClean === 'targets',
-        disabled: mapSubjectClean === 'targets',
-      },
-    ];
     if (mapSubjectClean === 'targets') {
       // note this should always be true!
       memberOption = {
@@ -230,8 +214,7 @@ export function EntitiesMapActors({
     });
     infoTitle = typeLabels.plural;
     infoSubTitle = `for ${entitiesTotal} ${typeLabelsFor[entitiesTotal === 1 ? 'single' : 'plural']}${hasFilters ? ' (filtered)' : ''}`;
-    const subjectOption = subjectOptions && subjectOptions.find((option) => option.active);
-    infoTitlePrint = subjectOption.title;
+    infoTitlePrint = infoTitle;
   } else if (hasActions) {
     // entities are orgs
     // figure out action ids for each country
@@ -407,7 +390,6 @@ export function EntitiesMapActors({
           title: infoTitle,
           titlePrint: infoTitlePrint,
           subTitle: infoSubTitle,
-          subjectOptions,
           memberOption,
         }]}
       />
@@ -428,7 +410,6 @@ EntitiesMapActors.propTypes = {
   membershipsByAssociation: PropTypes.instanceOf(Map),
   typeId: PropTypes.string,
   mapSubject: PropTypes.string,
-  onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeTargetMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,

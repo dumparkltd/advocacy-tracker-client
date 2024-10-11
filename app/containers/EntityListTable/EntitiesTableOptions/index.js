@@ -24,7 +24,7 @@ const EntityListSearchWrapper = styled((p) => <Box {...p} />)`
 `;
 
 export function EntityListTableOptions({
-  options,
+  options = {},
   onPageItemsSelect,
   onSearch,
   searchQuery,
@@ -34,12 +34,13 @@ export function EntityListTableOptions({
   const size = React.useContext(ResponsiveContext);
   const {
     checkboxOptions,
-    subjectOptions,
     typeOptions,
+    subjectOptions,
     hasSearch,
     hasPageSelect,
   } = options;
   const isPrintView = usePrint();
+
   return (
     <Box
       direction={isMinSize(size, 'medium') ? 'row' : 'column'}

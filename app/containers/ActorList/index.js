@@ -34,8 +34,6 @@ import {
   selectAssociationtypesForActortype,
   selectParentAssociationtypesForActortype,
   selectViewQuery,
-  // selectIncludeActorMembers,
-  // selectIncludeActorChildren,
 } from 'containers/App/selectors';
 
 import { checkActorAttribute } from 'utils/entities';
@@ -89,18 +87,6 @@ const LayerContent = styled((p) => (
     {...p}
   />
 ))``;
-
-const prepareTypeOptions = (
-  types,
-  activeId,
-  intl,
-) => types.toList().toJS().map(
-  (type) => ({
-    value: type.id,
-    label: intl.formatMessage(appMessages.actortypes[type.id]),
-    active: activeId === type.id,
-  })
-);
 
 const VALID_VIEWS = ['map', 'list'];
 const getView = ({
@@ -280,16 +266,13 @@ export function ActorList({
         }}
         locationQuery={fromJS(location.query)}
         actortypes={actortypes}
-        actiontypes={actiontypes}
-        actiontypesForTarget={actiontypesForTarget}
+        actiontypes={actiontypesForTarget
+          ? actiontypes.merge(actiontypesForTarget)
+          : actiontypes
+        }
         membertypes={membertypes}
         filterAssociationtypes={filterAssociationtypes}
         associationtypes={associationtypes}
-        typeOptions={prepareTypeOptions(
-          actortypes,
-          typeId,
-          intl,
-        )}
         onSelectType={onSelectType}
         typeId={typeId}
         showCode={checkActorAttribute(typeId, 'code', isAdmin)}

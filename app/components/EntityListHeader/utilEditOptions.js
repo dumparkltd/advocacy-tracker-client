@@ -1,6 +1,6 @@
 import { find, forEach } from 'lodash/collection';
 
-import { ACTORTYPES } from 'themes/config';
+import { ACTORTYPES, ACTIONTYPE_TARGETTYPES } from 'themes/config';
 
 import {
   testEntityEntityAssociation,
@@ -31,7 +31,6 @@ export const makeActiveEditOptions = ({
       return makeTaxonomyEditOptions(entities, taxonomies, activeEditOption, messages);
     case 'actions':
     case 'actors':
-    case 'targets':
     case 'members':
     case 'associations':
     case 'resources':
@@ -170,16 +169,31 @@ const makeGroupedConnectionEditOptions = (
     selectAll: true,
     tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, intl),
   };
-  const areActors = type === 'action-targets' // targets
-    || type === 'action-actors' // active actors
+  const connectingToActors = type === 'action-actors' // active actors
     || type === 'member-associations' // associations
     || type === 'association-members' // members
     || type === 'indicator-actions';
+  const connectingToActions = type === 'actor-actions'
+    || type === 'resource-actions'
+    || type === 'action-parents'
+    || type === 'action-children';
+  const connectingToResources = type === 'action-resources';
 
-  const hasCode = isAdmin || (areActors && qe(typeId, ACTORTYPES.COUNTRY));
+  const hasCode = isAdmin || (connectingToActors && qe(typeId, ACTORTYPES.COUNTRY));
+
   if (option) {
+    let isTargetConnection = false;
+    if (connectingToActions) {
+      isTargetConnection = Object.keys(ACTIONTYPE_TARGETTYPES).indexOf(typeId) > -1;
+    }
+    if (option.connectPaths) {
+      editOptions.path = option.connectPaths[
+        isTargetConnection ? 'target' : 'actor'
+      ];
+    } else {
+      editOptions.path = option.connectPath;
+    }
     editOptions.title = messages.title;
-    editOptions.path = option.connectPath;
     editOptions.invalidateEntitiesPaths = option.invalidateEntitiesPaths;
     editOptions.search = option.search;
     editOptions.multiple = !option.single;
@@ -187,19 +201,13 @@ const makeGroupedConnectionEditOptions = (
     connections
       .get(connectionPath)
       .filter((c) => {
-        if (
-          type === 'target-actions'
-          || type === 'actor-actions'
-          || type === 'resource-actions'
-          || type === 'action-parents'
-          || type === 'action-children'
-        ) {
+        if (connectingToActions) {
           return qe(typeId, c.getIn(['attributes', 'measuretype_id']));
         }
-        if (type === 'action-resources') {
+        if (connectingToResources) {
           return qe(typeId, c.getIn(['attributes', 'resourcetype_id']));
         }
-        if (areActors) {
+        if (connectingToActors) {
           return qe(typeId, c.getIn(['attributes', 'actortype_id']));
         }
         return true;
@@ -254,16 +262,30 @@ const makeConnectionEditOptions = (
     selectAll: true,
     tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, intl),
   };
-  const areActors = type === 'action-targets' // targets
-    || type === 'action-actors' // active actors
+  const connectingToActors = type === 'action-actors' // active actors
     || type === 'member-associations' // associations
     || type === 'association-members' // members
     || type === 'indicator-actions';
+  const connectingToActions = type === 'actor-actions'
+    || type === 'resource-actions'
+    || type === 'action-parents'
+    || type === 'action-children';
+  // const connectingToResources = type === 'action-resources';
 
-  const hasCode = isAdmin || (areActors && qe(typeId, ACTORTYPES.COUNTRY));
+  const hasCode = isAdmin || (connectingToActors && qe(typeId, ACTORTYPES.COUNTRY));
   if (option) {
+    let isTargetConnection = false;
+    if (connectingToActions) {
+      isTargetConnection = Object.keys(ACTIONTYPE_TARGETTYPES).indexOf(typeId) > -1;
+    }
+    if (option.connectPaths) {
+      editOptions.path = option.connectPaths[
+        isTargetConnection ? 'target' : 'actor'
+      ];
+    } else {
+      editOptions.path = option.connectPath;
+    }
     editOptions.title = messages.title;
-    editOptions.path = option.connectPath;
     editOptions.invalidateEntitiesPaths = option.invalidateEntitiesPaths;
     editOptions.search = option.search;
     editOptions.multiple = !option.single;

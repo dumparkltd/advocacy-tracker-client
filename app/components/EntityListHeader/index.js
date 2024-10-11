@@ -409,6 +409,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     const normalActions = headerActions && headerActions.filter(
       (action) => !action.isMember
     );
+
     return (
       <ResponsiveContext.Consumer>
         {(size) => (
@@ -554,8 +555,9 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                 onSubmit={showEditOptions
                   ? (associations) => {
                     // close and reset option panel
+                    const connectPath = formOptions.path;
                     this.setState({ activeOption: null });
-                    onUpdate(associations, activeOption);
+                    onUpdate(associations, { ...activeOption, path: connectPath });
                   }
                   : (filterOptions) => {
                     // close and reset option panel

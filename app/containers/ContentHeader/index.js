@@ -21,13 +21,13 @@ import { usePrint } from 'containers/App/PrintContext';
 const Styled = styled.div`
   padding: ${({ isModal, hasViewOptions }) => {
     if (isModal) return '0 0 10px 10px';
-    if (hasViewOptions) return '0.5em 0 0.5em';
+    if (hasViewOptions) return '0';
     return '1em 0 0.5em';
   }};
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     padding: ${({ isModal, hasViewOptions }) => {
     if (isModal) return '20px 0 20px 24px';
-    if (hasViewOptions) return '0 0 1em';
+    if (hasViewOptions) return '0';
     return '3em 0 1em';
   }};
   }
@@ -117,6 +117,7 @@ export function ContentHeader({
 }) {
   const isPrintView = usePrint();
   const size = React.useContext(ResponsiveContext);
+
   return (
     <Styled
       hasBottomBorder={type === CONTENT_PAGE || type === CONTENT_MODAL}

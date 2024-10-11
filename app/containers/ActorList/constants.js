@@ -76,6 +76,10 @@ export const CONFIG = {
     actions: {
       query: 'action',
       type: 'actor-actions',
+      types: {
+        actor: 'actor-actions',
+        target: 'target-actions',
+      },
       search: true,
       messageByType: 'entities.actions_{typeid}.plural',
       message: 'entities.actions.plural',
@@ -84,26 +88,13 @@ export const CONFIG = {
       entityType: 'actions', // filter by actor connection
       clientPath: ROUTES.ACTION,
       connectPath: API.ACTOR_ACTIONS, // filter by actor connection
+      connectPaths: {
+        actor: API.ACTOR_ACTIONS,
+        target: API.ACTION_ACTORS,
+      }, // filter by actor connection
       key: 'measure_id',
       ownKey: 'actor_id',
       groupByType: true,
-    },
-    targets: { // filter by associated entity
-      query: 'targeting',
-      type: 'target-actions',
-      search: true,
-      messageByType: 'entities.actions_{typeid}.plural',
-      message: 'entities.actions.plural',
-      path: API.ACTIONS, // filter by actor connection
-      invalidateEntitiesPaths: [API.ACTORS, API.ACTIONS],
-      entityType: 'actions', // filter by actor connection
-      entityTypeAs: 'targetingActions',
-      clientPath: ROUTES.ACTION,
-      connectPath: API.ACTION_ACTORS, // filter by actor connection
-      key: 'measure_id',
-      ownKey: 'actor_id',
-      groupByType: true,
-      typeFilter: 'has_target',
     },
     members: { // filter by associated entity
       query: 'by-member',
