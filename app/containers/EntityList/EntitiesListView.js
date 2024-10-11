@@ -6,7 +6,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Map, List } from 'immutable';
-import { Box, Text } from 'grommet';
+import { Box } from 'grommet';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import styled from 'styled-components';
 
@@ -26,13 +26,9 @@ import { jumpToComponent } from 'utils/scroll-to-component';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
 import Content from 'components/styled/ContentSimple';
-import ButtonPill from 'components/buttons/ButtonPill';
 import HeaderPrint from 'components/Header/HeaderPrint';
 import TagList from 'components/TagList';
-import BoxPrint from 'components/styled/BoxPrint';
 
-import MapSubjectOptions from 'containers/MapContainer/MapInfoOptions/MapSubjectOptions';
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 import EntityListTable from 'containers/EntityListTable';
 import ContentHeader from 'containers/ContentHeader';
 
@@ -172,13 +168,11 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     let isTarget;
     let isActive;
     let subjectOptions = [];
-    let memberOption;
-    let childOption;
-    let checkboxOptions;
+    let checkboxOptions = [];
+    let typeOptions = [];
     let entityActors;
     let entityUsers;
     let columns;
-    let headerColumnsUtility;
     let mapSubjectClean = mapSubject;
     let userEntityColumnTitle;
     let relatedActortypes;
@@ -296,49 +290,61 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         );
         const typeLabel = lowerCase(intl.formatMessage(appMessages.actortypes[viewTypeClean]));
         if (mapSubjectClean === 'targets') {
+          typeOptions = relatedTargettypes;
           if (canBeMember) {
+            let label;
             if (qe(viewTypeClean, ACTORTYPES.COUNTRY)) {
-              memberOption = {
-                active: includeTargetMembers,
-                onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-                label: `Show activities targeting regions & groups (${typeLabel} are member of)`,
-              };
+              label = `Show activities targeting regions & groups (${typeLabel} are member of)`;
             } else if (qe(viewTypeClean, ACTORTYPES.ORG)) {
-              memberOption = {
-                active: includeTargetMembers,
-                onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-                label: `Show activities targeting groups (${typeLabel} are member of)`,
-              };
+              label = `Show activities targeting groups (${typeLabel} are member of)`;
             } else if (qe(viewTypeClean, ACTORTYPES.CONTACT)) {
-              memberOption = {
+              label = `Show activities targeting countries, organisations & groups (${typeLabel} are member of)`;
+            }
+            checkboxOptions = [
+              ...checkboxOptions,
+              {
                 active: includeTargetMembers,
                 onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-                label: `Show activities targeting countries, organisations & groups (${typeLabel} are member of)`,
-              };
-            }
+                type: 'as-member',
+                label,
+              },
+            ];
           } else if (canHaveMembers) {
-            childOption = {
-              active: includeTargetChildren,
-              onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
-              label: `Show activities targeting members of ${typeLabel}`,
-            };
+            checkboxOptions = [
+              ...checkboxOptions,
+              {
+                active: includeTargetChildren,
+                onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
+                label: `Show activities targeting members of ${typeLabel}`,
+                type: 'children',
+              },
+            ];
           }
         } else if (mapSubjectClean === 'actors') {
+          typeOptions = relatedActortypes;
           if (canBeMember) {
-            memberOption = {
-              active: includeActorMembers,
-              onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-              label: qe(viewTypeClean, ACTORTYPES.CONTACT)
-                ? `Show activities of countries, organisations & groups (${typeLabel} are member of)`
-                : `Show activities of groups (${typeLabel} are member of)`,
-            };
+            checkboxOptions = [
+              ...checkboxOptions,
+              {
+                active: includeActorMembers,
+                onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+                label: qe(viewTypeClean, ACTORTYPES.CONTACT)
+                  ? `Show activities of countries, organisations & groups (${typeLabel} are member of)`
+                  : `Show activities of groups (${typeLabel} are member of)`,
+                type: 'as-member',
+              },
+            ];
           }
           if (canHaveMembers) {
-            childOption = {
-              active: includeActorChildren,
-              onClick: () => onSetIncludeActorChildren(includeActorChildren ? '0' : '1'),
-              label: `Show activities of ${typeLabel} members`,
-            };
+            checkboxOptions = [
+              ...checkboxOptions,
+              {
+                active: includeActorChildren,
+                onClick: () => onSetIncludeActorChildren(includeActorChildren ? '0' : '1'),
+                label: `Show activities of ${typeLabel} members`,
+                type: 'children',
+              },
+            ];
           }
         }
       } else if (mapSubjectClean === 'users') {
@@ -383,22 +389,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         isSingle: false,
         isAdmin,
       });
-      headerColumnsUtility = [
-        {
-          type: 'main',
-          content: '',
-        },
-        ...typeColumns.map(() => ({
-          type: 'spacer',
-          content: '',
-          hasSingleActionColumn: actionColumns.length === 1,
-        })),
-        {
-          type: 'options',
-          span: actionColumns.length,
-          isSingleActionColumn: actionColumns.length === 1,
-        },
-      ];
 
       columns = [
         {
@@ -434,7 +424,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           ...subjectOptions,
           {
             type: 'secondary',
-            title: isPrintView ? 'Activities targeted by' : 'As targets',
+            title: isPrintView ? 'Actors targeted by' : 'As targets',
             onClick: () => onSetMapSubject('targets'),
             active: mapSubjectClean === 'targets',
             disabled: mapSubjectClean === 'targets',
@@ -444,85 +434,81 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
 
       if (mapSubjectClean === 'targets') {
         if (canBeMember) {
+          let label;
           if (qe(typeId, ACTORTYPES.CONTACT)) {
-            memberOption = {
-              active: includeTargetMembers,
-              onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-              label: 'Show activities targeting countries (contacts belong to)',
-            };
+            label = 'Show activities targeting countries (contacts belong to)';
           } else if (!qe(typeId, ACTORTYPES.ORG)) {
-            memberOption = {
+            label = `Show activities targeting groups or regions (${lowerCase(intl.formatMessage(appMessages.actortypes[typeId]))} belong to)`;
+          }
+          checkboxOptions = [
+            ...checkboxOptions,
+            {
               active: includeTargetMembers,
               onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-              label: `Show activities targeting groups or regions (${lowerCase(intl.formatMessage(appMessages.actortypes[typeId]))} belong to)`,
-            };
-          }
+              type: 'as-member',
+              label,
+            },
+          ];
         }
         if (canHaveMembers) {
+          let label;
           if (qe(typeId, ACTORTYPES.REG)) {
-            childOption = {
-              active: includeTargetChildren,
-              onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
-              label: 'Show activities targeting region members',
-            };
+            label = 'Show activities targeting region members';
           } else if (qe(typeId, ACTORTYPES.GROUP)) {
-            childOption = {
-              active: includeTargetChildren,
-              onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
-              label: 'Show activities targeting group members',
-            };
+            label = 'Show activities targeting group members';
           } else if (qe(typeId, ACTORTYPES.COUNTRY)) {
-            childOption = {
-              active: includeTargetChildren,
-              onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
-              label: 'Show activities targeting country members',
-            };
+            label = 'Show activities targeting country members';
           } else if (qe(typeId, ACTORTYPES.ORG)) {
-            childOption = {
+            label = 'Show activities targeting organisation members';
+          }
+          checkboxOptions = [
+            ...checkboxOptions,
+            {
               active: includeTargetChildren,
               onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
-              label: 'Show activities targeting organisation members',
-            };
-          }
+              type: 'children',
+              label,
+            },
+          ];
         }
       } else if (mapSubjectClean === 'actors') {
         if (canBeMember) {
+          let label;
           if (qe(typeId, ACTORTYPES.CONTACT)) {
-            memberOption = {
-              active: includeActorMembers,
-              onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-              label: 'Include activities of countries (contacts belong to)',
-            };
+            label = 'Include activities of countries (contacts belong to)';
           } else {
-            memberOption = {
+            label = `Include activities of ${lowerCase(intl.formatMessage(appMessages.actortypes[typeId]))}' groups`;
+          }
+          checkboxOptions = [
+            ...checkboxOptions,
+            {
               active: includeActorMembers,
               onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-              label: `Include activities of ${lowerCase(intl.formatMessage(appMessages.actortypes[typeId]))}' groups`,
-            };
-          }
+              type: 'as-member',
+              label,
+            },
+          ];
         }
         if (canHaveMembers) {
+          let label;
           if (qe(typeId, ACTORTYPES.GROUP)) {
-            childOption = {
-              active: includeActorChildren,
-              onClick: () => onSetIncludeActorChildren(includeActorChildren ? '0' : '1'),
-              label: 'Include activities of group members',
-            };
+            label = 'Include activities of group members';
           }
           if (qe(typeId, ACTORTYPES.COUNTRY)) {
-            childOption = {
-              active: includeActorChildren,
-              onClick: () => onSetIncludeActorChildren(includeActorChildren ? '0' : '1'),
-              label: 'Include activities of country contacts',
-            };
+            label = 'Include activities of country contacts';
           }
           if (qe(typeId, ACTORTYPES.ORG)) {
-            childOption = {
+            label = 'Include activities of organisation contacts';
+          }
+          checkboxOptions = [
+            ...checkboxOptions,
+            {
               active: includeActorChildren,
               onClick: () => onSetIncludeActorChildren(includeActorChildren ? '0' : '1'),
-              label: 'Include activities of organisation contacts',
-            };
-          }
+              type: 'children',
+              label,
+            },
+          ];
         }
       }
 
@@ -576,11 +562,12 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         },
       ];
       checkboxOptions = [
+        ...checkboxOptions,
         {
           label: 'Infer country support from group statements',
           active: includeActorMembers,
           onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-          type: 'members',
+          type: 'as-member',
         },
         {
           active: !includeInofficial,
@@ -646,154 +633,106 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                 buttons={listActions}
                 entityIdsSelected={entityIdsSelected}
               />
-              {isPrintView && (searchQuery || hasFilters) && (
+              {(searchQuery || hasFilters) && (
                 <Box margin={{ vertical: 'small' }}>
-                  <LabelPrint>
-                    {!!searchQuery && !hasFilters && (
-                      <FormattedMessage {...messages.labelPrintKeywords} />
-                    )}
-                    {!searchQuery && hasFilters && (
-                      <FormattedMessage {...messages.labelPrintFilters} />
-                    )}
-                    {!!searchQuery && hasFilters && (
-                      <FormattedMessage {...messages.labelPrintFiltersKeywords} />
-                    )}
-                  </LabelPrint>
+                  {isPrintView && (
+                    <LabelPrint>
+                      {!!searchQuery && !hasFilters && (
+                        <FormattedMessage {...messages.labelPrintKeywords} />
+                      )}
+                      {!searchQuery && hasFilters && (
+                        <FormattedMessage {...messages.labelPrintFilters} />
+                      )}
+                      {!!searchQuery && hasFilters && (
+                        <FormattedMessage {...messages.labelPrintFiltersKeywords} />
+                      )}
+                    </LabelPrint>
+                  )}
                   <TagList
                     filters={filters}
                     searchQuery={searchQuery}
-                    isPrintView
-                    isPrint
                   />
                 </Box>
               )}
               {showRelatedActorsForActions && (
-                <Box>
-                  <BoxPrint
-                    isPrint={isPrintView}
-                    printHide
-                    direction="row"
-                    gap="xsmall"
-                    margin={{ vertical: 'small' }}
-                    wrap
-                  >
-                    {mapSubject === 'actors'
-                      && relatedActortypes
-                      && relatedActortypes.map(
-                        (actortypeId) => (
-                          <ButtonPill
-                            key={actortypeId}
-                            onClick={() => this.setType(actortypeId)}
-                            active={qe(viewTypeClean, actortypeId)}
-                          >
-                            <Text size="small">
-                              <FormattedMessage {...appMessages.entities[`actors_${actortypeId}`].pluralShort} />
-                            </Text>
-                          </ButtonPill>
-                        )
-                      )}
-                    {mapSubject === 'targets'
-                      && relatedTargettypes
-                      && relatedTargettypes.map(
-                        (actortypeId) => (
-                          <ButtonPill
-                            key={actortypeId}
-                            onClick={() => this.setType(actortypeId)}
-                            active={qe(viewTypeClean, actortypeId)}
-                          >
-                            <Text size="small">
-                              <FormattedMessage {...appMessages.entities[`actors_${actortypeId}`].pluralShort} />
-                            </Text>
-                          </ButtonPill>
-                        )
-                      )}
-                  </BoxPrint>
-                  {memberOption && (
-                    <Box>
-                      <MapOption option={memberOption} type="member" />
-                    </Box>
-                  )}
-                  {childOption && (
-                    <Box>
-                      <MapOption option={childOption} type="child" />
-                    </Box>
-                  )}
-                  <EntityListTable
-                    isByOption
-                    hasFilters={hasFilters}
-                    paginate
-                    hasSearch
-                    columns={[
-                      {
-                        id: 'main',
-                        type: 'main',
-                        sort: 'title',
-                        attributes: (showCode || qe(viewTypeClean, ACTORTYPES.COUNTRY))
-                          ? ['code', 'title']
-                          : ['title'],
+                <EntityListTable
+                  isByOption
+                  hasFilters={hasFilters}
+                  paginate
+                  hasSearch
+                  columns={[
+                    {
+                      id: 'main',
+                      type: 'main',
+                      sort: 'title',
+                      attributes: (showCode || qe(viewTypeClean, ACTORTYPES.COUNTRY))
+                        ? ['code', 'title']
+                        : ['title'],
+                    },
+                    {
+                      id: 'actorActions',
+                      type: 'actorActions',
+                      label: entityTitle.plural,
+                      subject: mapSubject,
+                      actions: mapSubject === 'actors'
+                        ? 'actions'
+                        : 'targetingActions',
+                    },
+                    {
+                      id: 'actorActionsAsMember',
+                      type: 'actorActions',
+                      members: true,
+                      subject: mapSubject,
+                      label: `${entityTitle.plural} as member`,
+                      actions: mapSubject === 'actors'
+                        ? 'actionsMembers'
+                        : 'targetingActionsAsMember',
+                    },
+                    {
+                      id: 'actorActionsAsParent',
+                      type: 'actorActions',
+                      children: true,
+                      subject: mapSubject,
+                      label: mapSubject === 'actors'
+                        ? `${entityTitle.plural} by members`
+                        : `${entityTitle.plural} targeting members`,
+                      actions: mapSubject === 'actors'
+                        ? 'actionsAsParent'
+                        : 'targetingActionsAsParent',
+                    },
+                  ]}
+                  entities={entityActors.get(parseInt(viewTypeClean, 10))}
+                  entityPath={ROUTES.ACTOR}
+                  onEntityClick={onEntityClick}
+                  entityTitle={{
+                    single: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].single),
+                    plural: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].plural),
+                  }}
+                  onResetScroll={this.scrollToTop}
+                  config={{
+                    types: 'actortypes',
+                    clientPath: ROUTES.ACTOR,
+                    views: {
+                      list: {
+                        search: ['code', 'title', 'description'],
                       },
-                      {
-                        id: 'actorActions',
-                        type: 'actorActions',
-                        label: entityTitle.plural,
-                        subject: mapSubject,
-                        actions: mapSubject === 'actors'
-                          ? 'actions'
-                          : 'targetingActions',
-                      },
-                      {
-                        id: 'actorActionsAsMember',
-                        type: 'actorActions',
-                        members: true,
-                        subject: mapSubject,
-                        label: `${entityTitle.plural} as member`,
-                        actions: mapSubject === 'actors'
-                          ? 'actionsMembers'
-                          : 'targetingActionsAsMember',
-                        skip: !(memberOption
-                          && (
-                            (mapSubject === 'actors' && includeActorMembers)
-                            || (mapSubject === 'targets' && includeTargetMembers)
-                          )),
-                      },
-                      {
-                        id: 'actorActionsAsParent',
-                        type: 'actorActions',
-                        children: true,
-                        subject: mapSubject,
-                        label: mapSubject === 'actors'
-                          ? `${entityTitle.plural} by members`
-                          : `${entityTitle.plural} targeting members`,
-                        actions: mapSubject === 'actors'
-                          ? 'actionsAsParent'
-                          : 'targetingActionsAsParent',
-                        skip: !(childOption
-                          && (
-                            (mapSubject === 'actors' && includeActorChildren)
-                            || (mapSubject === 'targets' && includeTargetChildren)
-                          )),
-                      },
-                    ]}
-                    entities={entityActors.get(parseInt(viewTypeClean, 10))}
-                    entityPath={ROUTES.ACTOR}
-                    onEntityClick={onEntityClick}
-                    entityTitle={{
-                      single: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].single),
-                      plural: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].plural),
-                    }}
-                    onResetScroll={this.scrollToTop}
-                    config={{
-                      types: 'actortypes',
-                      clientPath: ROUTES.ACTOR,
-                      views: {
-                        list: {
-                          search: ['code', 'title', 'description'],
-                        },
-                      },
-                    }}
-                    connections={connections}
-                  />
-                </Box>
+                    },
+                  }}
+                  connections={connections}
+                  options={{
+                    checkboxOptions,
+                    subjectOptions,
+                    typeOptions: typeOptions.map((id) => ({
+                      id,
+                      onClick: () => this.setType(id),
+                      active: qe(viewTypeClean, id),
+                      label: intl.formatMessage(appMessages.entities[`actors_${id}`].pluralShort),
+                    })),
+                    hasSearch: true,
+                    paginate: true,
+                    activeType: viewTypeClean,
+                  }}
+                />
               )}
               {showRelatedUsersForActions && (
                 <Box>
@@ -833,54 +772,37 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                       },
                     }}
                     connections={connections}
+                    options={{
+                      hasSearch: true,
+                      paginate: true,
+                      checkboxOptions,
+                      subjectOptions,
+                    }}
                   />
                 </Box>
-
               )}
               {showEntities && (
                 <EntityListTable
                   hasFilters={hasFilters}
-                  paginate
-                  hasSearch
                   columns={columns}
-                  headerColumnsUtility={headerColumnsUtility}
-                  memberOption={memberOption && (
-                    <MapOption
-                      option={memberOption}
-                      type="member"
-                    />
-                  )}
-                  childOption={childOption && (
-                    <MapOption
-                      option={childOption}
-                      type="child"
-                    />
-                  )}
-                  subjectOptions={(
-                    <>
-                      {subjectOptions && (
-                        <MapSubjectOptions
-                          inList
-                          options={subjectOptions}
-                        />
-                      )}
-                      {checkboxOptions && (
-                        <Box>
-                          {checkboxOptions && checkboxOptions.map(
-                            (option, i) => (
-                              <MapOption key={i} option={option} />
-                            )
-                          )}
-                        </Box>
-                      )}
-                    </>
-                  )}
+                  options={{
+                    checkboxOptions,
+                    subjectOptions,
+                    typeOptions,
+                    hasSearch: true,
+                    paginate: true,
+                    includeMembers: mapSubjectClean === 'actors'
+                      ? includeActorMembers
+                      : includeTargetMembers,
+                    includeChildren: mapSubjectClean === 'actors'
+                      ? includeActorChildren
+                      : includeTargetChildren,
+                  }}
                   listUpdating={listUpdating}
                   entities={entities}
                   allEntityCount={allEntityCount}
                   errors={errors}
                   taxonomies={taxonomies}
-                  actortypes={actortypes}
                   connections={connections}
                   connectedTaxonomies={connectedTaxonomies}
                   entityIdsSelected={entityIdsSelected}
@@ -897,14 +819,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                   onDismissError={onDismissError}
                   typeId={typeId}
                   showCode={showCode}
-                  includeMembers={mapSubjectClean === 'actors'
-                    ? includeActorMembers
-                    : includeTargetMembers
-                  }
-                  includeChildren={mapSubjectClean === 'actors'
-                    ? includeActorChildren
-                    : includeTargetChildren
-                  }
                 />
               )}
             </div>

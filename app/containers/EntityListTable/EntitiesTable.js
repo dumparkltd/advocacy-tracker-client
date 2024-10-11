@@ -4,6 +4,7 @@ import { Box, ResponsiveContext } from 'grommet';
 import styled, { css } from 'styled-components';
 import { isMinSize } from 'utils/responsive';
 import { scaleColorCount } from 'containers/MapContainer/utils';
+import { usePrint } from 'containers/App/PrintContext';
 
 import { MAP_OPTIONS } from 'themes/config';
 
@@ -145,52 +146,15 @@ export function EntitiesTable({
   headerColumns,
   onEntityClick,
   columnMaxValues,
-  headerColumnsUtility,
-  memberOption,
-  childOption,
   inSingleView,
-  isPrintView,
 }) {
   const size = React.useContext(ResponsiveContext);
+  const isPrintView = usePrint();
   return (
     <Box fill="horizontal">
       <Table isPrint={isPrintView}>
         {headerColumns && (
           <TableHeader>
-            {headerColumnsUtility && isMinSize(size, 'large') && (
-              <TableRow>
-                {headerColumnsUtility.map(
-                  (col, i) => (
-                    <TableCellHeader
-                      key={i}
-                      scope="col"
-                      col={col}
-                      count={headerColumns.length}
-                      colSpan={col.span || 1}
-                      first={i === 0}
-                      last={i === headerColumns.length - 1}
-                      inSingleView={inSingleView}
-                      utility
-                    >
-                      {col.type === 'options' && (
-                        <Box>
-                          {memberOption && (
-                            <Box>
-                              {memberOption}
-                            </Box>
-                          )}
-                          {childOption && (
-                            <Box>
-                              {childOption}
-                            </Box>
-                          )}
-                        </Box>
-                      )}
-                    </TableCellHeader>
-                  )
-                )}
-              </TableRow>
-            )}
             <TableRow>
               {headerColumns.map(
                 (col, i) => (isMinSize(size, 'large') || isPrintView || col.type === 'main') && (
@@ -361,13 +325,9 @@ EntitiesTable.propTypes = {
   columns: PropTypes.array,
   columnMaxValues: PropTypes.object,
   headerColumns: PropTypes.array,
-  headerColumnsUtility: PropTypes.array,
   canEdit: PropTypes.bool,
   inSingleView: PropTypes.bool,
-  isPrintView: PropTypes.bool,
   onEntityClick: PropTypes.func,
-  memberOption: PropTypes.node,
-  childOption: PropTypes.node,
 };
 
 export default EntitiesTable;

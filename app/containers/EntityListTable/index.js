@@ -3,13 +3,9 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
-import { Box, ResponsiveContext } from 'grommet';
 import isNumber from 'utils/is-number';
 
-import {
-  OrderedMap, Map, List, fromJS,
-} from 'immutable';
-import { PAGE_ITEM_OPTIONS } from 'themes/config';
+import { Map, List, fromJS } from 'immutable';
 
 import {
   selectSortByQuery,
@@ -25,19 +21,16 @@ import {
 } from 'containers/App/selectors';
 import { updateQuery } from 'containers/EntityList/actions';
 
-import SelectReset from 'components/SelectReset';
-import EntityListSearch from 'components/EntityListSearch';
-
 import ToggleAllItems from 'components/fields/ToggleAllItems';
 import appMessages from 'containers/App/messages';
 
 import Messages from 'components/Messages';
 import { filterEntitiesByKeywords } from 'utils/entities';
 import { prepSortTarget } from 'utils/sort';
-import { isMinSize } from 'utils/responsive';
 import qe from 'utils/quasi-equals';
 
 import EntitiesTable from './EntitiesTable';
+import EntitiesTableOptions from './EntitiesTableOptions';
 
 import EntityListFooter from './EntityListFooter';
 
@@ -61,9 +54,7 @@ const ListEntitiesMain = styled.div`
   padding-top: 0.5em;
 `;
 const ListEntitiesEmpty = styled.div``;
-const EntityListSearchWrapper = styled((p) => <Box {...p} />)`
-  width: 500px;
-`;
+
 const CONNECTIONMAX = 5;
 const PAGE_SIZE = 20;
 const PAGE_SIZE_MAX = 100;
@@ -76,7 +67,6 @@ export function EntityListTable({
   entityIdsSelected,
   config,
   columns,
-  headerColumnsUtility,
   onEntityClick,
   canEdit,
   onEntitySelect,
@@ -84,11 +74,9 @@ export function EntityListTable({
   onEntitySelectAll,
   entities = List(),
   errors,
-  categories,
   connections,
   entityPath,
   url,
-  paginate,
   moreLess,
   onSort,
   onDismissError,
@@ -100,17 +88,11 @@ export function EntityListTable({
   hasFilters = false,
   searchQuery = '',
   onSearch,
-  hasSearch,
   inSingleView,
   label,
-  actortypes,
   taxonomies,
   resources,
-  memberOption,
-  childOption,
-  subjectOptions,
-  includeMembers,
-  includeChildren,
+  options = {},
   onPageItemsSelect,
   onPageSelect,
   printConfig,
@@ -118,8 +100,17 @@ export function EntityListTable({
   // allEntityCount,
   isByOption,
 }) {
-  const size = React.useContext(ResponsiveContext);
   if (!columns) return null;
+
+  // list options
+  const {
+    hasSearch,
+    paginate,
+    includeMembers,
+    includeChildren,
+  } = options;
+
+  // list sorting
   const sortColumn = columns.find((c) => !!c.sortDefault);
   const sortDefault = {
     sort: sortColumn ? sortColumn.sort : 'main',
@@ -127,7 +118,6 @@ export function EntityListTable({
   };
   const [showAllConnections, setShowAllConnections] = useState(false);
   const [localSort, setLocalSort] = useState(sortDefault);
-
   const cleanSortOrder = inSingleView ? localSort.order : (sortOrder || sortDefault.order);
   const cleanSortBy = inSingleView ? localSort.sort : (sortBy || sortDefault.sort);
   const cleanOnSort = inSingleView
@@ -153,27 +143,23 @@ export function EntityListTable({
       searchAttributes,
     );
   }
-  const activeColumns = columns.filter((col) => !col.skip && !(isPrintView && col.printHideOnSingle));
+  const activeColumns = columns.filter((col) => !(isPrintView && col.printHideOnSingle));
   // warning converting List to Array
   const entityRows = prepareEntityRows({
     entities: searchedEntities,
     columns: activeColumns,
-    config,
-    connections,
-    categories,
-    intl,
     entityIdsSelected,
+    config,
     url,
     entityPath,
     onEntityClick,
     onEntitySelect,
-    actortypes,
+    connections,
     taxonomies,
     resources,
+    intl,
     includeMembers,
     includeChildren,
-    isPrintView,
-    printConfig,
   });
   const columnMaxValues = getColumnMaxValues(
     entityRows,
@@ -288,71 +274,28 @@ export function EntityListTable({
   const listEmptyAfterQueryAndErrors = listEmptyAfterQuery
     && (errors && errors.size > 0);
 
-  const hasPageSelect = !isPrintView && entitiesOnPage && entitiesOnPage.length > 0 && paginate;
-
   return (
     <div>
-      <Box
-        direction={isMinSize(size, 'medium') ? 'row' : 'column'}
-        justify={subjectOptions ? 'between' : 'end'}
-        fill="horizontal"
-      >
-        {subjectOptions && !isPrintView && (
-          <Box
-            direction="column"
-            align="start"
-            gap="small"
-            pad={{ vertical: 'small' }}
-          >
-            <Box>
-              {subjectOptions}
-            </Box>
-          </Box>
-        )}
-        {(hasSearch || hasPageSelect) && (
-          <Box
-            direction="column"
-            align="end"
-            gap="small"
-            pad={{ vertical: 'small' }}
-            justify={hasSearch ? 'start' : 'end'}
-          >
-            {hasPageSelect && (
-              <Box>
-                <SelectReset
-                  value={pageItems === 'all' ? pageItems : pageSize.toString()}
-                  label={intl && intl.formatMessage(appMessages.labels.perPage)}
-                  index="page-select"
-                  options={PAGE_ITEM_OPTIONS && PAGE_ITEM_OPTIONS.map((option) => ({
-                    value: option.value.toString(),
-                    label: option.value.toString(),
-                  }))}
-                  isReset={false}
-                  onChange={onPageItemsSelect}
-                />
-              </Box>
-            )}
-            {hasSearch && (
-              <EntityListSearchWrapper>
-                <EntityListSearch searchQuery={searchQuery} onSearch={onSearch} />
-              </EntityListSearchWrapper>
-            )}
-          </Box>
-        )}
-      </Box>
+      {options && (
+        <EntitiesTableOptions
+          options={{
+            ...options,
+            hasPageSelect: !isPrintView && entitiesOnPage && entitiesOnPage.length > 0 && paginate,
+          }}
+          onPageItemsSelect={onPageItemsSelect}
+          onSearch={onSearch}
+          searchQuery={searchQuery}
+          pageSelectValue={pageItems === 'all' ? pageItems : pageSize.toString()}
+        />
+      )}
       <EntitiesTable
         entities={entitiesOnPage}
+        canEdit={canEdit}
         columns={activeColumns}
         headerColumns={headerColumns || []}
-        canEdit={canEdit}
         onEntityClick={onEntityClick}
         columnMaxValues={columnMaxValues}
-        headerColumnsUtility={headerColumnsUtility}
-        memberOption={memberOption}
-        childOption={childOption}
-        subjectOptions={subjectOptions}
         inSingleView={inSingleView}
-        isPrintView={isPrintView}
       />
       <ListEntitiesMain>
         {listEmpty && (
@@ -424,10 +367,8 @@ export function EntityListTable({
 
 EntityListTable.propTypes = {
   entities: PropTypes.instanceOf(List),
-  categories: PropTypes.instanceOf(Map),
   resources: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
-  actortypes: PropTypes.instanceOf(OrderedMap),
   connections: PropTypes.instanceOf(Map),
   entityIdsSelected: PropTypes.instanceOf(List),
   // locationQuery: PropTypes.instanceOf(Map),
@@ -447,7 +388,6 @@ EntityListTable.propTypes = {
   onDismissError: PropTypes.func,
   showCode: PropTypes.bool,
   inSingleView: PropTypes.bool,
-  paginate: PropTypes.bool,
   moreLess: PropTypes.bool,
   entityPath: PropTypes.string,
   url: PropTypes.string,
@@ -459,11 +399,8 @@ EntityListTable.propTypes = {
   searchQuery: PropTypes.string,
   hasFilters: PropTypes.bool,
   onSearch: PropTypes.func,
-  hasSearch: PropTypes.bool,
   label: PropTypes.string,
-  memberOption: PropTypes.node,
-  childOption: PropTypes.node,
-  subjectOptions: PropTypes.node,
+  options: PropTypes.object,
   includeMembers: PropTypes.bool,
   includeChildren: PropTypes.bool,
   isByOption: PropTypes.bool,
