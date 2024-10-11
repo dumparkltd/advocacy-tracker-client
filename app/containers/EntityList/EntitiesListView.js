@@ -674,20 +674,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                   />
                 </Box>
               )}
-              {config.types === 'actiontypes' && subjectOptions && !isPrintView && (
-                <Box>
-                  <MapSubjectOptions options={subjectOptions} inList />
-                </Box>
-              )}
-              {checkboxOptions && (
-                <Box>
-                  {checkboxOptions && checkboxOptions.map(
-                    (option, i) => (
-                      <MapOption key={i} option={option} />
-                    )
-                  )}
-                </Box>
-              )}
               {showRelatedActorsForActions && (
                 <Box>
                   <BoxPrint
@@ -877,14 +863,25 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                       type="child"
                     />
                   )}
-                  subjectOptions={config.types === 'actortypes'
-                    && subjectOptions
-                    && (
-                      <MapSubjectOptions
-                        inList
-                        options={subjectOptions}
-                      />
-                    )}
+                  subjectOptions={(
+                    <>
+                      {subjectOptions && (
+                        <MapSubjectOptions
+                          inList
+                          options={subjectOptions}
+                        />
+                      )}
+                      {checkboxOptions && (
+                        <Box>
+                          {checkboxOptions && checkboxOptions.map(
+                            (option, i) => (
+                              <MapOption key={i} option={option} />
+                            )
+                          )}
+                        </Box>
+                      )}
+                    </>
+                  )}
                   listUpdating={listUpdating}
                   entities={entities}
                   allEntityCount={allEntityCount}

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
-import { Box } from 'grommet';
+import { Box, ResponsiveContext } from 'grommet';
 import isNumber from 'utils/is-number';
 
 import {
@@ -34,6 +34,7 @@ import appMessages from 'containers/App/messages';
 import Messages from 'components/Messages';
 import { filterEntitiesByKeywords } from 'utils/entities';
 import { prepSortTarget } from 'utils/sort';
+import { isMinSize } from 'utils/responsive';
 import qe from 'utils/quasi-equals';
 
 import EntitiesTable from './EntitiesTable';
@@ -117,6 +118,7 @@ export function EntityListTable({
   // allEntityCount,
   isByOption,
 }) {
+  const size = React.useContext(ResponsiveContext);
   if (!columns) return null;
   const sortColumn = columns.find((c) => !!c.sortDefault);
   const sortDefault = {
@@ -287,38 +289,57 @@ export function EntityListTable({
     && (errors && errors.size > 0);
 
   const hasPageSelect = !isPrintView && entitiesOnPage && entitiesOnPage.length > 0 && paginate;
+
   return (
     <div>
-      {(hasSearch || hasPageSelect) && (
-        <Box
-          direction="column"
-          align="end"
-          gap="small"
-          pad={{ vertical: 'small' }}
-          justify={hasSearch ? 'start' : 'end'}
-        >
-          {hasPageSelect && (
+      <Box
+        direction={isMinSize(size, 'medium') ? 'row' : 'column'}
+        justify={subjectOptions ? 'between' : 'end'}
+        fill="horizontal"
+      >
+        {subjectOptions && !isPrintView && (
+          <Box
+            direction="column"
+            align="start"
+            gap="small"
+            pad={{ vertical: 'small' }}
+          >
             <Box>
-              <SelectReset
-                value={pageItems === 'all' ? pageItems : pageSize.toString()}
-                label={intl && intl.formatMessage(appMessages.labels.perPage)}
-                index="page-select"
-                options={PAGE_ITEM_OPTIONS && PAGE_ITEM_OPTIONS.map((option) => ({
-                  value: option.value.toString(),
-                  label: option.value.toString(),
-                }))}
-                isReset={false}
-                onChange={onPageItemsSelect}
-              />
+              {subjectOptions}
             </Box>
-          )}
-          {hasSearch && (
-            <EntityListSearchWrapper>
-              <EntityListSearch searchQuery={searchQuery} onSearch={onSearch} />
-            </EntityListSearchWrapper>
-          )}
-        </Box>
-      )}
+          </Box>
+        )}
+        {(hasSearch || hasPageSelect) && (
+          <Box
+            direction="column"
+            align="end"
+            gap="small"
+            pad={{ vertical: 'small' }}
+            justify={hasSearch ? 'start' : 'end'}
+          >
+            {hasPageSelect && (
+              <Box>
+                <SelectReset
+                  value={pageItems === 'all' ? pageItems : pageSize.toString()}
+                  label={intl && intl.formatMessage(appMessages.labels.perPage)}
+                  index="page-select"
+                  options={PAGE_ITEM_OPTIONS && PAGE_ITEM_OPTIONS.map((option) => ({
+                    value: option.value.toString(),
+                    label: option.value.toString(),
+                  }))}
+                  isReset={false}
+                  onChange={onPageItemsSelect}
+                />
+              </Box>
+            )}
+            {hasSearch && (
+              <EntityListSearchWrapper>
+                <EntityListSearch searchQuery={searchQuery} onSearch={onSearch} />
+              </EntityListSearchWrapper>
+            )}
+          </Box>
+        )}
+      </Box>
       <EntitiesTable
         entities={entitiesOnPage}
         columns={activeColumns}

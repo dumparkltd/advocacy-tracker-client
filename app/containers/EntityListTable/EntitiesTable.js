@@ -148,7 +148,6 @@ export function EntitiesTable({
   headerColumnsUtility,
   memberOption,
   childOption,
-  subjectOptions,
   inSingleView,
   isPrintView,
 }) {
@@ -175,11 +174,6 @@ export function EntitiesTable({
                     >
                       {col.type === 'options' && (
                         <Box>
-                          {subjectOptions && (
-                            <Box>
-                              {subjectOptions}
-                            </Box>
-                          )}
                           {memberOption && (
                             <Box>
                               {memberOption}
@@ -374,7 +368,6 @@ EntitiesTable.propTypes = {
   onEntityClick: PropTypes.func,
   memberOption: PropTypes.node,
   childOption: PropTypes.node,
-  subjectOptions: PropTypes.node,
 };
 
 export default EntitiesTable;
