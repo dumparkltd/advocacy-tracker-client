@@ -14,7 +14,7 @@ import {
 
 import appMessages from 'containers/App/messages';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
-import { lowerCase } from 'lodash';
+import { lowerCase } from 'utils/string';
 import OptionGroup from './OptionGroup';
 
 import messages from './messages';
