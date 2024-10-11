@@ -32,7 +32,6 @@ import {
 } from 'containers/App/actions';
 
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
-import EntityListViewOptions from 'components/EntityListViewOptions';
 import HeaderPrint from 'components/Header/HeaderPrint';
 
 import appMessages from 'containers/App/messages';
@@ -57,7 +56,6 @@ const StatementButton = styled((p) => <Button {...p} />)`
 `;
 
 export function EntitiesMapActions({
-  viewOptions,
   entities,
   actortypes,
   actiontypes,
@@ -479,7 +477,12 @@ export function EntitiesMapActions({
     }];
   }
   return (
-    <Styled headerStyle="types" noOverflow isPrint={isPrintView}>
+    <Styled
+      headerStyle="types"
+      isPrint={isPrintView}
+      noOverflow
+      isOnMap
+    >
       {isPrintView && (
         <HeaderPrint argsRemove={['msubj', 'subj', 'ac', 'tc', 'mtchm', 'mtch', 'actontype']} />
       )}
@@ -507,9 +510,6 @@ export function EntitiesMapActions({
         onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
         mapInfo={mapInfo}
       />
-      {viewOptions && viewOptions.length > 1 && (
-        <EntityListViewOptions options={viewOptions} isOnMap isPrintView={isPrintView} />
-      )}
     </Styled>
   );
 }
@@ -521,7 +521,6 @@ EntitiesMapActions.propTypes = {
   targettypes: PropTypes.instanceOf(Map),
   countries: PropTypes.instanceOf(Map),
   indicators: PropTypes.instanceOf(Map),
-  viewOptions: PropTypes.array,
   // primitive
   typeId: PropTypes.string,
   mapSubject: PropTypes.string,

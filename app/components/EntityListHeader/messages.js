@@ -18,7 +18,7 @@ export default defineMessages({
   listOptions: {
     showFilter: {
       id: 'app.components.EntityListHeader.listOptions.showFilter',
-      defaultMessage: 'Show filter options',
+      defaultMessage: 'Filter',
     },
     showEditOptions: {
       id: 'app.components.EntityListHeader.listOptions.showEditOptions',

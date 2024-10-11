@@ -71,7 +71,6 @@ export function ActionList({
   targettypes,
   resourcetypes,
   onSetPrintView,
-  handleNew,
   handleImport,
   view,
   intl,
@@ -140,12 +139,6 @@ export function ActionList({
     });
   }
   if (isMember) {
-    headerOptions.actions.push({
-      title: 'Create new',
-      onClick: () => handleNew(typeId),
-      icon: 'add',
-      isMember,
-    });
     headerOptions.actions.push({
       title: intl.formatMessage(appMessages.buttons.import),
       onClick: () => handleImport(typeId),
@@ -260,7 +253,6 @@ ActionList.propTypes = {
   allEntities: PropTypes.instanceOf(Map),
   onLoadEntitiesIfNeeded: PropTypes.func,
   onSetFilterMemberOption: PropTypes.func,
-  handleNew: PropTypes.func,
   handleImport: PropTypes.func,
   onSetPrintView: PropTypes.func,
   location: PropTypes.object,
@@ -294,9 +286,6 @@ function mapDispatchToProps(dispatch) {
   return {
     onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
-    },
-    handleNew: (typeId) => {
-      dispatch(updatePath(`${ROUTES.ACTIONS}/${typeId}${ROUTES.NEW}`, { replace: true }));
     },
     handleImport: (typeId) => {
       dispatch(updatePath(`${ROUTES.ACTIONS}/${typeId}${ROUTES.IMPORT}`));

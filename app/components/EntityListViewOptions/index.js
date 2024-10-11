@@ -1,29 +1,30 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { palette } from 'styled-theme';
 
-import ButtonFactory from 'components/buttons/ButtonFactory';
+import {
+  Text, Box, Button,
+} from 'grommet';
 
-const Styled = styled.div`
-  position: ${({ isOnMap }) => isOnMap ? 'absolute' : 'relative'};
+import { Map, List } from 'grommet-icons';
+
+const Styled = styled((p) => <Box {...p} />)`
+  position: relative;
   z-index: 20;
-  margin-left: 20px;
-  padding: 10px 0;
   display: ${({ isPrint }) => isPrint ? 'none' : 'inline-block'};
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    margin-left: 60px;
-    padding: 20px 0;
-  }
 `;
-const ButtonGroup = styled.div`
+const ButtonGroup = styled((p) => <Box {...p} />)`
   display: table;
   text-align: right;
-  margin-bottom: 10px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    margin-bottom: 0;
-  }
+  border-radius: 999px;
+  box-shadow: ${({ isOnMap }) => isOnMap ? '0px 0px 5px 0px rgba(0,0,0,0.2)' : 'none'};
+  background: white;
 `;
-
+const ButtonLabel = styled((p) => <Text size="small" {...p} />)`
+  color: ${({ isActive }) => isActive ? palette('dark', 1) : palette('dark', 3)};
+  font-weight: normal;
+`;
 const TableCell = styled.span`
   display: ${({ hiddenMobile }) => {
     if (hiddenMobile) {
@@ -41,24 +42,64 @@ const ButtonWrap = styled.span`
     display: none;
   }
 `;
-
-
+const ButtonOptions = styled((p) => <Button {...p} />)`
+  color: ${({ isActive }) => isActive ? palette('dark', 1) : palette('dark', 3)};
+  border-radius: 999px;
+  border: none;
+  &:hover {
+    box-shadow: none;
+    color: ${palette('primary', 1)};
+  }
+`;
 class EntityListViewOptions extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   render() {
     const { options, isOnMap, isPrintView } = this.props;
-
     return (
-      <Styled isOnMap={isOnMap} isPrint={isPrintView}>
+      <Styled isPrint={isPrintView}>
         {options && (
-          <ButtonGroup>
-            {
-              options.map((option, i) => option && (
-                <TableCell key={i}>
-                  <ButtonWrap>
-                    <ButtonFactory button={option} />
-                  </ButtonWrap>
-                </TableCell>
-              ))
+          <ButtonGroup pad="xsmall" isOnMap={isOnMap}>
+            {options.map((option, i) => option && (
+              <TableCell key={i}>
+                <ButtonWrap>
+                  <ButtonOptions
+                    onClick={() => option.onClick()}
+                    isActive={option.active}
+                    pad={{
+                      vertical: 'xsmall',
+                      horizontal: 'small',
+                      left: (option.isFirst && !isOnMap) ? 'none' : 'smaall',
+                    }}
+                    label={(
+                      <Box direction="row" gap="small" align="center">
+                        <Box>
+                          {
+                            option.title === 'Map'
+                              ? (
+                                <Map
+                                  size="small"
+                                  color={option.active ? palette('dark', 1) : palette('dark', 3)}
+                                />
+                              )
+                              : (
+                                <List
+                                  size="small"
+                                  color={option.active ? palette('dark', 1) : palette('dark', 3)}
+                                />
+                              )
+                          }
+                        </Box>
+                        <ButtonLabel
+                          size="small"
+                          isActive={option.active}
+                        >
+                          {option.title}
+                        </ButtonLabel>
+                      </Box>
+                    )}
+                  />
+                </ButtonWrap>
+              </TableCell>
+            ))
             }
           </ButtonGroup>
         )}

@@ -5,7 +5,8 @@ const Styled = styled.div`
   position: ${({ isStatic, isPrint }) => (isPrint || isStatic) ? 'static' : 'absolute'};
   top: ${({ headerStyle, theme }) => {
     if (headerStyle === 'types') {
-      return theme.sizes.headerList.banner.height;
+      // to fix: add dynamic headerexplore height
+      return theme.sizes.headerList.banner.height + 60;
     }
     if (headerStyle === 'simple') {
       return 40;

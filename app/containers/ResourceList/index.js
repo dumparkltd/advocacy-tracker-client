@@ -62,7 +62,6 @@ export function ResourceList({
   resourcetypes,
   onSelectType,
   handleImport,
-  handleNew,
   allEntities,
   onSetPrintView,
   intl,
@@ -109,13 +108,6 @@ export function ResourceList({
     });
   }
   if (isMember) {
-    headerOptions.actions.push({
-      type: 'text',
-      title: 'Create new',
-      onClick: () => handleNew(typeId),
-      icon: 'add',
-      isMember,
-    });
     headerOptions.actions.push({
       type: 'text',
       title: intl.formatMessage(appMessages.buttons.import),
@@ -167,7 +159,6 @@ export function ResourceList({
 
 ResourceList.propTypes = {
   onLoadEntitiesIfNeeded: PropTypes.func,
-  handleNew: PropTypes.func,
   handleImport: PropTypes.func,
   onSelectType: PropTypes.func,
   dataReady: PropTypes.bool,
@@ -200,9 +191,6 @@ function mapDispatchToProps(dispatch) {
   return {
     onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
-    },
-    handleNew: (typeId) => {
-      dispatch(updatePath(`${ROUTES.RESOURCES}/${typeId}${ROUTES.NEW}`, { replace: true }));
     },
     handleImport: (typeId) => {
       dispatch(updatePath(`${ROUTES.RESOURCES}/${typeId}${ROUTES.IMPORT}`));

@@ -26,11 +26,9 @@ import { jumpToComponent } from 'utils/scroll-to-component';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
 import Content from 'components/styled/ContentSimple';
-import EntityListViewOptions from 'components/EntityListViewOptions';
 import ButtonPill from 'components/buttons/ButtonPill';
 import HeaderPrint from 'components/Header/HeaderPrint';
 import TagList from 'components/TagList';
-import PrintHide from 'components/styled/PrintHide';
 import BoxPrint from 'components/styled/BoxPrint';
 
 import MapSubjectOptions from 'containers/MapContainer/MapInfoOptions/MapSubjectOptions';
@@ -636,11 +634,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       <ContainerWrapper headerStyle={headerStyle} ref={this.ScrollContainer} isPrintView={isPrintView}>
         {isPrintView && (
           <HeaderPrint argsRemove={['subj', 'ac', 'tc', 'mtchm', 'mtch', 'actontype']} />
-        )}
-        {viewOptions && viewOptions.length > 1 && (
-          <PrintHide>
-            <EntityListViewOptions options={viewOptions} isPrintView={isPrintView} />
-          </PrintHide>
         )}
         <Container ref={this.ScrollReference} isPrint={isPrintView}>
           <Content isPrint={isPrintView}>
