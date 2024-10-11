@@ -110,10 +110,6 @@ export default defineMessages({
       id: 'app.components.EntityListDownload.optionGroups.supportLabel',
       defaultMessage: 'Support',
     },
-    actionAsTargetLabel: {
-      id: 'app.components.EntityListDownload.optionGroups.actionAsTargetLabel',
-      defaultMessage: 'Activities as target',
-    },
     associationsLabel: {
       id: 'app.components.EntityListDownload.optionGroups.associationsLabel',
       defaultMessage: 'Memberships',
@@ -180,7 +176,7 @@ export default defineMessages({
     },
     introNodeHasMembersNoAssociation: {
       id: 'app.components.EntityListDownload.optionGroups.introNode.introNodeHasMembersNoAssociation',
-      defaultMessage: ' Please note that activities targeting {type} members are not included.',
+      defaultMessage: ' Please note that activities connected to {type} members are not included.',
     },
     introNodeHasAssociations: {
       id: 'app.components.EntityListDownload.optionGroups.introNodeHasAssociations',

@@ -26,8 +26,6 @@ import {
   selectActiontypes,
   selectActortypesForActiontype,
   selectParentActortypesForActiontype,
-  selectParentTargettypesForActiontype,
-  selectTargettypesForActiontype,
   selectResourcetypesForActiontype,
   selectViewQuery,
   selectIncludeMembersForFiltering,
@@ -67,8 +65,6 @@ export function ActionList({
   actiontypes,
   actortypes,
   parentActortypes,
-  parentTargettypes,
-  targettypes,
   resourcetypes,
   onSetPrintView,
   handleImport,
@@ -150,13 +146,9 @@ export function ActionList({
   const filterActortypes = hasMemberFilterOption && parentActortypes
     ? actortypes.merge(parentActortypes)
     : actortypes;
-  const filterTargettypes = hasMemberFilterOption && parentTargettypes
-    ? targettypes.merge(parentTargettypes)
-    : targettypes;
   // console.log('filterActortypes', filterActortypes && filterActortypes.toJS())
   // console.log('parentActortypes', parentActortypes && parentActortypes.toJS())
   // console.log('actortypes', actortypes && actortypes.toJS())
-  // console.log('targettypes', targettypes && targettypes.toJS())
   let filteringOptions;
   if (hasMemberFilterOption && onSetFilterMemberOption) {
     filteringOptions = [{
@@ -225,8 +217,6 @@ export function ActionList({
         locationQuery={fromJS(location.query)}
         actortypes={actortypes}
         filterActortypes={filterActortypes}
-        targettypes={targettypes}
-        filterTargettypes={filterTargettypes}
         actiontypes={actiontypes}
         resourcetypes={resourcetypes}
         typeId={typeId}
@@ -246,9 +236,7 @@ ActionList.propTypes = {
   connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
   parentActortypes: PropTypes.instanceOf(Map),
-  parentTargettypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
-  targettypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   allEntities: PropTypes.instanceOf(Map),
   onLoadEntitiesIfNeeded: PropTypes.func,
@@ -275,8 +263,6 @@ const mapStateToProps = (state, props) => ({
   actiontypes: selectActiontypes(state),
   actortypes: selectActortypesForActiontype(state, { type: props.params.id }),
   parentActortypes: selectParentActortypesForActiontype(state, { type: props.params.id }),
-  parentTargettypes: selectParentTargettypesForActiontype(state, { type: props.params.id }),
-  targettypes: selectTargettypesForActiontype(state, { type: props.params.id }),
   resourcetypes: selectResourcetypesForActiontype(state, { type: props.params.id }),
   allEntities: selectActionsWithConnections(state, { type: props.params.id }),
   view: selectViewQuery(state),

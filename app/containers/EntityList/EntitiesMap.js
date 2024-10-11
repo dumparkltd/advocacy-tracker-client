@@ -22,14 +22,11 @@ export function EntitiesMap({
   entities,
   actortypes,
   actiontypes,
-  targettypes,
   typeId,
   mapSubject,
   onSetMapSubject,
   onSetIncludeActorMembers,
-  onSetIncludeTargetMembers,
   includeActorMembers,
-  includeTargetMembers,
   onEntityClick,
   hasFilters,
   isPrintView,
@@ -47,9 +44,7 @@ export function EntitiesMap({
         mapSubject={mapSubject}
         onSetMapSubject={onSetMapSubject}
         onSetIncludeActorMembers={onSetIncludeActorMembers}
-        onSetIncludeTargetMembers={onSetIncludeTargetMembers}
         includeActorMembers={includeActorMembers}
-        includeTargetMembers={includeTargetMembers}
         hasFilters={hasFilters}
         onEntityClick={onEntityClick}
       />
@@ -64,15 +59,12 @@ export function EntitiesMap({
         entities={entities}
         actortypes={actortypes}
         actiontypes={actiontypes}
-        targettypes={targettypes}
         viewOptions={viewOptions}
         typeId={typeId}
         mapSubject={mapSubject}
         onSetMapSubject={onSetMapSubject}
         onSetIncludeActorMembers={onSetIncludeActorMembers}
-        onSetIncludeTargetMembers={onSetIncludeTargetMembers}
         includeActorMembers={includeActorMembers}
-        includeTargetMembers={includeTargetMembers}
         hasFilters={hasFilters}
         onEntityClick={onEntityClick}
       />
@@ -87,7 +79,6 @@ EntitiesMap.propTypes = {
   // connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
-  targettypes: PropTypes.instanceOf(Map),
   // object/arrays
   viewOptions: PropTypes.array,
   // primitive
@@ -95,9 +86,7 @@ EntitiesMap.propTypes = {
   mapSubject: PropTypes.string,
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
-  onSetIncludeTargetMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
-  includeTargetMembers: PropTypes.bool,
   hasFilters: PropTypes.bool,
   onEntityClick: PropTypes.func,
   isPrintView: PropTypes.bool,

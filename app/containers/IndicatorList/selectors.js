@@ -112,7 +112,7 @@ export const selectIndicatorsWithConnections = createSelector(
   selectIndicatorsWhereQuery,
   (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
   selectConnections,
-  selectActionIndicatorsGroupedByIndicator, // as targets
+  selectActionIndicatorsGroupedByIndicator,
   (
     ready,
     indicators,

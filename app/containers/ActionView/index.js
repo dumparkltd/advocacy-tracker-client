@@ -49,7 +49,6 @@ import {
 import {
   // ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG, ACTORTYPES, RESOURCE_FIELDS,
   ROUTES,
-  ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_ACTIONTYPES,
   INDICATOR_ACTIONTYPES,
@@ -183,8 +182,7 @@ export function ActionView(props) {
   // const type = `actions_${typeId}`;
   let viewSubject = subject || 'actors';
 
-  const hasMap = viewSubject === 'actors'
-    || viewSubject === 'targets';
+  const hasMap = viewSubject === 'actors';
 
   const mySetPrintView = () => onSetPrintView({
     printType: PRINT_TYPES.SINGLE,
@@ -244,7 +242,6 @@ export function ActionView(props) {
     ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
     : `${pageTitle}: ${params.id}`;
 
-  const hasTarget = ACTIONTYPE_TARGETTYPES[typeId] && ACTIONTYPE_TARGETTYPES[typeId].length > 0;
   const hasActor = ACTIONTYPE_ACTORTYPES[typeId] && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
   const childActiontypeIds = typeId
     ? Object.keys(ACTIONTYPE_ACTIONTYPES).reduce(
@@ -263,9 +260,6 @@ export function ActionView(props) {
   const validViewSubjects = [];
   if (hasActor) {
     validViewSubjects.push('actors');
-  }
-  if (hasTarget) {
-    validViewSubjects.push('targets');
   }
   if (hasChildren) {
     validViewSubjects.push('children');
@@ -408,14 +402,6 @@ export function ActionView(props) {
                               <Text size="large">Actors</Text>
                             </SubjectButton>
                           )}
-                          {hasTarget && (
-                            <SubjectButton
-                              onClick={() => onSetSubject('targets')}
-                              active={viewSubject === 'targets'}
-                            >
-                              <Text size="large">Targets</Text>
-                            </SubjectButton>
-                          )}
                           {hasChildren && (
                             <SubjectButton
                               onClick={() => onSetSubject('children')}
@@ -455,7 +441,7 @@ export function ActionView(props) {
                             <span key={vSubject}>
                               <PrintOnly>
                                 <PrintSectionTitleWrapper>
-                                  <Text size="large">{subject === 'actors' ? 'Actors' : 'Targets'}</Text>
+                                  <Text size="large">Actors</Text>
                                 </PrintSectionTitleWrapper>
                               </PrintOnly>
                               <TabActors

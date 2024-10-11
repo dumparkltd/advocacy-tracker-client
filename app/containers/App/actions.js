@@ -74,13 +74,11 @@ import {
   SET_MAPSUBJECT,
   SET_MAPINDICATOR,
   SET_INCLUDE_ACTOR_MEMBERS,
-  SET_INCLUDE_TARGET_MEMBERS,
   SET_INCLUDE_ACTOR_CHILDREN,
-  SET_INCLUDE_TARGET_CHILDREN,
   SET_INCLUDE_MEMBERS_FORFILTERS,
   SET_INCLUDE_INOFFICAL_STATEMENTS,
-  SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
-  SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP,
+  SET_INCLUDE_ACTOR_CHILDREN_ON_MAP,
+  SET_INCLUDE_ACTOR_CHILDREN_MEMBERS_ON_MAP,
   PRINT_VIEW,
   CLOSE_PRINT_VIEW,
 } from './constants';
@@ -564,33 +562,21 @@ export function setIncludeActorMembers(value) {
     value,
   };
 }
-export function setIncludeTargetMembers(value) {
-  return {
-    type: SET_INCLUDE_TARGET_MEMBERS,
-    value,
-  };
-}
 export function setIncludeActorChildren(value) {
   return {
     type: SET_INCLUDE_ACTOR_CHILDREN,
     value,
   };
 }
-export function setIncludeTargetChildren(value) {
+export function setIncludeActorChildrenOnMap(value) {
   return {
-    type: SET_INCLUDE_TARGET_CHILDREN,
+    type: SET_INCLUDE_ACTOR_CHILDREN_ON_MAP,
     value,
   };
 }
-export function setIncludeTargetChildrenOnMap(value) {
+export function setIncludeActorChildrenMembersOnMap(value) {
   return {
-    type: SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
-    value,
-  };
-}
-export function setIncludeTargetChildrenMembersOnMap(value) {
-  return {
-    type: SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP,
+    type: SET_INCLUDE_ACTOR_CHILDREN_MEMBERS_ON_MAP,
     value,
   };
 }

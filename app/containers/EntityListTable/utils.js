@@ -71,24 +71,16 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
-      case 'targets':
+      case 'actorsViaChildren':
         return ({
           ...col,
-          title: 'Targets',
-          sortActive,
-          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
-          onSort,
-        });
-      case 'targetsViaChildren':
-        return ({
-          ...col,
-          title: 'Indirect targets',
+          title: 'Indirect stakeholders',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
           info: {
             type: 'text',
-            title: 'Indirect targets',
+            title: 'Indirect stakeholders',
             text: 'From child activities, e.g tasks',
           },
         });
@@ -217,20 +209,11 @@ export const prepareHeader = ({
       case 'indicatorActions':
       case 'actorActions':
         if (!label) {
-          if (col.subject === 'targets') {
-            label = 'Targeted by';
-            if (col.members) {
-              label = 'Targeted as member';
-            } else if (col.children) {
-              label = 'Targeted as parent';
-            }
-          } else {
-            label = 'Activities';
-            if (col.members) {
-              label = 'Activities as member';
-            } else if (col.children) {
-              label = 'Activities as parent';
-            }
+          label = 'Activities';
+          if (col.members) {
+            label = 'Activities as member';
+          } else if (col.children) {
+            label = 'Activities as parent';
           }
         }
         return ({
@@ -251,7 +234,7 @@ export const prepareHeader = ({
         });
       case 'actionsSimple':
         if (!label) {
-          label = col.subject === 'actors' ? 'Actions' : 'Targets';
+          label = 'Actions';
         }
         return ({
           ...col,
@@ -435,29 +418,14 @@ export const prepareEntityRows = ({
                 sortValue: getRelatedSortValue(relatedEntities),
               },
             };
-          case 'targets':
-            temp = entity.get('targets') || (entity.get('targetsByType') && entity.get('targetsByType').flatten(true));
+          case 'actorsViaChildren':
+            temp = entity.get('actorsViaChildren');
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: getRelatedValue(relatedEntities, col.label || 'targets'),
-                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
-                tooltip: relatedEntities && relatedEntities.size > 1
-                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
-                multiple: relatedEntities && relatedEntities.size > 1,
-                sortValue: getRelatedSortValue(relatedEntities),
-              },
-            };
-          case 'targetsViaChildren':
-            temp = entity.get('targetsViaChildren');
-            relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
-            return {
-              ...memoEntity,
-              [col.id]: {
-                ...col,
-                value: getRelatedValue(relatedEntities, col.label || 'targets'),
+                value: getRelatedValue(relatedEntities, col.label || 'actors'),
                 single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
                 tooltip: relatedEntities && relatedEntities.size > 1
                   && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),

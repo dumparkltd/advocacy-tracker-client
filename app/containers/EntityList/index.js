@@ -558,9 +558,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             entities={entities}
             errors={errors}
             taxonomies={taxonomies}
-            actortypes={actortypes}
-            actiontypes={actiontypes}
-            resourcetypes={resourcetypes}
             connections={connections}
             connectedTaxonomies={connectedTaxonomies}
             entityIdsSelected={entityIdsSelectedFiltered}

@@ -20,7 +20,6 @@ import {
   renderTaxonomyControl,
   getLinkFormField,
   renderActionsByActiontypeControl,
-  renderActionsAsTargetByActiontypeControl,
   renderAssociationsByActortypeControl,
   renderMembersByActortypeControl,
   getEmailField,
@@ -67,7 +66,6 @@ import FormWrapper from './FormWrapper';
 
 import {
   selectActionsByActiontype,
-  selectActionsAsTargetByActiontype,
   selectMembersByActortype,
   selectAssociationsByActortype,
   selectUserOptions,
@@ -172,7 +170,6 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
     typeId,
     connectedTaxonomies,
     actionsByActiontype,
-    actionsAsTargetByActiontype,
     membersByActortype,
     onCreateOption,
     isAdmin,
@@ -205,23 +202,6 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
         groups.push(
           {
             label: intl.formatMessage(appMessages.nav.actions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    if (actionsAsTargetByActiontype) {
-      const actionConnections = renderActionsAsTargetByActiontypeControl({
-        entitiesByActiontype: actionsAsTargetByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.targetingActions),
             fields: actionConnections,
           },
         );
@@ -318,7 +298,6 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       viewDomain,
       connectedTaxonomies,
       actionsByActiontype,
-      actionsAsTargetByActiontype,
       taxonomies,
       onCreateOption,
       actortype,
@@ -368,7 +347,6 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
             formData,
             actortype,
             actionsByActiontype,
-            actionsAsTargetByActiontype,
             membersByActortype,
             associationsByActortype,
             userOptions,
@@ -390,7 +368,6 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
                 typeId,
                 connectedTaxonomies,
                 actionsByActiontype,
-                actionsAsTargetByActiontype,
                 membersByActortype,
                 inModal ? null : onCreateOption,
                 isAdmin,
@@ -427,7 +404,6 @@ ActorNewForm.propTypes = {
   onCreateOption: PropTypes.func,
   initialiseForm: PropTypes.func,
   actionsByActiontype: PropTypes.object,
-  actionsAsTargetByActiontype: PropTypes.object,
   connectedTaxonomies: PropTypes.object,
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
@@ -463,7 +439,6 @@ const mapStateToProps = (state, { typeId, autoUser }) => ({
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   actortype: selectActortype(state, typeId),
   actionsByActiontype: selectActionsByActiontype(state, typeId),
-  actionsAsTargetByActiontype: selectActionsAsTargetByActiontype(state, typeId),
   membersByActortype: selectMembersByActortype(state, typeId),
   associationsByActortype: selectAssociationsByActortype(state, typeId),
   userOptions: selectUserOptions(state, typeId),
@@ -509,7 +484,6 @@ function mapDispatchToProps(
       formData,
       actortype,
       actionsByActiontype,
-      actionsAsTargetByActiontype,
       membersByActortype,
       associationsByActortype,
       userOptions,
@@ -553,29 +527,6 @@ function mapDispatchToProps(
               formData,
               connections: actors,
               connectionAttribute: ['associatedActionsByActiontype', actortypeid.toString()],
-              createConnectionKey: 'measure_id',
-              createKey: 'actor_id',
-            }))
-            .reduce(
-              (memo, deleteCreateLists) => {
-                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
-                return memo.set('create', creates);
-              },
-              fromJS({
-                create: [],
-              }),
-            )
-        );
-      }
-      // actions if allowed by actortype
-      if (actionsAsTargetByActiontype && formData.get('associatedActionsAsTargetByActiontype')) {
-        saveData = saveData.set(
-          'actionActors',
-          actionsAsTargetByActiontype
-            .map((actors, actortypeid) => getConnectionUpdatesFromFormData({
-              formData,
-              connections: actors,
-              connectionAttribute: ['associatedActionsAsTargetByActiontype', actortypeid.toString()],
               createConnectionKey: 'measure_id',
               createKey: 'actor_id',
             }))
@@ -654,7 +605,6 @@ function mapDispatchToProps(
         if (modalConnect
           && (
             modalConnect.get('type') === 'actorActions'
-            || modalConnect.get('type') === 'actionActors'
             || modalConnect.get('type') === 'userActions'
             || modalConnect.get('type') === 'subActions'
           )

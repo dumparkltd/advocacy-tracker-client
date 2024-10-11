@@ -1040,7 +1040,6 @@ export const setActionConnections = ({
   action,
   actionConnections,
   actorActions, // as active actor
-  actionActors, // as passive target of action
   actionResources,
   actionIndicators,
   actionIndicatorAttributes,
@@ -1054,14 +1053,6 @@ export const setActionConnections = ({
   const entityActorsByActortype = entityActors
     && actionConnections.get(API.ACTORS)
     && entityActors
-      .filter((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString()]))
-      .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
-      .sortBy((val, key) => key);
-  // actors
-  const entityTargets = actionActors && actionActors.get(actionId);
-  const entityTargetsByActortype = entityTargets
-    && actionConnections.get(API.ACTORS)
-    && entityTargets
       .filter((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString()]))
       .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
       .sortBy((val, key) => key);
@@ -1099,7 +1090,6 @@ export const setActionConnections = ({
   return action
     .set('categories', entityCategories)
     .set('actorsByType', entityActorsByActortype)
-    .set('targetsByType', entityTargetsByActortype)
     .set('resourcesByType', entityResourcesByResourcetype)
     .set('indicators', entityIndicators)
     .set('indicatorConnections', actionIndicatorAttributes && actionIndicatorAttributes.get(parseInt(action.get('id'), 10)))
@@ -1110,7 +1100,6 @@ export const setActorConnections = ({
   actor,
   actorConnections,
   actorActions,
-  actionActors,
   categories,
   actorCategories,
   memberships,
@@ -1124,15 +1113,6 @@ export const setActorConnections = ({
   const entityActionsByActiontype = entityActions
     && actorConnections.get(API.ACTIONS)
     && entityActions
-      .filter((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString()]))
-      .groupBy((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString(), 'attributes', 'measuretype_id']).toString())
-      .sortBy((val, key) => key);
-
-  // targets
-  const entityTargetingActions = actionActors && actionActors.get(actorId);
-  const entityTargetingActionsByType = entityTargetingActions
-    && actorConnections.get(API.ACTIONS)
-    && entityTargetingActions
       .filter((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString()]))
       .groupBy((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString(), 'attributes', 'measuretype_id']).toString())
       .sortBy((val, key) => key);
@@ -1174,7 +1154,6 @@ export const setActorConnections = ({
   return actor
     .set('categories', entityCategories)
     .set('actionsByType', entityActionsByActiontype)
-    .set('targetingActionsByType', entityTargetingActionsByType)
     .set('membersByType', entityMembersByActortype)
     .set('associationsByType', entityAssociationsByActortype)
     .set('users', entityUsers);

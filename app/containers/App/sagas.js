@@ -48,13 +48,9 @@ import {
   SET_MAPINDICATOR,
   OPEN_BOOKMARK,
   SET_INCLUDE_ACTOR_MEMBERS,
-  SET_INCLUDE_TARGET_MEMBERS,
   SET_INCLUDE_ACTOR_CHILDREN,
-  SET_INCLUDE_TARGET_CHILDREN,
   SET_INCLUDE_MEMBERS_FORFILTERS,
   SET_INCLUDE_INOFFICAL_STATEMENTS,
-  SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
-  SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP,
   SET_INCLUDE_SUPPORT_LEVEL,
   PARAMS,
 } from 'containers/App/constants';
@@ -457,15 +453,6 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
           },
         });
       }
-      // update action-actors connections (targets)
-      if (data.entity.actionActors) {
-        yield call(saveConnectionsSaga, {
-          data: {
-            path: API.ACTION_ACTORS,
-            updates: data.entity.actionActors,
-          },
-        });
-      }
       // update action-actions connections (relationships)
       if (data.entity.topActions) {
         yield call(saveConnectionsSaga, {
@@ -483,7 +470,6 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
           },
         });
       }
-      // update action-actors connections (targets)
       if (data.entity.actionResources) {
         yield call(saveConnectionsSaga, {
           data: {
@@ -668,15 +654,6 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
             entityId: entityCreated.data.id,
             path: API.ACTOR_ACTIONS,
             updates: data.entity.actorActions,
-            keyPair: ['actor_id', 'measure_id'],
-          });
-        }
-        // update action-actors connections (targets)
-        if (data.entity.actionActors) {
-          yield call(createConnectionsSaga, {
-            entityId: entityCreated.data.id,
-            path: API.ACTION_ACTORS,
-            updates: data.entity.actionActors,
             keyPair: ['actor_id', 'measure_id'],
           });
         }
@@ -1081,63 +1058,11 @@ export function* setIncludeActorMembersSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
-export function* setIncludeTargetMembersSaga({ value }) {
-  const location = yield select(selectLocation);
-  const queryNext = getNextQuery(
-    {
-      arg: 'tm',
-      value,
-      replace: true,
-    },
-    true, // extend
-    location,
-  );
-  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
-}
 export function* setIncludeActorChildrenSaga({ value }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
     {
       arg: 'ach',
-      value,
-      replace: true,
-    },
-    true, // extend
-    location,
-  );
-  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
-}
-export function* setIncludeTargetChildrenSaga({ value }) {
-  const location = yield select(selectLocation);
-  const queryNext = getNextQuery(
-    {
-      arg: 'tch',
-      value,
-      replace: true,
-    },
-    true, // extend
-    location,
-  );
-  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
-}
-export function* setIncludeTargetChildrenOnMapSaga({ value }) {
-  const location = yield select(selectLocation);
-  const queryNext = getNextQuery(
-    {
-      arg: 'mtch',
-      value,
-      replace: true,
-    },
-    true, // extend
-    location,
-  );
-  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
-}
-export function* setIncludeTargetChildrenMembersOnMapSaga({ value }) {
-  const location = yield select(selectLocation);
-  const queryNext = getNextQuery(
-    {
-      arg: 'mtchm',
       value,
       replace: true,
     },
@@ -1364,11 +1289,7 @@ export default function* rootSaga() {
   yield takeEvery(SET_MAPSUBJECT, setMapSubjectSaga);
   yield takeEvery(SET_MAPINDICATOR, setMapIndicatorSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_MEMBERS, setIncludeActorMembersSaga);
-  yield takeEvery(SET_INCLUDE_TARGET_MEMBERS, setIncludeTargetMembersSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_CHILDREN, setIncludeActorChildrenSaga);
-  yield takeEvery(SET_INCLUDE_TARGET_CHILDREN, setIncludeTargetChildrenSaga);
-  yield takeEvery(SET_INCLUDE_TARGET_CHILDREN_ON_MAP, setIncludeTargetChildrenOnMapSaga);
-  yield takeEvery(SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP, setIncludeTargetChildrenMembersOnMapSaga);
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
   yield takeEvery(SET_INCLUDE_INOFFICAL_STATEMENTS, setIncludeInofficialStatementsSaga);
   yield takeEvery(SET_INCLUDE_SUPPORT_LEVEL, setIncludeSupportLevelSaga);

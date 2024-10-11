@@ -17,9 +17,7 @@ import {
   selectActorConnections,
   selectActions,
   selectActorActionsGroupedByAction,
-  selectActionActorsGroupedByAction,
   selectActorActionsGroupedByActor,
-  selectActionActorsGroupedByActor,
   selectActionCategoriesGroupedByAction,
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
@@ -78,13 +76,6 @@ const selectActionAssociations = createSelector(
     parseInt(actorId, 10)
   )
 );
-const selectActionAsTargetAssociations = createSelector(
-  (state, id) => id,
-  selectActionActorsGroupedByActor,
-  (actorId, associationsByActor) => associationsByActor.get(
-    parseInt(actorId, 10)
-  )
-);
 const selectActionsAssociated = createSelector(
   selectActions,
   selectActionAssociations,
@@ -108,7 +99,6 @@ export const selectActionsWith = createSelector(
   selectActionsAssociated,
   selectActionConnections,
   selectActorActionsGroupedByAction,
-  selectActionActorsGroupedByAction,
   selectActionResourcesGroupedByAction,
   selectActionIndicatorsGroupedByAction,
   selectActionIndicatorsGroupedByActionAttributes,
@@ -122,7 +112,6 @@ export const selectActionsWith = createSelector(
     actions,
     actionConnections,
     actorActions,
-    actionActors,
     actionResources,
     actionIndicators,
     actionIndicatorsByActionAttributes,
@@ -150,7 +139,6 @@ export const selectActionsWith = createSelector(
         action,
         actionConnections,
         actorActions,
-        actionActors,
         actionResources,
         actionIndicators,
         actionIndicatorAttributes: actionIndicatorsByActionAttributes,
@@ -172,68 +160,6 @@ export const selectActionsByType = createSelector(
     return actions && actions
       .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
       .sortBy((val, key) => key);
-  }
-);
-
-const selectActionsAsTargetAssociated = createSelector(
-  selectActions,
-  selectActionAsTargetAssociations,
-  (actions, associations) => actions && associations && associations.reduce(
-    (memo, id) => {
-      const entity = actions.get(id.toString());
-      return entity
-        ? memo.set(id, entity)
-        : memo;
-    },
-    Map(),
-  )
-);
-// all connected actions where view entity is target
-// get associated actors with associoted actions and categories
-// - group by actortype
-export const selectActionsAsTargetByType = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectActionsAsTargetAssociated,
-  selectActionConnections,
-  selectActorActionsGroupedByAction,
-  selectActionActorsGroupedByAction,
-  selectActionResourcesGroupedByAction,
-  selectActionCategoriesGroupedByAction,
-  selectCategories,
-  selectUserActionsGroupedByAction,
-  (
-    ready,
-    actions,
-    actionConnections,
-    actorActions,
-    actionActors,
-    actionResources,
-    actionCategories,
-    categories,
-    userActions,
-  ) => {
-    if (!ready) return Map();
-    return actions && actions
-      .filter((action) => !!action)
-      .map((action) => setActionConnections({
-        action,
-        actionConnections,
-        actorActions,
-        actionActors,
-        actionResources,
-        categories,
-        actionCategories,
-        users: userActions,
-      }))
-      .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
-      .sortBy(
-        (val, key) => key,
-        (a, b) => {
-          const configA = ACTIONTYPES_CONFIG[a];
-          const configB = ACTIONTYPES_CONFIG[b];
-          return configA.order < configB.order ? -1 : 1;
-        }
-      );
   }
 );
 
@@ -266,7 +192,6 @@ export const selectMembersByType = createSelector(
   selectMembersJoined,
   selectActorConnections,
   selectActorActionsGroupedByActor,
-  selectActionActorsGroupedByActor,
   selectMembershipsGroupedByMember,
   selectMembershipsGroupedByParent,
   selectActorCategoriesGroupedByActor,
@@ -276,7 +201,6 @@ export const selectMembersByType = createSelector(
     actors,
     actorConnections,
     actorActions,
-    actionActors,
     memberships,
     associations,
     actorCategories,
@@ -289,7 +213,6 @@ export const selectMembersByType = createSelector(
         actor,
         actorConnections,
         actorActions,
-        actionActors,
         categories,
         actorCategories,
         memberships,
@@ -353,7 +276,6 @@ export const selectActionsAsMemberByActortype = createSelector(
   selectActorConnections,
   selectActionConnections,
   selectActorActionsGroupedByAction,
-  selectActionActorsGroupedByAction,
   selectCategories,
   selectActionCategoriesGroupedByAction,
   selectActions,
@@ -367,7 +289,6 @@ export const selectActionsAsMemberByActortype = createSelector(
     actorConnections,
     actionConnections,
     actorActionsByAction,
-    actionActors,
     categories,
     actionCategories,
     actions,
@@ -395,7 +316,6 @@ export const selectActionsAsMemberByActortype = createSelector(
                 actionCategories,
                 actionConnections,
                 actorActions: actorActionsByAction,
-                actionActors,
                 actionIndicators,
                 actionIndicatorAttributes: actionIndicatorsByActionAttributes,
                 users: userActions,
@@ -417,72 +337,6 @@ export const selectActionsAsMemberByActortype = createSelector(
       );
   },
 );
-export const selectActionsAsTargetAsMemberByActortype = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectAssociationsJoined, // all associations
-  selectActionActorsGroupedByActor,
-  selectActorConnections,
-  selectActionConnections,
-  selectActorActionsGroupedByAction,
-  selectActionActorsGroupedByAction,
-  selectCategories,
-  selectActionCategoriesGroupedByAction,
-  selectActions,
-  selectUserActionsGroupedByAction,
-  (
-    ready,
-    associations,
-    actionActorsByActor,
-    actorConnections,
-    actionConnections,
-    actorActionsByAction,
-    actionActors,
-    categories,
-    actionCategories,
-    actions,
-    userActions,
-  ) => {
-    if (!ready || !associations) return Map();
-    return associations
-      .filter((actor) => !!actor)
-      .map(
-        (actor) => setActorConnections({ actor, actionActors: actionActorsByActor, actorConnections })
-      )
-      .filter(
-        (actor) => actor.get('targetingActionsByType') && actor.get('targetingActionsByType').size > 0
-      )
-      .map(
-        (actor) => actor.set(
-          'targetingActionsByType',
-          actor.get('targetingActionsByType').map(
-            (actionIdsForType) => actionIdsForType.map(
-              (actionId) => setActionConnections({
-                action: actions.get(actionId.toString()),
-                categories,
-                actionCategories,
-                actionConnections,
-                actorActions: actorActionsByAction,
-                actionActors,
-                users: userActions,
-              })
-            )
-          )
-        )
-      )
-      .groupBy(
-        (r) => r.getIn(['attributes', 'actortype_id'])
-      )
-      .sortBy(
-        (val, key) => key,
-        (a, b) => {
-          const configA = ACTORTYPES_CONFIG[a];
-          const configB = ACTORTYPES_CONFIG[b];
-          return configA.order < configB.order ? -1 : 1;
-        }
-      );
-  },
-);
-
 // get any indirect actions that is actor is associated with via any members it has
 
 export const selectActionsViaMembersByActortype = createSelector(
@@ -492,7 +346,6 @@ export const selectActionsViaMembersByActortype = createSelector(
   selectActorConnections,
   selectActionConnections,
   selectActorActionsGroupedByAction,
-  selectActionActorsGroupedByAction,
   selectCategories,
   selectActionCategoriesGroupedByAction,
   selectActions,
@@ -506,7 +359,6 @@ export const selectActionsViaMembersByActortype = createSelector(
     actorConnections,
     actionConnections,
     actorActionsByAction,
-    actionActors,
     categories,
     actionCategories,
     actions,
@@ -534,77 +386,8 @@ export const selectActionsViaMembersByActortype = createSelector(
                 actionCategories,
                 actionConnections,
                 actorActions: actorActionsByAction,
-                actionActors,
                 actionIndicators,
                 actionIndicatorAttributes: actionIndicatorsByActionAttributes,
-                users: userActions,
-              })
-            )
-          )
-        )
-      )
-      .groupBy(
-        (r) => r.getIn(['attributes', 'actortype_id'])
-      )
-      .sortBy(
-        (val, key) => key,
-        (a, b) => {
-          const configA = ACTORTYPES_CONFIG[a];
-          const configB = ACTORTYPES_CONFIG[b];
-          return configA.order < configB.order ? -1 : 1;
-        }
-      );
-  },
-);
-export const selectActionsAsTargetViaMembersByActortype = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectMembersJoined, // all associations
-  selectActionActorsGroupedByActor,
-  selectActorConnections,
-  selectActionConnections,
-  selectActorActionsGroupedByAction,
-  selectActionActorsGroupedByAction,
-  // selectActionResourcesGroupedByAction,
-  selectCategories,
-  selectActionCategoriesGroupedByAction,
-  selectActions,
-  selectUserActionsGroupedByAction,
-  (
-    ready,
-    members,
-    actionActorsByActor,
-    actorConnections,
-    actionConnections,
-    actorActionsByAction,
-    actionActors,
-    // actionResources,
-    categories,
-    actionCategories,
-    actions,
-    userActions,
-  ) => {
-    if (!ready || !members) return Map();
-    return members
-      .filter((actor) => !!actor)
-      .map(
-        (actor) => setActorConnections({ actor, actionActors: actionActorsByActor, actorConnections })
-      )
-      .filter(
-        (actor) => actor.get('targetingActionsByType') && actor.get('targetingActionsByType').size > 0
-      )
-      .map(
-        (actor) => actor.set(
-          'targetingActionsByType',
-          actor.get('targetingActionsByType').map(
-            (actionIdsForType) => actionIdsForType.map(
-              (actionId) => setActionConnections({
-                action: actions.get(actionId.toString()),
-                categories,
-                actionCategories,
-                actionConnections,
-                actorActions: actorActionsByAction,
-                actionActors,
-                // actionResources,
                 users: userActions,
               })
             )

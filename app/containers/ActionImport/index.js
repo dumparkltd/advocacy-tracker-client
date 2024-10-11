@@ -304,7 +304,6 @@ function mapDispatchToProps(dispatch, { params }) {
           if (relRows) {
             let actionIndicators;
             let actorActions;
-            let actionActors;
             let topActions;
             let actionResources;
             let actionCategories;
@@ -366,20 +365,7 @@ function mapDispatchToProps(dispatch, { params }) {
                             actorActions = { create: [create] };
                           }
                         }
-                        if (
-                          relField === 'target-code'
-                          || relField === 'target-id'
-                        ) {
-                          const create = { actor_id: connectionId };
-                          if (actionActors && actionActors.create) {
-                            actionActors.create = [
-                              ...actionActors.create,
-                              create,
-                            ];
-                          } else {
-                            actionActors = { create: [create] };
-                          }
-                        }
+
                         // actionCategories by code or id
                         if (relField === 'category-code' || relField === 'category-id') {
                           const create = { category_id: connectionId };
@@ -449,7 +435,6 @@ function mapDispatchToProps(dispatch, { params }) {
             rowClean = {
               ...rowClean,
               actorActions,
-              actionActors, // targets
               actionIndicators,
               actionCategories,
               topActions,

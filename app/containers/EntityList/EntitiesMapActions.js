@@ -59,13 +59,10 @@ export function EntitiesMapActions({
   entities,
   actortypes,
   actiontypes,
-  targettypes,
   typeId,
   mapSubject,
   onSetIncludeActorMembers,
   includeActorMembers,
-  onSetIncludeTargetMembers,
-  includeTargetMembers,
   countries,
   onEntityClick,
   intl,
@@ -99,35 +96,12 @@ export function EntitiesMapActions({
     single: intl.formatMessage(appMessages.entities[`actions_${typeId}`].single),
     plural: intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural),
   };
-  const type = actiontypes.find((at) => qe(at.get('id'), typeId));
-  const hasByTarget = type.getIn(['attributes', 'has_target']);
-  const hasActions = isStatements
-    || qe(typeId, ACTIONTYPES.INTERACTION)
-    || qe(typeId, ACTIONTYPES.EVENT);
+  const hasActions = true;
 
   if (hasActions) {
-    if (!hasByTarget) {
-      mapSubjectClean = 'actors';
-    }
+    mapSubjectClean = 'actors';
   }
-  if (!isStatements && hasByTarget) {
-    if (!hasActions) {
-      mapSubjectClean = 'targets';
-    }
-    if (mapSubjectClean === 'targets') {
-      indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';
-    }
-  }
-  if (mapSubjectClean === 'targets') {
-    // note this should always be true!
-    if (hasGroupActors(targettypes)) {
-      infoOptions = [{
-        active: includeTargetMembers,
-        onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-        label: 'Include activities targeting regions & groups (countries are member of)',
-      }];
-    }
-  } else if (hasGroupActors(actortypes)) {
+  if (hasGroupActors(actortypes)) {
     if (isPositionIndicator) {
       infoOptions = [{
         active: includeActorMembers,
@@ -334,38 +308,6 @@ export function EntitiesMapActions({
           total += 1;
         }
       }
-      if (hasByTarget) {
-        const actionCountriesAsTargets = action.get('targetsByType')
-          && action.getIn(['targetsByType', parseInt(ACTORTYPES.COUNTRY, 10)]);
-        if (actionCountriesAsTargets) {
-          actionCountriesAsTargets.forEach((cid) => {
-            if (memo.get(cid) && memo.getIn([cid, 'targetingActions'])) {
-              updated = updated.setIn([cid, 'targetingActions'], memo.getIn([cid, 'targetingActions']) + 1);
-            } else {
-              updated = updated.setIn([cid, 'targetingActions'], 1);
-            }
-          });
-          if (mapSubjectClean === 'targets') {
-            total += 1;
-          }
-        }
-        const actionCountriesAsTargetsMembers = action.get('targetsMembersByType')
-          && action.getIn(['targetsMembersByType', parseInt(ACTORTYPES.COUNTRY, 10)]);
-        if (actionCountriesAsTargetsMembers) {
-          actionCountriesAsTargetsMembers
-            .filter((cid) => !actionCountriesAsTargets || !actionCountriesAsTargets.includes(cid))
-            .forEach((cid) => {
-              if (memo.get(cid) && memo.getIn([cid, 'targetingActionsMembers'])) {
-                updated = updated.setIn([cid, 'targetingActionsMembers'], memo.getIn([cid, 'targetingActionsMembers']) + 1);
-              } else {
-                updated = updated.setIn([cid, 'targetingActionsMembers'], 1);
-              }
-            });
-          if (mapSubjectClean === 'targets' && includeTargetMembers && total === memo2) {
-            total += 1;
-          }
-        }
-      }
       return [updated, total];
     }, [Map(), 0]);
 
@@ -375,10 +317,7 @@ export function EntitiesMapActions({
         const cCounts = countryCounts.get(parseInt(country.get('id'), 10));
         const countActions = (cCounts && cCounts.get('actions')) || 0;
         const countActionsMembers = (cCounts && cCounts.get('actionsMembers')) || 0;
-        const countTargetingActions = (cCounts && cCounts.get('targetingActions')) || 0;
-        const countTargetingActionsMembers = (cCounts && cCounts.get('targetingActionsMembers')) || 0;
         const actionsTotal = countActions + countActionsMembers;
-        const targetingActionsTotal = countTargetingActions + countTargetingActionsMembers;
         let stats;
         if (mapSubjectClean === 'actors') {
           stats = [
@@ -400,22 +339,6 @@ export function EntitiesMapActions({
           // add tooltip stats
           // if (qe(typeId, ACTIONTYPES.EXPRESS)) {
           // }
-        } else if (mapSubjectClean === 'targets') {
-          stats = [
-            {
-              title: `${intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural)} as target: ${targetingActionsTotal}`,
-              values: [
-                {
-                  label: 'Targeted directly',
-                  value: countTargetingActions,
-                },
-                {
-                  label: 'Targeted as member of region, intergov. org. or class',
-                  value: countTargetingActionsMembers,
-                },
-              ],
-            },
-          ];
         }
         return [
           ...memo,
@@ -433,8 +356,6 @@ export function EntitiesMapActions({
             values: {
               actions: countActions,
               actionsTotal,
-              targetingActions: countTargetingActions,
-              targetingActionsTotal,
             },
           },
         ];
@@ -470,7 +391,7 @@ export function EntitiesMapActions({
         mapData={{
           typeLabels,
           indicator,
-          includeSecondaryMembers: includeActorMembers || includeTargetMembers,
+          includeSecondaryMembers: includeActorMembers,
           scrollWheelZoom: true,
           mapSubject: mapSubjectClean,
           hasPointOption: false,
@@ -495,7 +416,6 @@ EntitiesMapActions.propTypes = {
   entities: PropTypes.instanceOf(List),
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
-  targettypes: PropTypes.instanceOf(Map),
   countries: PropTypes.instanceOf(Map),
   indicators: PropTypes.instanceOf(Map),
   // primitive
@@ -508,8 +428,6 @@ EntitiesMapActions.propTypes = {
   ]),
   onSetIncludeActorMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
-  onSetIncludeTargetMembers: PropTypes.func,
-  includeTargetMembers: PropTypes.bool,
   hasFilters: PropTypes.bool,
   isPrintView: PropTypes.bool,
   onEntityClick: PropTypes.func,

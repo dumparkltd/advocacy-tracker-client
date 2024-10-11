@@ -16,11 +16,11 @@ import {
 
 import FieldGroup from 'components/fields/FieldGroup';
 import {
-  selectChildTargetsByType,
+  selectChildActorsByType,
 } from './selectors';
 
-export function TabActorsAccordionChildTargets({
-  targetsByType,
+export function TabActorsAccordionChildActors({
+  actorsByType,
   title,
   taxonomies,
   onEntityClick,
@@ -33,7 +33,7 @@ export function TabActorsAccordionChildTargets({
         seamless
         group={{
           title,
-          fields: targetsByType.reduce(
+          fields: actorsByType.reduce(
             (memo, actors, actortypeid) => ([
               ...memo,
               getActorConnectionField({
@@ -53,9 +53,9 @@ export function TabActorsAccordionChildTargets({
   );
 }
 
-TabActorsAccordionChildTargets.propTypes = {
+TabActorsAccordionChildActors.propTypes = {
   // targetIds: PropTypes.object,
-  targetsByType: PropTypes.object,
+  actorsByType: PropTypes.object,
   onEntityClick: PropTypes.func,
   getActortypeColumns: PropTypes.func,
   taxonomies: PropTypes.object,
@@ -66,8 +66,8 @@ TabActorsAccordionChildTargets.propTypes = {
   ]),
 };
 
-const mapStateToProps = (state, { targetIds }) => ({
-  targetsByType: selectChildTargetsByType(state, targetIds),
+const mapStateToProps = (state, { actorIds }) => ({
+  actorsByType: selectChildActorsByType(state, actorIds),
 });
 
-export default connect(mapStateToProps, null)(TabActorsAccordionChildTargets);
+export default connect(mapStateToProps, null)(TabActorsAccordionChildActors);

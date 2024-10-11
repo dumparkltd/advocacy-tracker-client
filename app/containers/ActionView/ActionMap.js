@@ -21,17 +21,15 @@ import { ACTORTYPES, MAP_OPTIONS } from 'themes/config';
 import {
   selectActortypeActors,
   selectIncludeActorMembers,
-  selectIncludeTargetMembers,
-  selectIncludeTargetChildrenOnMap,
-  selectIncludeTargetChildrenMembersOnMap,
+  selectIncludeActorChildrenOnMap,
+  selectIncludeActorChildrenMembersOnMap,
   selectPrintConfig,
 } from 'containers/App/selectors';
 
 import {
   setIncludeActorMembers,
-  setIncludeTargetMembers,
-  setIncludeTargetChildrenOnMap,
-  setIncludeTargetChildrenMembersOnMap,
+  setIncludeActorChildrenOnMap,
+  setIncludeActorChildrenMembersOnMap,
 } from 'containers/App/actions';
 
 
@@ -70,7 +68,6 @@ const reduceCountryData = ({
   countriesChildTargets,
   hasDirectCountries,
   mapKeyOptionMap,
-  mapSubject,
 }) => features.reduce(
   (memo, feature) => {
     const countryDirect = hasDirectCountries
@@ -93,19 +90,13 @@ const reduceCountryData = ({
 
     if (country) {
       let styleOption = mapKeyOptionMap.direct;
-      let content = mapSubject === 'actors'
-        ? 'As direct actor'
-        : 'As direct target';
+      let content = 'As direct actor';
       if (countryVia) {
         styleOption = mapKeyOptionMap.via;
-        content = mapSubject === 'actors'
-          ? 'As member of group actor'
-          : 'As member of target';
+        content = 'As member of group actor';
       } else if (countryChildTarget) {
         styleOption = mapKeyOptionMap.children;
-        content = mapSubject === 'actors'
-          ? 'As actor of child activity' //  should never happen
-          : 'As target of child activity';
+        content = 'As actor of child activity';
       }
       return [
         ...memo,
@@ -133,18 +124,17 @@ export function ActionMap({
   entities,
   mapSubject,
   onSetIncludeActorMembers,
-  onSetIncludeTargetMembers,
   includeActorMembers,
   includeTargetMembers,
   onActorClick,
   countries,
   hasMemberOption,
   hasChildTargetOption,
-  includeTargetChildren,
-  onSetIncludeTargetChildren,
+  includeActorChildren,
+  onSetIncludeActorChildren,
   childActionsByActiontype,
-  includeTargetChildrenMembers,
-  onSetIncludeTargetChildrenMembers,
+  includeActorChildrenMembers,
+  onSetIncludeActorChildrenMembers,
   printArgs,
   // typeId,
   // intl,
@@ -203,17 +193,17 @@ export function ActionMap({
       (countryId) => countries.get(countryId.toString())
     );
   const countriesChildTargets = hasChildTargetOption
-    && includeTargetChildren
+    && includeActorChildren
     && childActionsByActiontype
     && childActionsByActiontype.reduce(
       (memo, typeActions) => memo.concat(typeActions.reduce(
         (memo2, childAction) => {
           let result = memo2;
-          if (childAction.getIn(['targetsByType', ACTORTYPES.COUNTRY])) {
-            result = result.concat(childAction.getIn(['targetsByType', ACTORTYPES.COUNTRY]).toList());
+          if (childAction.getIn(['actorsByType', ACTORTYPES.COUNTRY])) {
+            result = result.concat(childAction.getIn(['actorsByType', ACTORTYPES.COUNTRY]).toList());
           }
-          if (hasMemberOption && includeTargetChildrenMembers && childAction.getIn(['targetMembersByType', ACTORTYPES.COUNTRY])) {
-            result = result.concat(childAction.getIn(['targetMembersByType', ACTORTYPES.COUNTRY]).toList());
+          if (hasMemberOption && includeActorChildrenMembers && childAction.getIn(['membersByType', ACTORTYPES.COUNTRY])) {
+            result = result.concat(childAction.getIn(['membersByType', ACTORTYPES.COUNTRY]).toList());
           }
           return result;
         },
@@ -281,37 +271,23 @@ export function ActionMap({
     })
     : null;
   let memberOption;
-  let mapTitle;
-  if (mapSubject === 'targets') {
-    mapTitle = `${countryData ? countryData.length : 'No'} countries targeted by activity`;
-    // note this should be true unless no direct targets present
-    if (hasMemberOption && hasAssociations) {
-      memberOption = {
-        active: includeTargetMembers,
-        onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-        label: 'Include members of targeted regions and groups',
-      };
-    }
-  }
-  if (mapSubject === 'actors') {
-    mapTitle = `${countryData ? countryData.length : 'No'} countries responsible by activity`;
-    if (hasMemberOption && hasAssociations) {
-      memberOption = {
-        active: includeActorMembers,
-        onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-        label: 'Include members of group actors',
-      };
-    }
+  const mapTitle = `${countryData ? countryData.length : 'No'} countries responsible by activity`;
+  if (hasMemberOption && hasAssociations) {
+    memberOption = {
+      active: includeActorMembers,
+      onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+      label: 'Include members of group actors',
+    };
   }
   const childrenOption = hasChildTargetOption && ({
-    active: includeTargetChildren,
-    onClick: () => onSetIncludeTargetChildren(includeTargetChildren ? '0' : '1'),
-    label: 'Include targets of child activities',
+    active: includeActorChildren,
+    onClick: () => onSetIncludeActorChildren(includeActorChildren ? '0' : '1'),
+    label: 'Include stakeholders of child activities',
   });
-  const memberChildrenOption = hasChildTargetOption && hasMemberOption && includeTargetChildren && ({
-    active: includeTargetChildrenMembers,
-    onClick: () => onSetIncludeTargetChildrenMembers(includeTargetChildrenMembers ? '0' : '1'),
-    label: 'Include members of targets of child activities',
+  const memberChildrenOption = hasChildTargetOption && hasMemberOption && includeActorChildren && ({
+    active: includeActorChildrenMembers,
+    onClick: () => onSetIncludeActorChildrenMembers(includeActorChildrenMembers ? '0' : '1'),
+    label: 'Include members of stakeholders of child activities',
   });
   return (
     <Styled hasHeader noOverflow>
@@ -370,13 +346,12 @@ ActionMap.propTypes = {
   countries: PropTypes.instanceOf(Map), // all countries needed for indirect connections
   childActionsByActiontype: PropTypes.instanceOf(Map), // all countries needed for indirect connections
   onSetIncludeActorMembers: PropTypes.func,
-  onSetIncludeTargetMembers: PropTypes.func,
-  onSetIncludeTargetChildren: PropTypes.func,
-  onSetIncludeTargetChildrenMembers: PropTypes.func,
+  onSetIncludeActorChildren: PropTypes.func,
+  onSetIncludeActorChildrenMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   includeTargetMembers: PropTypes.bool,
-  includeTargetChildren: PropTypes.bool,
-  includeTargetChildrenMembers: PropTypes.bool,
+  includeActorChildren: PropTypes.bool,
+  includeActorChildrenMembers: PropTypes.bool,
   hasMemberOption: PropTypes.bool,
   hasChildTargetOption: PropTypes.bool,
   onActorClick: PropTypes.func,
@@ -387,21 +362,17 @@ ActionMap.propTypes = {
 const mapStateToProps = (state) => ({
   countries: selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
   includeActorMembers: selectIncludeActorMembers(state),
-  includeTargetMembers: selectIncludeTargetMembers(state),
-  includeTargetChildren: selectIncludeTargetChildrenOnMap(state),
-  includeTargetChildrenMembers: selectIncludeTargetChildrenMembersOnMap(state),
+  includeActorChildren: selectIncludeActorChildrenOnMap(state),
+  includeActorChildrenMembers: selectIncludeActorChildrenMembersOnMap(state),
   printArgs: selectPrintConfig(state),
 });
 function mapDispatchToProps(dispatch) {
   return {
-    onSetIncludeTargetMembers: (active) => {
-      dispatch(setIncludeTargetMembers(active));
+    onSetIncludeActorChildren: (active) => {
+      dispatch(setIncludeActorChildrenOnMap(active));
     },
-    onSetIncludeTargetChildren: (active) => {
-      dispatch(setIncludeTargetChildrenOnMap(active));
-    },
-    onSetIncludeTargetChildrenMembers: (active) => {
-      dispatch(setIncludeTargetChildrenMembersOnMap(active));
+    onSetIncludeActorChildrenMembers: (active) => {
+      dispatch(setIncludeActorChildrenMembersOnMap(active));
     },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));

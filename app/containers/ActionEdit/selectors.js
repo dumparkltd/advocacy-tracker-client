@@ -2,7 +2,6 @@ import { createSelector } from 'reselect';
 import {
   API,
   ACTIONTYPE_ACTORTYPES,
-  ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_RESOURCETYPES,
   INDICATOR_ACTIONTYPES,
   ACTIONTYPE_ACTIONTYPES,
@@ -16,7 +15,6 @@ import {
   selectActorsCategorised,
   selectActortypes,
   selectActorActionsGroupedByAction,
-  selectActionActorsGroupedByAction,
   selectActionCategoriesGroupedByAction,
   selectCategories,
   selectTaxonomiesSorted,
@@ -206,44 +204,7 @@ export const selectActorsByActortype = createSelector(
     if (!validActortypeIds || validActortypeIds.length === 0) {
       return null;
     }
-    return actortypes.filter(
-      (type) => validActortypeIds
-        && validActortypeIds.indexOf(type.get('id')) > -1
-        && type.getIn(['attributes', 'is_active'])
-    ).map((type) => {
-      const filtered = actors.filter(
-        (actor) => qe(
-          type.get('id'),
-          actor.getIn(['attributes', 'actortype_id']),
-        )
-      );
-      return entitiesSetAssociated(
-        filtered,
-        associations,
-        action.get('id'),
-      );
-    });
-  }
-);
-
-export const selectTargetsByActortype = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectViewEntity,
-  selectActorsCategorised,
-  selectActionActorsGroupedByAction,
-  selectActortypes,
-  (ready, action, actors, associations, actortypes) => {
-    if (!action || !ready) return null;
-    const actiontypeId = action.getIn(['attributes', 'measuretype_id']).toString();
-    const validActortypeIds = ACTIONTYPE_TARGETTYPES[actiontypeId];
-    if (!validActortypeIds || validActortypeIds.length === 0) {
-      return null;
-    }
-    return actortypes.filter(
-      (type) => validActortypeIds
-        && validActortypeIds.indexOf(type.get('id')) > -1
-        && type.getIn(['attributes', 'is_target'])
-    ).map((type) => {
+    return actortypes.map((type) => {
       const filtered = actors.filter(
         (actor) => qe(
           type.get('id'),

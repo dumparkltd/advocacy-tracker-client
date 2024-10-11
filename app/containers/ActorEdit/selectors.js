@@ -2,7 +2,6 @@ import { createSelector } from 'reselect';
 import {
   API,
   ACTIONTYPE_ACTORTYPES,
-  ACTIONTYPE_TARGETTYPES,
   USER_ACTORTYPES,
   MEMBERSHIPS,
 } from 'themes/config';
@@ -14,7 +13,6 @@ import {
   selectActionsCategorised,
   selectActiontypes,
   selectActorActionsGroupedByActor,
-  selectActionActorsGroupedByActor,
   selectActorCategoriesGroupedByActor,
   selectCategories,
   selectTaxonomiesSorted,
@@ -114,43 +112,6 @@ export const selectActionsByActiontype = createSelector(
     }
     return actiontypes.filter(
       (type) => validActiontypeIds && validActiontypeIds.indexOf(type.get('id')) > -1
-    ).map((type) => {
-      const filtered = actions.filter(
-        (action) => qe(
-          type.get('id'),
-          action.getIn(['attributes', 'measuretype_id']),
-        )
-      );
-      return entitiesSetAssociated(
-        filtered,
-        associations,
-        viewActor.get('id'),
-      );
-    });
-  }
-);
-
-export const selectActionsAsTargetByActiontype = createSelector(
-  (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectViewEntity,
-  selectActionsCategorised,
-  selectActionActorsGroupedByActor,
-  selectActiontypes,
-  (ready, viewActor, actions, associations, actiontypes) => {
-    if (!viewActor || !ready) return null;
-    const actortypeId = viewActor.getIn(['attributes', 'actortype_id']).toString();
-    // compare App/selectors/selectActiontypesForActortype
-    const validActiontypeIds = Object.keys(ACTIONTYPE_TARGETTYPES).filter((actiontypeId) => {
-      const actortypeIds = ACTIONTYPE_TARGETTYPES[actiontypeId];
-      return actortypeIds && actortypeIds.indexOf(actortypeId) > -1;
-    });
-    if (!validActiontypeIds || validActiontypeIds.length === 0) {
-      return null;
-    }
-    return actiontypes.filter(
-      (type) => validActiontypeIds
-        && validActiontypeIds.indexOf(type.get('id')) > -1
-        && type.getIn(['attributes', 'has_target'])
     ).map((type) => {
       const filtered = actions.filter(
         (action) => qe(

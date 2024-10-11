@@ -89,26 +89,6 @@ export const CONFIG = {
       key: 'actor_id',
       ownKey: 'measure_id',
       groupByType: true,
-      // typeFilter: 'is_active',
-    },
-    // filter by associated target
-    targets: {
-      query: 'targeted',
-      type: 'action-targets',
-      search: true,
-      messageByType: 'entities.actors_{typeid}.plural',
-      message: 'entities.actors.plural',
-      path: API.ACTORS,
-      invalidateEntitiesPaths: [API.ACTORS, API.ACTIONS],
-      entityType: 'actors',
-      entityTypeAs: 'targets',
-      clientPath: ROUTES.ACTOR,
-      connectPath: API.ACTION_ACTORS, // filter by actor connection
-      key: 'actor_id',
-      ownKey: 'measure_id',
-      groupByType: true,
-      typeFilter: 'is_target',
-      typeMemberFilter: 'has_members',
     },
     parents: {
       query: 'by-parent',

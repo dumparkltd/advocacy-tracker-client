@@ -21,7 +21,7 @@ import A from 'components/styled/A';
 
 import appMessages from 'containers/App/messages';
 import { ROUTES } from 'themes/config';
-import TabActorsAccordionChildTargets from './TabActorsAccordionChildTargets';
+import TabActorsAccordionChildActors from './TabActorsAccordionChildActors';
 
 const getTypeLabel = (
   typeId,
@@ -143,9 +143,9 @@ export function TabActorsAccordion({
                             intl,
                           );
                           return (
-                            <TabActorsAccordionChildTargets
+                            <TabActorsAccordionChildActors
                               key={childId}
-                              targetIds={actorIdsByType.flatten(true)}
+                              actorIds={actorIdsByType.flatten(true)}
                               title={(
                                 <div>
                                   {`As parent of ${actiontypeLabel}: `}

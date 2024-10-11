@@ -1,6 +1,6 @@
 import { find, forEach } from 'lodash/collection';
 
-import { ACTORTYPES, ACTIONTYPE_TARGETTYPES } from 'themes/config';
+import { ACTORTYPES } from 'themes/config';
 
 import {
   testEntityEntityAssociation,
@@ -182,18 +182,8 @@ const makeGroupedConnectionEditOptions = (
   const hasCode = isAdmin || (connectingToActors && qe(typeId, ACTORTYPES.COUNTRY));
 
   if (option) {
-    let isTargetConnection = false;
-    if (connectingToActions) {
-      isTargetConnection = Object.keys(ACTIONTYPE_TARGETTYPES).indexOf(typeId) > -1;
-    }
-    if (option.connectPaths) {
-      editOptions.path = option.connectPaths[
-        isTargetConnection ? 'target' : 'actor'
-      ];
-    } else {
-      editOptions.path = option.connectPath;
-    }
     editOptions.title = messages.title;
+    editOptions.path = option.connectPath;
     editOptions.invalidateEntitiesPaths = option.invalidateEntitiesPaths;
     editOptions.search = option.search;
     editOptions.multiple = !option.single;
@@ -266,25 +256,15 @@ const makeConnectionEditOptions = (
     || type === 'member-associations' // associations
     || type === 'association-members' // members
     || type === 'indicator-actions';
-  const connectingToActions = type === 'actor-actions'
-    || type === 'resource-actions'
-    || type === 'action-parents'
-    || type === 'action-children';
+  // const connectingToActions = type === 'actor-actions'
+  //   || type === 'resource-actions'
+  //   || type === 'action-parents'
+  //   || type === 'action-children';
   // const connectingToResources = type === 'action-resources';
 
   const hasCode = isAdmin || (connectingToActors && qe(typeId, ACTORTYPES.COUNTRY));
   if (option) {
-    let isTargetConnection = false;
-    if (connectingToActions) {
-      isTargetConnection = Object.keys(ACTIONTYPE_TARGETTYPES).indexOf(typeId) > -1;
-    }
-    if (option.connectPaths) {
-      editOptions.path = option.connectPaths[
-        isTargetConnection ? 'target' : 'actor'
-      ];
-    } else {
-      editOptions.path = option.connectPath;
-    }
+    editOptions.path = option.connectPath;
     editOptions.title = messages.title;
     editOptions.invalidateEntitiesPaths = option.invalidateEntitiesPaths;
     editOptions.search = option.search;

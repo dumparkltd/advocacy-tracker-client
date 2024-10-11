@@ -15,7 +15,6 @@ import {
   selectActorCategoriesGroupedByActor,
   selectActionCategoriesGroupedByAction,
   selectActorActionsGroupedByActor,
-  selectActionActorsGroupedByActor,
   selectMembershipsGroupedByMember,
   selectMembershipParentsGroupedByMember,
   selectMembershipsGroupedByParent,
@@ -146,7 +145,6 @@ export const selectActorsWithConnections = createSelector(
   selectActorsWithCategories,
   selectConnections,
   selectActorActionsGroupedByActor,
-  selectActionActorsGroupedByActor, // as targets
   selectMembershipsGroupedByParent,
   selectMembershipsGroupedByMember,
   selectMembershipParentsGroupedByMember,
@@ -156,7 +154,6 @@ export const selectActorsWithConnections = createSelector(
     actors,
     connections,
     actionsAsActorGrouped,
-    actionsAsTargetGrouped,
     memberConnectionsGrouped,
     associationConnectionsGrouped,
     associationParentConnectionsGrouped,
@@ -167,13 +164,8 @@ export const selectActorsWithConnections = createSelector(
         (actor) => {
           const actorId = parseInt(actor.get('id'), 10);
           // actors
-          let actorActions = actionsAsActorGrouped.get(actorId) || Map();
-          const targetActions = actionsAsTargetGrouped.get(actorId) || Map();
-          actorActions = actorActions && actorActions.merge(targetActions);
+          const actorActions = actionsAsActorGrouped.get(actorId) || Map();
           const actorActionsByType = actionsByType(actorActions, connections.get(API.ACTIONS));
-
-          // targets
-          // const targetingActionsByType = actionsByType(targetActions, connections.get(API.ACTIONS));
 
           // members
           const actorMembers = memberConnectionsGrouped.get(actorId);
@@ -191,40 +183,23 @@ export const selectActorsWithConnections = createSelector(
           const actorAssociationParentsByType = actorsByType(actorAssociationParents, connections.get(API.ACTORS));
 
           // actions as member of group
-          let actorActionsAsMember = actorAssociations && actorAssociations.size > 0 && actorAssociations.reduce((memo, associationId) => {
+          const actorActionsAsMember = actorAssociations && actorAssociations.size > 0 && actorAssociations.reduce((memo, associationId) => {
             const associationActions = actionsAsActorGrouped.get(parseInt(associationId, 10));
             if (associationActions) {
               return memo.concat(associationActions);
             }
             return memo;
           }, Map());
-          // targeted by actions as member of group
-          const targetActionsAsMember = actorAssociations && actorAssociations.size > 0 && actorAssociations.reduce((memo, associationId) => {
-            const associationActionsAsTarget = actionsAsTargetGrouped.get(parseInt(associationId, 10));
-            if (associationActionsAsTarget) {
-              return memo.concat(associationActionsAsTarget);
-            }
-            return memo;
-          }, Map());
-          actorActionsAsMember = actorActionsAsMember && actorActionsAsMember.merge(targetActionsAsMember);
           const actorActionsAsMemberByType = actorActionsAsMember && actionsByType(actorActionsAsMember, connections.get(API.ACTIONS));
 
           // actions as parent of actor
-          let actorActionsAsParent = actorMembers && actorMembers.size > 0 && actorMembers.reduce((memo, memberId) => {
+          const actorActionsAsParent = actorMembers && actorMembers.size > 0 && actorMembers.reduce((memo, memberId) => {
             const memberActions = actionsAsActorGrouped.get(parseInt(memberId, 10));
             if (memberActions) {
               return memo.concat(memberActions);
             }
             return memo;
           }, Map());
-          const targetActionsAsParent = actorMembers && actorMembers.size > 0 && actorMembers.reduce((memo, memberId) => {
-            const memberActionsAsTarget = actionsAsTargetGrouped.get(parseInt(memberId, 10));
-            if (memberActionsAsTarget) {
-              return memo.concat(memberActionsAsTarget);
-            }
-            return memo;
-          }, Map());
-          actorActionsAsParent = actorActionsAsParent && actorActionsAsParent.merge(targetActionsAsParent);
           const actorActionsAsParentByType = actorActionsAsParent && actionsByType(actorActionsAsParent, connections.get(API.ACTIONS));
 
           const actorUsers = userConnectionsGrouped.get(actorId);

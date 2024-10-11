@@ -185,7 +185,6 @@ export const MAP_OPTIONS = {
   GRADIENT: {
     // actors: ['#FAFA6E', '#81DD90', '#029481', '#035E93', '#043465'],
     actors: ['#FAFA6E', '#81DD90', '#029481', '#00728f', '#043465'],
-    targets: ['#FAFA6E', '#FAAB4B', '#DD654A', '#BF0071', '#59004d'],
   },
   NO_DATA_COLOR: '#EDEFF0',
   DEFAULT_STYLE: {
@@ -379,36 +378,6 @@ export const ACTION_FIELDS = {
       table: API.ACTOR_ACTIONS,
       keyPair: ['measure_id', 'actor_id'], // own, other
       hint: 'one or more unique actor ids (as assigned by the database / comma-separated)',
-    },
-    // column: country-code
-    'target-code': {
-      type: 'text',
-      optional: [
-        ACTIONTYPES.OP,
-        ACTIONTYPES.AP,
-        ACTIONTYPES.TASK,
-      ],
-      multiple: true,
-      lookup: {
-        table: API.ACTORS,
-        attribute: 'code',
-      },
-      table: API.ACTION_ACTORS,
-      keyPair: ['measure_id', 'actor_id'], // own, other
-      hint: 'one or more unique actor codes (as assigned by the users / comma-separated) for actors targeted',
-    },
-    // column: country-code
-    'target-id': {
-      type: 'text',
-      optional: [
-        ACTIONTYPES.OP,
-        ACTIONTYPES.AP,
-        ACTIONTYPES.TASK,
-      ],
-      multiple: true,
-      table: API.ACTION_ACTORS,
-      keyPair: ['measure_id', 'actor_id'], // own, other
-      hint: 'one or more unique actor ids (as assigned by the database / comma-separated) for actors targeted',
     },
     // belongs to event
     'event-code': {
@@ -1060,23 +1029,6 @@ export const ACTIONTYPE_ACTORTYPES = {
     ACTORTYPES.ORG,
     ACTORTYPES.GROUP,
   ],
-  // // outreach plans are targeting countries & contacts
-  // [ACTIONTYPES.OP]: [
-  //   ACTORTYPES.COUNTRY,
-  //   ACTORTYPES.CONTACT,
-  // ],
-  // // advocacy plans are targeting countries & contacts
-  // [ACTIONTYPES.AP]: [
-  //   ACTORTYPES.COUNTRY,
-  //   ACTORTYPES.CONTACT,
-  // ],
-  // // tasks target countries
-  // [ACTIONTYPES.TASK]: [
-  //   ACTORTYPES.COUNTRY,
-  // ],
-};
-
-export const ACTIONTYPE_TARGETTYPES = {
   // outreach plans are targeting countries & contacts
   [ACTIONTYPES.OP]: [
     ACTORTYPES.COUNTRY,
@@ -1100,7 +1052,6 @@ export const ACTIONTYPE_TARGETTYPES = {
     ACTORTYPES.GROUP,
   ],
 };
-
 
 export const ACTIONTYPE_RESOURCETYPES = {
   [ACTIONTYPES.EXPRESS]: [
@@ -1376,13 +1327,13 @@ export const ACTIONTYPES_CONFIG = {
         showOnSingle: false,
       },
       {
-        id: 'targets', // one row per type,
-        type: 'targets', // one row per type,
+        id: 'actors', // one row per type,
+        type: 'actors', // one row per type,
         sort: 'title',
       },
       {
-        id: 'targetsViaChildren', // one row per type,
-        type: 'targetsViaChildren', // one row per type,
+        id: 'actorsViaChildren', // one row per type,
+        type: 'actorsViaChildren', // one row per type,
         sort: 'title',
         showOnSingle: false,
       },
@@ -1417,13 +1368,13 @@ export const ACTIONTYPES_CONFIG = {
         showOnSingle: false,
       },
       {
-        id: 'targets',
-        type: 'targets',
+        id: 'actors',
+        type: 'actors',
         sort: 'title',
       },
       {
-        id: 'targetsViaChildren', // one row per type,
-        type: 'targetsViaChildren', // one row per type,
+        id: 'actorsViaChildren', // one row per type,
+        type: 'actorsViaChildren', // one row per type,
         sort: 'title',
       },
       {
@@ -1462,8 +1413,8 @@ export const ACTIONTYPES_CONFIG = {
         showOnSingle: false,
       },
       {
-        id: 'targets', // one row per type,
-        type: 'targets', // one row per type,
+        id: 'actors', // one row per type,
+        type: 'actors', // one row per type,
       },
       {
         id: 'users', // one row per type,

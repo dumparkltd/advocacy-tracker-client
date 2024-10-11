@@ -23,7 +23,6 @@ import {
   getLinkFormField,
   getCategoryUpdatesFromFormData,
   renderActionsByActiontypeControl,
-  renderActionsAsTargetByActiontypeControl,
   renderAssociationsByActortypeControl,
   renderMembersByActortypeControl,
   getConnectionUpdatesFromFormData,
@@ -72,7 +71,6 @@ import {
   selectViewEntity,
   selectTaxonomyOptions,
   selectActionsByActiontype,
-  selectActionsAsTargetByActiontype,
   selectMembersByActortype,
   selectAssociationsByActortype,
   selectUserOptions,
@@ -118,7 +116,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       viewEntity,
       taxonomies,
       actionsByActiontype,
-      actionsAsTargetByActiontype,
       membersByActortype,
       associationsByActortype,
       userOptions,
@@ -133,9 +130,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         associatedTaxonomies: taxonomyOptions(taxonomies),
         associatedActionsByActiontype: actionsByActiontype
           ? actionsByActiontype.map((actions) => entityOptions({ entities: actions }))
-          : Map(),
-        associatedActionsAsTargetByActiontype: actionsAsTargetByActiontype
-          ? actionsAsTargetByActiontype.map((actions) => entityOptions({ entities: actions }))
           : Map(),
         associatedMembersByActortype: membersByActortype
           ? membersByActortype.map((actors) => entityOptions({ entities: actors }))
@@ -204,7 +198,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
     entity,
     connectedTaxonomies,
     actionsByActiontype,
-    actionsAsTargetByActiontype,
     membersByActortype,
     onCreateOption,
     isAdmin,
@@ -240,23 +233,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         groups.push(
           {
             label: intl.formatMessage(appMessages.nav.actions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    if (actionsAsTargetByActiontype) {
-      const actionConnections = renderActionsAsTargetByActiontypeControl({
-        entitiesByActiontype: actionsAsTargetByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.targetingActions),
             fields: actionConnections,
           },
         );
@@ -357,7 +333,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       taxonomies,
       connectedTaxonomies,
       actionsByActiontype,
-      actionsAsTargetByActiontype,
       membersByActortype,
       associationsByActortype,
       userOptions,
@@ -425,7 +400,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
                   formData,
                   taxonomies,
                   actionsByActiontype,
-                  actionsAsTargetByActiontype,
                   membersByActortype,
                   associationsByActortype,
                   userOptions,
@@ -446,7 +420,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
                       viewEntity,
                       connectedTaxonomies,
                       actionsByActiontype,
-                      actionsAsTargetByActiontype,
                       membersByActortype,
                       onCreateOption,
                       isAdmin,
@@ -491,7 +464,6 @@ ActorEdit.propTypes = {
   params: PropTypes.object,
   taxonomies: PropTypes.object,
   actionsByActiontype: PropTypes.object,
-  actionsAsTargetByActiontype: PropTypes.object,
   membersByActortype: PropTypes.object,
   associationsByActortype: PropTypes.object,
   onCreateOption: PropTypes.func,
@@ -514,7 +486,6 @@ const mapStateToProps = (state, props) => ({
   viewEntity: selectViewEntity(state, props.params.id),
   taxonomies: selectTaxonomyOptions(state, props.params.id),
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
-  actionsAsTargetByActiontype: selectActionsAsTargetByActiontype(state, props.params.id),
   membersByActortype: selectMembersByActortype(state, props.params.id),
   associationsByActortype: selectAssociationsByActortype(state, props.params.id),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
@@ -550,7 +521,6 @@ function mapDispatchToProps(dispatch, props) {
       formData,
       taxonomies,
       actionsByActiontype,
-      actionsAsTargetByActiontype,
       membersByActortype,
       associationsByActortype,
       userOptions,
@@ -572,32 +542,6 @@ function mapDispatchToProps(dispatch, props) {
               formData,
               connections: actions,
               connectionAttribute: ['associatedActionsByActiontype', actiontypeid.toString()],
-              createConnectionKey: 'measure_id',
-              createKey: 'actor_id',
-            }))
-            .reduce(
-              (memo, deleteCreateLists) => {
-                const deletes = memo.get('delete').concat(deleteCreateLists.get('delete'));
-                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
-                return memo
-                  .set('delete', deletes)
-                  .set('create', creates);
-              },
-              fromJS({
-                delete: [],
-                create: [],
-              }),
-            )
-        );
-      }
-      if (actionsAsTargetByActiontype) {
-        saveData = saveData.set(
-          'actionActors',
-          actionsAsTargetByActiontype
-            .map((actions, actiontypeid) => getConnectionUpdatesFromFormData({
-              formData,
-              connections: actions,
-              connectionAttribute: ['associatedActionsAsTargetByActiontype', actiontypeid.toString()],
               createConnectionKey: 'measure_id',
               createKey: 'actor_id',
             }))

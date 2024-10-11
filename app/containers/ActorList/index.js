@@ -29,7 +29,6 @@ import {
   selectIsUserAdmin,
   selectActortypes,
   selectActiontypesForActortype,
-  selectActiontypesForTargettype,
   selectMembertypesForActortype,
   selectAssociationtypesForActortype,
   selectParentAssociationtypesForActortype,
@@ -120,7 +119,6 @@ export function ActorList({
   params, // { id: the action type }
   actiontypes,
   actortypes,
-  actiontypesForTarget,
   membertypes,
   parentAssociationtypes,
   associationtypes,
@@ -266,10 +264,7 @@ export function ActorList({
         }}
         locationQuery={fromJS(location.query)}
         actortypes={actortypes}
-        actiontypes={actiontypesForTarget
-          ? actiontypes.merge(actiontypesForTarget)
-          : actiontypes
-        }
+        actiontypes={actiontypes}
         membertypes={membertypes}
         filterAssociationtypes={filterAssociationtypes}
         associationtypes={associationtypes}
@@ -322,7 +317,6 @@ ActorList.propTypes = {
   connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
-  actiontypesForTarget: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
   parentAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
@@ -343,7 +337,6 @@ const mapStateToProps = (state, props) => ({
   isVisitor: selectIsUserVisitor(state),
   isAdmin: selectIsUserAdmin(state),
   actiontypes: selectActiontypesForActortype(state, { type: props.params.id }),
-  actiontypesForTarget: selectActiontypesForTargettype(state, { type: props.params.id }),
   membertypes: selectMembertypesForActortype(state, { type: props.params.id }),
   parentAssociationtypes: selectParentAssociationtypesForActortype(state, { type: props.params.id }),
   associationtypes: selectAssociationtypesForActortype(state, { type: props.params.id }),

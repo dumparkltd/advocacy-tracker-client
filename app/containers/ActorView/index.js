@@ -147,8 +147,7 @@ export function ActorView({
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'actortype_id']);
   const viewActortype = actortypes && actortypes.find((type) => qe(type.get('id'), typeId));
   const viewActortypeId = viewActortype && viewActortype.get('id').toString();
-  const isTarget = viewActortype && viewActortype.getIn(['attributes', 'is_target']);
-  const isActive = viewActortype && viewActortype.getIn(['attributes', 'is_active']);
+  const isActive = true;
   const hasMembers = viewActortypeId
     && Object.values(MEMBERSHIPS).reduce(
       (memo, actorGroups) => [...memo, ...actorGroups],
@@ -161,9 +160,6 @@ export function ActorView({
   const validViewSubjects = [];
   if (isActive) {
     validViewSubjects.push('actors');
-  }
-  if (isTarget) {
-    validViewSubjects.push('targets');
   }
   if (hasStatements) {
     validViewSubjects.push('topics');
@@ -338,14 +334,6 @@ export function ActorView({
                             active={viewSubject === 'actors'}
                           >
                             <Text size="large">Activities</Text>
-                          </SubjectButton>
-                        )}
-                        {isTarget && (
-                          <SubjectButton
-                            onClick={() => onSetSubject('targets')}
-                            active={viewSubject === 'targets'}
-                          >
-                            <Text size="large">Targeted by</Text>
                           </SubjectButton>
                         )}
                         {hasMembers && (
