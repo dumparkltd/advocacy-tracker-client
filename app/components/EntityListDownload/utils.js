@@ -471,9 +471,10 @@ const prepResourceData = ({
 }, data);
 
 const getIndicatorValue = ({ entity, indicatorId }) => {
-  const indicatorConnection = entity
-    .get('indicatorConnections')
-    .find((connection) => qe(connection.get('indicator_id'), indicatorId));
+  const indicatorConnection = entity.get('indicatorConnections')
+    && entity.get('indicatorConnections').find(
+      (connection) => qe(connection.get('indicator_id'), indicatorId)
+    );
   if (indicatorConnection) {
     return indicatorConnection.get('supportlevel_id') || '';
   }
