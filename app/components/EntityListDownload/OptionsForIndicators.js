@@ -7,19 +7,23 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 
-import {
-  Box,
-  // Text,
-} from 'grommet';
+import { Box } from 'grommet';
 
+import { injectIntl, intlShape } from 'react-intl';
+
+import { lowerCase } from 'utils/string';
+
+import appMessages from 'containers/App/messages';
 import OptionGroup from './OptionGroup';
 
+import messages from './messages';
 export function OptionsForIndicators({
   attributes,
   setAttributes,
   hasAttributes,
   includeSupport,
   setIncludeSupport,
+  intl,
 }) {
   const [expandGroup, setExpandGroup] = useState(null);
 
@@ -34,16 +38,18 @@ export function OptionsForIndicators({
       {hasAttributes && (
         <OptionGroup
           groupId="attributes"
-          label="Attributes"
+          label={intl.formatMessage(appMessages.nav.attributes)}
           expandedId={expandGroup}
           onExpandGroup={(val) => setExpandGroup(val)}
           activeOptionCount={activeAttributeCount}
           optionCount={Object.keys(attributes).length}
-          intro="The resulting CSV file will have one column for each attribute selected"
+          intro={intl.formatMessage(messages.optionGroups.introLabelDefault,
+            { type: intl.formatMessage(messages.optionGroups.attributeLabel) })}
           options={attributes}
           optionListLabels={{
-            attributes: 'Select attributes',
-            columns: 'Customise column name',
+            attributes: intl.formatMessage(messages.optionGroups.listLabelAttributes,
+              { type: lowerCase(intl.formatMessage(appMessages.nav.attributes)) }),
+            columns: intl.formatMessage(messages.optionGroups.listLabelColumns),
           }}
           onSetOptions={(options) => setAttributes(options)}
           editColumnNames
@@ -51,21 +57,22 @@ export function OptionsForIndicators({
       )}
       <OptionGroup
         groupId="support"
-        label="Support"
+        label={intl.formatMessage(messages.optionGroups.supportLabel)}
         expandedId={expandGroup}
         onExpandGroup={(val) => setExpandGroup(val)}
         activeOptionCount={includeSupport ? 1 : 0}
         optionCount={1}
         active={includeSupport}
-        intro="Please note that the values may include indirect support inferred from group statements (depending on the list option selected)"
+        intro={intl.formatMessage(messages.optionGroups.introLabelSupport)}
         onSetActive={(val) => setIncludeSupport(val)}
-        onActiveLabel="Include country numbers by level of support"
+        onActiveLabel={intl.formatMessage(messages.optionGroups.onActiveSupportLabel)}
       />
     </Box>
   );
 }
 
 OptionsForIndicators.propTypes = {
+  intl: intlShape.isRequired,
   attributes: PropTypes.object,
   setAttributes: PropTypes.func,
   hasAttributes: PropTypes.bool,
@@ -73,4 +80,4 @@ OptionsForIndicators.propTypes = {
   setIncludeSupport: PropTypes.func,
 };
 
-export default OptionsForIndicators;
+export default injectIntl(OptionsForIndicators);
