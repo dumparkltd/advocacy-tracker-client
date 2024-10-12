@@ -88,7 +88,7 @@ export const prepareHeader = ({
       case 'userActors':
         return ({
           ...col,
-          title: 'Actors',
+          title: 'Stakeholders',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
