@@ -1061,10 +1061,6 @@ export default defineMessages({
       id: 'app.containers.App.nav.actionsMembers',
       defaultMessage: 'Activities as member',
     },
-    targetingActions: {
-      id: 'app.containers.App.nav.targetingActions',
-      defaultMessage: 'Targeted by',
-    },
     topActions: {
       id: 'app.containers.App.nav.topActions',
       defaultMessage: 'Parent activities',
@@ -1084,14 +1080,6 @@ export default defineMessages({
     indicators: {
       id: 'app.containers.App.nav.indicators',
       defaultMessage: 'Position indicators',
-    },
-    targets: {
-      id: 'app.containers.App.nav.targets',
-      defaultMessage: 'Targets',
-    },
-    targetingActionsAsMember: {
-      id: 'app.containers.App.nav.targetingActionsAsMember',
-      defaultMessage: 'Targeted by (as member)',
     },
     members: {
       id: 'app.containers.App.nav.members',

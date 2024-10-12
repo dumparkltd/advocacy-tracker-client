@@ -179,7 +179,7 @@ export function ActorView({
     printType: PRINT_TYPES.SINGLE,
     printContentOptions: {
       tabs: true,
-      actionTypes: viewSubject === 'actors' || viewSubject === 'targets',
+      actionTypes: viewSubject === 'actors',
       actionTypesForArgs: (args) => args.printTabs === 'all',
     },
     printMapOptions: {
@@ -355,11 +355,11 @@ export function ActorView({
                       </SubjectButtonGroup>
                     </PrintHide>
                     <SubjectTabWrapper>
-                      {(showAllTabs || viewSubject === 'actors' || viewSubject === 'targets') && (
+                      {(showAllTabs || viewSubject === 'actors') && (
                         <>
                           <PrintOnly>
                             <PrintSectionTitleWrapper>
-                              <Text size="large">{viewSubject === 'actors' ? 'Activities' : 'Targeted By'}</Text>
+                              <Text size="large">Activities</Text>
                             </PrintSectionTitleWrapper>
                           </PrintOnly>
                           <TabActivities
@@ -500,7 +500,6 @@ ActorView.propTypes = {
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   actionsAsMemberByActortype: PropTypes.instanceOf(Map),
-  actionsAsTargetAsMemberByActortype: PropTypes.instanceOf(Map),
   userConnections: PropTypes.object,
   users: PropTypes.object,
   isAdmin: PropTypes.bool,

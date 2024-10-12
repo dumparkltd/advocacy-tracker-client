@@ -308,7 +308,7 @@ export function ActionView(props) {
         )}
         {viewEntity && dataReady && (
           <ViewWrapper isPrint={isPrintView}>
-            {isPrintView && <HeaderPrint argsKeep={['am', 'tm', 'mtchm', 'subj', 'mtch', 'ac', 'tc']} />}
+            {isPrintView && <HeaderPrint argsKeep={['am', 'tm', 'achmmap', 'subj', 'achmap', 'ac', 'tc']} />}
             <ViewHeader
               isPrintView={isPrintView}
               title={typeId
@@ -399,7 +399,7 @@ export function ActionView(props) {
                               onClick={() => onSetSubject('actors')}
                               active={viewSubject === 'actors'}
                             >
-                              <Text size="large">Actors</Text>
+                              <Text size="large">Stakeholders</Text>
                             </SubjectButton>
                           )}
                           {hasChildren && (
@@ -441,7 +441,7 @@ export function ActionView(props) {
                             <span key={vSubject}>
                               <PrintOnly>
                                 <PrintSectionTitleWrapper>
-                                  <Text size="large">Actors</Text>
+                                  <Text size="large">Stakeholders</Text>
                                 </PrintSectionTitleWrapper>
                               </PrintOnly>
                               <TabActors

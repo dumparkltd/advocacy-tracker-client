@@ -45,7 +45,7 @@ export function TabActorsAccordion({
   actorConnections,
   actorsByType,
   childActionsByActiontype,
-  hasChildTargets,
+  hasChildActors,
   intl,
   viewSubject,
   isAdmin,
@@ -55,18 +55,17 @@ export function TabActorsAccordion({
   // reset state
   useEffect(() => {
     setActive(defaultState);
-  }, [viewSubject, hasChildTargets]);
+  }, [viewSubject, hasChildActors]);
 
   useEffect(() => {
     if (actorsByType) {
       setActive([0]);
     }
   }, [actorsByType]);
-
   return (
     <>
       <Box margin={{ vertical: 'medium' }}>
-        {!hasChildTargets && actorsByType && (
+        {!hasChildActors && actorsByType && (
           <FieldGroup
             seamless
             group={{
@@ -89,7 +88,7 @@ export function TabActorsAccordion({
             }}
           />
         )}
-        {hasChildTargets && (
+        {hasChildActors && (
           <Accordion
             activePanels={actives}
             onActive={(newActives) => setActive(newActives)}
@@ -97,7 +96,7 @@ export function TabActorsAccordion({
               actorsByType
                 ? {
                   id: 0,
-                  titleButton: 'Direct targets',
+                  titleButton: 'Directly targeted stakeholders',
                   content: actives.indexOf(0) > -1 && (
                     <Box pad={{ vertical: 'small' }}>
                       <FieldGroup
@@ -126,15 +125,15 @@ export function TabActorsAccordion({
                   ),
                 }
                 : null,
-              hasChildTargets
+              hasChildActors
                 ? {
                   id: 1,
-                  titleButton: 'Indirect targets (from child activities)',
+                  titleButton: 'Indirectly targeted (from child activities)',
                   content: actives.indexOf(1) > -1 && (
                     <div>
                       {childActionsByActiontype.flatten(true).entrySeq().map(
                         ([childId, childAction]) => {
-                          const actorIdsByType = childAction.get('targetsByType');
+                          const actorIdsByType = childAction.get('actorsByType');
                           if (!actorIdsByType) return null;
                           const typeid = childAction.getIn(['attributes', 'measuretype_id']);
                           const actiontypeLabel = getTypeLabel(
@@ -189,7 +188,7 @@ TabActorsAccordion.propTypes = {
   taxonomies: PropTypes.object,
   actorConnections: PropTypes.object,
   childActionsByActiontype: PropTypes.object,
-  hasChildTargets: PropTypes.bool,
+  hasChildActors: PropTypes.bool,
   isAdmin: PropTypes.bool,
   viewSubject: PropTypes.string,
   intl: intlShape,

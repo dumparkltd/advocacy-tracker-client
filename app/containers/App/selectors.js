@@ -482,8 +482,8 @@ export const selectIncludeActorChildren = createSelector(
 export const selectIncludeActorChildrenOnMap = createSelector(
   selectLocationQuery,
   (locationQuery) => {
-    if (locationQuery && locationQuery.get('mtch')) {
-      return qe(locationQuery.get('mtch'), 1) || locationQuery.get('mtch') === 'true';
+    if (locationQuery && locationQuery.get('achmap')) {
+      return qe(locationQuery.get('achmap'), 1) || locationQuery.get('achmap') === 'true';
     }
     return true; // default
   }
@@ -491,8 +491,8 @@ export const selectIncludeActorChildrenOnMap = createSelector(
 export const selectIncludeActorChildrenMembersOnMap = createSelector(
   selectLocationQuery,
   (locationQuery) => {
-    if (locationQuery && locationQuery.get('mtchm')) {
-      return qe(locationQuery.get('mtchm'), 1) || locationQuery.get('mtchm') === 'true';
+    if (locationQuery && locationQuery.get('achmmap')) {
+      return qe(locationQuery.get('achmmap'), 1) || locationQuery.get('achmmap') === 'true';
     }
     return true; // default
   }

@@ -455,7 +455,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
     return (
       <ContainerWrapper headerStyle={headerStyle} ref={this.ScrollContainer} isPrintView={isPrintView}>
         {isPrintView && (
-          <HeaderPrint argsRemove={['subj', 'ac', 'tc', 'mtchm', 'mtch', 'actontype']} />
+          <HeaderPrint argsRemove={['subj', 'ac', 'tc', 'achmmap', 'achmap', 'actontype']} />
         )}
         <Container ref={this.ScrollReference} isPrint={isPrintView}>
           <Content isPrint={isPrintView}>

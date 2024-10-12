@@ -168,6 +168,7 @@ export const selectSubActionsByActiontype = createSelector(
   selectActionCategoriesGroupedByAction,
   selectCategories,
   selectUserActionsGroupedByAction,
+  selectMembershipsGroupedByParent,
   (
     ready,
     actions,
@@ -179,13 +180,14 @@ export const selectSubActionsByActiontype = createSelector(
     actionCategories,
     categories,
     userActions,
+    memberships,
   ) => {
     if (!ready) return Map();
     return actions && actions
       .filter((action) => !!action)
       .map(
         (action) => {
-          const result = setActionConnections({
+          let result = setActionConnections({
             action,
             actionConnections,
             actorActions,
@@ -196,6 +198,34 @@ export const selectSubActionsByActiontype = createSelector(
             actionCategories,
             users: userActions,
           });
+          const actionId = parseInt(action.get('id'), 10);
+          const actionActors = actorActions && actorActions.get(actionId);
+          if (actionActors) {
+            const allActorMembers = actionActors && actionActors.reduce(
+              (memo, actor) => {
+                const actorMembers = memberships.get(actor);
+                return actorMembers
+                  ? actorMembers.reduce(
+                    (memo2, member, key) => !memo2.includes(member)
+                      ? memo2.set(key, member)
+                      : memo2,
+                    memo,
+                  )
+                  : memo;
+              },
+              Map(),
+            );
+            const allActorMembersByActortype = allActorMembers
+              && actionConnections.get(API.ACTORS)
+              && allActorMembers
+                .filter((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString()]))
+                .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
+                .sortBy((val, key) => key);
+            result = result.set(
+              'actorMembersByType',
+              allActorMembersByActortype,
+            );
+          }
           return result;
         }
       )
@@ -437,7 +467,7 @@ export const selectEntityUsers = createSelector(
 );
 
 export const selectChildActorsByType = createSelector(
-  (state, targetIds) => targetIds,
+  (state, actorIds) => actorIds,
   selectActors,
   selectActorConnections,
   selectMembershipsGroupedByMember,
@@ -446,7 +476,7 @@ export const selectChildActorsByType = createSelector(
   selectUserActorsGroupedByActor,
   selectCategories,
   (
-    targetIds,
+    actorIds,
     actors,
     actorConnections,
     memberships,
@@ -455,8 +485,8 @@ export const selectChildActorsByType = createSelector(
     userActorsByActor,
     categories,
   ) => {
-    if (!targetIds) return null;
-    return targetIds
+    if (!actorIds) return null;
+    return actorIds
       .map(
         (actorId) => {
           const actor = actors.get(actorId.toString());

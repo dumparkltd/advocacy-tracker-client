@@ -54,7 +54,6 @@ export function TabActorsAccordionChildActors({
 }
 
 TabActorsAccordionChildActors.propTypes = {
-  // targetIds: PropTypes.object,
   actorsByType: PropTypes.object,
   onEntityClick: PropTypes.func,
   getActortypeColumns: PropTypes.func,

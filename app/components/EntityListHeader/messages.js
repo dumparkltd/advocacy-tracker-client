@@ -70,16 +70,8 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-actors',
       defaultMessage: 'By connection',
     },
-    'connections-action-targets': {
-      id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-targets',
-      defaultMessage: 'By connection',
-    },
     'connections-actor-actions': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-actor-actions',
-      defaultMessage: 'By connection',
-    },
-    'connections-target-actions': {
-      id: 'app.components.EntityListHeader.filterGroupLabel.connections-target-actions',
       defaultMessage: 'By connection',
     },
     'connections-association-members': {
@@ -156,10 +148,6 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.editGroupLabel.connections-action-actors',
       defaultMessage: 'Update actors',
     },
-    'connections-action-targets': {
-      id: 'app.components.EntityListHeader.editGroupLabel.connections-action-targets',
-      defaultMessage: 'Update targets',
-    },
     'connections-actor-actions': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-actor-actions',
       defaultMessage: 'Update activities',
@@ -171,10 +159,6 @@ export default defineMessages({
     'connections-member-associations': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-member-associations',
       defaultMessage: 'Update memberships',
-    },
-    'connections-target-actions': {
-      id: 'app.components.EntityListHeader.editGroupLabel.connections-target-actions',
-      defaultMessage: 'Update activities',
     },
     'connections-action-resources': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-action-resources',

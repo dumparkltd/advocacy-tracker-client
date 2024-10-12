@@ -474,7 +474,6 @@ theme.global = {
   colors: {
     icon: '#000000',
     actors: '#006076',
-    targets: '#a52752',
     brand: '#000000',
     highlight: '#00728f',
     highlightHover: '#08586c',

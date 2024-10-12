@@ -79,6 +79,7 @@ export function TabActors({
           mapSubject={viewSubject}
           onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
           hasMemberOption={hasMemberOption}
+          hasChildActorOption={hasChildActors}
           typeId={typeId}
           childActionsByActiontype={childActionsByActiontype}
         />
@@ -96,6 +97,7 @@ export function TabActors({
         {hasActivities && (
           <TabActorsAccordion
             viewSubject={viewSubject}
+            hasChildActors={hasChildActors}
             taxonomies={taxonomies}
             onEntityClick={onEntityClick}
             actorConnections={actorConnections}

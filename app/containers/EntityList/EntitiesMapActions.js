@@ -382,7 +382,7 @@ export function EntitiesMapActions({
       isOnMap
     >
       {isPrintView && (
-        <HeaderPrint argsRemove={['msubj', 'subj', 'ac', 'tc', 'mtchm', 'mtch', 'actontype']} />
+        <HeaderPrint argsRemove={['msubj', 'subj', 'ac', 'tc', 'achmmap', 'achmap', 'actontype']} />
       )}
       <MapContainer
         fullMap
