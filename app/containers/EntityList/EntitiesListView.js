@@ -86,7 +86,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       connectedTaxonomies,
       entities,
       errors,
-      viewOptions,
       hasFilters,
       filters,
       showCode,
@@ -445,7 +444,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         <ContentHeader
           type={CONTENT_LIST}
           title={headerTitle}
-          hasViewOptions={viewOptions && viewOptions.length > 1}
+          hasViewOptions
           info={headerInfo}
           buttons={listActions}
           entityIdsSelected={entityIdsSelected}
@@ -641,7 +640,6 @@ EntitiesListView.propTypes = {
   errors: PropTypes.instanceOf(Map),
   // object/arrays
   config: PropTypes.object,
-  viewOptions: PropTypes.array,
   entityTitle: PropTypes.object, // single/plural
   headerInfo: PropTypes.object,
   listActions: PropTypes.array,

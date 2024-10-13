@@ -17,10 +17,9 @@ const Styled = styled.div`
   background-color: white;
   box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
   position: relative;
-  padding: 20px 0 0;
+  height: ${({ theme }) => theme.sizes.navSecondary.nav.height}px;
   @media print {
     display: block;
-    height: ${({ theme }) => theme.sizes.headerExplore.banner.height}px;
     position: static;
     box-shadow: none;
     background: white;

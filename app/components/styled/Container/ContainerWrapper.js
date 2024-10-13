@@ -5,8 +5,8 @@ const Styled = styled.div`
   position: ${({ isStatic, isPrint }) => (isPrint || isStatic) ? 'static' : 'absolute'};
   top: ${({ isOnMap, theme }) => {
     if (isOnMap) {
-      // to fix: add dynamic headerexplore height
-      return theme.sizes.headerList.banner.height;
+      // to fix: add dynamic navSecondary height
+      return theme.sizes.navSecondary.nav.heightMobile + 2;
     }
     return 0;
   }}px;
@@ -17,6 +17,15 @@ const Styled = styled.div`
   overflow-y: ${({ noOverflow }) => noOverflow ? 'hidden' : 'auto'};
   z-index: 90;
   background-color: ${({ bg, isPrint }) => (bg && !isPrint) ? '#f1f0f1' : 'transparent'};
+  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+    top: ${({ isOnMap, theme }) => {
+    if (isOnMap) {
+      // to fix: add dynamic navSecondary height
+      return theme.sizes.navSecondary.nav.height + 2;
+    }
+    return 0;
+  }}px;
+  }
   @media print {
     box-shadow: none;
     position: ${({ printAbsolute }) => printAbsolute ? 'absolute' : 'static'};

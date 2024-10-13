@@ -315,14 +315,14 @@ theme.sizes = {
       heightMobile: 30,
     },
   },
-  headerExplore: {
+  navSecondary: {
     banner: {
       height: 120,
       heightMobile: 60,
     },
     nav: {
-      height: 40,
-      heightMobile: 35,
+      height: 60,
+      heightMobile: 40,
     },
   },
   header: {

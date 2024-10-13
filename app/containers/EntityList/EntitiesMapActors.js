@@ -144,7 +144,7 @@ export function EntitiesMapActors({
     infoTitlePrint = infoTitle;
   }
   return (
-    <Styled headerStyle="types" isPrint={isPrintView} noOverflow>
+    <Styled noOverflow isOnMap>
       {isPrintView && (
         <HeaderPrint argsRemove={['subj', 'ac', 'tc', 'achmmap', 'achmap', 'actontype']} />
       )}

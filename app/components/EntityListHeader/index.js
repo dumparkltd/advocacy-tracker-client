@@ -400,7 +400,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
         {(size) => (
           <Styled isPrint={isPrintView}>
             <TheHeader
-              margin={{ top: 'xsmall', bottom: 'xsmall' }}
+              margin={{ bottom: 'xsmall' }}
               pad={{ top: 'small' }}
               align="center"
               justify="between"

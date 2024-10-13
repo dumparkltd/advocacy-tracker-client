@@ -574,7 +574,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                   listActions={allListActions}
                   showEntitiesDelete={onEntitiesDelete}
                   allEntityCount={allEntities && allEntities.size}
-                  viewOptions={viewOptions}
                   hasHeader={includeHeader}
                   headerStyle={headerStyle}
                   listUpdating={progress !== null && progress >= 0 && progress < 100}
