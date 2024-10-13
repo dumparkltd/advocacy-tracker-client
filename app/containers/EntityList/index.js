@@ -12,7 +12,10 @@ import { palette } from 'styled-theme';
 import { Edit } from 'grommet-icons';
 import { Map, List, fromJS } from 'immutable';
 import ReactModal from 'react-modal';
+
 import { qe } from 'utils/quasi-equals';
+import { jumpToComponent } from 'utils/scroll-to-component';
+
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import Icon from 'components/Icon';
@@ -22,6 +25,7 @@ import EntityListDelete from 'components/EntityListDelete';
 import NavSecondary from 'containers/NavSecondary';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
+import Content from 'components/styled/ContentSimple';
 
 import {
   selectHasUserRole,
@@ -125,12 +129,23 @@ const STATE_INITIAL = {
 export class EntityList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   constructor() {
     super();
+    this.ScrollContainer = React.createRef();
+    this.ScrollTarget = React.createRef();
+    this.ScrollReference = React.createRef();
     this.state = STATE_INITIAL;
   }
 
   UNSAFE_componentWillMount() {
     this.props.updateClientPath();
   }
+
+  scrollToTop = () => {
+    jumpToComponent(
+      this.ScrollTarget.current,
+      this.ScrollReference.current,
+      this.ScrollContainer.current
+    );
+  };
 
   onShowFilters = (evt) => {
     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
@@ -475,141 +490,144 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             />
           </ReactModal>
         )}
+        {!dataReady && !isPrintView && (
+          <Loading loading={!dataReady} />
+        )}
         {dataReady && (
           <Container ref={this.ScrollReference} isPrint={isPrintView}>
-            {headerStyle === 'types' && !printing && (
-              <EntityListHeader
-                typeId={typeId}
-                dataReady={dataReady}
-                currentFilters={filters}
-                listUpdating={progress !== null && progress >= 0 && progress < 100}
-                entities={entities}
-                allEntities={allEntities}
-                entityIdsSelected={entityIdsSelectedFiltered}
-                taxonomies={taxonomies}
-                actortypes={actortypes}
-                filterActortypes={filterActortypes}
-                resourcetypes={resourcetypes}
-                actiontypes={actiontypes}
-                membertypes={membertypes}
-                filterAssociationtypes={filterAssociationtypes}
-                connections={connections}
-                associationtypes={associationtypes}
-                connectedTaxonomies={connectedTaxonomies}
-                config={config}
-                locationQuery={locationQuery}
-                canEdit={isMember && showList}
-                isMember={isMember}
-                isAdmin={isAdmin}
-                hasUserRole={hasUserRole}
-                onCreateOption={onCreateOption}
-                onUpdate={
-                  (associations, activeEditOption) => handleEditSubmit(
-                    associations,
-                    activeEditOption,
-                    entityIdsSelectedFiltered,
-                    viewDomain.get('errors'),
-                    connections,
+            <Content isPrint={isPrintView}>
+              {headerStyle === 'types' && !printing && (
+                <EntityListHeader
+                  typeId={typeId}
+                  dataReady={dataReady}
+                  currentFilters={filters}
+                  listUpdating={progress !== null && progress >= 0 && progress < 100}
+                  entities={entities}
+                  allEntities={allEntities}
+                  entityIdsSelected={entityIdsSelectedFiltered}
+                  taxonomies={taxonomies}
+                  actortypes={actortypes}
+                  filterActortypes={filterActortypes}
+                  resourcetypes={resourcetypes}
+                  actiontypes={actiontypes}
+                  membertypes={membertypes}
+                  filterAssociationtypes={filterAssociationtypes}
+                  connections={connections}
+                  associationtypes={associationtypes}
+                  connectedTaxonomies={connectedTaxonomies}
+                  config={config}
+                  locationQuery={locationQuery}
+                  canEdit={isMember && showList}
+                  isMember={isMember}
+                  isAdmin={isAdmin}
+                  hasUserRole={hasUserRole}
+                  onCreateOption={onCreateOption}
+                  onUpdate={
+                    (associations, activeEditOption) => handleEditSubmit(
+                      associations,
+                      activeEditOption,
+                      entityIdsSelectedFiltered,
+                      viewDomain.get('errors'),
+                      connections,
+                    )}
+                  onUpdateFilters={onUpdateFilters}
+                  showFilters={this.state.visibleFilters}
+                  showEditOptions={isMember && showList && this.state.visibleEditOptions}
+                  onShowFilters={this.onShowFilters}
+                  onHideFilters={this.onHideFilters}
+                  onHideEditOptions={this.onHideEditOptions}
+                  onSelectType={(type) => {
+                    // reset selection
+                    onEntitySelectAll([]);
+                    onSelectType(type);
+                  }}
+                  hasFilters={filters && filters.length > 0}
+                  onUpdateQuery={onUpdateQuery}
+                  filteringOptions={filteringOptions}
+                  includeMembersWhenFiltering={includeMembersWhenFiltering}
+                  includeActorMembers={includeActorMembers}
+                  includeActorChildren={includeActorChildren}
+                  headerActions={headerActions}
+                  viewOptions={viewOptions}
+                  isOnMap={showMap}
+                  onClearFilters={this.onClearFilters}
+                  isPrintView={isPrintView}
+                />
+              )}
+              {headerStyle === 'simple' && (
+                <EntityListHeader
+                  headerStyle={headerStyle}
+                  dataReady={dataReady}
+                  config={config}
+                  canEdit={isMember && showList}
+                  isMember={isMember}
+                  hasUserRole={hasUserRole}
+                  headerActions={headerOptions && headerOptions.actions}
+                  isPrintView={isPrintView}
+                />
+              )}
+              {showList && dataReady && (
+                <EntitiesListView
+                  onScrollToTop={this.scrollToTop}
+                  searchQuery={searchQuery}
+                  isPrintView={isPrintView}
+                  headerInfo={headerOptions.info}
+                  listActions={allListActions}
+                  showEntitiesDelete={onEntitiesDelete}
+                  allEntityCount={allEntities && allEntities.size}
+                  viewOptions={viewOptions}
+                  hasHeader={includeHeader}
+                  headerStyle={headerStyle}
+                  listUpdating={progress !== null && progress >= 0 && progress < 100}
+                  entities={entities}
+                  errors={errors}
+                  taxonomies={taxonomies}
+                  connections={connections}
+                  connectedTaxonomies={connectedTaxonomies}
+                  entityIdsSelected={entityIdsSelectedFiltered}
+
+                  config={config}
+                  entityTitle={entityTitle}
+
+                  isMember={isMember}
+                  isAdmin={isAdmin}
+                  isVisitor={hasUserRole[USER_ROLES.VISITOR.value]}
+
+                  onEntitySelect={(id, checked) => {
+                    // reset when unchecking last selected item
+                    if (!checked && !this.state.visibleEditOptions && entityIdsSelectedFiltered.size === 1) {
+                      this.onResetEditOptions();
+                    }
+                    this.onHideDeleteConfirm();
+                    onEntitySelect(id, checked);
+                  }}
+                  onEntitySelectAll={(ids) => {
+                    // reset when unchecking last selected item
+                    if (!this.state.visibleEditOptions && (!ids || ids.length === 0)) {
+                      this.onResetEditOptions();
+                    }
+                    this.onHideDeleteConfirm();
+                    onEntitySelectAll(ids);
+                  }}
+                  onEntityClick={(id, path) => onEntityClick(
+                    id, path, viewDomain.get('errors')
                   )}
-                onUpdateFilters={onUpdateFilters}
-                showFilters={this.state.visibleFilters}
-                showEditOptions={isMember && showList && this.state.visibleEditOptions}
-                onShowFilters={this.onShowFilters}
-                onHideFilters={this.onHideFilters}
-                onHideEditOptions={this.onHideEditOptions}
-                onSelectType={(type) => {
-                  // reset selection
-                  onEntitySelectAll([]);
-                  onSelectType(type);
-                }}
-                hasFilters={filters && filters.length > 0}
-                onUpdateQuery={onUpdateQuery}
-                filteringOptions={filteringOptions}
-                includeMembersWhenFiltering={includeMembersWhenFiltering}
-                includeActorMembers={includeActorMembers}
-                includeActorChildren={includeActorChildren}
-                headerActions={headerActions}
-                viewOptions={viewOptions}
-                isOnMap={showMap}
-                onClearFilters={this.onClearFilters}
-                isPrintView={isPrintView}
-              />
-            )}
-            {headerStyle === 'simple' && (
-              <EntityListHeader
-                headerStyle={headerStyle}
-                dataReady={dataReady}
-                config={config}
-                canEdit={isMember && showList}
-                isMember={isMember}
-                hasUserRole={hasUserRole}
-                headerActions={headerOptions && headerOptions.actions}
-                isPrintView={isPrintView}
-              />
-            )}
-            {!isPrintView && (
-              <Loading loading={!dataReady} />
-            )}
-            {showList && dataReady && (
-              <EntitiesListView
-                searchQuery={searchQuery}
-                isPrintView={isPrintView}
-                headerInfo={headerOptions.info}
-                listActions={allListActions}
-                showEntitiesDelete={onEntitiesDelete}
-                allEntityCount={allEntities && allEntities.size}
-                viewOptions={viewOptions}
-                hasHeader={includeHeader}
-                headerStyle={headerStyle}
-                listUpdating={progress !== null && progress >= 0 && progress < 100}
-                entities={entities}
-                errors={errors}
-                taxonomies={taxonomies}
-                connections={connections}
-                connectedTaxonomies={connectedTaxonomies}
-                entityIdsSelected={entityIdsSelectedFiltered}
-
-                config={config}
-                entityTitle={entityTitle}
-
-                isMember={isMember}
-                isAdmin={isAdmin}
-                isVisitor={hasUserRole[USER_ROLES.VISITOR.value]}
-
-                onEntitySelect={(id, checked) => {
-                  // reset when unchecking last selected item
-                  if (!checked && !this.state.visibleEditOptions && entityIdsSelectedFiltered.size === 1) {
-                    this.onResetEditOptions();
-                  }
-                  this.onHideDeleteConfirm();
-                  onEntitySelect(id, checked);
-                }}
-                onEntitySelectAll={(ids) => {
-                  // reset when unchecking last selected item
-                  if (!this.state.visibleEditOptions && (!ids || ids.length === 0)) {
-                    this.onResetEditOptions();
-                  }
-                  this.onHideDeleteConfirm();
-                  onEntitySelectAll(ids);
-                }}
-                onEntityClick={(id, path) => onEntityClick(
-                  id, path, viewDomain.get('errors')
-                )}
-                onDismissError={onDismissError}
-                typeId={typeId}
-                hasFilters={filters && filters.length > 0}
-                filters={filters}
-                showCode={showCode}
-                mapSubject={mapSubject}
-                onSetMapSubject={onSetMapSubject}
-                onSetIncludeActorMembers={onSetIncludeActorMembers}
-                onSetIncludeActorChildren={onSetIncludeActorChildren}
-                onSetIncludeInofficial={onSetIncludeInofficial}
-                includeActorMembers={includeActorMembers}
-                includeActorChildren={includeActorChildren}
-                includeInofficial={includeInofficial}
-              />
-            )}
+                  onDismissError={onDismissError}
+                  typeId={typeId}
+                  hasFilters={filters && filters.length > 0}
+                  filters={filters}
+                  showCode={showCode}
+                  mapSubject={mapSubject}
+                  onSetMapSubject={onSetMapSubject}
+                  onSetIncludeActorMembers={onSetIncludeActorMembers}
+                  onSetIncludeActorChildren={onSetIncludeActorChildren}
+                  onSetIncludeInofficial={onSetIncludeInofficial}
+                  includeActorMembers={includeActorMembers}
+                  includeActorChildren={includeActorChildren}
+                  includeInofficial={includeInofficial}
+                />
+              )}
+            </Content>
             {showMap && (
               <EntitiesMap
                 viewOptions={viewOptions}

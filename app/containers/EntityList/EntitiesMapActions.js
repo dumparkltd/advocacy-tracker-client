@@ -409,7 +409,6 @@ export function EntitiesMapActions({
 EntitiesMapActions.propTypes = {
   entities: PropTypes.instanceOf(List),
   actortypes: PropTypes.instanceOf(Map),
-  actiontypes: PropTypes.instanceOf(Map),
   countries: PropTypes.instanceOf(Map),
   indicators: PropTypes.instanceOf(Map),
   // primitive

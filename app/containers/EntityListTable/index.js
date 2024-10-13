@@ -99,6 +99,7 @@ export function EntityListTable({
   isPrintView,
   // allEntityCount,
   isByOption,
+  onResetScroll,
 }) {
   if (!columns) return null;
 
@@ -346,7 +347,10 @@ export function EntityListTable({
           pager={pager}
           isPrintView={isPrintView}
           pageSize={(pageItems === 'all' || (isPrintView && printConfig.printItems === 'all')) ? 'all' : pageSize}
-          onPageSelect={onPageSelect}
+          onPageSelect={(val) => {
+            if (onResetScroll) onResetScroll();
+            onPageSelect(val);
+          }}
         />
       )}
       {moreLess && searchedEntities.size > CONNECTIONMAX && (
@@ -407,6 +411,7 @@ EntityListTable.propTypes = {
   isPrintView: PropTypes.bool,
   printConfig: PropTypes.object,
   pageItemSelectConfig: PropTypes.object,
+  onResetScroll: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({
