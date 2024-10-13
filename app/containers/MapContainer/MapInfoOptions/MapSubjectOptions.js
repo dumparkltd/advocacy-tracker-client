@@ -28,6 +28,7 @@ const TypeButton = styled((p) => <Button plain {...p} />)`
   border-bottom: 2px solid;
   border-bottom-color: ${({ active }) => active ? 'auto' : 'transparent'};
   background: none;
+  cursor: ${(props) => props.disabled ? 'default' : 'pointer'};
 `;
 
 const StyledTextPrint = styled((p) => <TextPrint {...p} />)`
@@ -53,10 +54,11 @@ function MapSubjectOptions({ options, inList, align = 'start' }) {
               options.map((option, i) => option && (
                 <Box key={i}>
                   <TypeButton
-                    as={option.onClick ? 'button' : 'div'}
+                    as={(!!option.onClick || option.active) ? 'button' : 'div'}
                     active={option.active}
                     onClick={option.onClick}
                     inList={inList}
+                    disabled={!!option.onClick || option.active}
                   >
                     <StyledTextPrint
                       size={inList ? 'medium' : 'large'}

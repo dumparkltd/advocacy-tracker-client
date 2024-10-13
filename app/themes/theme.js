@@ -420,12 +420,12 @@ export const BREAKPOINTS = {
   },
   xlarge: {
     min: 1152, // exclusive
-    max: 1728,
+    max: 1444,
     name: 'desktop',
     index: 4,
   },
   xxlarge: {
-    min: 1728, // exclusive
+    min: 1444, // exclusive
     max: 99999999,
     name: 'large desktop',
     index: 5,
