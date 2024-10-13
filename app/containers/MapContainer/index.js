@@ -195,7 +195,9 @@ export function MapContainer({
   const MapOuterWrapper = getMapOuterWrapper(fullMap);
 
   return (
-    <Styled>
+    <Styled
+      className={`advocacy-tracker-map${fullMap ? ' advocacy-tracker-map-full' : ''}`}
+    >
       <MapOuterWrapper
         isPrint={isPrintView}
         orient={printArgs && printArgs.printOrientation}

@@ -183,6 +183,16 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 
+  .advocacy-tracker-map-full .leaflet-top.leaflet-left .leaflet-control {
+    @media (max-width: 1152px) {
+      margin-top: 66px;
+      margin-left: 28px;
+    }
+    @media (max-width: 992px) {
+      margin-left: 12px;
+    }
+  }
+
   .delete-csv-modal,
   .download-csv-modal,
   .new-entity-modal {
