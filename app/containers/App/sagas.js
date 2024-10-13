@@ -55,6 +55,7 @@ import {
   SET_INCLUDE_ACTOR_CHILDREN_ON_MAP,
   SET_INCLUDE_ACTOR_CHILDREN_MEMBERS_ON_MAP,
   PARAMS,
+  SET_LIST_PREVIEW,
 } from 'containers/App/constants';
 
 import {
@@ -1139,6 +1140,19 @@ export function* setIncludeSupportLevelSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
+export function* setListPreviewSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'preview',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
 /* export function* printViewSaga({ config }) {
   const location = yield select(selectLocation);
   let queryArgs = [];
@@ -1323,6 +1337,7 @@ export default function* rootSaga() {
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
   yield takeEvery(SET_INCLUDE_INOFFICAL_STATEMENTS, setIncludeInofficialStatementsSaga);
   yield takeEvery(SET_INCLUDE_SUPPORT_LEVEL, setIncludeSupportLevelSaga);
+  yield takeEvery(SET_LIST_PREVIEW, setListPreviewSaga);
   // yield takeEvery(PRINT_VIEW, printViewSaga);
   yield takeEvery(OPEN_BOOKMARK, openBookmarkSaga);
 

@@ -90,6 +90,8 @@ export const SET_INCLUDE_INOFFICAL_STATEMENTS = 'impactoss/App/SET_INCLUDE_INOFF
 export const SET_INCLUDE_SUPPORT_LEVEL = 'impactoss/App/SET_INCLUDE_SUPPORT_LEVEL';
 export const PRINT_VIEW = 'impactoss/App/PRINT_VIEW';
 export const CLOSE_PRINT_VIEW = 'impactoss/App/CLOSE_PRINT_VIEW';
+export const SET_LIST_PREVIEW = 'impactoss/App/SET_LIST_PREVIEW';
+export const SET_LIST_PREVIEW_CONTENT = 'impactoss/App/SET_LIST_PREVIEW_CONTENT';
 
 export const FILTERS_PANEL = 'filters';
 export const EDIT_PANEL = 'edit';

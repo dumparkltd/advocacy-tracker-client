@@ -6,7 +6,7 @@
 import { defineMessages } from 'react-intl';
 
 export default defineMessages({
-  subTitle: {
+  title: {
     id: 'app.containers.PositionsMap.subTitle',
     defaultMessage: 'Country Position By Topic',
   },

@@ -210,6 +210,21 @@ const GlobalStyle = createGlobalStyle`
     margin-left: auto;
     max-width: 1122px;
   }
+  .preview-item-modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 0;
+    width: 100%;
+    overflow: auto;
+    --webkit-overflow-scrolling: touch;
+    border-radius: 0;
+    outline: none;
+    margin-right: auto;
+    margin-left: auto;
+  }
   @media (min-width: 769px) {
     .delete-csv-modal,
     .download-csv-modal,
@@ -219,6 +234,10 @@ const GlobalStyle = createGlobalStyle`
       left: 40px;
       right: 40px;
       bottom: 40px;
+    }
+    .preview-item-modal {
+      max-width: 600px;
+      left: auto;
     }
   }
 
@@ -231,6 +250,14 @@ const GlobalStyle = createGlobalStyle`
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.85);
+  }
+  .preview-item-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.001);
   }
 
   [type="checkbox"] {

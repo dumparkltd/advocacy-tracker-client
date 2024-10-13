@@ -18,18 +18,26 @@ import {
 
 import {
   ACTORTYPES,
-  ROUTES,
   ACTION_INDICATOR_SUPPORTLEVELS,
   ACTIONTYPES,
+  ROUTES,
 } from 'themes/config';
 import qe from 'utils/quasi-equals';
 import asList from 'utils/as-list';
+import isDate from 'utils/is-date';
+import {
+  getIndicatorMainTitle,
+  getIndicatorShortTitle,
+  getIndicatorSecondaryTitle,
+} from 'utils/entities';
 
 import {
   loadEntitiesIfNeeded,
   setMapIndicator,
   setIncludeActorMembers,
   updateRouteQuery,
+  setPreviewContent,
+  updatePath,
 } from 'containers/App/actions';
 
 import {
@@ -39,6 +47,7 @@ import {
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
   selectSupportQuery,
+  selectPreviewQuery,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -46,6 +55,8 @@ import Loading from 'components/Loading';
 import MapContainer from 'containers/MapContainer';
 import SelectIndicators from 'containers/MapContainer/MapInfoOptions/SelectIndicators';
 import Icon from 'components/Icon';
+import ButtonPrimary from 'components/buttons/ButtonPrimaryNew';
+import ButtonSecondary from 'components/buttons/ButtonSecondaryNew';
 
 import { DEPENDENCIES } from './constants';
 import { selectIndicatorId } from './selectors';
@@ -134,55 +145,18 @@ const SearchWrapper = styled((p) => <Box {...p} />)`
 const MapTitle = styled((p) => <Heading level="3" {...p} />)`
   color: black;
   font-weight: bold;
+  margin: 0;
 `;
-const SubTitle = styled((p) => <Heading level="3" {...p} />)`
+const Title = styled((p) => <Heading level="5" {...p} />)`
   color: black;
   text-transform: uppercase;
   font-weight: bold;
 `;
-const TopicsButtonLabel = styled((p) => <Text size="large" {...p} />)`
-  color: ${palette('primary', 1)};
-    &:hover {
-    color: ${palette('primary', 0)};
-  }
-`;
-const TopicsButton = styled((p) => (
-  <Button
-    pad={{ vertical: 'small', horizontal: 'medium' }}
-    {...p}
-  />
-))`
-  font-family: ${({ theme }) => theme.fonts.title};
-  text-transform: uppercase;
-  border: none;
-  path {
-    stroke-width: 4px;
-  }
-  &:hover {
-    border: none;
-    box-shadow: none;
-  }
-`;
-const GlobalRulesButton = styled((p) => (
-  <Button
-    pad={{ vertical: 'small', horizontal: 'medium' }}
-    {...p}
-  />
-))`
-  font-family: ${({ theme }) => theme.fonts.title};
-  color: white;
-  text-transform: uppercase;
-  background: ${palette('primary', 1)};
-  border-radius: 0;
-  border: 1px solid transparent;
-  &:hover {
-    box-shadow: none;
-    background: ${palette('primary', 0)};
-  }
-`;
-/* const MapSubTitle = styled((p) => <Heading level="4" {...p} />)`
+const MapSecondaryTitle = styled((p) => <Text size="large" {...p} />)`
+  margin: 0;
   color: black;
-  font-weight: bold; */
+  font-weight: bold;
+`;
 export function PositionsMap({
   indicators,
   countries,
@@ -194,14 +168,100 @@ export function PositionsMap({
   supportQuery,
   onUpdateQuery,
   onLoadData,
-  onEntityClick,
   dataReady,
+  previewItemNo,
   intl,
+  onSetPreviewContent,
+  onUpdatePath,
 }) {
   useEffect(() => {
     // kick off loading of data
     onLoadData();
   }, []);
+  useEffect(() => {
+    if (dataReady && previewItemNo) {
+      const country = countries && countries.get(previewItemNo);
+      if (country) {
+        const countryIds = countries.keySeq().toArray();
+        const countryIndex = countryIds.indexOf(country.get('id'));
+        const nextIndex = countryIndex < countryIds.length ? countryIndex + 1 : 0;
+        const prevIndex = countryIndex > 0 ? countryIndex - 1 : countryIds.length - 1;
+
+        const currentIndicator = indicators && indicators.get(currentIndicatorId.toString());
+        const indicatorPositions = country.getIn(['indicatorPositions', currentIndicatorId.toString()])
+          && country.getIn(['indicatorPositions', currentIndicatorId.toString()]);
+        const indicatorPosition = indicatorPositions && indicatorPositions.first();
+        // console.log('indicatorPosition', indicatorPosition && indicatorPosition.toJS())
+        const content = {
+          header: {
+            aboveTitle: 'Country',
+            title: country.getIn(['attributes', 'title']),
+            code: country.getIn(['attributes', 'code']),
+            nextPreviewItem: countryIds[nextIndex],
+            prevPreviewItem: countryIds[prevIndex],
+          },
+          topicPosition: {
+            topicId: currentIndicatorId,
+            topic: currentIndicator && {
+              title: getIndicatorShortTitle(currentIndicator.getIn(['attributes', 'title'])),
+              viaGroup: indicatorPosition && indicatorPosition.get('viaGroups')
+              && indicatorPosition.get('viaGroups').first()
+              && indicatorPosition.get('viaGroups').first().getIn(['attributes', 'title']),
+            },
+            position: indicatorPosition ? {
+              supportlevelId: indicatorPosition.get('supportlevel_id'),
+              supportlevelTitle: intl.formatMessage(appMessages.supportlevels[indicatorPosition.get('supportlevel_id')]),
+              levelOfAuthority: indicatorPosition.getIn(['authority', 'short_title']),
+            } : {
+              supportlevelId: 0,
+              supportlevelTitle: intl.formatMessage(appMessages.supportlevels[99]),
+            },
+          },
+          topicStatements: indicatorPositions && {
+            includeInofficialStatements,
+            indicatorPositions: indicatorPositions.reduce((memo, position) => {
+              const statement = position.get('measure');
+              let date = statement.get('date_start');
+              if (isDate(date)) {
+                date = intl.formatDate(date);
+              } else if (isDate(statement.get('created_at'))) {
+                date = intl.formatDate(statement.get('created_at'));
+              }
+              return ([
+                ...memo,
+                {
+                  position: {
+                    supportlevelId: position.get('supportlevel_id'),
+                    supportlevelTitle: intl.formatMessage(appMessages.supportlevels[position.get('supportlevel_id')]),
+                  },
+                  statement: statement && {
+                    id: statement.get('id'),
+                    date,
+                    title: statement.get('title'),
+                  },
+                  levelOfAuthority: position && position.getIn(['authority', 'short_title']),
+                },
+              ]);
+            }, []),
+          },
+          footer: {
+            primaryLink: country && {
+              path: `${ROUTES.ACTOR}/${country.get('id')}`,
+              title: 'Country details',
+            },
+            secondaryLink: currentIndicator && {
+              path: `${ROUTES.INDICATOR}/${currentIndicator.get('id')}`,
+              id: currentIndicator.get('id'),
+              title: getIndicatorShortTitle(currentIndicator.getIn(['attributes', 'title'])),
+            },
+          },
+        };
+        onSetPreviewContent(content);
+      }
+    } else {
+      onSetPreviewContent();
+    }
+  }, [dataReady, previewItemNo, countries]);
 
   const size = React.useContext(ResponsiveContext);
 
@@ -212,6 +272,7 @@ export function PositionsMap({
     const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
     if (country) {
       const countryPosition = country.get('indicatorPositions')
+        && country.getIn(['indicatorPositions', currentIndicatorId.toString()])
         && country.getIn(['indicatorPositions', currentIndicatorId.toString()]).first();
 
       const statement = countryPosition && countryPosition.get('measure');
@@ -223,6 +284,8 @@ export function PositionsMap({
         {
           ...feature,
           id: country.get('id'),
+          previewItemNo: country.get('id'),
+          isPreviewItem: qe(previewItemNo, country.get('id')),
           attributes: country.get('attributes').toJS(),
           values: statement ? { [currentIndicatorId]: level || 0 } : {},
         },
@@ -254,16 +317,18 @@ export function PositionsMap({
       .map(([id, indicator]) => ({
         key: id,
         active: qe(currentIndicatorId, id),
-        label: indicator.getIn(['attributes', 'title']),
+        label: getIndicatorMainTitle(indicator.getIn(['attributes', 'title'])),
         onClick: () => onSetMapIndicator(id),
       }));
-
+  const currentIndicator = indicators
+    && currentIndicatorId
+    && indicators.get(currentIndicatorId.toString());
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
       <Box pad={{ top: 'small', bottom: 'xsmall' }}>
-        <SubTitle>
-          <FormattedMessage {...messages.subTitle} />
-        </SubTitle>
+        <Title>
+          <FormattedMessage {...messages.title} />
+        </Title>
       </Box>
       <StyledCard
         elevation="small"
@@ -325,13 +390,18 @@ export function PositionsMap({
           flex={{ grow: 1, shrink: 1 }}
         >
           <Loading loading={!dataReady} />
-          <Box>
-            {dataReady && size !== 'small' && (
+          {dataReady && size !== 'small' && (
+            <Box gap="small" margin={{ vertical: 'small' }}>
               <MapTitle>
-                {indicators.getIn([currentIndicatorId.toString(), 'attributes', 'title'])}
+                {getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title']))}
               </MapTitle>
-            )}
-          </Box>
+              {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title'])) && (
+                <MapSecondaryTitle>
+                  {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title']))}
+                </MapSecondaryTitle>
+              )}
+            </Box>
+          )}
           <MapWrapper>
             {dataReady
               && (
@@ -367,7 +437,6 @@ export function PositionsMap({
                     });
                   },
                 }}
-                onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
               />
             )}
           </MapWrapper>
@@ -380,23 +449,25 @@ export function PositionsMap({
               includeInofficialStatements={includeInofficialStatements}
             />
           )}
-          <Box
-            direction="row"
-            justify="end"
-            pad={{ top: 'small' }}
-            gap="none"
-          >
-            <TopicsButton
-              reverse
+          {dataReady && (
+            <Box
+              direction="row"
+              justify="end"
+              pad={{ top: 'small' }}
               gap="none"
-              justify="center"
-              label={(
-                <TopicsButtonLabel>
-                  {intl.formatMessage(messages.allTopics)}
-                </TopicsButtonLabel>
-              )}
-              icon={(
-                <Box margin={{ top: '3px', left: '2px' }}>
+            >
+              <ButtonSecondary
+                gap="none"
+                justify="center"
+                onClick={(e) => {
+                  if (e && e.preventDefault) e.preventDefault();
+                  onUpdatePath(ROUTES.INDICATORS);
+                }}
+              >
+                <Box direction="row" align="center">
+                  <Text size="large" style={{ marginTop: '-2px' }}>
+                    {intl.formatMessage(messages.allTopics)}
+                  </Text>
                   <Icon
                     name="arrowRight"
                     size="10px"
@@ -405,16 +476,22 @@ export function PositionsMap({
                     hasStroke
                   />
                 </Box>
-              )}
-            />
-            <GlobalRulesButton
-              label={(
-                <Text size="large">
-                  {intl.formatMessage(messages.globalRules)}
-                </Text>
-              )}
-            />
-          </Box>
+              </ButtonSecondary>
+              <ButtonPrimary
+                onClick={(e) => {
+                  if (e && e.preventDefault) e.preventDefault();
+                  onUpdatePath(`${ROUTES.INDICATOR}/${currentIndicatorId}`);
+                }}
+                label={(
+                  <Text size="large">
+                    {indicators
+                      && currentIndicatorId
+                      && getIndicatorShortTitle(currentIndicator.getIn(['attributes', 'title']))}
+                  </Text>
+                )}
+              />
+            </Box>
+          )}
         </OverviewContentWrapper>
       </StyledCard>
     </Box>
@@ -426,7 +503,6 @@ PositionsMap.propTypes = {
   onLoadData: PropTypes.func.isRequired,
   onSetMapIndicator: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
-  onEntityClick: PropTypes.func,
   countries: PropTypes.object,
   onUpdateQuery: PropTypes.func,
   supportQuery: PropTypes.oneOfType([
@@ -437,6 +513,9 @@ PositionsMap.propTypes = {
   includeInofficialStatements: PropTypes.bool,
   currentIndicatorId: PropTypes.number,
   indicators: PropTypes.object,
+  previewItemNo: PropTypes.string,
+  onSetPreviewContent: PropTypes.func,
+  onUpdatePath: PropTypes.func,
   intl: intlShape.isRequired,
 };
 
@@ -448,6 +527,7 @@ const mapStateToProps = (state, { includeActorMembers }) => ({
   supportQuery: selectSupportQuery(state),
   includeActorMembers: selectIncludeActorMembers(state),
   countries: selectActorsWithPositions(state, { includeActorMembers, type: ACTORTYPES.COUNTRY }),
+  previewItemNo: selectPreviewQuery(state),
 });
 
 export function mapDispatchToProps(dispatch) {
@@ -458,6 +538,8 @@ export function mapDispatchToProps(dispatch) {
     onSetMapIndicator: (value) => dispatch(setMapIndicator(value)),
     onSetIncludeActorMembers: (value) => dispatch(setIncludeActorMembers(value)),
     onUpdateQuery: (value) => dispatch(updateRouteQuery(value)),
+    onSetPreviewContent: (value) => dispatch(setPreviewContent(value)),
+    onUpdatePath: (path) => dispatch(updatePath(path)),
   };
 }
 

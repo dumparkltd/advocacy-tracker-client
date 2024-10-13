@@ -1318,3 +1318,27 @@ export const getActortypeColumns = ({
   }
   return columns;
 };
+
+export const getIndicatorShortTitle = (title) => {
+  let short = title;
+  if (short.indexOf(':') > -1) {
+    short = short.split(':')[0].trim();
+    if (short.indexOf(' - ') > -1) {
+      short = short.split('-')[1].trim();
+    }
+  }
+  return short;
+};
+export const getIndicatorMainTitle = (title) => {
+  let short = title;
+  if (short.indexOf(':') > -1) {
+    short = short.split(':')[0].trim();
+  }
+  return short;
+};
+export const getIndicatorSecondaryTitle = (title) => {
+  if (title && title.indexOf(':') > -1) {
+    return title.split(':')[1].trim();
+  }
+  return null;
+};

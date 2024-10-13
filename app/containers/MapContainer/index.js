@@ -3,9 +3,10 @@
  * MapContainer
  *
  */
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 import styled, { css } from 'styled-components';
 import { Box, Text } from 'grommet';
 
@@ -18,7 +19,11 @@ import countryPointsJSON from 'data/country-points.json';
 
 import {
   selectPrintConfig,
+  selectPreviewQuery,
 } from 'containers/App/selectors';
+import {
+  setListPreview,
+} from 'containers/App/actions';
 
 import { usePrint } from 'containers/App/PrintContext';
 
@@ -83,6 +88,8 @@ export function MapContainer({
   isOverviewMap,
   printArgs,
   onClearFilters,
+  onSetPreviewItemNo,
+  previewItemNo,
   // intl,
 }) {
   const {
@@ -107,7 +114,6 @@ export function MapContainer({
     unit,
     maxBinValue,
   } = mapKey;
-
   const [showAsPoint, setShowAsPoint] = useState(false);
 
   // convert TopoJSON to JSON
@@ -233,6 +239,7 @@ export function MapContainer({
             ...circleLayerConfig,
             rangeMax: minMaxValues && minMaxValues.points && minMaxValues.points.max,
           }}
+          onSetPreviewItemNo={onSetPreviewItemNo}
         />
       </MapOuterWrapper>
       {mapInfo && (
@@ -295,10 +302,25 @@ MapContainer.propTypes = {
   mapOptions: PropTypes.array,
   fullMap: PropTypes.bool,
   isOverviewMap: PropTypes.bool,
+  onSetPreviewItemNo: PropTypes.func,
+  previewItemNo: PropTypes.string,
 };
 
 const mapStateToProps = (state) => ({
   printArgs: selectPrintConfig(state),
+  previewItemNo: selectPreviewQuery(state),
 });
 
-export default connect(mapStateToProps)(MapContainer);
+
+export function mapDispatchToProps(dispatch) {
+  return {
+    onSetPreviewItemNo: (value) => dispatch(setListPreview(value)),
+  };
+}
+
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
+
+export default compose(withConnect)(MapContainer);

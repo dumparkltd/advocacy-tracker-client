@@ -76,6 +76,10 @@ export const selectNewEntityModal = createSelector(
   getGlobal,
   (globalState) => globalState.get('newEntityModal')
 );
+export const selectListPreviewContent = createSelector(
+  getGlobal,
+  (globalState) => globalState.get('listPreviewContent')
+);
 
 // users and user authentication ///////////////////////////////////////////////
 
@@ -530,6 +534,15 @@ export const selectSupportQuery = createSelector(
   (locationQuery) => {
     if (locationQuery && locationQuery.get('support')) {
       return locationQuery.get('support');
+    }
+    return null; // default
+  }
+);
+export const selectPreviewQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => {
+    if (locationQuery && locationQuery.get('preview')) {
+      return locationQuery.get('preview');
     }
     return null; // default
   }

@@ -16,6 +16,7 @@ import { Box, Text } from 'grommet';
 import Header from 'components/Header';
 import Overlay from 'components/InfoOverlay/Overlay';
 import EntityNew from 'containers/EntityNew';
+import ListItemPreview from 'containers/ListItemPreview';
 import PrintUI from 'containers/PrintUI';
 
 import { getAuthValues } from 'utils/api-request';
@@ -38,6 +39,7 @@ import {
   selectReady,
   selectEntitiesWhere,
   selectNewEntityModal,
+  selectListPreviewContent,
   selectIsAuthenticating,
   selectIsPrintView,
   selectPrintConfig,
@@ -50,6 +52,7 @@ import {
   openNewEntityModal,
   submitInvalid,
   saveErrorDismiss,
+  setPreviewContent,
 } from './actions';
 
 import { PrintContext } from './PrintContext';
@@ -392,8 +395,9 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       isUserAuthenticating,
       isPrintView,
       printArgs,
+      listPreviewContent,
+      onClosePreviewModal,
     } = this.props;
-
     const { intl } = this.context;
     const title = intl.formatMessage(messages.app.title);
     const isHome = location.pathname === '/';
@@ -475,6 +479,23 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             />
           </ReactModal>
         )}
+        {listPreviewContent && (
+          <ReactModal
+            isOpen
+            contentLabel="List item preview"
+            onRequestClose={onClosePreviewModal}
+            className="preview-item-modal"
+            overlayClassName="preview-item-modal-overlay"
+            style={{
+              overlay: { zIndex: 99999999 },
+            }}
+            appElement={document.getElementById('app')}
+          >
+            <ListItemPreview
+              content={listPreviewContent.toJS()}
+            />
+          </ReactModal>
+        )}
         {isUserAuthenticating && !isAuth && !isUserSignedIn && (
           <Overlay
             title={intl.formatMessage(messages.labels.userLoading)}
@@ -517,7 +538,9 @@ App.propTypes = {
   onPageLink: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   newEntityModal: PropTypes.object,
+  listPreviewContent: PropTypes.object,
   onCloseModal: PropTypes.func,
+  onClosePreviewModal: PropTypes.func,
   isPrintView: PropTypes.bool,
   printArgs: PropTypes.object,
 };
@@ -539,6 +562,7 @@ const mapStateToProps = (state) => ({
     where: { draft: false },
   }),
   newEntityModal: selectNewEntityModal(state),
+  listPreviewContent: selectListPreviewContent(state),
 });
 
 export function mapDispatchToProps(dispatch) {
@@ -557,6 +581,9 @@ export function mapDispatchToProps(dispatch) {
       dispatch(submitInvalid(true));
       dispatch(saveErrorDismiss());
       dispatch(openNewEntityModal(null));
+    },
+    onClosePreviewModal: () => {
+      dispatch(setPreviewContent(null));
     },
   };
 }

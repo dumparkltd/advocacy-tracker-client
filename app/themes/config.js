@@ -167,6 +167,11 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#67402E', // teal-brown
     order: 5,
   },
+  99: {
+    value: '0',
+    color: '#EDEFF0',
+    order: 99,
+  },
 };
 
 export const ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS = {

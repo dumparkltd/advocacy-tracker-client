@@ -81,6 +81,8 @@ import {
   SET_INCLUDE_ACTOR_CHILDREN_MEMBERS_ON_MAP,
   PRINT_VIEW,
   CLOSE_PRINT_VIEW,
+  SET_LIST_PREVIEW,
+  SET_LIST_PREVIEW_CONTENT,
 } from './constants';
 
 export function submitInvalid(valid) {
@@ -596,5 +598,17 @@ export function openBookmark(bookmark) {
   return {
     type: OPEN_BOOKMARK,
     bookmark,
+  };
+}
+export function setListPreview(listItemNo) {
+  return {
+    type: SET_LIST_PREVIEW,
+    value: listItemNo,
+  };
+}
+export function setPreviewContent(args) {
+  return {
+    type: SET_LIST_PREVIEW_CONTENT,
+    args,
   };
 }
