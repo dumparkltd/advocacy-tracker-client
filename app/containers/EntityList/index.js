@@ -550,7 +550,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                   headerActions={headerActions}
                   viewOptions={viewOptions}
                   isOnMap={showMap}
-                  onClearFilters={this.onClearFilters}
                   isPrintView={isPrintView}
                 />
               )}
@@ -625,6 +624,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                   includeActorMembers={includeActorMembers}
                   includeActorChildren={includeActorChildren}
                   includeInofficial={includeInofficial}
+                  onClearFilters={this.onClearFilters}
                 />
               )}
             </Content>
@@ -648,6 +648,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 includeActorMembers={includeActorMembers}
                 includeActorChildren={includeActorChildren}
                 isPrintView={isPrintView}
+                filters={filters}
+                onClearFilters={this.onClearFilters}
               />
             )}
           </Container>

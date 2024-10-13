@@ -38,20 +38,10 @@ const OptionButton = styled((p) => <Button plain {...p} />)`
   &:hover {
     color:${palette('headerNavMainItemHover', 0)};
   }
-  opacity: ${({ isDefaultOption }) => isDefaultOption ? 0.6 : 1};
   color: ${({ active }) => active ? palette('headerNavMainItem', 1) : 'inherit'};
 `;
 
-const SelectText = styled((p) => <Text {...p} />)`
-  opacity: ${({ isDefaultOption }) => isDefaultOption ? 0.5 : 1}
-`;
-const Reset = styled((p) => <Button plain {...p} />)`
-  text-align: center;
-  width: 25px;
-`;
-const ResetPlaceholder = styled((p) => <Box {...p} />)`
-  width: 25px;
-`;
+const SelectText = styled((p) => <Text {...p} />)``;
 
 export function SelectIndicators({ config }) {
   const {
@@ -65,48 +55,34 @@ export function SelectIndicators({ config }) {
     (o) => o.active
   );
   if (!activeOption) return null;
-  const isDefaultOption = activeOption.id === 'all';
   return (
     <Box fill="horizontal" direction="row" align="center">
-      <Box flex={{ grow: 1 }}>
-        <SelectButton
-          ref={buttonRef}
-          plain
-          fill="horizontal"
-          onClick={() => setShowOptions(!showOptions)}
-        >
-          <Box direction="row" justify="between" align="center">
-            <SelectText
-              size="large"
-              isDefaultOption={isDefaultOption}
-            >
-              {truncateText(
-                activeOption.label,
-                TEXT_TRUNCATE.INDICATOR_SELECT,
-                false
-              )}
-            </SelectText>
-            <Box>
-              {!showOptions && (
-                <Icon name="dropdownOpen" text textRight size="1em" />
-              )}
-              {showOptions && (
-                <Icon name="dropdownClose" text textRight size="1em" />
-              )}
-            </Box>
+      <SelectButton
+        ref={buttonRef}
+        plain
+        fill="horizontal"
+        onClick={() => setShowOptions(!showOptions)}
+      >
+        <Box direction="row" justify="between" align="center">
+          <SelectText
+            size="large"
+          >
+            {truncateText(
+              activeOption.label,
+              TEXT_TRUNCATE.INDICATOR_SELECT,
+              false
+            )}
+          </SelectText>
+          <Box>
+            {!showOptions && (
+              <Icon name="dropdownOpen" text textRight size="1em" />
+            )}
+            {showOptions && (
+              <Icon name="dropdownClose" text textRight size="1em" />
+            )}
           </Box>
-        </SelectButton>
-      </Box>
-      <Box flex={{ shrink: 0 }} pad={{ left: 'ms' }}>
-        {!isDefaultOption && (
-          <Reset onClick={() => onIndicatorSelect()}>
-            <Icon name="removeSmall" text printHide />
-          </Reset>
-        )}
-        {isDefaultOption && (
-          <ResetPlaceholder />
-        )}
-      </Box>
+        </Box>
+      </SelectButton>
       {showOptions && (
         <Drop
           target={buttonRef.current}
@@ -120,7 +96,7 @@ export function SelectIndicators({ config }) {
           >
             {indicatorOptions && indicatorOptions.map(
               (o) => (
-                <Box key={o.key} flex={{ shrink: 0 }}>
+                <Box key={o.id} flex={{ shrink: 0 }}>
                   <OptionButton
                     active={o.active}
                     isDefaultOption={o.id === 'all'}

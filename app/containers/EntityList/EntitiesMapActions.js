@@ -72,6 +72,8 @@ export function EntitiesMapActions({
   catQuery,
   onUpdateQuery,
   isPrintView,
+  filters,
+  onClearFilters,
 }) {
   let indicatorOptions;
   let infoOptions = [];
@@ -142,7 +144,8 @@ export function EntitiesMapActions({
         {
           id: entity.get('id'),
           value: entity.get('id'),
-          label: entity.getIn(['attributes', 'title']),
+          label: `${entity.getIn(['attributes', 'title'])}`,
+          supTitle: 'Country positions for topic',
           active: qe(mapIndicator, entity.get('id')),
           onClick: () => onEntityClick(entity.get('id'), ROUTES.INDICATOR),
           href: `${ROUTES.INDICATOR}/${entity.get('id')}`,
@@ -152,6 +155,8 @@ export function EntitiesMapActions({
       [{
         id: 'all',
         value: 'all',
+        defaultOption: true,
+        supTitle: 'No of statements by Country',
         label: 'All topics',
         active: typeof mapIndicator === 'undefined' || mapIndicator === null,
       }]
@@ -251,8 +256,7 @@ export function EntitiesMapActions({
     }, []);
     indicator = mapIndicator;
     mapSubjectClean = null;
-    mapInfo = [{
-      id: 'countries',
+    mapInfo = {
       infoOptions,
       indicatorOptions,
       onIndicatorSelect: onSetMapIndicator,
@@ -271,7 +275,7 @@ export function EntitiesMapActions({
             })
           ),
       },
-    }];
+    };
   } else {
     [countryCounts, actionsTotalShowing] = entities.reduce(([memo, memo2], action) => {
       let updated = memo;
@@ -363,16 +367,16 @@ export function EntitiesMapActions({
     }, []);
     infoTitle = `No. of ${typeLabels[actionsTotalShowing === 1 ? 'single' : 'plural']} by Country`;
     infoSubTitle = `Showing ${actionsTotalShowing} of ${entities ? entities.size : 0} activities total${hasFilters ? ' (filtered)' : ''}`;
-    mapInfo = [{
-      id: 'countries',
+    mapInfo = {
       title: infoTitle,
       subTitle: infoSubTitle,
       titlePrint: infoTitle,
       infoOptions,
       indicatorOptions,
       onIndicatorSelect: onSetMapIndicator,
-    }];
+    };
   }
+
   return (
     <Styled noOverflow isOnMap>
       {isPrintView && (
@@ -383,6 +387,7 @@ export function EntitiesMapActions({
         reduceCountryAreas={reduceCountryAreas}
         typeLabels={typeLabels}
         mapData={{
+          filters,
           typeLabels,
           indicator,
           includeSecondaryMembers: includeActorMembers,
@@ -401,6 +406,7 @@ export function EntitiesMapActions({
         }}
         onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
         mapInfo={mapInfo}
+        onClearFilters={onClearFilters}
       />
     </Styled>
   );
@@ -426,6 +432,8 @@ EntitiesMapActions.propTypes = {
   onEntityClick: PropTypes.func,
   onSetMapIndicator: PropTypes.func,
   onUpdateQuery: PropTypes.func,
+  filters: PropTypes.array,
+  onClearFilters: PropTypes.func,
   intl: intlShape.isRequired,
 };
 

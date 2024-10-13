@@ -46,6 +46,8 @@ export function EntitiesMapActors({
   intl,
   hasFilters,
   isPrintView,
+  filters,
+  onClearFilters,
 }) {
   // const { intl } = this.context;
   // let { countries } = this.props;
@@ -141,7 +143,6 @@ export function EntitiesMapActors({
     infoSubTitle = `for ${entitiesTotal} ${typeLabelsFor[entitiesTotal === 1 ? 'single' : 'plural']}${hasFilters ? ' (filtered)' : ''}`;
     infoTitlePrint = infoTitle;
   }
-
   return (
     <Styled headerStyle="types" isPrint={isPrintView} noOverflow>
       {isPrintView && (
@@ -162,15 +163,16 @@ export function EntitiesMapActors({
           hasPointOption: false,
           hasPointOverlay: true,
           fitBounds: true,
+          filters,
         }}
         onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
-        mapInfo={[{
-          id: 'countries',
+        mapInfo={{
           title: infoTitle,
           titlePrint: infoTitlePrint,
           subTitle: infoSubTitle,
           memberOption,
-        }]}
+        }}
+        onClearFilters={onClearFilters}
       />
     </Styled>
   );
@@ -187,7 +189,9 @@ EntitiesMapActors.propTypes = {
   hasFilters: PropTypes.bool,
   isPrintView: PropTypes.bool,
   onEntityClick: PropTypes.func,
+  filters: PropTypes.array,
   intl: intlShape.isRequired,
+  onClearFilters: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({

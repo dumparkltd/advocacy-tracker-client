@@ -82,6 +82,7 @@ export function MapContainer({
   fullMap,
   isOverviewMap,
   printArgs,
+  onClearFilters,
   // intl,
 }) {
   const {
@@ -98,6 +99,7 @@ export function MapContainer({
     includeSecondaryMembers,
     scrollWheelZoom,
     valueToStyle,
+    filters,
   } = mapData;
   const {
     keyTitle,
@@ -226,20 +228,22 @@ export function MapContainer({
           fitBounds={fitBounds}
           projection={projection}
           mapId={mapId}
-          hasInfo={mapInfo && mapInfo.length > 0}
+          hasInfo={!!mapInfo}
           circleLayerConfig={{
             ...circleLayerConfig,
             rangeMax: minMaxValues && minMaxValues.points && minMaxValues.points.max,
           }}
         />
       </MapOuterWrapper>
-      {mapInfo && mapInfo.length > 0 && (
+      {mapInfo && (
         <MapInfoOptions
           isPrintView={isPrintView}
-          options={mapInfo}
+          option={mapInfo}
           minMaxValues={minMaxValues}
           countryMapSubject={mapSubject}
           circleLayerConfig={circleLayerConfig}
+          filters={filters}
+          onClearFilters={onClearFilters}
         />
       )}
       {mapKey && Object.keys(mapKey).length > 0 && (
@@ -281,12 +285,13 @@ export function MapContainer({
 
 MapContainer.propTypes = {
   onActorClick: PropTypes.func,
+  onClearFilters: PropTypes.func,
   reducePoints: PropTypes.func,
   reduceCountryAreas: PropTypes.func,
   mapData: PropTypes.object,
   mapKey: PropTypes.object,
   printArgs: PropTypes.object,
-  mapInfo: PropTypes.array,
+  mapInfo: PropTypes.object,
   mapOptions: PropTypes.array,
   fullMap: PropTypes.bool,
   isOverviewMap: PropTypes.bool,
