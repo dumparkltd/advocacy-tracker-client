@@ -39,7 +39,6 @@ import { keydownHandlerPrint } from 'utils/print';
 
 import { ROUTES, ACTIONTYPES, OUTREACH_ACTIONTYPES } from 'themes/config';
 
-import HeaderExplore from 'containers/HeaderExplore';
 import EntityList from 'containers/EntityList';
 import { CONFIG, DEPENDENCIES } from './constants';
 import {
@@ -201,8 +200,8 @@ export function ActionList({
           { name: 'description', content: intl.formatMessage(messages.metaDescription) },
         ]}
       />
-      <HeaderExplore navItems={navItems} />
       <EntityList
+        secondaryNavItems={navItems}
         entities={entities}
         allEntities={allEntities.toList()}
         taxonomies={taxonomies}

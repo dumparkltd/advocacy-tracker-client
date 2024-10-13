@@ -46,12 +46,8 @@ const Styled = styled(PrintHide)`
 
 const TheHeader = styled((p) => <Box direction="row" {...p} />)`
   height: ${({ theme }) => theme.sizes.headerList.banner.height}px;
-  padding: 0 3px;
   position: relative;
   z-index: 96;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    padding: 0 15px 0 75px;
-  }
 `;
 const HeaderSection = styled((p) => <Box direction="row" {...p} />)`
   position: relative;

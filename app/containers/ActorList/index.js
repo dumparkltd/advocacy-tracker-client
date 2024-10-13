@@ -41,8 +41,6 @@ import { qe } from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
 import { ROUTES, ACTORTYPES } from 'themes/config';
 
-
-import HeaderExplore from 'containers/HeaderExplore';
 import EntityList from 'containers/EntityList';
 import { PRINT_TYPES } from 'containers/App/constants';
 import EmailHelper from './EmailHelper';
@@ -249,8 +247,8 @@ export function ActorList({
           { name: 'description', content: intl.formatMessage(messages.metaDescription) },
         ]}
       />
-      <HeaderExplore navItems={navItems} />
       <EntityList
+        secondaryNavItems={navItems}
         entities={entities}
         allEntities={allEntities.toList()}
         taxonomies={taxonomies}

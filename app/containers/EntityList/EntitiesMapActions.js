@@ -58,7 +58,6 @@ const StatementButton = styled((p) => <Button {...p} />)`
 export function EntitiesMapActions({
   entities,
   actortypes,
-  actiontypes,
   typeId,
   mapSubject,
   onSetIncludeActorMembers,
@@ -375,12 +374,7 @@ export function EntitiesMapActions({
     }];
   }
   return (
-    <Styled
-      headerStyle="types"
-      isPrint={isPrintView}
-      noOverflow
-      isOnMap
-    >
+    <Styled noOverflow isOnMap>
       {isPrintView && (
         <HeaderPrint argsRemove={['msubj', 'subj', 'ac', 'tc', 'achmmap', 'achmap', 'actontype']} />
       )}

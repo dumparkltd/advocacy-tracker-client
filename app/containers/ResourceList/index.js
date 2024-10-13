@@ -30,7 +30,6 @@ import { PRINT_TYPES } from 'containers/App/constants';
 
 import { keydownHandlerPrint } from 'utils/print';
 
-import HeaderExplore from 'containers/HeaderExplore';
 import EntityList from 'containers/EntityList';
 
 import { CONFIG, DEPENDENCIES } from './constants';
@@ -133,8 +132,8 @@ export function ResourceList({
           { name: 'description', content: intl.formatMessage(messages.metaDescription) },
         ]}
       />
-      <HeaderExplore navItems={navItems} />
       <EntityList
+        secondaryNavItems={navItems}
         entities={entities}
         allEntities={allEntities.toList()}
         connections={connections}

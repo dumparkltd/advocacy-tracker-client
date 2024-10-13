@@ -3,13 +3,10 @@ import React from 'react';
 import { usePrint } from 'containers/App/PrintContext';
 const Styled = styled.div`
   position: ${({ isStatic, isPrint }) => (isPrint || isStatic) ? 'static' : 'absolute'};
-  top: ${({ headerStyle, theme }) => {
-    if (headerStyle === 'types') {
+  top: ${({ isOnMap, theme }) => {
+    if (isOnMap) {
       // to fix: add dynamic headerexplore height
-      return theme.sizes.headerList.banner.height + 60;
-    }
-    if (headerStyle === 'simple') {
-      return 40;
+      return theme.sizes.headerList.banner.height;
     }
     return 0;
   }}px;

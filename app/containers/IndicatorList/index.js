@@ -28,7 +28,6 @@ import {
 import appMessages from 'containers/App/messages';
 import { ROUTES, ACTIONTYPES } from 'themes/config';
 
-import HeaderExplore from 'containers/HeaderExplore';
 import EntityList from 'containers/EntityList';
 
 import { PRINT_TYPES } from 'containers/App/constants';
@@ -127,8 +126,8 @@ export function IndicatorList({
           { name: 'description', content: intl.formatMessage(messages.metaDescription) },
         ]}
       />
-      <HeaderExplore navItems={navItems} />
       <EntityList
+        secondaryNavItems={navItems}
         entities={entities}
         config={CONFIG}
         allEntities={allEntities.toList()}
