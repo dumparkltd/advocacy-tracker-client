@@ -1252,6 +1252,7 @@ export const ACTIONTYPES_CONFIG = {
         sortOrder: 'desc',
         sortDefault: true,
         attribute: 'date_start',
+        fallbackAttribute: 'created_at',
         primary: true,
       },
       {

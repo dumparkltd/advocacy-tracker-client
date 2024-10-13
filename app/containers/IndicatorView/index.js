@@ -241,7 +241,7 @@ export function IndicatorView({
                     <CountryMap
                       countries={countries}
                       indicatorId={viewEntity.get('id')}
-                      onEntityClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
+                      onEntityClick={(id, path) => onEntityClick(id, path || ROUTES.ACTOR)}
                       includeInofficial={includeInofficial}
                       onSetIncludeInofficial={onSetIncludeInofficial}
                       includeActorMembers={includeActorMembers}

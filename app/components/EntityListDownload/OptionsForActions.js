@@ -14,7 +14,7 @@ import {
 
 import appMessages from 'containers/App/messages';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
-import { lowerCase } from 'lodash';
+import { lowerCase } from 'utils/string';
 import OptionGroup from './OptionGroup';
 
 import messages from './messages';
@@ -261,7 +261,7 @@ export function OptionsForActions({
           active={indicatorsActive}
           onSetActive={(val) => setIndicatorsActive(val)}
           onActiveLabel={intl.formatMessage(messages.optionGroups.onActiveLabelDefault,
-            { type: intl.formatMessage(messages.optionGroups.topicLabel) })}
+            { type: intl.formatMessage(messages.optionGroups.topicsLabel) })}
           onSetAsRows={(val) => setIndicatorsAsRows(val)}
           asRows={indicatorsAsRows}
           asRowsDisabled={!indicatorsActive}
