@@ -79,9 +79,10 @@ const IndicatorSidePanel = styled((p) => <Box {...p} />)`
   }
 `;
 const OverviewContentWrapper = styled((p) => <Box {...p} />)``;
-const IndicatorList = styled((p) => <Box {...p} />)``;
+const IndicatorList = styled((p) => <Box {...p} />)`
+  border-top: 1px solid ${palette('light', 2)};
+`;
 const IndicatorPanelHeader = styled((p) => <Box {...p} />)`
-  border-bottom: 1px solid ${palette('light', 2)};
   position: relative;
 `;
 const IndicatorSelectButton = styled((p) => <Button plain {...p} />)`
@@ -349,8 +350,8 @@ export function PositionsMap({
                 <FormattedMessage {...messages.indicatorListTitle} />
               </IndicatorListTitle>
             </IndicatorPanelHeader>
-            <IndicatorList>
-              {dataReady && indicatorOptions && indicatorOptions.map((indicator) => (
+            {dataReady && indicatorOptions && indicatorOptions.map((indicator) => (
+              <IndicatorList>
                 <IndicatorSelectButton
                   active={indicator.active}
                   key={indicator.key}
@@ -361,8 +362,8 @@ export function PositionsMap({
                     {indicator.label}
                   </IndicatorLabel>
                 </IndicatorSelectButton>
-              ))}
-            </IndicatorList>
+              </IndicatorList>
+            ))}
           </IndicatorSidePanel>
         )}
         {size === 'small'
@@ -390,21 +391,21 @@ export function PositionsMap({
           flex={{ grow: 1, shrink: 1 }}
         >
           <Loading loading={!dataReady} />
-          {dataReady && size !== 'small' && (
-            <Box gap="small" margin={{ vertical: 'small' }}>
-              <MapTitle>
-                {getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title']))}
-              </MapTitle>
-              {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title'])) && (
-                <MapSecondaryTitle>
-                  {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title']))}
-                </MapSecondaryTitle>
+          {dataReady && (
+            <>
+              {size !== 'small' && (
+                <Box gap="small" margin={{ vertical: 'small' }}>
+                  <MapTitle>
+                    {getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title']))}
+                  </MapTitle>
+                  {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title'])) && (
+                    <MapSecondaryTitle>
+                      {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title']))}
+                    </MapSecondaryTitle>
+                  )}
+                </Box>
               )}
-            </Box>
-          )}
-          <MapWrapper>
-            {dataReady
-              && (
+              <MapWrapper>
                 <SearchWrapper>
                   <Search
                     options={countries}
@@ -412,85 +413,79 @@ export function PositionsMap({
                     placeholder={intl.formatMessage(messages.searchPlaceholder)}
                   />
                 </SearchWrapper>
-              )
-            }
-            {dataReady && (
-              <MapContainer
-                isOverviewMap
-                reduceCountryAreas={reduceCountryAreas}
-                typeLabels={typeLabels}
-                mapData={{
-                  typeLabels,
-                  indicator: currentIndicatorId.toString(),
-                  includeSecondaryMembers: true,
-                  scrollWheelZoom: true,
-                  hasPointOption: false,
-                  hasPointOverlay: true,
-                  valueToStyle: (value) => {
-                    let val = value.toString() || '0';
-                    if (supportQuery && !supportQueryAsList.includes(val)) {
-                      val = '0';
-                    }
-                    const pos = ACTION_INDICATOR_SUPPORTLEVELS[val];
-                    return ({
-                      fillColor: pos.color,
-                    });
-                  },
-                }}
+                <MapContainer
+                  isOverviewMap
+                  reduceCountryAreas={reduceCountryAreas}
+                  typeLabels={typeLabels}
+                  mapData={{
+                    typeLabels,
+                    indicator: currentIndicatorId.toString(),
+                    includeSecondaryMembers: true,
+                    scrollWheelZoom: true,
+                    hasPointOption: false,
+                    hasPointOverlay: true,
+                    valueToStyle: (value) => {
+                      let val = value.toString() || '0';
+                      if (supportQuery && !supportQueryAsList.includes(val)) {
+                        val = '0';
+                      }
+                      const pos = ACTION_INDICATOR_SUPPORTLEVELS[val];
+                      return ({
+                        fillColor: pos.color,
+                      });
+                    },
+                  }}
+                />
+              </MapWrapper>
+              <QuickFilters
+                onSetisActorMembers={onSetIncludeActorMembers}
+                isActorMembers={includeActorMembers}
+                onUpdateQuery={onUpdateQuery}
+                supportLevels={supportLevels}
+                includeInofficialStatements={includeInofficialStatements}
               />
-            )}
-          </MapWrapper>
-          {dataReady && (
-            <QuickFilters
-              onSetisActorMembers={onSetIncludeActorMembers}
-              isActorMembers={includeActorMembers}
-              onUpdateQuery={onUpdateQuery}
-              supportLevels={supportLevels}
-              includeInofficialStatements={includeInofficialStatements}
-            />
-          )}
-          {dataReady && (
-            <Box
-              direction="row"
-              justify="end"
-              pad={{ top: 'small' }}
-              gap="none"
-            >
-              <ButtonSecondary
+              <Box
+                direction="row"
+                justify="end"
+                pad={{ top: 'small' }}
                 gap="none"
-                justify="center"
-                onClick={(e) => {
-                  if (e && e.preventDefault) e.preventDefault();
-                  onUpdatePath(ROUTES.INDICATORS);
-                }}
               >
-                <Box direction="row" align="center">
-                  <Text size="large" style={{ marginTop: '-2px' }}>
-                    {intl.formatMessage(messages.allTopics)}
-                  </Text>
-                  <Icon
-                    name="arrowRight"
-                    size="10px"
-                    palette="primary"
-                    paletteIndex={1}
-                    hasStroke
-                  />
-                </Box>
-              </ButtonSecondary>
-              <ButtonPrimary
-                onClick={(e) => {
-                  if (e && e.preventDefault) e.preventDefault();
-                  onUpdatePath(`${ROUTES.INDICATOR}/${currentIndicatorId}`);
-                }}
-                label={(
-                  <Text size="large">
-                    {indicators
-                      && currentIndicatorId
-                      && getIndicatorShortTitle(currentIndicator.getIn(['attributes', 'title']))}
-                  </Text>
-                )}
-              />
-            </Box>
+                <ButtonSecondary
+                  gap="none"
+                  justify="center"
+                  onClick={(e) => {
+                    if (e && e.preventDefault) e.preventDefault();
+                    onUpdatePath(ROUTES.INDICATORS);
+                  }}
+                >
+                  <Box direction="row" align="center">
+                    <Text size="large" style={{ marginTop: '-2px' }}>
+                      {intl.formatMessage(messages.allTopics)}
+                    </Text>
+                    <Icon
+                      name="arrowRight"
+                      size="10px"
+                      palette="primary"
+                      paletteIndex={1}
+                      hasStroke
+                    />
+                  </Box>
+                </ButtonSecondary>
+                <ButtonPrimary
+                  onClick={(e) => {
+                    if (e && e.preventDefault) e.preventDefault();
+                    onUpdatePath(`${ROUTES.INDICATOR}/${currentIndicatorId}`);
+                  }}
+                  label={(
+                    <Text size="large">
+                      {indicators
+                        && currentIndicatorId
+                        && getIndicatorShortTitle(currentIndicator.getIn(['attributes', 'title']))}
+                    </Text>
+                  )}
+                />
+              </Box>
+            </>
           )}
         </OverviewContentWrapper>
       </StyledCard>
@@ -519,14 +514,14 @@ PositionsMap.propTypes = {
   intl: intlShape.isRequired,
 };
 
-const mapStateToProps = (state, { includeActorMembers }) => ({
+const mapStateToProps = (state) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   indicators: selectIndicators(state),
   currentIndicatorId: selectIndicatorId(state),
   includeInofficialStatements: selectIncludeInofficialStatements(state),
   supportQuery: selectSupportQuery(state),
   includeActorMembers: selectIncludeActorMembers(state),
-  countries: selectActorsWithPositions(state, { includeActorMembers, type: ACTORTYPES.COUNTRY }),
+  countries: selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
   previewItemNo: selectPreviewQuery(state),
 });
 

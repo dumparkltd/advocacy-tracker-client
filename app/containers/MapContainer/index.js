@@ -3,7 +3,7 @@
  * MapContainer
  *
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
@@ -19,7 +19,6 @@ import countryPointsJSON from 'data/country-points.json';
 
 import {
   selectPrintConfig,
-  selectPreviewQuery,
 } from 'containers/App/selectors';
 import {
   setListPreview,
@@ -58,7 +57,7 @@ const getMapOuterWrapper = (fullMap) => fullMap
   ? styled.div``
   : styled(({ isOverviewMap, ...rest }) => (
     <Box
-      margin={isOverviewMap ? { right: 'medium' } : { horizontal: 'medium' }}
+      margin={isOverviewMap ? 0 : { horizontal: 'medium' }}
       {...rest}
     />
   ))`
@@ -89,7 +88,6 @@ export function MapContainer({
   printArgs,
   onClearFilters,
   onSetPreviewItemNo,
-  previewItemNo,
   // intl,
 }) {
   const {
@@ -303,12 +301,10 @@ MapContainer.propTypes = {
   fullMap: PropTypes.bool,
   isOverviewMap: PropTypes.bool,
   onSetPreviewItemNo: PropTypes.func,
-  previewItemNo: PropTypes.string,
 };
 
 const mapStateToProps = (state) => ({
   printArgs: selectPrintConfig(state),
-  previewItemNo: selectPreviewQuery(state),
 });
 
 
