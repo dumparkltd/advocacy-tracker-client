@@ -36,7 +36,7 @@ const NavMain = styled(PrintHide)`
 const StyledContainer = styled(Container)`
   padding-bottom: 0;
 `;
-class HeaderExplore extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
+class NavSecondary extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   render() {
     const { onPageLink, navItems } = this.props;
 
@@ -68,7 +68,7 @@ class HeaderExplore extends React.PureComponent { // eslint-disable-line react/p
   }
 }
 
-HeaderExplore.propTypes = {
+NavSecondary.propTypes = {
   onPageLink: PropTypes.func.isRequired,
   navItems: PropTypes.array,
 };
@@ -86,4 +86,4 @@ export function mapDispatchToProps(dispatch) {
 }
 
 
-export default connect(null, mapDispatchToProps)(HeaderExplore);
+export default connect(null, mapDispatchToProps)(NavSecondary);

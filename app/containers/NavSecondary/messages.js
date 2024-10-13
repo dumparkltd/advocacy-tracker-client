@@ -7,11 +7,11 @@ import { defineMessages } from 'react-intl';
 
 export default defineMessages({
   title: {
-    id: 'app.containers.HeaderExplore.title',
+    id: 'app.containers.NavSecondary.title',
     defaultMessage: 'Tracking advocacy plans and outcomes',
   },
   explore: {
-    id: 'app.containers.HeaderExplore.explore',
+    id: 'app.containers.NavSecondary.explore',
     defaultMessage: 'Explore',
   },
 });

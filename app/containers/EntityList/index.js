@@ -19,7 +19,7 @@ import Icon from 'components/Icon';
 import EntityListHeader from 'components/EntityListHeader';
 import EntityListDownload from 'components/EntityListDownload';
 import EntityListDelete from 'components/EntityListDelete';
-import HeaderExplore from 'containers/HeaderExplore';
+import NavSecondary from 'containers/NavSecondary';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
 
@@ -418,7 +418,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     const isSelectionActiveForDownload = showList && entityIdsSelectedFiltered && entityIdsSelectedFiltered.size > 0;
     return (
       <ContainerWrapper ref={this.ScrollContainer} isPrintView={isPrintView}>
-        {secondaryNavItems && (<HeaderExplore navItems={secondaryNavItems} />)}
+        {secondaryNavItems && (<NavSecondary navItems={secondaryNavItems} />)}
         {config.batchDelete && this.state.deleteConfirm && entityIdsSelectedFiltered && (
           <ReactModal
             isOpen

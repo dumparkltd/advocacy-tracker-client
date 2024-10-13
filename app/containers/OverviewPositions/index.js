@@ -6,7 +6,7 @@ import { Box, Heading } from 'grommet';
 
 import { ROUTES, ACTIONTYPES } from 'themes/config';
 
-import HeaderExplore from 'containers/HeaderExplore';
+import NavSecondary from 'containers/NavSecondary';
 import Footer from 'containers/Footer';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
@@ -33,7 +33,7 @@ const TitleMedium = styled((p) => <Heading level="2" {...p} />)`
 export function OverviewPositions({ intl }) {
   return (
     <ContainerWrapper bg>
-      <HeaderExplore
+      <NavSecondary
         navItems={[
           {
             path: ROUTES.POSITIONS,
