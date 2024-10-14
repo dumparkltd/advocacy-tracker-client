@@ -28,7 +28,7 @@ const Bar = styled.div`
   width: ${({ value, maxvalue }) => value / maxvalue * 100}%;
   min-width: 1px;
   height: 20px;
-  background-color: ${({ theme, subject }) => theme.global.colors[subject] || theme.global.colors.primary};
+  background-color: ${({ theme, color }) => color || theme.global.colors.primary};
   opacity: ${({ issecondary }) => issecondary ? 0.6 : 1};
   display: block;
   position: absolute;
@@ -60,7 +60,6 @@ export function CellBodyBarChart({
   value,
   maxvalue,
   issecondary,
-  subject,
   rowConfig,
   entityType,
   onEntityClick,
@@ -96,7 +95,7 @@ export function CellBodyBarChart({
           </Value>
           <BarWrapper>
             {!rowConfig.tooltip && (
-              <Bar value={value} maxvalue={maxvalue} issecondary={issecondary} subject={subject} />
+              <Bar value={value} maxvalue={maxvalue} issecondary={issecondary} color={color} />
             )}
             {rowConfig.tooltip && (
               <BarButton
@@ -104,7 +103,6 @@ export function CellBodyBarChart({
                 maxvalue={maxvalue}
                 issecondary={issecondary}
                 color={color}
-                subject={subject}
                 fill={false}
                 isHover={hover}
                 onClick={() => showInfo(true)}
@@ -148,7 +146,6 @@ CellBodyBarChart.propTypes = {
   value: PropTypes.number,
   maxvalue: PropTypes.number,
   issecondary: PropTypes.bool,
-  subject: PropTypes.string,
   entityType: PropTypes.string,
   color: PropTypes.string,
   rowConfig: PropTypes.object,

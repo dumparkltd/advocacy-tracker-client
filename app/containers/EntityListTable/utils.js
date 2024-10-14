@@ -331,7 +331,6 @@ export const prepareEntityRows = ({
   config,
   url,
   entityPath,
-  onEntityClick,
   onEntitySelect,
   connections,
   taxonomies,
@@ -378,11 +377,9 @@ export const prepareEntityRows = ({
                 private: entity.getIn(['attributes', 'private']),
                 sortValue: entity.getIn(['attributes', col.sort || 'title']),
                 selected: entityIdsSelected && entityIdsSelected.includes(id),
+                id,
+                path,
                 href: url || `${path}/${id}`,
-                onClick: (evt) => {
-                  if (evt) evt.preventDefault();
-                  onEntityClick(id, path);
-                },
                 onSelect: (checked) => onEntitySelect(id, checked),
               },
             };
@@ -803,6 +800,7 @@ export const getListHeaderLabel = ({
 }) => {
   let result = 'error';
   if (!intl) return result;
+  if (!entityTitle) return '';
   if (selectedTotal > 0) {
     if (allSelectedOnPage) {
       // return `All ${selectedTotal} ${selectedTotal === 1 ? entityTitle.single : entityTitle.plural} on this page are selected. `;

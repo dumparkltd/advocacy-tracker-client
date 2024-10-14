@@ -494,7 +494,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             appElement={document.getElementById('app')}
           >
             <ListItemPreview
-              content={listPreviewContent.toJS()}
+              content={listPreviewContent}
             />
           </ReactModal>
         )}

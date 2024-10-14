@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
+import { Map } from 'immutable';
 
 import styled from 'styled-components';
 
@@ -30,8 +31,6 @@ import {
   loadEntitiesIfNeeded,
   setIncludeActorMembers,
   updateRouteQuery,
-  // setPreviewContent,
-  setListPreview,
   updatePath,
 } from 'containers/App/actions';
 import {
@@ -39,7 +38,6 @@ import {
   selectIndicators,
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
-  // selectPreviewQuery,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -83,9 +81,6 @@ export function PositionsList({
   includeInofficialStatements,
   onUpdateQuery,
   intl,
-  // previewItemId,
-  // onSetPreviewContent,
-  onSetPreviewItemId,
   onUpdatePath,
   connections,
 }) {
@@ -94,7 +89,6 @@ export function PositionsList({
     // kick off loading of data
     onLoadData();
   }, []);
-  // const size = React.useContext(ResponsiveContext);
 
   let supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
     .filter((level) => parseInt(level.value, 10) > 0) // exclude 0
@@ -145,6 +139,91 @@ export function PositionsList({
     },
     [],
   );
+  const reducePreviewItem = (item) => {
+    const indicatorsWithSupport = indicators && indicators.reduce(
+      (memo, indicator, id) => {
+        const indicatorPositions = item
+          && item.get('indicatorPositions')
+          && item.getIn([
+            'indicatorPositions',
+            indicator.get('id'),
+          ]);
+        if (indicatorPositions) {
+          const relPos = indicatorPositions.first();
+          const result = relPos && indicator
+            .setIn(
+              ['supportlevel', item.get('id')],
+              relPos.get('supportlevel_id')
+            )
+            .set(
+              'position',
+              relPos,
+            );
+          if (result) {
+            return memo.set(id, result);
+          }
+          return memo;
+        }
+        return memo;
+      },
+      Map(),
+    );
+    const content = {
+      header: {
+        aboveTitle: 'Country',
+        title: item.getIn(['attributes', 'title']),
+        code: item.getIn(['attributes', 'code']),
+      },
+      countryPositions: {
+        key: {
+          title: 'Levels of support',
+          items: supportLevels,
+        },
+        options,
+        countryPositionsTableColumns: [
+          {
+            id: 'main',
+            type: 'main',
+            sort: 'title',
+            attributes: ['title'],
+          },
+          {
+            id: 'positionStatement',
+            type: 'positionStatement',
+          },
+          {
+            id: 'authority',
+            type: 'positionStatementAuthority',
+          },
+          {
+            id: 'viaGroups',
+            type: 'viaGroups',
+          },
+          {
+            id: 'supportlevel_id',
+            type: 'supportlevel',
+            title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+          },
+        ],
+        entityTitle: {
+          single: intl.formatMessage(appMessages.entities.indicators.single),
+          plural: intl.formatMessage(appMessages.entities.indicators.plural),
+        },
+        indicators: indicatorsWithSupport,
+      },
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.ACTOR}/${item.get('id')}`,
+          title: 'Country details',
+        },
+        secondaryLink: {
+          path: ROUTES.INDICATORS,
+          title: 'All topics',
+        },
+      },
+    };
+    return content;
+  };
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
       <Box pad={{ top: 'small', bottom: 'xsmall' }}>
@@ -200,6 +279,8 @@ export function PositionsList({
               </Box>
               <Box>
                 <EntityListTable
+                  entityPath={ROUTES.ACTOR}
+                  reducePreviewItem={reducePreviewItem}
                   columns={[
                     {
                       id: 'main',
@@ -210,7 +291,6 @@ export function PositionsList({
                     {
                       id: `action_${ACTIONTYPES.EXPRESS}`,
                       type: 'actiontype',
-                      subject: 'actors',
                       actiontype_id: ACTIONTYPES.EXPRESS,
                       actions: 'actionsByType',
                       actionsMembers: 'actionsAsMemberByType',
@@ -220,7 +300,6 @@ export function PositionsList({
                     {
                       id: `action_${ACTIONTYPES.INTERACTION}`,
                       type: 'actiontype',
-                      subject: 'actors',
                       actiontype_id: ACTIONTYPES.INTERACTION,
                       actions: 'actionsByType',
                       actionsMembers: 'actionsAsMemberByType',
@@ -245,7 +324,6 @@ export function PositionsList({
                   }}
                   entities={countries.toList()}
                   connections={connections}
-                  onEntityClick={(actorId) => onSetPreviewItemId(`${ID}|${actorId}`)}
                 />
               </Box>
               <Box
@@ -284,11 +362,8 @@ PositionsList.propTypes = {
   includeActorMembers: PropTypes.bool,
   includeInofficialStatements: PropTypes.bool,
   onUpdateQuery: PropTypes.func,
-  // previewItemId: PropTypes.string,
-  // onSetPreviewContent: PropTypes.func,
   onUpdatePath: PropTypes.func,
   intl: intlShape.isRequired,
-  onSetPreviewItemId: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({
@@ -298,7 +373,6 @@ const mapStateToProps = (state) => ({
   includeActorMembers: selectIncludeActorMembers(state),
   countries: selectCountries(state),
   connections: selectConnections(state),
-  // previewItemId: selectPreviewQuery(state),
 });
 
 export function mapDispatchToProps(dispatch) {
@@ -308,9 +382,7 @@ export function mapDispatchToProps(dispatch) {
     },
     onSetIncludeActorMembers: (value) => dispatch(setIncludeActorMembers(value)),
     onUpdateQuery: (value) => dispatch(updateRouteQuery(value)),
-    // onSetPreviewContent: (value) => dispatch(setPreviewContent(value)),
     onUpdatePath: (path) => dispatch(updatePath(path)),
-    onSetPreviewItemId: (value) => dispatch(setListPreview(value)),
   };
 }
 

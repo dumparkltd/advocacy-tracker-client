@@ -34,6 +34,7 @@ export function CellBodyMain({
   // column,
   canEdit,
   intl,
+  onEntityClick,
 }) {
   const code = entity && entity.values && entity.values.code;
   const meta = [];
@@ -102,7 +103,10 @@ export function CellBodyMain({
         )}
         <Link
           href={entity.href}
-          onClick={entity.onClick}
+          onClick={(evt) => {
+            if (evt) evt.preventDefault();
+            onEntityClick(entity.id, entity.path);
+          }}
           title={entity.values.title}
         >
           <Box direction="row" gap="xsmall" align="center">
@@ -139,6 +143,7 @@ export function CellBodyMain({
 
 CellBodyMain.propTypes = {
   entity: PropTypes.object,
+  onEntityClick: PropTypes.func,
   // column: PropTypes.object,
   canEdit: PropTypes.bool,
   intl: intlShape,

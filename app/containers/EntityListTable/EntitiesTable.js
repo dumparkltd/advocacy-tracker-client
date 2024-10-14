@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box, ResponsiveContext } from 'grommet';
-import styled, { css } from 'styled-components';
+import styled, { css, withTheme } from 'styled-components';
 import { groupBy } from 'lodash/collection';
 
+import qe from 'utils/quasi-equals';
 import { isMinSize } from 'utils/responsive';
 import { scaleColorCount } from 'containers/MapContainer/utils';
 import { usePrint } from 'containers/App/PrintContext';
 
-import { MAP_OPTIONS } from 'themes/config';
+import { MAP_OPTIONS, ROUTES } from 'themes/config';
 
 import CellBodyMain from './CellBodyMain';
 import CellBodyPlain from './CellBodyPlain';
@@ -140,9 +141,13 @@ const TableCellBodyInner = styled((p) => <Box {...p} />)`
 
 const MAX_VALUE_COUNTRIES = 100;
 
-const getColorForColumn = (col) => {
+const getColorForColumn = (col, theme) => {
   if (!MAP_OPTIONS.GRADIENT[col.subject]) {
-    return 'black';
+    return (theme
+      && theme.global
+      && theme.global.colors
+      && theme.global.colors.primary)
+      || 'black';
   }
   if (col.members) {
     return scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[col.subject], false)(70);
@@ -152,7 +157,7 @@ const getColorForColumn = (col) => {
   }
   return scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[col.subject], false)(100);
 };
-
+const ID = 'entities-table';
 export function EntitiesTable({
   entities,
   canEdit,
@@ -161,7 +166,50 @@ export function EntitiesTable({
   onEntityClick,
   columnMaxValues,
   inSingleView,
+  theme,
+  previewItemId,
+  reducePreviewItem,
+  onSetPreviewContent,
+  sortedEntities,
+  searchedEntities,
 }) {
+  useEffect(() => {
+    if (reducePreviewItem && sortedEntities) {
+      if (previewItemId) {
+        const [componentId, path, itemId] = previewItemId.split('|');
+        if (qe(componentId, ID)) {
+          if (path === ROUTES.ACTOR) {
+            const country = searchedEntities && itemId && searchedEntities.find(
+              (item) => qe(item.get('id'), itemId)
+            );
+            if (country) {
+              const countryIds = sortedEntities.map((e) => e.id);
+              const countryIndex = countryIds.indexOf(country.get('id'));
+              const nextIndex = countryIndex < countryIds.length ? countryIndex + 1 : 0;
+              const prevIndex = countryIndex > 0 ? countryIndex - 1 : countryIds.length - 1;
+
+              let content = reducePreviewItem(country, path);
+              content = {
+                ...content,
+                header: {
+                  ...content.header,
+                  nextPreviewItem: nextIndex !== countryIndex && `${ID}|${ROUTES.ACTOR}|${countryIds[nextIndex]}`,
+                  prevPreviewItem: prevIndex !== countryIndex && `${ID}|${ROUTES.ACTOR}|${countryIds[prevIndex]}`,
+                },
+              };
+              onSetPreviewContent(content);
+            } else {
+              onSetPreviewContent();
+            }
+          } else {
+            onSetPreviewContent();
+          }
+        }
+      } else {
+        onSetPreviewContent();
+      }
+    }
+  }, [sortedEntities, previewItemId]);
   const size = React.useContext(ResponsiveContext);
   const isPrintView = usePrint();
   return (
@@ -219,6 +267,7 @@ export function EntitiesTable({
                         entity={entity[col.id]}
                         canEdit={canEdit && !isPrintView}
                         column={col}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                       />
                     )}
                     {(
@@ -251,14 +300,14 @@ export function EntitiesTable({
                     {col.type === 'users' && (
                       <CellBodyUsers
                         entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
                     {col.type === 'indicators' && (
                       <CellBodyIndicators
                         entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
@@ -273,7 +322,7 @@ export function EntitiesTable({
                     ) && (
                       <CellBodyActors
                         entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
@@ -289,7 +338,7 @@ export function EntitiesTable({
                     {col.type === 'hasResources' && (
                       <CellBodyHasResource
                         entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
@@ -309,7 +358,7 @@ export function EntitiesTable({
                       <CellBodyActions
                         entity={entity[col.id]}
                         column={col}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                       />
                     )}
                     {(
@@ -322,9 +371,9 @@ export function EntitiesTable({
                         subject={col.subject}
                         column={col}
                         issecondary={col.type !== 'actiontype' && (col.members || col.children)}
-                        color={getColorForColumn(col)}
+                        color={getColorForColumn(col, theme)}
                         entityType="actions"
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         rowConfig={entity[col.id]}
                       />
                     )}
@@ -337,7 +386,7 @@ export function EntitiesTable({
                         maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
                         column={col}
                         entityType="actors"
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                       />
                     )}
                   </TableCellBodyInner>
@@ -353,12 +402,18 @@ export function EntitiesTable({
 
 EntitiesTable.propTypes = {
   entities: PropTypes.array.isRequired,
+  sortedEntities: PropTypes.array,
+  searchedEntities: PropTypes.object,
   columns: PropTypes.array,
   columnMaxValues: PropTypes.object,
+  theme: PropTypes.object,
   headerColumns: PropTypes.array,
   canEdit: PropTypes.bool,
   inSingleView: PropTypes.bool,
   onEntityClick: PropTypes.func,
+  previewItemId: PropTypes.string,
+  reducePreviewItem: PropTypes.func,
+  onSetPreviewContent: PropTypes.func,
 };
 
-export default EntitiesTable;
+export default withTheme(EntitiesTable);

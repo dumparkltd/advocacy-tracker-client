@@ -476,6 +476,7 @@ theme.global = {
     actors: '#006076',
     brand: '#000000',
     highlight: '#00728f',
+    primary: '#00728f',
     highlightHover: '#08586c',
     background: '#f1f0f1',
     backgroundLight: '#fcfcfc',

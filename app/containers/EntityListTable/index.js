@@ -18,8 +18,15 @@ import {
   selectResources,
   selectIsPrintView,
   selectPrintConfig,
+  selectPreviewQuery,
 } from 'containers/App/selectors';
-import { updateQuery } from 'containers/EntityList/actions';
+import {
+  setPreviewContent,
+  setListPreview,
+} from 'containers/App/actions';
+import {
+  updateQuery,
+} from 'containers/EntityList/actions';
 
 import ToggleAllItems from 'components/fields/ToggleAllItems';
 import appMessages from 'containers/App/messages';
@@ -100,9 +107,13 @@ export function EntityListTable({
   // allEntityCount,
   isByOption,
   onResetScroll,
+  previewItemId,
+  onSetPreviewItemId,
+  onSetPreviewContent,
+  reducePreviewItem,
 }) {
   if (!columns) return null;
-
+  // const size = React.useContext(ResponsiveContext);
   // list options
   const {
     hasSearch,
@@ -299,12 +310,23 @@ export function EntityListTable({
       )}
       <EntitiesTable
         entities={entitiesOnPage}
+        sortedEntities={sortedEntities}
+        searchedEntities={searchedEntities}
         canEdit={canEdit}
         columns={activeColumns}
         headerColumns={headerColumns || []}
-        onEntityClick={onEntityClick}
+        onEntityClick={(id, path, componentId) => {
+          if (reducePreviewItem && onSetPreviewItemId && componentId) {
+            onSetPreviewItemId(`${componentId}|${path}|${id}`);
+          } else {
+            onEntityClick(id, path);
+          }
+        }}
         columnMaxValues={columnMaxValues}
         inSingleView={inSingleView}
+        previewItemId={previewItemId}
+        reducePreviewItem={reducePreviewItem}
+        onSetPreviewContent={onSetPreviewContent}
       />
       <ListEntitiesMain>
         {listEmpty && (
@@ -393,7 +415,7 @@ EntityListTable.propTypes = {
   canEdit: PropTypes.bool,
   onPageSelect: PropTypes.func,
   onPageItemsSelect: PropTypes.func,
-  onEntityClick: PropTypes.func.isRequired,
+  onEntityClick: PropTypes.func,
   onEntitySelect: PropTypes.func,
   onEntitySelectAll: PropTypes.func,
   onSort: PropTypes.func,
@@ -418,6 +440,10 @@ EntityListTable.propTypes = {
   printConfig: PropTypes.object,
   pageItemSelectConfig: PropTypes.object,
   onResetScroll: PropTypes.func,
+  previewItemId: PropTypes.string,
+  reducePreviewItem: PropTypes.func,
+  onSetPreviewContent: PropTypes.func,
+  onSetPreviewItemId: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({
@@ -431,6 +457,7 @@ const mapStateToProps = (state) => ({
   resources: selectResources(state),
   isPrintView: selectIsPrintView(state),
   printConfig: selectPrintConfig(state),
+  previewItemId: selectPreviewQuery(state),
 });
 function mapDispatchToProps(dispatch) {
   return {
@@ -453,6 +480,8 @@ function mapDispatchToProps(dispatch) {
         },
       ])));
     },
+    onSetPreviewContent: (value) => dispatch(setPreviewContent(value)),
+    onSetPreviewItemId: (value) => dispatch(setListPreview(value)),
   };
 }
 

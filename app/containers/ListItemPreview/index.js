@@ -10,6 +10,7 @@ import PreviewHeader from './PreviewHeader';
 import PreviewFooter from './PreviewFooter';
 import PreviewCountryTopicPosition from './PreviewCountryTopicPosition';
 import PreviewCountryTopicStatementList from './PreviewCountryTopicStatementList';
+import PreviewCountryPositionsList from './PreviewCountryPositionsList';
 
 const Styled = styled((p) => <Box {...p} />)`
   margin-left: 5px;
@@ -32,25 +33,30 @@ export function ListItemPreview({
       overflow="auto"
       style={{ position: 'relative' }}
     >
-      {content && content.header && (
+      {content && content.get('header') && (
         <PreviewHeader
-          content={content.header}
+          content={content.get('header').toJS()}
           onSetPreviewItemId={onSetPreviewItemId}
         />
       )}
-      {content && content.topicPosition && (
+      {content && content.get('topicPosition') && (
         <PreviewCountryTopicPosition
-          content={content.topicPosition}
+          content={content.get('topicPosition').toJS()}
         />
       )}
-      {content && content.topicStatements && (
+      {content && content.get('topicStatements') && (
         <PreviewCountryTopicStatementList
-          content={content.topicStatements}
+          content={content.get('topicStatements').toJS()}
         />
       )}
-      {content && content.footer && (
+      {content && content.get('countryPositions') && (
+        <PreviewCountryPositionsList
+          content={content.get('countryPositions')}
+        />
+      )}
+      {content && content.get('footer') && (
         <PreviewFooter
-          content={content.footer}
+          content={content.get('footer').toJS()}
           onUpdatePath={onUpdatePath}
         />
       )}
@@ -59,7 +65,7 @@ export function ListItemPreview({
 }
 
 ListItemPreview.propTypes = {
-  content: PropTypes.object,
+  content: PropTypes.object, // immutable Map
   onSetPreviewItemId: PropTypes.func,
   onUpdatePath: PropTypes.func,
 };
