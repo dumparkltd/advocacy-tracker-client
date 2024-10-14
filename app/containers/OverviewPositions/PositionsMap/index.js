@@ -59,10 +59,12 @@ import Icon from 'components/Icon';
 import ButtonPrimary from 'components/buttons/ButtonPrimaryNew';
 import ButtonSecondary from 'components/buttons/ButtonSecondaryNew';
 
+import Card from 'containers/OverviewPositions/Card';
+
 import { DEPENDENCIES } from './constants';
 import { selectIndicatorId } from './selectors';
 
-import QuickFilters from './QuickFilters';
+import ComponentOptions from './ComponentOptions';
 import Search from './Search';
 
 import messages from './messages';
@@ -156,6 +158,9 @@ const MapSecondaryTitle = styled((p) => <Text size="large" {...p} />)`
   color: black;
   font-weight: bold;
 `;
+
+const ID = 'positions-map';
+
 export function PositionsMap({
   indicators,
   countries,
@@ -168,7 +173,7 @@ export function PositionsMap({
   onUpdateQuery,
   onLoadData,
   dataReady,
-  previewItemNo,
+  previewItemId,
   intl,
   onSetPreviewContent,
   onUpdatePath,
@@ -178,139 +183,146 @@ export function PositionsMap({
     onLoadData();
   }, []);
   useEffect(() => {
-    if (dataReady && previewItemNo) {
-      const country = countries && countries.get(previewItemNo);
-      if (country) {
-        const countryIds = countries.keySeq().toArray();
-        const countryIndex = countryIds.indexOf(country.get('id'));
-        const nextIndex = countryIndex < countryIds.length ? countryIndex + 1 : 0;
-        const prevIndex = countryIndex > 0 ? countryIndex - 1 : countryIds.length - 1;
+    if (dataReady) {
+      if (previewItemId) {
+        const [componentId, countryId] = previewItemId.split('|');
+        if (qe(componentId, ID)) {
+          const country = countries && countryId && countries.get(countryId);
+          if (country) {
+            const countryIds = countries.keySeq().toArray();
+            const countryIndex = countryIds.indexOf(country.get('id'));
+            const nextIndex = countryIndex < countryIds.length ? countryIndex + 1 : 0;
+            const prevIndex = countryIndex > 0 ? countryIndex - 1 : countryIds.length - 1;
 
-        const currentIndicator = indicators && indicators.get(currentIndicatorId.toString());
-        const indicatorPositions = country.getIn(['indicatorPositions', currentIndicatorId.toString()])
-          && country.getIn(['indicatorPositions', currentIndicatorId.toString()]);
-        const indicatorPosition = indicatorPositions && indicatorPositions.first();
-        const content = {
-          header: {
-            aboveTitle: 'Country',
-            title: country.getIn(['attributes', 'title']),
-            code: country.getIn(['attributes', 'code']),
-            nextPreviewItem: countryIds[nextIndex],
-            prevPreviewItem: countryIds[prevIndex],
-          },
-          topicPosition: {
-            topicId: currentIndicatorId,
-            topic: currentIndicator && {
-              title: getIndicatorShortTitle(currentIndicator.getIn(['attributes', 'title'])),
-              viaGroup: indicatorPosition && indicatorPosition.get('viaGroups')
-              && indicatorPosition.get('viaGroups').first()
-              && indicatorPosition.get('viaGroups').first().getIn(['attributes', 'title']),
-            },
-            position: indicatorPosition ? {
-              supportlevelId: indicatorPosition.get('supportlevel_id'),
-              supportlevelTitle: intl.formatMessage(appMessages.supportlevels[indicatorPosition.get('supportlevel_id')]),
-              levelOfAuthority: indicatorPosition.getIn(['authority', 'short_title']),
-            } : {
-              supportlevelId: 0,
-              supportlevelTitle: intl.formatMessage(appMessages.supportlevels[99]),
-            },
-          },
-          topicStatements: indicatorPositions && {
-            options: [
-              {
-                id: '0',
-                active: includeActorMembers,
-                onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-                label: intl.formatMessage(messages.isActorMembers),
+            const currentIndicator = indicators && indicators.get(currentIndicatorId.toString());
+            const indicatorPositions = country.getIn(['indicatorPositions', currentIndicatorId.toString()])
+              && country.getIn(['indicatorPositions', currentIndicatorId.toString()]);
+            const indicatorPosition = indicatorPositions && indicatorPositions.first();
+            const content = {
+              header: {
+                aboveTitle: 'Country',
+                title: country.getIn(['attributes', 'title']),
+                code: country.getIn(['attributes', 'code']),
+                nextPreviewItem: `${ID}|${countryIds[nextIndex]}`,
+                prevPreviewItem: `${ID}|${countryIds[prevIndex]}`,
               },
-              {
-                id: '1',
-                active: !includeInofficialStatements,
-                label: intl.formatMessage(messages.isOfficialFiltered),
-                onClick: () => onUpdateQuery([{
-                  arg: 'inofficial',
-                  value: includeInofficialStatements ? 'false' : null,
-                  replace: true,
-                  multipleAttributeValues: false,
-                }]),
-              },
-            ],
-            indicatorPositionsTableColumns: [
-              {
-                id: 'position',
-                type: 'position',
-                label: 'Level of support',
-              },
-              {
-                id: 'statement',
-                type: 'plainWithDate',
-                label: 'Statement',
-              },
-              {
-                id: 'levelOfAuthority',
-                type: 'plain',
-                label: 'Level of authority',
-              },
-              {
-                id: 'viaGroup',
-                type: 'plain',
-                label: 'As Member of',
-              },
-            ],
-            indicatorPositions: indicatorPositions.reduce((memo, position) => {
-              const statement = position.get('measure');
-              let date = statement.get('date_start');
-              if (date && isDate(date)) {
-                date = intl.formatDate(date);
-              } else if (statement.get('created_at') && isDate(statement.get('created_at'))) {
-                date = intl.formatDate(statement.get('created_at'));
-              }
-              const supportLevel = position.get('supportlevel_id') || 0;
-              return ([
-                ...memo,
-                {
-                  position: {
-                    color: ACTION_INDICATOR_SUPPORTLEVELS[supportLevel]
-                      && ACTION_INDICATOR_SUPPORTLEVELS[supportLevel].color,
-                    value: appMessages.supportlevels[supportLevel]
-                      && intl.formatMessage(appMessages.supportlevels[supportLevel]),
-                  },
-                  statement: statement && {
-                    // id: statement.get('id'),
-                    date,
-                    value: statement.get('title'),
-                  },
-                  levelOfAuthority: position && {
-                    value: position.getIn(['authority', 'short_title']),
-                  },
-                  viaGroup: {
-                    value: position.get('viaGroups')
-                      && position.get('viaGroups').first()
-                      ? position.get('viaGroups').first().getIn(['attributes', 'title'])
-                      : '',
-                  },
+              topicPosition: {
+                topicId: currentIndicatorId,
+                topic: currentIndicator && {
+                  title: getIndicatorShortTitle(currentIndicator.getIn(['attributes', 'title'])),
+                  viaGroup: indicatorPosition && indicatorPosition.get('viaGroups')
+                  && indicatorPosition.get('viaGroups').first()
+                  && indicatorPosition.get('viaGroups').first().getIn(['attributes', 'title']),
                 },
-              ]);
-            }, []),
-          },
-          footer: {
-            primaryLink: country && {
-              path: `${ROUTES.ACTOR}/${country.get('id')}`,
-              title: 'Country details',
-            },
-            secondaryLink: currentIndicator && {
-              path: `${ROUTES.INDICATOR}/${currentIndicator.get('id')}`,
-              id: currentIndicator.get('id'),
-              title: getIndicatorShortTitle(currentIndicator.getIn(['attributes', 'title'])),
-            },
-          },
-        };
-        onSetPreviewContent(content);
+                position: indicatorPosition ? {
+                  supportlevelId: indicatorPosition.get('supportlevel_id'),
+                  supportlevelTitle: intl.formatMessage(appMessages.supportlevels[indicatorPosition.get('supportlevel_id')]),
+                  levelOfAuthority: indicatorPosition.getIn(['authority', 'short_title']),
+                } : {
+                  supportlevelId: 0,
+                  supportlevelTitle: intl.formatMessage(appMessages.supportlevels[99]),
+                },
+              },
+              topicStatements: indicatorPositions && {
+                options: [
+                  {
+                    id: `${ID}-preview-0`,
+                    active: includeActorMembers,
+                    label: intl.formatMessage(appMessages.ui.statementOptions.includeMemberships),
+                    onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+                  },
+                  {
+                    id: `${ID}-preview-1`,
+                    active: !includeInofficialStatements,
+                    label: intl.formatMessage(appMessages.ui.statementOptions.excludeInofficial),
+                    onClick: () => onUpdateQuery([{
+                      arg: 'inofficial',
+                      value: includeInofficialStatements ? 'false' : null,
+                      replace: true,
+                      multipleAttributeValues: false,
+                    }]),
+                  },
+                ],
+                indicatorPositionsTableColumns: [
+                  {
+                    id: 'position',
+                    type: 'position',
+                    label: 'Level of support',
+                  },
+                  {
+                    id: 'statement',
+                    type: 'plainWithDate',
+                    label: 'Statement',
+                  },
+                  {
+                    id: 'levelOfAuthority',
+                    type: 'plain',
+                    label: 'Level of authority',
+                  },
+                  {
+                    id: 'viaGroup',
+                    type: 'plain',
+                    label: 'As Member of',
+                  },
+                ],
+                indicatorPositions: indicatorPositions.reduce((memo, position) => {
+                  const statement = position.get('measure');
+                  let date = statement.get('date_start');
+                  if (date && isDate(date)) {
+                    date = intl.formatDate(date);
+                  } else if (statement.get('created_at') && isDate(statement.get('created_at'))) {
+                    date = intl.formatDate(statement.get('created_at'));
+                  }
+                  const supportLevel = position.get('supportlevel_id') || 0;
+                  return ([
+                    ...memo,
+                    {
+                      position: {
+                        color: ACTION_INDICATOR_SUPPORTLEVELS[supportLevel]
+                          && ACTION_INDICATOR_SUPPORTLEVELS[supportLevel].color,
+                        value: appMessages.supportlevels[supportLevel]
+                          && intl.formatMessage(appMessages.supportlevels[supportLevel]),
+                      },
+                      statement: statement && {
+                        // id: statement.get('id'),
+                        date,
+                        value: statement.get('title'),
+                      },
+                      levelOfAuthority: position && {
+                        value: position.getIn(['authority', 'short_title']),
+                      },
+                      viaGroup: {
+                        value: position.get('viaGroups')
+                          && position.get('viaGroups').first()
+                          ? position.get('viaGroups').first().getIn(['attributes', 'title'])
+                          : '',
+                      },
+                    },
+                  ]);
+                }, []),
+              },
+              footer: {
+                primaryLink: country && {
+                  path: `${ROUTES.ACTOR}/${country.get('id')}`,
+                  title: 'Country details',
+                },
+                secondaryLink: currentIndicator && {
+                  path: `${ROUTES.INDICATOR}/${currentIndicator.get('id')}`,
+                  id: currentIndicator.get('id'),
+                  title: getIndicatorShortTitle(currentIndicator.getIn(['attributes', 'title'])),
+                },
+              },
+            };
+            onSetPreviewContent(content);
+          } else {
+            onSetPreviewContent();
+          }
+        }
+      } else {
+        onSetPreviewContent();
       }
-    } else {
-      onSetPreviewContent();
     }
-  }, [dataReady, previewItemNo, countries]);
+  }, [dataReady, previewItemId, countries]);
 
   const size = React.useContext(ResponsiveContext);
 
@@ -333,8 +345,7 @@ export function PositionsMap({
         {
           ...feature,
           id: country.get('id'),
-          previewItemNo: country.get('id'),
-          isPreviewItem: qe(previewItemNo, country.get('id')),
+          previewItemId: `${ID}|${country.get('id')}`,
           attributes: country.get('attributes').toJS(),
           values: statement ? { [currentIndicatorId]: level || 0 } : {},
         },
@@ -349,7 +360,7 @@ export function PositionsMap({
   };
 
   let supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
-    .filter((level) => !qe(level.value, 0)) // exclude 0
+    .filter((level) => parseInt(level.value, 10) > 0 && parseInt(level.value, 10) < 99) // exclude 0
     .sort((a, b) => a.order > b.order ? 1 : -1);
 
   supportLevels = supportLevels
@@ -366,15 +377,15 @@ export function PositionsMap({
 
   const options = [
     {
-      id: '0',
+      id: `${ID}-0`,
       active: includeActorMembers,
+      label: intl.formatMessage(appMessages.ui.statementOptions.includeMemberships),
       onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-      label: intl.formatMessage(messages.isActorMembers),
     },
     {
-      id: '1',
+      id: `${ID}-1`,
       active: !includeInofficialStatements,
-      label: intl.formatMessage(messages.isOfficialFiltered),
+      label: intl.formatMessage(appMessages.ui.statementOptions.excludeInofficial),
       onClick: () => onUpdateQuery([{
         arg: 'inofficial',
         value: includeInofficialStatements ? 'false' : null,
@@ -390,12 +401,8 @@ export function PositionsMap({
           <FormattedMessage {...messages.title} />
         </Title>
       </Box>
-      <Box
-        elevation="small"
-        background="white"
+      <Card
         direction={isMinSize(size, 'medium') ? 'row' : 'column'}
-        flex="grow"
-        fill
       >
         {isMinSize(size, 'medium') && (
           <IndicatorSidePanel>
@@ -504,10 +511,11 @@ export function PositionsMap({
                         fillColor: pos.color,
                       });
                     },
+                    previewContainerId: ID,
                   }}
                 />
               </MapWrapper>
-              <QuickFilters
+              <ComponentOptions
                 supportLevels={supportLevels}
                 options={options}
                 onUpdateQuery={onUpdateQuery}
@@ -556,7 +564,7 @@ export function PositionsMap({
             </>
           )}
         </Box>
-      </Box>
+      </Card>
     </Box>
   );
 }
@@ -576,7 +584,7 @@ PositionsMap.propTypes = {
   includeInofficialStatements: PropTypes.bool,
   currentIndicatorId: PropTypes.number,
   indicators: PropTypes.object,
-  previewItemNo: PropTypes.string,
+  previewItemId: PropTypes.string,
   onSetPreviewContent: PropTypes.func,
   onUpdatePath: PropTypes.func,
   intl: intlShape.isRequired,
@@ -590,7 +598,7 @@ const mapStateToProps = (state) => ({
   supportQuery: selectSupportQuery(state),
   includeActorMembers: selectIncludeActorMembers(state),
   countries: selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
-  previewItemNo: selectPreviewQuery(state),
+  previewItemId: selectPreviewQuery(state),
 });
 
 export function mapDispatchToProps(dispatch) {

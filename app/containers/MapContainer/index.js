@@ -87,7 +87,7 @@ export function MapContainer({
   isOverviewMap,
   printArgs,
   onClearFilters,
-  onSetPreviewItemNo,
+  onSetPreviewItemId,
   // intl,
 }) {
   const {
@@ -237,7 +237,7 @@ export function MapContainer({
             ...circleLayerConfig,
             rangeMax: minMaxValues && minMaxValues.points && minMaxValues.points.max,
           }}
-          onSetPreviewItemNo={onSetPreviewItemNo}
+          onSetPreviewItemId={onSetPreviewItemId}
         />
       </MapOuterWrapper>
       {mapInfo && (
@@ -300,7 +300,7 @@ MapContainer.propTypes = {
   mapOptions: PropTypes.array,
   fullMap: PropTypes.bool,
   isOverviewMap: PropTypes.bool,
-  onSetPreviewItemNo: PropTypes.func,
+  onSetPreviewItemId: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({
@@ -310,7 +310,7 @@ const mapStateToProps = (state) => ({
 
 export function mapDispatchToProps(dispatch) {
   return {
-    onSetPreviewItemNo: (value) => dispatch(setListPreview(value)),
+    onSetPreviewItemId: (value) => dispatch(setListPreview(value)),
   };
 }
 

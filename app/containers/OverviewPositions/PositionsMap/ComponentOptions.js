@@ -45,7 +45,7 @@ const ResetSupportTagsButton = styled((p) => <Button plain {...p} />)`
   color: ${palette('primary', 1)};
   font-family: ${({ theme }) => theme.fonts.title};
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 500;
   &:hover {
     color: ${palette('primary', 0)};
   }
@@ -59,7 +59,7 @@ const ResetSupport = styled((p) => <Box margin={{ bottom: 'small' }} {...p} />)`
 // const actives = supportLevels
 //   && supportLevels.filter((level) => level.active);
 // console.log(actives)
-const QuickFilters = ({
+const ComponentOptions = ({
   onUpdateQuery,
   supportLevels,
   options,
@@ -142,9 +142,9 @@ const QuickFilters = ({
   );
 };
 
-QuickFilters.propTypes = {
+ComponentOptions.propTypes = {
   supportLevels: PropTypes.array,
   options: PropTypes.array,
   onUpdateQuery: PropTypes.func,
 };
-export default QuickFilters;
+export default ComponentOptions;

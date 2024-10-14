@@ -2427,5 +2427,15 @@ export default defineMessages({
         defaultMessage: 'All',
       },
     },
+    statementOptions: {
+      includeMemberships: {
+        id: 'app.containers.App.ui.statementOptions.includeMemberships',
+        defaultMessage: 'Include positions of groups (countries are member of)',
+      },
+      excludeInofficial: {
+        id: 'app.containers.App.ui.statementOptions.excludeInofficial',
+        defaultMessage: 'Only show "official" statements (Level of Authority)',
+      },
+    },
   },
 });

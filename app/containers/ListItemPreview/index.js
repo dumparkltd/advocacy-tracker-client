@@ -16,7 +16,7 @@ const Styled = styled((p) => <Box {...p} />)`
 `;
 export function ListItemPreview({
   content,
-  onSetPreviewItemNo,
+  onSetPreviewItemId,
   onUpdatePath,
 }) {
   // console.log('content', content)
@@ -35,7 +35,7 @@ export function ListItemPreview({
       {content && content.header && (
         <PreviewHeader
           content={content.header}
-          onSetPreviewItemNo={onSetPreviewItemNo}
+          onSetPreviewItemId={onSetPreviewItemId}
         />
       )}
       {content && content.topicPosition && (
@@ -60,14 +60,14 @@ export function ListItemPreview({
 
 ListItemPreview.propTypes = {
   content: PropTypes.object,
-  onSetPreviewItemNo: PropTypes.func,
+  onSetPreviewItemId: PropTypes.func,
   onUpdatePath: PropTypes.func,
 };
 
 
 export function mapDispatchToProps(dispatch) {
   return {
-    onSetPreviewItemNo: (val) => {
+    onSetPreviewItemId: (val) => {
       dispatch(setListPreview(val));
     },
     onUpdatePath: (path) => {

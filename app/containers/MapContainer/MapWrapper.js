@@ -131,7 +131,7 @@ export function MapWrapper({
   printArgs,
   isPrintView,
   fullMap,
-  onSetPreviewItemNo,
+  onSetPreviewItemId,
 }) {
   const mapOptions = merge({}, options, MAP_OPTIONS);
 
@@ -231,8 +231,8 @@ export function MapWrapper({
   const onFeatureClick = (e) => {
     const { feature } = e.sourceTarget;
     if (e && L.DomEvent) L.DomEvent.stopPropagation(e);
-    if (e && e.containerPoint && feature && feature.previewItemNo && onSetPreviewItemNo) {
-      onSetPreviewItemNo(feature.isPreviewItem ? '' : feature.previewItemNo);
+    if (e && e.containerPoint && feature && feature.previewItemId && onSetPreviewItemId) {
+      onSetPreviewItemId(feature.previewItemId);
     }
     if (e && e.containerPoint && feature && feature.tooltip) {
       const activeTT = tooltip.features.reduce(
@@ -700,7 +700,7 @@ MapWrapper.propTypes = {
   isLocationData: PropTypes.bool,
   circleLayerConfig: PropTypes.object,
   printArgs: PropTypes.object,
-  onSetPreviewItemNo: PropTypes.func,
+  onSetPreviewItemId: PropTypes.func,
   // onSetMapSubject: PropTypes.func,
 };
 

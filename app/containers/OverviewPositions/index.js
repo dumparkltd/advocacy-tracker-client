@@ -16,6 +16,7 @@ import appMessages from 'containers/App/messages';
 import messages from './messages';
 
 import PositionsMap from './PositionsMap';
+import PositionsList from './PositionsList';
 
 const ViewContainer = styled(Container)`
   min-height: 80vH;
@@ -57,7 +58,10 @@ export function OverviewPositions({ intl }) {
               <FormattedMessage {...messages.pageTitle} />
             </TitleMedium>
           </Box>
-          <PositionsMap />
+          <Box gap="small">
+            <PositionsMap />
+            <PositionsList />
+          </Box>
         </ContentSimple>
       </ViewContainer>
       <Footer />

@@ -600,10 +600,10 @@ export function openBookmark(bookmark) {
     bookmark,
   };
 }
-export function setListPreview(listItemNo) {
+export function setListPreview(previewItemId) {
   return {
     type: SET_LIST_PREVIEW,
-    value: listItemNo,
+    value: previewItemId,
   };
 }
 export function setPreviewContent(args) {

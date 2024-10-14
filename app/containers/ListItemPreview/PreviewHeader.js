@@ -9,7 +9,7 @@ import Icon from 'components/Icon';
 import Reference from 'components/fields/Reference';
 import ButtonClose from 'components/buttons/ButtonClose';
 
-export function PreviewHeader({ content, onSetPreviewItemNo }) {
+export function PreviewHeader({ content, onSetPreviewItemId }) {
   const {
     title,
     aboveTitle,
@@ -22,8 +22,8 @@ export function PreviewHeader({ content, onSetPreviewItemNo }) {
       flex={{ shrink: 0 }}
     >
       <Box fill="horizontal" align="end">
-        {onSetPreviewItemNo && (
-          <ButtonClose onClose={() => onSetPreviewItemNo(null)} />
+        {onSetPreviewItemId && (
+          <ButtonClose onClose={() => onSetPreviewItemId(null)} />
         )}
       </Box>
       <Box direction="row" justify="between" align="center">
@@ -35,12 +35,12 @@ export function PreviewHeader({ content, onSetPreviewItemNo }) {
             {title}
           </Heading>
         </Box>
-        {onSetPreviewItemNo && (nextPreviewItem || prevPreviewItem) && (
+        {onSetPreviewItemId && (nextPreviewItem || prevPreviewItem) && (
           <Box direction="row" flex={{ shrink: 0 }} width="120">
             {prevPreviewItem && (
               <Button
                 plain
-                onClick={() => onSetPreviewItemNo(prevPreviewItem)}
+                onClick={() => onSetPreviewItemId(prevPreviewItem)}
               >
                 <Icon name="arrowLeft" text size="1.5em" sizes={{ mobile: '1em' }} />
               </Button>
@@ -48,7 +48,7 @@ export function PreviewHeader({ content, onSetPreviewItemNo }) {
             {nextPreviewItem && (
               <Button
                 plain
-                onClick={() => onSetPreviewItemNo(nextPreviewItem)}
+                onClick={() => onSetPreviewItemId(nextPreviewItem)}
               >
                 <Icon name="arrowRight" text size="1.5em" sizes={{ mobile: '1em' }} />
               </Button>
@@ -62,6 +62,6 @@ export function PreviewHeader({ content, onSetPreviewItemNo }) {
 
 PreviewHeader.propTypes = {
   content: PropTypes.object,
-  onSetPreviewItemNo: PropTypes.func,
+  onSetPreviewItemId: PropTypes.func,
 };
 export default PreviewHeader;

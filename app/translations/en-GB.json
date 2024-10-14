@@ -761,8 +761,6 @@
   "app.containers.PositionsMap.indicatorListTitle": "Select a topic",
   "app.containers.PositionsMap.supportLevelTitle": "States by level of support",
   "app.containers.PositionsMap.supportLevelHint": "Click to highlight",
-  "app.containers.PositionsMap.isActorMembers": "Include positions of groups (countries are member of)",
-  "app.containers.PositionsMap.isOfficialFiltered": "Only show \"official\" statements (Level of Authority)",
   "app.containers.PositionsMap.allTopics": "All Topics",
   "app.containers.PositionsMap.globalRules": "Global Rules",
   "app.containers.PositionsMap.reset": "Reset",

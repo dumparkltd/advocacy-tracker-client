@@ -43,6 +43,7 @@ import {
   selectIsAuthenticating,
   selectIsPrintView,
   selectPrintConfig,
+  selectPreviewQuery,
 } from './selectors';
 
 import {
@@ -397,6 +398,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       printArgs,
       listPreviewContent,
       onClosePreviewModal,
+      previewItemId,
     } = this.props;
     const { intl } = this.context;
     const title = intl.formatMessage(messages.app.title);
@@ -479,7 +481,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             />
           </ReactModal>
         )}
-        {listPreviewContent && (
+        {listPreviewContent && previewItemId && (
           <ReactModal
             isOpen
             contentLabel="List item preview"
@@ -543,6 +545,7 @@ App.propTypes = {
   onClosePreviewModal: PropTypes.func,
   isPrintView: PropTypes.bool,
   printArgs: PropTypes.object,
+  previewItemId: PropTypes.string,
 };
 App.contextTypes = {
   intl: PropTypes.object.isRequired,
@@ -563,6 +566,7 @@ const mapStateToProps = (state) => ({
   }),
   newEntityModal: selectNewEntityModal(state),
   listPreviewContent: selectListPreviewContent(state),
+  previewItemId: selectPreviewQuery(state),
 });
 
 export function mapDispatchToProps(dispatch) {
