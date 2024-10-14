@@ -759,7 +759,7 @@
   "app.containers.OverviewPositions.pageTitle": "Positions Dashboard",
   "app.containers.PositionsMap.subTitle": "Country Position By Topic",
   "app.containers.PositionsMap.indicatorListTitle": "Select a topic",
-  "app.containers.PositionsMap.supportLevelTitle": "UN Member States' level of support",
+  "app.containers.PositionsMap.supportLevelTitle": "States by level of support",
   "app.containers.PositionsMap.supportLevelHint": "Click to highlight",
   "app.containers.PositionsMap.isActorMembers": "Include positions of groups (countries are member of)",
   "app.containers.PositionsMap.isOfficialFiltered": "Only show \"official\" statements (Level of Authority)",

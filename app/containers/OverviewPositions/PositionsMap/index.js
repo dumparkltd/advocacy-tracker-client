@@ -30,6 +30,7 @@ import {
   getIndicatorShortTitle,
   getIndicatorSecondaryTitle,
 } from 'utils/entities';
+import { isMinSize } from 'utils/responsive';
 
 import {
   loadEntitiesIfNeeded,
@@ -189,7 +190,6 @@ export function PositionsMap({
         const indicatorPositions = country.getIn(['indicatorPositions', currentIndicatorId.toString()])
           && country.getIn(['indicatorPositions', currentIndicatorId.toString()]);
         const indicatorPosition = indicatorPositions && indicatorPositions.first();
-        console.log('indicatorPosition', indicatorPosition && indicatorPosition.toJS())
         const content = {
           header: {
             aboveTitle: 'Country',
@@ -360,15 +360,6 @@ export function PositionsMap({
       label: intl.formatMessage(appMessages.supportlevels[level.value]),
     }));
 
-  const indicatorOptions = indicators
-    && indicators
-      .entrySeq()
-      .map(([id, indicator]) => ({
-        key: id,
-        active: qe(currentIndicatorId, id),
-        label: getIndicatorMainTitle(indicator.getIn(['attributes', 'title'])),
-        onClick: () => onSetMapIndicator(id),
-      }));
   const currentIndicator = indicators
     && currentIndicatorId
     && indicators.get(currentIndicatorId.toString());
@@ -402,11 +393,11 @@ export function PositionsMap({
       <Box
         elevation="small"
         background="white"
-        direction={size !== 'small' ? 'row' : 'column'}
+        direction={isMinSize(size, 'medium') ? 'row' : 'column'}
         flex="grow"
         fill
       >
-        {size !== 'small' && (
+        {isMinSize(size, 'medium') && (
           <IndicatorSidePanel>
             <IndicatorPanelHeader
               pad={{
@@ -419,30 +410,41 @@ export function PositionsMap({
               </IndicatorListTitle>
             </IndicatorPanelHeader>
             <IndicatorList>
-              {dataReady && indicatorOptions && indicatorOptions.map((indicator) => (
-                <IndicatorSelectButton
-                  active={indicator.active}
-                  key={indicator.key}
-                  onClick={() => indicator.onClick(indicator.id)}
-                  title={indicator.label}
-                >
-                  <IndicatorLabel active={indicator.active}>
-                    {indicator.label}
-                  </IndicatorLabel>
-                </IndicatorSelectButton>
-              ))}
+              {dataReady && indicators && indicators.valueSeq().map((indicator) => {
+                const active = qe(currentIndicatorId, indicator.get('id'));
+                const label = getIndicatorMainTitle(indicator.getIn(['attributes', 'title']));
+                return (
+                  <IndicatorSelectButton
+                    active={active}
+                    key={indicator.get('id')}
+                    onClick={() => onSetMapIndicator(indicator.get('id'))}
+                    title={label}
+                  >
+                    <IndicatorLabel active={active}>
+                      {label}
+                    </IndicatorLabel>
+                  </IndicatorSelectButton>
+                );
+              })}
             </IndicatorList>
           </IndicatorSidePanel>
         )}
-        {size === 'small'
+        {!isMinSize(size, 'medium')
           && dataReady
-          && indicatorOptions
+          && indicators
           && (
             <Box pad="small">
               <SelectIndicators
                 config={{
                   onIndicatorSelect: (id) => onSetMapIndicator(id),
-                  indicatorOptions,
+                  indicatorOptions: indicators.reduce((memo, indicator) => ([
+                    ...memo,
+                    {
+                      value: indicator.get('id'),
+                      active: qe(currentIndicatorId, indicator.get('id')),
+                      label: getIndicatorMainTitle(indicator.getIn(['attributes', 'title'])),
+                    },
+                  ]), []),
                   dropAlign: {
                     top: 'bottom',
                     left: 'left',
@@ -461,7 +463,7 @@ export function PositionsMap({
           <Loading loading={!dataReady} />
           {dataReady && (
             <>
-              {size !== 'small' && (
+              {isMinSize(size, 'medium') && (
                 <Box gap="small" margin={{ vertical: 'small' }}>
                   <MapTitle>
                     {getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title']))}

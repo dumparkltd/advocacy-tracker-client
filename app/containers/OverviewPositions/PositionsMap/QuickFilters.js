@@ -6,8 +6,14 @@ import styled from 'styled-components';
 import { palette } from 'styled-theme';
 
 import {
-  Box, Button, Text, Heading,
+  Box,
+  Button,
+  Text,
+  Heading,
+  ResponsiveContext,
 } from 'grommet';
+
+import { isMinSize } from 'utils/responsive';
 
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
@@ -16,6 +22,7 @@ import Dot from 'components/styled/Dot';
 import messages from './messages';
 
 const SupportTagsTitle = styled((p) => <Heading level="5" {...p} />)`
+  margin: 0;
   color: black;
   font-weight: bold;
 `;
@@ -43,6 +50,11 @@ const ResetSupportTagsButton = styled((p) => <Button plain {...p} />)`
     color: ${palette('primary', 0)};
   }
 `;
+const ResetSupport = styled((p) => <Box margin={{ bottom: 'small' }} {...p} />)`
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+`;
 // gap={{ row: 'small', column: 'xsmall' }}
 // const actives = supportLevels
 //   && supportLevels.filter((level) => level.active);
@@ -51,18 +63,17 @@ const QuickFilters = ({
   onUpdateQuery,
   supportLevels,
   options,
-}) => (
-  <Box direction="row" gap="small">
-    <Box direction="column">
-      <Box
-        height="xxsmall"
-        direction="row"
-        gap="xsmall"
-        align="center"
-        justify="between"
-        margin={{ vertical: 'small' }}
-      >
-        <Box direction="row" justify="start" gap="small">
+}) => {
+  const size = React.useContext(ResponsiveContext);
+  return (
+    <Box gap="medium" margin={{ vertical: 'small' }}>
+      <Box gap="small">
+        <Box
+          direction={isMinSize(size, 'medium') ? 'row' : 'column'}
+          align={isMinSize(size, 'medium') ? 'center' : 'start'}
+          justify="start"
+          gap="small"
+        >
           <SupportTagsTitle margin="none">
             <FormattedMessage {...messages.supportLevelTitle} />
           </SupportTagsTitle>
@@ -70,62 +81,66 @@ const QuickFilters = ({
             <FormattedMessage {...messages.supportLevelHint} />
           </Hint>
         </Box>
-        {supportLevels.find((level) => level.active) && (
-          <ResetSupportTagsButton
-            onClick={() => onUpdateQuery([{
-              arg: 'support',
-              value: null,
-              replace: true,
-            }])}
-          >
-            <FormattedMessage {...messages.reset} />
-          </ResetSupportTagsButton>
-        )}
+        <Box
+          wrap
+          direction="row"
+          gap="xsmall"
+          alignSelf="start"
+          style={{ position: 'relative' }}
+        >
+          {supportLevels && supportLevels.map((tag) => (
+            <TagButton
+              key={tag.value}
+              selected={tag.active}
+              onClick={() => onUpdateQuery([{
+                arg: 'support',
+                value: tag.value,
+                add: !tag.active ? tag.value : false,
+                remove: tag.active ? tag.value : false,
+                replace: false,
+                multipleAttributeValues: true,
+              }])}
+            >
+              <Box direction="row" align="center" gap="xsmall">
+                <Dot size="18px" color={tag.color} />
+                <Text>{tag.label}</Text>
+              </Box>
+            </TagButton>
+          ))}
+          {supportLevels.find((level) => level.active) && (
+            <ResetSupport>
+              <ResetSupportTagsButton
+                onClick={() => onUpdateQuery([{
+                  arg: 'support',
+                  value: null,
+                  replace: true,
+                }])}
+              >
+                <FormattedMessage {...messages.reset} />
+              </ResetSupportTagsButton>
+            </ResetSupport>
+          )}
+        </Box>
       </Box>
-      <Box
-        wrap
-        direction="row"
-        gap="xsmall"
-        basis="2/3"
-      >
-        {supportLevels && supportLevels.map((tag) => (
-          <TagButton
-            key={tag.value}
-            selected={tag.active}
-            onClick={() => onUpdateQuery([{
-              arg: 'support',
-              value: tag.value,
-              add: !tag.active ? tag.value : false,
-              remove: tag.active ? tag.value : false,
-              replace: false,
-              multipleAttributeValues: true,
-            }])}
-          >
-            <Box direction="row" align="center" gap="xsmall">
-              <Dot size="18px" color={tag.color} />
-              <Text>{tag.label}</Text>
-            </Box>
-          </TagButton>
-        ))}
-      </Box>
+      {options && (
+        <Box
+          direction={isMinSize(size, 'medium') ? 'row' : 'column'}
+          gap={isMinSize(size, 'medium') ? 'medium' : 'xsmall'}
+          flex={{ grow: 0 }}
+          fill={false}
+          alignSelf="start"
+        >
+          {options.map((option) => (
+            <MapOption
+              key={option.id}
+              option={option}
+            />
+          ))}
+        </Box>
+      )}
     </Box>
-    {options && (
-      <Box
-        direction="column"
-        justify="end"
-        flex={{ shrink: 0 }}
-        basis="1/3"
-      >
-        {options.map((option) => (
-          <MapOption
-            key={option.id}
-            option={option}
-          />
-        ))}
-      </Box>
-    )}
-  </Box>
-);
+  );
+};
 
 QuickFilters.propTypes = {
   supportLevels: PropTypes.array,

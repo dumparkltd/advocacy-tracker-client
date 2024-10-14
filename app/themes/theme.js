@@ -322,7 +322,7 @@ theme.sizes = {
     },
     nav: {
       height: 60,
-      heightMobile: 40,
+      heightMobile: 60,
     },
   },
   header: {

@@ -16,7 +16,7 @@ export default styled((p) => <Button plain {...p} />)`
     border-bottom: 4px solid ${({ active }) => active ? 'black' : 'transparent'};
   }
   height: ${(props) => props.theme.sizes.navSecondary.nav.heightMobile}px;
-  padding: 5px 0.5em 0;
+  padding: 30px 0.5em 0;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
     padding: 30px 0.5em 0;
     height: ${(props) => props.theme.sizes.navSecondary.nav.height}px;
