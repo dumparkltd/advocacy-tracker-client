@@ -10,7 +10,7 @@ export const prepOptions = (options, search) => options
     .map((option) => ({
       code: option.getIn(['attributes', 'code']),
       label: option.getIn(['attributes', 'title']),
-      typeId: option.get('id'),
+      id: option.get('id'),
     }))
     .filter((option) => filterOption(option, search))
     .sort((a, b) => (a.label < b.label ? -1 : 1));

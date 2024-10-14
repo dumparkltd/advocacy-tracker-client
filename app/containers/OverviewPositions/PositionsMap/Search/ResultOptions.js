@@ -29,12 +29,12 @@ export function ResultOptions({
         <Keyboard
           key={option.code}
           onEnter={() => {
-            if (options[activeResult]) onClick(options[activeResult].typeId);
+            if (options[activeResult]) onClick(options[activeResult].id);
           }}
         >
           <ResultOption
             onClick={() => {
-              onClick(option.typeId);
+              onClick(option.id);
             }}
             ref={(el) => {
               myRefs.current[index] = el;

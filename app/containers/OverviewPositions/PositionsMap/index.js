@@ -40,6 +40,7 @@ import {
   updateRouteQuery,
   setPreviewContent,
   updatePath,
+  setListPreview,
 } from 'containers/App/actions';
 
 import {
@@ -177,6 +178,7 @@ export function PositionsMap({
   previewItemId,
   intl,
   onSetPreviewContent,
+  onSetPreviewItemId,
   onUpdatePath,
 }) {
   useEffect(() => {
@@ -479,7 +481,7 @@ export function PositionsMap({
                 <SearchWrapper>
                   <Search
                     options={countries}
-                    onSelect={() => { }}
+                    onSelect={(countryId) => onSetPreviewItemId(`${ID}|${countryId}`)}
                     placeholder={intl.formatMessage(messages.searchPlaceholder)}
                   />
                 </SearchWrapper>
@@ -579,6 +581,7 @@ PositionsMap.propTypes = {
   indicators: PropTypes.object,
   previewItemId: PropTypes.string,
   onSetPreviewContent: PropTypes.func,
+  onSetPreviewItemId: PropTypes.func,
   onUpdatePath: PropTypes.func,
   intl: intlShape.isRequired,
 };
@@ -604,6 +607,7 @@ export function mapDispatchToProps(dispatch) {
     onUpdateQuery: (value) => dispatch(updateRouteQuery(value)),
     onSetPreviewContent: (value) => dispatch(setPreviewContent(value)),
     onUpdatePath: (path) => dispatch(updatePath(path)),
+    onSetPreviewItemId: (value) => dispatch(setListPreview(value)),
   };
 }
 

@@ -97,7 +97,7 @@ export function SearchResults({
               <ResultOptions
                 options={options.toList().toJS()}
                 activeResult={activeResult}
-                onClick={(typeId) => onSelect(typeId)}
+                onClick={(id) => onSelect(id)}
                 focus={focus}
                 onFocus={(index) => {
                   setActiveResult(index);
