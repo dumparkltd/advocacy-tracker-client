@@ -538,6 +538,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
               })),
               hasSearch: true,
               paginate: true,
+              paginateOptions: true,
               activeType: viewTypeClean,
             }}
           />
@@ -547,8 +548,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             <EntityListTable
               isByOption
               hasFilters={hasFilters}
-              paginate
-              hasSearch
               columns={[
                 {
                   id: 'main',
@@ -583,6 +582,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
               options={{
                 hasSearch: true,
                 paginate: true,
+                paginateOptions: true,
                 checkboxOptions,
                 subjectOptions,
               }}
@@ -599,6 +599,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
               typeOptions,
               hasSearch: true,
               paginate: true,
+              paginateOptions: true,
               includeMembers: includeActorMembers,
               includeChildren: includeActorChildren,
             }}

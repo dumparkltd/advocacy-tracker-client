@@ -180,7 +180,7 @@ export const prepareHeader = ({
           ...col,
           title: appMessages.entities[`actions_${col.actiontype_id}`]
             ? intl.formatMessage(appMessages.entities[`actions_${col.actiontype_id}`].pluralShort)
-            : 'Actions',
+            : 'Activities',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -234,7 +234,7 @@ export const prepareHeader = ({
         });
       case 'actionsSimple':
         if (!label) {
-          label = 'Actions';
+          label = 'Activities';
         }
         return ({
           ...col,
@@ -314,6 +314,15 @@ const getSingleRelatedValueFromAttributes = (relatedEntity) => relatedEntity
   ? relatedEntity.get('name') || relatedEntity.get('title')
   : null;
 
+const getColorFromPositions = (positions) => {
+  const latest = positions && positions.first();
+  const value = latest && latest.get('supportlevel_id');
+  const level = value && ACTION_INDICATOR_SUPPORTLEVELS[parseInt(value, 10)];
+  if (level) {
+    return level.color;
+  }
+  return ACTION_INDICATOR_SUPPORTLEVELS[99].color;
+};
 
 export const prepareEntityRows = ({
   entities,
@@ -739,7 +748,7 @@ export const prepareEntityRows = ({
                 values: temp && temp.map(
                   (val) => {
                     if (val.actors) {
-                      relatedEntities = getRelatedEntities(value.actors, connections.get('actors'), col);
+                      relatedEntities = getRelatedEntities(val.actors, connections.get('actors'), col);
                       if (relatedEntities && relatedEntities.size > 0) {
                         return {
                           ...val,
@@ -757,6 +766,15 @@ export const prepareEntityRows = ({
                     0,
                   )
                   : null,
+              },
+            };
+          case 'topicPosition':
+            temp = entity.getIn([col.positions, col.indicatorId]);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                color: getColorFromPositions(temp),
               },
             };
           default:

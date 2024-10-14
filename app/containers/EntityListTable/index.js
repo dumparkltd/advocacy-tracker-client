@@ -106,9 +106,13 @@ export function EntityListTable({
   // list options
   const {
     hasSearch,
+    search,
     paginate,
+    paginateOptions,
+    pageSize,
     includeMembers,
     includeChildren,
+    searchPlaceholder,
   } = options;
 
   // list sorting
@@ -130,17 +134,18 @@ export function EntityListTable({
 
   // filter entitities by keyword
   const searchAttributes = (
-    config.views
+    config
+    && config.views
     && config.views.list
     && config.views.list.search
   ) || ['title'];
 
   let searchedEntities = entities;
-
-  if (hasSearch && searchQuery.length > 2) {
+  const searchQueryClean = search || searchQuery;
+  if (searchQueryClean && searchQueryClean.length > 2) {
     searchedEntities = filterEntitiesByKeywords(
       searchedEntities,
-      searchQuery,
+      searchQueryClean,
       searchAttributes,
     );
   }
@@ -212,15 +217,17 @@ export function EntityListTable({
     }
   );
 
-  let pageSize = PAGE_SIZE_MAX;
+  let pageSizeClean = PAGE_SIZE_MAX;
   let entitiesOnPage = sortedEntities;
   let pager;
   const isSortedOrPaged = !!pageNo || !!pageItems || !!cleanSortBy || !!cleanSortOrder;
   if (paginate) {
-    if (pageItems === 'all' || (isPrintView && printConfig && printConfig.printItems === 'all')) {
-      pageSize = sortedEntities.length;
+    if (pageSize) {
+      pageSizeClean = 10;
+    } else if (pageItems === 'all' || (isPrintView && printConfig && printConfig.printItems === 'all')) {
+      pageSizeClean = sortedEntities.length;
     } else {
-      pageSize = pageItems
+      pageSizeClean = pageItems
         ? Math.min(
           (pageItems && parseInt(pageItems, 10)),
           PAGE_SIZE_MAX
@@ -229,12 +236,12 @@ export function EntityListTable({
 
     // grouping and paging
     // if grouping required
-    if (sortedEntities.length > pageSize) {
+    if (sortedEntities.length > pageSizeClean) {
       // get new pager object for specified page
       pager = getPager(
         sortedEntities.length,
         pageNo && parseInt(pageNo, 10),
-        pageSize
+        pageSizeClean
       );
       entitiesOnPage = sortedEntities.slice(pager.startIndex, pager.endIndex + 1);
     }
@@ -264,14 +271,14 @@ export function EntityListTable({
       selectedTotal: canEdit && entityIdsSelected && entityIdsSelected.size,
       allSelectedOnPage: canEdit && entityIdsOnPage.length === entityIdsSelected.size,
       messages,
-      hasFilters: (searchQuery.length > 0 || hasFilters),
+      hasFilters: (searchQueryClean.length > 0 || hasFilters),
     }),
     intl,
   });
 
   const listEmpty = searchedEntities.size === 0;
   const listEmptyAfterQuery = listEmpty
-    && (searchQuery.length > 0 || hasFilters);
+    && (searchQueryClean.length > 0 || hasFilters);
   const listEmptyAfterQueryAndErrors = listEmptyAfterQuery
     && (errors && errors.size > 0);
 
@@ -281,12 +288,13 @@ export function EntityListTable({
         <EntitiesTableOptions
           options={{
             ...options,
-            hasPageSelect: !isPrintView && entitiesOnPage && entitiesOnPage.length > 0 && paginate,
+            hasPageSelect: paginateOptions && !isPrintView && entitiesOnPage && entitiesOnPage.length > 0 && paginate,
+            searchPlaceholder,
           }}
           onPageItemsSelect={onPageItemsSelect}
-          onSearch={onSearch}
-          searchQuery={searchQuery}
-          pageSelectValue={pageItems === 'all' ? pageItems : pageSize.toString()}
+          onSearch={hasSearch && onSearch}
+          searchQuery={searchQueryClean}
+          pageSelectValue={pageItems === 'all' ? pageItems : pageSizeClean.toString()}
         />
       )}
       <EntitiesTable
@@ -405,8 +413,6 @@ EntityListTable.propTypes = {
   onSearch: PropTypes.func,
   label: PropTypes.string,
   options: PropTypes.object,
-  includeMembers: PropTypes.bool,
-  includeChildren: PropTypes.bool,
   isByOption: PropTypes.bool,
   isPrintView: PropTypes.bool,
   printConfig: PropTypes.object,

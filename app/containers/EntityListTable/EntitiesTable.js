@@ -2,6 +2,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, ResponsiveContext } from 'grommet';
 import styled, { css } from 'styled-components';
+import { groupBy } from 'lodash/collection';
+
 import { isMinSize } from 'utils/responsive';
 import { scaleColorCount } from 'containers/MapContainer/utils';
 import { usePrint } from 'containers/App/PrintContext';
@@ -45,8 +47,18 @@ const TableRow = styled.tr`
   }
 `;
 const getColWidth = ({
-  col, count, colSpan = 1, inSingleView,
+  col, count, colSpan = 1, inSingleView, columnsByType,
 }) => {
+  if (columnsByType && columnsByType.topicPosition && columnsByType.topicPosition.length > 0) {
+    if (col.type === 'main') {
+      return 25;
+    }
+    if (col.type === 'topicPosition') {
+      return 4;
+    }
+    return (75 - (4 * columnsByType.topicPosition.length))
+      / (count - columnsByType.topicPosition.length - 1);
+  }
   if (inSingleView) {
     return (100 / count) * colSpan;
   }
@@ -165,6 +177,7 @@ export function EntitiesTable({
                     scope="col"
                     col={col}
                     count={headerColumns.length}
+                    columnsByType={groupBy(headerColumns, 'type')}
                     first={i === 0}
                     last={i === headerColumns.length - 1}
                     inSingleView={inSingleView}
@@ -215,6 +228,7 @@ export function EntitiesTable({
                       || col.type === 'userrole'
                       || col.type === 'date'
                       || col.type === 'supportlevel'
+                      || col.type === 'topicPosition'
                     ) && (
                       <CellBodyPlain
                         entity={entity[col.id]}
@@ -287,6 +301,10 @@ export function EntitiesTable({
                       || col.type === 'positionStatement'
                       || col.type === 'childActions'
                       || col.type === 'parentActions'
+                      || (col.simple && (
+                        col.type === 'actorActions'
+                        || col.type === 'actiontype'
+                      ))
                     ) && (
                       <CellBodyActions
                         entity={entity[col.id]}
@@ -297,7 +315,7 @@ export function EntitiesTable({
                     {(
                       col.type === 'actorActions'
                       || col.type === 'actiontype'
-                    ) && (
+                    ) && !col.simple && (
                       <CellBodyBarChart
                         value={entity[col.id].value}
                         maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}

@@ -17,11 +17,13 @@ export function CellBodyPlain({
       {color && (
         <LabelWrap>
           <Box flex={{ shrink: 0 }}>
-            <Dot color={color} />
+            <Dot size={!value && '33px'} color={color} />
           </Box>
-          <Text size="xsmall" weight={primary ? 500 : 300} wordBreak="keep-all">
-            {value}
-          </Text>
+          {value && (
+            <Text size="xsmall" weight={primary ? 500 : 300} wordBreak="keep-all">
+              {value}
+            </Text>
+          )}
         </LabelWrap>
       )}
       {!color && (

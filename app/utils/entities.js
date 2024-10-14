@@ -1342,3 +1342,18 @@ export const getIndicatorSecondaryTitle = (title) => {
   }
   return null;
 };
+export const getIndicatorAbbreviation = (title) => {
+  const short = getIndicatorShortTitle(title);
+  const words = short.split(' ');
+  if (words.length === 1) {
+    return words[0].length > 2 ? words[0].substr(0, 2) : words[0];
+  }
+  return words.reduce((memo, word) => `${memo}${word.substr(0, 1)}`, '');
+};
+export const getIndicatorNumber = (title) => {
+  const short = getIndicatorMainTitle(title);
+  if (short.indexOf(' - ') > -1) {
+    return short.split('-')[0].trim();
+  }
+  return null;
+};

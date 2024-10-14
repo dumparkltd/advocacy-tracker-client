@@ -38,6 +38,7 @@ export function EntityListTableOptions({
     subjectOptions,
     hasSearch,
     hasPageSelect,
+    searchPlaceholder,
   } = options;
   const isPrintView = usePrint();
 
@@ -103,7 +104,7 @@ export function EntityListTableOptions({
           align="end"
           gap="small"
           pad={{ vertical: 'small' }}
-          justify={hasSearch ? 'start' : 'end'}
+          justify="end"
         >
           {hasPageSelect && (
             <Box>
@@ -122,7 +123,11 @@ export function EntityListTableOptions({
           )}
           {hasSearch && (
             <EntityListSearchWrapper>
-              <EntityListSearch searchQuery={searchQuery} onSearch={onSearch} />
+              <EntityListSearch
+                searchQuery={searchQuery}
+                onSearch={onSearch}
+                placeholder={searchPlaceholder}
+              />
             </EntityListSearchWrapper>
           )}
         </Box>
