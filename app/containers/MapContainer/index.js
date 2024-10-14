@@ -57,7 +57,7 @@ const getMapOuterWrapper = (fullMap) => fullMap
   ? styled.div``
   : styled(({ isOverviewMap, ...rest }) => (
     <Box
-      margin={isOverviewMap ? 0 : { horizontal: 'medium' }}
+      margin={isOverviewMap ? null : { horizontal: 'medium' }}
       {...rest}
     />
   ))`

@@ -24,9 +24,13 @@ export function ListItemPreview({
     <Styled
       background="white"
       fill="vertical"
+      responsive={false}
+      flex={{ shrink: 0 }}
       elevation="medium"
       pad={{ horizontal: 'large', vertical: 'small' }}
       gap="large"
+      overflow="auto"
+      style={{ position: 'relative' }}
     >
       {content && content.header && (
         <PreviewHeader
@@ -41,7 +45,7 @@ export function ListItemPreview({
       )}
       {content && content.topicStatements && (
         <PreviewCountryTopicStatementList
-          content={content.topicPosition}
+          content={content.topicStatements}
         />
       )}
       {content && content.footer && (

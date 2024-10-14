@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
@@ -15,9 +15,6 @@ import Dot from 'components/styled/Dot';
 
 import messages from './messages';
 
-const InputSelectWrapper = styled((p) => <Box {...p} />)``;
-const SupportTagsWrapper = styled((p) => <Box {...p} />)``;
-const SupportTagsSubHeaderWrapper = styled((p) => <Box {...p} />)``;
 const SupportTagsTitle = styled((p) => <Heading level="5" {...p} />)`
   color: black;
   font-weight: bold;
@@ -27,17 +24,17 @@ const Hint = styled((p) => <Text {...p} />)`
   font-weight: 300;
   font-style: italic;
 `;
-const StyledTag = styled((p) => <Button {...p} gap="5px" />)`
+const TagButton = styled((p) => <Button plain {...p} />)`
   color: ${({ selected }) => selected ? 'white' : 'black'};
   background: ${({ selected }) => selected ? palette('primary', 1) : 'transparent'};
   border: 1px solid ${({ selected }) => selected ? palette('primary', 1) : palette('light', 4)};
-  padding: 3px 5px;
+  border-radius: 9999px;
+  padding: 3px 8px 3px 5px;
   &:hover {
-    box-shadow: none;
     border: 1px solid ${({ selected }) => selected ? palette('primary', 0) : palette('dark', 3)};
   }
 `;
-const ResetSuportTagsButton = styled((p) => <Button plain {...p} />)`
+const ResetSupportTagsButton = styled((p) => <Button plain {...p} />)`
   color: ${palette('primary', 1)};
   font-family: ${({ theme }) => theme.fonts.title};
   text-transform: uppercase;
@@ -51,16 +48,13 @@ const ResetSuportTagsButton = styled((p) => <Button plain {...p} />)`
 //   && supportLevels.filter((level) => level.active);
 // console.log(actives)
 const QuickFilters = ({
-  intl,
-  onSetisActorMembers,
   onUpdateQuery,
-  isActorMembers,
   supportLevels,
-  includeInofficialStatements,
+  options,
 }) => (
   <Box direction="row" gap="small">
     <Box direction="column">
-      <SupportTagsSubHeaderWrapper
+      <Box
         height="xxsmall"
         direction="row"
         gap="xsmall"
@@ -77,7 +71,7 @@ const QuickFilters = ({
           </Hint>
         </Box>
         {supportLevels.find((level) => level.active) && (
-          <ResetSuportTagsButton
+          <ResetSupportTagsButton
             onClick={() => onUpdateQuery([{
               arg: 'support',
               value: null,
@@ -85,18 +79,18 @@ const QuickFilters = ({
             }])}
           >
             <FormattedMessage {...messages.reset} />
-          </ResetSuportTagsButton>
+          </ResetSupportTagsButton>
         )}
-      </SupportTagsSubHeaderWrapper>
-      <SupportTagsWrapper
+      </Box>
+      <Box
         wrap
         direction="row"
+        gap="xsmall"
+        basis="2/3"
       >
         {supportLevels && supportLevels.map((tag) => (
-          <StyledTag
+          <TagButton
             key={tag.value}
-            label={tag.label}
-            size="small"
             selected={tag.active}
             onClick={() => onUpdateQuery([{
               arg: 'support',
@@ -106,45 +100,36 @@ const QuickFilters = ({
               replace: false,
               multipleAttributeValues: true,
             }])}
-            icon={(<Dot size="18px" color={tag.color} />)}
+          >
+            <Box direction="row" align="center" gap="xsmall">
+              <Dot size="18px" color={tag.color} />
+              <Text>{tag.label}</Text>
+            </Box>
+          </TagButton>
+        ))}
+      </Box>
+    </Box>
+    {options && (
+      <Box
+        direction="column"
+        justify="end"
+        flex={{ shrink: 0 }}
+        basis="1/3"
+      >
+        {options.map((option) => (
+          <MapOption
+            key={option.id}
+            option={option}
           />
         ))}
-      </SupportTagsWrapper>
-    </Box>
-    <InputSelectWrapper direction="column">
-      <Box height="xxsmall" />
-      <MapOption
-        option={{
-          id: '0',
-          active: isActorMembers,
-          onClick: () => onSetisActorMembers(isActorMembers ? '0' : '1'),
-          label: intl.formatMessage(messages.isActorMembers),
-        }}
-      />
-      <MapOption
-        option={{
-          id: '1',
-          active: !includeInofficialStatements,
-          label: intl.formatMessage(messages.isOfficialFiltered),
-          onClick: () => onUpdateQuery([{
-            arg: 'inofficial',
-            value: includeInofficialStatements ? 'false' : null,
-            replace: true,
-            multipleAttributeValues: false,
-          }]),
-        }}
-      />
-    </InputSelectWrapper>
+      </Box>
+    )}
   </Box>
 );
 
 QuickFilters.propTypes = {
-  intl: intlShape.isRequired,
   supportLevels: PropTypes.array,
-  onSetisActorMembers: PropTypes.func,
+  options: PropTypes.array,
   onUpdateQuery: PropTypes.func,
-  isPositionIndicator: PropTypes.bool,
-  isActorMembers: PropTypes.bool,
-  includeInofficialStatements: PropTypes.bool,
 };
-export default injectIntl(QuickFilters);
+export default QuickFilters;

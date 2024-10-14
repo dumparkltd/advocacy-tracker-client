@@ -15,6 +15,8 @@ export function PreviewFooter({ content, onUpdatePath }) {
       justify="end"
       pad={{ top: 'small' }}
       gap="none"
+      responsive={false}
+      flex={{ shrink: 0 }}
     >
       {secondaryLink && (
         <ButtonSecondary

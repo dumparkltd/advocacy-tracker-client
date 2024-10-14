@@ -66,8 +66,6 @@ import Search from './Search';
 
 import messages from './messages';
 
-
-const StyledCard = styled((p) => <Box {...p} />)``;
 const IndicatorSidePanel = styled((p) => <Box {...p} />)`
   border-right: 1px solid ${palette('light', 2)};
   width: 200px;
@@ -78,7 +76,6 @@ const IndicatorSidePanel = styled((p) => <Box {...p} />)`
    width: 350px;
   }
 `;
-const OverviewContentWrapper = styled((p) => <Box {...p} />)``;
 const IndicatorList = styled((p) => <Box {...p} />)`
   border-top: 1px solid ${palette('light', 2)};
 `;
@@ -192,7 +189,7 @@ export function PositionsMap({
         const indicatorPositions = country.getIn(['indicatorPositions', currentIndicatorId.toString()])
           && country.getIn(['indicatorPositions', currentIndicatorId.toString()]);
         const indicatorPosition = indicatorPositions && indicatorPositions.first();
-        // console.log('indicatorPosition', indicatorPosition && indicatorPosition.toJS())
+        console.log('indicatorPosition', indicatorPosition && indicatorPosition.toJS())
         const content = {
           header: {
             aboveTitle: 'Country',
@@ -219,28 +216,79 @@ export function PositionsMap({
             },
           },
           topicStatements: indicatorPositions && {
-            includeInofficialStatements,
+            options: [
+              {
+                id: '0',
+                active: includeActorMembers,
+                onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+                label: intl.formatMessage(messages.isActorMembers),
+              },
+              {
+                id: '1',
+                active: !includeInofficialStatements,
+                label: intl.formatMessage(messages.isOfficialFiltered),
+                onClick: () => onUpdateQuery([{
+                  arg: 'inofficial',
+                  value: includeInofficialStatements ? 'false' : null,
+                  replace: true,
+                  multipleAttributeValues: false,
+                }]),
+              },
+            ],
+            indicatorPositionsTableColumns: [
+              {
+                id: 'position',
+                type: 'position',
+                label: 'Level of support',
+              },
+              {
+                id: 'statement',
+                type: 'plainWithDate',
+                label: 'Statement',
+              },
+              {
+                id: 'levelOfAuthority',
+                type: 'plain',
+                label: 'Level of authority',
+              },
+              {
+                id: 'viaGroup',
+                type: 'plain',
+                label: 'As Member of',
+              },
+            ],
             indicatorPositions: indicatorPositions.reduce((memo, position) => {
               const statement = position.get('measure');
               let date = statement.get('date_start');
-              if (isDate(date)) {
+              if (date && isDate(date)) {
                 date = intl.formatDate(date);
-              } else if (isDate(statement.get('created_at'))) {
+              } else if (statement.get('created_at') && isDate(statement.get('created_at'))) {
                 date = intl.formatDate(statement.get('created_at'));
               }
+              const supportLevel = position.get('supportlevel_id') || 0;
               return ([
                 ...memo,
                 {
                   position: {
-                    supportlevelId: position.get('supportlevel_id'),
-                    supportlevelTitle: intl.formatMessage(appMessages.supportlevels[position.get('supportlevel_id')]),
+                    color: ACTION_INDICATOR_SUPPORTLEVELS[supportLevel]
+                      && ACTION_INDICATOR_SUPPORTLEVELS[supportLevel].color,
+                    value: appMessages.supportlevels[supportLevel]
+                      && intl.formatMessage(appMessages.supportlevels[supportLevel]),
                   },
                   statement: statement && {
-                    id: statement.get('id'),
+                    // id: statement.get('id'),
                     date,
-                    title: statement.get('title'),
+                    value: statement.get('title'),
                   },
-                  levelOfAuthority: position && position.getIn(['authority', 'short_title']),
+                  levelOfAuthority: position && {
+                    value: position.getIn(['authority', 'short_title']),
+                  },
+                  viaGroup: {
+                    value: position.get('viaGroups')
+                      && position.get('viaGroups').first()
+                      ? position.get('viaGroups').first().getIn(['attributes', 'title'])
+                      : '',
+                  },
                 },
               ]);
             }, []),
@@ -324,6 +372,26 @@ export function PositionsMap({
   const currentIndicator = indicators
     && currentIndicatorId
     && indicators.get(currentIndicatorId.toString());
+
+  const options = [
+    {
+      id: '0',
+      active: includeActorMembers,
+      onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+      label: intl.formatMessage(messages.isActorMembers),
+    },
+    {
+      id: '1',
+      active: !includeInofficialStatements,
+      label: intl.formatMessage(messages.isOfficialFiltered),
+      onClick: () => onUpdateQuery([{
+        arg: 'inofficial',
+        value: includeInofficialStatements ? 'false' : null,
+        replace: true,
+        multipleAttributeValues: false,
+      }]),
+    },
+  ];
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
       <Box pad={{ top: 'small', bottom: 'xsmall' }}>
@@ -331,7 +399,7 @@ export function PositionsMap({
           <FormattedMessage {...messages.title} />
         </Title>
       </Box>
-      <StyledCard
+      <Box
         elevation="small"
         background="white"
         direction={size !== 'small' ? 'row' : 'column'}
@@ -350,8 +418,8 @@ export function PositionsMap({
                 <FormattedMessage {...messages.indicatorListTitle} />
               </IndicatorListTitle>
             </IndicatorPanelHeader>
-            {dataReady && indicatorOptions && indicatorOptions.map((indicator) => (
-              <IndicatorList>
+            <IndicatorList>
+              {dataReady && indicatorOptions && indicatorOptions.map((indicator) => (
                 <IndicatorSelectButton
                   active={indicator.active}
                   key={indicator.key}
@@ -362,8 +430,8 @@ export function PositionsMap({
                     {indicator.label}
                   </IndicatorLabel>
                 </IndicatorSelectButton>
-              </IndicatorList>
-            ))}
+              ))}
+            </IndicatorList>
           </IndicatorSidePanel>
         )}
         {size === 'small'
@@ -384,7 +452,7 @@ export function PositionsMap({
             </Box>
           )
         }
-        <OverviewContentWrapper
+        <Box
           direction="column"
           fill="horizontal"
           pad={{ horizontal: 'medium', bottom: 'none' }}
@@ -438,11 +506,9 @@ export function PositionsMap({
                 />
               </MapWrapper>
               <QuickFilters
-                onSetisActorMembers={onSetIncludeActorMembers}
-                isActorMembers={includeActorMembers}
-                onUpdateQuery={onUpdateQuery}
                 supportLevels={supportLevels}
-                includeInofficialStatements={includeInofficialStatements}
+                options={options}
+                onUpdateQuery={onUpdateQuery}
               />
               <Box
                 direction="row"
@@ -487,8 +553,8 @@ export function PositionsMap({
               </Box>
             </>
           )}
-        </OverviewContentWrapper>
-      </StyledCard>
+        </Box>
+      </Box>
     </Box>
   );
 }

@@ -10,7 +10,14 @@ import Dot from 'components/styled/Dot';
 export function PreviewCountryTopicPosition({ content }) {
   const { topic, position } = content;
   return (
-    <Box direction="row" justify="between" align="start" gap="medium">
+    <Box
+      direction="row"
+      justify="between"
+      align="start"
+      gap="medium"
+      responsive={false}
+      flex={{ shrink: 0 }}
+    >
       <Box gap="small">
         <Box>
           <Text>Country position for</Text>
@@ -20,11 +27,14 @@ export function PreviewCountryTopicPosition({ content }) {
             <Heading level="5" style={{ margin: 0 }}>{topic.title}</Heading>
           </Box>
         )}
-        {topic && topic.viaGroup && (
-          <Box>
+        <Box>
+          {topic && topic.viaGroup && (
             <Text>{`From group: ${topic.viaGroup}`}</Text>
-          </Box>
-        )}
+          )}
+          {topic && !topic.viaGroup && (
+            <Text>&nbsp;</Text>
+          )}
+        </Box>
       </Box>
       <Box>
         {position && (
@@ -41,11 +51,14 @@ export function PreviewCountryTopicPosition({ content }) {
             <Box>
               <Text textAlign="center">{position.supportlevelTitle}</Text>
             </Box>
-            {position.levelOfAuthority && (
-              <Box>
+            <Box>
+              {position.levelOfAuthority && (
                 <Text textAlign="center">{position.levelOfAuthority}</Text>
-              </Box>
-            )}
+              )}
+              {!position.levelOfAuthority && (
+                <Text textAlign="center">&nbsp;</Text>
+              )}
+            </Box>
           </Box>
         )}
       </Box>

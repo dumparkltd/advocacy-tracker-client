@@ -1,18 +1,26 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { Box, Heading, Button } from 'grommet';
+
+import {
+  Box, Heading, Button,
+} from 'grommet';
 import Icon from 'components/Icon';
 
+import Reference from 'components/fields/Reference';
 import ButtonClose from 'components/buttons/ButtonClose';
 
-const Styled = styled((p) => <Box {...p} />)``;
-const ButtonNext = styled((p) => <Button {...p} />)``;
-
 export function PreviewHeader({ content, onSetPreviewItemNo }) {
-  const { prevPreviewItem, nextPreviewItem, title } = content;
+  const {
+    title,
+    aboveTitle,
+    prevPreviewItem,
+    nextPreviewItem,
+  } = content;
   return (
-    <Styled>
+    <Box
+      responsive={false}
+      flex={{ shrink: 0 }}
+    >
       <Box fill="horizontal" align="end">
         {onSetPreviewItemNo && (
           <ButtonClose onClose={() => onSetPreviewItemNo(null)} />
@@ -20,6 +28,9 @@ export function PreviewHeader({ content, onSetPreviewItemNo }) {
       </Box>
       <Box direction="row" justify="between" align="center">
         <Box>
+          {aboveTitle && (
+            <Reference>{aboveTitle}</Reference>
+          )}
           <Heading level="3" style={{ margin: 0 }}>
             {title}
           </Heading>
@@ -27,25 +38,25 @@ export function PreviewHeader({ content, onSetPreviewItemNo }) {
         {onSetPreviewItemNo && (nextPreviewItem || prevPreviewItem) && (
           <Box direction="row" flex={{ shrink: 0 }} width="120">
             {prevPreviewItem && (
-              <ButtonNext
+              <Button
                 plain
                 onClick={() => onSetPreviewItemNo(prevPreviewItem)}
               >
                 <Icon name="arrowLeft" text size="1.5em" sizes={{ mobile: '1em' }} />
-              </ButtonNext>
+              </Button>
             )}
             {nextPreviewItem && (
-              <ButtonNext
+              <Button
                 plain
                 onClick={() => onSetPreviewItemNo(nextPreviewItem)}
               >
                 <Icon name="arrowRight" text size="1.5em" sizes={{ mobile: '1em' }} />
-              </ButtonNext>
+              </Button>
             )}
           </Box>
         )}
       </Box>
-    </Styled>
+    </Box>
   );
 }
 

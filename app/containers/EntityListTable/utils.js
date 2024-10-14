@@ -737,18 +737,18 @@ export const prepareEntityRows = ({
               [col.id]: {
                 ...col,
                 values: temp && temp.map(
-                  (value) => {
-                    if (value.actors) {
+                  (val) => {
+                    if (val.actors) {
                       relatedEntities = getRelatedEntities(value.actors, connections.get('actors'), col);
                       if (relatedEntities && relatedEntities.size > 0) {
                         return {
-                          ...value,
+                          ...val,
                           tooltip: relatedEntities && relatedEntities.size > 0
                             && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
                         };
                       }
                     }
-                    return value;
+                    return val;
                   }
                 ).toJS(),
                 sortValue: temp

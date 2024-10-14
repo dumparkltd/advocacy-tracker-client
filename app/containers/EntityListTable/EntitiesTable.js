@@ -10,6 +10,8 @@ import { MAP_OPTIONS } from 'themes/config';
 
 import CellBodyMain from './CellBodyMain';
 import CellBodyPlain from './CellBodyPlain';
+import CellBodyPosition from './CellBodyPosition';
+import CellBodyPlainWithDate from './CellBodyPlainWithDate';
 import CellBodyUsers from './CellBodyUsers';
 import CellBodyActors from './CellBodyActors';
 import CellBodyActions from './CellBodyActions';
@@ -218,6 +220,18 @@ export function EntitiesTable({
                         entity={entity[col.id]}
                         column={col}
                         primary={col.type === 'userrole'}
+                      />
+                    )}
+                    {col.type === 'plainWithDate' && (
+                      <CellBodyPlainWithDate
+                        entity={entity[col.id]}
+                        column={col}
+                      />
+                    )}
+                    {col.type === 'position' && (
+                      <CellBodyPosition
+                        entity={entity[col.id]}
+                        column={col}
                       />
                     )}
                     {col.type === 'users' && (
