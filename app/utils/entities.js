@@ -1336,6 +1336,11 @@ export const getIndicatorMainTitle = (title) => {
   }
   return short;
 };
+export const getIndicatorNiceTitle = (title) => {
+  const no = getIndicatorNumber(title);
+  const label = getIndicatorShortTitle(title);
+  return no ? `${no}. ${label}` : label;
+};
 export const getIndicatorSecondaryTitle = (title) => {
   if (title && title.indexOf(':') > -1) {
     return title.split(':')[1].trim();

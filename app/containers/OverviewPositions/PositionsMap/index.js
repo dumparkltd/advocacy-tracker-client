@@ -29,6 +29,7 @@ import {
   getIndicatorMainTitle,
   getIndicatorShortTitle,
   getIndicatorSecondaryTitle,
+  getIndicatorNiceTitle,
 } from 'utils/entities';
 import { isMinSize } from 'utils/responsive';
 
@@ -126,7 +127,7 @@ const IndicatorListTitle = styled((p) => <Text size="small" {...p} />)`
   color: ${palette('dark', 4)};
   font-style: italic;
 `;
-const IndicatorLabel = styled((p) => <Text size="small" {...p} />)`
+const IndicatorLabel = styled((p) => <Text size="small" weight={600} {...p} />)`
   display: block;
   white-space: nowrap;
   overflow: hidden;
@@ -401,85 +402,77 @@ export function PositionsMap({
           <FormattedMessage {...messages.title} />
         </Title>
       </Box>
-      <Card
-        direction={isMinSize(size, 'medium') ? 'row' : 'column'}
-      >
-        {isMinSize(size, 'medium') && (
-          <IndicatorSidePanel>
-            <IndicatorPanelHeader
-              pad={{
-                vertical: 'small',
-                horizontal: 'xsmall',
-              }}
-            >
-              <IndicatorListTitle>
-                <FormattedMessage {...messages.indicatorListTitle} />
-              </IndicatorListTitle>
-            </IndicatorPanelHeader>
-            <IndicatorList>
-              {dataReady && indicators && indicators.valueSeq().map((indicator) => {
-                const active = qe(currentIndicatorId, indicator.get('id'));
-                const label = getIndicatorMainTitle(indicator.getIn(['attributes', 'title']));
-                return (
-                  <IndicatorSelectButton
-                    active={active}
-                    key={indicator.get('id')}
-                    onClick={() => onSetMapIndicator(indicator.get('id'))}
-                    title={label}
-                  >
-                    <IndicatorLabel active={active}>
-                      {label}
-                    </IndicatorLabel>
-                  </IndicatorSelectButton>
-                );
-              })}
-            </IndicatorList>
-          </IndicatorSidePanel>
-        )}
-        {!isMinSize(size, 'medium')
-          && dataReady
-          && indicators
-          && (
-            <Box pad="small">
-              <SelectIndicators
-                config={{
-                  onIndicatorSelect: (id) => onSetMapIndicator(id),
-                  indicatorOptions: indicators.reduce((memo, indicator) => ([
-                    ...memo,
-                    {
-                      value: indicator.get('id'),
-                      active: qe(currentIndicatorId, indicator.get('id')),
-                      label: getIndicatorMainTitle(indicator.getIn(['attributes', 'title'])),
+      <Card>
+        <Loading loading={!dataReady} />
+        {dataReady && (
+          <Box direction={isMinSize(size, 'medium') ? 'row' : 'column'}>
+            {isMinSize(size, 'medium') && (
+              <IndicatorSidePanel>
+                <IndicatorPanelHeader
+                  pad={{
+                    vertical: 'small',
+                    horizontal: 'xsmall',
+                  }}
+                >
+                  <IndicatorListTitle>
+                    <FormattedMessage {...messages.indicatorListTitle} />
+                  </IndicatorListTitle>
+                </IndicatorPanelHeader>
+                <IndicatorList>
+                  {indicators && indicators.valueSeq().map((indicator) => {
+                    const active = qe(currentIndicatorId, indicator.get('id'));
+                    const label = getIndicatorNiceTitle(indicator.getIn(['attributes', 'title']));
+                    return (
+                      <IndicatorSelectButton
+                        active={active}
+                        key={indicator.get('id')}
+                        onClick={() => onSetMapIndicator(indicator.get('id'))}
+                        title={label}
+                      >
+                        <IndicatorLabel active={active}>
+                          {label}
+                        </IndicatorLabel>
+                      </IndicatorSelectButton>
+                    );
+                  })}
+                </IndicatorList>
+              </IndicatorSidePanel>
+            )}
+            {!isMinSize(size, 'medium') && indicators && (
+              <Box pad="small">
+                <SelectIndicators
+                  config={{
+                    onIndicatorSelect: (id) => onSetMapIndicator(id),
+                    indicatorOptions: indicators.reduce((memo, indicator) => ([
+                      ...memo,
+                      {
+                        value: indicator.get('id'),
+                        active: qe(currentIndicatorId, indicator.get('id')),
+                        label: getIndicatorMainTitle(indicator.getIn(['attributes', 'title'])),
+                      },
+                    ]), []),
+                    dropAlign: {
+                      top: 'bottom',
+                      left: 'left',
                     },
-                  ]), []),
-                  dropAlign: {
-                    top: 'bottom',
-                    left: 'left',
-                  },
-                }}
-              />
-            </Box>
-          )
-        }
-        <Box
-          direction="column"
-          fill="horizontal"
-          pad={{ horizontal: 'medium', bottom: 'none' }}
-          flex={{ grow: 1, shrink: 1 }}
-        >
-          <Loading loading={!dataReady} />
-          {dataReady && (
-            <>
+                  }}
+                />
+              </Box>
+            )}
+            <Box
+              direction="column"
+              fill="horizontal"
+              pad={{ horizontal: 'medium', bottom: 'none' }}
+              flex={{ grow: 1, shrink: 1 }}
+            >
               {isMinSize(size, 'medium') && (
                 <Box gap="small" margin={{ vertical: 'small' }}>
                   <MapTitle>
-                    {getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title']))}
+                    {getIndicatorNiceTitle(currentIndicator.getIn(['attributes', 'title']))}
                   </MapTitle>
-                  {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title'])) && (
-                    <MapSecondaryTitle>
-                      {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title']))}
-                    </MapSecondaryTitle>
-                  )}
+                  <MapSecondaryTitle>
+                    {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title'])) || '$nbsp;'}
+                  </MapSecondaryTitle>
                 </Box>
               )}
               <MapWrapper>
@@ -561,9 +554,9 @@ export function PositionsMap({
                   )}
                 />
               </Box>
-            </>
-          )}
-        </Box>
+            </Box>
+          </Box>
+        )}
       </Card>
     </Box>
   );
