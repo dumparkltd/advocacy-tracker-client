@@ -34,6 +34,7 @@ import qe from 'utils/quasi-equals';
 import {
   getEntityTitleTruncated,
   checkActionAttribute,
+  getIndicatorColumnsForStatement,
 } from 'utils/entities';
 
 import { keydownHandlerPrint } from 'utils/print';
@@ -111,29 +112,6 @@ const PrintSectionTitleWrapper = styled(
   (p) => <Box margin={{ top: 'large', bottom: 'small' }} pad={{ bottom: 'small' }} border="bottom" {...p} />
 )``;
 
-const getIndicatorColumns = (viewEntity, intl, isAdmin) => {
-  let columns = [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: isAdmin ? ['code', 'title'] : ['title'],
-  }];
-  if (
-    ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[viewEntity.getIn(['attributes', 'measuretype_id'])]
-    && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[viewEntity.getIn(['attributes', 'measuretype_id'])].length > 0
-  ) {
-    columns = [
-      ...columns,
-      {
-        id: 'supportlevel_id',
-        type: 'supportlevel',
-        actionId: viewEntity.get('id'),
-        title: intl.formatMessage(appMessages.attributes.supportlevel_id),
-      },
-    ];
-  }
-  return columns;
-};
 export function ActionView(props) {
   const {
     viewEntity,
@@ -384,7 +362,11 @@ export function ActionView(props) {
                             onEntityClick,
                             // connections: indicatorConnections,
                             skipLabel: true,
-                            columns: getIndicatorColumns(viewEntity, intl, isAdmin),
+                            columns: getIndicatorColumnsForStatement({
+                              action: viewEntity,
+                              intl,
+                              isAdmin,
+                            }),
                           }),
                         ],
                       }}

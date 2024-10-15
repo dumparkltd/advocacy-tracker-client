@@ -1,11 +1,20 @@
 import { truncateText } from 'utils/string';
 import { sortEntities, sortCategories } from 'utils/sort';
-// import { filterTaxonomies } from 'utils/entities';
+import {
+  getEntityTitle,
+  checkActionAttribute,
+  checkActorAttribute,
+  getIndicatorColumnsForStatement,
+} from 'utils/entities';
 import isNumber from 'utils/is-number';
 import qe from 'utils/quasi-equals';
 
 import {
-  USER_ROLES, TEXT_TRUNCATE, ROUTES, API,
+  USER_ROLES,
+  TEXT_TRUNCATE,
+  ROUTES,
+  API,
+  ACTION_FIELDS,
 } from 'themes/config';
 
 import appMessages from 'containers/App/messages';
@@ -286,7 +295,7 @@ export const getDateField = (
     value: !!value && value,
     label,
     showEmpty: showEmpty && (emptyMessage || appMessages.attributes[`${attribute}_empty`]),
-    specificity,
+    specificity: specificity || 'd',
   });
 };
 
@@ -616,3 +625,95 @@ export const getEmailField = (entity) => ({
   type: 'email',
   value: entity.getIn(['attributes', 'email']),
 });
+
+export const getActionPreviewHeader = (action, intl) => ({
+  aboveTitle: intl.formatMessage(
+    appMessages.entities[`actions_${action.getIn(['attributes', 'measuretype_id'])}`].single
+  ),
+  title: getEntityTitle(action),
+  code: checkActionAttribute(action, 'code'),
+});
+export const getActionPreviewFooter = (action, intl) => {
+  const typeId = action && action.getIn(['attributes', 'measuretype_id']);
+  return ({
+    primaryLink: action && {
+      path: `${ROUTES.ACTION}/${action.get('id')}`,
+      title: `${intl.formatMessage(
+        appMessages.entities[`actions_${typeId}`].single
+      )} details`,
+    },
+    secondaryLink: {
+      path: `${ROUTES.ACTIONS}/${typeId}`,
+      title: `All ${intl.formatMessage(
+        appMessages.entities[`actions_${typeId}`].plural
+      )}`,
+    },
+  });
+};
+export const getActorPreviewHeader = (actor, intl) => ({
+  aboveTitle: intl.formatMessage(
+    appMessages.entities[`actors_${actor.getIn(['attributes', 'measuretype_id'])}`].single
+  ),
+  title: getEntityTitle(actor),
+  code: checkActorAttribute(actor, 'code'),
+});
+export const getActionPreviewFields = ({
+  action,
+  indicators,
+  onEntityClick,
+  intl,
+  isAdmin,
+}) => {
+  let fields = [];
+  fields = Object.keys(ACTION_FIELDS.ATTRIBUTES).reduce(
+    (memo, key) => {
+      const attribute = ACTION_FIELDS.ATTRIBUTES[key];
+      if (
+        action
+        && attribute.preview
+        && attribute.preview.indexOf(`${action.getIn(['attributes', 'measuretype_id'])}`) > -1
+      ) {
+        if (key === 'date_start') {
+          return [
+            ...memo,
+            getDateField(action, key, { showEmpty: false }),
+          ];
+        }
+      }
+      return memo;
+    },
+    [],
+  );
+  if (ACTION_FIELDS.CONNECTIONS) {
+    fields = Object.keys(ACTION_FIELDS.CONNECTIONS).reduce(
+      (memo, key) => {
+        const connection = ACTION_FIELDS.CONNECTIONS[key];
+        if (
+          action
+          && indicators
+          && key === 'indicators'
+          && connection.preview
+          && connection.preview.indexOf(`${action.getIn(['attributes', 'measuretype_id'])}`) > -1
+        ) {
+          // console.log('indicators', indicators && indicators.toJS())
+          const field = getIndicatorConnectionField({
+            indicators,
+            onEntityClick,
+            columns: getIndicatorColumnsForStatement({
+              action,
+              intl,
+              isAdmin,
+            }),
+          });
+          return [
+            ...memo,
+            field,
+          ];
+        }
+        return memo;
+      },
+      fields,
+    );
+  }
+  return fields;
+};

@@ -92,6 +92,15 @@ export const API = {
   BOOKMARKS: 'bookmarks',
 };
 
+export const API_FOR_ROUTE = {
+  [ROUTES.ACTOR]: API.ACTORS,
+  [ROUTES.ACTION]: API.ACTIONS,
+  [ROUTES.INDICATOR]: API.INDICATORS,
+  [ROUTES.CATEGORY]: API.CATEGORIES,
+  [ROUTES.RESOURCE]: API.RESOURCES,
+  [ROUTES.USER]: API.USERS,
+};
+
 export const ACTIONTYPES = {
   EXPRESS: '1',
   EVENT: '2',
@@ -259,6 +268,127 @@ export const ACTION_FIELDS = {
         table: API.ACTORTYPES,
         on: 'actortype_id',
       },
+    },
+    indicators: {
+      table: API.INDICATORS,
+      preview: [ACTIONTYPES.EXPRESS],
+    },
+  },
+  ATTRIBUTES: {
+    measuretype_id: {
+      defaultValue: '1',
+      required: Object.values(ACTIONTYPES), // all types
+      type: 'number',
+      skipImport: true,
+      table: API.ACTIONTYPES,
+      exportColumn: 'activity_type',
+      export: true,
+    },
+    code: {
+      optional: Object.values(ACTIONTYPES), // all types
+      adminOnly: true,
+      type: 'text',
+    },
+    title: {
+      required: Object.values(ACTIONTYPES), // all types
+      type: 'text',
+      // exportRequired: true,
+    },
+    // parent_id: {
+    //   skipImport: true,
+    //   optional: Object.values(ACTIONTYPES), // controlled by type setting
+    //   type: 'number',
+    // },
+    description: {
+      optional: Object.values(ACTIONTYPES),
+      type: 'markdown',
+    },
+    comment: {
+      optional: Object.values(ACTIONTYPES),
+      type: 'markdown',
+    },
+    url: {
+      optional: Object.values(ACTIONTYPES),
+      type: 'url',
+    },
+    date_start: {
+      optional: Object.values(ACTIONTYPES),
+      preview: Object.values(ACTIONTYPES),
+      type: 'date',
+    },
+    date_end: {
+      optional: [ACTIONTYPES.EVENT],
+      type: 'date',
+    },
+    date_comment: {
+      optional: Object.values(ACTIONTYPES),
+      type: 'text',
+    },
+    draft: {
+      defaultValue: true,
+      required: Object.values(ACTIONTYPES), // all types
+      type: 'bool',
+      // ui: 'dropdown',
+      skipImport: true,
+      // options: [
+      //   { value: true, message: 'ui.publishStatuses.draft' },
+      //   { value: false, message: 'ui.publishStatuses.public' },
+      // ],
+    },
+    private: {
+      defaultValue: false,
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      type: 'bool',
+    },
+    notifications: {
+      defaultValue: true,
+      type: 'bool',
+    },
+    created_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    created_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'created_by',
+    },
+    updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'updated_by',
+    },
+    relationship_updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+      exportColumn: 'connection_updated_at',
+    },
+    relationship_updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'connection_updated_by',
     },
   },
   // additional
@@ -441,143 +571,27 @@ export const ACTION_FIELDS = {
       hint: 'one or more user email addresses (exact / comma-separated)',
     },
   },
-  ATTRIBUTES: {
-    measuretype_id: {
-      defaultValue: '1',
-      required: Object.values(ACTIONTYPES), // all types
-      type: 'number',
-      skipImport: true,
-      table: API.ACTIONTYPES,
-      exportColumn: 'activity_type',
-      export: true,
-    },
-    code: {
-      optional: Object.values(ACTIONTYPES), // all types
-      adminOnly: true,
-      type: 'text',
-    },
-    title: {
-      required: Object.values(ACTIONTYPES), // all types
-      type: 'text',
-      // exportRequired: true,
-    },
-    // parent_id: {
-    //   skipImport: true,
-    //   optional: Object.values(ACTIONTYPES), // controlled by type setting
-    //   type: 'number',
-    // },
-    description: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'markdown',
-    },
-    comment: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'markdown',
-    },
-    url: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'url',
-    },
-    date_start: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'date',
-    },
-    date_end: {
-      optional: [ACTIONTYPES.EVENT],
-      type: 'date',
-    },
-    date_comment: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'text',
-    },
-    draft: {
-      defaultValue: true,
-      required: Object.values(ACTIONTYPES), // all types
-      type: 'bool',
-      // ui: 'dropdown',
-      skipImport: true,
-      // options: [
-      //   { value: true, message: 'ui.publishStatuses.draft' },
-      //   { value: false, message: 'ui.publishStatuses.public' },
-      // ],
-    },
-    private: {
-      defaultValue: false,
-      type: 'bool',
-    },
-    is_archive: {
-      defaultValue: false,
-      type: 'bool',
-    },
-    notifications: {
-      defaultValue: true,
-      type: 'bool',
-    },
-    created_at: {
-      skipImport: true,
-      type: 'datetime',
-      adminOnly: true,
-      meta: true,
-    },
-    created_by_id: {
-      skipImport: true,
-      type: 'key',
-      adminOnly: true,
-      meta: true,
-      table: API.USERS,
-      exportColumn: 'created_by',
-    },
-    updated_at: {
-      skipImport: true,
-      type: 'datetime',
-      adminOnly: true,
-      meta: true,
-    },
-    updated_by_id: {
-      skipImport: true,
-      type: 'key',
-      adminOnly: true,
-      meta: true,
-      table: API.USERS,
-      exportColumn: 'updated_by',
-    },
-    relationship_updated_at: {
-      skipImport: true,
-      type: 'datetime',
-      adminOnly: true,
-      meta: true,
-      exportColumn: 'connection_updated_at',
-    },
-    relationship_updated_by_id: {
-      skipImport: true,
-      type: 'key',
-      adminOnly: true,
-      meta: true,
-      table: API.USERS,
-      exportColumn: 'connection_updated_by',
-    },
-  },
 };
 
 export const ACTOR_FIELDS = {
-  CONNECTIONS: {
-    categories: {
-      table: API.CATEGORIES,
-      connection: API.ACTOR_CATEGORIES,
-      groupby: {
-        table: API.TAXONOMIES,
-        on: '_id',
-      },
-    },
-    actions: {
-      table: API.ACTIONS,
-      connection: API.ACTOR_ACTIONS,
-      groupby: {
-        table: API.ACTIONTYPES,
-        on: 'measuretype_id',
-      },
-    },
-  },
+  // CONNECTIONS: {
+  //   categories: {
+  //     table: API.CATEGORIES,
+  //     connection: API.ACTOR_CATEGORIES,
+  //     groupby: {
+  //       table: API.TAXONOMIES,
+  //       on: '_id',
+  //     },
+  //   },
+  //   actions: {
+  //     table: API.ACTIONS,
+  //     connection: API.ACTOR_ACTIONS,
+  //     groupby: {
+  //       table: API.ACTIONTYPES,
+  //       on: 'measuretype_id',
+  //     },
+  //   },
+  // },
   ATTRIBUTES: {
     actortype_id: {
       defaultValue: '1',
@@ -785,16 +799,16 @@ export const ACTOR_FIELDS = {
 };
 
 export const RESOURCE_FIELDS = {
-  CONNECTIONS: {
-    actions: {
-      table: API.ACTIONS,
-      connection: API.ACTION_RESOURCES,
-      groupby: {
-        table: API.ACTIONTYPES,
-        on: 'measuretype_id',
-      },
-    },
-  },
+  // CONNECTIONS: {
+  //   actions: {
+  //     table: API.ACTIONS,
+  //     connection: API.ACTION_RESOURCES,
+  //     groupby: {
+  //       table: API.ACTIONTYPES,
+  //       on: 'measuretype_id',
+  //     },
+  //   },
+  // },
   ATTRIBUTES: {
     resourcetype_id: {
       defaultValue: '1',
@@ -848,16 +862,16 @@ export const RESOURCE_FIELDS = {
 };
 
 export const INDICATOR_FIELDS = {
-  CONNECTIONS: {
-    actions: {
-      table: API.ACTIONS,
-      connection: API.ACTION_INDICATORS,
-      groupby: {
-        table: API.ACTIONTYPES,
-        on: 'measuretype_id',
-      },
-    },
-  },
+  // CONNECTIONS: {
+  //   actions: {
+  //     table: API.ACTIONS,
+  //     connection: API.ACTION_INDICATORS,
+  //     groupby: {
+  //       table: API.ACTIONTYPES,
+  //       on: 'measuretype_id',
+  //     },
+  //   },
+  // },
   ATTRIBUTES: {
     code: {
       type: 'text',

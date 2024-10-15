@@ -53,7 +53,7 @@ import {
   openNewEntityModal,
   submitInvalid,
   saveErrorDismiss,
-  setPreviewContent,
+  setListPreview,
 } from './actions';
 
 import { PrintContext } from './PrintContext';
@@ -485,7 +485,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           <ReactModal
             isOpen
             contentLabel="List item preview"
-            onRequestClose={onClosePreviewModal}
+            onRequestClose={() => onClosePreviewModal(null)}
             className="preview-item-modal"
             overlayClassName="preview-item-modal-overlay"
             style={{
@@ -586,8 +586,8 @@ export function mapDispatchToProps(dispatch) {
       dispatch(saveErrorDismiss());
       dispatch(openNewEntityModal(null));
     },
-    onClosePreviewModal: () => {
-      dispatch(setPreviewContent(null));
+    onClosePreviewModal: (val) => {
+      dispatch(setListPreview(val));
     },
   };
 }

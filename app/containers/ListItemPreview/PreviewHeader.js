@@ -10,12 +10,13 @@ import Reference from 'components/fields/Reference';
 import ButtonClose from 'components/buttons/ButtonClose';
 
 export function PreviewHeader({ content, onSetPreviewItemId }) {
+  const contentClean = content || {};
   const {
     title,
     aboveTitle,
     prevPreviewItem,
     nextPreviewItem,
-  } = content;
+  } = contentClean;
   return (
     <Box
       responsive={false}

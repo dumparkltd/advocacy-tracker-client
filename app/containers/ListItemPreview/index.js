@@ -7,6 +7,7 @@ import { Box } from 'grommet';
 import { setListPreview, updatePath } from 'containers/App/actions';
 
 import PreviewHeader from './PreviewHeader';
+import PreviewEntity from './PreviewEntity';
 import PreviewFooter from './PreviewFooter';
 import PreviewCountryTopicPosition from './PreviewCountryTopicPosition';
 import PreviewCountryTopicStatementList from './PreviewCountryTopicStatementList';
@@ -20,7 +21,6 @@ export function ListItemPreview({
   onSetPreviewItemId,
   onUpdatePath,
 }) {
-  // console.log('content', content)
   return (
     <Styled
       background="white"
@@ -33,9 +33,12 @@ export function ListItemPreview({
       overflow="auto"
       style={{ position: 'relative' }}
     >
-      {content && content.get('header') && (
+      {content && content.get('entity') && (
+        <PreviewEntity content={content.get('entity')} />
+      )}
+      {content && content.get('header') && !content.get('entity') && (
         <PreviewHeader
-          content={content.get('header').toJS()}
+          content={content && content.get('header') && content.get('header').toJS()}
           onSetPreviewItemId={onSetPreviewItemId}
         />
       )}

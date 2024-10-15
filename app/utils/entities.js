@@ -8,6 +8,7 @@ import {
   INDICATOR_FIELDS,
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
   API,
 } from 'themes/config';
 import { find, reduce, every } from 'lodash/collection';
@@ -23,7 +24,7 @@ import isNumber from 'utils/is-number';
 import appMessage from 'utils/app-message';
 import { qe } from 'utils/quasi-equals';
 import validateEmailFormat from 'components/forms/validators/validate-email-format';
-
+import appMessages from 'containers/App/messages';
 // check if entity has nested connection by id
 // - connectionAttributes: { path: 'indicatorConnections', id: 'indicator_id' }
 // - connectionAttributeQuery: { attribute: connectionAttribute, values: [value2,value3] }
@@ -1361,4 +1362,31 @@ export const getIndicatorNumber = (title) => {
     return short.split('-')[0].trim();
   }
   return null;
+};
+
+export const getIndicatorColumnsForStatement = ({
+  action, intl, isAdmin,
+}) => {
+  const actionType = action && action.getIn(['attributes', 'measuretype_id']);
+  let columns = [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: isAdmin ? ['code', 'title'] : ['title'],
+  }];
+  if (
+    ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actionType]
+    && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actionType].length > 0
+  ) {
+    columns = [
+      ...columns,
+      {
+        id: 'supportlevel_id',
+        type: 'supportlevel',
+        actionId: action.get('id'),
+        title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+      },
+    ];
+  }
+  return columns;
 };

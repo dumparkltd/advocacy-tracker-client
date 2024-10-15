@@ -178,7 +178,9 @@ export function EntitiesTable({
       if (previewItemId) {
         const [componentId, path, itemId] = previewItemId.split('|');
         if (qe(componentId, ID)) {
-          if (path === ROUTES.ACTOR) {
+          if (path === ROUTES.ACTION) {
+            onSetPreviewContent(reducePreviewItem({ id: itemId, path }));
+          } else if (path === ROUTES.ACTOR) {
             const country = searchedEntities && itemId && searchedEntities.find(
               (item) => qe(item.get('id'), itemId)
             );
@@ -188,7 +190,7 @@ export function EntitiesTable({
               const nextIndex = countryIndex < countryIds.length ? countryIndex + 1 : 0;
               const prevIndex = countryIndex > 0 ? countryIndex - 1 : countryIds.length - 1;
 
-              let content = reducePreviewItem(country, path);
+              let content = reducePreviewItem({ item: country, path });
               content = {
                 ...content,
                 header: {
