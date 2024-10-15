@@ -365,6 +365,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         {
           type: 'primaryGroup',
           title: 'List',
+          icon: 'list',
           onClick: () => onSetView('list'),
           active: showList,
           disabled: showList,
@@ -373,6 +374,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         {
           type: 'primaryGroup',
           title: 'Map',
+          icon: 'map',
           onClick: () => onSetView('map'),
           active: showMap,
           disabled: showMap,

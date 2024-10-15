@@ -7,7 +7,7 @@ import {
   Text, Box, Button,
 } from 'grommet';
 
-import { Map, List } from 'grommet-icons';
+import Icon from 'components/Icon';
 
 const Styled = styled((p) => <Box {...p} />)`
   position: relative;
@@ -18,11 +18,12 @@ const ButtonGroup = styled((p) => <Box {...p} />)`
   display: table;
   text-align: right;
   border-radius: 999px;
+  padding-bottom: 0px;
   box-shadow: ${({ isOnMap }) => isOnMap ? '0px 0px 5px 0px rgba(0,0,0,0.2)' : 'none'};
   background: white;
 `;
 const ButtonLabel = styled((p) => <Text size="small" {...p} />)`
-  color: ${({ isActive }) => isActive ? palette('dark', 1) : palette('dark', 3)};
+  color: ${({ isActive }) => isActive ? palette('dark', 1) : palette('dark', 4)};
   font-weight: normal;
 `;
 const TableCell = styled.span`
@@ -42,8 +43,9 @@ const ButtonWrap = styled.span`
     display: none;
   }
 `;
-const ButtonOptions = styled((p) => <Button {...p} />)`
-  color: ${({ isActive }) => isActive ? palette('dark', 1) : palette('dark', 3)};
+const ButtonOptions = styled((p) => <Button plain {...p} />)`
+  color: ${({ isActive }) => isActive ? palette('dark', 2) : palette('dark', 4)};
+  padding: 0px 10px;
   border-radius: 999px;
   border: none;
   &:hover {
@@ -70,23 +72,14 @@ class EntityListViewOptions extends React.PureComponent { // eslint-disable-line
                       left: (option.isFirst && !isOnMap) ? 'none' : 'smaall',
                     }}
                     label={(
-                      <Box direction="row" gap="small" align="center">
+                      <Box direction="row" gap="none" align="center">
                         <Box>
-                          {
-                            option.title === 'Map'
-                              ? (
-                                <Map
-                                  size="small"
-                                  color={option.active ? palette('dark', 1) : palette('dark', 3)}
-                                />
-                              )
-                              : (
-                                <List
-                                  size="small"
-                                  color={option.active ? palette('dark', 1) : palette('dark', 3)}
-                                />
-                              )
-                          }
+                          <Icon
+                            name={option.icon}
+                            size="35px"
+                            paletteIndex={option.active ? 2 : 4}
+                            palette="dark"
+                          />
                         </Box>
                         <ButtonLabel
                           size="small"
