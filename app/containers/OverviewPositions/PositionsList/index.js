@@ -21,6 +21,8 @@ import {
   ACTIONTYPES,
 } from 'themes/config';
 
+import qe from 'utils/quasi-equals';
+
 import {
   getIndicatorMainTitle,
   getIndicatorAbbreviation,
@@ -139,90 +141,96 @@ export function PositionsList({
     },
     [],
   );
-  const reducePreviewItem = (item) => {
-    const indicatorsWithSupport = indicators && indicators.reduce(
-      (memo, indicator, id) => {
-        const indicatorPositions = item
-          && item.get('indicatorPositions')
-          && item.getIn([
-            'indicatorPositions',
-            indicator.get('id'),
-          ]);
-        if (indicatorPositions) {
-          const relPos = indicatorPositions.first();
-          const result = relPos && indicator
-            .setIn(
-              ['supportlevel', item.get('id')],
-              relPos.get('supportlevel_id')
-            )
-            .set(
-              'position',
-              relPos,
-            );
-          if (result) {
-            return memo.set(id, result);
+  const reducePreviewItem = ({ id, item, path }) => {
+    if (item && qe(item.getIn(['attributes', 'actortype_id'], ACTORTYPES.COUNTRY))) {
+      const indicatorsWithSupport = indicators && indicators.reduce(
+        (memo, indicator, indicatorId) => {
+          const indicatorPositions = item
+            && item.get('indicatorPositions')
+            && item.getIn([
+              'indicatorPositions',
+              indicator.get('id'),
+            ]);
+          if (indicatorPositions) {
+            const relPos = indicatorPositions.first();
+            const result = relPos && indicator
+              .setIn(
+                ['supportlevel', item.get('id')],
+                relPos.get('supportlevel_id')
+              )
+              .set(
+                'position',
+                relPos,
+              );
+            if (result) {
+              return memo.set(indicatorId, result);
+            }
+            return memo;
           }
           return memo;
-        }
-        return memo;
-      },
-      Map(),
-    );
-    const content = {
-      header: {
-        aboveTitle: 'Country',
-        title: item.getIn(['attributes', 'title']),
-        code: item.getIn(['attributes', 'code']),
-      },
-      countryPositions: {
-        key: {
-          title: 'Levels of support',
-          items: supportLevels,
         },
-        options,
-        countryPositionsTableColumns: [
-          {
-            id: 'main',
-            type: 'main',
-            sort: 'title',
-            attributes: ['title'],
-          },
-          {
-            id: 'positionStatement',
-            type: 'positionStatement',
-          },
-          {
-            id: 'authority',
-            type: 'positionStatementAuthority',
-          },
-          {
-            id: 'viaGroups',
-            type: 'viaGroups',
-          },
-          {
-            id: 'supportlevel_id',
-            type: 'supportlevel',
-            title: intl.formatMessage(appMessages.attributes.supportlevel_id),
-          },
-        ],
-        entityTitle: {
-          single: intl.formatMessage(appMessages.entities.indicators.single),
-          plural: intl.formatMessage(appMessages.entities.indicators.plural),
+        Map(),
+      );
+      const content = {
+        header: {
+          aboveTitle: 'Country',
+          title: item.getIn(['attributes', 'title']),
+          code: item.getIn(['attributes', 'code']),
         },
-        indicators: indicatorsWithSupport,
-      },
-      footer: {
-        primaryLink: item && {
-          path: `${ROUTES.ACTOR}/${item.get('id')}`,
-          title: 'Country details',
+        countryPositions: {
+          key: {
+            title: 'Levels of support',
+            items: supportLevels,
+          },
+          options,
+          countryPositionsTableColumns: [
+            {
+              id: 'main',
+              type: 'main',
+              sort: 'title',
+              attributes: ['title'],
+            },
+            {
+              id: 'positionStatement',
+              type: 'positionStatement',
+            },
+            {
+              id: 'authority',
+              type: 'positionStatementAuthority',
+            },
+            {
+              id: 'viaGroups',
+              type: 'viaGroups',
+            },
+            {
+              id: 'supportlevel_id',
+              type: 'supportlevel',
+              title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+            },
+          ],
+          entityTitle: {
+            single: intl.formatMessage(appMessages.entities.indicators.single),
+            plural: intl.formatMessage(appMessages.entities.indicators.plural),
+          },
+          indicators: indicatorsWithSupport,
         },
-        secondaryLink: {
-          path: ROUTES.INDICATORS,
-          title: 'All topics',
+        footer: {
+          primaryLink: item && {
+            path: `${ROUTES.ACTOR}/${item.get('id')}`,
+            title: 'Country details',
+          },
+          secondaryLink: {
+            path: ROUTES.INDICATORS,
+            title: 'All topics',
+          },
         },
-      },
-    };
-    return content;
+      };
+      return content;
+    }
+    if (id && path) {
+      return { entity: { path, id } };
+    }
+    return {};
   };
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>

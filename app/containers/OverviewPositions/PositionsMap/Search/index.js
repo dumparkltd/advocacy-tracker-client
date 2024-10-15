@@ -186,11 +186,11 @@ export function Search({
     };
   }, []);
 
-  let sortedOptions;
+  let sortedOptions = [];
   if (search.length > 0) {
     sortedOptions = options ? prepOptions(options, search) : [];
   }
-  const searchHasResults = sortedOptions && sortedOptions.size > 0 && search.length > 1;
+  const searchHasResults = sortedOptions.size > 0 && search.length > 1;
   const searchIconSize = theme
     && theme.sizes
     && theme.sizes.mapSearchBar
@@ -304,9 +304,9 @@ export function Search({
                 setActiveResult(activeResetIndex);
               }}
               search={search}
-              onSelect={(id) => {
+              onSelect={(typeId) => {
                 onDropFocused(false);
-                onSelect(id);
+                onSelect(typeId);
               }}
               activeResult={activeResult}
               setActiveResult={setActiveResult}

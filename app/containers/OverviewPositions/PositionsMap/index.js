@@ -139,10 +139,6 @@ const MapWrapper = styled((p) => <Box {...p} />)`
   position: relative;
 `;
 const SearchWrapper = styled((p) => <Box {...p} />)`
-  position: absolute;
-  z-index: 100;
-  right: 12px;
-  top: 12px;
   width: ${({ theme }) => theme.sizes.mapSearchBar.width}px;
 `;
 const MapTitle = styled((p) => <Heading level="3" {...p} />)`
@@ -467,17 +463,17 @@ export function PositionsMap({
               pad={{ horizontal: 'medium', bottom: 'none' }}
               flex={{ grow: 1, shrink: 1 }}
             >
-              {isMinSize(size, 'medium') && (
-                <Box gap="small" margin={{ vertical: 'small' }}>
-                  <MapTitle>
-                    {getIndicatorNiceTitle(currentIndicator.getIn(['attributes', 'title']))}
-                  </MapTitle>
-                  <MapSecondaryTitle>
-                    {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title'])) || '$nbsp;'}
-                  </MapSecondaryTitle>
-                </Box>
-              )}
-              <MapWrapper>
+              <Box direction="row" fill="horizontal" justify="between" margin={{ vertical: 'small' }}>
+                {isMinSize(size, 'medium') && (
+                  <Box gap="small">
+                    <MapTitle>
+                      {getIndicatorNiceTitle(currentIndicator.getIn(['attributes', 'title']))}
+                    </MapTitle>
+                    <MapSecondaryTitle>
+                      {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title'])) || '$nbsp;'}
+                    </MapSecondaryTitle>
+                  </Box>
+                )}
                 <SearchWrapper>
                   <Search
                     options={countries}
@@ -485,6 +481,8 @@ export function PositionsMap({
                     placeholder={intl.formatMessage(messages.searchPlaceholder)}
                   />
                 </SearchWrapper>
+              </Box>
+              <MapWrapper>
                 <MapContainer
                   isOverviewMap
                   reduceCountryAreas={reduceCountryAreas}

@@ -2,7 +2,6 @@ import { createSelector } from 'reselect';
 import { Map } from 'immutable';
 import {
   API,
-  ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
   ACTIONTYPE_ACTORTYPES,
 } from 'themes/config';
