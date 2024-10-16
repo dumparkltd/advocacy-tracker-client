@@ -53,7 +53,7 @@ const HeaderSection = styled((p) => <Box direction="row" {...p} />)`
   position: relative;
   flex: ${({ grow }) => grow ? '1' : '0'} ${({ shrink = '1' }) => shrink ? '1' : '0'} auto;
 `;
-const FilterButton = styled((p) => <Button {...p} />)`
+const FilterButton = styled((p) => <Button plain {...p} />)`
   color: ${palette('buttonFlat', 1)};
   background: ${palette('primary', 1)};
   color: white;
@@ -62,6 +62,7 @@ const FilterButton = styled((p) => <Button {...p} />)`
   border: none;
   font-family: ${({ theme }) => theme.fonts.title};
   text-transform: uppercase;
+  padding: 8px 16px 6px 16px;
   &:hover {
     box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
     background: ${palette('primary', 0)};
@@ -70,6 +71,7 @@ const FilterButton = styled((p) => <Button {...p} />)`
 const HeaderActionsWrapper = styled((p) => <Box {...p} />)`
   background: white;
   border-radius: 999px;
+  padding: 4px 16px;
   box-shadow: ${({ isOnMap }) => isOnMap ? '0px 0px 5px 0px rgba(0,0,0,0.2)' : 'none'};
 `;
 const STATE_INITIAL = {
@@ -401,11 +403,11 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           <Styled isPrint={isPrintView}>
             <TheHeader
               margin={{ bottom: 'xsmall' }}
-              pad={{ top: 'small' }}
+              pad={{ top: 'medium' }}
               align="center"
               justify="between"
             >
-              <HeaderSection align="start" justify="start">
+              <HeaderSection>
                 <PrintHide>
                   {viewOptions && viewOptions.length > 1
                     && (
@@ -424,7 +426,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                       fill="vertical"
                       direction="row"
                       align="center"
-                      pad={{ vertical: 'xsmall', horizontal: 'small' }}
+                      pad="none"
                       isOnMap={isOnMap}
                     >
                       {normalActions && normalActions.map(
@@ -482,17 +484,25 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                   <HeaderSection align="center">
                     <FilterButton
                       onClick={onShowFilters}
-                      pad={{ vertical: 'xsmall', horizontal: 'medium' }}
                       label={(
                         <Box direction="row" gap="small" align="center">
                           {isMinSize(size, 'medium')
                             && (
-                              <Text>
-                                {intl.formatMessage(messages.listOptions.showFilter)}
-                              </Text>
+                              <Box
+                                margin={{
+                                  top: '-3px',
+                                  bottom: 'none',
+                                  vertical: 'none',
+                                }}
+                                pad="none"
+                              >
+                                <Text>
+                                  {intl.formatMessage(messages.listOptions.showFilter)}
+                                </Text>
+                              </Box>
                             )}
-                          <Box>
-                            <Icon name="filter" text />
+                          <Box margin="none" pad="none">
+                            <Icon name="filter" size="33px" text />
                           </Box>
                         </Box>
                       )}
