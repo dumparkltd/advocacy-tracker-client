@@ -9,7 +9,7 @@ import { isMinSize } from 'utils/responsive';
 import { scaleColorCount } from 'containers/MapContainer/utils';
 import { usePrint } from 'containers/App/PrintContext';
 
-import { MAP_OPTIONS, ROUTES } from 'themes/config';
+import { MAP_OPTIONS } from 'themes/config';
 
 import CellBodyMain from './CellBodyMain';
 import CellBodyPlain from './CellBodyPlain';
@@ -174,35 +174,31 @@ export function EntitiesTable({
   searchedEntities,
 }) {
   useEffect(() => {
-    if (reducePreviewItem && sortedEntities) {
+    if (!!reducePreviewItem && sortedEntities) {
       if (previewItemId) {
         const [componentId, path, itemId] = previewItemId.split('|');
         if (qe(componentId, ID)) {
-          if (path === ROUTES.ACTION) {
-            onSetPreviewContent(reducePreviewItem({ id: itemId, path }));
-          } else if (path === ROUTES.ACTOR) {
-            const country = searchedEntities && itemId && searchedEntities.find(
-              (item) => qe(item.get('id'), itemId)
-            );
-            if (country) {
-              const countryIds = sortedEntities.map((e) => e.id);
-              const countryIndex = countryIds.indexOf(country.get('id'));
-              const nextIndex = countryIndex < countryIds.length ? countryIndex + 1 : 0;
-              const prevIndex = countryIndex > 0 ? countryIndex - 1 : countryIds.length - 1;
+          const mainItem = searchedEntities && itemId && searchedEntities.find(
+            (item) => qe(item.get('id'), itemId)
+          );
+          if (mainItem) {
+            const entityIds = sortedEntities.map((e) => e.id);
+            const entityIndex = entityIds.indexOf(mainItem.get('id'));
+            const nextIndex = entityIndex < entityIds.length ? entityIndex + 1 : 0;
+            const prevIndex = entityIndex > 0 ? entityIndex - 1 : entityIds.length - 1;
 
-              let content = reducePreviewItem({ item: country, path });
-              content = {
-                ...content,
-                header: {
-                  ...content.header,
-                  nextPreviewItem: nextIndex !== countryIndex && `${ID}|${ROUTES.ACTOR}|${countryIds[nextIndex]}`,
-                  prevPreviewItem: prevIndex !== countryIndex && `${ID}|${ROUTES.ACTOR}|${countryIds[prevIndex]}`,
-                },
-              };
-              onSetPreviewContent(content);
-            } else {
-              onSetPreviewContent();
-            }
+            let content = reducePreviewItem({ item: mainItem, path });
+            content = {
+              ...content,
+              header: {
+                ...content.header,
+                nextPreviewItem: nextIndex !== entityIndex && `${ID}|${path}|${entityIds[nextIndex]}`,
+                prevPreviewItem: prevIndex !== entityIndex && `${ID}|${path}|${entityIds[prevIndex]}`,
+              },
+            };
+            onSetPreviewContent(content);
+          } else if (itemId && path) {
+            onSetPreviewContent(reducePreviewItem({ id: itemId, path }));
           } else {
             onSetPreviewContent();
           }
@@ -211,7 +207,7 @@ export function EntitiesTable({
         onSetPreviewContent();
       }
     }
-  }, [sortedEntities, previewItemId]);
+  }, [previewItemId]);
   const size = React.useContext(ResponsiveContext);
   const isPrintView = usePrint();
   return (

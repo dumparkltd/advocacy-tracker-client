@@ -4,6 +4,7 @@ import {
   getEntityTitle,
   checkActionAttribute,
   checkActorAttribute,
+  checkIndicatorAttribute,
   getIndicatorColumnsForStatement,
 } from 'utils/entities';
 import isNumber from 'utils/is-number';
@@ -15,6 +16,7 @@ import {
   ROUTES,
   API,
   ACTION_FIELDS,
+  ACTOR_FIELDS,
 } from 'themes/config';
 
 import appMessages from 'containers/App/messages';
@@ -655,30 +657,6 @@ export const getActionPreviewFooter = (action, intl) => {
     },
   });
 };
-export const getActorPreviewFooter = (actor, intl) => {
-  const typeId = actor && actor.getIn(['attributes', 'actortype_id']);
-  return ({
-    primaryLink: actor && {
-      path: `${ROUTES.ACTOR}/${actor.get('id')}`,
-      title: `${intl.formatMessage(
-        appMessages.entities[`actors_${typeId}`].single
-      )} details`,
-    },
-    secondaryLink: {
-      path: `${ROUTES.ACTORS}/${typeId}`,
-      title: `All ${intl.formatMessage(
-        appMessages.entities[`actors_${typeId}`].plural
-      )}`,
-    },
-  });
-};
-export const getActorPreviewHeader = (actor, intl) => ({
-  aboveTitle: intl.formatMessage(
-    appMessages.entities[`actors_${actor.getIn(['attributes', 'measuretype_id'])}`].single
-  ),
-  title: getEntityTitle(actor),
-  code: checkActorAttribute(actor, 'code'),
-});
 export const getActionPreviewFields = ({
   action,
   indicators,
@@ -740,6 +718,30 @@ export const getActionPreviewFields = ({
   }
   return fields;
 };
+export const getActorPreviewHeader = (actor, intl) => ({
+  aboveTitle: intl.formatMessage(
+    appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].single
+  ),
+  title: getEntityTitle(actor),
+  code: checkActorAttribute(actor, 'code'),
+});
+export const getActorPreviewFooter = (actor, intl) => {
+  const typeId = actor && actor.getIn(['attributes', 'actortype_id']);
+  return ({
+    primaryLink: actor && {
+      path: `${ROUTES.ACTOR}/${actor.get('id')}`,
+      title: `${intl.formatMessage(
+        appMessages.entities[`actors_${typeId}`].single
+      )} details`,
+    },
+    secondaryLink: {
+      path: `${ROUTES.ACTORS}/${typeId}`,
+      title: `All ${intl.formatMessage(
+        appMessages.entities[`actors_${typeId}`].plural
+      )}`,
+    },
+  });
+};
 export const getActorPreviewFields = ({
   action,
   // indicators,
@@ -748,13 +750,13 @@ export const getActorPreviewFields = ({
   // isAdmin,
 }) => {
   let fields = [];
-  fields = Object.keys(ACTION_FIELDS.ATTRIBUTES).reduce(
+  fields = Object.keys(ACTOR_FIELDS.ATTRIBUTES).reduce(
     (memo, key) => {
-      const attribute = ACTION_FIELDS.ATTRIBUTES[key];
+      const attribute = ACTOR_FIELDS.ATTRIBUTES[key];
       if (
         action
         && attribute.preview
-        && attribute.preview.indexOf(`${action.getIn(['attributes', 'measuretype_id'])}`) > -1
+        && attribute.preview.indexOf(`${action.getIn(['attributes', 'actortype_id'])}`) > -1
       ) {
         if (key === 'date_start') {
           return [
@@ -767,14 +769,55 @@ export const getActorPreviewFields = ({
     },
     [],
   );
-  // if (ACTION_FIELDS.CONNECTIONS) {
-  //   fields = Object.keys(ACTION_FIELDS.CONNECTIONS).reduce(
-  //     (memo, key) => {
-  //       const connection = ACTION_FIELDS.CONNECTIONS[key];
-  //       return memo;
-  //     },
-  //     fields,
-  //   );
-  // }
+  return fields;
+};
+
+export const getIndicatorPreviewHeader = (indicator, intl) => ({
+  aboveTitle: intl.formatMessage(
+    appMessages.entities.indicators.single
+  ),
+  title: getEntityTitle(indicator),
+  code: checkIndicatorAttribute(indicator, 'code'),
+});
+export const getIndicatorPreviewFooter = (indicator, intl) => ({
+  primaryLink: indicator && {
+    path: `${ROUTES.ACTOR}/${indicator.get('id')}`,
+    title: `${intl.formatMessage(
+      appMessages.entities.indicators.single
+    )} details`,
+  },
+  secondaryLink: {
+    path: ROUTES.INDICATORS,
+    title: `All ${intl.formatMessage(appMessages.entities.indicators.plural)}`,
+  },
+});
+
+export const getIndicatorPreviewFields = ({
+  action,
+  // indicators,
+  // onEntityClick,
+  // intl,
+  // isAdmin,
+}) => {
+  let fields = [];
+  fields = Object.keys(ACTOR_FIELDS.ATTRIBUTES).reduce(
+    (memo, key) => {
+      const attribute = ACTOR_FIELDS.ATTRIBUTES[key];
+      if (
+        action
+        && attribute.preview
+        && attribute.preview.indexOf(`${action.getIn(['attributes', 'actortype_id'])}`) > -1
+      ) {
+        if (key === 'date_start') {
+          return [
+            ...memo,
+            getDateField(action, key, { showEmpty: false }),
+          ];
+        }
+      }
+      return memo;
+    },
+    [],
+  );
   return fields;
 };

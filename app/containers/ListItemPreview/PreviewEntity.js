@@ -17,6 +17,9 @@ import {
   getActorPreviewHeader,
   getActorPreviewFields,
   getActorPreviewFooter,
+  getIndicatorPreviewHeader,
+  getIndicatorPreviewFields,
+  getIndicatorPreviewFooter,
 } from 'utils/fields';
 
 import {
@@ -55,6 +58,7 @@ export function PreviewEntity({
   intl,
   dataReady,
 }) {
+  // console.log(previewEntity && previewEntity.toJS())
   let headerContent;
   let mainContent;
   let footerContent;
@@ -76,6 +80,15 @@ export function PreviewEntity({
       intl,
     });
     footerContent = previewEntity && getActorPreviewFooter(previewEntity, intl);
+  }
+  if (previewEntity && qe(content.get('path'), ROUTES.INDICATOR)) {
+    headerContent = previewEntity && getIndicatorPreviewHeader(previewEntity, intl);
+    mainContent = dataReady && getIndicatorPreviewFields({
+      actor: previewEntity,
+      onEntityClick,
+      intl,
+    });
+    footerContent = previewEntity && getIndicatorPreviewFooter(previewEntity, intl);
   }
   return (
     <>

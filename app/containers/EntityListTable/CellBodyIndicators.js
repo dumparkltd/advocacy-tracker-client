@@ -43,12 +43,6 @@ const LabelWrap = styled((p) => <Box direction="row" gap="xsmall" align="center"
 
 const getIndicatorLink = (indicator) => `${ROUTES.INDICATOR}/${indicator.get('id')}`;
 
-const getIndicatorOnClick = (indicator, onEntityClick, setShowContent) => (evt) => {
-  if (evt) evt.preventDefault();
-  if (setShowContent) setShowContent(false);
-  onEntityClick(indicator.get('id'), ROUTES.INDICATOR);
-};
-
 const getTitleWithLevel = (indicator, value, intl) => {
   const level = indicator.getIn(['supportlevel', 'value']);
   const levelLabel = intl.formatMessage(appMessages.supportlevels[level]);
@@ -68,7 +62,10 @@ export function CellBodyIndicators({
       {entity.single && (
         <Link
           href={getIndicatorLink(entity.single)}
-          onClick={getIndicatorOnClick(entity.single, onEntityClick)}
+          onClick={(evt) => {
+            if (evt) evt.preventDefault();
+            onEntityClick(entity.single.get('id'), ROUTES.INDICATOR);
+          }}
           title={entity.single.get('supportlevel')
             ? getTitleWithLevel(entity.single, entity.value, intl)
             : entity.value}
@@ -151,7 +148,7 @@ export function CellBodyIndicators({
                                   onClick={(evt) => {
                                     if (evt) evt.preventDefault();
                                     setShowContent(false);
-                                    getIndicatorOnClick(indicator, onEntityClick);
+                                    onEntityClick(indicator.get('id'), ROUTES.INDICATOR);
                                   }}
                                   title={indicator.getIn(['attributes', 'title'])}
                                 >

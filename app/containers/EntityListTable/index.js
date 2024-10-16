@@ -74,7 +74,6 @@ export function EntityListTable({
   entityIdsSelected,
   config,
   columns,
-  onEntityClick,
   canEdit,
   onEntitySelect,
   entityTitle,
@@ -169,7 +168,6 @@ export function EntityListTable({
     config,
     url,
     entityPath,
-    onEntityClick,
     onEntitySelect,
     connections,
     taxonomies,
@@ -316,10 +314,8 @@ export function EntityListTable({
         columns={activeColumns}
         headerColumns={headerColumns || []}
         onEntityClick={(id, path, componentId) => {
-          if (reducePreviewItem && onSetPreviewItemId && componentId) {
+          if (onSetPreviewItemId && componentId) {
             onSetPreviewItemId(`${componentId}|${path}|${id}`);
-          } else {
-            onEntityClick(id, path);
           }
         }}
         columnMaxValues={columnMaxValues}
@@ -415,7 +411,6 @@ EntityListTable.propTypes = {
   canEdit: PropTypes.bool,
   onPageSelect: PropTypes.func,
   onPageItemsSelect: PropTypes.func,
-  onEntityClick: PropTypes.func,
   onEntitySelect: PropTypes.func,
   onEntitySelectAll: PropTypes.func,
   onSort: PropTypes.func,

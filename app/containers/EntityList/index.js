@@ -40,10 +40,11 @@ import {
   selectIsPrintView,
   selectSearchQuery,
   selectSessionUserId,
+  selectPreviewQuery,
 } from 'containers/App/selectors';
 
 import {
-  updatePath,
+  setListPreview,
   openNewEntityModal,
   setView,
   updateRouteQuery,
@@ -63,6 +64,8 @@ import {
   ACTION_FIELDS,
   ACTOR_FIELDS,
   INDICATOR_FIELDS,
+  ROUTES,
+  API,
 } from 'themes/config';
 
 import EntitiesMap from './EntitiesMap';
@@ -124,6 +127,43 @@ const STATE_INITIAL = {
   visibleEditOptions: null,
   deleteConfirm: null,
   downloadActive: false,
+};
+
+const reducePreviewItem = ({ item, id, path }) => {
+  if (id && path) {
+    return { entity: { path, id } };
+  }
+  if (item && qe(item.get('type'), API.ACTORS)) {
+    const content = {
+      header: {
+        aboveTitle: 'Actor',
+        title: item && item.getIn(['attributes', 'title']),
+      },
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.ACTOR}/${item.get('id')}`,
+          title: 'Actor details',
+        },
+      },
+    };
+    return content;
+  }
+  if (item && qe(item.get('type'), API.ACTIONS)) {
+    const content = {
+      header: {
+        aboveTitle: 'Action',
+        title: item && item.getIn(['attributes', 'title']),
+      },
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.ACTION}/${item.get('id')}`,
+          title: 'Action details',
+        },
+      },
+    };
+    return content;
+  }
+  return {};
 };
 
 export class EntityList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
@@ -569,6 +609,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               )}
               {showList && dataReady && (
                 <EntitiesListView
+                  reducePreviewItem={reducePreviewItem}
                   onScrollToTop={this.scrollToTop}
                   searchQuery={searchQuery}
                   isPrintView={isPrintView}
@@ -609,9 +650,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                     this.onHideDeleteConfirm();
                     onEntitySelectAll(ids);
                   }}
-                  onEntityClick={(id, path) => onEntityClick(
-                    id, path, viewDomain.get('errors')
-                  )}
                   onDismissError={onDismissError}
                   typeId={typeId}
                   hasFilters={filters && filters.length > 0}
@@ -637,8 +675,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 actiontypes={actiontypes}
                 config={config}
                 dataReady={dataReady}
-                onEntityClick={(id, path) => onEntityClick(
-                  id, path, viewDomain.get('errors')
+                onEntityClick={(id, path, componentId) => onEntityClick(
+                  id, path, componentId, viewDomain.get('errors')
                 )}
                 typeId={typeId}
                 hasFilters={filters && filters.length > 0}
@@ -769,6 +807,7 @@ EntityList.propTypes = {
   onDismissError: PropTypes.func.isRequired,
   onDismissAllErrors: PropTypes.func.isRequired,
   onUpdateQuery: PropTypes.func.isRequired,
+  // reducePreviewItem: PropTypes.func,
   canEdit: PropTypes.bool,
   includeHeader: PropTypes.bool,
   headerStyle: PropTypes.string,
@@ -792,6 +831,7 @@ EntityList.propTypes = {
   onUpdateFilters: PropTypes.func,
   isPrintView: PropTypes.bool,
   currentUserId: PropTypes.string,
+  previewItemId: PropTypes.string,
   filteringOptions: PropTypes.array,
   secondaryNavItems: PropTypes.array,
 };
@@ -818,6 +858,7 @@ const mapStateToProps = (state) => ({
   isPrintView: selectIsPrintView(state),
   searchQuery: selectSearchQuery(state),
   currentUserId: selectSessionUserId(state),
+  previewItemId: selectPreviewQuery(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -839,7 +880,7 @@ function mapDispatchToProps(dispatch, props) {
     onEntitySelect: (id, checked) => {
       dispatch(selectEntity({ id, checked }));
     },
-    onEntityClick: (id, path, errors) => {
+    onEntityClick: (id, path, componentId, errors) => {
       if (errors && errors.size) {
         dispatch(resetProgress());
         errors.forEach((error, key) => {
@@ -848,7 +889,7 @@ function mapDispatchToProps(dispatch, props) {
           }
         });
       }
-      dispatch(updatePath(`${path || props.config.clientPath}/${id}`));
+      dispatch(setListPreview(`${componentId}|${path}|${id}`));
     },
     onEntitySelectAll: (ids) => {
       dispatch(selectMultipleEntities(ids));

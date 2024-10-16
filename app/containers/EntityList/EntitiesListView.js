@@ -91,7 +91,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       showCode,
       entityIdsSelected,
       listUpdating,
-      onEntityClick,
+      reducePreviewItem,
       onEntitySelect,
       onEntitySelectAll,
       onDismissError,
@@ -431,7 +431,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
 
     const showRelatedActorsForActions = !!entityActors;
     const showRelatedUsersForActions = !!entityUsers;
-    const showEntities = !showRelatedActorsForActions && !showRelatedUsersForActions;
+    const showMainEntities = !showRelatedActorsForActions && !showRelatedUsersForActions;
 
     return (
       <div>
@@ -508,7 +508,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             ]}
             entities={entityActors.get(parseInt(viewTypeClean, 10))}
             entityPath={ROUTES.ACTOR}
-            onEntityClick={onEntityClick}
             entityTitle={{
               single: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].single),
               plural: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].plural),
@@ -561,7 +560,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
               ]}
               entities={entityUsers}
               entityPath={ROUTES.USER}
-              onEntityClick={onEntityClick}
               entityTitle={{
                 single: intl.formatMessage(appMessages.entities.users.single),
                 plural: intl.formatMessage(appMessages.entities.users.plural),
@@ -586,7 +584,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             />
           </Box>
         )}
-        {showEntities && (
+        {showMainEntities && (
           <EntityListTable
             hasFilters={hasFilters}
             columns={columns}
@@ -617,10 +615,10 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             onEntitySelect={onEntitySelect}
             onEntitySelectAll={onEntitySelectAll}
             onResetScroll={onScrollToTop}
-            onEntityClick={onEntityClick}
             onDismissError={onDismissError}
             typeId={typeId}
             showCode={showCode}
+            reducePreviewItem={reducePreviewItem}
           />
         )}
       </div>
@@ -660,7 +658,6 @@ EntitiesListView.propTypes = {
   searchQuery: PropTypes.string,
   allEntityCount: PropTypes.number,
   // functions
-  onEntityClick: PropTypes.func.isRequired,
   onEntitySelect: PropTypes.func.isRequired,
   onEntitySelectAll: PropTypes.func.isRequired,
   onDismissError: PropTypes.func.isRequired,
@@ -669,6 +666,7 @@ EntitiesListView.propTypes = {
   onSetIncludeActorChildren: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
   onScrollToTop: PropTypes.func,
+  reducePreviewItem: PropTypes.func,
 };
 
 export default injectIntl(EntitiesListView);
