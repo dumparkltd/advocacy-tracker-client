@@ -141,8 +141,8 @@ export function PositionsList({
     },
     [],
   );
-  const reducePreviewItem = ({ id, item, path }) => {
-    if (item && qe(item.getIn(['attributes', 'actortype_id'], ACTORTYPES.COUNTRY))) {
+  const reducePreviewItem = ({ id, path, item }) => {
+    if (item && qe(item.getIn(['attributes', 'actortype_id']), ACTORTYPES.COUNTRY)) {
       const indicatorsWithSupport = indicators && indicators.reduce(
         (memo, indicator, indicatorId) => {
           const indicatorPositions = item

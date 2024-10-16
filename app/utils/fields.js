@@ -383,6 +383,7 @@ const getConnectionField = ({
   columns,
   isGrouped,
   onCreate,
+  moreLess = true,
 }) => ({
   type: 'connections',
   values: entities && entities.toList(),
@@ -404,6 +405,7 @@ const getConnectionField = ({
     attributes: ['code', 'title'],
   }],
   onCreate,
+  moreLess,
 });
 
 export const getActorConnectionField = ({
@@ -561,6 +563,7 @@ export const getIndicatorConnectionField = ({
   skipLabel,
   connectionOptions,
   columns,
+  moreLess,
 }) => getConnectionField({
   entities: sortEntities(indicators, 'asc', 'id'),
   connections,
@@ -577,6 +580,7 @@ export const getIndicatorConnectionField = ({
   onEntityClick,
   skipLabel,
   columns,
+  moreLess,
 });
 export const getUserConnectionField = ({
   users,
@@ -630,6 +634,7 @@ export const getActionPreviewHeader = (action, intl) => ({
   aboveTitle: intl.formatMessage(
     appMessages.entities[`actions_${action.getIn(['attributes', 'measuretype_id'])}`].single
   ),
+  path: `${ROUTES.ACTION}/${action.get('id')}`,
   title: getEntityTitle(action),
   code: checkActionAttribute(action, 'code'),
 });
@@ -704,6 +709,7 @@ export const getActionPreviewFields = ({
               intl,
               isAdmin,
             }),
+            moreLess: false,
           });
           return [
             ...memo,

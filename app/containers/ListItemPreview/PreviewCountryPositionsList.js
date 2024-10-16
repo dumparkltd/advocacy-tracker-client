@@ -6,7 +6,7 @@ import { Box } from 'grommet';
 import EntityListTable from 'containers/EntityListTable';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
-export function PreviewCountryPositionsList({ content }) {
+export function PreviewCountryPositionsList({ content, onUpdatePath }) {
   const indicators = content.get('indicators');
   const columns = content.get('countryPositionsTableColumns').toJS();
   const options = content.get('options').toJS();
@@ -37,6 +37,7 @@ export function PreviewCountryPositionsList({ content }) {
             columns={columns}
             entities={indicators.toList()}
             entityTitle={entityTitle}
+            onEntityClick={onUpdatePath}
             inSingleView
           />
         </Box>
@@ -48,5 +49,6 @@ export function PreviewCountryPositionsList({ content }) {
 
 PreviewCountryPositionsList.propTypes = {
   content: PropTypes.object,
+  onUpdatePath: PropTypes.func,
 };
 export default PreviewCountryPositionsList;

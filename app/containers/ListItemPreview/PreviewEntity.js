@@ -2,8 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
+import FieldFactory from 'components/fields/FieldFactory';
 // import styled from 'styled-components';
-// import { Box } from 'grommet';
+import { Box } from 'grommet';
 
 import { ROUTES, API, API_FOR_ROUTE } from 'themes/config';
 
@@ -13,6 +14,9 @@ import {
   getActionPreviewHeader,
   getActionPreviewFields,
   getActionPreviewFooter,
+  getActorPreviewHeader,
+  getActorPreviewFields,
+  getActorPreviewFooter,
 } from 'utils/fields';
 
 import {
@@ -33,23 +37,13 @@ export const DEPENDENCIES = [
   API.USERS,
   API.USER_ROLES,
   API.CATEGORIES,
-  API.TAXONOMIES,
-  API.ACTIONTYPES,
-  API.ACTORTYPES,
-  API.ACTIONTYPE_TAXONOMIES,
   API.ACTORS,
   API.ACTIONS,
-  API.RESOURCES,
   API.ACTOR_ACTIONS,
-  API.ACTION_ACTORS,
-  API.ACTION_RESOURCES,
   API.MEMBERSHIPS,
-  API.ACTOR_CATEGORIES,
   API.ACTION_CATEGORIES,
   API.INDICATORS,
   API.ACTION_INDICATORS,
-  API.USER_ACTORS,
-  API.USER_ACTIONS,
 ];
 
 export function PreviewEntity({
@@ -59,19 +53,29 @@ export function PreviewEntity({
   onUpdatePath,
   onEntityClick,
   intl,
+  dataReady,
 }) {
   let headerContent;
   let mainContent;
   let footerContent;
   if (previewEntity && qe(content.get('path'), ROUTES.ACTION)) {
     headerContent = previewEntity && getActionPreviewHeader(previewEntity, intl);
-    mainContent = getActionPreviewFields({
+    mainContent = dataReady && getActionPreviewFields({
       action: previewEntity,
       indicators: previewEntity && previewEntity.get('indicators'),
       onEntityClick,
       intl,
     });
     footerContent = previewEntity && getActionPreviewFooter(previewEntity, intl);
+  }
+  if (previewEntity && qe(content.get('path'), ROUTES.ACTOR)) {
+    headerContent = previewEntity && getActorPreviewHeader(previewEntity, intl);
+    mainContent = dataReady && getActorPreviewFields({
+      actor: previewEntity,
+      onEntityClick,
+      intl,
+    });
+    footerContent = previewEntity && getActorPreviewFooter(previewEntity, intl);
   }
   return (
     <>
@@ -80,6 +84,20 @@ export function PreviewEntity({
           content={headerContent}
           onSetPreviewItemId={onSetPreviewItemId}
         />
+      )}
+      {mainContent && (
+        <Box margin={{ vertical: 'medium' }}>
+          {mainContent.map(
+            (field, i) => field
+              ? (
+                <FieldFactory
+                  key={i}
+                  field={{ ...field }}
+                />
+              )
+              : null
+          )}
+        </Box>
       )}
       {footerContent && (
         <PreviewFooter
@@ -102,6 +120,7 @@ PreviewEntity.propTypes = {
 };
 
 const mapStateToProps = (state, { content }) => ({
+  dataReady: selectReady(state, { path: DEPENDENCIES }),
   previewEntity: selectPreviewEntity(
     state,
     {
@@ -109,7 +128,6 @@ const mapStateToProps = (state, { content }) => ({
       path: API_FOR_ROUTE[content.get('path')],
     },
   ),
-  dataReady: selectReady(state, { path: DEPENDENCIES }),
 });
 export function mapDispatchToProps(dispatch) {
   return {

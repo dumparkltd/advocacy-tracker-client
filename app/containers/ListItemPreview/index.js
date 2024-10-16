@@ -50,6 +50,7 @@ export function ListItemPreview({
       {content && content.get('topicStatements') && (
         <PreviewCountryTopicStatementList
           content={content.get('topicStatements').toJS()}
+          onUpdatePath={onUpdatePath}
         />
       )}
       {content && content.get('countryPositions') && (

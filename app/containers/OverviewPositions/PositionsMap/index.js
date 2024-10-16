@@ -286,6 +286,7 @@ export function PositionsMap({
                         // id: statement.get('id'),
                         date,
                         value: statement.get('title'),
+                        path: `${ROUTES.ACTION}/${statement.get('id')}`,
                       },
                       levelOfAuthority: position && {
                         value: position.getIn(['authority', 'short_title']),
@@ -295,6 +296,9 @@ export function PositionsMap({
                           && position.get('viaGroups').first()
                           ? position.get('viaGroups').first().getIn(['attributes', 'title'])
                           : '',
+                        path: position.get('viaGroups')
+                          && position.get('viaGroups').first()
+                          && `${ROUTES.ACTOR}/${position.get('viaGroups').first().get('id')}`,
                       },
                     },
                   ]);

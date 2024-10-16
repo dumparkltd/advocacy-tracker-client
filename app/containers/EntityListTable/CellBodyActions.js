@@ -41,6 +41,13 @@ export function CellBodyActions({
   const [showContent, setShowContent] = useState(false);
   return (
     <Box alignContent={align}>
+      {entity.single && entity.date && (
+        <Box flex={{ shrink: 0 }}>
+          <Text size="xsmall" weight={500} wordBreak="keep-all">
+            {entity.date}
+          </Text>
+        </Box>
+      )}
       {entity.single && (
         <Link
           href={getActionLink(entity.single)}

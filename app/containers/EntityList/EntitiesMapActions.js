@@ -108,7 +108,7 @@ export function EntitiesMapActions({
       infoOptions = [{
         active: includeActorMembers,
         onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-        label: 'Include positions of groups (countries are member of)',
+        label: 'Include statements of groups (countries are member of)',
       }];
     } else {
       infoOptions = [{

@@ -285,11 +285,13 @@ export function EntitiesTable({
                         entity={entity[col.id]}
                         column={col}
                         primary={col.type === 'userrole'}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                       />
                     )}
                     {col.type === 'plainWithDate' && (
                       <CellBodyPlainWithDate
                         entity={entity[col.id]}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
