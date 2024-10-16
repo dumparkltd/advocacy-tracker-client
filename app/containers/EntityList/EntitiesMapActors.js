@@ -33,7 +33,7 @@ const Styled = styled((p) => <ContainerWrapper {...p} />)`
   box-shadow: none;
   padding: 0;
 `;
-
+const ID = 'entities-map';
 // countries only
 export function EntitiesMapActors({
   entities,
@@ -48,6 +48,7 @@ export function EntitiesMapActors({
   isPrintView,
   filters,
   onClearFilters,
+  reducePreviewItem,
 }) {
   // const { intl } = this.context;
   // let { countries } = this.props;
@@ -83,6 +84,7 @@ export function EntitiesMapActors({
       single: intl.formatMessage(appMessages.entities[`actors_${typeId}`].single),
       plural: intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural),
     };
+
     reduceCountryAreas = (features) => features.map((feature) => {
       const country = entities.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
       // console.log('country', country && country.toJS())
@@ -118,6 +120,7 @@ export function EntitiesMapActors({
           ...feature,
           id: country.get('id'),
           attributes: country.get('attributes').toJS(),
+          previewItemId: `${ID}|${ROUTES.ACTORS}|${country.get('id')}`,
           tooltip: {
             id: country.get('id'),
             title: country.getIn(['attributes', 'title']),
@@ -143,6 +146,7 @@ export function EntitiesMapActors({
     infoSubTitle = `for ${entitiesTotal} ${typeLabelsFor[entitiesTotal === 1 ? 'single' : 'plural']}${hasFilters ? ' (filtered)' : ''}`;
     infoTitlePrint = infoTitle;
   }
+
   return (
     <Styled noOverflow isOnMap>
       {isPrintView && (
@@ -173,6 +177,8 @@ export function EntitiesMapActors({
           memberOption,
         }}
         onClearFilters={onClearFilters}
+        reducePreviewItem={reducePreviewItem}
+        entities={entities}
       />
     </Styled>
   );
@@ -192,6 +198,7 @@ EntitiesMapActors.propTypes = {
   filters: PropTypes.array,
   intl: intlShape.isRequired,
   onClearFilters: PropTypes.func,
+  reducePreviewItem: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({

@@ -106,7 +106,7 @@ const getBBox = (bounds, xLat = 0.5, xLon = 180) => {
 };
 
 const TOOLTIP_INITIAL = { features: [] };
-
+const ID = 'entities-map';
 export function MapWrapper({
   countryFeatures,
   countryData,
@@ -131,7 +131,12 @@ export function MapWrapper({
   printArgs,
   isPrintView,
   fullMap,
+
   onSetPreviewItemId,
+  onSetPreviewContent,
+  reducePreviewItem,
+  previewItemId,
+  entities,
 }) {
   const mapOptions = merge({}, options, MAP_OPTIONS);
 
@@ -650,6 +655,28 @@ export function MapWrapper({
     }
   }, [mapSubject, countryData]);
 
+  useEffect(() => {
+    if (reducePreviewItem) {
+      if (previewItemId) {
+        const [componentId, path, itemId] = previewItemId.split('|');
+        if (qe(componentId, ID)) {
+          const mainItem = entities && itemId
+            && entities.find((item) => qe(item.get('id'), itemId));
+          if (mainItem) {
+            const content = reducePreviewItem({ item: mainItem, path });
+            onSetPreviewContent(content);
+          }
+        } else if (itemId && path) {
+          onSetPreviewContent(reducePreviewItem({ id: itemId, path }));
+        } else {
+          onSetPreviewContent();
+        }
+      } else {
+        onSetPreviewContent();
+      }
+    }
+  }, [previewItemId]);
+
   return (
     <Styled isPrint={isPrintView} fullMap={fullMap} hasInfo={hasInfo}>
       <Map id={mapId} ref={ref} styleType={styleType} />
@@ -700,8 +727,13 @@ MapWrapper.propTypes = {
   isLocationData: PropTypes.bool,
   circleLayerConfig: PropTypes.object,
   printArgs: PropTypes.object,
-  onSetPreviewItemId: PropTypes.func,
   // onSetMapSubject: PropTypes.func,
+
+  onSetPreviewItemId: PropTypes.func,
+  onSetPreviewContent: PropTypes.func,
+  reducePreviewItem: PropTypes.func,
+  previewItemId: PropTypes.string,
+  entities: PropTypes.object,
 };
 
 export default MapWrapper;
