@@ -50,7 +50,6 @@ export const selectPreviewEntity = createSelector(
     actionIndicatorsByActionFull,
     actionIndicators,
   ) => {
-    console.log('previewEntity', previewEntity && previewEntity.toJS())
     if (
       !previewEntity
     ) return null;
