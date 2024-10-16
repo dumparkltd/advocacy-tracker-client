@@ -20,6 +20,12 @@ import {
   getIndicatorPreviewHeader,
   getIndicatorPreviewFields,
   getIndicatorPreviewFooter,
+  getResourcePreviewHeader,
+  getResourcePreviewFields,
+  getResourcePreviewFooter,
+  getUserPreviewHeader,
+  getUserPreviewFields,
+  getUserPreviewFooter,
 } from 'utils/fields';
 
 import {
@@ -84,11 +90,29 @@ export function PreviewEntity({
   if (previewEntity && qe(content.get('path'), ROUTES.INDICATOR)) {
     headerContent = previewEntity && getIndicatorPreviewHeader(previewEntity, intl);
     mainContent = dataReady && getIndicatorPreviewFields({
-      actor: previewEntity,
+      indicator: previewEntity,
       onEntityClick,
       intl,
     });
     footerContent = previewEntity && getIndicatorPreviewFooter(previewEntity, intl);
+  }
+  if (previewEntity && qe(content.get('path'), ROUTES.RESOURCE)) {
+    headerContent = previewEntity && getResourcePreviewHeader(previewEntity, intl);
+    mainContent = dataReady && getResourcePreviewFields({
+      resource: previewEntity,
+      onEntityClick,
+      intl,
+    });
+    footerContent = previewEntity && getResourcePreviewFooter(previewEntity, intl);
+  }
+  if (previewEntity && qe(content.get('path'), ROUTES.USERS)) {
+    headerContent = previewEntity && getUserPreviewHeader(previewEntity, intl);
+    mainContent = dataReady && getUserPreviewFields({
+      user: previewEntity,
+      onEntityClick,
+      intl,
+    });
+    footerContent = previewEntity && getUserPreviewFooter(previewEntity, intl);
   }
   return (
     <>

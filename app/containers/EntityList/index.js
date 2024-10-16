@@ -163,6 +163,18 @@ const reducePreviewItem = ({ item, id, path }) => {
     };
     return content;
   }
+  if (item && qe(item.get('type'), API.INDICATORS)) {
+    return { entity: { path: ROUTES.INDICATOR, id: item.get('id') } };
+  }
+  if (item && qe(item.get('type'), API.USERS)) {
+    return { entity: { path: ROUTES.USERS, id: item.get('id') } };
+  }
+  if (item && qe(item.get('type'), API.CATEGORIES)) {
+    return { entity: { path: ROUTES.CATEGORY, id: item.get('id') } };
+  }
+  if (item && qe(item.get('type'), API.RESOURCES)) {
+    return { entity: { path: ROUTES.RESOURCE, id: item.get('id') } };
+  }
   return {};
 };
 

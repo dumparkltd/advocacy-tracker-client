@@ -571,7 +571,7 @@ export const selectEntities = createSelector(
 export const selectEntity = createSelector(
   (state, { path }) => selectEntities(state, path),
   (state, { id }) => id,
-  (entities, id) => id && entities.get(id.toString())
+  (entities, id) => id && entities && entities.get(id.toString())
 );
 
 

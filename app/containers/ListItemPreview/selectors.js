@@ -50,9 +50,10 @@ export const selectPreviewEntity = createSelector(
     actionIndicatorsByActionFull,
     actionIndicators,
   ) => {
+    console.log('previewEntity', previewEntity && previewEntity.toJS())
     if (
       !previewEntity
-    ) return Map();
+    ) return null;
     if (previewEntity.get('type') === API.ACTIONS) {
       let indicatorsWithConnections;
       const hasSupportLevel = previewEntity
