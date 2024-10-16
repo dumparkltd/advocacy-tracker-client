@@ -37,7 +37,7 @@ import { prepSortTarget } from 'utils/sort';
 import qe from 'utils/quasi-equals';
 
 import EntitiesTable from './EntitiesTable';
-import EntitiesTableOptions from './EntitiesTableOptions';
+import EntityListTableOptions from './EntityListTableOptions';
 
 import EntityListFooter from './EntityListFooter';
 
@@ -296,7 +296,7 @@ export function EntityListTable({
   return (
     <div>
       {options && (
-        <EntitiesTableOptions
+        <EntityListTableOptions
           options={{
             ...options,
             hasPageSelect: paginateOptions && !isPrintView && entitiesOnPage && entitiesOnPage.length > 0 && paginate,

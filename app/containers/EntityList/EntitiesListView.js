@@ -154,7 +154,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           title: `${primaryEntityCount} ${headerTitle}`,
           onClick: () => onSetMapSubject(),
           active: !mapSubjectClean,
-          disabled: !mapSubjectClean,
         },
       ];
       if (hasByActor) {
@@ -165,7 +164,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             title: 'by stakeholder',
             onClick: () => onSetMapSubject('actors'),
             active: mapSubjectClean === 'actors',
-            disabled: mapSubjectClean === 'actors',
           },
         ];
       }
@@ -177,7 +175,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             title: 'by user',
             onClick: () => onSetMapSubject('users'),
             active: mapSubjectClean === 'users',
-            disabled: mapSubjectClean === 'users',
           },
         ];
       }
