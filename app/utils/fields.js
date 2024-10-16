@@ -655,6 +655,23 @@ export const getActionPreviewFooter = (action, intl) => {
     },
   });
 };
+export const getActorPreviewFooter = (actor, intl) => {
+  const typeId = actor && actor.getIn(['attributes', 'actortype_id']);
+  return ({
+    primaryLink: actor && {
+      path: `${ROUTES.ACTOR}/${actor.get('id')}`,
+      title: `${intl.formatMessage(
+        appMessages.entities[`actors_${typeId}`].single
+      )} details`,
+    },
+    secondaryLink: {
+      path: `${ROUTES.ACTORS}/${typeId}`,
+      title: `All ${intl.formatMessage(
+        appMessages.entities[`actors_${typeId}`].plural
+      )}`,
+    },
+  });
+};
 export const getActorPreviewHeader = (actor, intl) => ({
   aboveTitle: intl.formatMessage(
     appMessages.entities[`actors_${actor.getIn(['attributes', 'measuretype_id'])}`].single
@@ -721,5 +738,43 @@ export const getActionPreviewFields = ({
       fields,
     );
   }
+  return fields;
+};
+export const getActorPreviewFields = ({
+  action,
+  // indicators,
+  // onEntityClick,
+  // intl,
+  // isAdmin,
+}) => {
+  let fields = [];
+  fields = Object.keys(ACTION_FIELDS.ATTRIBUTES).reduce(
+    (memo, key) => {
+      const attribute = ACTION_FIELDS.ATTRIBUTES[key];
+      if (
+        action
+        && attribute.preview
+        && attribute.preview.indexOf(`${action.getIn(['attributes', 'measuretype_id'])}`) > -1
+      ) {
+        if (key === 'date_start') {
+          return [
+            ...memo,
+            getDateField(action, key, { showEmpty: false }),
+          ];
+        }
+      }
+      return memo;
+    },
+    [],
+  );
+  // if (ACTION_FIELDS.CONNECTIONS) {
+  //   fields = Object.keys(ACTION_FIELDS.CONNECTIONS).reduce(
+  //     (memo, key) => {
+  //       const connection = ACTION_FIELDS.CONNECTIONS[key];
+  //       return memo;
+  //     },
+  //     fields,
+  //   );
+  // }
   return fields;
 };
