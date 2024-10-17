@@ -55,6 +55,10 @@ const SearchInput = styled((p) => <DebounceInput {...p} />)`
   }
 `;
 const Clear = styled((p) => <Button {...p} />)`
+  color: ${palette('dark', 4)};
+  &:hover {
+    color: ${palette('primary', 0)};
+  }
   @media print {
     display: none;
   }
@@ -103,11 +107,9 @@ export class EntityListSearch extends React.Component { // eslint-disable-line r
             />
             <Box direction="row" gap="none" align="center">
               {searchQuery && (
-                <Box>
-                  <Clear onClick={() => onSearch()}>
-                    <Icon name="removeSmall" palette="dark" paletteIndex={4} />
-                  </Clear>
-                </Box>
+                <Clear onClick={() => onSearch()}>
+                  <Icon name="removeSmall" />
+                </Clear>
               )}
               <Box>
                 <Icon name="search" palette="dark" paletteIndex={4} />

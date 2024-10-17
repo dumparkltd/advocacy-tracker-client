@@ -3,25 +3,25 @@ import styled from 'styled-components';
 import { palette } from 'styled-theme';
 
 import { TextInput } from 'grommet';
-
-export default styled(forwardRef((p, ref) => <TextInput {...p} ref={ref} />))`
-  font-weight: 600;
+const TextInputBase = forwardRef((p, ref) => <TextInput plain ref={ref} {...p} />);
+export default styled(TextInputBase)`
+  font-weight: normal;
   font-size: ${({ theme }) => theme.text.small.size};
-  background-color: white;
-  color: ${palette('dark', 2)};
+  background: ${palette('light', 1)};
+  color: ${palette('dark', 1)};
   border: none;
-  height: ${({ theme }) => theme.sizes.mapSearchBar.height}px;
+  height: ${({ theme }) => theme.sizes.mapSearchBar.height - 2}px;
+  padding: ${({ theme }) => theme.global.edgeSize.small};
+  padding-left: ${({ theme }) => theme.global.edgeSize.xsmall};
   &:focus {
     outline: none;
     box-shadow: none;
   }
   &::placeholder {
-    color: ${palette('dark', 2)};
-    font-weight: 400;
+    color: ${palette('dark', 1)};
+    font-weight: 300;
   }
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     font-size: ${({ theme }) => theme.text.medium.size};
-    padding-right: 16px;
-    padding-left: 16px;
   }
 `;

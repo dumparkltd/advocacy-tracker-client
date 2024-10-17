@@ -23,68 +23,77 @@ import SearchResults from './SearchResults';
 import TextInput from './TextInput';
 
 import { prepOptions } from './utils';
-
-const SearchButton = styled(
-  forwardRef((p, ref) => <Button {...p} ref={ref} />)
-)`
-  cursor: ${({ onClick }) => onClick ? 'pointer' : 'auto'};
+const SearchButtonBase = forwardRef((p, ref) => <Button plain {...p} ref={ref} />);
+const SearchButton = styled(SearchButtonBase)`
+  // removing extra space to reveal border + focus-visible outline
+  height: ${({ theme }) => theme.sizes.mapSearchBar.height - 6}px;
+  width: ${({ theme }) => theme.sizes.mapSearchBar.height - 6}px;
   background: ${palette('light', 1)};
-  border-top-right-radius: 999px;
-  border-bottom-right-radius: 999px;
-  border-left: 0px;
-  padding-left: 13px;
-  height: ${({ theme }) => theme.sizes.mapSearchBar.height}px;
-  width: ${({ theme }) => theme.sizes.mapSearchBar.height}px;
+  color: ${palette('dark', 4)};
+  padding-left: 7px;
   &:focus-visible {
     z-index: 1;
     outline: 2px auto ${palette('primary', 0)};
     box-shadow: none;
   }
+  &:hover {
+    color: ${palette('primary', 0)};
+  }
 `;
 const ClearButton = styled((p) => <Button {...p} />)`
-  cursor: ${({ onClick }) => onClick ? 'pointer' : 'auto'};
-  height: ${({ theme }) => theme.sizes.mapSearchBar.height}px;
-  width: ${({ theme }) => theme.sizes.mapSearchBar.height}px;
-  border-left: 1px solid ${palette('light', 3)};
-  border-right: 1px solid ${palette('light', 3)};
-  background-color: ${palette('light', 1)};
+  // removing extra space to reveal border + focus-visible outline
+  height: ${({ theme }) => theme.sizes.mapSearchBar.height - 6}px;
+  width: ${({ theme }) => theme.sizes.mapSearchBar.height - 6}px;
+  color: ${palette('dark', 4)};
+  &:hover {
+    color: ${palette('primary', 0)};
+  }
   &:focus-visible {
     z-index: 1;
     outline: 2px auto  ${palette('primary', 0)};
     box-shadow: none;
   }
+  @media print {
+    display: none;
+  }
 `;
-const StyledArrowIcon = styled((p) => (
-  <Icon
-    name="arrowDown"
-    size="10px"
-    palette="dark"
-    paletteIndex={4}
-    hasStroke
-    {...p}
-  />
-))``;
 const StyledCloseIcon = styled((p) => (
   <Icon
-    name="close"
-    size="10px"
-    palette="dark"
-    paletteIndex={4}
-    hasStroke
+    name="removeSmall"
+    size="16px"
     {...p}
   />
 ))``;
 const Styled = styled((p) => <Box {...p} />)`
   width: 100%;
+  height: ${({ theme }) => theme.sizes.mapSearchBar.height}px;
   position: relative;
 `;
 // eslint-disable-next-line react/no-multi-comp
-const StyledSearchBox = styled(forwardRef((p, ref) => <Box {...p} ref={ref} pad={{ left: 'small' }} />))`
+const StyledSearchBoxBase = forwardRef((p, ref) => (
+  <Box
+    pad={{
+      vertical: 'none',
+      left: 'medium',
+      right: 'small',
+    }}
+    {...p}
+    ref={ref}
+  />
+));
+const StyledSearchBox = styled(StyledSearchBoxBase)`
+  width: 100%;
+  background-color: ${palette('light', 1)};
+  color: ${palette('dark', 4)};
+  border: 1px solid ${palette('light', 3)};
   border-radius: 999px;
-  outline: 2px solid ${({ active }) => active ? palette('primary', 0) : 'transparent'};
-  outline-offset: 2px;
-  background: white;
-  border: solid 1px ${palette('light', 3)};
+  position: relative;
+  @media print {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    display: ${({ hidePrint }) => hidePrint ? 'none' : 'block'};
+  }
 `;
 const DropDown = styled.div`
   display: none;
@@ -198,9 +207,7 @@ export function Search({
     ? theme.sizes.mapSearchBar.searchIconSize : 0;
 
   return (
-    <Styled
-      pad={{ right: 'ms' }}
-    >
+    <Styled>
       <StyledSearchBox
         direction="row"
         align="center"
@@ -208,12 +215,6 @@ export function Search({
         active={textInputFocused}
       >
         <>
-          <Icon
-            size={`${searchIconSize}px`}
-            name="search"
-            palette="dark"
-            paletteIndex={3}
-          />
           <Box
             width="large"
             fill="horizontal"
@@ -246,22 +247,23 @@ export function Search({
                     setActiveResult(activeResetIndex);
                   }
                 }}
-
                 placeholder={placeholder}
               />
             </Keyboard>
-            {search.length > 0 && (
-              <ClearButton
-                onClick={() => {
-                  setSearch('');
-                  setActiveResult(activeResetIndex);
-                  setFocusByRef(textInputRef);
-                }}
-                justify="center"
-                align="center"
-                title="Clear"
-                icon={<StyledCloseIcon />}
-              />
+            {search.length > 1 && (
+              <Box>
+                <ClearButton
+                  onClick={() => {
+                    setSearch('');
+                    setActiveResult(activeResetIndex);
+                    setFocusByRef(textInputRef);
+                  }}
+                  justify="center"
+                  align="center"
+                  title="Clear"
+                  icon={<StyledCloseIcon />}
+                />
+              </Box>
             )}
           </Box>
           <Keyboard
@@ -290,7 +292,12 @@ export function Search({
                 onToggle(true);
               }}
               title="Search"
-              icon={<StyledArrowIcon />}
+              icon={(
+                <Icon
+                  size={`${searchIconSize}px`}
+                  name="search"
+                />
+              )}
             />
           </Keyboard>
         </>
