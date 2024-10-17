@@ -60,12 +60,11 @@ class EntityListViewOptions extends React.PureComponent { // eslint-disable-line
                             palette="dark"
                           />
                         </Box>
-                        {isMinSize(size, 'medium')
-                          && (
-                            <ButtonLabel size="small" isActive={option.active}>
-                              {option.title}
-                            </ButtonLabel>
-                          )}
+                        {isMinSize(size, 'medium') && (
+                          <ButtonLabel size="small" isActive={option.active}>
+                            {option.title}
+                          </ButtonLabel>
+                        )}
                       </Box>
                     )}
                   />
