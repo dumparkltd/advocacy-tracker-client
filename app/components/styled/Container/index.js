@@ -16,10 +16,10 @@ const Container = styled.div`
     padding-right: ${({ inModal, isPrint }) => (isPrint || inModal) ? 0 : 12}px;
     padding-left: ${({ inModal, isPrint }) => (isPrint || inModal) ? 0 : 12}px;
   }
-  @media (min-width: ${({ theme }) => theme.breakpoints.xxlarge}) {
+  @media (min-width: ${({ theme }) => theme.breakpoints.xlarge}) {
     max-width: ${({ isNarrow, isPrint, theme }) => {
     if (isPrint) return '100%';
-    return isNarrow ? '960px' : (parseInt(theme.breakpoints.xxlarge, 10) - 30) + 'px';
+    return isNarrow ? '960px' : (parseInt(theme.breakpoints.xlarge, 10) - 20) + 'px';
   }};
 }
   @media print {

@@ -1390,3 +1390,26 @@ export const getIndicatorColumnsForStatement = ({
   }
   return columns;
 };
+
+
+export const actionsByType = (actorActions, actions) => actorActions
+  && actions && actorActions.filter(
+  (id) => actions.get(id.toString())
+).groupBy(
+  (actionId) => actions.getIn([
+    actionId.toString(),
+    'attributes',
+    'measuretype_id',
+  ])
+).sortBy((val, key) => key);
+
+
+export const actorsByType = (actorActors, actors) => actorActors && actors && actorActors.filter(
+  (id) => actors.get(id.toString())
+).groupBy(
+  (actionId) => actors.getIn([
+    actionId.toString(),
+    'attributes',
+    'actortype_id',
+  ])
+).sortBy((val, key) => key);

@@ -26,7 +26,7 @@ const Search = styled((p) => <Box direction="row" pad={{ vertical: 'xsmall', hor
   background-color: ${palette('light', 1)};
   color: ${palette('dark', 2)};
   border: 1px solid ${palette('light', 3)};
-  min-height: ${({ small }) => small ? 30 : 36}px;
+  min-height: ${({ small }) => small ? 35 : 45}px;
   border-radius: 999px;
   position: relative;
   @media print {
@@ -42,8 +42,9 @@ const SearchInput = styled((p) => <DebounceInput {...p} />)`
   border: none;
   padding: 3px;
   &::placeholder {
-  color: ${palette('dark', 2)};
-  font-size: ${({ theme }) => theme.text.xsmall.size};
+    color: ${palette('dark', 2)};
+    opacity: 1;
+    font-size: ${({ theme }) => theme.text.small.size};
   }
   &:focus {
     outline: none;

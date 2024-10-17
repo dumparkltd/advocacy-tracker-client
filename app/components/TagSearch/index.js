@@ -102,21 +102,21 @@ export class TagSearch extends React.Component { // eslint-disable-line react/pr
     // onClick={() => {
     //   this.inputNode.focus()
     // }}
-    const hasFilters = (searchQuery || filters.length > 0);
+    const hasFilters = (searchQuery || (filters && filters.length > 0));
     return (
       <Search
         active={this.state.active}
         small={this.props.multiselect}
         printHide={!hasFilters}
       >
-        {filters.length > 0 && (
+        {filters && filters.length > 0 && (
           <LabelPrint>
             <FormattedMessage {...messages.labelPrintFilters} />
           </LabelPrint>
         )}
-        {filters.length > 0 && (
+        {filters && filters.length > 0 && (
           <Tags>
-            {filters.map((filter, i) => (
+            {filters && filters.map((filter, i) => (
               <ButtonTagFilterWrap
                 key={i}
                 filter={filter}

@@ -17,23 +17,18 @@ import {
   selectActionCategoriesGroupedByAction,
   selectCategories,
   selectIncludeInofficialStatements,
+  selectAssociationQuery,
 } from 'containers/App/selectors';
 
 import qe from 'utils/quasi-equals';
-import { getEntityCategories } from 'utils/entities';
+import {
+  getEntityCategories,
+  filterEntitiesByConnection,
+  actionsByType,
+  actorsByType,
+} from 'utils/entities';
 
 import { DEPENDENCIES } from './constants';
-
-const actionsByType = (actorActions, actions) => actorActions
-  && actions && actorActions.filter(
-  (id) => actions.get(id.toString())
-).groupBy(
-  (actionId) => actions.getIn([
-    actionId.toString(),
-    'attributes',
-    'measuretype_id',
-  ])
-).sortBy((val, key) => key);
 
 export const selectConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
@@ -71,10 +66,48 @@ export const selectConnections = createSelector(
   }
 );
 
+const selectCountriesWithAssociations = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
+  selectConnections,
+  selectMembershipsGroupedByMember,
+  (
+    ready,
+    actors,
+    connections,
+    associationConnectionsGrouped,
+  ) => {
+    if (ready) {
+      return actors.map(
+        (actor) => {
+          const actorId = parseInt(actor.get('id'), 10);
+          // memberships
+          const actorAssociations = associationConnectionsGrouped.get(actorId);
+          const actorAssociationsByType = actorsByType(actorAssociations, connections.get(API.ACTORS));
+          return actor
+            .set('associations', actorAssociations)
+            .set('associationsByType', actorAssociationsByType);
+        }
+      );
+    }
+    return actors;
+  }
+);
+
+const selectCountriesByAssociation = createSelector(
+  selectCountriesWithAssociations,
+  selectAssociationQuery,
+  (countries, query) => {
+    if (query) {
+      return filterEntitiesByConnection(countries, query, 'associations');
+    }
+    return countries;
+  }
+);
 
 export const selectCountries = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
+  selectCountriesByAssociation,
   selectConnections,
   selectActorActionsGroupedByActor,
   selectMembershipsGroupedByParent,

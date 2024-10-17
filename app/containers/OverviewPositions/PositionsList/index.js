@@ -4,7 +4,7 @@ import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { Map } from 'immutable';
-
+import { palette } from 'styled-theme';
 import styled from 'styled-components';
 
 import {
@@ -22,12 +22,16 @@ import {
 } from 'themes/config';
 
 import qe from 'utils/quasi-equals';
+import asArray from 'utils/as-array';
 
 import {
   getIndicatorMainTitle,
   getIndicatorAbbreviation,
   getIndicatorNumber,
+  getEntityTitle,
 } from 'utils/entities';
+
+import { sortEntities } from 'utils/sort';
 
 import {
   loadEntitiesIfNeeded,
@@ -40,6 +44,8 @@ import {
   selectIndicators,
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
+  selectAssociationQuery,
+  selectActorsByType,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -58,6 +64,7 @@ import {
 import { DEPENDENCIES } from './constants';
 
 import ComponentOptions from './ComponentOptions';
+import FilterDropdown from './FilterDropdown';
 
 import messages from './messages';
 
@@ -71,8 +78,25 @@ const Title = styled((p) => <Heading level="5" {...p} />)`
   text-transform: uppercase;
   font-weight: bold;
 `;
-const ID = 'positions-list';
+const Label = styled.span`
+  color: ${palette('dark', 2)};
+  font-size: ${({ theme }) => theme.text.xsmall.size};
+`;
 
+const prepareDropdownOptions = (entities, query) => entities
+  ? sortEntities(entities, 'asc', 'title', null, false).reduce(
+    (memo, entity) => ([
+      ...memo, {
+        title: getEntityTitle(entity),
+        id: entity.get('id'),
+        active: asArray(query).indexOf(entity.get('id')) > -1,
+      },
+    ]),
+    [],
+  )
+  : [];
+
+const ID = 'positions-list';
 export function PositionsList({
   dataReady,
   onLoadData,
@@ -85,6 +109,9 @@ export function PositionsList({
   intl,
   onUpdatePath,
   connections,
+  associationQuery,
+  actorsByType,
+  onUpdateAssociationQuery,
 }) {
   const [search, setSearch] = useState('');
   useEffect(() => {
@@ -255,12 +282,33 @@ export function PositionsList({
                     Countries
                   </ComponentTitle>
                 </Box>
-                <Box>
-                  <EntityListSearch
-                    searchQuery={search}
-                    onSearch={setSearch}
-                    placeholder="Search list by name or code"
+                <Box direction="row" gap="small">
+                  <FilterDropdown
+                    options={prepareDropdownOptions(
+                      actorsByType.get(parseInt(ACTORTYPES.REG, 10)),
+                      associationQuery,
+                    )}
+                    onSelect={onUpdateAssociationQuery}
+                    label="Filter by region"
+                    buttonLabel="Select region"
                   />
+                  <FilterDropdown
+                    options={prepareDropdownOptions(
+                      actorsByType.get(parseInt(ACTORTYPES.GROUP, 10)),
+                      associationQuery,
+                    )}
+                    onSelect={onUpdateAssociationQuery}
+                    label="Filter by group"
+                    buttonLabel="Select group"
+                  />
+                  <Box>
+                    <Label>Filter by name or code</Label>
+                    <EntityListSearch
+                      searchQuery={search}
+                      onSearch={setSearch}
+                      placeholder="Enter name or code"
+                    />
+                  </Box>
                 </Box>
               </Box>
               <Box
@@ -367,10 +415,13 @@ PositionsList.propTypes = {
   connections: PropTypes.object,
   indicators: PropTypes.object,
   onSetIncludeActorMembers: PropTypes.func,
+  onUpdateAssociationQuery: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   includeInofficialStatements: PropTypes.bool,
   onUpdateQuery: PropTypes.func,
   onUpdatePath: PropTypes.func,
+  associationQuery: PropTypes.string,
+  actorsByType: PropTypes.object, // immutable Map
   intl: intlShape.isRequired,
 };
 
@@ -381,6 +432,8 @@ const mapStateToProps = (state) => ({
   includeActorMembers: selectIncludeActorMembers(state),
   countries: selectCountries(state),
   connections: selectConnections(state),
+  associationQuery: selectAssociationQuery(state),
+  actorsByType: selectActorsByType(state),
 });
 
 export function mapDispatchToProps(dispatch) {
@@ -391,6 +444,24 @@ export function mapDispatchToProps(dispatch) {
     onSetIncludeActorMembers: (value) => dispatch(setIncludeActorMembers(value)),
     onUpdateQuery: (value) => dispatch(updateRouteQuery(value)),
     onUpdatePath: (path) => dispatch(updatePath(path)),
+    onUpdateAssociationQuery: (value) => {
+      if (!value) {
+        dispatch(updateRouteQuery({
+          arg: 'by-association',
+          value: null,
+          remove: true,
+          replace: true,
+          multipleAttributeValues: false,
+        }));
+      } else {
+        dispatch(updateRouteQuery({
+          arg: 'by-association',
+          value,
+          replace: true,
+          multipleAttributeValues: false,
+        }));
+      }
+    },
   };
 }
 

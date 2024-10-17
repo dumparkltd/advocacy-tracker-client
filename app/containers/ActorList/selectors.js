@@ -38,6 +38,8 @@ import {
   filterEntitiesByMultipleConnections,
   filterEntitiesByAttributes,
   entitiesSetCategoryIds,
+  actionsByType,
+  actorsByType,
 } from 'utils/entities';
 // import { qe } from 'utils/quasi-equals';
 
@@ -120,25 +122,6 @@ const selectActorsWithCategories = createSelector(
 //     return entities;
 //   }
 // );
-const actionsByType = (actorActions, actions) => actorActions && actions && actorActions.filter(
-  (id) => actions.get(id.toString())
-).groupBy(
-  (actionId) => actions.getIn([
-    actionId.toString(),
-    'attributes',
-    'measuretype_id',
-  ])
-).sortBy((val, key) => key);
-
-const actorsByType = (actorActors, actors) => actorActors && actors && actorActors.filter(
-  (id) => actors.get(id.toString())
-).groupBy(
-  (actionId) => actors.getIn([
-    actionId.toString(),
-    'attributes',
-    'actortype_id',
-  ])
-).sortBy((val, key) => key);
 
 export const selectActorsWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),

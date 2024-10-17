@@ -2081,3 +2081,8 @@ export const selectActorsWithPositions = createSelector(
     );
   }
 );
+
+export const selectActorsByType = createSelector(
+  selectActors,
+  (actors) => actors && actors.groupBy((actor) => actor.getIn(['attributes', 'actortype_id']))
+);

@@ -54,57 +54,55 @@ export function SearchResults({
       background="white"
     >
       <Styled flex overflow="auto" margin="none" dropdownWidth={dropdownWidth}>
-        {!hasOptions
-          && (
-            <Keyboard
-              onEnter={() => {
+        {!hasOptions && (
+          <Keyboard
+            onEnter={() => {
+              onToggle(false);
+              setActiveResult(activeResetIndex);
+              focusTextInput();
+            }}
+            onTab={() => {
+              onToggle(false);
+              setActiveResult(activeResetIndex);
+            }}
+          >
+            <StyledButton ref={noResultsRef}>
+              <Box pad="small">
+                <Hint italic>
+                  <FormattedMessage {...messages.noResults} />
+                </Hint>
+              </Box>
+            </StyledButton>
+          </Keyboard>
+        )}
+        {hasOptions && (
+          <Keyboard
+            onUp={(event) => {
+              event.preventDefault();
+              setActiveResult(Math.max(0, activeResult - 1));
+            }}
+            onDown={(event) => {
+              event.preventDefault();
+              setActiveResult(Math.min(activeResult + 1, maxResult - 1));
+            }}
+            onTab={() => {
+              // if end of the dropdown has been reached, toggle drop
+              if (activeResult + 1 === maxResult) {
                 onToggle(false);
-                setActiveResult(activeResetIndex);
-                focusTextInput();
+              }
+            }}
+          >
+            <ResultOptions
+              options={options.toList().toJS()}
+              activeResult={activeResult}
+              onClick={(id) => onSelect(id)}
+              focus={focus}
+              onFocus={(index) => {
+                setActiveResult(index);
               }}
-              onTab={() => {
-                onToggle(false);
-                setActiveResult(activeResetIndex);
-              }}
-            >
-              <StyledButton ref={noResultsRef}>
-                <Box pad="small">
-                  <Hint italic>
-                    <FormattedMessage {...messages.noResults} />
-                  </Hint>
-                </Box>
-              </StyledButton>
-            </Keyboard>
-          )}
-        {hasOptions
-          && (
-            <Keyboard
-              onUp={(event) => {
-                event.preventDefault();
-                setActiveResult(Math.max(0, activeResult - 1));
-              }}
-              onDown={(event) => {
-                event.preventDefault();
-                setActiveResult(Math.min(activeResult + 1, maxResult - 1));
-              }}
-              onTab={() => {
-                // if end of the dropdown has been reached, toggle drop
-                if (activeResult + 1 === maxResult) {
-                  onToggle(false);
-                }
-              }}
-            >
-              <ResultOptions
-                options={options.toList().toJS()}
-                activeResult={activeResult}
-                onClick={(id) => onSelect(id)}
-                focus={focus}
-                onFocus={(index) => {
-                  setActiveResult(index);
-                }}
-              />
-            </Keyboard>
-          )}
+            />
+          </Keyboard>
+        )}
       </Styled>
     </Box>
   );
