@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import {
-  Box, Button, Heading, Text,
+  Box, Button, Text,
 } from 'grommet';
 
 import appMessages from 'containers/App/messages';
@@ -32,36 +32,42 @@ const HintWrapper = styled((p) => <Box pad={{ bottom: 'small' }} {...p} />)`
 const Hint = styled((p) => <Text size="xsmall" {...p} />)`
   color: ${palette('dark', 3)};
 `;
-const TitleWrapper = styled((p) => <Box pad={{ bottom: 'medium' }} {...p} />)``;
-const Title = styled((p) => <Heading level={2} {...p} />)`
+const TitleWrapper = styled((p) => <Box pad={{ bottom: 'xlarge', top: 'small' }} {...p} />)``;
+const Title = styled((p) => <Text {...p} />)`
  font-family: ${({ theme }) => theme.fonts.title};
  font-weight: normal;
+ font-size: 42px;
  margin-top: 0px;
 `;
-const CreateItemButton = styled((p) => (
-  <Button
-    as="a"
-    plain={false}
-    pad="xsmall"
-    icon={<Icon name="add" size="10px" palette="primary" paletteIndex={1} />}
-    {...p}
-  />
-))`
+const AddIconWrapper = styled((p) => <Box {...p} />)`
+  color: ${palette('primary', 1)};
   background-color: white;
   border-radius: 999px;
   border: none;
-  box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1), 0px 1px 3px rgba(0, 0, 0, 0.08);
+  padding: 10px;
+`;
+const ItemButton = styled((p) => <Button as="a" pad="xsmall" {...p} />)`
+  background-color: white;
+  border: none;
+  &:hover {
+    color: ${palette('primary', 0)};
+    box-shadow: none;
+  }
+`;
+const ItemWrapper = styled((p) => <Box {...p} />)`
+  border-bottom: 1px solid ${palette('light', 1)};
   &:hover {
     color: ${palette('primary', 0)};
   }
-`;
-const NavItem = styled((p) => <Box {...p} />)`
-  border-bottom: 1px solid ${palette('light', 1)};
 `;
 const ExpandItems = styled((p) => <Button plain {...p} />)`
   color: ${palette('primary', 1)};
   font-family: ${({ theme }) => theme.fonts.title};
   font-weight: normal;
+  &:hover {
+    color: ${palette('primary', 0)};
+  }
 `;
 
 const CreateMenu = ({
@@ -103,16 +109,10 @@ const CreateMenu = ({
               <FormattedMessage {...messages.selectLabel} />
             </Hint>
           </HintWrapper>
-          {displayedNavItems && displayedNavItems.map((item, i) => (
-            <NavItem
-              key={i}
-              direction="row"
-              justify="between"
-              fill="horizontal"
-              pad={{ vertical: 'small' }}
-            >
-              <Text>{item.title}</Text>
-              <CreateItemButton
+          <Box margin={{ left: 'xsmall' }}>
+            {displayedNavItems && displayedNavItems.map((item, i) => (
+              <ItemButton
+                key={i}
                 href={item.path}
                 active={item.active}
                 onClick={(evt) => {
@@ -120,9 +120,31 @@ const CreateMenu = ({
                   onHideMenu();
                   onClick(evt, item.path);
                 }}
-              />
-            </NavItem>
-          ))}
+              >
+                <ItemWrapper
+                  direction="row"
+                  justify="between"
+                  align="center"
+                  fill="horizontal"
+                  pad={{ vertical: 'xsmall' }}
+                >
+                  <Text>{item.title}</Text>
+                  <Box
+                    width="79px"
+                    align="center"
+                  >
+                    <AddIconWrapper>
+                      <Icon
+                        name="add"
+                        size="14px"
+                        hasStroke
+                      />
+                    </AddIconWrapper>
+                  </Box>
+                </ItemWrapper>
+              </ItemButton>
+            ))}
+          </Box>
           <ExpandItems
             label={
               isExpanded
@@ -130,6 +152,7 @@ const CreateMenu = ({
                 : <FormattedMessage {...messages.showMoreLabel} />
             }
             onClick={() => setIsExpanded(!isExpanded)}
+            margin={{ left: 'xsmall' }}
           />
         </Styled>
       </Section>
