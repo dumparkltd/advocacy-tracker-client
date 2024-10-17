@@ -25,7 +25,7 @@ import {
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
-import { ROUTES } from 'themes/config';
+import { ROUTES, RESOURCETYPES } from 'themes/config';
 import { PRINT_TYPES } from 'containers/App/constants';
 
 import { keydownHandlerPrint } from 'utils/print';
@@ -61,7 +61,6 @@ export function ResourceList({
   resourcetypes,
   onSelectType,
   handleImport,
-  handleNew,
   allEntities,
   onSetPrintView,
   intl,
@@ -110,13 +109,6 @@ export function ResourceList({
   if (isMember) {
     headerOptions.actions.push({
       type: 'text',
-      title: 'Create new',
-      onClick: () => handleNew(typeId),
-      icon: 'add',
-      isMember,
-    });
-    headerOptions.actions.push({
-      type: 'text',
       title: intl.formatMessage(appMessages.buttons.import),
       onClick: () => handleImport(typeId),
       icon: 'import',
@@ -125,6 +117,13 @@ export function ResourceList({
   }
 
   // connectedTaxonomies={connectedTaxonomies}
+  const navItems = Object.values(RESOURCETYPES).map(
+    (resourceTypeId) => ({
+      path: `${ROUTES.RESOURCES}/${resourceTypeId}`,
+      title: intl.formatMessage(appMessages.resourcetypes[resourceTypeId]),
+      active: location.pathname && location.pathname.startsWith(`${ROUTES.RESOURCES}/${resourceTypeId}`),
+    })
+  );
   return (
     <div>
       <Helmet
@@ -134,6 +133,7 @@ export function ResourceList({
         ]}
       />
       <EntityList
+        secondaryNavItems={navItems}
         entities={entities}
         allEntities={allEntities.toList()}
         connections={connections}
@@ -158,7 +158,6 @@ export function ResourceList({
 
 ResourceList.propTypes = {
   onLoadEntitiesIfNeeded: PropTypes.func,
-  handleNew: PropTypes.func,
   handleImport: PropTypes.func,
   onSelectType: PropTypes.func,
   dataReady: PropTypes.bool,
@@ -191,9 +190,6 @@ function mapDispatchToProps(dispatch) {
   return {
     onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
-    },
-    handleNew: (typeId) => {
-      dispatch(updatePath(`${ROUTES.RESOURCES}/${typeId}${ROUTES.NEW}`, { replace: true }));
     },
     handleImport: (typeId) => {
       dispatch(updatePath(`${ROUTES.RESOURCES}/${typeId}${ROUTES.IMPORT}`));

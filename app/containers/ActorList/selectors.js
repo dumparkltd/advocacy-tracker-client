@@ -15,12 +15,10 @@ import {
   selectActorCategoriesGroupedByActor,
   selectActionCategoriesGroupedByAction,
   selectActorActionsGroupedByActor,
-  selectActionActorsGroupedByActor,
   selectMembershipsGroupedByMember,
   selectMembershipParentsGroupedByMember,
   selectMembershipsGroupedByParent,
   selectCategories,
-  selectTargetingQuery,
   selectMemberQuery,
   selectAssociationQuery,
   selectUserQuery,
@@ -29,8 +27,6 @@ import {
   selectIncludeMembersForFiltering,
   selectIncludeActorMembers,
   selectIncludeActorChildren,
-  selectIncludeTargetMembers,
-  selectIncludeTargetChildren,
 } from 'containers/App/selectors';
 
 import {
@@ -149,7 +145,6 @@ export const selectActorsWithConnections = createSelector(
   selectActorsWithCategories,
   selectConnections,
   selectActorActionsGroupedByActor,
-  selectActionActorsGroupedByActor, // as targets
   selectMembershipsGroupedByParent,
   selectMembershipsGroupedByMember,
   selectMembershipParentsGroupedByMember,
@@ -159,7 +154,6 @@ export const selectActorsWithConnections = createSelector(
     actors,
     connections,
     actionsAsActorGrouped,
-    actionsAsTargetGrouped,
     memberConnectionsGrouped,
     associationConnectionsGrouped,
     associationParentConnectionsGrouped,
@@ -172,10 +166,6 @@ export const selectActorsWithConnections = createSelector(
           // actors
           const actorActions = actionsAsActorGrouped.get(actorId) || Map();
           const actorActionsByType = actionsByType(actorActions, connections.get(API.ACTIONS));
-
-          // targets
-          const targetActions = actionsAsTargetGrouped.get(actorId) || Map();
-          const targetingActionsByType = actionsByType(targetActions, connections.get(API.ACTIONS));
 
           // members
           const actorMembers = memberConnectionsGrouped.get(actorId);
@@ -212,25 +202,6 @@ export const selectActorsWithConnections = createSelector(
           }, Map());
           const actorActionsAsParentByType = actorActionsAsParent && actionsByType(actorActionsAsParent, connections.get(API.ACTIONS));
 
-          // targeted by actions as member of group
-          const targetActionsAsMember = actorAssociations && actorAssociations.size > 0 && actorAssociations.reduce((memo, associationId) => {
-            const associationActionsAsTarget = actionsAsTargetGrouped.get(parseInt(associationId, 10));
-            if (associationActionsAsTarget) {
-              return memo.concat(associationActionsAsTarget);
-            }
-            return memo;
-          }, Map());
-          const targetActionsAsMemberByType = targetActionsAsMember && actionsByType(targetActionsAsMember, connections.get(API.ACTIONS));
-
-          // targeted by actions as parent of actor
-          const targetActionsAsParent = actorMembers && actorMembers.size > 0 && actorMembers.reduce((memo, memberId) => {
-            const memberActionsAsTarget = actionsAsTargetGrouped.get(parseInt(memberId, 10));
-            if (memberActionsAsTarget) {
-              return memo.concat(memberActionsAsTarget);
-            }
-            return memo;
-          }, Map());
-          const targetActionsAsParentByType = targetActionsAsParent && actionsByType(targetActionsAsParent, connections.get(API.ACTIONS));
           const actorUsers = userConnectionsGrouped.get(actorId);
 
           return actor
@@ -240,12 +211,6 @@ export const selectActorsWithConnections = createSelector(
             .set('actionsAsMemberByType', actorActionsAsMemberByType)
             .set('actionsAsParent', actorActionsAsParent)
             .set('actionsAsParentByType', actorActionsAsParentByType)
-            .set('targetingActions', targetActions)
-            .set('targetingActionsByType', targetingActionsByType)
-            .set('targetingActionsAsMember', targetActionsAsMember)
-            .set('targetingActionsAsMemberByType', targetActionsAsMemberByType)
-            .set('targetingActionsAsParent', targetActionsAsParent)
-            .set('targetingActionsAsParentByType', targetActionsAsParentByType)
             .set('members', actorMembers)
             .set('membersByType', actorMembersByType)
             .set('associations', actorAssociations)
@@ -259,22 +224,6 @@ export const selectActorsWithConnections = createSelector(
     return actors;
   }
 );
-
-// TODO probably not needed
-// const selectActorsByActortype = createSelector(
-//   selectActorsWithActions,
-//   selectActortypeQuery,
-//   selectActortypeListQuery,
-//   (entities, actortypeQuery, listQuery) => actortypeQuery === 'all'
-//     && listQuery
-//     ? entities.filter(
-//       (entity) => qe(
-//         entity.getIn(['attributes', 'actortype_id']),
-//         listQuery,
-//       )
-//     )
-//     : entities
-// );
 
 const selectActorsWhereQuery = createSelector(
   selectAttributeQuery,
@@ -338,47 +287,9 @@ const selectActorsByActions = createSelector(
     )
     : entities
 );
-const selectActorsByTargeted = createSelector(
-  selectActorsByActions,
-  selectTargetingQuery,
-  selectIncludeTargetMembers,
-  selectIncludeTargetChildren,
-  (entities, query, includeTargetMembersQuery, includeTargetChildrenQuery) => query && entities
-    ? entities.filter(
-      (entity) => {
-        let pass = asList(query).some(
-          (queryValue) => checkQuery({
-            entity,
-            queryValue,
-            path: 'targetingActions',
-          })
-        );
-        if (!pass && includeTargetMembersQuery) {
-          pass = asList(query).some(
-            (queryValue) => checkQuery({
-              entity,
-              queryValue,
-              path: 'targetingActionsAsMember',
-            })
-          );
-        }
-        if (!pass && includeTargetChildrenQuery) {
-          pass = asList(query).some(
-            (queryValue) => checkQuery({
-              entity,
-              queryValue,
-              path: 'targetingActionsAsParent',
-            })
-          );
-        }
-        return pass;
-      }
-    )
-    : entities
-);
 
 const selectActorsByMembers = createSelector(
-  selectActorsByTargeted,
+  selectActorsByActions,
   selectMemberQuery,
   (entities, query) => query
     ? filterEntitiesByConnection(entities, query, 'members')

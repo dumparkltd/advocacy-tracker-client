@@ -21,6 +21,7 @@ import {
 } from 'themes/config';
 import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
+import isDate from 'utils/is-date';
 // import { hasGroupActors } from 'utils/entities';
 import MapWrapper from 'containers/MapContainer/MapWrapper';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
@@ -87,9 +88,14 @@ const reduceCountryData = ({
                       <Text size="xxxsmall" color="textSecondary">
                         Statement
                       </Text>
-                      {statement.get('date_start') && (
+                      {isDate(statement.get('date_start')) && (
                         <Text size="xxxsmall" color="textSecondary">
                           {`(${intl.formatDate(statement.get('date_start'))})`}
+                        </Text>
+                      )}
+                      {!isDate(statement.get('date_start')) && isDate(statement.get('created_at')) && (
+                        <Text size="xxxsmall" color="textSecondary">
+                          {`(${intl.formatDate(statement.get('created_at'))})`}
                         </Text>
                       )}
                     </Box>

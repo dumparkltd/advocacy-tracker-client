@@ -55,7 +55,7 @@ export const selectResourcesWithConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectResourcetypeResources,
   selectConnections,
-  selectActionResourcesGroupedByResource, // as targets
+  selectActionResourcesGroupedByResource,
   (
     ready,
     entities,

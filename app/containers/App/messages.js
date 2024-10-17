@@ -23,23 +23,23 @@ export default defineMessages({
     },
     1: {
       id: 'app.containers.App.supportlevels.1',
-      defaultMessage: '1 - Strong support',
+      defaultMessage: 'Strong support',
     },
     2: {
       id: 'app.containers.App.supportlevels.2',
-      defaultMessage: '2 - Quite positive',
+      defaultMessage: 'Quite positive',
     },
     3: {
       id: 'app.containers.App.supportlevels.3',
-      defaultMessage: '3 - On the fence',
+      defaultMessage: 'On the fence',
     },
     4: {
       id: 'app.containers.App.supportlevels.4',
-      defaultMessage: '4 - Rather sceptical',
+      defaultMessage: 'Rather sceptical',
     },
     5: {
       id: 'app.containers.App.supportlevels.5',
-      defaultMessage: '5 - Opponent',
+      defaultMessage: 'Opponent',
     },
     99: {
       id: 'app.containers.App.supportlevels.99',
@@ -1065,10 +1065,6 @@ export default defineMessages({
       id: 'app.containers.App.nav.actionsMembers',
       defaultMessage: 'Activities as member',
     },
-    targetingActions: {
-      id: 'app.containers.App.nav.targetingActions',
-      defaultMessage: 'Targeted by',
-    },
     topActions: {
       id: 'app.containers.App.nav.topActions',
       defaultMessage: 'Parent activities',
@@ -1088,14 +1084,6 @@ export default defineMessages({
     indicators: {
       id: 'app.containers.App.nav.indicators',
       defaultMessage: 'Position indicators',
-    },
-    targets: {
-      id: 'app.containers.App.nav.targets',
-      defaultMessage: 'Targets',
-    },
-    targetingActionsAsMember: {
-      id: 'app.containers.App.nav.targetingActionsAsMember',
-      defaultMessage: 'Targeted by (as member)',
     },
     members: {
       id: 'app.containers.App.nav.members',
@@ -1168,6 +1156,18 @@ export default defineMessages({
     register: {
       id: 'app.containers.App.nav.register',
       defaultMessage: 'Register',
+    },
+    positions: {
+      id: 'app.containers.App.nav.positions',
+      defaultMessage: 'Positions',
+    },
+    outreach: {
+      id: 'app.containers.App.nav.outreach',
+      defaultMessage: 'Outreach',
+    },
+    mystuff: {
+      id: 'app.containers.App.nav.mystuff',
+      defaultMessage: 'My stuff',
     },
   },
   entities: {
@@ -2425,6 +2425,16 @@ export default defineMessages({
       all: {
         id: 'app.containers.App.ui.pageItemOptions.all',
         defaultMessage: 'All',
+      },
+    },
+    statementOptions: {
+      includeMemberships: {
+        id: 'app.containers.App.ui.statementOptions.includeMemberships',
+        defaultMessage: 'Include positions of groups (countries are member of)',
+      },
+      excludeInofficial: {
+        id: 'app.containers.App.ui.statementOptions.excludeInofficial',
+        defaultMessage: 'Only show "official" statements (Level of Authority)',
       },
     },
   },

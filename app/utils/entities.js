@@ -8,6 +8,7 @@ import {
   INDICATOR_FIELDS,
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
   API,
 } from 'themes/config';
 import { find, reduce, every } from 'lodash/collection';
@@ -23,7 +24,7 @@ import isNumber from 'utils/is-number';
 import appMessage from 'utils/app-message';
 import { qe } from 'utils/quasi-equals';
 import validateEmailFormat from 'components/forms/validators/validate-email-format';
-
+import appMessages from 'containers/App/messages';
 // check if entity has nested connection by id
 // - connectionAttributes: { path: 'indicatorConnections', id: 'indicator_id' }
 // - connectionAttributeQuery: { attribute: connectionAttribute, values: [value2,value3] }
@@ -1040,7 +1041,6 @@ export const setActionConnections = ({
   action,
   actionConnections,
   actorActions, // as active actor
-  actionActors, // as passive target of action
   actionResources,
   actionIndicators,
   actionIndicatorAttributes,
@@ -1054,14 +1054,6 @@ export const setActionConnections = ({
   const entityActorsByActortype = entityActors
     && actionConnections.get(API.ACTORS)
     && entityActors
-      .filter((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString()]))
-      .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
-      .sortBy((val, key) => key);
-  // actors
-  const entityTargets = actionActors && actionActors.get(actionId);
-  const entityTargetsByActortype = entityTargets
-    && actionConnections.get(API.ACTORS)
-    && entityTargets
       .filter((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString()]))
       .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
       .sortBy((val, key) => key);
@@ -1099,7 +1091,6 @@ export const setActionConnections = ({
   return action
     .set('categories', entityCategories)
     .set('actorsByType', entityActorsByActortype)
-    .set('targetsByType', entityTargetsByActortype)
     .set('resourcesByType', entityResourcesByResourcetype)
     .set('indicators', entityIndicators)
     .set('indicatorConnections', actionIndicatorAttributes && actionIndicatorAttributes.get(parseInt(action.get('id'), 10)))
@@ -1110,7 +1101,6 @@ export const setActorConnections = ({
   actor,
   actorConnections,
   actorActions,
-  actionActors,
   categories,
   actorCategories,
   memberships,
@@ -1124,15 +1114,6 @@ export const setActorConnections = ({
   const entityActionsByActiontype = entityActions
     && actorConnections.get(API.ACTIONS)
     && entityActions
-      .filter((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString()]))
-      .groupBy((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString(), 'attributes', 'measuretype_id']).toString())
-      .sortBy((val, key) => key);
-
-  // targets
-  const entityTargetingActions = actionActors && actionActors.get(actorId);
-  const entityTargetingActionsByType = entityTargetingActions
-    && actorConnections.get(API.ACTIONS)
-    && entityTargetingActions
       .filter((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString()]))
       .groupBy((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString(), 'attributes', 'measuretype_id']).toString())
       .sortBy((val, key) => key);
@@ -1174,7 +1155,6 @@ export const setActorConnections = ({
   return actor
     .set('categories', entityCategories)
     .set('actionsByType', entityActionsByActiontype)
-    .set('targetingActionsByType', entityTargetingActionsByType)
     .set('membersByType', entityMembersByActortype)
     .set('associationsByType', entityAssociationsByActortype)
     .set('users', entityUsers);
@@ -1335,6 +1315,77 @@ export const getActortypeColumns = ({
     columns = [
       ...columns,
       ...otherColumns,
+    ];
+  }
+  return columns;
+};
+
+export const getIndicatorShortTitle = (title) => {
+  let short = title;
+  if (short.indexOf(':') > -1) {
+    short = short.split(':')[0].trim();
+    if (short.indexOf(' - ') > -1) {
+      short = short.split('-')[1].trim();
+    }
+  }
+  return short;
+};
+export const getIndicatorMainTitle = (title) => {
+  let short = title;
+  if (short.indexOf(':') > -1) {
+    short = short.split(':')[0].trim();
+  }
+  return short;
+};
+export const getIndicatorNiceTitle = (title) => {
+  const no = getIndicatorNumber(title);
+  const label = getIndicatorShortTitle(title);
+  return no ? `${no}. ${label}` : label;
+};
+export const getIndicatorSecondaryTitle = (title) => {
+  if (title && title.indexOf(':') > -1) {
+    return title.split(':')[1].trim();
+  }
+  return null;
+};
+export const getIndicatorAbbreviation = (title) => {
+  const short = getIndicatorShortTitle(title);
+  const words = short.split(' ');
+  if (words.length === 1) {
+    return words[0].length > 2 ? words[0].substr(0, 2) : words[0];
+  }
+  return words.reduce((memo, word) => `${memo}${word.substr(0, 1)}`, '');
+};
+export const getIndicatorNumber = (title) => {
+  const short = getIndicatorMainTitle(title);
+  if (short.indexOf(' - ') > -1) {
+    return short.split('-')[0].trim();
+  }
+  return null;
+};
+
+export const getIndicatorColumnsForStatement = ({
+  action, intl, isAdmin,
+}) => {
+  const actionType = action && action.getIn(['attributes', 'measuretype_id']);
+  let columns = [{
+    id: 'main',
+    type: 'main',
+    sort: 'title',
+    attributes: isAdmin ? ['code', 'title'] : ['title'],
+  }];
+  if (
+    ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actionType]
+    && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actionType].length > 0
+  ) {
+    columns = [
+      ...columns,
+      {
+        id: 'supportlevel_id',
+        type: 'supportlevel',
+        actionId: action.get('id'),
+        title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+      },
     ];
   }
   return columns;

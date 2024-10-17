@@ -1,11 +1,24 @@
 import { truncateText } from 'utils/string';
 import { sortEntities, sortCategories } from 'utils/sort';
-// import { filterTaxonomies } from 'utils/entities';
+import {
+  getEntityTitle,
+  checkActionAttribute,
+  checkActorAttribute,
+  checkIndicatorAttribute,
+  getIndicatorColumnsForStatement,
+} from 'utils/entities';
 import isNumber from 'utils/is-number';
 import qe from 'utils/quasi-equals';
 
 import {
-  USER_ROLES, TEXT_TRUNCATE, ROUTES, API,
+  USER_ROLES,
+  TEXT_TRUNCATE,
+  ROUTES,
+  API,
+  ACTION_FIELDS,
+  ACTOR_FIELDS,
+  RESOURCE_FIELDS,
+  INDICATOR_FIELDS,
 } from 'themes/config';
 
 import appMessages from 'containers/App/messages';
@@ -286,7 +299,7 @@ export const getDateField = (
     value: !!value && value,
     label,
     showEmpty: showEmpty && (emptyMessage || appMessages.attributes[`${attribute}_empty`]),
-    specificity,
+    specificity: specificity || 'd',
   });
 };
 
@@ -374,6 +387,7 @@ const getConnectionField = ({
   columns,
   isGrouped,
   onCreate,
+  moreLess = true,
 }) => ({
   type: 'connections',
   values: entities && entities.toList(),
@@ -395,6 +409,7 @@ const getConnectionField = ({
     attributes: ['code', 'title'],
   }],
   onCreate,
+  moreLess,
 });
 
 export const getActorConnectionField = ({
@@ -552,6 +567,7 @@ export const getIndicatorConnectionField = ({
   skipLabel,
   connectionOptions,
   columns,
+  moreLess,
 }) => getConnectionField({
   entities: sortEntities(indicators, 'asc', 'id'),
   connections,
@@ -568,6 +584,7 @@ export const getIndicatorConnectionField = ({
   onEntityClick,
   skipLabel,
   columns,
+  moreLess,
 });
 export const getUserConnectionField = ({
   users,
@@ -616,3 +633,278 @@ export const getEmailField = (entity) => ({
   type: 'email',
   value: entity.getIn(['attributes', 'email']),
 });
+
+export const getActionPreviewHeader = (action, intl) => ({
+  aboveTitle: intl.formatMessage(
+    appMessages.entities[`actions_${action.getIn(['attributes', 'measuretype_id'])}`].single
+  ),
+  path: `${ROUTES.ACTION}/${action.get('id')}`,
+  title: getEntityTitle(action),
+  code: checkActionAttribute(action, 'code'),
+});
+export const getActionPreviewFooter = (action, intl) => {
+  const typeId = action && action.getIn(['attributes', 'measuretype_id']);
+  return ({
+    primaryLink: action && {
+      path: `${ROUTES.ACTION}/${action.get('id')}`,
+      title: `${intl.formatMessage(
+        appMessages.entities[`actions_${typeId}`].single
+      )} details`,
+    },
+    secondaryLink: {
+      path: `${ROUTES.ACTIONS}/${typeId}`,
+      title: `All ${intl.formatMessage(
+        appMessages.entities[`actions_${typeId}`].plural
+      )}`,
+    },
+  });
+};
+export const getActionPreviewFields = ({
+  action,
+  indicators,
+  onEntityClick,
+  intl,
+  isAdmin,
+}) => {
+  let fields = [];
+  fields = Object.keys(ACTION_FIELDS.ATTRIBUTES).reduce(
+    (memo, key) => {
+      const attribute = ACTION_FIELDS.ATTRIBUTES[key];
+      if (
+        action
+        && attribute.preview
+        && attribute.preview.indexOf(`${action.getIn(['attributes', 'measuretype_id'])}`) > -1
+      ) {
+        if (key === 'date_start') {
+          return [
+            ...memo,
+            getDateField(action, key, { showEmpty: false }),
+          ];
+        }
+      }
+      return memo;
+    },
+    [],
+  );
+  if (ACTION_FIELDS.CONNECTIONS) {
+    fields = Object.keys(ACTION_FIELDS.CONNECTIONS).reduce(
+      (memo, key) => {
+        const connection = ACTION_FIELDS.CONNECTIONS[key];
+        if (
+          action
+          && indicators
+          && key === 'indicators'
+          && connection.preview
+          && connection.preview.indexOf(`${action.getIn(['attributes', 'measuretype_id'])}`) > -1
+        ) {
+          // console.log('indicators', indicators && indicators.toJS())
+          const field = getIndicatorConnectionField({
+            indicators,
+            onEntityClick,
+            columns: getIndicatorColumnsForStatement({
+              action,
+              intl,
+              isAdmin,
+            }),
+            moreLess: false,
+          });
+          return [
+            ...memo,
+            field,
+          ];
+        }
+        return memo;
+      },
+      fields,
+    );
+  }
+  return fields;
+};
+export const getActorPreviewHeader = (actor, intl) => ({
+  aboveTitle: intl.formatMessage(
+    appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].single
+  ),
+  title: getEntityTitle(actor),
+  code: checkActorAttribute(actor, 'code'),
+});
+export const getActorPreviewFooter = (actor, intl) => {
+  const typeId = actor && actor.getIn(['attributes', 'actortype_id']);
+  return ({
+    primaryLink: actor && {
+      path: `${ROUTES.ACTOR}/${actor.get('id')}`,
+      title: `${intl.formatMessage(
+        appMessages.entities[`actors_${typeId}`].single
+      )} details`,
+    },
+    secondaryLink: {
+      path: `${ROUTES.ACTORS}/${typeId}`,
+      title: `All ${intl.formatMessage(
+        appMessages.entities[`actors_${typeId}`].plural
+      )}`,
+    },
+  });
+};
+export const getActorPreviewFields = ({
+  action,
+  // indicators,
+  // onEntityClick,
+  // intl,
+  // isAdmin,
+}) => {
+  let fields = [];
+  fields = Object.keys(ACTOR_FIELDS.ATTRIBUTES).reduce(
+    (memo, key) => {
+      const attribute = ACTOR_FIELDS.ATTRIBUTES[key];
+      if (
+        action
+        && attribute.preview
+        && attribute.preview.indexOf(`${action.getIn(['attributes', 'actortype_id'])}`) > -1
+      ) {
+        if (key === 'date_start') {
+          return [
+            ...memo,
+            getDateField(action, key, { showEmpty: false }),
+          ];
+        }
+      }
+      return memo;
+    },
+    [],
+  );
+  return fields;
+};
+
+export const getIndicatorPreviewHeader = (indicator, intl) => ({
+  aboveTitle: intl.formatMessage(
+    appMessages.entities.indicators.single
+  ),
+  title: getEntityTitle(indicator),
+  code: checkIndicatorAttribute(indicator, 'code'),
+});
+export const getIndicatorPreviewFooter = (indicator, intl) => ({
+  primaryLink: indicator && {
+    path: `${ROUTES.ACTOR}/${indicator.get('id')}`,
+    title: `${intl.formatMessage(
+      appMessages.entities.indicators.single
+    )} details`,
+  },
+  secondaryLink: {
+    path: ROUTES.INDICATORS,
+    title: `All ${intl.formatMessage(appMessages.entities.indicators.plural)}`,
+  },
+});
+
+export const getIndicatorPreviewFields = ({
+  action,
+  // indicators,
+  // onEntityClick,
+  // intl,
+  // isAdmin,
+}) => {
+  let fields = [];
+  fields = Object.keys(INDICATOR_FIELDS.ATTRIBUTES).reduce(
+    (memo, key) => {
+      const attribute = INDICATOR_FIELDS.ATTRIBUTES[key];
+      if (
+        action
+        && attribute.preview
+        && attribute.preview.indexOf(`${action.getIn(['attributes', 'actortype_id'])}`) > -1
+      ) {
+        if (key === 'date_start') {
+          return [
+            ...memo,
+            getDateField(action, key, { showEmpty: false }),
+          ];
+        }
+      }
+      return memo;
+    },
+    [],
+  );
+  return fields;
+};
+export const getResourcePreviewHeader = (resource, intl) => ({
+  aboveTitle: intl.formatMessage(
+    appMessages.entities[`resources_${resource.getIn(['attributes', 'resourcetype_id'])}`].single
+  ),
+  title: getEntityTitle(resource),
+});
+export const getResourcePreviewFooter = (resource, intl) => {
+  const typeId = resource && resource.getIn(['attributes', 'resourcetype_id']);
+  return ({
+    primaryLink: resource && {
+      path: `${ROUTES.RESOURCE}/${resource.get('id')}`,
+      title: `${intl.formatMessage(
+        appMessages.entities[`resources_${typeId}`].single
+      )} details`,
+    },
+    secondaryLink: {
+      path: `${ROUTES.RESOURCES}/${typeId}`,
+      title: `All ${intl.formatMessage(
+        appMessages.entities[`resources_${typeId}`].plural
+      )}`,
+    },
+  });
+};
+
+export const getResourcePreviewFields = ({
+  resource,
+  // indicators,
+  // onEntityClick,
+  // intl,
+  // isAdmin,
+}) => {
+  let fields = [];
+  fields = Object.keys(RESOURCE_FIELDS.ATTRIBUTES).reduce(
+    (memo, key) => {
+      const attribute = RESOURCE_FIELDS.ATTRIBUTES[key];
+      if (
+        resource
+        && attribute.preview
+        && attribute.preview.indexOf(`${resource.getIn(['attributes', 'resourcetype_id'])}`) > -1
+      ) {
+        if (key === 'date_start') {
+          return [
+            ...memo,
+            getDateField(resource, key, { showEmpty: false }),
+          ];
+        }
+      }
+      return memo;
+    },
+    [],
+  );
+  return fields;
+};
+
+export const getUserPreviewHeader = (indicator, intl) => ({
+  aboveTitle: intl.formatMessage(
+    appMessages.entities.users.single
+  ),
+  title: getEntityTitle(indicator),
+});
+export const getUserPreviewFooter = (user, intl) => ({
+  primaryLink: user && {
+    path: `${ROUTES.USERS}/${user.get('id')}`,
+    title: `${intl.formatMessage(
+      appMessages.entities.users.single
+    )} details`,
+  },
+  secondaryLink: {
+    path: ROUTES.USERS,
+    title: `All ${intl.formatMessage(appMessages.entities.users.plural)}`,
+  },
+});
+
+export const getUserPreviewFields = (
+// {
+  // user,
+  // indicators,
+  // onEntityClick,
+  // intl,
+  // isAdmin,
+// }) => {
+) => {
+  const fields = [];
+  return fields;
+};

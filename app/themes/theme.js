@@ -315,14 +315,14 @@ theme.sizes = {
       heightMobile: 30,
     },
   },
-  headerExplore: {
+  navSecondary: {
     banner: {
       height: 120,
       heightMobile: 60,
     },
     nav: {
-      height: 40,
-      heightMobile: 35,
+      height: 60,
+      heightMobile: 60,
     },
   },
   header: {
@@ -351,6 +351,11 @@ theme.sizes = {
       small: 8,
       large: 10,
     },
+  },
+  mapSearchBar: {
+    height: 40,
+    width: 250,
+    searchIconSize: 26,
   },
   home: {
     // px or em
@@ -415,12 +420,12 @@ export const BREAKPOINTS = {
   },
   xlarge: {
     min: 1152, // exclusive
-    max: 1728,
+    max: 1444,
     name: 'desktop',
     index: 4,
   },
   xxlarge: {
-    min: 1728, // exclusive
+    min: 1444, // exclusive
     max: 99999999,
     name: 'large desktop',
     index: 5,
@@ -469,9 +474,9 @@ theme.global = {
   colors: {
     icon: '#000000',
     actors: '#006076',
-    targets: '#a52752',
     brand: '#000000',
     highlight: '#00728f',
+    primary: '#00728f',
     highlightHover: '#08586c',
     background: '#f1f0f1',
     backgroundLight: '#fcfcfc',

@@ -67,7 +67,6 @@ const STATE_INITIAL = {
     taxonomies_13: false,
     actors: false,
     actions: false,
-    targets: false,
     members: false,
     associations: false,
     indicators: false,

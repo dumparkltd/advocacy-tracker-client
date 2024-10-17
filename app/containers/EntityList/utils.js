@@ -4,97 +4,79 @@ import { Map, List } from 'immutable';
 export const getActorsForEntities = ({
   actions,
   actors,
-  subject = 'actors',
   includeIndirect = true,
   includeChildren = true,
 }) => {
-  const actionAtt = subject === 'actors'
-    ? 'actors'
-    : 'targets';
-  const actionAttMembers = subject === 'actors'
-    ? 'actorsMembers'
-    : 'targetsMembers';
-  const actionAttParents = subject === 'actors'
-    ? 'actorsAssociations'
-    : 'targetsAssociations';
-  const actorAtt = subject === 'actors'
-    ? 'actions'
-    : 'targetingActions';
-  const actorAttMembers = subject === 'actors'
-    ? 'actionsMembers'
-    : 'targetingActionsAsMember';
-  const actorAttChildren = subject === 'actors'
-    ? 'actionsAsParent'
-    : 'targetingActionsAsParent';
+  console.log('getActorsForEntities');
   return actions && actions.reduce(
     (memo, action) => {
       const actionId = parseInt(action.get('id'), 10);
-      const actionActors = action.get(actionAtt);
-      let result = actionActors
-        ? actionActors.reduce(
+      const actorsForAction = action.get('actors');
+      let result = actorsForAction
+        ? actorsForAction.reduce(
           (memo2, actorId) => {
             const sActorId = actorId.toString();
             if (memo2.get(sActorId)) {
-              if (memo2.getIn([sActorId, actorAtt])) {
+              if (memo2.getIn([sActorId, 'actions'])) {
                 return memo2.setIn(
-                  [sActorId, actorAtt],
-                  memo2.getIn([sActorId, actorAtt]).push(actionId),
+                  [sActorId, 'actions'],
+                  memo2.getIn([sActorId, 'actions']).push(actionId),
                 );
               }
               // remove from indirect list if already added there
               if (includeIndirect
-                && memo2.getIn([sActorId, actorAttMembers])
-                && memo2.getIn([sActorId, actorAttMembers]).includes(actionId)
+                && memo2.getIn([sActorId, 'actionsMembers'])
+                && memo2.getIn([sActorId, 'actionsMembers']).includes(actionId)
               ) {
                 return memo2
-                  .setIn([sActorId, actorAtt], List().push(actionId))
-                  .setIn([sActorId, actorAttMembers], memo2.getIn([sActorId, actorAttMembers]).delete(actionId));
+                  .setIn([sActorId, 'actions'], List().push(actionId))
+                  .setIn([sActorId, 'actionsMembers'], memo2.getIn([sActorId, 'actionsMembers']).delete(actionId));
               }
               if (includeChildren
-                && memo2.getIn([sActorId, actorAttChildren])
-                && memo2.getIn([sActorId, actorAttChildren]).includes(actionId)
+                && memo2.getIn([sActorId, 'actionsAsParent'])
+                && memo2.getIn([sActorId, 'actionsAsParent']).includes(actionId)
               ) {
                 return memo2
-                  .setIn([sActorId, actorAtt], List().push(actionId))
-                  .setIn([sActorId, actorAttChildren], memo2.getIn([sActorId, actorAttChildren]).delete(actionId));
+                  .setIn([sActorId, 'actions'], List().push(actionId))
+                  .setIn([sActorId, 'actionsAsParent'], memo2.getIn([sActorId, 'actionsAsParent']).delete(actionId));
               }
-              return memo2.setIn([sActorId, actorAtt], List().push(actionId));
+              return memo2.setIn([sActorId, 'actions'], List().push(actionId));
             }
             const actor = actors.get(sActorId);
             return actor
-              ? memo2.set(sActorId, actor.set(actorAtt, List().push(actionId)))
+              ? memo2.set(sActorId, actor.set('actions', List().push(actionId)))
               : memo2;
           },
           memo,
         )
         : memo;
       if (includeIndirect) {
-        const actionActorsAsMember = action.get(actionAttMembers);
-        result = actionActorsAsMember
-          ? actionActorsAsMember.reduce(
+        const actorsAsMemberForAction = action.get('actorsMembers');
+        result = actorsAsMemberForAction
+          ? actorsAsMemberForAction.reduce(
             (memo2, actorId) => {
               const sActorId = actorId.toString();
               // makes sure not already included in direct or indirect action
               if (
-                !memo2.getIn([sActorId, actorAtt])
-                || !memo2.getIn([sActorId, actorAtt]).includes(actionId)
+                !memo2.getIn([sActorId, 'actions'])
+                || !memo2.getIn([sActorId, 'actions']).includes(actionId)
               ) {
                 // if already present, add action id
                 if (memo2.get(sActorId)) {
-                  if (memo2.getIn([sActorId, actorAttMembers])) {
-                    if (!memo2.getIn([sActorId, actorAttMembers]).includes(actionId)) {
+                  if (memo2.getIn([sActorId, 'actionsMembers'])) {
+                    if (!memo2.getIn([sActorId, 'actionsMembers']).includes(actionId)) {
                       return memo2.setIn(
-                        [sActorId, actorAttMembers],
-                        memo2.getIn([sActorId, actorAttMembers]).push(actionId),
+                        [sActorId, 'actionsMembers'],
+                        memo2.getIn([sActorId, 'actionsMembers']).push(actionId),
                       );
                     }
                     return memo2;
                   }
-                  return memo2.setIn([sActorId, actorAttMembers], List().push(actionId));
+                  return memo2.setIn([sActorId, 'actionsMembers'], List().push(actionId));
                 }
                 const actor = actors.get(sActorId);
                 return actor
-                  ? memo2.set(sActorId, actor.set(actorAttMembers, List().push(actionId)))
+                  ? memo2.set(sActorId, actor.set('actionsMembers', List().push(actionId)))
                   : memo2;
               }
               return memo2;
@@ -104,32 +86,32 @@ export const getActorsForEntities = ({
           : result;
       }
       if (includeChildren) {
-        const actionActorsAsParent = action.get(actionAttParents);
-        result = actionActorsAsParent
-          ? actionActorsAsParent.reduce(
+        const actorsAsAssociationForAction = action.get('actorsAssociations');
+        result = actorsAsAssociationForAction
+          ? actorsAsAssociationForAction.reduce(
             (memo2, actorId) => {
               const sActorId = actorId.toString();
               // makes sure not already included in direct or indirect action
               if (
-                !memo2.getIn([sActorId, actorAtt])
-                || !memo2.getIn([sActorId, actorAtt]).includes(actionId)
+                !memo2.getIn([sActorId, 'actions'])
+                || !memo2.getIn([sActorId, 'actions']).includes(actionId)
               ) {
                 // if already present, add action id
                 if (memo2.get(sActorId)) {
-                  if (memo2.getIn([sActorId, actorAttChildren])) {
-                    if (!memo2.getIn([sActorId, actorAttChildren]).includes(actionId)) {
+                  if (memo2.getIn([sActorId, 'actionsAsParent'])) {
+                    if (!memo2.getIn([sActorId, 'actionsAsParent']).includes(actionId)) {
                       return memo2.setIn(
-                        [sActorId, actorAttChildren],
-                        memo2.getIn([sActorId, actorAttChildren]).push(actionId),
+                        [sActorId, 'actionsAsParent'],
+                        memo2.getIn([sActorId, 'actionsAsParent']).push(actionId),
                       );
                     }
                     return memo2;
                   }
-                  return memo2.setIn([sActorId, actorAttChildren], List().push(actionId));
+                  return memo2.setIn([sActorId, 'actionsAsParent'], List().push(actionId));
                 }
                 const actor = actors.get(sActorId);
                 return actor
-                  ? memo2.set(sActorId, actor.set(actorAttChildren, List().push(actionId)))
+                  ? memo2.set(sActorId, actor.set('actionsAsParent', List().push(actionId)))
                   : memo2;
               }
               return memo2;
