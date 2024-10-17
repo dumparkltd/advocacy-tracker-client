@@ -486,22 +486,12 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                       onClick={onShowFilters}
                       label={(
                         <Box direction="row" gap="small" align="center">
-                          {isMinSize(size, 'medium')
-                            && (
-                              <Box
-                                margin={{
-                                  top: '-3px',
-                                  bottom: 'none',
-                                  vertical: 'none',
-                                }}
-                                pad="none"
-                              >
-                                <Text>
-                                  {intl.formatMessage(messages.listOptions.showFilter)}
-                                </Text>
-                              </Box>
-                            )}
-                          <Box margin="none" pad="none">
+                          {isMinSize(size, 'medium') && (
+                            <Text style={{ marginTop: '-3px' }}>
+                              {intl.formatMessage(messages.listOptions.showFilter)}
+                            </Text>
+                          )}
+                          <Box>
                             <Icon name="filter" size="33px" text />
                           </Box>
                         </Box>
