@@ -1,24 +1,29 @@
 import React from 'react';
 import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
 import styled from 'styled-components';
-import { Box, Text, ResponsiveContext } from 'grommet';
+import {
+  Box, Text, ResponsiveContext,
+} from 'grommet';
 
 import { VERSION } from 'themes/config';
 import Container from 'components/styled/Container';
-import PrintHide from 'components/styled/PrintHide';
+// import PrintHide from 'components/styled/PrintHide';
 import BoxPrint from 'components/styled/BoxPrint';
 import { usePrint } from 'containers/App/PrintContext';
+import Icon from 'components/Icon';
 
 import { isMinSize } from 'utils/responsive';
 
 import appMessages from 'containers/App/messages';
+
+import BrandTitle from './BrandTitle';
 import messages from './messages';
 
 const FooterMain = styled.div`
   background-color: ${({ isPrint }) => isPrint ? 'transparent' : '#000000'};
   color: ${({ isPrint, theme }) => isPrint ? theme.global.colors.text.secondary : 'white'};
   border-top: 1px solid;
-  border-color: ${({ isPrint, theme }) => isPrint ? theme.global.colors.text.secondary : 'transparent'};s
+  border-color: ${({ isPrint, theme }) => isPrint ? theme.global.colors.text.secondary : 'transparent'};
   padding: 0;
   @media print {
     color: ${({ theme }) => theme.global.colors.text.secondary} !important;
@@ -26,7 +31,6 @@ const FooterMain = styled.div`
     background: transparent;
   }
 `;
-
 const FooterLink = styled.a`
   font-weight: bold;
   color: ${({ isPrint, theme }) => isPrint ? theme.global.colors.text.secondary : 'white'};
@@ -39,20 +43,44 @@ const FooterLink = styled.a`
   }
 `;
 
-const Between = styled((p) => <Box plain {...p} />)`
-  flex: 0 0 auto;
-  align-self: stretch;
-  width: ${({ direction }) => direction === 'row' ? '1px' : '100%'};
-  position: relative;
-  &:after {
-    content: "";
-    position: absolute;
-    height: 100%;
-    width: 100%;
-    left: 0;
-    top: 0;
-    border-left: ${({ direction }) => direction === 'row' ? 1 : 0}px solid rgba(0, 0, 0, 1);
-    border-top: ${({ direction }) => direction === 'column' ? 1 : 0}px solid rgba(0, 0, 0, 1);
+const LogoWrap = styled((p) => <Box {...p} />)`
+  background: white;
+  color: black;
+  height: 65px;
+  width: 60px;
+  @media print {
+    height: 60px;
+    width: 60px;
+  }
+  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
+    height:  ${({ isPrint }) => isPrint ? '62' : '93'}px;
+    width:  ${({ isPrint }) => isPrint ? '62' : '85'}px;
+  }
+`;
+const Label = styled((p) => <Text {...p} />)`
+  font-family: ${({ theme }) => theme.fonts.title};
+`;
+const StyledBoxPrint = styled((p) => (
+  <BoxPrint
+    fill
+    pad={isMinSize(p.size, 'large') ? 'medium' : 'small'}
+    justify="center"
+    {...p}
+  />
+))`
+  min-height: unset;
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    min-height: ${({ theme }) => theme.sizes.footer.height}px;
+  }
+`;
+const FooterWrapper = styled((p) => <Box {...p} />)`
+  padding: ${({ theme }) => theme.global.edgeSize.small};
+  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    padding: 0px;
+  }
+  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
+    padding-left: ${({ theme }) => theme.global.edgeSize.medium};
+    padding-right: ${({ theme }) => theme.global.edgeSize.medium};
   }
 `;
 function Footer({
@@ -65,23 +93,41 @@ function Footer({
   return (
     <FooterMain isPrint={isPrint}>
       <Container noPaddingBottom>
-        <Box direction={isMinSize(size, 'medium') ? 'row' : 'column'} fill="vertical">
-          <BoxPrint pad="medium" padPrintHorizontal="none" fill basis="1/2">
-            <Text size="small">
-              {appTitle}
-            </Text>
-            <Text size="xsmall">
-              {`Version: ${VERSION}`}
-            </Text>
-          </BoxPrint>
-          <PrintHide>
-            <Between direction={isMinSize(size, 'medium') ? 'row' : 'column'} />
-          </PrintHide>
-          <BoxPrint pad="medium" padPrintHorizontal={0} fill basis="1/2" gap="small" style={{ minHeight: '150px' }}>
-            <Text size="small">
+        <FooterWrapper
+          direction={isMinSize(size, 'medium') ? 'row' : 'column'}
+          fill="vertical"
+        >
+          <StyledBoxPrint
+            size={size}
+            pad={{
+              left: isMinSize(size, 'large') ? 'medium' : 'small',
+              right: 'none',
+            }}
+            align="center"
+            direction="row"
+            justify="start"
+            basis="1/4"
+            gap={isMinSize(size, 'large') ? 'small' : 'xsmall'}
+          >
+            <LogoWrap isPrint={isPrint}>
+              <Icon name="logo" size={isMinSize(size, 'large') ? '80px' : '60px'} />
+            </LogoWrap>
+            <Box
+              fill="vertical"
+              pad={{ left: 'small' }}
+              justify="center"
+              gap="xxsmall"
+            >
+              <BrandTitle size={isMinSize(size, 'large') ? 'xlarge' : 'large'}>
+                <FormattedMessage {...appMessages.app.title} />
+              </BrandTitle>
+            </Box>
+          </StyledBoxPrint>
+          <StyledBoxPrint size={size} basis="1/2" gap="small">
+            <Text size={isMinSize(size, 'large') ? 'small' : 'xsmall'}>
               <FormattedMessage {...messages.disclaimer} />
             </Text>
-            <Text size="small">
+            <Text size={isMinSize(size, 'large') ? 'small' : 'xsmall'}>
               <FormattedMessage
                 {...messages.disclaimer2}
                 values={{
@@ -108,8 +154,16 @@ function Footer({
                 }}
               />
             </Text>
-          </BoxPrint>
-        </Box>
+          </StyledBoxPrint>
+          <StyledBoxPrint basis="1/4" gap="none">
+            <Label size="medium">
+              {appTitle}
+            </Label>
+            <Label size="medium">
+              {`Version: ${VERSION}`}
+            </Label>
+          </StyledBoxPrint>
+        </FooterWrapper>
       </Container>
     </FooterMain>
   );
