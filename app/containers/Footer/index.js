@@ -21,10 +21,10 @@ import messages from './messages';
 
 const FooterMain = styled.div`
   background-color: ${({ isPrint }) => isPrint ? 'transparent' : '#000000'};
-  color: ${({ isPrint, theme }) => isPrint ? theme.global.colors.text.secondary : 'white'};
+  color: ${({ isPrint }) => isPrint ? 'black' : 'white'};
   border-top: 1px solid;
   border-color: ${({ isPrint, theme }) => isPrint ? theme.global.colors.text.secondary : 'transparent'};
-  padding: 0;
+  padding: 0px;
   @media print {
     color: ${({ theme }) => theme.global.colors.text.secondary} !important;
     border-color: ${({ theme }) => theme.global.colors.text.secondary};
@@ -72,17 +72,26 @@ const StyledBoxPrint = styled((p) => (
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     min-height: ${({ theme }) => theme.sizes.footer.height}px;
   }
+  @media print {
+    padding: 0px;
+  }
 `;
 const FooterWrapper = styled((p) => <Box {...p} />)`
-  padding: ${({ theme }) => theme.global.edgeSize.small};
+  padding: ${({ theme, isPrint }) => isPrint ? '0px' : theme.global.edgeSize.small};
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
     padding: 0px;
   }
   @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
-    padding-left: ${({ theme }) => theme.global.edgeSize.medium};
-    padding-right: ${({ theme }) => theme.global.edgeSize.medium};
+    padding-left: ${({ theme, isPrint }) => isPrint ? '0px' : theme.global.edgeSize.medium};
+    padding-right: ${({ theme, isPrint }) => isPrint ? '0px' : theme.global.edgeSize.medium};
   }
 `;
+function getBoxPrintPadding(isPrint, size) {
+  if (isPrint) {
+    return 'none';
+  }
+  return isMinSize(size, 'large') ? 'medium' : 'small';
+}
 function Footer({
   intl,
 }) {
@@ -90,17 +99,20 @@ function Footer({
   // const appTitle = `${intl.formatMessage(appMessages.app.claim)} - ${intl.formatMessage(appMessages.app.title)}`;
   const appTitle = `${intl.formatMessage(appMessages.app.title)}`;
   const isPrint = usePrint();
+
   return (
     <FooterMain isPrint={isPrint}>
       <Container noPaddingBottom>
         <FooterWrapper
           direction={isMinSize(size, 'medium') ? 'row' : 'column'}
           fill="vertical"
+          isPrint={isPrint}
+          gap="small"
         >
           <StyledBoxPrint
             size={size}
             pad={{
-              left: isMinSize(size, 'large') ? 'medium' : 'small',
+              left: getBoxPrintPadding(isPrint, size),
               right: 'none',
             }}
             align="center"
@@ -110,7 +122,7 @@ function Footer({
             gap={isMinSize(size, 'large') ? 'small' : 'xsmall'}
           >
             <LogoWrap isPrint={isPrint}>
-              <Icon name="logo" size={isMinSize(size, 'large') ? '80px' : '60px'} />
+              <Icon name="logo" size={isMinSize(size, 'large') && !isPrint ? '80px' : '60px'} />
             </LogoWrap>
             <Box
               fill="vertical"
@@ -118,16 +130,16 @@ function Footer({
               justify="center"
               gap="xxsmall"
             >
-              <BrandTitle size={isMinSize(size, 'large') ? 'xlarge' : 'large'}>
+              <BrandTitle isPrint={isPrint} size={isMinSize(size, 'large') && !isPrint ? 'xlarge' : 'large'}>
                 <FormattedMessage {...appMessages.app.title} />
               </BrandTitle>
             </Box>
           </StyledBoxPrint>
-          <StyledBoxPrint size={size} basis="1/2" gap="small">
+          <StyledBoxPrint size={size} basis="1/2" gap="small" pad={getBoxPrintPadding(isPrint, size)}>
             <Text size={isMinSize(size, 'large') ? 'small' : 'xsmall'}>
               <FormattedMessage {...messages.disclaimer} />
             </Text>
-            <Text size={isMinSize(size, 'large') ? 'small' : 'xsmall'}>
+            <Text size={isMinSize(size, 'large') && !isPrint ? 'small' : 'xsmall'}>
               <FormattedMessage
                 {...messages.disclaimer2}
                 values={{
@@ -155,7 +167,7 @@ function Footer({
               />
             </Text>
           </StyledBoxPrint>
-          <StyledBoxPrint basis="1/4" gap="none">
+          <StyledBoxPrint basis="1/4" gap="none" pad={getBoxPrintPadding(isPrint, size)}>
             <Label size="medium">
               {appTitle}
             </Label>

@@ -11,7 +11,7 @@ const BrandTitle = styled((p) => <Text {...p} />)`
   word-break: break-word;
   text-transform: uppercase;
   @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
-    max-width: 120px;
+    max-width: ${({ isPrint }) => isPrint ? '150' : '120'}px;
   }
   @media (min-width: ${({ theme }) => theme.breakpoints.xlarge}) {
     max-width: 150px;
