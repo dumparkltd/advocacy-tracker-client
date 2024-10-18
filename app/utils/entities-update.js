@@ -1,4 +1,5 @@
 import apiRequest from 'utils/api-request';
+import { API } from 'themes/config';
 
 export function updateAssociationsRequest(path, associations) {
   // create action-category associations
@@ -51,6 +52,13 @@ export function updateAssociationsBatchRequest(path, associations) {
 }
 
 export function deleteEntityRequest(path, entityId) {
+  if (path === API.ACTOR_ACTIONS && parseInt(entityId, 10) < 0) {
+    console.log('deleteEntityRequest', `${API.ACTION_ACTORS}/${parseInt(entityId, 10) * -1}`)
+    return apiRequest('delete', `${API.ACTION_ACTORS}/${parseInt(entityId, 10) * -1}`).then(() => ({
+      id: entityId,
+      type: 'delete',
+    }));
+  }
   return apiRequest('delete', `${path}/${entityId}`).then(() => ({
     id: entityId,
     type: 'delete',

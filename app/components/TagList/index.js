@@ -52,7 +52,7 @@ function TagList({
   const groupedFilters = groupBy(filters, 'groupId');
   return (
     <Styled>
-      {(hasFilters || !!searchQuery) && (
+      {(hasFilters || (!!searchQuery && isPrintView)) && (
         <Tags gap="xsmall" align="end" isPrint={isPrintView}>
           {hasFilters && Object.keys(groupedFilters).map(
             (groupId, i) => {

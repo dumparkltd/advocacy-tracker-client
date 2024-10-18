@@ -106,7 +106,6 @@ const getBBox = (bounds, xLat = 0.5, xLon = 180) => {
 };
 
 const TOOLTIP_INITIAL = { features: [] };
-
 export function MapWrapper({
   countryFeatures,
   countryData,
@@ -131,6 +130,8 @@ export function MapWrapper({
   printArgs,
   isPrintView,
   fullMap,
+
+  onSetPreviewItemId,
 }) {
   const mapOptions = merge({}, options, MAP_OPTIONS);
 
@@ -230,6 +231,9 @@ export function MapWrapper({
   const onFeatureClick = (e) => {
     const { feature } = e.sourceTarget;
     if (e && L.DomEvent) L.DomEvent.stopPropagation(e);
+    if (e && e.containerPoint && feature && feature.previewItemId && onSetPreviewItemId) {
+      onSetPreviewItemId(feature.previewItemId);
+    }
     if (e && e.containerPoint && feature && feature.tooltip) {
       const activeTT = tooltip.features.reduce(
         (active, f) => f.id === feature.id || active,
@@ -646,6 +650,7 @@ export function MapWrapper({
     }
   }, [mapSubject, countryData]);
 
+
   return (
     <Styled isPrint={isPrintView} fullMap={fullMap} hasInfo={hasInfo}>
       <Map id={mapId} ref={ref} styleType={styleType} />
@@ -697,6 +702,7 @@ MapWrapper.propTypes = {
   circleLayerConfig: PropTypes.object,
   printArgs: PropTypes.object,
   // onSetMapSubject: PropTypes.func,
+  onSetPreviewItemId: PropTypes.func,
 };
 
 export default MapWrapper;

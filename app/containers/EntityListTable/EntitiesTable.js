@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box, ResponsiveContext } from 'grommet';
-import styled, { css } from 'styled-components';
+import styled, { css, withTheme } from 'styled-components';
+import { groupBy } from 'lodash/collection';
+
+import qe from 'utils/quasi-equals';
 import { isMinSize } from 'utils/responsive';
 import { scaleColorCount } from 'containers/MapContainer/utils';
+import { usePrint } from 'containers/App/PrintContext';
 
 import { MAP_OPTIONS } from 'themes/config';
 
 import CellBodyMain from './CellBodyMain';
 import CellBodyPlain from './CellBodyPlain';
+import CellBodyPosition from './CellBodyPosition';
+import CellBodyPlainWithDate from './CellBodyPlainWithDate';
 import CellBodyUsers from './CellBodyUsers';
 import CellBodyActors from './CellBodyActors';
 import CellBodyActions from './CellBodyActions';
@@ -42,8 +48,18 @@ const TableRow = styled.tr`
   }
 `;
 const getColWidth = ({
-  col, count, colSpan = 1, inSingleView,
+  col, count, colSpan = 1, inSingleView, columnsByType,
 }) => {
+  if (columnsByType && columnsByType.topicPosition && columnsByType.topicPosition.length > 0) {
+    if (col.type === 'main') {
+      return 25;
+    }
+    if (col.type === 'topicPosition') {
+      return 4;
+    }
+    return (75 - (4 * columnsByType.topicPosition.length))
+      / (count - columnsByType.topicPosition.length - 1);
+  }
   if (inSingleView) {
     return (100 / count) * colSpan;
   }
@@ -125,9 +141,13 @@ const TableCellBodyInner = styled((p) => <Box {...p} />)`
 
 const MAX_VALUE_COUNTRIES = 100;
 
-const getColorForColumn = (col) => {
+const getColorForColumn = (col, theme) => {
   if (!MAP_OPTIONS.GRADIENT[col.subject]) {
-    return 'black';
+    return (theme
+      && theme.global
+      && theme.global.colors
+      && theme.global.colors.primary)
+      || 'black';
   }
   if (col.members) {
     return scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[col.subject], false)(70);
@@ -137,7 +157,7 @@ const getColorForColumn = (col) => {
   }
   return scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[col.subject], false)(100);
 };
-
+const ID = 'entities-table';
 export function EntitiesTable({
   entities,
   canEdit,
@@ -145,58 +165,56 @@ export function EntitiesTable({
   headerColumns,
   onEntityClick,
   columnMaxValues,
-  headerColumnsUtility,
-  memberOption,
-  childOption,
-  subjectOptions,
   inSingleView,
-  isPrintView,
+  theme,
+  previewItemId,
+  reducePreviewItem,
+  onSetPreviewContent,
+  sortedEntities,
+  searchedEntities,
 }) {
+  useEffect(() => {
+    if (!!reducePreviewItem && sortedEntities) {
+      if (previewItemId) {
+        const [componentId, path, itemId] = previewItemId.split('|');
+        if (qe(componentId, ID)) {
+          const mainItem = searchedEntities && itemId && searchedEntities.find(
+            (item) => qe(item.get('id'), itemId)
+          );
+          if (mainItem) {
+            const entityIds = sortedEntities.map((e) => e.id);
+            const entityIndex = entityIds.indexOf(mainItem.get('id'));
+            const nextIndex = entityIndex < entityIds.length ? entityIndex + 1 : 0;
+            const prevIndex = entityIndex > 0 ? entityIndex - 1 : entityIds.length - 1;
+
+            let content = reducePreviewItem({ item: mainItem, path });
+            content = {
+              ...content,
+              header: {
+                ...content.header,
+                nextPreviewItem: nextIndex !== entityIndex && `${ID}|${path}|${entityIds[nextIndex]}`,
+                prevPreviewItem: prevIndex !== entityIndex && `${ID}|${path}|${entityIds[prevIndex]}`,
+              },
+            };
+            onSetPreviewContent(content);
+          } else if (itemId && path) {
+            onSetPreviewContent(reducePreviewItem({ id: itemId, path }));
+          } else {
+            onSetPreviewContent();
+          }
+        }
+      } else {
+        onSetPreviewContent();
+      }
+    }
+  }, [previewItemId]);
   const size = React.useContext(ResponsiveContext);
+  const isPrintView = usePrint();
   return (
     <Box fill="horizontal">
       <Table isPrint={isPrintView}>
         {headerColumns && (
           <TableHeader>
-            {headerColumnsUtility && isMinSize(size, 'large') && (
-              <TableRow>
-                {headerColumnsUtility.map(
-                  (col, i) => (
-                    <TableCellHeader
-                      key={i}
-                      scope="col"
-                      col={col}
-                      count={headerColumns.length}
-                      colSpan={col.span || 1}
-                      first={i === 0}
-                      last={i === headerColumns.length - 1}
-                      inSingleView={inSingleView}
-                      utility
-                    >
-                      {col.type === 'options' && (
-                        <Box>
-                          {subjectOptions && (
-                            <Box>
-                              {subjectOptions}
-                            </Box>
-                          )}
-                          {memberOption && (
-                            <Box>
-                              {memberOption}
-                            </Box>
-                          )}
-                          {childOption && (
-                            <Box>
-                              {childOption}
-                            </Box>
-                          )}
-                        </Box>
-                      )}
-                    </TableCellHeader>
-                  )
-                )}
-              </TableRow>
-            )}
             <TableRow>
               {headerColumns.map(
                 (col, i) => (isMinSize(size, 'large') || isPrintView || col.type === 'main') && (
@@ -205,6 +223,7 @@ export function EntitiesTable({
                     scope="col"
                     col={col}
                     count={headerColumns.length}
+                    columnsByType={groupBy(headerColumns, 'type')}
                     first={i === 0}
                     last={i === headerColumns.length - 1}
                     inSingleView={inSingleView}
@@ -246,6 +265,7 @@ export function EntitiesTable({
                         entity={entity[col.id]}
                         canEdit={canEdit && !isPrintView}
                         column={col}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                       />
                     )}
                     {(
@@ -255,32 +275,46 @@ export function EntitiesTable({
                       || col.type === 'userrole'
                       || col.type === 'date'
                       || col.type === 'supportlevel'
+                      || col.type === 'topicPosition'
                     ) && (
                       <CellBodyPlain
                         entity={entity[col.id]}
                         column={col}
                         primary={col.type === 'userrole'}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                      />
+                    )}
+                    {col.type === 'plainWithDate' && (
+                      <CellBodyPlainWithDate
+                        entity={entity[col.id]}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                        column={col}
+                      />
+                    )}
+                    {col.type === 'position' && (
+                      <CellBodyPosition
+                        entity={entity[col.id]}
+                        column={col}
                       />
                     )}
                     {col.type === 'users' && (
                       <CellBodyUsers
                         entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
                     {col.type === 'indicators' && (
                       <CellBodyIndicators
                         entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
                     {(
                       col.type === 'actorsSimple'
                       || col.type === 'actors'
-                      || col.type === 'targets'
-                      || col.type === 'targetsViaChildren'
+                      || col.type === 'actorsViaChildren'
                       || col.type === 'members'
                       || col.type === 'associations'
                       || col.type === 'userActors'
@@ -288,7 +322,7 @@ export function EntitiesTable({
                     ) && (
                       <CellBodyActors
                         entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
@@ -304,7 +338,7 @@ export function EntitiesTable({
                     {col.type === 'hasResources' && (
                       <CellBodyHasResource
                         entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
@@ -316,26 +350,30 @@ export function EntitiesTable({
                       || col.type === 'positionStatement'
                       || col.type === 'childActions'
                       || col.type === 'parentActions'
+                      || (col.simple && (
+                        col.type === 'actorActions'
+                        || col.type === 'actiontype'
+                      ))
                     ) && (
                       <CellBodyActions
                         entity={entity[col.id]}
                         column={col}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                       />
                     )}
                     {(
                       col.type === 'actorActions'
                       || col.type === 'actiontype'
-                    ) && (
+                    ) && !col.simple && (
                       <CellBodyBarChart
                         value={entity[col.id].value}
                         maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
                         subject={col.subject}
                         column={col}
                         issecondary={col.type !== 'actiontype' && (col.members || col.children)}
-                        color={getColorForColumn(col)}
+                        color={getColorForColumn(col, theme)}
                         entityType="actions"
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         rowConfig={entity[col.id]}
                       />
                     )}
@@ -348,7 +386,7 @@ export function EntitiesTable({
                         maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
                         column={col}
                         entityType="actors"
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                       />
                     )}
                   </TableCellBodyInner>
@@ -364,17 +402,18 @@ export function EntitiesTable({
 
 EntitiesTable.propTypes = {
   entities: PropTypes.array.isRequired,
+  sortedEntities: PropTypes.array,
+  searchedEntities: PropTypes.object,
   columns: PropTypes.array,
   columnMaxValues: PropTypes.object,
+  theme: PropTypes.object,
   headerColumns: PropTypes.array,
-  headerColumnsUtility: PropTypes.array,
   canEdit: PropTypes.bool,
   inSingleView: PropTypes.bool,
-  isPrintView: PropTypes.bool,
   onEntityClick: PropTypes.func,
-  memberOption: PropTypes.node,
-  childOption: PropTypes.node,
-  subjectOptions: PropTypes.node,
+  previewItemId: PropTypes.string,
+  reducePreviewItem: PropTypes.func,
+  onSetPreviewContent: PropTypes.func,
 };
 
-export default EntitiesTable;
+export default withTheme(EntitiesTable);

@@ -71,24 +71,16 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
-      case 'targets':
+      case 'actorsViaChildren':
         return ({
           ...col,
-          title: 'Targets',
-          sortActive,
-          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
-          onSort,
-        });
-      case 'targetsViaChildren':
-        return ({
-          ...col,
-          title: 'Indirect targets',
+          title: 'Indirect stakeholders',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
           info: {
             type: 'text',
-            title: 'Indirect targets',
+            title: 'Indirect stakeholders',
             text: 'From child activities, e.g tasks',
           },
         });
@@ -96,7 +88,7 @@ export const prepareHeader = ({
       case 'userActors':
         return ({
           ...col,
-          title: 'Actors',
+          title: 'Stakeholders',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -188,7 +180,7 @@ export const prepareHeader = ({
           ...col,
           title: appMessages.entities[`actions_${col.actiontype_id}`]
             ? intl.formatMessage(appMessages.entities[`actions_${col.actiontype_id}`].pluralShort)
-            : 'Actions',
+            : 'Activities',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -217,20 +209,11 @@ export const prepareHeader = ({
       case 'indicatorActions':
       case 'actorActions':
         if (!label) {
-          if (col.subject === 'targets') {
-            label = 'Targeted by';
-            if (col.members) {
-              label = 'Targeted as member';
-            } else if (col.children) {
-              label = 'Targeted as parent';
-            }
-          } else {
-            label = 'Activities';
-            if (col.members) {
-              label = 'Activities as member';
-            } else if (col.children) {
-              label = 'Activities as parent';
-            }
+          label = 'Activities';
+          if (col.members) {
+            label = 'Activities as member';
+          } else if (col.children) {
+            label = 'Activities as parent';
           }
         }
         return ({
@@ -251,7 +234,7 @@ export const prepareHeader = ({
         });
       case 'actionsSimple':
         if (!label) {
-          label = col.subject === 'actors' ? 'Actions' : 'Targets';
+          label = 'Activities';
         }
         return ({
           ...col,
@@ -331,6 +314,15 @@ const getSingleRelatedValueFromAttributes = (relatedEntity) => relatedEntity
   ? relatedEntity.get('name') || relatedEntity.get('title')
   : null;
 
+const getColorFromPositions = (positions) => {
+  const latest = positions && positions.first();
+  const value = latest && latest.get('supportlevel_id');
+  const level = value && ACTION_INDICATOR_SUPPORTLEVELS[parseInt(value, 10)];
+  if (level) {
+    return level.color;
+  }
+  return ACTION_INDICATOR_SUPPORTLEVELS[99].color;
+};
 
 export const prepareEntityRows = ({
   entities,
@@ -339,7 +331,6 @@ export const prepareEntityRows = ({
   config,
   url,
   entityPath,
-  onEntityClick,
   onEntitySelect,
   connections,
   taxonomies,
@@ -359,6 +350,7 @@ export const prepareEntityRows = ({
         let temp;
         let attribute;
         let value;
+        // console.log(col)
         // let formattedDate;
         if (col.attribute) {
           value = entity.getIn(['attributes', col.attribute]);
@@ -366,7 +358,6 @@ export const prepareEntityRows = ({
             value = entity.getIn(['attributes', col.fallbackAttribute]);
           }
         }
-        // console.log(col)
         switch (col.type) {
           case 'main':
             return {
@@ -386,11 +377,9 @@ export const prepareEntityRows = ({
                 private: entity.getIn(['attributes', 'private']),
                 sortValue: entity.getIn(['attributes', col.sort || 'title']),
                 selected: entityIdsSelected && entityIdsSelected.includes(id),
+                id,
+                path,
                 href: url || `${path}/${id}`,
-                onClick: (evt) => {
-                  if (evt) evt.preventDefault();
-                  onEntityClick(id, path);
-                },
                 onSelect: (checked) => onEntitySelect(id, checked),
               },
             };
@@ -436,29 +425,14 @@ export const prepareEntityRows = ({
                 sortValue: getRelatedSortValue(relatedEntities),
               },
             };
-          case 'targets':
-            temp = entity.get('targets') || (entity.get('targetsByType') && entity.get('targetsByType').flatten(true));
+          case 'actorsViaChildren':
+            temp = entity.get('actorsViaChildren');
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: getRelatedValue(relatedEntities, col.label || 'targets'),
-                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
-                tooltip: relatedEntities && relatedEntities.size > 1
-                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
-                multiple: relatedEntities && relatedEntities.size > 1,
-                sortValue: getRelatedSortValue(relatedEntities),
-              },
-            };
-          case 'targetsViaChildren':
-            temp = entity.get('targetsViaChildren');
-            relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
-            return {
-              ...memoEntity,
-              [col.id]: {
-                ...col,
-                value: getRelatedValue(relatedEntities, col.label || 'targets'),
+                value: getRelatedValue(relatedEntities, col.label || 'actors'),
                 single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
                 tooltip: relatedEntities && relatedEntities.size > 1
                   && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
@@ -769,18 +743,18 @@ export const prepareEntityRows = ({
               [col.id]: {
                 ...col,
                 values: temp && temp.map(
-                  (value) => {
-                    if (value.actors) {
-                      relatedEntities = getRelatedEntities(value.actors, connections.get('actors'), col);
+                  (val) => {
+                    if (val.actors) {
+                      relatedEntities = getRelatedEntities(val.actors, connections.get('actors'), col);
                       if (relatedEntities && relatedEntities.size > 0) {
                         return {
-                          ...value,
+                          ...val,
                           tooltip: relatedEntities && relatedEntities.size > 0
                             && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
                         };
                       }
                     }
-                    return value;
+                    return val;
                   }
                 ).toJS(),
                 sortValue: temp
@@ -789,6 +763,15 @@ export const prepareEntityRows = ({
                     0,
                   )
                   : null,
+              },
+            };
+          case 'topicPosition':
+            temp = entity.getIn([col.positions, col.indicatorId]);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                color: getColorFromPositions(temp),
               },
             };
           default:
@@ -817,6 +800,7 @@ export const getListHeaderLabel = ({
 }) => {
   let result = 'error';
   if (!intl) return result;
+  if (!entityTitle) return '';
   if (selectedTotal > 0) {
     if (allSelectedOnPage) {
       // return `All ${selectedTotal} ${selectedTotal === 1 ? entityTitle.single : entityTitle.plural} on this page are selected. `;

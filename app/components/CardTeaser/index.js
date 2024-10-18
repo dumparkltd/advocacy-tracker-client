@@ -74,7 +74,7 @@ export function CardTeaser({
 CardTeaser.propTypes = {
   // intl: intlShape.isRequired,
   primary: PropTypes.bool,
-  // dataReady: PropTypes.bool,
+  dataReady: PropTypes.bool,
   onClick: PropTypes.func,
   path: PropTypes.string,
   count: PropTypes.number,

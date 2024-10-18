@@ -147,8 +147,7 @@ export function ActorView({
   const typeId = viewEntity && viewEntity.getIn(['attributes', 'actortype_id']);
   const viewActortype = actortypes && actortypes.find((type) => qe(type.get('id'), typeId));
   const viewActortypeId = viewActortype && viewActortype.get('id').toString();
-  const isTarget = viewActortype && viewActortype.getIn(['attributes', 'is_target']);
-  const isActive = viewActortype && viewActortype.getIn(['attributes', 'is_active']);
+  const isActive = true;
   const hasMembers = viewActortypeId
     && Object.values(MEMBERSHIPS).reduce(
       (memo, actorGroups) => [...memo, ...actorGroups],
@@ -161,9 +160,6 @@ export function ActorView({
   const validViewSubjects = [];
   if (isActive) {
     validViewSubjects.push('actors');
-  }
-  if (isTarget) {
-    validViewSubjects.push('targets');
   }
   if (hasStatements) {
     validViewSubjects.push('topics');
@@ -183,7 +179,7 @@ export function ActorView({
     printType: PRINT_TYPES.SINGLE,
     printContentOptions: {
       tabs: true,
-      actionTypes: viewSubject === 'actors' || viewSubject === 'targets',
+      actionTypes: viewSubject === 'actors',
       actionTypesForArgs: (args) => args.printTabs === 'all',
     },
     printMapOptions: {
@@ -340,14 +336,6 @@ export function ActorView({
                             <Text size="large">Activities</Text>
                           </SubjectButton>
                         )}
-                        {isTarget && (
-                          <SubjectButton
-                            onClick={() => onSetSubject('targets')}
-                            active={viewSubject === 'targets'}
-                          >
-                            <Text size="large">Targeted by</Text>
-                          </SubjectButton>
-                        )}
                         {hasMembers && (
                           <SubjectButton
                             onClick={() => onSetSubject('members')}
@@ -367,11 +355,11 @@ export function ActorView({
                       </SubjectButtonGroup>
                     </PrintHide>
                     <SubjectTabWrapper>
-                      {(showAllTabs || viewSubject === 'actors' || viewSubject === 'targets') && (
+                      {(showAllTabs || viewSubject === 'actors') && (
                         <>
                           <PrintOnly>
                             <PrintSectionTitleWrapper>
-                              <Text size="large">{viewSubject === 'actors' ? 'Activities' : 'Targeted By'}</Text>
+                              <Text size="large">Activities</Text>
                             </PrintSectionTitleWrapper>
                           </PrintOnly>
                           <TabActivities
@@ -512,7 +500,6 @@ ActorView.propTypes = {
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   actionsAsMemberByActortype: PropTypes.instanceOf(Map),
-  actionsAsTargetAsMemberByActortype: PropTypes.instanceOf(Map),
   userConnections: PropTypes.object,
   users: PropTypes.object,
   isAdmin: PropTypes.bool,

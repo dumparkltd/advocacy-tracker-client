@@ -64,7 +64,6 @@ const getIndicatorColumns = (viewEntity, typeId, intl, isAdmin) => {
     {
       id: 'supportlevel_id',
       type: 'supportlevel',
-      actionId: viewEntity.get('id'),
       title: intl.formatMessage(appMessages.attributes.supportlevel_id),
     },
     {

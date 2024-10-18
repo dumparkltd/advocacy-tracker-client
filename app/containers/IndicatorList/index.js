@@ -26,7 +26,7 @@ import {
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
-import { ROUTES } from 'themes/config';
+import { ROUTES, ACTIONTYPES } from 'themes/config';
 
 import EntityList from 'containers/EntityList';
 
@@ -43,7 +43,6 @@ import messages from './messages';
 export function IndicatorList({
   onLoadEntitiesIfNeeded,
   onSetPrintView,
-  handleNew,
   handleImport,
   dataReady,
   entities,
@@ -98,18 +97,27 @@ export function IndicatorList({
   }
   if (isMember) {
     headerOptions.actions.push({
-      title: 'Create new',
-      onClick: () => handleNew(),
-      icon: 'add',
-      isMember,
-    });
-    headerOptions.actions.push({
       title: intl.formatMessage(appMessages.buttons.import),
       onClick: () => handleImport(),
       icon: 'import',
       isMember,
     });
   }
+  const navItems = [
+    {
+      path: ROUTES.POSITIONS,
+      title: 'Overview',
+    },
+    {
+      path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`,
+      title: intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`].plural),
+    },
+    {
+      path: ROUTES.INDICATORS,
+      title: intl.formatMessage(appMessages.entities.indicators.plural),
+      active: true,
+    },
+  ];
   return (
     <div>
       <Helmet
@@ -119,6 +127,7 @@ export function IndicatorList({
         ]}
       />
       <EntityList
+        secondaryNavItems={navItems}
         entities={entities}
         config={CONFIG}
         allEntities={allEntities.toList()}
@@ -140,7 +149,6 @@ export function IndicatorList({
 IndicatorList.propTypes = {
   onLoadEntitiesIfNeeded: PropTypes.func,
   onSetPrintView: PropTypes.func,
-  handleNew: PropTypes.func,
   handleImport: PropTypes.func,
   dataReady: PropTypes.bool,
   isMember: PropTypes.bool,
@@ -168,9 +176,6 @@ function mapDispatchToProps(dispatch) {
   return {
     onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
-    },
-    handleNew: () => {
-      dispatch(updatePath(`${ROUTES.INDICATORS}${ROUTES.NEW}`, { replace: true }));
     },
     handleImport: () => {
       dispatch(updatePath(`${ROUTES.INDICATORS}${ROUTES.IMPORT}`));

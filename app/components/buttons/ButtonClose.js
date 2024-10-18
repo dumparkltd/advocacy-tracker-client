@@ -6,9 +6,8 @@ import Icon from 'components/Icon';
 import Button from 'components/buttons/Button';
 
 const Styled = styled(Button)`
-  position: absolute;
-  right:10px;
-  top:10px;
+  width: 60px;
+  height: 60px;
   color: ${palette('link', 2)};
   &:hover {
     color: ${palette('linkHover', 2)};

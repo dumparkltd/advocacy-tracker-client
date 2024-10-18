@@ -1,68 +1,80 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { palette } from 'styled-theme';
 
-import ButtonFactory from 'components/buttons/ButtonFactory';
+import {
+  Text, Box, Button, ResponsiveContext,
+} from 'grommet';
 
-const Styled = styled.div`
-  position: ${({ isOnMap }) => isOnMap ? 'absolute' : 'relative'};
+import { isMinSize } from 'utils/responsive';
+
+import Icon from 'components/Icon';
+
+const Styled = styled((p) => <Box {...p} />)`
+  position: relative;
   z-index: 20;
-  margin-left: 20px;
-  padding: 10px 0;
   display: ${({ isPrint }) => isPrint ? 'none' : 'inline-block'};
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    margin-left: 60px;
-    padding: 20px 0;
+`;
+const ButtonGroup = styled((p) => <Box direction="row" margin="none" gap="medium" {...p} />)`
+  border-radius: 999px;
+  padding: 8px 18px 6px ${({ isOnMap }) => isOnMap ? '18' : '0'}px;
+  box-shadow: ${({ isOnMap }) => isOnMap ? '0px 0px 5px 0px rgba(0,0,0,0.2)' : 'none'};
+  background: white;
+`;
+const ButtonLabel = styled((p) => <Text size="small" {...p} />)`
+  color: ${({ isActive }) => isActive ? palette('dark', 1) : palette('dark', 4)};
+  font-weight: normal;
+`;
+const ButtonOptions = styled((p) => <Button plain {...p} />)`
+  color: ${({ isActive }) => isActive ? palette('dark', 2) : palette('dark', 4)};
+  border-radius: 999px;
+  border: none;
+  &:hover {
+    box-shadow: none;
+    color: ${palette('primary', 1)};
   }
 `;
-const ButtonGroup = styled.div`
-  display: table;
-  text-align: right;
-  margin-bottom: 10px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    margin-bottom: 0;
-  }
-`;
-
-const TableCell = styled.span`
-  display: ${({ hiddenMobile }) => {
-    if (hiddenMobile) {
-      return 'none';
-    }
-    return 'table-cell';
-  }};
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    display: table-cell;
-    vertical-align: middle;
-  }
-`;
-const ButtonWrap = styled.span`
-  @media print {
-    display: none;
-  }
-`;
-
 
 class EntityListViewOptions extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   render() {
     const { options, isOnMap, isPrintView } = this.props;
-
     return (
-      <Styled isOnMap={isOnMap} isPrint={isPrintView}>
-        {options && (
-          <ButtonGroup>
-            {
-              options.map((option, i) => option && (
-                <TableCell key={i}>
-                  <ButtonWrap>
-                    <ButtonFactory button={option} />
-                  </ButtonWrap>
-                </TableCell>
-              ))
-            }
-          </ButtonGroup>
+      <ResponsiveContext.Consumer>
+        {(size) => (
+          <Styled isPrint={isPrintView}>
+            {options && (
+              <ButtonGroup pad="none" isOnMap={isOnMap}>
+                {options.map((option, i) => option && (
+                  <ButtonOptions
+                    key={i}
+                    onClick={() => option.onClick()}
+                    isActive={option.active}
+                    label={(
+                      <Box direction="row" gap="none" align="center">
+                        <Box>
+                          <Icon
+                            name={option.icon}
+                            size="33px"
+                            paletteIndex={option.active ? 2 : 4}
+                            palette="dark"
+                          />
+                        </Box>
+                        {isMinSize(size, 'medium') && (
+                          <ButtonLabel size="small" isActive={option.active}>
+                            {option.title}
+                          </ButtonLabel>
+                        )}
+                      </Box>
+                    )}
+                  />
+                ))
+                }
+              </ButtonGroup>
+            )}
+          </Styled>
         )}
-      </Styled>
+      </ResponsiveContext.Consumer>
     );
   }
 }

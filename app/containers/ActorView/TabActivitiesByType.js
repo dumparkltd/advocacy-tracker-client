@@ -74,27 +74,14 @@ export function TabActivitiesByType(props) {
   if (canBeMember && actiontypesAsMemberForSubject) {
     associationsWithActionsViaMemberships = actiontypesAsMemberForSubject
       .flatten(true)
-      .filter((association) => {
-        if (viewSubject === 'actors') {
-          return association.get('actionsByType')
-            && association.getIn(['actionsByType', activeActiontypeId])
-            && association.getIn(['actionsByType', activeActiontypeId]).size > 0;
-        }
-        if (viewSubject === 'targets') {
-          return association.get('targetingActionsByType')
-            && association.getIn(['targetingActionsByType', activeActiontypeId])
-            && association.getIn(['targetingActionsByType', activeActiontypeId]).size > 0;
-        }
-        return false;
-      });
+      .filter((association) => association.get('actionsByType')
+        && association.getIn(['actionsByType', activeActiontypeId])
+        && association.getIn(['actionsByType', activeActiontypeId]).size > 0);
     uniqueActionsAsMember = associationsWithActionsViaMemberships
       && associationsWithActionsViaMemberships.reduce(
-        (memo, association) => {
-          if (viewSubject === 'actors') {
-            return memo.concat(association.getIn(['actionsByType', activeActiontypeId]).valueSeq());
-          }
-          return memo.concat(association.getIn(['targetingActionsByType', activeActiontypeId]).valueSeq());
-        },
+        (memo, association) => memo.concat(
+          association.getIn(['actionsByType', activeActiontypeId]).valueSeq(),
+        ),
         List(),
       ).toSet();
   }
@@ -103,27 +90,14 @@ export function TabActivitiesByType(props) {
   if (canHaveMembers && actiontypesViaMembersForSubject) {
     membersWithActionsViaMembership = actiontypesViaMembersForSubject
       .flatten(true)
-      .filter((member) => {
-        if (viewSubject === 'actors') {
-          return member.get('actionsByType')
-            && member.getIn(['actionsByType', activeActiontypeId])
-            && member.getIn(['actionsByType', activeActiontypeId]).size > 0;
-        }
-        if (viewSubject === 'targets') {
-          return member.get('targetingActionsByType')
-            && member.getIn(['targetingActionsByType', activeActiontypeId])
-            && member.getIn(['targetingActionsByType', activeActiontypeId]).size > 0;
-        }
-        return false;
-      });
+      .filter((member) => member.get('actionsByType')
+        && member.getIn(['actionsByType', activeActiontypeId])
+        && member.getIn(['actionsByType', activeActiontypeId]).size > 0);
     uniqueActionsViaMembers = membersWithActionsViaMembership
       && membersWithActionsViaMembership.reduce(
-        (memo, member) => {
-          if (viewSubject === 'actors') {
-            return memo.concat(member.getIn(['actionsByType', activeActiontypeId]).valueSeq());
-          }
-          return memo.concat(member.getIn(['targetingActionsByType', activeActiontypeId]).valueSeq());
-        },
+        (memo, member) => memo.concat(
+          member.getIn(['actionsByType', activeActiontypeId]).valueSeq(),
+        ),
         List(),
       ).toSet();
   }
@@ -139,9 +113,7 @@ export function TabActivitiesByType(props) {
           {
             id: 0,
             titleButton:
-              `Direct${
-                viewSubject === 'actors' ? '' : ' (as target)'
-              }: ${
+              `Direct: ${
                 activeActiontypeActions ? activeActiontypeActions.size : 0
               } ${
                 getTypeLabel(activeActiontypeId, activeActiontypeActions ? activeActiontypeActions.size : 0, intl)
@@ -171,7 +143,7 @@ export function TabActivitiesByType(props) {
                           invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
                           autoUser: true,
                           connect: {
-                            type: viewSubject === 'actors' ? 'actorActions' : 'actionActors',
+                            type: 'actorActions',
                             create: [{
                               actor_id: viewEntity.get('id'),
                             }],
@@ -186,7 +158,7 @@ export function TabActivitiesByType(props) {
           },
           hasAsMemberPanel ? {
             id: 1,
-            titleButton: `As member${viewSubject === 'actors' ? '' : ' (of target)'}: ${uniqueActionsAsMember.size} ${getTypeLabel(activeActiontypeId, uniqueActionsAsMember.size, intl)}`,
+            titleButton: `As member: ${uniqueActionsAsMember.size} ${getTypeLabel(activeActiontypeId, uniqueActionsAsMember.size, intl)}`,
             content: actives.indexOf(1) > -1 && (
               <div>
                 {associationsWithActionsViaMemberships && associationsWithActionsViaMemberships.entrySeq().map(
@@ -200,7 +172,7 @@ export function TabActivitiesByType(props) {
                             title: `As member of ${actortypeLabel}: "${actor.getIn(['attributes', 'title'])}"`,
                             fields: [
                               getActionConnectionField({
-                                actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),
+                                actions: actor.getIn(['actionsByType', activeActiontypeId]),
                                 taxonomies,
                                 onEntityClick,
                                 connections: actionConnections,
@@ -223,7 +195,7 @@ export function TabActivitiesByType(props) {
           } : null,
           hasViaMembersPanel ? {
             id: 2,
-            titleButton: `From members${viewSubject === 'actors' ? '' : ' (as targets)'}: ${uniqueActionsViaMembers.size} ${getTypeLabel(activeActiontypeId, uniqueActionsViaMembers.size, intl)}`,
+            titleButton: `From members: ${uniqueActionsViaMembers.size} ${getTypeLabel(activeActiontypeId, uniqueActionsViaMembers.size, intl)}`,
             content: actives.indexOf(2) > -1 && (
               <div>
                 {membersWithActionsViaMembership && membersWithActionsViaMembership.entrySeq().map(
@@ -249,7 +221,7 @@ export function TabActivitiesByType(props) {
                             ),
                             fields: [
                               getActionConnectionField({
-                                actions: actor.getIn([viewSubject === 'actors' ? 'actionsByType' : 'targetingActionsByType', activeActiontypeId]),
+                                actions: actor.getIn(['actionsByType', activeActiontypeId]),
                                 taxonomies,
                                 onEntityClick,
                                 connections: actionConnections,
