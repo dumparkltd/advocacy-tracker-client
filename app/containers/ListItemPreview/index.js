@@ -29,7 +29,7 @@ export function ListItemPreview({
       flex={{ shrink: 0 }}
       elevation="medium"
       pad={{ horizontal: 'large', vertical: 'small' }}
-      gap="large"
+      gap="small"
       overflow="auto"
       style={{ position: 'relative' }}
     >

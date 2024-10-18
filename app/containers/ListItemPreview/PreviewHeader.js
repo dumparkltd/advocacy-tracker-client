@@ -1,13 +1,47 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import styled from 'styled-components';
+import { palette } from 'styled-theme';
 
 import {
   Box, Heading, Button,
 } from 'grommet';
 import Icon from 'components/Icon';
 
+import appMessages from 'containers/App/messages';
+
 import Reference from 'components/fields/Reference';
-import ButtonClose from 'components/buttons/ButtonClose';
+import ScreenReaderOnly from 'components/styled/ScreenReaderOnly';
+
+const Title = styled((p) => <Heading level={3} {...p} />)`
+  font-family: ${({ theme }) => theme.fonts.title};
+  font-size: 34px;
+  font-weight: normal;
+  margin: 0px;
+`;
+const NavButton = styled((p) => <Button {...p} />)`
+  border-radius: 999px;
+  border: 1px solid ${palette('light', 1)};
+  color: ${({ isDisabled }) => isDisabled ? palette('light', 3) : 'black'};
+  background: ${({ isDisabled }) => isDisabled ? palette('light', 1) : 'white'};
+  padding: ${({ isLeft }) => isLeft ? '2px 9px 2px 7px' : '2px 7px 2px 9px'};
+  path {
+    stroke-width: 3px;
+  }
+`;
+const CloseButton = styled((p) => <Button plain {...p} />)`
+  background-color: ${palette('primary', 1)};
+  color: white;
+  border-radius: 999px;
+  border: none;
+  box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
+  padding: 17px;
+  &:hover {
+    background-color: ${palette('primary', 0)};
+    box-shadow: none;
+  }
+`;
 
 export function PreviewHeader({ content, onSetPreviewItemId }) {
   const contentClean = content || {};
@@ -21,41 +55,49 @@ export function PreviewHeader({ content, onSetPreviewItemId }) {
     <Box
       responsive={false}
       flex={{ shrink: 0 }}
+      direction="column"
+      pad={{ vertical: 'medium' }}
     >
       <Box fill="horizontal" align="end">
         {onSetPreviewItemId && (
-          <ButtonClose onClose={() => onSetPreviewItemId(null)} />
+          <CloseButton onClose={() => onSetPreviewItemId(null)}>
+            <ScreenReaderOnly>
+              <FormattedMessage {...appMessages.buttons.close} />
+            </ScreenReaderOnly>
+            <Icon name="close" size="39px" />
+          </CloseButton>
         )}
       </Box>
-      <Box direction="row" justify="between" align="center">
-        <Box>
-          {aboveTitle && (
-            <Reference>{aboveTitle}</Reference>
-          )}
-          <Heading level="3" style={{ margin: 0 }}>
-            {title}
-          </Heading>
-        </Box>
-        {onSetPreviewItemId && (nextPreviewItem || prevPreviewItem) && (
-          <Box direction="row" flex={{ shrink: 0 }} width="120">
-            {prevPreviewItem && (
-              <Button
-                plain
-                onClick={() => onSetPreviewItemId(prevPreviewItem)}
-              >
-                <Icon name="arrowLeft" text size="1.5em" sizes={{ mobile: '1em' }} />
-              </Button>
-            )}
-            {nextPreviewItem && (
-              <Button
-                plain
-                onClick={() => onSetPreviewItemId(nextPreviewItem)}
-              >
-                <Icon name="arrowRight" text size="1.5em" sizes={{ mobile: '1em' }} />
-              </Button>
-            )}
-          </Box>
+      <Box
+        direction="column"
+        gap="xsmall"
+        pad={{ top: 'medium' }}
+      >
+        {aboveTitle && (
+          <Reference>{aboveTitle}</Reference>
         )}
+        <Box direction="row" justify="between">
+          <Title>
+            {title}
+          </Title>
+          {onSetPreviewItemId && (nextPreviewItem || prevPreviewItem) && (
+            <Box direction="row" flex={{ shrink: 0 }} width="120" gap="xsmall">
+              <NavButton
+                onClick={() => onSetPreviewItemId(prevPreviewItem)}
+                isDisabled={!prevPreviewItem}
+                isLeft
+              >
+                <Icon name="arrowLeft" text hasStroke size="1em" sizes={{ mobile: '1em' }} />
+              </NavButton>
+              <NavButton
+                onClick={() => onSetPreviewItemId(nextPreviewItem)}
+                isDisabled={!nextPreviewItem}
+              >
+                <Icon name="arrowRight" text hasStroke size="1em" sizes={{ mobile: '1em' }} />
+              </NavButton>
+            </Box>
+          )}
+        </Box>
       </Box>
     </Box>
   );

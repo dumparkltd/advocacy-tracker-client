@@ -28,7 +28,7 @@ const SearchButton = styled(SearchButtonBase)`
   // removing extra space to reveal border + focus-visible outline
   height: ${({ theme }) => theme.sizes.mapSearchBar.height - 6}px;
   width: ${({ theme }) => theme.sizes.mapSearchBar.height - 6}px;
-  background: ${palette('light', 1)};
+  background: transparent;
   color: ${palette('dark', 4)};
   padding-left: 7px;
   &:focus-visible {
@@ -45,6 +45,7 @@ const ClearButton = styled((p) => <Button {...p} />)`
   height: ${({ theme }) => theme.sizes.mapSearchBar.height - 6}px;
   width: ${({ theme }) => theme.sizes.mapSearchBar.height - 6}px;
   color: ${palette('dark', 4)};
+  background: transparent;
   &:hover {
     color: ${palette('primary', 0)};
   }
