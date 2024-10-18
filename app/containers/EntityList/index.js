@@ -701,7 +701,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 isPrintView={isPrintView}
                 filters={filters}
                 onClearFilters={this.onClearFilters}
-                reducePreviewItem={reducePreviewItem}
               />
             )}
           </Container>

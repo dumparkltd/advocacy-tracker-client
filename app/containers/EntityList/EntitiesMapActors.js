@@ -33,7 +33,6 @@ const Styled = styled((p) => <ContainerWrapper {...p} />)`
   box-shadow: none;
   padding: 0;
 `;
-const ID = 'entities-map';
 // countries only
 export function EntitiesMapActors({
   entities,
@@ -48,7 +47,6 @@ export function EntitiesMapActors({
   isPrintView,
   filters,
   onClearFilters,
-  reducePreviewItem,
 }) {
   // const { intl } = this.context;
   // let { countries } = this.props;
@@ -120,7 +118,6 @@ export function EntitiesMapActors({
           ...feature,
           id: country.get('id'),
           attributes: country.get('attributes').toJS(),
-          previewItemId: `${ID}|${ROUTES.ACTORS}|${country.get('id')}`,
           tooltip: {
             id: country.get('id'),
             title: country.getIn(['attributes', 'title']),
@@ -177,8 +174,6 @@ export function EntitiesMapActors({
           memberOption,
         }}
         onClearFilters={onClearFilters}
-        reducePreviewItem={reducePreviewItem}
-        entities={entities}
       />
     </Styled>
   );
@@ -198,7 +193,6 @@ EntitiesMapActors.propTypes = {
   filters: PropTypes.array,
   intl: intlShape.isRequired,
   onClearFilters: PropTypes.func,
-  reducePreviewItem: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({

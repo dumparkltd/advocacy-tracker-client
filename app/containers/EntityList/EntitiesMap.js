@@ -32,7 +32,6 @@ export function EntitiesMap({
   isPrintView,
   filters,
   onClearFilters,
-  reducePreviewItem,
 }) {
   // actors ===================================================
   if (config.types === 'actortypes') {
@@ -52,7 +51,6 @@ export function EntitiesMap({
         onEntityClick={onEntityClick}
         filters={filters}
         onClearFilters={onClearFilters}
-        reducePreviewItem={reducePreviewItem}
       />
     );
   }
@@ -75,7 +73,6 @@ export function EntitiesMap({
         onEntityClick={onEntityClick}
         filters={filters}
         onClearFilters={onClearFilters}
-        // reducePreviewItem={reducePreviewItem}
       />
     );
   }
@@ -101,7 +98,6 @@ EntitiesMap.propTypes = {
   isPrintView: PropTypes.bool,
   filters: PropTypes.array,
   onClearFilters: PropTypes.func,
-  reducePreviewItem: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({

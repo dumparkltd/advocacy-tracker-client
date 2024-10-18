@@ -19,11 +19,9 @@ import countryPointsJSON from 'data/country-points.json';
 
 import {
   selectPrintConfig,
-  selectPreviewQuery,
 } from 'containers/App/selectors';
 import {
   setListPreview,
-  setPreviewContent,
 } from 'containers/App/actions';
 
 import { usePrint } from 'containers/App/PrintContext';
@@ -90,10 +88,6 @@ export function MapContainer({
   printArgs,
   onClearFilters,
   onSetPreviewItemId,
-  onSetPreviewContent,
-  reducePreviewItem,
-  previewItemId,
-  entities,
   // intl,
 }) {
   const {
@@ -245,10 +239,6 @@ export function MapContainer({
           }}
 
           onSetPreviewItemId={onSetPreviewItemId}
-          reducePreviewItem={reducePreviewItem}
-          onSetPreviewContent={onSetPreviewContent}
-          previewItemId={previewItemId}
-          entities={entities}
         />
       </MapOuterWrapper>
       {mapInfo && (
@@ -313,21 +303,15 @@ MapContainer.propTypes = {
   isOverviewMap: PropTypes.bool,
 
   onSetPreviewItemId: PropTypes.func,
-  onSetPreviewContent: PropTypes.func,
-  reducePreviewItem: PropTypes.func,
-  previewItemId: PropTypes.string,
-  entities: PropTypes.object,
 };
 
 const mapStateToProps = (state) => ({
   printArgs: selectPrintConfig(state),
-  previewItemId: selectPreviewQuery(state),
 });
 
 
 export function mapDispatchToProps(dispatch) {
   return {
-    onSetPreviewContent: (value) => dispatch(setPreviewContent(value)),
     onSetPreviewItemId: (value) => dispatch(setListPreview(value)),
   };
 }
