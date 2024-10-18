@@ -8,11 +8,8 @@ const ToggleButtonCreate = styled((p) => <ToggleButton plain {...p} />)`
   background-color: ${palette('primary', 1)};
   border-radius: 999px;
   border: none;
-  position: absolute;
   box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
-  padding: 20px;
-  top: 16px;
-  right: ${({ showMenu, theme }) => showMenu ? theme.global.edgeSize.medium : '129px'};
+  padding: 10px;
   &:hover {
     opacity: 1;
     background-color: ${palette('primary', 0)};

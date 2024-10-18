@@ -7,25 +7,29 @@ import {
   Box, Button, Text,
 } from 'grommet';
 
-import appMessages from 'containers/App/messages';
 import Icon from 'components/Icon';
 import ScreenReaderOnly from 'components/styled/ScreenReaderOnly';
-
-import messages from './messages';
+import appMessages from 'containers/App/messages';
 
 import ToggleButtonCreate from './ToggleMenus/ToggleButtonCreate';
-import HiddenMenu from './ToggleMenus/HiddenMenu';
-import Section from './ToggleMenus/Section';
+import messages from './messages';
 
-const Styled = styled((p) => <Box fill="horizontal" {...p} />)``;
-const StyledHiddenMenu = styled((p) => <HiddenMenu {...p} />)`
-  top: 0px;
-  right: 0px;
-  z-index: 301;
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
-    right: 105px;
+const Styled = styled.div`
+  position: relative;
+  z-index:110;
+`;
+const Menu = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: white;
+  width: 100%;
+  z-index: 110;
+  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
+    width: 300px;
   }
 `;
+
 const HintWrapper = styled((p) => <Box pad={{ bottom: 'small' }} {...p} />)`
   border-bottom: 1px solid ${palette('light', 1)};
 `;
@@ -71,99 +75,108 @@ const ExpandItems = styled((p) => <Button plain {...p} />)`
 `;
 
 const CreateMenu = ({
-  onHideMenu,
   navItems,
   onClick,
+  onShow,
+  onHide,
+  show,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const displayedNavItems = isExpanded ? navItems : navItems.slice(0, 4);
   return (
-    <StyledHiddenMenu
-      flex={{ grow: 1 }}
-      direction="column"
-      align="start"
-      justify="start"
-      wide={false}
-      elevation="medium"
-    >
-      <ToggleButtonCreate showMenu onClick={() => onHideMenu()}>
-        <ScreenReaderOnly>
-          <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
-        </ScreenReaderOnly>
-        <Icon name="close" size="39px" />
-      </ToggleButtonCreate>
-      <Section
-        pad="small"
-        fill="horizontal"
-        align="start"
-        justify="start"
-      >
-        <Styled pad={{ bottom: 'small', horizontal: 'small' }}>
-          <TitleWrapper>
-            <Title>
-              <FormattedMessage {...messages.addLabel} />
-            </Title>
-          </TitleWrapper>
-          <HintWrapper>
-            <Hint>
-              <FormattedMessage {...messages.selectLabel} />
-            </Hint>
-          </HintWrapper>
-          <Box margin={{ left: 'xsmall' }}>
-            {displayedNavItems && displayedNavItems.map((item, i) => (
-              <ItemButton
-                key={i}
-                href={item.path}
-                active={item.active}
-                onClick={(evt) => {
-                  evt.stopPropagation();
-                  onHideMenu();
-                  onClick(evt, item.path);
-                }}
-              >
-                <ItemWrapper
-                  direction="row"
-                  justify="between"
-                  align="center"
-                  fill="horizontal"
-                  pad={{ vertical: 'xsmall' }}
-                >
-                  <Text>{item.title}</Text>
-                  <Box
-                    width="79px"
-                    align="center"
+    <Styled>
+      {show && (
+        <Menu>
+          <Box
+            pad="small"
+            fill="horizontal"
+            align="start"
+            justify="start"
+            elevation="medium"
+            flex={{ shrink: 0 }}
+          >
+            <Box fill="horizontal" pad={{ bottom: 'small', horizontal: 'small' }}>
+              <TitleWrapper>
+                <Title>
+                  <FormattedMessage {...messages.addLabel} />
+                </Title>
+              </TitleWrapper>
+              <HintWrapper>
+                <Hint>
+                  <FormattedMessage {...messages.selectLabel} />
+                </Hint>
+              </HintWrapper>
+              <Box margin={{ left: 'xsmall' }}>
+                {displayedNavItems && displayedNavItems.map((item, i) => (
+                  <ItemButton
+                    key={i}
+                    href={item.path}
+                    active={item.active}
+                    onClick={(evt) => {
+                      evt.stopPropagation();
+                      onHide();
+                      onClick(evt, item.path);
+                    }}
                   >
-                    <AddIconWrapper>
-                      <Icon
-                        name="add"
-                        size="14px"
-                        hasStroke
-                      />
-                    </AddIconWrapper>
-                  </Box>
-                </ItemWrapper>
-              </ItemButton>
-            ))}
+                    <ItemWrapper
+                      direction="row"
+                      justify="between"
+                      align="center"
+                      fill="horizontal"
+                      pad={{ vertical: 'xsmall' }}
+                    >
+                      <Text>{item.title}</Text>
+                      <Box
+                        width="79px"
+                        align="center"
+                      >
+                        <AddIconWrapper>
+                          <Icon
+                            name="add"
+                            size="14px"
+                            hasStroke
+                          />
+                        </AddIconWrapper>
+                      </Box>
+                    </ItemWrapper>
+                  </ItemButton>
+                ))}
+              </Box>
+              <ExpandItems
+                label={
+                  isExpanded
+                    ? <FormattedMessage {...messages.showLessLabel} />
+                    : <FormattedMessage {...messages.showMoreLabel} />
+                }
+                onClick={() => setIsExpanded(!isExpanded)}
+                margin={{ left: 'xsmall' }}
+              />
+            </Box>
           </Box>
-          <ExpandItems
-            label={
-              isExpanded
-                ? <FormattedMessage {...messages.showLessLabel} />
-                : <FormattedMessage {...messages.showMoreLabel} />
-            }
-            onClick={() => setIsExpanded(!isExpanded)}
-            margin={{ left: 'xsmall' }}
-          />
-        </Styled>
-      </Section>
-    </StyledHiddenMenu>
+        </Menu>
+      )}
+      <div
+        style={{ position: 'relative', top: '50%', zIndex: '111', right: '5px' }}
+      >
+        <ToggleButtonCreate onClick={() => show ? onHide() : onShow()}>
+          <ScreenReaderOnly>
+            <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
+          </ScreenReaderOnly>
+          <div style={{ transform: show ? 'rotate(0)' : 'rotate(45deg)' }}>
+            <Icon name="close" size="39px" />
+          </div>
+        </ToggleButtonCreate>
+      </div>
+    </Styled>
   );
 };
 
 CreateMenu.propTypes = {
   navItems: PropTypes.array,
   onClick: PropTypes.func,
-  onHideMenu: PropTypes.func,
+  show: PropTypes.bool,
+  onShow: PropTypes.func,
+  onHide: PropTypes.func,
 };
 
 export default CreateMenu;

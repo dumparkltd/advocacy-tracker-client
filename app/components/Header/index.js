@@ -17,7 +17,6 @@ import BoxPrint from 'components/styled/BoxPrint';
 import Brand from './Brand';
 import LogoWrap from './LogoWrap';
 import ToggleButton from './ToggleMenus/ToggleButton';
-import ToggleButtonCreate from './ToggleMenus/ToggleButtonCreate';
 import LinkMenu from './ToggleMenus/LinkMenu';
 import ToggleCreateMenu from './ToggleCreateMenu';
 import ToggleUserMenu from './ToggleUserMenu';
@@ -221,34 +220,15 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                       && navItems.create
                       && navItems.create.length > 0
                       && (
-                        <>
-                          {!this.state.showCreateMenu && (
-                            <BoxPrint
-                              printHide
-                              flex={{ grow: 1 }}
-                              direction="row"
-                              align="center"
-                              justify="end"
-                              pad={{ right: 'small' }}
-                            >
-                              <ToggleButtonCreate onClick={this.onShowCreateMenu} showMenu={false}>
-                                <ScreenReaderOnly>
-                                  <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
-                                </ScreenReaderOnly>
-                                <Icon name="add" size="39px" />
-                              </ToggleButtonCreate>
-                            </BoxPrint>
-                          )}
-                          {this.state.showCreateMenu && (
-                            <ToggleCreateMenu
-                              onHideMenu={this.onHideCreateMenu}
-                              navItems={navItems && navItems.create}
-                              onClick={this.onClick}
-                              toggleMenuLength={navItems}
-                              wide={wide}
-                            />
-                          )}
-                        </>
+                        <ToggleCreateMenu
+                          onHide={this.onHideCreateMenu}
+                          onShow={this.onShowCreateMenu}
+                          navItems={navItems && navItems.create}
+                          onClick={this.onClick}
+                          toggleMenuLength={navItems}
+                          show={this.state.showCreateMenu}
+                          wide={wide}
+                        />
                       )}
                     {!this.state.showUserMenu && (
                       <BoxPrint
