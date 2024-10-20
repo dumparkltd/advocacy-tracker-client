@@ -59,8 +59,8 @@ export function OverviewPositions({ intl }) {
             </TitleMedium>
           </Box>
           <Box gap="small">
-            <PositionsList />
             <PositionsMap />
+            <PositionsList />
           </Box>
         </ContentSimple>
       </ViewContainer>
