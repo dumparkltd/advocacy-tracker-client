@@ -17,7 +17,6 @@ import qe from 'utils/quasi-equals';
 import {
   ACTIONTYPES_CONFIG,
   ACTIONTYPE_ACTORTYPES,
-  ACTIONTYPE_TARGETTYPES,
   MEMBERSHIPS,
 } from 'themes/config';
 
@@ -37,11 +36,8 @@ import ButtonPill from 'components/buttons/ButtonPill';
 import TabActivitiesByType from './TabActivitiesByType';
 
 import {
-  selectActionsAsTargetByType,
   selectActionsAsMemberByActortype,
-  selectActionsAsTargetAsMemberByActortype,
   selectActionsViaMembersByActortype,
-  selectActionsAsTargetViaMembersByActortype,
 } from './selectors';
 
 const TypeSelectBox = styled((p) => <Box {...p} />)``;
@@ -60,14 +56,11 @@ export function TabActivities(props) {
     onSetActiontype,
     viewActiontypeId, // as set in URL
     actionsByActiontype,
-    actionsAsTargetByActiontype,
     actiontypes,
     actionsAsMemberByActortype,
-    actionsAsTargetAsMemberByActortype,
     onEntityClick,
     intl,
     actionsViaMembersByActortype,
-    actionsAsTargetViaMembersByActortype,
     isAdmin,
     showAllActionTypes,
   } = props;
@@ -102,14 +95,6 @@ export function TabActivities(props) {
           return ACTIONTYPE_ACTORTYPES[atId] && ACTIONTYPE_ACTORTYPES[atId].indexOf(viewActortypeId) > -1;
         }
       );
-    } else if (viewSubject === 'targets') {
-      actiontypesForSubject = actionsAsTargetByActiontype;
-      actiontypesForSubjectOptions = actiontypes.filter(
-        (at) => {
-          const atId = at.get('id');
-          return ACTIONTYPE_TARGETTYPES[atId] && ACTIONTYPE_TARGETTYPES[atId].indexOf(viewActortypeId) > -1;
-        }
-      );
     }
     // direct && indirect actiontypeids for selected subject
     actiontypeIdsForSubjectOptions = actiontypesForSubjectOptions
@@ -120,16 +105,12 @@ export function TabActivities(props) {
       if (viewSubject === 'actors') {
         // indirect actiontypeids for selected subject
         actiontypesAsMemberByActortypeForSubject = actionsAsMemberByActortype;
-      } else if (viewSubject === 'targets') {
-        actiontypesAsMemberByActortypeForSubject = actionsAsTargetAsMemberByActortype;
       }
     }
     if (canHaveMembers) {
       if (viewSubject === 'actors') {
         // indirect actiontypeids for selected subject
         actiontypesViaMembersByActortypeForSubject = actionsViaMembersByActortype;
-      } else if (viewSubject === 'targets') {
-        actiontypesViaMembersByActortypeForSubject = actionsAsTargetViaMembersByActortype;
       }
     }
 
@@ -151,7 +132,7 @@ export function TabActivities(props) {
     // direct actions for selected subject and type
     activeActiontypeActions = actiontypesForSubject && actiontypesForSubject.get(parseInt(activeActiontypeId, 10));
     // figure out inactive action types
-    if (canBeMember && (viewSubject === 'actors' || viewSubject === 'targets')) {
+    if (canBeMember && viewSubject === 'actors') {
       actiontypesAsMemberForSubject = actiontypesAsMemberByActortypeForSubject
         && actiontypesAsMemberByActortypeForSubject.reduce(
           (memo, typeActors, id) => {
@@ -164,7 +145,7 @@ export function TabActivities(props) {
         );
     }
     // figure out inactive action types
-    if (canHaveMembers && (viewSubject === 'actors' || viewSubject === 'targets')) {
+    if (canHaveMembers && viewSubject === 'actors') {
       actiontypesViaMembersForSubject = actiontypesViaMembersByActortypeForSubject
         && actiontypesViaMembersByActortypeForSubject.reduce(
           (memo, typeActors, id) => {
@@ -184,11 +165,6 @@ export function TabActivities(props) {
           {viewSubject === 'actors' && (
             <Text>
               No activities for actor in database
-            </Text>
-          )}
-          {viewSubject === 'targets' && (
-            <Text>
-              Actor not target of any activities in database
             </Text>
           )}
         </Box>
@@ -267,12 +243,9 @@ TabActivities.propTypes = {
   onEntityClick: PropTypes.func,
   viewActiontypeId: PropTypes.string,
   actionsByActiontype: PropTypes.instanceOf(Map),
-  actionsAsTargetByActiontype: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   actionsAsMemberByActortype: PropTypes.instanceOf(Map),
-  actionsAsTargetAsMemberByActortype: PropTypes.instanceOf(Map),
   actionsViaMembersByActortype: PropTypes.instanceOf(Map),
-  actionsAsTargetViaMembersByActortype: PropTypes.instanceOf(Map),
   intl: intlShape,
 };
 
@@ -280,11 +253,8 @@ TabActivities.propTypes = {
 const mapStateToProps = (state, { viewEntity }) => ({
   actiontypes: selectActiontypes(state),
   viewActiontypeId: selectActiontypeQuery(state),
-  actionsAsTargetByActiontype: selectActionsAsTargetByType(state, viewEntity.get('id')),
   actionsAsMemberByActortype: selectActionsAsMemberByActortype(state, viewEntity.get('id')),
-  actionsAsTargetAsMemberByActortype: selectActionsAsTargetAsMemberByActortype(state, viewEntity.get('id')),
   actionsViaMembersByActortype: selectActionsViaMembersByActortype(state, viewEntity.get('id')),
-  actionsAsTargetViaMembersByActortype: selectActionsAsTargetViaMembersByActortype(state, viewEntity.get('id')),
 });
 
 function mapDispatchToProps(dispatch) {

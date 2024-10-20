@@ -36,6 +36,7 @@ import {
   OPEN_NEW_ENTITY_MODAL,
   PRINT_VIEW,
   CLOSE_PRINT_VIEW,
+  SET_LIST_PREVIEW_CONTENT,
 } from './constants';
 
 // The initial state of the App
@@ -61,6 +62,7 @@ const initialState = fromJS({
   },
   newEntityModal: null,
   printConfig: null,
+  listPreviewContent: null,
 });
 
 function appReducer(state = initialState, payload) {
@@ -157,6 +159,8 @@ function appReducer(state = initialState, payload) {
         .set('entities', fromJS(initialState.toJS().entities));
     case OPEN_NEW_ENTITY_MODAL:
       return state.set('newEntityModal', fromJS(payload.args));
+    case SET_LIST_PREVIEW_CONTENT:
+      return state.set('listPreviewContent', fromJS(payload.args));
     case PRINT_VIEW:
       return state.set(
         'printConfig', {

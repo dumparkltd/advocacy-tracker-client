@@ -55,6 +55,9 @@ export const ROUTES = {
   CATEGORY: '/category',
   PAGES: '/pages',
   SEARCH: '/search',
+  POSITIONS: '/positions',
+  // OUTREACH: '/outreach',
+  MYSTUFF: '/mystuff',
 };
 
 // Server endpoints for database tables **************************
@@ -89,6 +92,15 @@ export const API = {
   BOOKMARKS: 'bookmarks',
 };
 
+export const API_FOR_ROUTE = {
+  [ROUTES.ACTOR]: API.ACTORS,
+  [ROUTES.ACTION]: API.ACTIONS,
+  [ROUTES.INDICATOR]: API.INDICATORS,
+  [ROUTES.CATEGORY]: API.CATEGORIES,
+  [ROUTES.RESOURCE]: API.RESOURCES,
+  [ROUTES.USERS]: API.USERS,
+};
+
 export const ACTIONTYPES = {
   EXPRESS: '1',
   EVENT: '2',
@@ -100,21 +112,20 @@ export const ACTIONTYPES = {
 
 export const ACTORTYPES = {
   COUNTRY: '1',
-  ORG: '2',
   CONTACT: '3',
-  REG: '4',
+  ORG: '2',
   GROUP: '5',
+  REG: '4',
 };
 
 export const RESOURCETYPES = {
-  REF: '1',
   WEB: '2',
+  REF: '1',
   DOC: '3',
 };
 
 export const OFFICIAL_STATEMENT_CATEGORY_ID = 55;
 export const AUTHORITY_TAXONOMY = 13;
-
 
 export const ACTION_INDICATOR_SUPPORTLEVELS = {
   // not assigned
@@ -164,6 +175,11 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#67402E', // teal-brown
     order: 5,
   },
+  99: {
+    value: '99',
+    color: '#EDEFF0',
+    order: 99,
+  },
 };
 
 export const ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS = {
@@ -177,79 +193,13 @@ export const ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS = {
   ],
 };
 
-export const MAP_OPTIONS = {
-  RANGE: ['#CAE0F7', '#164571'],
-  GRADIENT: {
-    // actors: ['#FAFA6E', '#81DD90', '#029481', '#035E93', '#043465'],
-    actors: ['#FAFA6E', '#81DD90', '#029481', '#00728f', '#043465'],
-    targets: ['#FAFA6E', '#FAAB4B', '#DD654A', '#BF0071', '#59004d'],
-  },
-  NO_DATA_COLOR: '#EDEFF0',
-  DEFAULT_STYLE: {
-    weight: 1,
-    color: '#CFD3D7',
-    fillOpacity: 1,
-    fillColor: '#EDEFF0',
-  },
-  STYLE: {
-    active: {
-      weight: 2,
-      color: '#000000',
-    },
-    members: {
-      fillColor: '#aaa',
-    },
-    country: {
-      fillColor: '#0063b5',
-      weight: 1.5,
-      color: '#333333',
-    },
-  },
-  TOOLTIP_STYLE: {
-    weight: 1,
-    fillOpacity: 0,
-    color: '#666666',
-    interactive: false,
-  },
-  OVER_STYLE: {
-    weight: 1,
-    fillOpacity: 0,
-    color: '#ADB4B9',
-    interactive: false,
-  },
-  BBOX_STYLE: {
-    fillColor: '#F9F9FA',
-    fillOpacity: 1,
-    weight: 0.5,
-    color: '#DEE1E3',
-  },
-  CENTER: [20, 0],
-  ZOOM: {
-    INIT: 1,
-    MIN: 0,
-    MAX: 9,
-  },
-  BOUNDS: {
-    N: 90,
-    W: -3600,
-    S: -90,
-    E: 3600,
-  },
-  PROJ: {
-    robinson: {
-      name: 'Robinson',
-      crs: 'ESRI:54030',
-      proj4def: '+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
-      resolutions: [
-        65536, 32768, 16384, 8192, 4096, 2048, 1024, 512, 256, 128,
-      ],
-      origin: [0, 0],
-      bounds: [[90, -180], [-90, 180]], // [[N, W], [S, E]]
-      addBBox: true,
-    },
-  },
-};
-
+export const OUTREACH_ACTIONTYPES = [
+  ACTIONTYPES.INTERACTION,
+  ACTIONTYPES.TASK,
+  ACTIONTYPES.OP,
+  ACTIONTYPES.AP,
+  ACTIONTYPES.EVENT,
+];
 export const ACTIONTYPE_NAVGROUPS = {
   // Plans & Tasks
   1: {
@@ -319,6 +269,127 @@ export const ACTION_FIELDS = {
         on: 'actortype_id',
       },
     },
+    indicators: {
+      table: API.INDICATORS,
+      preview: [ACTIONTYPES.EXPRESS],
+    },
+  },
+  ATTRIBUTES: {
+    measuretype_id: {
+      defaultValue: '1',
+      required: Object.values(ACTIONTYPES), // all types
+      type: 'number',
+      skipImport: true,
+      table: API.ACTIONTYPES,
+      exportColumn: 'activity_type',
+      export: true,
+    },
+    code: {
+      optional: Object.values(ACTIONTYPES), // all types
+      adminOnly: true,
+      type: 'text',
+    },
+    title: {
+      required: Object.values(ACTIONTYPES), // all types
+      type: 'text',
+      // exportRequired: true,
+    },
+    // parent_id: {
+    //   skipImport: true,
+    //   optional: Object.values(ACTIONTYPES), // controlled by type setting
+    //   type: 'number',
+    // },
+    description: {
+      optional: Object.values(ACTIONTYPES),
+      type: 'markdown',
+    },
+    comment: {
+      optional: Object.values(ACTIONTYPES),
+      type: 'markdown',
+    },
+    url: {
+      optional: Object.values(ACTIONTYPES),
+      type: 'url',
+    },
+    date_start: {
+      optional: Object.values(ACTIONTYPES),
+      preview: Object.values(ACTIONTYPES),
+      type: 'date',
+    },
+    date_end: {
+      optional: [ACTIONTYPES.EVENT],
+      type: 'date',
+    },
+    date_comment: {
+      optional: Object.values(ACTIONTYPES),
+      type: 'text',
+    },
+    draft: {
+      defaultValue: true,
+      required: Object.values(ACTIONTYPES), // all types
+      type: 'bool',
+      // ui: 'dropdown',
+      skipImport: true,
+      // options: [
+      //   { value: true, message: 'ui.publishStatuses.draft' },
+      //   { value: false, message: 'ui.publishStatuses.public' },
+      // ],
+    },
+    private: {
+      defaultValue: false,
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      type: 'bool',
+    },
+    notifications: {
+      defaultValue: true,
+      type: 'bool',
+    },
+    created_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    created_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'created_by',
+    },
+    updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'updated_by',
+    },
+    relationship_updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+      exportColumn: 'connection_updated_at',
+    },
+    relationship_updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'connection_updated_by',
+    },
   },
   // additional
   RELATIONSHIPS_IMPORT: {
@@ -369,36 +440,6 @@ export const ACTION_FIELDS = {
       table: API.ACTOR_ACTIONS,
       keyPair: ['measure_id', 'actor_id'], // own, other
       hint: 'one or more unique actor ids (as assigned by the database / comma-separated)',
-    },
-    // column: country-code
-    'target-code': {
-      type: 'text',
-      optional: [
-        ACTIONTYPES.OP,
-        ACTIONTYPES.AP,
-        ACTIONTYPES.TASK,
-      ],
-      multiple: true,
-      lookup: {
-        table: API.ACTORS,
-        attribute: 'code',
-      },
-      table: API.ACTION_ACTORS,
-      keyPair: ['measure_id', 'actor_id'], // own, other
-      hint: 'one or more unique actor codes (as assigned by the users / comma-separated) for actors targeted',
-    },
-    // column: country-code
-    'target-id': {
-      type: 'text',
-      optional: [
-        ACTIONTYPES.OP,
-        ACTIONTYPES.AP,
-        ACTIONTYPES.TASK,
-      ],
-      multiple: true,
-      table: API.ACTION_ACTORS,
-      keyPair: ['measure_id', 'actor_id'], // own, other
-      hint: 'one or more unique actor ids (as assigned by the database / comma-separated) for actors targeted',
     },
     // belongs to event
     'event-code': {
@@ -530,143 +571,27 @@ export const ACTION_FIELDS = {
       hint: 'one or more user email addresses (exact / comma-separated)',
     },
   },
-  ATTRIBUTES: {
-    measuretype_id: {
-      defaultValue: '1',
-      required: Object.values(ACTIONTYPES), // all types
-      type: 'number',
-      skipImport: true,
-      table: API.ACTIONTYPES,
-      exportColumn: 'activity_type',
-      export: true,
-    },
-    code: {
-      optional: Object.values(ACTIONTYPES), // all types
-      adminOnly: true,
-      type: 'text',
-    },
-    title: {
-      required: Object.values(ACTIONTYPES), // all types
-      type: 'text',
-      // exportRequired: true,
-    },
-    // parent_id: {
-    //   skipImport: true,
-    //   optional: Object.values(ACTIONTYPES), // controlled by type setting
-    //   type: 'number',
-    // },
-    description: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'markdown',
-    },
-    comment: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'markdown',
-    },
-    url: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'url',
-    },
-    date_start: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'date',
-    },
-    date_end: {
-      optional: [ACTIONTYPES.EVENT],
-      type: 'date',
-    },
-    date_comment: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'text',
-    },
-    draft: {
-      defaultValue: true,
-      required: Object.values(ACTIONTYPES), // all types
-      type: 'bool',
-      // ui: 'dropdown',
-      skipImport: true,
-      // options: [
-      //   { value: true, message: 'ui.publishStatuses.draft' },
-      //   { value: false, message: 'ui.publishStatuses.public' },
-      // ],
-    },
-    private: {
-      defaultValue: false,
-      type: 'bool',
-    },
-    is_archive: {
-      defaultValue: false,
-      type: 'bool',
-    },
-    notifications: {
-      defaultValue: true,
-      type: 'bool',
-    },
-    created_at: {
-      skipImport: true,
-      type: 'datetime',
-      adminOnly: true,
-      meta: true,
-    },
-    created_by_id: {
-      skipImport: true,
-      type: 'key',
-      adminOnly: true,
-      meta: true,
-      table: API.USERS,
-      exportColumn: 'created_by',
-    },
-    updated_at: {
-      skipImport: true,
-      type: 'datetime',
-      adminOnly: true,
-      meta: true,
-    },
-    updated_by_id: {
-      skipImport: true,
-      type: 'key',
-      adminOnly: true,
-      meta: true,
-      table: API.USERS,
-      exportColumn: 'updated_by',
-    },
-    relationship_updated_at: {
-      skipImport: true,
-      type: 'datetime',
-      adminOnly: true,
-      meta: true,
-      exportColumn: 'connection_updated_at',
-    },
-    relationship_updated_by_id: {
-      skipImport: true,
-      type: 'key',
-      adminOnly: true,
-      meta: true,
-      table: API.USERS,
-      exportColumn: 'connection_updated_by',
-    },
-  },
 };
 
 export const ACTOR_FIELDS = {
-  CONNECTIONS: {
-    categories: {
-      table: API.CATEGORIES,
-      connection: API.ACTOR_CATEGORIES,
-      groupby: {
-        table: API.TAXONOMIES,
-        on: '_id',
-      },
-    },
-    actions: {
-      table: API.ACTIONS,
-      connection: API.ACTOR_ACTIONS,
-      groupby: {
-        table: API.ACTIONTYPES,
-        on: 'measuretype_id',
-      },
-    },
-  },
+  // CONNECTIONS: {
+  //   categories: {
+  //     table: API.CATEGORIES,
+  //     connection: API.ACTOR_CATEGORIES,
+  //     groupby: {
+  //       table: API.TAXONOMIES,
+  //       on: '_id',
+  //     },
+  //   },
+  //   actions: {
+  //     table: API.ACTIONS,
+  //     connection: API.ACTOR_ACTIONS,
+  //     groupby: {
+  //       table: API.ACTIONTYPES,
+  //       on: 'measuretype_id',
+  //     },
+  //   },
+  // },
   ATTRIBUTES: {
     actortype_id: {
       defaultValue: '1',
@@ -874,16 +799,16 @@ export const ACTOR_FIELDS = {
 };
 
 export const RESOURCE_FIELDS = {
-  CONNECTIONS: {
-    actions: {
-      table: API.ACTIONS,
-      connection: API.ACTION_RESOURCES,
-      groupby: {
-        table: API.ACTIONTYPES,
-        on: 'measuretype_id',
-      },
-    },
-  },
+  // CONNECTIONS: {
+  //   actions: {
+  //     table: API.ACTIONS,
+  //     connection: API.ACTION_RESOURCES,
+  //     groupby: {
+  //       table: API.ACTIONTYPES,
+  //       on: 'measuretype_id',
+  //     },
+  //   },
+  // },
   ATTRIBUTES: {
     resourcetype_id: {
       defaultValue: '1',
@@ -937,16 +862,16 @@ export const RESOURCE_FIELDS = {
 };
 
 export const INDICATOR_FIELDS = {
-  CONNECTIONS: {
-    actions: {
-      table: API.ACTIONS,
-      connection: API.ACTION_INDICATORS,
-      groupby: {
-        table: API.ACTIONTYPES,
-        on: 'measuretype_id',
-      },
-    },
-  },
+  // CONNECTIONS: {
+  //   actions: {
+  //     table: API.ACTIONS,
+  //     connection: API.ACTION_INDICATORS,
+  //     groupby: {
+  //       table: API.ACTIONTYPES,
+  //       on: 'measuretype_id',
+  //     },
+  //   },
+  // },
   ATTRIBUTES: {
     code: {
       type: 'text',
@@ -1050,23 +975,6 @@ export const ACTIONTYPE_ACTORTYPES = {
     ACTORTYPES.ORG,
     ACTORTYPES.GROUP,
   ],
-  // // outreach plans are targeting countries & contacts
-  // [ACTIONTYPES.OP]: [
-  //   ACTORTYPES.COUNTRY,
-  //   ACTORTYPES.CONTACT,
-  // ],
-  // // advocacy plans are targeting countries & contacts
-  // [ACTIONTYPES.AP]: [
-  //   ACTORTYPES.COUNTRY,
-  //   ACTORTYPES.CONTACT,
-  // ],
-  // // tasks target countries
-  // [ACTIONTYPES.TASK]: [
-  //   ACTORTYPES.COUNTRY,
-  // ],
-};
-
-export const ACTIONTYPE_TARGETTYPES = {
   // outreach plans are targeting countries & contacts
   [ACTIONTYPES.OP]: [
     ACTORTYPES.COUNTRY,
@@ -1090,7 +998,6 @@ export const ACTIONTYPE_TARGETTYPES = {
     ACTORTYPES.GROUP,
   ],
 };
-
 
 export const ACTIONTYPE_RESOURCETYPES = {
   [ACTIONTYPES.EXPRESS]: [
@@ -1367,13 +1274,13 @@ export const ACTIONTYPES_CONFIG = {
         showOnSingle: false,
       },
       {
-        id: 'targets', // one row per type,
-        type: 'targets', // one row per type,
+        id: 'actors', // one row per type,
+        type: 'actors', // one row per type,
         sort: 'title',
       },
       {
-        id: 'targetsViaChildren', // one row per type,
-        type: 'targetsViaChildren', // one row per type,
+        id: 'actorsViaChildren', // one row per type,
+        type: 'actorsViaChildren', // one row per type,
         sort: 'title',
         showOnSingle: false,
       },
@@ -1408,13 +1315,13 @@ export const ACTIONTYPES_CONFIG = {
         showOnSingle: false,
       },
       {
-        id: 'targets',
-        type: 'targets',
+        id: 'actors',
+        type: 'actors',
         sort: 'title',
       },
       {
-        id: 'targetsViaChildren', // one row per type,
-        type: 'targetsViaChildren', // one row per type,
+        id: 'actorsViaChildren', // one row per type,
+        type: 'actorsViaChildren', // one row per type,
         sort: 'title',
       },
       {
@@ -1453,8 +1360,8 @@ export const ACTIONTYPES_CONFIG = {
         showOnSingle: false,
       },
       {
-        id: 'targets', // one row per type,
-        type: 'targets', // one row per type,
+        id: 'actors', // one row per type,
+        type: 'actors', // one row per type,
       },
       {
         id: 'users', // one row per type,
@@ -1558,7 +1465,7 @@ export const TEXT_TRUNCATE = {
   TYPE_SELECT: 24,
   GRACE: 2,
   META_TITLE: 20,
-  INDICATOR_SELECT: 30,
+  INDICATOR_SELECT: 35,
   INDICATOR_SELECT_OPTION: 40,
 };
 
@@ -1661,5 +1568,77 @@ export const PRINT = {
     },
     portrait: { W: 760, H: 1080 }, // pt
     landscape: { W: 1100, H: 680 }, // pt
+  },
+};
+
+export const MAP_OPTIONS = {
+  RANGE: ['#CAE0F7', '#164571'],
+  GRADIENT: {
+    // actors: ['#FAFA6E', '#81DD90', '#029481', '#035E93', '#043465'],
+    actors: ['#FAFA6E', '#81DD90', '#029481', '#00728f', '#043465'],
+  },
+  NO_DATA_COLOR: '#EDEFF0',
+  DEFAULT_STYLE: {
+    weight: 1,
+    color: '#CFD3D7',
+    fillOpacity: 1,
+    fillColor: '#EDEFF0',
+  },
+  STYLE: {
+    active: {
+      weight: 2,
+      color: '#000000',
+    },
+    members: {
+      fillColor: '#aaa',
+    },
+    country: {
+      fillColor: '#0063b5',
+      weight: 1.5,
+      color: '#333333',
+    },
+  },
+  TOOLTIP_STYLE: {
+    weight: 1,
+    fillOpacity: 0,
+    color: '#666666',
+    interactive: false,
+  },
+  OVER_STYLE: {
+    weight: 1,
+    fillOpacity: 0,
+    color: '#ADB4B9',
+    interactive: false,
+  },
+  BBOX_STYLE: {
+    fillColor: '#F9F9FA',
+    fillOpacity: 1,
+    weight: 0.5,
+    color: '#DEE1E3',
+  },
+  CENTER: [20, 0],
+  ZOOM: {
+    INIT: 1,
+    MIN: 0,
+    MAX: 9,
+  },
+  BOUNDS: {
+    N: 90,
+    W: -3600,
+    S: -90,
+    E: 3600,
+  },
+  PROJ: {
+    robinson: {
+      name: 'Robinson',
+      crs: 'ESRI:54030',
+      proj4def: '+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
+      resolutions: [
+        65536, 32768, 16384, 8192, 4096, 2048, 1024, 512, 256, 128,
+      ],
+      origin: [0, 0],
+      bounds: [[90, -180], [-90, 180]], // [[N, W], [S, E]]
+      addBBox: true,
+    },
   },
 };

@@ -21,10 +21,8 @@ export const makeFilterGroups = ({
   taxonomies,
   hasUserRole,
   actortypes,
-  targettypes,
   actiontypes,
   resourcetypes,
-  actiontypesForTarget,
   activeFilterOption,
   membertypes,
   associationtypes,
@@ -121,14 +119,7 @@ export const makeFilterGroups = ({
 
   // connections option group
   if (config.connections) {
-    Object.keys(config.connections).filter((connectionKey) => {
-      // exclude targets for non-target actions
-      if (connectionKey === 'targets' && config.types === 'actiontypes') {
-        const actiontype = actiontypes.find((t) => qe(t.get('id'), typeId));
-        return actiontype.getIn(['attributes', 'has_target']);
-      }
-      return true;
-    }).forEach((connectionKey) => {
+    Object.keys(config.connections).forEach((connectionKey) => {
       const option = config.connections[connectionKey];
       const groupCurrentFilters = currentFilters && currentFilters.filter(
         (f) => qe(f.groupId, connectionKey)
@@ -193,15 +184,9 @@ export const makeFilterGroups = ({
           case 'user-actions':
             types = actiontypes;
             break;
-          case 'target-actions':
-            types = actiontypesForTarget;
-            break;
           case 'action-actors':
           case 'user-actors':
             types = actortypes;
-            break;
-          case 'action-targets':
-            types = targettypes;
             break;
           case 'association-members':
             types = membertypes;
@@ -218,12 +203,6 @@ export const makeFilterGroups = ({
         switch (option.type) {
           case 'action-actors':
             typeAbout = 'actortypes_about';
-            break;
-          case 'action-targets':
-            typeAbout = 'actortypes_about';
-            break;
-          case 'target-actions':
-            typeAbout = 'actiontypes_about';
             break;
           case 'actor-actions':
             typeAbout = 'actiontypes_about';

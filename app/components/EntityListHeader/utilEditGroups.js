@@ -18,8 +18,6 @@ export const makeEditGroups = ({
   messages,
   actortypes,
   actiontypes,
-  targettypes,
-  actiontypesForTarget,
   membertypes,
   associationtypes,
   resourcetypes,
@@ -136,7 +134,6 @@ export const makeEditGroups = ({
                 id: option.type, // filterOptionId
                 label: option.label,
                 message: option.message,
-                path: option.connectPath,
                 invalidateEntitiesPaths: option.invalidateEntitiesPaths,
                 connection: option.entityType,
                 key: option.key,
@@ -160,18 +157,12 @@ export const makeEditGroups = ({
             case 'action-actors':
               types = actortypes;
               break;
-            case 'action-targets':
-              types = targettypes;
-              break;
             case 'actor-actions':
             case 'user-actions':
             case 'resource-actions':
             case 'action-parents':
             case 'action-children':
               types = actiontypes;
-              break;
-            case 'target-actions':
-              types = actiontypesForTarget;
               break;
             case 'association-members':
               types = membertypes;
@@ -189,13 +180,11 @@ export const makeEditGroups = ({
             // actors
             case 'user-actors':
             case 'action-actors':
-            case 'action-targets':
             case 'association-members':
             case 'member-associations':
               typeAttribute_id = 'actortype_id';
               break;
             // actions
-            case 'target-actions':
             case 'actor-actions':
             case 'user-actions':
             case 'resource-actions':
@@ -248,7 +237,6 @@ export const makeEditGroups = ({
                     message: (option.messageByType && option.messageByType.indexOf('{typeid}') > -1)
                       ? option.messageByType.replace('{typeid}', type.get('id'))
                       : option.message,
-                    path: option.connectPath,
                     invalidateEntitiesPaths: option.invalidateEntitiesPaths,
                     connection: option.entityTypeAs || option.entityType,
                     key: option.key,
