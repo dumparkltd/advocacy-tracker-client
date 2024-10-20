@@ -60,6 +60,7 @@ export function OverviewPositions({ intl }) {
           </Box>
           <Box gap="small">
             <PositionsList />
+            <PositionsMap />
           </Box>
         </ContentSimple>
       </ViewContainer>
@@ -67,7 +68,6 @@ export function OverviewPositions({ intl }) {
     </ContainerWrapper>
   );
 }
-// <PositionsMap />
 
 OverviewPositions.propTypes = {
   intl: intlShape.isRequired,

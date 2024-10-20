@@ -423,7 +423,8 @@ PositionsList.propTypes = {
   includeInofficialStatements: PropTypes.bool,
   onUpdateQuery: PropTypes.func,
   onUpdatePath: PropTypes.func,
-  associationQuery: PropTypes.string,
+  associationRegionQuery: PropTypes.string,
+  associationGroupQuery: PropTypes.string,
   actorsByType: PropTypes.object, // immutable Map
   intl: intlShape.isRequired,
 };
