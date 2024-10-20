@@ -59,7 +59,6 @@ export function OverviewPositions({ intl }) {
             </TitleMedium>
           </Box>
           <Box gap="small">
-            <PositionsMap />
             <PositionsList />
           </Box>
         </ContentSimple>
@@ -68,6 +67,7 @@ export function OverviewPositions({ intl }) {
     </ContainerWrapper>
   );
 }
+// <PositionsMap />
 
 OverviewPositions.propTypes = {
   intl: intlShape.isRequired,

@@ -17,7 +17,7 @@ import {
   selectActionCategoriesGroupedByAction,
   selectCategories,
   selectIncludeInofficialStatements,
-  selectAssociationQuery,
+  selectAssociationTypeQuery,
 } from 'containers/App/selectors';
 
 import qe from 'utils/quasi-equals';
@@ -96,12 +96,17 @@ const selectCountriesWithAssociations = createSelector(
 
 const selectCountriesByAssociation = createSelector(
   selectCountriesWithAssociations,
-  selectAssociationQuery,
-  (countries, query) => {
-    if (query) {
-      return filterEntitiesByConnection(countries, query, 'associations');
+  (state) => selectAssociationTypeQuery(state, { typeId: ACTORTYPES.REG }),
+  (state) => selectAssociationTypeQuery(state, { typeId: ACTORTYPES.GROUP }),
+  (countries, queryRegion, queryGroup) => {
+    let result = countries;
+    if (queryRegion) {
+      result = filterEntitiesByConnection(result, queryRegion, 'associations');
     }
-    return countries;
+    if (queryGroup) {
+      result = filterEntitiesByConnection(result, queryGroup, 'associations');
+    }
+    return result;
   }
 );
 

@@ -44,7 +44,7 @@ import {
   selectIndicators,
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
-  selectAssociationQuery,
+  selectAssociationTypeQuery,
   selectActorsByType,
 } from 'containers/App/selectors';
 
@@ -109,7 +109,8 @@ export function PositionsList({
   intl,
   onUpdatePath,
   connections,
-  associationQuery,
+  associationRegionQuery,
+  associationGroupQuery,
   actorsByType,
   onUpdateAssociationQuery,
 }) {
@@ -286,18 +287,20 @@ export function PositionsList({
                   <FilterDropdown
                     options={prepareDropdownOptions(
                       actorsByType.get(parseInt(ACTORTYPES.REG, 10)),
-                      associationQuery,
+                      associationRegionQuery,
                     )}
-                    onSelect={onUpdateAssociationQuery}
+                    onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.REG })}
+                    onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.REG })}
                     label="Filter by region"
                     buttonLabel="Select region"
                   />
                   <FilterDropdown
                     options={prepareDropdownOptions(
                       actorsByType.get(parseInt(ACTORTYPES.GROUP, 10)),
-                      associationQuery,
+                      associationGroupQuery,
                     )}
-                    onSelect={onUpdateAssociationQuery}
+                    onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.GROUP })}
+                    onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.GROUP })}
                     label="Filter by group"
                     buttonLabel="Select group"
                   />
@@ -432,7 +435,8 @@ const mapStateToProps = (state) => ({
   includeActorMembers: selectIncludeActorMembers(state),
   countries: selectCountries(state),
   connections: selectConnections(state),
-  associationQuery: selectAssociationQuery(state),
+  associationRegionQuery: selectAssociationTypeQuery(state, { typeId: ACTORTYPES.REG }),
+  associationGroupQuery: selectAssociationTypeQuery(state, { typeId: ACTORTYPES.GROUP }),
   actorsByType: selectActorsByType(state),
 });
 
@@ -444,10 +448,10 @@ export function mapDispatchToProps(dispatch) {
     onSetIncludeActorMembers: (value) => dispatch(setIncludeActorMembers(value)),
     onUpdateQuery: (value) => dispatch(updateRouteQuery(value)),
     onUpdatePath: (path) => dispatch(updatePath(path)),
-    onUpdateAssociationQuery: (value) => {
+    onUpdateAssociationQuery: ({ value, type }) => {
       if (!value) {
         dispatch(updateRouteQuery({
-          arg: 'by-association',
+          arg: `by-association-${type}`,
           value: null,
           remove: true,
           replace: true,
@@ -455,7 +459,7 @@ export function mapDispatchToProps(dispatch) {
         }));
       } else {
         dispatch(updateRouteQuery({
-          arg: 'by-association',
+          arg: `by-association-${type}`,
           value,
           replace: true,
           multipleAttributeValues: false,

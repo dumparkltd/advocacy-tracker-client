@@ -395,6 +395,11 @@ export const selectAssociationQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('by-association')
 );
+export const selectAssociationTypeQuery = createSelector(
+  (state, { typeId }) => typeId,
+  selectLocationQuery,
+  (typeId, locationQuery) => locationQuery && locationQuery.get(`by-association-${typeId}`)
+);
 export const selectConnectedCategoryQuery = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('catx')
