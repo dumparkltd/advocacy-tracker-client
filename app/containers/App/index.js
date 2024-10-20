@@ -342,42 +342,52 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       {
         path: `${ROUTES.ACTIONS}/${ACTIONTYPES.TASK}${ROUTES.NEW}`,
         title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.TASK}`].single),
+        hidden: true,
       },
       {
         path: `${ROUTES.ACTIONS}/${ACTIONTYPES.OP}${ROUTES.NEW}`,
         title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.OP}`].single),
+        hidden: true,
       },
       {
         path: `${ROUTES.ACTIONS}/${ACTIONTYPES.AP}${ROUTES.NEW}`,
         title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.AP}`].single),
+        hidden: true,
       },
       {
         path: `${ROUTES.ACTORS}/${ACTORTYPES.ORG}${ROUTES.NEW}`,
         title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.ORG}`].single),
+        hidden: true,
       },
       {
         path: `${ROUTES.ACTORS}/${ACTORTYPES.GROUP}${ROUTES.NEW}`,
         title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.GROUP}`].single),
+        hidden: true,
       },
       {
         path: `${ROUTES.RESOURCES}${ROUTES.NEW}`,
         title: intl.formatMessage(messages.entities.resources.single),
+        hidden: true,
       },
       {
         path: `${ROUTES.INDICATORS}${ROUTES.NEW}`,
         title: intl.formatMessage(messages.entities.indicators.single),
+        hidden: true,
       },
       {
         path: `${ROUTES.ACTORS}/${ACTORTYPES.REG}${ROUTES.NEW}`,
         title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.REG}`].single),
+        hidden: true,
       },
       {
         path: `${ROUTES.ACTORS}${ACTORTYPES.COUNTRY}${ROUTES.NEW}`,
         title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.COUNTRY}`].single),
+        hidden: true,
       },
       {
         path: `${ROUTES.PAGES}${ROUTES.NEW}`,
         title: intl.formatMessage(messages.entities.pages.single),
+        hidden: true,
       },
     ];
   }

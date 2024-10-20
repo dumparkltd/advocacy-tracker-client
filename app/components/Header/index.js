@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import styled, { withTheme } from 'styled-components';
 import {
   Box, ResponsiveContext, Heading,
@@ -9,18 +8,14 @@ import { ROUTES, IS_DEV } from 'themes/config';
 import { isMinSize } from 'utils/responsive';
 import appMessages from 'containers/App/messages';
 import Icon from 'components/Icon';
-import ScreenReaderOnly from 'components/styled/ScreenReaderOnly';
 // import PrintOnly from 'components/styled/PrintOnly';
 import PrintHide from 'components/styled/PrintHide';
-import BoxPrint from 'components/styled/BoxPrint';
 
 import Brand from './Brand';
 import LogoWrap from './LogoWrap';
-import ToggleButton from './ToggleMenus/ToggleButton';
-import LinkMenu from './ToggleMenus/LinkMenu';
-import ToggleCreateMenu from './ToggleCreateMenu';
-import ToggleUserMenu from './ToggleUserMenu';
-import ToggleMainMenu from './ToggleMainMenu';
+import LinkMenu from './LinkMenu';
+import DropMenu from './DropMenu';
+import messages from './messages';
 
 
 const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
@@ -80,57 +75,13 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
 
   componentDidMount() {
     window.addEventListener('resize', this.resize);
-    window.addEventListener('mousedown', this.handleClickOutside);
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this.resize);
-    window.removeEventListener('mousedown', this.handleClickOutside);
   }
 
-  onShowMenu = (evt) => {
-    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({
-      showMenu: true,
-      showUserMenu: false,
-      showCreateMenu: false,
-    });
-  };
-
-  onHideMenu = (evt) => {
-    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ showMenu: false });
-  };
-
-  onShowUserMenu = (evt) => {
-    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({
-      showUserMenu: true,
-      showCreateMenu: false,
-      showMenu: false,
-    });
-  };
-
-  onHideUserMenu = (evt) => {
-    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ showUserMenu: false });
-  };
-
-  onShowCreateMenu = (evt) => {
-    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({
-      showCreateMenu: true,
-      showUserMenu: false,
-      showMenu: false,
-    });
-  };
-
-  onHideCreateMenu = (evt) => {
-    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ showCreateMenu: false });
-  };
-
-  onClick = (evt, path, currentPath) => {
+  onClick = (path, currentPath, evt) => {
     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
     this.onHideMenu();
     if (currentPath) {
@@ -154,8 +105,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
     const { isAuth, navItems, isPrintView } = this.props;
     const { intl } = this.context;
     const appTitle = `${intl.formatMessage(appMessages.app.title)} - ${intl.formatMessage(appMessages.app.claim)}`;
-    // const userPath = user ? `${ROUTES.USERS}/${user.id}` : '';
-    // console.log('navItems', navItems);
+
     return (
       <ResponsiveContext.Consumer>
         {(size) => {
@@ -175,7 +125,8 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                     as={isPrintView ? 'div' : 'a'}
                     href={isPrintView ? '' : '/'}
                     onClick={(evt) => {
-                      if (!isPrintView) this.onClick(evt, '/');
+                      if (evt) evt.stopPropagation();
+                      if (!isPrintView) this.onClick('/');
                     }}
                     title={appTitle}
                     isPrint={isPrintView}
@@ -205,8 +156,8 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                           href={item.path}
                           active={item.active}
                           onClick={(evt) => {
-                            evt.stopPropagation();
-                            this.onClick(evt, item.path);
+                            if (evt) evt.stopPropagation();
+                            this.onClick(item.path);
                           }}
                         >
                           {item.title}
@@ -216,73 +167,47 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                   )}
                 {!isPrintView && (
                   <Box direction="row">
-                    {navItems
-                      && navItems.create
-                      && navItems.create.length > 0
-                      && (
-                        <ToggleCreateMenu
-                          onHide={this.onHideCreateMenu}
-                          onShow={this.onShowCreateMenu}
-                          navItems={navItems && navItems.create}
-                          onClick={this.onClick}
-                          toggleMenuLength={navItems}
-                          show={this.state.showCreateMenu}
-                          wide={wide}
-                        />
-                      )}
-                    {!this.state.showUserMenu && (
-                      <BoxPrint
-                        printHide
-                        flex={{ grow: 1 }}
-                        direction="row"
-                        align="center"
-                        justify="end"
-                        pad={{ right: 'small' }}
-                      >
-                        <ToggleButton
-                          onClick={this.onShowUserMenu}
-                        >
-                          <ScreenReaderOnly>
-                            <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
-                          </ScreenReaderOnly>
-                          <Icon name="profile" hasStroke size="39px" />
-                        </ToggleButton>
-                      </BoxPrint>
-                    )}
-                    {this.state.showUserMenu && (
-                      <ToggleUserMenu
-                        navItems={navItems}
-                        showMenu={this.state.showUserMenu}
-                        onShowMenu={this.onShowUserMenu}
-                        onHideMenu={this.onHideUserMenu}
-                        onClick={this.onClick}
+                    {navItems && navItems.create && navItems.create.length > 0 && (
+                      <DropMenu
+                        title={intl.formatMessage(messages.addLabel)}
+                        type="add"
+                        navItemGroups={navItems && [{
+                          title: intl.formatMessage(messages.selectLabel),
+                          items: navItems.create,
+                        }]}
+                        onClick={(path) => this.onClick(path)}
                       />
                     )}
-                    {!this.state.showMenu && (
-                      <BoxPrint
-                        printHide
-                        flex={{ grow: 1 }}
-                        direction="row"
-                        align="center"
-                        justify="end"
-                        pad={{ right: 'small' }}
-                      >
-                        <ToggleButton
-                          onClick={this.onShowMenu}
-                        >
-                          <ScreenReaderOnly>
-                            <FormattedMessage {...appMessages.buttons.showSecondaryNavigation} />
-                          </ScreenReaderOnly>
-                          <Icon name="menu" hasStroke size="39px" />
-                        </ToggleButton>
-                      </BoxPrint>
+                    {navItems && navItems.user && navItems.user.length > 0 && (
+                      <DropMenu
+                        title="User"
+                        type="user"
+                        icon="profile"
+                        navItemGroups={navItems && [{
+                          items: navItems.user,
+                        }]}
+                        onClick={(path) => this.onClick(path)}
+                      />
                     )}
-                    {this.state.showMenu && (
-                      <ToggleMainMenu
-                        onClick={this.onClick}
-                        onHideMenu={this.onHideMenu}
-                        navItems={navItems}
-                        wide={wide}
+                    {navItems && (navItems.pages || navItems.other) && (
+                      <DropMenu
+                        title="More"
+                        type="other"
+                        navItemGroups={navItems && [
+                          !wide && {
+                            title: 'Main',
+                            items: navItems.main,
+                          },
+                          {
+                            title: 'Pages',
+                            items: navItems.pages,
+                          },
+                          {
+                            title: 'Admin',
+                            items: navItems.other,
+                          },
+                        ]}
+                        onClick={(path) => this.onClick(path)}
                       />
                     )}
                   </Box>
@@ -365,7 +290,6 @@ Header.propTypes = {
   navItems: PropTypes.object,
   onPageLink: PropTypes.func.isRequired,
   isAuth: PropTypes.bool, // not shown on home page
-  theme: PropTypes.object.isRequired,
   isPrintView: PropTypes.bool,
 };
 
