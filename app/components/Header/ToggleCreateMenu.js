@@ -156,7 +156,12 @@ const CreateMenu = ({
         </Menu>
       )}
       <div
-        style={{ position: 'relative', top: '50%', zIndex: '111', right: '5px' }}
+        style={{
+          position: 'relative',
+          top: '50%',
+          zIndex: '111',
+          right: '5px',
+        }}
       >
         <ToggleButtonCreate onClick={() => show ? onHide() : onShow()}>
           <ScreenReaderOnly>

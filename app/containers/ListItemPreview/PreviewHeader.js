@@ -20,7 +20,7 @@ const Title = styled((p) => <Heading level={3} {...p} />)`
   font-weight: normal;
   margin: 0px;
 `;
-const NavButton = styled((p) => <Button {...p} />)`
+const NavButton = styled((p) => <Button plain {...p} />)`
   border-radius: 999px;
   border: 1px solid ${palette('light', 1)};
   color: ${({ isDisabled }) => isDisabled ? palette('light', 3) : 'black'};
@@ -60,7 +60,7 @@ export function PreviewHeader({ content, onSetPreviewItemId }) {
     >
       <Box fill="horizontal" align="end">
         {onSetPreviewItemId && (
-          <CloseButton onClose={() => onSetPreviewItemId(null)}>
+          <CloseButton onClick={() => onSetPreviewItemId(null)}>
             <ScreenReaderOnly>
               <FormattedMessage {...appMessages.buttons.close} />
             </ScreenReaderOnly>
