@@ -16,7 +16,7 @@ import PreviewCountryPositionsList from './PreviewCountryPositionsList';
 const Styled = styled((p) => <Box {...p} />)`
   margin-left: 5px;
 `;
-export function ListItemPreview({
+export function EntityPreview({
   content,
   onSetPreviewItemId,
   onUpdatePath,
@@ -68,7 +68,7 @@ export function ListItemPreview({
   );
 }
 
-ListItemPreview.propTypes = {
+EntityPreview.propTypes = {
   content: PropTypes.object, // immutable Map
   onSetPreviewItemId: PropTypes.func,
   onUpdatePath: PropTypes.func,
@@ -85,4 +85,4 @@ export function mapDispatchToProps(dispatch) {
     },
   };
 }
-export default connect(null, mapDispatchToProps)(ListItemPreview);
+export default connect(null, mapDispatchToProps)(EntityPreview);

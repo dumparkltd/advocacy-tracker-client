@@ -16,7 +16,7 @@ import { Box, Text } from 'grommet';
 import Header from 'components/Header';
 import Overlay from 'components/InfoOverlay/Overlay';
 import EntityNew from 'containers/EntityNew';
-import ListItemPreview from 'containers/ListItemPreview';
+import EntityPreview from 'containers/EntityPreview';
 import PrintUI from 'containers/PrintUI';
 
 import { getAuthValues } from 'utils/api-request';
@@ -493,7 +493,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             }}
             appElement={document.getElementById('app')}
           >
-            <ListItemPreview
+            <EntityPreview
               content={listPreviewContent}
             />
           </ReactModal>
