@@ -314,6 +314,10 @@ export const selectLocationQuery = createSelector(
   selectLocation,
   (location) => location && location.get('query')
 );
+export const selectInactiveColumnQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('xcol')
+);
 
 // filter queries //////////////////////////////////////////////////////////////
 

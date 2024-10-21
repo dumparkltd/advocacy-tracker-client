@@ -19,6 +19,7 @@ import {
   selectIsPrintView,
   selectPrintConfig,
   selectPreviewQuery,
+  selectInactiveColumnQuery,
 } from 'containers/App/selectors';
 import {
   setPreviewContent,
@@ -110,6 +111,7 @@ export function EntityListTable({
   onSetPreviewItemId,
   onSetPreviewContent,
   reducePreviewItem,
+  inactiveColumns,
 }) {
   if (!columns) return null;
   // const size = React.useContext(ResponsiveContext);
@@ -159,7 +161,13 @@ export function EntityListTable({
       searchAttributes,
     );
   }
-  const activeColumns = columns.filter((col) => !(isPrintView && col.printHideOnSingle));
+  const activeColumns = columns
+    .filter((col) => !(isPrintView && col.printHideOnSingle))
+    .map((col) => ({
+      ...col,
+      hidden: inactiveColumns && inactiveColumns.includes(col.id),
+    }));
+
   // warning converting List to Array
   const entityRows = prepareEntityRows({
     entities: searchedEntities,
@@ -439,6 +447,7 @@ EntityListTable.propTypes = {
   reducePreviewItem: PropTypes.func,
   onSetPreviewContent: PropTypes.func,
   onSetPreviewItemId: PropTypes.func,
+  inactiveColumns: PropTypes.object, // immutable List
 };
 
 const mapStateToProps = (state) => ({
@@ -453,6 +462,7 @@ const mapStateToProps = (state) => ({
   isPrintView: selectIsPrintView(state),
   printConfig: selectPrintConfig(state),
   previewItemId: selectPreviewQuery(state),
+  inactiveColumns: selectInactiveColumnQuery(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

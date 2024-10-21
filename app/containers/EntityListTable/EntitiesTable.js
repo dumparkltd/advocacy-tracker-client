@@ -25,6 +25,7 @@ import CellBodyBarChart from './CellBodyBarChart';
 import CellBodyStackedBarChart from './CellBodyStackedBarChart';
 import CellHeaderMain from './CellHeaderMain';
 import CellHeaderPlain from './CellHeaderPlain';
+import CellHeaderAuxColumns from './CellHeaderAuxColumns';
 
 const Table = styled.table`
   border-spacing: 0;
@@ -47,39 +48,22 @@ const TableRow = styled.tr`
     page-break-inside: avoid;
   }
 `;
-const getColWidth = ({
-  col, count, colSpan = 1, inSingleView, columnsByType,
-}) => {
-  if (columnsByType && columnsByType.topicPosition && columnsByType.topicPosition.length > 0) {
+const getColWidth = ({ col, count, topicPositionLength }) => {
+  let result = 'auto';
+  if (col.type === 'auxColumns') {
+    result = '22px';
+  } else if (col.type === 'topicPosition') {
+    result = '33px';
+  } else if (topicPositionLength > 0) {
     if (col.type === 'main') {
-      return 25;
+      result = '25%';
     }
-    if (col.type === 'topicPosition') {
-      return 4;
-    }
-    return (75 - (4 * columnsByType.topicPosition.length))
-      / (count - columnsByType.topicPosition.length - 1);
-  }
-  if (inSingleView) {
-    return (100 / count) * colSpan;
-  }
-  if (count === 1) {
-    return 100;
-  }
-  if (count === 2) {
-    return col.type === 'main' ? 50 : 50;
-  }
-  if (count > 2) {
+  } else if (count > 2) {
     if (col.type === 'main') {
-      return 35;
+      result = '35%';
+    } else if (col.isSingleActionColumn) {
+      result = '25%';
     }
-    if (col.isSingleActionColumn) {
-      return 25;
-    }
-    if (col.hasSingleActionColumn) {
-      return (40 / (count - 2)) * colSpan;
-    }
-    return (65 / (count - 1)) * colSpan;
   }
   // if (count === 4) {
   //   return col.type === 'main' ? 30 : (70 / (count - 1)) * colSpan;
@@ -87,7 +71,7 @@ const getColWidth = ({
   // if (count > 4) {
   //   return col.type === 'main' ? 25 : (75 / (count - 1)) * colSpan;
   // }
-  return 0;
+  return result;
 };
 // background-color: ${({ utility, col }) => {
 //   if (utility && col.type === 'options') return '#f9f9f9';
@@ -106,13 +90,19 @@ const TableCellHeader = styled.th`
     if (utility) return 'transparent';
     return 'rgba(0,0,0,0.33)';
   }};
-  padding-left: ${({ col, first }) => (col.align !== 'end' && !first) ? 16 : 8}px;
-  padding-right: ${({ col, last }) => (col.align === 'end' && !last) ? 16 : 8}px;
+  padding-left: ${({ col, first, plain }) => {
+    if (plain) return 0;
+    return (col.align !== 'end' && !first) ? 8 : 4;
+  }}px;
+  padding-right: ${({ col, last, plain }) => {
+    if (plain) return 0;
+    return (col.align === 'end' && !last) ? 8 : 4;
+  }}px;
   padding-top: 6px;
   padding-bottom: 6px;
   width: 100%;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    width: ${getColWidth}%;
+    width: ${getColWidth};
   }
 `;
 const TableCellHeaderInner = styled((p) => <Box {...p} />)`
@@ -125,14 +115,21 @@ const TableCellBody = styled.td`
   height: 100%;
   text-align: start;
   border-bottom: solid 1px #DADADA;
-  padding-left: ${({ col, first }) => (col.align !== 'end' && !first) ? 20 : 8}px;
-  padding-right: ${({ col, last }) => (col.align === 'end' && !last) ? 20 : 8}px;
+  padding-left: ${({ col, first, plain }) => {
+    if (plain) return 0;
+    return (col.align !== 'end' && !first) ? 8 : 4;
+  }}px;
+  padding-right: ${({ col, last, plain }) => {
+    if (plain) return 0;
+    return (col.align === 'end' && !last) ? 8 : 4;
+  }}px;
   padding-top: 6px;
   padding-bottom: 6px;
   word-wrap:break-word;
   width: 100%;
+  overflow: hidden;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    width: ${getColWidth}%;
+    width: ${getColWidth};
   }
 `;
 const TableCellBodyInner = styled((p) => <Box {...p} />)`
@@ -210,23 +207,44 @@ export function EntitiesTable({
   }, [previewItemId]);
   const size = React.useContext(ResponsiveContext);
   const isPrintView = usePrint();
+  const headerColumnsAux = [
+    ...headerColumns,
+    {
+      id: 'auxColumns',
+      title: 'CC',
+      type: 'auxColumns',
+    },
+  ];
+  const columnsAux = [
+    ...columns,
+    {
+      type: 'spacer',
+      content: '',
+    },
+  ];
+  const headerColumnsByType = headerColumnsAux && groupBy(headerColumnsAux, 'type');
+  // console.log('headerColumnsAux', headerColumnsAux)
   return (
     <Box fill="horizontal">
       <Table isPrint={isPrintView}>
-        {headerColumns && (
+        {headerColumnsAux && (
           <TableHeader>
             <TableRow>
-              {headerColumns.map(
-                (col, i) => (isMinSize(size, 'large') || isPrintView || col.type === 'main') && (
+              {headerColumnsAux.map(
+                (col, i) => (
                   <TableCellHeader
                     key={i}
                     scope="col"
                     col={col}
-                    count={headerColumns.length}
-                    columnsByType={groupBy(headerColumns, 'type')}
+                    count={headerColumnsAux.length}
+                    topicPositionLength={
+                      headerColumnsByType
+                      && headerColumnsByType.topicPosition
+                      && headerColumnsByType.topicPosition.length
+                    }
                     first={i === 0}
-                    last={i === headerColumns.length - 1}
-                    inSingleView={inSingleView}
+                    last={i === headerColumnsAux.length - 1}
+                    plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
                   >
                     <TableCellHeaderInner fill={false} flex={{ grow: 0 }} justify="start">
                       {col.type === 'main' && (
@@ -236,8 +254,14 @@ export function EntitiesTable({
                           isPrintView={isPrintView}
                         />
                       )}
-                      {(isMinSize(size, 'large') || isPrintView) && col.type !== 'main' && (
-                        <CellHeaderPlain column={col} isPrintView={isPrintView} />
+                      {col.type === 'auxColumns' && (
+                        <CellHeaderAuxColumns
+                          column={col}
+                          columnOptions={headerColumns}
+                        />
+                      )}
+                      {(isMinSize(size, 'large') || isPrintView) && col.type !== 'main' && col.type !== 'auxColumns' && (
+                        <CellHeaderPlain column={col} />
                       )}
                     </TableCellHeaderInner>
                   </TableCellHeader>
@@ -249,15 +273,20 @@ export function EntitiesTable({
         <TableBody>
           {entities.length > 0 && entities.map((entity, key) => (
             <TableRow key={key}>
-              {columns.map((col, i) => (isMinSize(size, 'large') || isPrintView || col.type === 'main') && (
+              {columnsAux.map((col, i) => (isMinSize(size, 'large') || isPrintView || col.type === 'main') && (
                 <TableCellBody
                   key={i}
                   scope="row"
                   col={col}
-                  count={headerColumns.length}
+                  count={headerColumnsAux.length}
                   first={i === 0}
-                  last={i === headerColumns.length - 1}
-                  inSingleView={inSingleView}
+                  last={i === headerColumnsAux.length - 1}
+                  plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
+                  topicPositionLength={
+                    headerColumnsByType
+                    && headerColumnsByType.topicPosition
+                    && headerColumnsByType.topicPosition.length
+                  }
                 >
                   <TableCellBodyInner>
                     {col.type === 'main' && (
