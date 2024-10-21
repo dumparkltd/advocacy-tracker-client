@@ -1,11 +1,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-// import styled from 'styled-components';
+import styled from 'styled-components';
 import { Box, Text } from 'grommet';
+import { FormattedMessage } from 'react-intl';
 
 import EntitiesTable from 'containers/EntityListTable/EntitiesTable';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
+import messages from './messages';
+
+const SectionTitle = styled((p) => <Text size="xsmall" {...p} />)`
+  text-transform: uppercase;
+  font-weight: bold;
+`;
 export function PreviewCountryTopicStatementList({ content, onUpdatePath }) {
   const { options, indicatorPositions, indicatorPositionsTableColumns } = content;
   return (
@@ -17,7 +24,9 @@ export function PreviewCountryTopicStatementList({ content, onUpdatePath }) {
       <Box gap="medium">
         <Box fill="horizontal" direction="row" justify="between" align="end">
           <Box>
-            <Text weight={500}>Most recent statement on topic</Text>
+            <SectionTitle>
+              <FormattedMessage {...messages.countryTopicStatementList.latestSectionTitle} />
+            </SectionTitle>
           </Box>
           {options && (
             <Box direction="column" justify="end">
@@ -46,7 +55,9 @@ export function PreviewCountryTopicStatementList({ content, onUpdatePath }) {
         <Box gap="medium">
           <Box fill="horizontal" direction="row" justify="between" align="end">
             <Box>
-              <Text weight={500}>Other statements on topic</Text>
+              <SectionTitle>
+                <FormattedMessage {...messages.countryTopicStatementList.previousSectionTitle} />
+              </SectionTitle>
             </Box>
           </Box>
           {indicatorPositions && (

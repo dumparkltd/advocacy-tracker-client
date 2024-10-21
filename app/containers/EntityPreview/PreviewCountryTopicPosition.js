@@ -1,12 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-// import styled from 'styled-components';
+import styled from 'styled-components';
+
+import { FormattedMessage } from 'react-intl';
 import { Box, Text, Heading } from 'grommet';
 
 import { ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
 
 import Dot from 'components/styled/Dot';
-
+import messages from './messages';
+const SectionTitle = styled((p) => <Text size="xsmall" {...p} />)`
+  text-transform: uppercase;
+  font-weight: bold;
+`;
+const TopicTitle = styled((p) => <Heading level="4" {...p} />)`
+  font-family: ${({ theme }) => theme.fonts.title};
+  font-size: 34px;
+  font-weight: normal;
+  margin: 0px;
+`;
+const SupportLevelTitle = styled((p) => <Text size="xsmall" {...p} />)`
+  text-transform: uppercase;
+  text-align center;
+  font-weight: bold;
+`;
+const LevelOfAuthorityLabel = styled((p) => <Text size="xsmall" {...p} />)`
+  text-align center;
+`;
 export function PreviewCountryTopicPosition({ content }) {
   const { topic, position } = content;
   return (
@@ -20,11 +40,13 @@ export function PreviewCountryTopicPosition({ content }) {
     >
       <Box gap="small">
         <Box>
-          <Text>Country position for</Text>
+          <SectionTitle>
+            <FormattedMessage {...messages.countryTopicPosition.sectionTitle} />
+          </SectionTitle>
         </Box>
         {topic && (
           <Box>
-            <Heading level="5" style={{ margin: 0 }}>{topic.title}</Heading>
+            <TopicTitle>{topic.title}</TopicTitle>
           </Box>
         )}
         <Box>
@@ -38,7 +60,7 @@ export function PreviewCountryTopicPosition({ content }) {
       </Box>
       <Box>
         {position && (
-          <Box align="center" gap="small" flex={{ shrink: 0 }}>
+          <Box align="center" gap="xsmall" flex={{ shrink: 0 }}>
             <Box>
               <Dot
                 size="60px"
@@ -49,11 +71,11 @@ export function PreviewCountryTopicPosition({ content }) {
               />
             </Box>
             <Box>
-              <Text textAlign="center">{position.supportlevelTitle}</Text>
+              <SupportLevelTitle>{position.supportlevelTitle}</SupportLevelTitle>
             </Box>
             <Box>
               {position.levelOfAuthority && (
-                <Text textAlign="center">{position.levelOfAuthority}</Text>
+                <LevelOfAuthorityLabel>{position.levelOfAuthority}</LevelOfAuthorityLabel>
               )}
               {!position.levelOfAuthority && (
                 <Text textAlign="center">&nbsp;</Text>
