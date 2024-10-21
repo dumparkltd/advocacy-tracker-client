@@ -32,11 +32,11 @@ import {
 } from 'containers/App/actions';
 
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
-import EntityListViewOptions from 'components/EntityListViewOptions';
 import HeaderPrint from 'components/Header/HeaderPrint';
 
 import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
+import isDate from 'utils/is-date';
 import { hasGroupActors } from 'utils/entities';
 import MapContainer from 'containers/MapContainer';
 // import messages from './messages';
@@ -57,18 +57,12 @@ const StatementButton = styled((p) => <Button {...p} />)`
 `;
 
 export function EntitiesMapActions({
-  viewOptions,
   entities,
   actortypes,
-  actiontypes,
-  targettypes,
   typeId,
   mapSubject,
-  onSetMapSubject,
   onSetIncludeActorMembers,
   includeActorMembers,
-  onSetIncludeTargetMembers,
-  includeTargetMembers,
   countries,
   onEntityClick,
   intl,
@@ -79,8 +73,9 @@ export function EntitiesMapActions({
   catQuery,
   onUpdateQuery,
   isPrintView,
+  filters,
+  onClearFilters,
 }) {
-  let subjectOptions = [];
   let indicatorOptions;
   let infoOptions = [];
   let indicator = includeActorMembers ? 'actionsTotal' : 'actions';
@@ -103,60 +98,17 @@ export function EntitiesMapActions({
     single: intl.formatMessage(appMessages.entities[`actions_${typeId}`].single),
     plural: intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural),
   };
-  const type = actiontypes.find((at) => qe(at.get('id'), typeId));
-  const hasByTarget = type.getIn(['attributes', 'has_target']);
-  const hasActions = isStatements
-    || qe(typeId, ACTIONTYPES.INTERACTION)
-    || qe(typeId, ACTIONTYPES.EVENT);
+  const hasActions = true;
 
   if (hasActions) {
-    if (!hasByTarget) {
-      mapSubjectClean = 'actors';
-    }
-    if (!isStatements) {
-      subjectOptions = [
-        {
-          title: qe(ACTIONTYPES.DONOR, typeId) ? 'By donor' : 'By actor',
-          onClick: () => onSetMapSubject('actors'),
-          active: mapSubjectClean === 'actors',
-          disabled: mapSubjectClean === 'actors',
-        },
-      ];
-    }
+    mapSubjectClean = 'actors';
   }
-  if (!isStatements && hasByTarget) {
-    if (!hasActions) {
-      mapSubjectClean = 'targets';
-    }
-    if (mapSubjectClean === 'targets') {
-      indicator = includeTargetMembers ? 'targetingActionsTotal' : 'targetingActions';
-    }
-    // cleanMapSubject = mapSubject;
-    subjectOptions = [
-      ...subjectOptions,
-      {
-        title: qe(ACTIONTYPES.DONOR, typeId) ? 'By recipient' : 'By target',
-        onClick: () => onSetMapSubject('targets'),
-        active: mapSubjectClean === 'targets',
-        disabled: mapSubjectClean === 'targets',
-      },
-    ];
-  }
-  if (mapSubjectClean === 'targets') {
-    // note this should always be true!
-    if (hasGroupActors(targettypes)) {
-      infoOptions = [{
-        active: includeTargetMembers,
-        onClick: () => onSetIncludeTargetMembers(includeTargetMembers ? '0' : '1'),
-        label: 'Include activities targeting regions & groups (countries are member of)',
-      }];
-    }
-  } else if (hasGroupActors(actortypes)) {
+  if (hasGroupActors(actortypes)) {
     if (isPositionIndicator) {
       infoOptions = [{
         active: includeActorMembers,
         onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-        label: 'Include positions of groups (countries are member of)',
+        label: 'Include statements of groups (countries are member of)',
       }];
     } else {
       infoOptions = [{
@@ -193,7 +145,8 @@ export function EntitiesMapActions({
         {
           id: entity.get('id'),
           value: entity.get('id'),
-          label: entity.getIn(['attributes', 'title']),
+          label: `${entity.getIn(['attributes', 'title'])}`,
+          supTitle: 'Country positions for topic',
           active: qe(mapIndicator, entity.get('id')),
           onClick: () => onEntityClick(entity.get('id'), ROUTES.INDICATOR),
           href: `${ROUTES.INDICATOR}/${entity.get('id')}`,
@@ -203,6 +156,8 @@ export function EntitiesMapActions({
       [{
         id: 'all',
         value: 'all',
+        defaultOption: true,
+        supTitle: 'No of statements by Country',
         label: 'All topics',
         active: typeof mapIndicator === 'undefined' || mapIndicator === null,
       }]
@@ -271,9 +226,14 @@ export function EntitiesMapActions({
                         <Text size="xxxsmall" color="textSecondary">
                           Statement
                         </Text>
-                        {statement.get('date_start') && (
+                        {isDate(statement.get('date_start')) && (
                           <Text size="xxxsmall" color="textSecondary">
                             {`(${intl.formatDate(statement.get('date_start'))})`}
+                          </Text>
+                        )}
+                        {!isDate(statement.get('date_start')) && isDate(statement.get('created_at')) && (
+                          <Text size="xxxsmall" color="textSecondary">
+                            {`(${intl.formatDate(statement.get('created_at'))})`}
                           </Text>
                         )}
                       </Box>
@@ -302,8 +262,7 @@ export function EntitiesMapActions({
     }, []);
     indicator = mapIndicator;
     mapSubjectClean = null;
-    mapInfo = [{
-      id: 'countries',
+    mapInfo = {
       infoOptions,
       indicatorOptions,
       onIndicatorSelect: onSetMapIndicator,
@@ -322,7 +281,7 @@ export function EntitiesMapActions({
             })
           ),
       },
-    }];
+    };
   } else {
     [countryCounts, actionsTotalShowing] = entities.reduce(([memo, memo2], action) => {
       let updated = memo;
@@ -358,38 +317,6 @@ export function EntitiesMapActions({
           total += 1;
         }
       }
-      if (hasByTarget) {
-        const actionCountriesAsTargets = action.get('targetsByType')
-          && action.getIn(['targetsByType', parseInt(ACTORTYPES.COUNTRY, 10)]);
-        if (actionCountriesAsTargets) {
-          actionCountriesAsTargets.forEach((cid) => {
-            if (memo.get(cid) && memo.getIn([cid, 'targetingActions'])) {
-              updated = updated.setIn([cid, 'targetingActions'], memo.getIn([cid, 'targetingActions']) + 1);
-            } else {
-              updated = updated.setIn([cid, 'targetingActions'], 1);
-            }
-          });
-          if (mapSubjectClean === 'targets') {
-            total += 1;
-          }
-        }
-        const actionCountriesAsTargetsMembers = action.get('targetsMembersByType')
-          && action.getIn(['targetsMembersByType', parseInt(ACTORTYPES.COUNTRY, 10)]);
-        if (actionCountriesAsTargetsMembers) {
-          actionCountriesAsTargetsMembers
-            .filter((cid) => !actionCountriesAsTargets || !actionCountriesAsTargets.includes(cid))
-            .forEach((cid) => {
-              if (memo.get(cid) && memo.getIn([cid, 'targetingActionsMembers'])) {
-                updated = updated.setIn([cid, 'targetingActionsMembers'], memo.getIn([cid, 'targetingActionsMembers']) + 1);
-              } else {
-                updated = updated.setIn([cid, 'targetingActionsMembers'], 1);
-              }
-            });
-          if (mapSubjectClean === 'targets' && includeTargetMembers && total === memo2) {
-            total += 1;
-          }
-        }
-      }
       return [updated, total];
     }, [Map(), 0]);
 
@@ -399,10 +326,7 @@ export function EntitiesMapActions({
         const cCounts = countryCounts.get(parseInt(country.get('id'), 10));
         const countActions = (cCounts && cCounts.get('actions')) || 0;
         const countActionsMembers = (cCounts && cCounts.get('actionsMembers')) || 0;
-        const countTargetingActions = (cCounts && cCounts.get('targetingActions')) || 0;
-        const countTargetingActionsMembers = (cCounts && cCounts.get('targetingActionsMembers')) || 0;
         const actionsTotal = countActions + countActionsMembers;
-        const targetingActionsTotal = countTargetingActions + countTargetingActionsMembers;
         let stats;
         if (mapSubjectClean === 'actors') {
           stats = [
@@ -424,22 +348,6 @@ export function EntitiesMapActions({
           // add tooltip stats
           // if (qe(typeId, ACTIONTYPES.EXPRESS)) {
           // }
-        } else if (mapSubjectClean === 'targets') {
-          stats = [
-            {
-              title: `${intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural)} as target: ${targetingActionsTotal}`,
-              values: [
-                {
-                  label: 'Targeted directly',
-                  value: countTargetingActions,
-                },
-                {
-                  label: 'Targeted as member of region, intergov. org. or class',
-                  value: countTargetingActionsMembers,
-                },
-              ],
-            },
-          ];
         }
         return [
           ...memo,
@@ -457,8 +365,6 @@ export function EntitiesMapActions({
             values: {
               actions: countActions,
               actionsTotal,
-              targetingActions: countTargetingActions,
-              targetingActionsTotal,
             },
           },
         ];
@@ -467,30 +373,30 @@ export function EntitiesMapActions({
     }, []);
     infoTitle = `No. of ${typeLabels[actionsTotalShowing === 1 ? 'single' : 'plural']} by Country`;
     infoSubTitle = `Showing ${actionsTotalShowing} of ${entities ? entities.size : 0} activities total${hasFilters ? ' (filtered)' : ''}`;
-    mapInfo = [{
-      id: 'countries',
+    mapInfo = {
       title: infoTitle,
       subTitle: infoSubTitle,
       titlePrint: infoTitle,
       infoOptions,
-      subjectOptions,
       indicatorOptions,
       onIndicatorSelect: onSetMapIndicator,
-    }];
+    };
   }
+
   return (
-    <Styled headerStyle="types" noOverflow isPrint={isPrintView}>
+    <Styled noOverflow isOnMap>
       {isPrintView && (
-        <HeaderPrint argsRemove={['msubj', 'subj', 'ac', 'tc', 'mtchm', 'mtch', 'actontype']} />
+        <HeaderPrint argsRemove={['msubj', 'subj', 'ac', 'tc', 'achmmap', 'achmap', 'actontype']} />
       )}
       <MapContainer
         fullMap
         reduceCountryAreas={reduceCountryAreas}
         typeLabels={typeLabels}
         mapData={{
+          filters,
           typeLabels,
           indicator,
-          includeSecondaryMembers: includeActorMembers || includeTargetMembers,
+          includeSecondaryMembers: includeActorMembers,
           scrollWheelZoom: true,
           mapSubject: mapSubjectClean,
           hasPointOption: false,
@@ -506,10 +412,8 @@ export function EntitiesMapActions({
         }}
         onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
         mapInfo={mapInfo}
+        onClearFilters={onClearFilters}
       />
-      {viewOptions && viewOptions.length > 1 && (
-        <EntityListViewOptions options={viewOptions} isOnMap isPrintView={isPrintView} />
-      )}
     </Styled>
   );
 }
@@ -517,11 +421,8 @@ export function EntitiesMapActions({
 EntitiesMapActions.propTypes = {
   entities: PropTypes.instanceOf(List),
   actortypes: PropTypes.instanceOf(Map),
-  actiontypes: PropTypes.instanceOf(Map),
-  targettypes: PropTypes.instanceOf(Map),
   countries: PropTypes.instanceOf(Map),
   indicators: PropTypes.instanceOf(Map),
-  viewOptions: PropTypes.array,
   // primitive
   typeId: PropTypes.string,
   mapSubject: PropTypes.string,
@@ -530,16 +431,15 @@ EntitiesMapActions.propTypes = {
     PropTypes.string,
     PropTypes.instanceOf(List),
   ]),
-  onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
-  onSetIncludeTargetMembers: PropTypes.func,
-  includeTargetMembers: PropTypes.bool,
   hasFilters: PropTypes.bool,
   isPrintView: PropTypes.bool,
   onEntityClick: PropTypes.func,
   onSetMapIndicator: PropTypes.func,
   onUpdateQuery: PropTypes.func,
+  filters: PropTypes.array,
+  onClearFilters: PropTypes.func,
   intl: intlShape.isRequired,
 };
 

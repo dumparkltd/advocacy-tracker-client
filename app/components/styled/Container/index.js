@@ -19,7 +19,7 @@ const Container = styled.div`
   @media (min-width: ${({ theme }) => theme.breakpoints.xlarge}) {
     max-width: ${({ isNarrow, isPrint, theme }) => {
     if (isPrint) return '100%';
-    return isNarrow ? '960px' : (parseInt(theme.breakpoints.xlarge, 10) - 30) + 'px';
+    return isNarrow ? '960px' : (parseInt(theme.breakpoints.xlarge, 10) - 20) + 'px';
   }};
 }
   @media print {

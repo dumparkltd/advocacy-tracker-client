@@ -34,8 +34,6 @@ export function OptionsForActions({
   setTaxonomies,
   actortypes,
   setActortypes,
-  targettypes,
-  setTargettypes,
   parenttypes,
   setParenttypes,
   childtypes,
@@ -45,7 +43,6 @@ export function OptionsForActions({
   hasAttributes,
   hasTaxonomies,
   hasActors,
-  hasTargets,
   hasParentActions,
   hasChildActions,
   hasResources,
@@ -66,10 +63,6 @@ export function OptionsForActions({
   }, 0);
   const activeActortypeCount = hasActors && Object.keys(actortypes).reduce((counter, actortypeId) => {
     if (actortypes[actortypeId].active) return counter + 1;
-    return counter;
-  }, 0);
-  const activeTargettypeCount = hasTargets && Object.keys(targettypes).reduce((counter, actortypeId) => {
-    if (targettypes[actortypeId].active) return counter + 1;
     return counter;
   }, 0);
   const activeParenttypeCount = hasParentActions && Object.keys(parenttypes).reduce((counter, parenttypeId) => {
@@ -177,24 +170,6 @@ export function OptionsForActions({
               : intl.formatMessage(messages.optionGroups.asRowsLabels,
                 { type: intl.formatMessage(messages.optionGroups.actorLabel) }),
           }}
-        />
-      )}
-      {hasTargets && (
-        <OptionGroup
-          groupId="targets"
-          label={intl.formatMessage(appMessages.nav.targets)}
-          expandedId={expandGroup}
-          onExpandGroup={(val) => setExpandGroup(val)}
-          activeOptionCount={activeTargettypeCount}
-          optionCount={Object.keys(targettypes).length}
-          intro={intl.formatMessage(messages.optionGroups.introLabelGroups,
-            { type: lowerCase(intl.formatMessage(appMessages.nav.targets)) })}
-          options={targettypes}
-          optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelTypes,
-              { type: lowerCase(intl.formatMessage(appMessages.nav.targets)) }),
-          }}
-          onSetOptions={(options) => setTargettypes(options)}
         />
       )}
       {hasParentActions && (
@@ -335,8 +310,6 @@ OptionsForActions.propTypes = {
   setTaxonomies: PropTypes.func,
   actortypes: PropTypes.object,
   setActortypes: PropTypes.func,
-  targettypes: PropTypes.object,
-  setTargettypes: PropTypes.func,
   parenttypes: PropTypes.object,
   setParenttypes: PropTypes.func,
   childtypes: PropTypes.object,
@@ -344,7 +317,6 @@ OptionsForActions.propTypes = {
   resourcetypes: PropTypes.object,
   setResourcetypes: PropTypes.func,
   hasActors: PropTypes.bool,
-  hasTargets: PropTypes.bool,
   hasParentActions: PropTypes.bool,
   hasChildActions: PropTypes.bool,
   hasResources: PropTypes.bool,

@@ -18,7 +18,6 @@ import {
   getMarkdownFormField,
   getCodeFormField,
   renderActorsByActortypeControl,
-  renderTargetsByActortypeControl,
   renderResourcesByResourcetypeControl,
   getDateField,
   getTextareaField,
@@ -75,7 +74,6 @@ import {
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
   selectActorsByActortype,
-  selectTargetsByActortype,
   selectResourcesByResourcetype,
   selectIndicatorOptions,
   selectUserOptions,
@@ -168,7 +166,6 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     typeId,
     connectedTaxonomies,
     actorsByActortype,
-    targetsByActortype,
     resourcesByResourcetype,
     subActionsByActiontype,
     indicatorOptions,
@@ -249,23 +246,6 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           {
             label: intl.formatMessage(appMessages.nav.actors),
             fields: actorConnections,
-          },
-        );
-      }
-    }
-    if (targetsByActortype) {
-      const targetConnections = renderTargetsByActortypeControl({
-        entitiesByActortype: targetsByActortype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (targetConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.targets),
-            fields: targetConnections,
           },
         );
       }
@@ -397,7 +377,6 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       dataReady,
       viewDomain,
       actorsByActortype,
-      targetsByActortype,
       resourcesByResourcetype,
       connectedTaxonomies,
       taxonomies,
@@ -427,21 +406,13 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     let subTitle;
     if (inModal && modalConnect && modalConnect.get('create')) {
       // connect action to actor
-      if (
-        modalConnect.get('type') === 'actorActions'
-        || modalConnect.get('type') === 'actionActors'
-      ) {
+      if (modalConnect.get('type') === 'actorActions') {
         const actorId = modalConnect
           .get('create')
           .find((item) => item.keySeq().includes('actor_id'))
           .get('actor_id');
         // console.log(actorId)
-        let actor;
-        if (modalConnect.get('type') === 'actorActions') {
-          actor = actorId && actorsByActortype.flatten(true).get(actorId);
-        } else if (modalConnect.get('type') === 'actionActors') {
-          actor = actorId && targetsByActortype.flatten(true).get(actorId);
-        }
+        const actor = actorId && actorsByActortype.flatten(true).get(actorId);
         const actorType = actor && intl.formatMessage(appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].single);
         subTitle = actor && `For ${lowerCase(actorType)}: ${getEntityTitle(actor)}`;
       }
@@ -492,7 +463,6 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             formData,
             actiontype,
             actorsByActortype,
-            targetsByActortype,
             resourcesByResourcetype,
             topActionsByActiontype,
             subActionsByActiontype,
@@ -516,7 +486,6 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
                 typeId,
                 connectedTaxonomies,
                 actorsByActortype,
-                targetsByActortype,
                 resourcesByResourcetype,
                 subActionsByActiontype,
                 indicatorOptions,
@@ -551,7 +520,6 @@ ActionNewForm.propTypes = {
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   actorsByActortype: PropTypes.instanceOf(Map),
-  targetsByActortype: PropTypes.instanceOf(Map),
   resourcesByResourcetype: PropTypes.instanceOf(Map),
   initialiseForm: PropTypes.func,
   onErrorDismiss: PropTypes.func.isRequired,
@@ -595,7 +563,6 @@ const mapStateToProps = (state, { typeId, autoUser }) => ({
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   actiontype: selectActiontype(state, typeId),
   actorsByActortype: selectActorsByActortype(state, typeId),
-  targetsByActortype: selectTargetsByActortype(state, typeId),
   resourcesByResourcetype: selectResourcesByResourcetype(state, typeId),
   topActionsByActiontype: selectTopActionsByActiontype(state, typeId),
   subActionsByActiontype: selectSubActionsByActiontype(state, typeId),
@@ -642,7 +609,6 @@ function mapDispatchToProps(
       formData,
       actiontype,
       actorsByActortype,
-      targetsByActortype,
       resourcesByResourcetype,
       topActionsByActiontype,
       subActionsByActiontype,
@@ -712,7 +678,7 @@ function mapDispatchToProps(
       // indicators
       if (formData.get('associatedIndicators') && indicatorOptions) {
         saveData = saveData.set(
-          'actionIndicators', // targets
+          'actionIndicators', // indicators
           getConnectionUpdatesFromFormData({
             formData,
             connections: indicatorOptions,
@@ -731,29 +697,6 @@ function mapDispatchToProps(
               formData,
               connections: actors,
               connectionAttribute: ['associatedActorsByActortype', actortypeid.toString()],
-              createConnectionKey: 'actor_id',
-              createKey: 'measure_id',
-            }))
-            .reduce(
-              (memo, deleteCreateLists) => {
-                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
-                return memo.set('create', creates);
-              },
-              fromJS({
-                create: [],
-              }),
-            )
-        );
-      }
-      // targets
-      if (formData.get('associatedTargetsByActortype') && targetsByActortype) {
-        saveData = saveData.set(
-          'actionActors',
-          targetsByActortype
-            .map((targets, actortypeid) => getConnectionUpdatesFromFormData({
-              formData,
-              connections: targets,
-              connectionAttribute: ['associatedTargetsByActortype', actortypeid.toString()],
               createConnectionKey: 'actor_id',
               createKey: 'measure_id',
             }))
@@ -810,7 +753,6 @@ function mapDispatchToProps(
         if (modalConnect
           && (
             modalConnect.get('type') === 'actorActions'
-            || modalConnect.get('type') === 'actionActors'
             || modalConnect.get('type') === 'userActions'
             || modalConnect.get('type') === 'subActions'
           )

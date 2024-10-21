@@ -26,7 +26,6 @@ import {
   getCategoryUpdatesFromFormData,
   getConnectionUpdatesFromFormData,
   renderActorsByActortypeControl,
-  renderTargetsByActortypeControl,
   renderResourcesByResourcetypeControl,
   renderIndicatorControl,
   renderActionsByActiontypeControl,
@@ -86,7 +85,6 @@ import {
   selectSubActionsByActiontype,
   selectTaxonomyOptions,
   selectActorsByActortype,
-  selectTargetsByActortype,
   selectResourcesByResourcetype,
   selectIndicatorOptions,
   selectUserOptions,
@@ -133,7 +131,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       viewEntity,
       taxonomies,
       actorsByActortype,
-      targetsByActortype,
       resourcesByResourcetype,
       topActionsByActiontype,
       subActionsByActiontype,
@@ -150,9 +147,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         associatedTaxonomies: taxonomyOptions(taxonomies),
         associatedActorsByActortype: actorsByActortype
           ? actorsByActortype.map((actors) => entityOptions({ entities: actors }))
-          : Map(),
-        associatedTargetsByActortype: targetsByActortype
-          ? targetsByActortype.map((targets) => entityOptions({ entities: targets }))
           : Map(),
         associatedResourcesByResourcetype: resourcesByResourcetype
           ? resourcesByResourcetype.map((resources) => entityOptions({ entities: resources }))
@@ -217,7 +211,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     entity,
     connectedTaxonomies,
     actorsByActortype,
-    targetsByActortype,
     resourcesByResourcetype,
     subActionsByActiontype,
     indicatorOptions,
@@ -305,23 +298,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           {
             label: intl.formatMessage(appMessages.nav.actors),
             fields: actorConnections,
-          },
-        );
-      }
-    }
-    if (targetsByActortype) {
-      const targetConnections = renderTargetsByActortypeControl({
-        entitiesByActortype: targetsByActortype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (targetConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.targets),
-            fields: targetConnections,
           },
         );
       }
@@ -460,7 +436,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       taxonomies,
       connectedTaxonomies,
       actorsByActortype,
-      targetsByActortype,
       resourcesByResourcetype,
       onCreateOption,
       topActionsByActiontype,
@@ -538,7 +513,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                   formData,
                   taxonomies,
                   actorsByActortype,
-                  targetsByActortype,
                   resourcesByResourcetype,
                   topActionsByActiontype,
                   subActionsByActiontype,
@@ -561,7 +535,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       entity: viewEntity,
                       connectedTaxonomies,
                       actorsByActortype,
-                      targetsByActortype,
                       resourcesByResourcetype,
                       subActionsByActiontype,
                       indicatorOptions,
@@ -614,7 +587,6 @@ ActionEdit.propTypes = {
   userOptions: PropTypes.object,
   connectedTaxonomies: PropTypes.object,
   actorsByActortype: PropTypes.object,
-  targetsByActortype: PropTypes.object,
   resourcesByResourcetype: PropTypes.object,
   onCreateOption: PropTypes.func,
   onErrorDismiss: PropTypes.func.isRequired,
@@ -637,7 +609,6 @@ const mapStateToProps = (state, { params }) => ({
   taxonomies: selectTaxonomyOptions(state, params.id),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   actorsByActortype: selectActorsByActortype(state, params.id),
-  targetsByActortype: selectTargetsByActortype(state, params.id),
   resourcesByResourcetype: selectResourcesByResourcetype(state, params.id),
   topActionsByActiontype: selectTopActionsByActiontype(state, params.id),
   subActionsByActiontype: selectSubActionsByActiontype(state, params.id),
@@ -675,7 +646,6 @@ function mapDispatchToProps(dispatch, props) {
       formData,
       taxonomies,
       actorsByActortype,
-      targetsByActortype,
       resourcesByResourcetype,
       topActionsByActiontype,
       subActionsByActiontype,
@@ -768,35 +738,9 @@ function mapDispatchToProps(dispatch, props) {
             )
         );
       }
-      if (targetsByActortype) {
-        saveData = saveData.set(
-          'actionActors', // targets
-          targetsByActortype
-            .map((targets, actortypeid) => getConnectionUpdatesFromFormData({
-              formData,
-              connections: targets,
-              connectionAttribute: ['associatedTargetsByActortype', actortypeid.toString()],
-              createConnectionKey: 'actor_id',
-              createKey: 'measure_id',
-            }))
-            .reduce(
-              (memo, deleteCreateLists) => {
-                const deletes = memo.get('delete').concat(deleteCreateLists.get('delete'));
-                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
-                return memo
-                  .set('delete', deletes)
-                  .set('create', creates);
-              },
-              fromJS({
-                delete: [],
-                create: [],
-              }),
-            )
-        );
-      }
       if (resourcesByResourcetype) {
         saveData = saveData.set(
-          'actionResources', // targets
+          'actionResources', // resources
           resourcesByResourcetype
             .map((resources, resourcetypeid) => getConnectionUpdatesFromFormData({
               formData,
@@ -822,7 +766,7 @@ function mapDispatchToProps(dispatch, props) {
       }
       if (indicatorOptions) {
         saveData = saveData.set(
-          'actionIndicators', // targets
+          'actionIndicators', // indicators
           getConnectionUpdatesFromFormData({
             formData,
             connections: indicatorOptions,

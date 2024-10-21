@@ -22,4 +22,16 @@ export default defineMessages({
     id: 'app.components.Header.dateLabelPrint',
     defaultMessage: 'Date:',
   },
+  addLabel: {
+    id: 'app.components.Header.addLabel',
+    defaultMessage: 'Add',
+  },
+  showMoreLabel: {
+    id: 'app.components.Header.showMoreLabel',
+    defaultMessage: 'Show more',
+  },
+  showLessLabel: {
+    id: 'app.components.Header.showLessLabel',
+    defaultMessage: 'Show less',
+  },
 });

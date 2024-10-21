@@ -1,14 +1,20 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { Box, ResponsiveContext } from 'grommet';
-import styled, { css } from 'styled-components';
+import styled, { css, withTheme } from 'styled-components';
+import { groupBy } from 'lodash/collection';
+
+import qe from 'utils/quasi-equals';
 import { isMinSize } from 'utils/responsive';
 import { scaleColorCount } from 'containers/MapContainer/utils';
+import { usePrint } from 'containers/App/PrintContext';
 
 import { MAP_OPTIONS } from 'themes/config';
 
 import CellBodyMain from './CellBodyMain';
 import CellBodyPlain from './CellBodyPlain';
+import CellBodyPosition from './CellBodyPosition';
+import CellBodyPlainWithDate from './CellBodyPlainWithDate';
 import CellBodyUsers from './CellBodyUsers';
 import CellBodyActors from './CellBodyActors';
 import CellBodyActions from './CellBodyActions';
@@ -19,6 +25,7 @@ import CellBodyBarChart from './CellBodyBarChart';
 import CellBodyStackedBarChart from './CellBodyStackedBarChart';
 import CellHeaderMain from './CellHeaderMain';
 import CellHeaderPlain from './CellHeaderPlain';
+import CellHeaderAuxColumns from './CellHeaderAuxColumns';
 
 const Table = styled.table`
   border-spacing: 0;
@@ -41,29 +48,22 @@ const TableRow = styled.tr`
     page-break-inside: avoid;
   }
 `;
-const getColWidth = ({
-  col, count, colSpan = 1, inSingleView,
-}) => {
-  if (inSingleView) {
-    return (100 / count) * colSpan;
-  }
-  if (count === 1) {
-    return 100;
-  }
-  if (count === 2) {
-    return col.type === 'main' ? 50 : 50;
-  }
-  if (count > 2) {
+const getColWidth = ({ col, count, topicPositionLength }) => {
+  let result = 'auto';
+  if (col.type === 'auxColumns') {
+    result = '22px';
+  } else if (col.type === 'topicPosition') {
+    result = '33px';
+  } else if (topicPositionLength > 0) {
     if (col.type === 'main') {
-      return 35;
+      result = '25%';
     }
-    if (col.isSingleActionColumn) {
-      return 25;
+  } else if (count > 2) {
+    if (col.type === 'main') {
+      result = '35%';
+    } else if (col.isSingleActionColumn) {
+      result = '25%';
     }
-    if (col.hasSingleActionColumn) {
-      return (40 / (count - 2)) * colSpan;
-    }
-    return (65 / (count - 1)) * colSpan;
   }
   // if (count === 4) {
   //   return col.type === 'main' ? 30 : (70 / (count - 1)) * colSpan;
@@ -71,7 +71,7 @@ const getColWidth = ({
   // if (count > 4) {
   //   return col.type === 'main' ? 25 : (75 / (count - 1)) * colSpan;
   // }
-  return 0;
+  return result;
 };
 // background-color: ${({ utility, col }) => {
 //   if (utility && col.type === 'options') return '#f9f9f9';
@@ -90,13 +90,19 @@ const TableCellHeader = styled.th`
     if (utility) return 'transparent';
     return 'rgba(0,0,0,0.33)';
   }};
-  padding-left: ${({ col, first }) => (col.align !== 'end' && !first) ? 16 : 8}px;
-  padding-right: ${({ col, last }) => (col.align === 'end' && !last) ? 16 : 8}px;
+  padding-left: ${({ col, first, plain }) => {
+    if (plain) return 0;
+    return (col.align !== 'end' && !first) ? 8 : 4;
+  }}px;
+  padding-right: ${({ col, last, plain }) => {
+    if (plain) return 0;
+    return (col.align === 'end' && !last) ? 8 : 4;
+  }}px;
   padding-top: 6px;
   padding-bottom: 6px;
   width: 100%;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    width: ${getColWidth}%;
+    width: ${getColWidth};
   }
 `;
 const TableCellHeaderInner = styled((p) => <Box {...p} />)`
@@ -109,14 +115,21 @@ const TableCellBody = styled.td`
   height: 100%;
   text-align: start;
   border-bottom: solid 1px #DADADA;
-  padding-left: ${({ col, first }) => (col.align !== 'end' && !first) ? 20 : 8}px;
-  padding-right: ${({ col, last }) => (col.align === 'end' && !last) ? 20 : 8}px;
+  padding-left: ${({ col, first, plain }) => {
+    if (plain) return 0;
+    return (col.align !== 'end' && !first) ? 8 : 4;
+  }}px;
+  padding-right: ${({ col, last, plain }) => {
+    if (plain) return 0;
+    return (col.align === 'end' && !last) ? 8 : 4;
+  }}px;
   padding-top: 6px;
   padding-bottom: 6px;
   word-wrap:break-word;
   width: 100%;
+  overflow: hidden;
   @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    width: ${getColWidth}%;
+    width: ${getColWidth};
   }
 `;
 const TableCellBodyInner = styled((p) => <Box {...p} />)`
@@ -125,9 +138,13 @@ const TableCellBodyInner = styled((p) => <Box {...p} />)`
 
 const MAX_VALUE_COUNTRIES = 100;
 
-const getColorForColumn = (col) => {
+const getColorForColumn = (col, theme) => {
   if (!MAP_OPTIONS.GRADIENT[col.subject]) {
-    return 'black';
+    return (theme
+      && theme.global
+      && theme.global.colors
+      && theme.global.colors.primary)
+      || 'black';
   }
   if (col.members) {
     return scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[col.subject], false)(70);
@@ -137,7 +154,7 @@ const getColorForColumn = (col) => {
   }
   return scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[col.subject], false)(100);
 };
-
+const ID = 'entities-table';
 export function EntitiesTable({
   entities,
   canEdit,
@@ -145,69 +162,89 @@ export function EntitiesTable({
   headerColumns,
   onEntityClick,
   columnMaxValues,
-  headerColumnsUtility,
-  memberOption,
-  childOption,
-  subjectOptions,
   inSingleView,
-  isPrintView,
+  theme,
+  previewItemId,
+  reducePreviewItem,
+  onSetPreviewContent,
+  sortedEntities,
+  searchedEntities,
 }) {
+  useEffect(() => {
+    if (!!reducePreviewItem && sortedEntities) {
+      if (previewItemId) {
+        const [componentId, path, itemId] = previewItemId.split('|');
+        if (qe(componentId, ID)) {
+          const mainItem = searchedEntities && itemId && searchedEntities.find(
+            (item) => qe(item.get('id'), itemId)
+          );
+          if (mainItem) {
+            const entityIds = sortedEntities.map((e) => e.id);
+            const entityIndex = entityIds.indexOf(mainItem.get('id'));
+            const nextIndex = entityIndex < entityIds.length ? entityIndex + 1 : 0;
+            const prevIndex = entityIndex > 0 ? entityIndex - 1 : entityIds.length - 1;
+
+            let content = reducePreviewItem({ item: mainItem, path });
+            content = {
+              ...content,
+              header: {
+                ...content.header,
+                nextPreviewItem: nextIndex !== entityIndex && `${ID}|${path}|${entityIds[nextIndex]}`,
+                prevPreviewItem: prevIndex !== entityIndex && `${ID}|${path}|${entityIds[prevIndex]}`,
+              },
+            };
+            onSetPreviewContent(content);
+          } else if (itemId && path) {
+            onSetPreviewContent(reducePreviewItem({ id: itemId, path }));
+          } else {
+            onSetPreviewContent();
+          }
+        }
+      } else {
+        onSetPreviewContent();
+      }
+    }
+  }, [previewItemId]);
   const size = React.useContext(ResponsiveContext);
+  const isPrintView = usePrint();
+  const headerColumnsAux = [
+    ...headerColumns,
+    {
+      id: 'auxColumns',
+      title: 'CC',
+      type: 'auxColumns',
+    },
+  ];
+  const columnsAux = [
+    ...columns,
+    {
+      type: 'spacer',
+      content: '',
+    },
+  ];
+  const headerColumnsByType = headerColumnsAux && groupBy(headerColumnsAux, 'type');
+  // console.log('headerColumnsAux', headerColumnsAux)
   return (
     <Box fill="horizontal">
       <Table isPrint={isPrintView}>
-        {headerColumns && (
+        {headerColumnsAux && (
           <TableHeader>
-            {headerColumnsUtility && isMinSize(size, 'large') && (
-              <TableRow>
-                {headerColumnsUtility.map(
-                  (col, i) => (
-                    <TableCellHeader
-                      key={i}
-                      scope="col"
-                      col={col}
-                      count={headerColumns.length}
-                      colSpan={col.span || 1}
-                      first={i === 0}
-                      last={i === headerColumns.length - 1}
-                      inSingleView={inSingleView}
-                      utility
-                    >
-                      {col.type === 'options' && (
-                        <Box>
-                          {subjectOptions && (
-                            <Box>
-                              {subjectOptions}
-                            </Box>
-                          )}
-                          {memberOption && (
-                            <Box>
-                              {memberOption}
-                            </Box>
-                          )}
-                          {childOption && (
-                            <Box>
-                              {childOption}
-                            </Box>
-                          )}
-                        </Box>
-                      )}
-                    </TableCellHeader>
-                  )
-                )}
-              </TableRow>
-            )}
             <TableRow>
-              {headerColumns.map(
-                (col, i) => (isMinSize(size, 'large') || isPrintView || col.type === 'main') && (
+              {headerColumnsAux.map(
+                (col, i) => (
                   <TableCellHeader
                     key={i}
                     scope="col"
                     col={col}
-                    count={headerColumns.length}
+                    count={headerColumnsAux.length}
+                    topicPositionLength={
+                      headerColumnsByType
+                      && headerColumnsByType.topicPosition
+                      && headerColumnsByType.topicPosition.length
+                    }
                     first={i === 0}
-                    last={i === headerColumns.length - 1}
-                    inSingleView={inSingleView}
+                    last={i === headerColumnsAux.length - 1}
+                    plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
                   >
                     <TableCellHeaderInner fill={false} flex={{ grow: 0 }} justify="start">
                       {col.type === 'main' && (
@@ -217,8 +254,14 @@ export function EntitiesTable({
                           isPrintView={isPrintView}
                         />
                       )}
-                      {(isMinSize(size, 'large') || isPrintView) && col.type !== 'main' && (
-                        <CellHeaderPlain column={col} isPrintView={isPrintView} />
+                      {col.type === 'auxColumns' && (
+                        <CellHeaderAuxColumns
+                          column={col}
+                          columnOptions={headerColumns}
+                        />
+                      )}
+                      {(isMinSize(size, 'large') || isPrintView) && col.type !== 'main' && col.type !== 'auxColumns' && (
+                        <CellHeaderPlain column={col} />
                       )}
                     </TableCellHeaderInner>
                   </TableCellHeader>
@@ -230,15 +273,20 @@ export function EntitiesTable({
         <TableBody>
           {entities.length > 0 && entities.map((entity, key) => (
             <TableRow key={key}>
-              {columns.map((col, i) => (isMinSize(size, 'large') || isPrintView || col.type === 'main') && (
+              {columnsAux.map((col, i) => (isMinSize(size, 'large') || isPrintView || col.type === 'main') && (
                 <TableCellBody
                   key={i}
                   scope="row"
                   col={col}
-                  count={headerColumns.length}
+                  count={headerColumnsAux.length}
                   first={i === 0}
-                  last={i === headerColumns.length - 1}
-                  inSingleView={inSingleView}
+                  last={i === headerColumnsAux.length - 1}
+                  plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
+                  topicPositionLength={
+                    headerColumnsByType
+                    && headerColumnsByType.topicPosition
+                    && headerColumnsByType.topicPosition.length
+                  }
                 >
                   <TableCellBodyInner>
                     {col.type === 'main' && (
@@ -246,6 +294,7 @@ export function EntitiesTable({
                         entity={entity[col.id]}
                         canEdit={canEdit && !isPrintView}
                         column={col}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                       />
                     )}
                     {(
@@ -255,32 +304,46 @@ export function EntitiesTable({
                       || col.type === 'userrole'
                       || col.type === 'date'
                       || col.type === 'supportlevel'
+                      || col.type === 'topicPosition'
                     ) && (
                       <CellBodyPlain
                         entity={entity[col.id]}
                         column={col}
                         primary={col.type === 'userrole'}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                      />
+                    )}
+                    {col.type === 'plainWithDate' && (
+                      <CellBodyPlainWithDate
+                        entity={entity[col.id]}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                        column={col}
+                      />
+                    )}
+                    {col.type === 'position' && (
+                      <CellBodyPosition
+                        entity={entity[col.id]}
+                        column={col}
                       />
                     )}
                     {col.type === 'users' && (
                       <CellBodyUsers
                         entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
                     {col.type === 'indicators' && (
                       <CellBodyIndicators
                         entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
                     {(
                       col.type === 'actorsSimple'
                       || col.type === 'actors'
-                      || col.type === 'targets'
-                      || col.type === 'targetsViaChildren'
+                      || col.type === 'actorsViaChildren'
                       || col.type === 'members'
                       || col.type === 'associations'
                       || col.type === 'userActors'
@@ -288,7 +351,7 @@ export function EntitiesTable({
                     ) && (
                       <CellBodyActors
                         entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
@@ -304,7 +367,7 @@ export function EntitiesTable({
                     {col.type === 'hasResources' && (
                       <CellBodyHasResource
                         entity={entity[col.id]}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         column={col}
                       />
                     )}
@@ -316,26 +379,30 @@ export function EntitiesTable({
                       || col.type === 'positionStatement'
                       || col.type === 'childActions'
                       || col.type === 'parentActions'
+                      || (col.simple && (
+                        col.type === 'actorActions'
+                        || col.type === 'actiontype'
+                      ))
                     ) && (
                       <CellBodyActions
                         entity={entity[col.id]}
                         column={col}
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                       />
                     )}
                     {(
                       col.type === 'actorActions'
                       || col.type === 'actiontype'
-                    ) && (
+                    ) && !col.simple && (
                       <CellBodyBarChart
                         value={entity[col.id].value}
                         maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
                         subject={col.subject}
                         column={col}
                         issecondary={col.type !== 'actiontype' && (col.members || col.children)}
-                        color={getColorForColumn(col)}
+                        color={getColorForColumn(col, theme)}
                         entityType="actions"
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         rowConfig={entity[col.id]}
                       />
                     )}
@@ -348,7 +415,7 @@ export function EntitiesTable({
                         maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
                         column={col}
                         entityType="actors"
-                        onEntityClick={onEntityClick}
+                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                       />
                     )}
                   </TableCellBodyInner>
@@ -364,17 +431,18 @@ export function EntitiesTable({
 
 EntitiesTable.propTypes = {
   entities: PropTypes.array.isRequired,
+  sortedEntities: PropTypes.array,
+  searchedEntities: PropTypes.object,
   columns: PropTypes.array,
   columnMaxValues: PropTypes.object,
+  theme: PropTypes.object,
   headerColumns: PropTypes.array,
-  headerColumnsUtility: PropTypes.array,
   canEdit: PropTypes.bool,
   inSingleView: PropTypes.bool,
-  isPrintView: PropTypes.bool,
   onEntityClick: PropTypes.func,
-  memberOption: PropTypes.node,
-  childOption: PropTypes.node,
-  subjectOptions: PropTypes.node,
+  previewItemId: PropTypes.string,
+  reducePreviewItem: PropTypes.func,
+  onSetPreviewContent: PropTypes.func,
 };
 
-export default EntitiesTable;
+export default withTheme(EntitiesTable);

@@ -400,7 +400,6 @@ function mapDispatchToProps(
         if (modalConnect
           && (
             modalConnect.get('type') === 'actorActions'
-            || modalConnect.get('type') === 'actionActors'
             || modalConnect.get('type') === 'userActions'
             || modalConnect.get('type') === 'subActions'
           )

@@ -3,13 +3,9 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
-import { Box } from 'grommet';
 import isNumber from 'utils/is-number';
 
-import {
-  OrderedMap, Map, List, fromJS,
-} from 'immutable';
-import { PAGE_ITEM_OPTIONS } from 'themes/config';
+import { Map, List, fromJS } from 'immutable';
 
 import {
   selectSortByQuery,
@@ -22,11 +18,16 @@ import {
   selectResources,
   selectIsPrintView,
   selectPrintConfig,
+  selectPreviewQuery,
+  selectInactiveColumnQuery,
 } from 'containers/App/selectors';
-import { updateQuery } from 'containers/EntityList/actions';
-
-import SelectReset from 'components/SelectReset';
-import EntityListSearch from 'components/EntityListSearch';
+import {
+  setPreviewContent,
+  setListPreview,
+} from 'containers/App/actions';
+import {
+  updateQuery,
+} from 'containers/EntityList/actions';
 
 import ToggleAllItems from 'components/fields/ToggleAllItems';
 import appMessages from 'containers/App/messages';
@@ -37,6 +38,7 @@ import { prepSortTarget } from 'utils/sort';
 import qe from 'utils/quasi-equals';
 
 import EntitiesTable from './EntitiesTable';
+import EntityListTableOptions from './EntityListTableOptions';
 
 import EntityListFooter from './EntityListFooter';
 
@@ -73,19 +75,15 @@ export function EntityListTable({
   entityIdsSelected,
   config,
   columns,
-  headerColumnsUtility,
-  onEntityClick,
   canEdit,
   onEntitySelect,
   entityTitle,
   onEntitySelectAll,
   entities = List(),
   errors,
-  categories,
   connections,
   entityPath,
   url,
-  paginate,
   moreLess,
   onSort,
   onDismissError,
@@ -97,25 +95,39 @@ export function EntityListTable({
   hasFilters = false,
   searchQuery = '',
   onSearch,
-  hasSearch,
   inSingleView,
   label,
-  actortypes,
   taxonomies,
   resources,
-  memberOption,
-  childOption,
-  subjectOptions,
-  includeMembers,
-  includeChildren,
+  options = {},
   onPageItemsSelect,
   onPageSelect,
   printConfig,
   isPrintView,
   // allEntityCount,
   isByOption,
+  onResetScroll,
+  previewItemId,
+  onSetPreviewItemId,
+  onSetPreviewContent,
+  reducePreviewItem,
+  inactiveColumns,
 }) {
   if (!columns) return null;
+  // const size = React.useContext(ResponsiveContext);
+  // list options
+  const {
+    hasSearch,
+    search,
+    paginate,
+    paginateOptions,
+    pageSize,
+    includeMembers,
+    includeChildren,
+    searchPlaceholder,
+  } = options;
+
+  // list sorting
   const sortColumn = columns.find((c) => !!c.sortDefault);
   const sortDefault = {
     sort: sortColumn ? sortColumn.sort : 'main',
@@ -123,7 +135,6 @@ export function EntityListTable({
   };
   const [showAllConnections, setShowAllConnections] = useState(false);
   const [localSort, setLocalSort] = useState(sortDefault);
-
   const cleanSortOrder = inSingleView ? localSort.order : (sortOrder || sortDefault.order);
   const cleanSortBy = inSingleView ? localSort.sort : (sortBy || sortDefault.sort);
   const cleanOnSort = inSingleView
@@ -135,41 +146,43 @@ export function EntityListTable({
 
   // filter entitities by keyword
   const searchAttributes = (
-    config.views
+    config
+    && config.views
     && config.views.list
     && config.views.list.search
   ) || ['title'];
 
   let searchedEntities = entities;
-
-  if (hasSearch && searchQuery.length > 2) {
+  const searchQueryClean = search || searchQuery;
+  if (searchQueryClean && searchQueryClean.length > 2) {
     searchedEntities = filterEntitiesByKeywords(
       searchedEntities,
-      searchQuery,
+      searchQueryClean,
       searchAttributes,
     );
   }
-  const activeColumns = columns.filter((col) => !col.skip && !(isPrintView && col.printHideOnSingle));
+  const activeColumns = columns
+    .filter((col) => !(isPrintView && col.printHideOnSingle))
+    .map((col) => ({
+      ...col,
+      hidden: inactiveColumns && inactiveColumns.includes(col.id),
+    }));
+
   // warning converting List to Array
   const entityRows = prepareEntityRows({
     entities: searchedEntities,
     columns: activeColumns,
-    config,
-    connections,
-    categories,
-    intl,
     entityIdsSelected,
+    config,
     url,
     entityPath,
-    onEntityClick,
     onEntitySelect,
-    actortypes,
+    connections,
     taxonomies,
     resources,
+    intl,
     includeMembers,
     includeChildren,
-    isPrintView,
-    printConfig,
   });
   const columnMaxValues = getColumnMaxValues(
     entityRows,
@@ -221,15 +234,17 @@ export function EntityListTable({
     }
   );
 
-  let pageSize = PAGE_SIZE_MAX;
+  let pageSizeClean = PAGE_SIZE_MAX;
   let entitiesOnPage = sortedEntities;
   let pager;
   const isSortedOrPaged = !!pageNo || !!pageItems || !!cleanSortBy || !!cleanSortOrder;
   if (paginate) {
-    if (pageItems === 'all' || (isPrintView && printConfig && printConfig.printItems === 'all')) {
-      pageSize = sortedEntities.length;
+    if (pageSize) {
+      pageSizeClean = 10;
+    } else if (pageItems === 'all' || (isPrintView && printConfig && printConfig.printItems === 'all')) {
+      pageSizeClean = sortedEntities.length;
     } else {
-      pageSize = pageItems
+      pageSizeClean = pageItems
         ? Math.min(
           (pageItems && parseInt(pageItems, 10)),
           PAGE_SIZE_MAX
@@ -238,12 +253,12 @@ export function EntityListTable({
 
     // grouping and paging
     // if grouping required
-    if (sortedEntities.length > pageSize) {
+    if (sortedEntities.length > pageSizeClean) {
       // get new pager object for specified page
       pager = getPager(
         sortedEntities.length,
         pageNo && parseInt(pageNo, 10),
-        pageSize
+        pageSizeClean
       );
       entitiesOnPage = sortedEntities.slice(pager.startIndex, pager.endIndex + 1);
     }
@@ -273,66 +288,49 @@ export function EntityListTable({
       selectedTotal: canEdit && entityIdsSelected && entityIdsSelected.size,
       allSelectedOnPage: canEdit && entityIdsOnPage.length === entityIdsSelected.size,
       messages,
-      hasFilters: (searchQuery.length > 0 || hasFilters),
+      hasFilters: (searchQueryClean.length > 0 || hasFilters),
     }),
     intl,
   });
 
   const listEmpty = searchedEntities.size === 0;
   const listEmptyAfterQuery = listEmpty
-    && (searchQuery.length > 0 || hasFilters);
+    && (searchQueryClean.length > 0 || hasFilters);
   const listEmptyAfterQueryAndErrors = listEmptyAfterQuery
     && (errors && errors.size > 0);
 
-  const hasPageSelect = !isPrintView && entitiesOnPage && entitiesOnPage.length > 0 && paginate;
   return (
     <div>
-      {(hasSearch || hasPageSelect) && (
-        <Box
-          direction="row"
-          align="center"
-          gap="medium"
-          pad={{ vertical: 'small' }}
-          justify={hasSearch ? 'start' : 'end'}
-        >
-          {hasSearch && (
-            <Box flex={{ shrink: 0, grow: 1 }}>
-              <EntityListSearch
-                searchQuery={searchQuery}
-                onSearch={onSearch}
-              />
-            </Box>
-          )}
-          {hasPageSelect && (
-            <Box flex={{ shrink: 1, grow: 0 }}>
-              <SelectReset
-                value={pageItems === 'all' ? pageItems : pageSize.toString()}
-                label={intl && intl.formatMessage(appMessages.labels.perPage)}
-                index="page-select"
-                options={PAGE_ITEM_OPTIONS && PAGE_ITEM_OPTIONS.map((option) => ({
-                  value: option.value.toString(),
-                  label: option.value.toString(),
-                }))}
-                isReset={false}
-                onChange={onPageItemsSelect}
-              />
-            </Box>
-          )}
-        </Box>
+      {options && (
+        <EntityListTableOptions
+          options={{
+            ...options,
+            hasPageSelect: paginateOptions && !isPrintView && entitiesOnPage && entitiesOnPage.length > 0 && paginate,
+            searchPlaceholder,
+          }}
+          onPageItemsSelect={onPageItemsSelect}
+          onSearch={hasSearch && onSearch}
+          searchQuery={searchQueryClean}
+          pageSelectValue={pageItems === 'all' ? pageItems : pageSizeClean.toString()}
+        />
       )}
       <EntitiesTable
         entities={entitiesOnPage}
+        sortedEntities={sortedEntities}
+        searchedEntities={searchedEntities}
+        canEdit={canEdit}
         columns={activeColumns}
         headerColumns={headerColumns || []}
-        canEdit={canEdit}
-        onEntityClick={onEntityClick}
+        onEntityClick={(id, path, componentId) => {
+          if (onSetPreviewItemId && componentId) {
+            onSetPreviewItemId(`${componentId}|${path}|${id}`);
+          }
+        }}
         columnMaxValues={columnMaxValues}
-        headerColumnsUtility={headerColumnsUtility}
-        memberOption={memberOption}
-        childOption={childOption}
-        subjectOptions={subjectOptions}
         inSingleView={inSingleView}
-        isPrintView={isPrintView}
+        previewItemId={previewItemId}
+        reducePreviewItem={reducePreviewItem}
+        onSetPreviewContent={onSetPreviewContent}
       />
       <ListEntitiesMain>
         {listEmpty && (
@@ -383,7 +381,10 @@ export function EntityListTable({
           pager={pager}
           isPrintView={isPrintView}
           pageSize={(pageItems === 'all' || (isPrintView && printConfig.printItems === 'all')) ? 'all' : pageSize}
-          onPageSelect={onPageSelect}
+          onPageSelect={(val) => {
+            if (onResetScroll) onResetScroll();
+            onPageSelect(val);
+          }}
         />
       )}
       {moreLess && searchedEntities.size > CONNECTIONMAX && (
@@ -404,10 +405,8 @@ export function EntityListTable({
 
 EntityListTable.propTypes = {
   entities: PropTypes.instanceOf(List),
-  categories: PropTypes.instanceOf(Map),
   resources: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
-  actortypes: PropTypes.instanceOf(OrderedMap),
   connections: PropTypes.instanceOf(Map),
   entityIdsSelected: PropTypes.instanceOf(List),
   // locationQuery: PropTypes.instanceOf(Map),
@@ -420,14 +419,12 @@ EntityListTable.propTypes = {
   canEdit: PropTypes.bool,
   onPageSelect: PropTypes.func,
   onPageItemsSelect: PropTypes.func,
-  onEntityClick: PropTypes.func.isRequired,
   onEntitySelect: PropTypes.func,
   onEntitySelectAll: PropTypes.func,
   onSort: PropTypes.func,
   onDismissError: PropTypes.func,
   showCode: PropTypes.bool,
   inSingleView: PropTypes.bool,
-  paginate: PropTypes.bool,
   moreLess: PropTypes.bool,
   entityPath: PropTypes.string,
   url: PropTypes.string,
@@ -439,18 +436,18 @@ EntityListTable.propTypes = {
   searchQuery: PropTypes.string,
   hasFilters: PropTypes.bool,
   onSearch: PropTypes.func,
-  hasSearch: PropTypes.bool,
   label: PropTypes.string,
-  memberOption: PropTypes.node,
-  childOption: PropTypes.node,
-  subjectOptions: PropTypes.node,
-  includeMembers: PropTypes.bool,
-  includeChildren: PropTypes.bool,
+  options: PropTypes.object,
   isByOption: PropTypes.bool,
   isPrintView: PropTypes.bool,
   printConfig: PropTypes.object,
   pageItemSelectConfig: PropTypes.object,
-  // allEntityCount: PropTypes.number,
+  onResetScroll: PropTypes.func,
+  previewItemId: PropTypes.string,
+  reducePreviewItem: PropTypes.func,
+  onSetPreviewContent: PropTypes.func,
+  onSetPreviewItemId: PropTypes.func,
+  inactiveColumns: PropTypes.object, // immutable List
 };
 
 const mapStateToProps = (state) => ({
@@ -464,6 +461,8 @@ const mapStateToProps = (state) => ({
   resources: selectResources(state),
   isPrintView: selectIsPrintView(state),
   printConfig: selectPrintConfig(state),
+  previewItemId: selectPreviewQuery(state),
+  inactiveColumns: selectInactiveColumnQuery(state),
 });
 function mapDispatchToProps(dispatch) {
   return {
@@ -486,6 +485,8 @@ function mapDispatchToProps(dispatch) {
         },
       ])));
     },
+    onSetPreviewContent: (value) => dispatch(setPreviewContent(value)),
+    onSetPreviewItemId: (value) => dispatch(setListPreview(value)),
   };
 }
 
