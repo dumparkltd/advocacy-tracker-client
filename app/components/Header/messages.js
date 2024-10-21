@@ -26,10 +26,6 @@ export default defineMessages({
     id: 'app.components.Header.addLabel',
     defaultMessage: 'Add',
   },
-  selectLabel: {
-    id: 'app.components.Header.selectLabel',
-    defaultMessage: 'Select',
-  },
   showMoreLabel: {
     id: 'app.components.Header.showMoreLabel',
     defaultMessage: 'Show more',

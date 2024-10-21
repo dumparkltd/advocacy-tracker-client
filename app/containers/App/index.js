@@ -192,7 +192,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     }
   }
 
-  preparePageMenuPages = (pages, currentPath) => sortEntities(
+  preparePageMenuPages = (currentPath, pages) => sortEntities(
     pages,
     'asc',
     'order',
@@ -254,12 +254,18 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     let navItems = [];
     if (user) {
       const userPath = `${ROUTES.USERS}/${user.id}`;
+      const userPWPath = `${ROUTES.USERS}${ROUTES.PASSWORD}/${user.id}`;
       navItems = [
         ...navItems,
         {
           path: userPath,
           active: currentPath === userPath,
           title: 'Profile',
+        },
+        {
+          path: userPWPath,
+          active: currentPath === userPWPath,
+          title: 'Change password',
         },
       ];
     }
@@ -287,35 +293,44 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
         },
       ];
     }
-    return navItems;
+    return [{ title: 'User', items: navItems }];
   }
 
-  prepareOtherMenuItems = (currentPath) => {
+  prepareOtherMenuItems = (currentPath, pages) => {
     const { intl } = this.context;
     return [
       {
-        path: `${ROUTES.RESOURCES}/${RESOURCETYPES.WEB}`,
-        title: intl.formatMessage(messages.nav.resources),
-        active: currentPath && currentPath.startsWith(ROUTES.RESOURCE),
+        title: 'Pages',
+        items: this.preparePageMenuPages(currentPath, pages),
       },
       {
-        path: ROUTES.USERS,
-        title: intl.formatMessage(messages.nav.users),
-        isAdmin: true,
-        active: currentPath === ROUTES.USERS,
-      },
-      {
-        path: ROUTES.PAGES,
-        title: intl.formatMessage(messages.nav.pages),
-        isAdmin: true,
-        active: currentPath === ROUTES.PAGES,
-      },
-      {
-        path: ROUTES.TAXONOMIES,
-        title: intl.formatMessage(messages.nav.taxonomies),
-        isAdmin: true,
-        active: currentPath.startsWith(ROUTES.CATEGORY)
-          || currentPath.startsWith(ROUTES.TAXONOMIES),
+        title: 'Admin',
+        items: [
+          {
+            path: `${ROUTES.RESOURCES}/${RESOURCETYPES.WEB}`,
+            title: intl.formatMessage(messages.nav.resources),
+            active: currentPath && currentPath.startsWith(ROUTES.RESOURCE),
+          },
+          {
+            path: ROUTES.USERS,
+            title: intl.formatMessage(messages.nav.users),
+            isAdmin: true,
+            active: currentPath === ROUTES.USERS,
+          },
+          {
+            path: ROUTES.PAGES,
+            title: intl.formatMessage(messages.nav.pages),
+            isAdmin: true,
+            active: currentPath === ROUTES.PAGES,
+          },
+          {
+            path: ROUTES.TAXONOMIES,
+            title: intl.formatMessage(messages.nav.taxonomies),
+            isAdmin: true,
+            active: currentPath.startsWith(ROUTES.CATEGORY)
+              || currentPath.startsWith(ROUTES.TAXONOMIES),
+          },
+        ],
       },
     ];
   }
@@ -324,70 +339,87 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     const { intl } = this.context;
     return [
       {
-        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.INTERACTION}`].single),
+        title: 'Positions',
+        items: [
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.EXPRESS}`].single),
+            popular: 2,
+          },
+          {
+            path: `${ROUTES.INDICATORS}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities.indicators.single),
+          },
+        ],
       },
       {
-        path: `${ROUTES.ACTORS}/${ACTORTYPES.CONTACT}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.CONTACT}`].single),
+        title: 'Stakeholders',
+        items: [
+          {
+            path: `${ROUTES.ACTORS}/${ACTORTYPES.CONTACT}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.CONTACT}`].single),
+            popular: 3,
+          },
+          {
+            path: `${ROUTES.ACTORS}/${ACTORTYPES.ORG}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.ORG}`].single),
+          },
+          {
+            path: `${ROUTES.ACTORS}/${ACTORTYPES.GROUP}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.GROUP}`].single),
+          },
+          {
+            path: `${ROUTES.ACTORS}/${ACTORTYPES.REG}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.REG}`].single),
+          },
+          {
+            path: `${ROUTES.ACTORS}${ACTORTYPES.COUNTRY}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.COUNTRY}`].single),
+          },
+        ],
       },
       {
-        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.EXPRESS}`].single),
+        title: 'Outreach',
+        items: [
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.INTERACTION}`].single),
+            popular: 1,
+          },
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EVENT}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.EVENT}`].single),
+            popular: 4,
+          },
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.TASK}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.TASK}`].single),
+          },
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.OP}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.OP}`].single),
+          },
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.AP}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.AP}`].single),
+            hidden: true,
+          },
+        ],
       },
       {
-        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EVENT}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.EVENT}`].single),
-      },
-      {
-        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.TASK}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.TASK}`].single),
-        hidden: true,
-      },
-      {
-        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.OP}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.OP}`].single),
-        hidden: true,
-      },
-      {
-        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.AP}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.AP}`].single),
-        hidden: true,
-      },
-      {
-        path: `${ROUTES.ACTORS}/${ACTORTYPES.ORG}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.ORG}`].single),
-        hidden: true,
-      },
-      {
-        path: `${ROUTES.ACTORS}/${ACTORTYPES.GROUP}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.GROUP}`].single),
-        hidden: true,
-      },
-      {
-        path: `${ROUTES.RESOURCES}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities.resources.single),
-        hidden: true,
-      },
-      {
-        path: `${ROUTES.INDICATORS}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities.indicators.single),
-        hidden: true,
-      },
-      {
-        path: `${ROUTES.ACTORS}/${ACTORTYPES.REG}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.REG}`].single),
-        hidden: true,
-      },
-      {
-        path: `${ROUTES.ACTORS}${ACTORTYPES.COUNTRY}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.COUNTRY}`].single),
-        hidden: true,
-      },
-      {
-        path: `${ROUTES.PAGES}${ROUTES.NEW}`,
-        title: intl.formatMessage(messages.entities.pages.single),
-        hidden: true,
+        title: 'Other',
+        items: [
+          {
+            path: `${ROUTES.RESOURCES}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities.resources.single),
+            hidden: true,
+          },
+          {
+            path: `${ROUTES.PAGES}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities.pages.single),
+            hidden: true,
+          },
+        ],
       },
     ];
   }
@@ -434,8 +466,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             navItems={{
               main: this.prepareMainMenuItems(location.pathname),
               user: this.prepareUserMenuItems(location.pathname, user, isUserSignedIn),
-              pages: this.preparePageMenuPages(pages, location.pathname),
-              other: this.prepareOtherMenuItems(location.pathname),
+              other: this.prepareOtherMenuItems(location.pathname, pages),
               create: isMember && this.prepareCreateMenuItems(),
             }}
             onPageLink={onPageLink}

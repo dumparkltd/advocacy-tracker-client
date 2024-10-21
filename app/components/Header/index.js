@@ -109,7 +109,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
     return (
       <ResponsiveContext.Consumer>
         {(size) => {
-          const wide = isMinSize(size, 'large');
+          const isLarge = isMinSize(size, 'large');
           return (
             <Styled
               sticky={!isAuth}
@@ -119,8 +119,8 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
               hasBrand
               isPrint={isPrintView}
             >
-              <Box direction="row" fill justify="between">
-                <Box>
+              <Box direction="row" justify="between">
+                <Box direction="row">
                   <Brand
                     as={isPrintView ? 'div' : 'a'}
                     href={isPrintView ? '' : '/'}
@@ -142,39 +142,36 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                       </BrandTitle>
                     </Box>
                   </Brand>
+                  {isLarge
+                    && navItems
+                    && navItems.main
+                    && navItems.main.length > 0
+                    && (
+                      <Box direction="row">
+                        {navItems.main.map((item, i) => (
+                          <LinkMenu
+                            flex={{ shrink: 0 }}
+                            key={i}
+                            href={item.path}
+                            active={item.active}
+                            onClick={(evt) => {
+                              if (evt) evt.stopPropagation();
+                              this.onClick(item.path);
+                            }}
+                          >
+                            {item.title}
+                          </LinkMenu>
+                        ))}
+                      </Box>
+                    )}
                 </Box>
-                {wide
-                  && navItems
-                  && navItems.main
-                  && navItems.main.length > 0
-                  && (
-                    <Box direction="row" flex={{ grow: 1 }}>
-                      {navItems.main.map((item, i) => (
-                        <LinkMenu
-                          flex={{ shrink: 0 }}
-                          key={i}
-                          href={item.path}
-                          active={item.active}
-                          onClick={(evt) => {
-                            if (evt) evt.stopPropagation();
-                            this.onClick(item.path);
-                          }}
-                        >
-                          {item.title}
-                        </LinkMenu>
-                      ))}
-                    </Box>
-                  )}
                 {!isPrintView && (
                   <Box direction="row">
                     {navItems && navItems.create && navItems.create.length > 0 && (
                       <DropMenu
                         title={intl.formatMessage(messages.addLabel)}
                         type="add"
-                        navItemGroups={navItems && [{
-                          title: intl.formatMessage(messages.selectLabel),
-                          items: navItems.create,
-                        }]}
+                        navItemGroups={navItems && navItems.create}
                         onClick={(path) => this.onClick(path)}
                       />
                     )}
@@ -183,29 +180,20 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                         title="User"
                         type="user"
                         icon="profile"
-                        navItemGroups={navItems && [{
-                          items: navItems.user,
-                        }]}
+                        navItemGroups={navItems && navItems.user}
                         onClick={(path) => this.onClick(path)}
                       />
                     )}
-                    {navItems && (navItems.pages || navItems.other) && (
+                    {navItems && (navItems.other || (!isLarge && navItems.main)) && (
                       <DropMenu
                         title="More"
                         type="other"
                         navItemGroups={navItems && [
-                          !wide && {
+                          !isLarge && {
                             title: 'Main',
                             items: navItems.main,
                           },
-                          {
-                            title: 'Pages',
-                            items: navItems.pages,
-                          },
-                          {
-                            title: 'Admin',
-                            items: navItems.other,
-                          },
+                          ...navItems.other,
                         ]}
                         onClick={(path) => this.onClick(path)}
                       />
