@@ -21,11 +21,11 @@ const TopicTitle = styled((p) => <Heading level="4" {...p} />)`
 `;
 const SupportLevelTitle = styled((p) => <Text size="xsmall" {...p} />)`
   text-transform: uppercase;
-  text-align center;
+  text-align: center;
   font-weight: bold;
 `;
 const LevelOfAuthorityLabel = styled((p) => <Text size="xsmall" {...p} />)`
-  text-align center;
+  text-align: center;
 `;
 export function PreviewCountryTopicPosition({ content }) {
   const { topic, position } = content;
