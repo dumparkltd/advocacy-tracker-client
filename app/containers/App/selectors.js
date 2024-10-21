@@ -316,7 +316,7 @@ export const selectLocationQuery = createSelector(
 );
 export const selectInactiveColumnQuery = createSelector(
   selectLocationQuery,
-  (locationQuery) => locationQuery && locationQuery.get('xcol')
+  (locationQuery) => locationQuery && asList(locationQuery.get('xcol'))
 );
 
 // filter queries //////////////////////////////////////////////////////////////
