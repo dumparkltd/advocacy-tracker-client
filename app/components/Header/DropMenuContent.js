@@ -16,6 +16,7 @@ import appMessages from 'containers/App/messages';
 import DropMenuGroup from './DropMenuGroup';
 import DropButtonWrap from './DropButtonWrap';
 import DropButton from './DropButton';
+import messages from './messages';
 
 const Menu = styled((p) => (
   <Box
@@ -57,17 +58,11 @@ const DropMenuContent = ({
 }) => {
   const [showAll, setShowAll] = useState(false);
   const size = React.useContext(ResponsiveContext);
+  const hasHidden = navItemGroups && navItemGroups.find((group) => group.hidden);
+  const groups = (hasHidden && showAll)
+    ? navItemGroups
+    : navItemGroups.filter((group) => !group.hidden);
 
-  let groups = navItemGroups;
-  if (type === 'add' && !showAll) {
-    groups = [{
-      title: 'Common',
-      items: groups.reduce((memo, group) => ([
-        ...memo,
-        ...group.items.filter((i) => i.popular),
-      ]), []),
-    }];
-  }
   return (
     <Menu
       pad={{ horizontal: 'medium', bottom: 'large' }}
@@ -108,14 +103,11 @@ const DropMenuContent = ({
       </Box>
       {type === 'add' && (
         <ExpandItems
-          label={
-            showAll
-              ? 'Show most common only'
-              : 'Show all items (by type)'
-          }
           onClick={() => setShowAll(!showAll)}
           margin={{ left: 'xsmall' }}
-        />
+        >
+          <FormattedMessage {...messages[showAll ? 'showLessLabel' : 'showMoreLabel']} />
+        </ExpandItems>
       )}
     </Menu>
   );

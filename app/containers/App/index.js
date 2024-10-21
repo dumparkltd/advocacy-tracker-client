@@ -339,13 +339,30 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     const { intl } = this.context;
     return [
       {
-        title: 'Positions',
+        title: 'Common',
         items: [
           {
             path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}${ROUTES.NEW}`,
             title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.EXPRESS}`].single),
-            popular: 2,
           },
+          {
+            path: `${ROUTES.ACTORS}/${ACTORTYPES.CONTACT}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.CONTACT}`].single),
+          },
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.INTERACTION}`].single),
+          },
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EVENT}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.EVENT}`].single),
+          },
+        ],
+      },
+      {
+        title: 'Positions',
+        hidden: true,
+        items: [
           {
             path: `${ROUTES.INDICATORS}${ROUTES.NEW}`,
             title: intl.formatMessage(messages.entities.indicators.single),
@@ -354,12 +371,8 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       },
       {
         title: 'Stakeholders',
+        hidden: true,
         items: [
-          {
-            path: `${ROUTES.ACTORS}/${ACTORTYPES.CONTACT}${ROUTES.NEW}`,
-            title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.CONTACT}`].single),
-            popular: 3,
-          },
           {
             path: `${ROUTES.ACTORS}/${ACTORTYPES.ORG}${ROUTES.NEW}`,
             title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.ORG}`].single),
@@ -380,17 +393,8 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       },
       {
         title: 'Outreach',
+        hidden: true,
         items: [
-          {
-            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}${ROUTES.NEW}`,
-            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.INTERACTION}`].single),
-            popular: 1,
-          },
-          {
-            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EVENT}${ROUTES.NEW}`,
-            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.EVENT}`].single),
-            popular: 4,
-          },
           {
             path: `${ROUTES.ACTIONS}/${ACTIONTYPES.TASK}${ROUTES.NEW}`,
             title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.TASK}`].single),
@@ -402,22 +406,20 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           {
             path: `${ROUTES.ACTIONS}/${ACTIONTYPES.AP}${ROUTES.NEW}`,
             title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.AP}`].single),
-            hidden: true,
           },
         ],
       },
       {
         title: 'Other',
+        hidden: true,
         items: [
           {
             path: `${ROUTES.RESOURCES}${ROUTES.NEW}`,
             title: intl.formatMessage(messages.entities.resources.single),
-            hidden: true,
           },
           {
             path: `${ROUTES.PAGES}${ROUTES.NEW}`,
             title: intl.formatMessage(messages.entities.pages.single),
-            hidden: true,
           },
         ],
       },
