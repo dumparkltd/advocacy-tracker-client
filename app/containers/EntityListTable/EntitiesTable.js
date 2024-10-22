@@ -186,6 +186,8 @@ export function EntitiesTable({
                 nextPreviewItem: nextIndex !== entityIndex && `${ID}|${path}|${entityIds[nextIndex]}`,
                 prevPreviewItem: prevIndex !== entityIndex && `${ID}|${path}|${entityIds[prevIndex]}`,
               },
+              item: mainItem,
+              columns: columns,
             };
             onSetPreviewContent(content);
           } else if (itemId && path) {
