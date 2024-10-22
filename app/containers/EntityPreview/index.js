@@ -8,6 +8,7 @@ import { setListPreview, updatePath } from 'containers/App/actions';
 
 import PreviewHeader from './PreviewHeader';
 import PreviewEntity from './PreviewEntity';
+import PreviewContent from './PreviewContent';
 import PreviewFooter from './PreviewFooter';
 import PreviewCountryTopicPosition from './PreviewCountryTopicPosition';
 import PreviewCountryTopicStatementList from './PreviewCountryTopicStatementList';
@@ -57,6 +58,9 @@ export function EntityPreview({
         <PreviewCountryPositionsList
           content={content.get('countryPositions')}
         />
+      )}
+      {content && content.get('item') && (
+        <PreviewContent item={content.get('item')} columns={content.get('columns')} />
       )}
       {content && content.get('footer') && (
         <PreviewFooter

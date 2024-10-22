@@ -139,6 +139,7 @@ const reducePreviewItem = ({ item, id, path }) => {
         aboveTitle: 'Actor',
         title: item && item.getIn(['attributes', 'title']),
       },
+      item,
       footer: {
         primaryLink: item && {
           path: `${ROUTES.ACTOR}/${item.get('id')}`,
@@ -154,6 +155,7 @@ const reducePreviewItem = ({ item, id, path }) => {
         aboveTitle: 'Action',
         title: item && item.getIn(['attributes', 'title']),
       },
+      item,
       footer: {
         primaryLink: item && {
           path: `${ROUTES.ACTION}/${item.get('id')}`,

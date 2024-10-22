@@ -89,3 +89,25 @@ export const selectPreviewEntity = createSelector(
     return previewEntity;
   }
 );
+//
+// export const selectConnections = createSelector(
+//   (state, { item }) => item,
+//   select
+//   // selectIndicatorsAssociated,
+// export const selectPreviewContent = createSelector(
+//   (state, { item }) => item,
+//   // selectIndicatorsAssociated,
+//   // selectIndicatorConnections,
+//   // selectActionIndicatorsGroupedByActionAttributes,
+//   // selectActionIndicatorsGroupedByIndicator,
+//   (
+//     item,
+//     // indicators,
+//     // indicatorConnections,
+//     // actionIndicatorsByActionFull,
+//     // actionIndicators,
+//   ) => {
+//     if (!item) return null;
+//     return null;
+//   }
+// );
