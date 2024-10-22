@@ -17,7 +17,7 @@ const Styled = styled.div`
   overflow-y: ${({ noOverflow }) => noOverflow ? 'hidden' : 'auto'};
   z-index: 90;
   background-color: ${({ bg, isPrint }) => (bg && !isPrint) ? '#f1f0f1' : 'transparent'};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     top: ${({ isOnMap, theme }) => {
     if (isOnMap) {
       // to fix: add dynamic navSecondary height

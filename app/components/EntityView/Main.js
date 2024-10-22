@@ -9,7 +9,7 @@ import Section from './Section';
 const Styled = styled(Section)`
   border-color: ${palette('light', 1)};
   border-width: 1px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     border-right-style: ${({ hasAside, isPrint }) => (hasAside && !isPrint) ? 'solid' : 'none'};
     display: table-cell;
     width: ${({ hasAside }) => hasAside ? '70%' : '100%'};

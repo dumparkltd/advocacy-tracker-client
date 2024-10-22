@@ -23,7 +23,7 @@ const Styled = styled.div`
     }
     return seamless ? 0 : theme.global.edgeSize.small;
   }};
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding-top: ${({ seamless, theme }) => seamless ? '10px' : theme.global.edgeSize.medium};
     padding-bottom: ${({ seamless, theme }) => seamless ? '20px' : theme.global.edgeSize.medium};
     padding-right: ${({ theme, isPrint, aside }) => (isPrint && aside) ? 0 : theme.global.edgeSize.medium};

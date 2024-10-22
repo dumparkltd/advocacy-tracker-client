@@ -21,7 +21,7 @@ export default styled(TextInputBase)`
     color: ${palette('dark', 1)};
     font-weight: 300;
   }
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     font-size: ${({ theme }) => theme.text.medium.size};
   }
 `;

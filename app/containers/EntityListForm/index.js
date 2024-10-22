@@ -16,7 +16,7 @@ import MultiSelectControl from 'components/forms/MultiSelectControl';
 const Styled = styled(ContainerWithSidebar)`
   z-index: 101;
   background-color: rgba(0,0,0,0.2);
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
     z-index: 99;
   }
 `;
@@ -30,10 +30,10 @@ const FormWrapper = styled.div`
   overflow: hidden;
   box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
   width: 100%;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     width: ${(props) => props.wide ? '100%' : '350px'};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
     width: ${(props) => props.wide ? 692 : 350}px;
     z-index: 99;
   }

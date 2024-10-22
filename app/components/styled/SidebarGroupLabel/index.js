@@ -7,7 +7,7 @@ const SidebarGroupLabel = styled.div`
   background-color: ${palette('asideListGroup', 1)};
   padding: 0.25em 12px;
   font-size: 0.9em;
-  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.xlarge}) {
     padding: 0.25em 16px;
   }
   @media print {

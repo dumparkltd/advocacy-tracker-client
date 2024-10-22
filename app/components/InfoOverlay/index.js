@@ -32,7 +32,7 @@ const DropContent = styled(({ dropBackground, ...p }) => (
 
 const Markdown = styled(ReactMarkdown)`
   font-size: ${(props) => props.theme.sizes.text.markdownMobile};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     font-size: ${(props) => props.theme.sizes.text.markdown};
   }
   @media print {

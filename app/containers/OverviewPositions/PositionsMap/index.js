@@ -74,10 +74,10 @@ import messages from './messages';
 const IndicatorSidePanel = styled((p) => <Box {...p} />)`
   border-right: 1px solid ${palette('light', 2)};
   width: 200px;
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
    width: 325px;
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.xlarge}) {
    width: 350px;
   }
 `;

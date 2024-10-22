@@ -17,7 +17,7 @@ const Styled = styled.div`
   background-color: white;
   border: 1px solid ${palette('light', 2)};
   box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.1);
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     min-width: 350px;
   }
   margin-top: 10px;
@@ -28,7 +28,7 @@ const Search = styled.div`
   padding: 0.75em;
   background-color: ${palette('background', 1)};
   height: 80px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0.75em 1em;
   }
   border-bottom: 1px solid ${palette('light', 2)};

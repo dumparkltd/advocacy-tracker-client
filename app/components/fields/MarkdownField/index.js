@@ -13,7 +13,7 @@ import { usePrint } from 'containers/App/PrintContext';
 const Markdown = styled(ReactMarkdown)`
   font-size: ${({ theme }) => theme.text.mediumTall.size};
   line-height: ${({ theme }) => theme.text.mediumTall.height};
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     font-size: ${({ theme, isPrint }) => isPrint ? theme.textPrint.mediumTall.size : theme.text.largeTall.size};
     line-height: ${({ theme }) => theme.text.largeTall.height};
   }

@@ -19,7 +19,7 @@ import { selectBookmarkForLocation } from './selectors';
 
 const BookmarkerContainer = styled.div`
   z-index: 10;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     position: relative;
   }
 `;

@@ -9,7 +9,7 @@ const DropButtonWrap = styled.div`
   right:  ${({ inDrop }) => inDrop ? '5px' : 'auto'};
   height: ${({ theme }) => theme.sizes.header.banner.heightMobile}px;
   width: ${({ theme }) => theme.sizes.header.banner.heightMobile - 10}px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0;
     position: ${({ inDrop }) => inDrop ? 'absolute' : 'relative'};
     top:  ${({ inDrop, menuType }) => {

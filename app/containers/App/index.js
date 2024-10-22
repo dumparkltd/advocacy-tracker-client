@@ -73,7 +73,7 @@ const Main = styled.div`
   bottom:0;
   overflow: ${({ isPrint }) => isPrint ? 'auto' : 'hidden'};
   width: auto;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     top: ${({ isHome, theme }) => isHome
     ? 0
     : theme.sizes.header.banner.height

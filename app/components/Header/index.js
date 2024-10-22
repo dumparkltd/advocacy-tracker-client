@@ -25,7 +25,7 @@ const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
   line-height: ${({ theme, isDev }) => isDev ? theme.text.medium.size : theme.text.large.size};
   font-weight: 500;
   padding: 0;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     font-size: ${({ theme, isDev }) => isDev ? theme.text.large.size : theme.text.xlarge.size};
     line-height: ${({ theme, isDev }) => isDev ? theme.text.large.size : theme.text.xlarge.size};
   }
@@ -44,7 +44,7 @@ const Styled = styled.div`
   left: 0;
   right: 0;
   height:${({ theme }) => theme.sizes.header.banner.heightMobile}px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     height:${({ theme }) => theme.sizes.header.banner.height}px;
   }
   background-color: #000;

@@ -17,15 +17,15 @@ const SVG = styled.svg`
   margin-left: ${({ size, textRight }) => textRight ? (parseFloat(size) / 4) + size.split(/[0-9]+/)[1] : 0};
   width: ${({ sizes, size }) => (sizes && sizes.mobile) ? sizes.mobile : size};
   height: ${({ sizes, size }) => (sizes && sizes.mobile) ? sizes.mobile : size};
-  @media (min-width: ${({ theme }) => theme && theme.breakpoints ? theme.breakpoints.medium : '769px'}) {
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.medium : '769px'}) {
     width: ${({ sizes, size }) => (sizes && sizes.small) ? sizes.small : size};
     height:${({ sizes, size }) => (sizes && sizes.small) ? sizes.small : size};
   }
-  @media (min-width:${({ theme }) => theme && theme.breakpoints ? theme.breakpoints.large : '993px'}) {
+  @media (min-width:${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.large : '993px'}) {
     width: ${({ sizes, size }) => (sizes && sizes.medium) ? sizes.medium : size};
     height: ${({ sizes, size }) => (sizes && sizes.medium) ? sizes.medium : size};
   }
-  @media (min-width: ${({ theme }) => theme && theme.breakpoints ? theme.breakpoints.xlarge : '1200px'}) {
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.xlarge : '1200px'}) {
     width: ${({ sizes, size }) => (sizes && sizes.large) ? sizes.large : size};
     height: ${({ sizes, size }) => (sizes && sizes.large) ? sizes.large : size};
   }

@@ -40,7 +40,7 @@ const ChangeHint = styled.div`
   padding: 0.5em 1em;
   box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2);
   text-align: right;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     bottom: ${(props) => props.hasFooter ? '59px' : '0px'};
   }
 `;
@@ -58,7 +58,7 @@ const ControlMain = styled.div`
   overflow-y: auto;
   padding:0;
   padding-bottom: ${(props) => props.hasChangeNote ? '59px' : '0px'};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     top: 60px;
   }
 `;
@@ -69,7 +69,7 @@ const ControlFooter = styled.div`
   right: 0;
   background-color: ${palette('background', 1)};
   box-shadow: 0px 0px 8px 0px rgba(0,0,0,0.2);
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     height: 59px;
   }
 `;
@@ -77,7 +77,7 @@ const ControlFooter = styled.div`
 const Search = styled.div`
   padding: 0.75em;
   background-color: ${palette('background', 1)};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0.75em 1em;
   }
 `;

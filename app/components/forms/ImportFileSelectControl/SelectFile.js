@@ -55,7 +55,7 @@ const Remove = styled(ButtonFlatIconOnly)`
   &:hover {
     color: ${palette('buttonFlatHover', 1)};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0 0.75em;
   }
 `;

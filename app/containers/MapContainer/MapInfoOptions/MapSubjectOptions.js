@@ -16,7 +16,7 @@ const Styled = styled.div`
     if (isPrint) return 0;
     return inList ? 2 : 10;
   }}px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding-bottom: ${({ inList, isPrint }) => {
     if (isPrint) return 0;
     return inList ? 5 : 15;

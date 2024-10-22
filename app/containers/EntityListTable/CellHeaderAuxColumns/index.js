@@ -19,7 +19,7 @@ const Styled = styled((p) => <Box {...p} />)`
 const AuxButton = styled(ButtonFlatIconOnly)`
   color: inherit;
   padding: 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0;
   }
   width: 22px;
@@ -42,7 +42,7 @@ const Dot = styled.div`
 const DropContent = styled.div`
   max-width: none;
   height: 400px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     height: 400px;
     width: 300px;
   }

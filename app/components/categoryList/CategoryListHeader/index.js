@@ -24,7 +24,7 @@ const Styled = styled.div`
 
 const Column = styled((p) => <ColumnHeader {...p} />)`
   position: relative;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding-right: 30px;
   }
 `;
@@ -39,14 +39,14 @@ const Via = styled.span`
 const SortWrapper = styled.div`
   float: right;
   background-color: ${palette('light', 1)};
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 4px 2px 0 0;
     position: absolute;
     right: 0;
     top: 0;
     float: none;
   }
-  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
     padding: 6px 2px 0 0;
   }
   @media print {
@@ -56,7 +56,7 @@ const SortWrapper = styled.div`
 const SortButton = styled(ButtonFlatIconOnly)`
   color: inherit;
   padding: 0;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0;
   }
 `;

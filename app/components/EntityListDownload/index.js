@@ -70,7 +70,7 @@ const StyledButtonCancel = styled(ButtonForm)`
 const Main = styled.div`
   padding: 0 0 10px;
   margin: 0 0 30px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 20px 24px;
     margin: 0 0 50px;
   }

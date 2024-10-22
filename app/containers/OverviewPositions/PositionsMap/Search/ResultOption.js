@@ -23,7 +23,7 @@ export default styled(forwardRef((props, ref) => (<Button plain {...props} ref={
     outline: 2px solid ${palette('primary', 0)};
     box-shadow: none;
   }
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 10px 16px;
   }
 `;

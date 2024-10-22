@@ -32,7 +32,7 @@ const ListInlineItem = styled.li`
   font-size: 1em;
   color: ${palette('linkHover', 0)};
   vertical-align: middle;
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.medium : '769px'}) {
     font-size: 1.25em;
   }
   @media print {
@@ -47,7 +47,7 @@ const ListInlineItemLink = styled(A)`
   font-weight: bold;
   display: block;
   text-align: center;
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.medium : '769px'}) {
     width: 2em;
     height: 2em;
     line-height: 2;
@@ -61,7 +61,7 @@ const ListInlineItemActive = styled.div`
   font-weight: bold;
   background-color: ${palette('buttonDefault', 1)};
   color: ${palette('buttonDefault', 0)};
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.medium : '769px'}) {
     width: 2em;
     height: 2em;
     line-height: 2;
@@ -70,7 +70,7 @@ const ListInlineItemActive = styled.div`
 const ListInlineItemNav = styled(A)`
   padding: 0;
   display: block;
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.medium : '769px'}) {
     padding: 0 0.5em;
   }
 `;
@@ -78,7 +78,7 @@ const ListInlineItemNav = styled(A)`
 const ListInlineItemNavDisabled = styled.div`
   color: ${palette('buttonDefaultDisabled', 1)};
   padding: 0;
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.medium : '769px'}) {
     padding: 0 0.5em;
   }`;
 

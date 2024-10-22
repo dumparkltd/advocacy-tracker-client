@@ -26,7 +26,7 @@ const Menu = styled((p) => (
   />
 ))`
   max-width: none;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     width: 300px;
   }
 `;

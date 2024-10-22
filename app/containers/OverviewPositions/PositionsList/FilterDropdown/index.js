@@ -59,7 +59,7 @@ const ButtonLabelActive = styled.span`
 //   box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
 //   z-index: 999;
 //   margin-top: 6px;
-//   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+//   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
 //     position: absolute;
 //     left: 3px;
 //     top: 100%;

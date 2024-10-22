@@ -37,7 +37,7 @@ const MultiSelectWrapper = styled.div`
   border-bottom: 1px solid;
   border-color: ${palette('light', 2)};
   box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     min-width: 350px;
   }
 `;
@@ -57,7 +57,7 @@ const MultiSelectDropdownIcon = styled.div`
   right: 0;
   top: 0;
   padding: 12px 8px 0 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding-right: 16px;
   }
 `;
@@ -73,7 +73,7 @@ const MultiSelectDropdown = styled(Button)`
     background-color: ${({ theme }) => theme.global.colors.highlightHover};
   }
   padding: 12px 0 12px 8px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     font-size: 0.85em;
     padding: 12px 0 12px 16px;
   }
@@ -85,7 +85,7 @@ const MultiSelectDropdown = styled(Button)`
 const MultiSelectWithout = styled.div`
   color: ${palette('text', 1)};
   padding: 12px 0 12px 8px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding-left: 16px;
   }
 `;

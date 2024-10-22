@@ -24,7 +24,7 @@ import { getFilterLabel } from './utils';
 const Clear = styled(Button)`
   background-color: ${palette('background', 4)};
   padding: 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0;
   }
   @media print {

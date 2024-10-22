@@ -23,7 +23,7 @@ const ButtonTagCategoryInverse = styled(Button)`
   &:last-child {
     margin-right: 0;
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 1px 6px;
     font-size: 0.85em;
   }

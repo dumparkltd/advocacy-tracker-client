@@ -13,12 +13,12 @@ const LogoWrap = styled.div`
     height: 52px;
     width: 52px;
   }
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     margin-left: ${({ theme, isPrint }) => isPrint ? 0 : (theme.sizes.header.paddingLeft.small || 12)}px;
     height:  ${({ isPrint }) => isPrint ? '52px;' : '81px;'}
     width:  ${({ isPrint }) => isPrint ? '52px' : '72px;'}
   }
-  @media (min-width: ${({ theme }) => theme.breakpoints.xlarge}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.xlarge}) {
     margin-left: ${({ theme, isPrint }) => isPrint ? 0 : (theme.sizes.header.paddingLeft.large || 20)}px;
   }
 `;

@@ -22,7 +22,7 @@ const ButtonFlat = styled(Button)`
     return props.primary ? palette('buttonFlatHover', 0) : palette('buttonFlatHover', 1);
   }};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: ${(props) => props.inForm ? '1em 1.2em' : '10px 12px'};
   }
 `;

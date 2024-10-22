@@ -9,7 +9,7 @@ const StyledButton = styled((p) => <Button plain {...p} />)`
   line-height: 1.3;
   font-size: ${({ theme }) => theme.text.xsmall.size};
   padding: 10px 20px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     border-bottom: 1px solid ${palette('light', 1)};
     font-size: ${({ theme }) => theme.text.small.size};
   }

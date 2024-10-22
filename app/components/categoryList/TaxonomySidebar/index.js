@@ -37,7 +37,7 @@ const ToggleShow = styled(ButtonDefault)`
   box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
   font-size: 0.85em;
   width: 100%;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0.75em 1em;
     font-size: 0.85em;
     width: ${(props) => props.theme.sizes.aside.width.large}px;
@@ -95,11 +95,11 @@ class TaxonomySidebar extends React.PureComponent { // eslint-disable-line react
 
   updateViewport() {
     let viewport = VIEWPORTS.MOBILE;
-    if (window.innerWidth >= parseInt(this.props.theme.breakpoints.xlarge, 10)) {
+    if (window.innerWidth > parseInt(this.props.theme.breakpoints.xlarge, 10)) {
       viewport = VIEWPORTS.LARGE;
-    } else if (window.innerWidth >= parseInt(this.props.theme.breakpoints.large, 10)) {
+    } else if (window.innerWidth > parseInt(this.props.theme.breakpoints.large, 10)) {
       viewport = VIEWPORTS.MEDIUM;
-    } else if (window.innerWidth >= parseInt(this.props.theme.breakpoints.medium, 10)) {
+    } else if (window.innerWidth > parseInt(this.props.theme.breakpoints.medium, 10)) {
       viewport = VIEWPORTS.SMALL;
     }
     this.setState({ viewport });

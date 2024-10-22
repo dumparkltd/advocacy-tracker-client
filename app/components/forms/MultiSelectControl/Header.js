@@ -12,7 +12,7 @@ const Styled = styled.div`
   z-index: 1;
   height: 40px;
   padding-left: 0.75em;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     height: 60px;
     padding-left: 1em;
   }

@@ -17,7 +17,7 @@ export default styled((p) => <Button plain {...p} />)`
   }
   height: ${(props) => props.theme.sizes.navSecondary.nav.heightMobile}px;
   padding: 30px 0.5em 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 30px 0.5em 0;
     height: ${(props) => props.theme.sizes.navSecondary.nav.height}px;
     font-size: ${({ theme }) => theme.text.xlarge.size};

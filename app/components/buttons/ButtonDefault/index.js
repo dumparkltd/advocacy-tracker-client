@@ -54,7 +54,7 @@ const ButtonDefault = styled(Button)`
     return 'none';
   }};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0.3em 1.2em;
   }
 `;

@@ -44,7 +44,7 @@ const SidebarWrapper = styled.div`
   right: 0;
   z-index: 100;
   width: 100%;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     width: auto;
   }
 `;

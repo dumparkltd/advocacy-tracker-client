@@ -23,7 +23,7 @@ const LinkMenu = styled((p) => <Button plain as="a" justify="center" fill="verti
     color: ${({ active }) => active ? 'black' : 'white'};
     background-color: ${({ active }) => active ? '#f0f0f0' : '#282a2c'};
   }
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     font-size: ${({ theme }) => theme.text.xlarge.size};
     line-height: ${({ theme }) => theme.text.xlarge.size};
   }

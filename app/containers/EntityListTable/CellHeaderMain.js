@@ -25,7 +25,7 @@ const Select = styled(PrintHide)`
 const SortButton = styled(ButtonFlatIconOnly)`
   color: inherit;
   padding: 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0;
   }
 `;

@@ -24,7 +24,7 @@ const Styled = styled.div`
     if (hasViewOptions) return '0';
     return '1em 0 0.5em';
   }};
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: ${({ isModal, hasViewOptions }) => {
     if (isModal) return '20px 0 20px 24px';
     if (hasViewOptions) return '0';
@@ -60,7 +60,7 @@ const ButtonWrap = styled.span`
   }
 `;
 const TitleButtonWrap = styled((p) => <Box align="center" direction="row" {...p} />)`
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     min-height: 62px;
     width: 100%;
   }
@@ -69,7 +69,7 @@ const TitleButtonWrap = styled((p) => <Box align="center" direction="row" {...p}
 const ButtonGroup = styled((p) => <Box align="center" direction="row" {...p} />)`
   text-align: left;
   margin-bottom: 10px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     margin-bottom: -4px;
   }
 `;
