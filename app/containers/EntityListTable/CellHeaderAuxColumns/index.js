@@ -1,15 +1,16 @@
 import React, { useState, useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { palette } from 'styled-theme';
 import {
-  Box, ResponsiveContext, Drop, Text, Button,
+  Box, ResponsiveContext, Drop, Layer
 } from 'grommet';
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import BoxPrint from 'components/styled/BoxPrint';
-import Icon from 'components/Icon';
 
 import { isMinSize } from 'utils/responsive';
+import DropHeader from './DropHeader';
+import DropBody from './DropBody';
+import DropFooter from './DropFooter';
 
 const Styled = styled((p) => <Box {...p} />)`
   position: relative;
@@ -45,57 +46,6 @@ const DropContent = styled.div`
     height: 400px;
     width: 300px;
   }
-`;
-const Checkbox = styled.input`
-  accent-color: ${({ disabled }) => disabled ? palette('dark', 3) : 'black'};
-`;
-const DropLayerTitle = styled((p) => <Text size="small" {...p} />)`
-  text-transform: uppercase;
-  font-weight: bold;
-`;
-const CloseButton = styled((p) => <Button plain {...p} />)`
-  border-radius: 999px;
-  color: white;
-  height: 25px;
-  width: 25px;
-  padding: 0px 4px 4px 0px;
-  background-color: ${palette('primary', 1)};
-  &:hover {
-    opacity: 0.9;
-  };
-`;
-const ColumnOptionWrapper = styled((p) => (
-  <Box
-    pad={{ vertical: 'xsmall' }}
-    direction="row"
-    gap="small"
-    flex={{ shrink: 0 }}
-    {...p}
-  />
-))`
-  border-bottom: 1px solid ${palette('light', 4)};
-  &:first-child {
-    border-top: 1px solid ${palette('light', 4)};
-  }
-`;
-const ColumnTitle = styled((p) => <Text {...p} />)`
-  color: ${({ isDisabled }) => isDisabled ? palette('dark', 3) : 'black'}
-`;
-const ActionButton = styled((p) => <Button plain {...p} />)`
-  padding: 5px 10px 6px 10px;
-  border-radius: 10px;
-
-  font-family: ${({ theme }) => theme.fonts.title};
-  font-weight: normal;
-  font-size: 18px;
-  text-transform: uppercase;
-`;
-const ConfirmButton = styled((p) => <ActionButton {...p} />)`
-  background: ${palette('primary', 1)};
-  color: white;
-`;
-const CancelButton = styled((p) => <ActionButton {...p} />)`
-  color: ${palette('light', 4)};
 `;
 
 const DropAnchor = styled.div`
@@ -155,6 +105,37 @@ export function CellHeaderAuxColumns({ column, columnOptions, onUpdateHiddenColu
             <Dot />
           </Box>
         </AuxButton>
+        {open && !isMinSize(size, 'medium') && (
+          <Layer
+            full
+            responsive
+            onClickOutside={() => setOpen(false)}
+            onEsc={() => setOpen(false)}
+            animation={false}
+            style={{ overflowY: 'auto', borderRadius: '0' }}
+          >
+            <DropHeader
+              onClose={() => {
+                setOpen(false);
+                // onResetActiveColumns
+              }}
+            />
+            <DropBody
+              options={updatedColumnOptions}
+              onUpdate={(args) => console.log('onUpdate', args)}
+            />
+            <DropFooter
+              onConfirm={(args) => {
+                console.log('onConfirm', args);
+                onUpdateHiddenColumns('heyhey');
+              }}
+              onCancel={() => {
+                setOpen(false);
+                // onResetActiveColumns
+              }}
+            />
+          </Layer>
+        )}
         {open && isMinSize(size, 'medium') && (
           <Drop
             target={ref.current}
@@ -165,66 +146,38 @@ export function CellHeaderAuxColumns({ column, columnOptions, onUpdateHiddenColu
             style={{
               animation: 'none',
               opacity: '1',
+              zIndex: '999999999',
             }}
             animate={false}
             overflow="hidden"
+            inline
           >
             <DropContent>
               <HeaderInDrop>
-                <Box
-                  pad={{ horizontal: 'ms', top: 'ms' }}
-                  direction="row"
-                  justify="between"
-                  align="center"
-                  flex={{ shrink: 0 }}
-                >
-                  <DropLayerTitle>Configure columns</DropLayerTitle>
-                  <CloseButton onClick={() => setOpen(false)}>
-                    <Icon name="close" size="25px" />
-                  </CloseButton>
-                </Box>
+                <DropHeader
+                  onClose={() => {
+                    setOpen(false);
+                    // onResetActiveColumns
+                  }}
+                />
               </HeaderInDrop>
               <BodyInDrop>
-                <Box pad="ms" gap="none" flex={{ shrink: 0 }}>
-                  {updatedColumnOptions && updatedColumnOptions.map(
-                    (option, i) => option && (
-                      <ColumnOptionWrapper key={i}>
-                        <Checkbox
-                          type="checkbox"
-                          checked={!(option.hidden)}
-                          onChange={(evt) => {
-                            evt.stopPropagation();
-                            const updatedOptions = [...updatedColumnOptions];
-                            updatedOptions[i] = { ...updatedOptions[i], hidden: !evt.target.checked };
-                            setUpdatedColumnOptions([...updatedOptions]);
-                          }}
-                        />
-                        <ColumnTitle>
-                          {option.title}
-                        </ColumnTitle>
-                      </ColumnOptionWrapper>
-                    )
-                  )}
-                </Box>
+                <DropBody
+                  options={updatedColumnOptions}
+                  onUpdate={(args) => console.log('onUpdate', args)}
+                />
               </BodyInDrop>
               <FooterInDrop>
-                <Box
-                  pad={{ horizontal: 'ms', bottom: 'ms', top: 'small' }}
-                  direction="row"
-                  justify="end"
-                  gap="small"
-                  flex={{ shrink: 0 }}
-                >
-                  <CancelButton onClick={() => setOpen(false)}>Cancel</CancelButton>
-                  <ConfirmButton
-                    onClick={() => {
-                      onUpdateHiddenColumns(updatedColumnOptions);
-                      setOpen(false);
-                    }}
-                  >
-                    Confirm
-                  </ConfirmButton>
-                </Box>
+                <DropFooter
+                  onConfirm={(args) => {
+                    console.log('onConfirm', args);
+                    onUpdateHiddenColumns('heyhey');
+                  }}
+                  onCancel={() => {
+                    setOpen(false);
+                    // onResetActiveColumns
+                  }}
+                />
               </FooterInDrop>
             </DropContent>
           </Drop>

@@ -4,8 +4,9 @@ import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import isNumber from 'utils/is-number';
-
+import { ResponsiveContext } from 'grommet';
 import { Map, List, fromJS } from 'immutable';
+import { isMinSize } from 'utils/responsive';
 
 import {
   selectSortByQuery,
@@ -114,7 +115,7 @@ export function EntityListTable({
   inactiveColumns,
 }) {
   if (!columns) return null;
-  // const size = React.useContext(ResponsiveContext);
+  const size = React.useContext(ResponsiveContext);
   // list options
   const {
     hasSearch,
@@ -162,7 +163,15 @@ export function EntityListTable({
     );
   }
   const activeColumns = columns
-    .filter((col) => !(isPrintView && col.printHideOnSingle))
+    .filter((col) => {
+      if ((!isMinSize(size, 'medium') || isPrintView) && col.type !== 'main') {
+        return false;
+      }
+      if (col.printHideOnSingle && isPrintView) {
+        return false;
+      }
+      return true;
+    })
     .map((col) => ({
       ...col,
       hidden: inactiveColumns && inactiveColumns.includes(col.id),

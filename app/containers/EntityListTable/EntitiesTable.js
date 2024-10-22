@@ -100,10 +100,7 @@ const TableCellHeader = styled.th`
   }}px;
   padding-top: 6px;
   padding-bottom: 6px;
-  width: 100%;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    width: ${getColWidth};
-  }
+  width: ${getColWidth};
 `;
 const TableCellHeaderInner = styled((p) => <Box {...p} />)`
 `;
@@ -126,11 +123,8 @@ const TableCellBody = styled.td`
   padding-top: 6px;
   padding-bottom: 6px;
   word-wrap:break-word;
-  width: 100%;
   overflow: hidden;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    width: ${getColWidth};
-  }
+  width: ${getColWidth};
 `;
 const TableCellBodyInner = styled((p) => <Box {...p} />)`
   padding: 6px 0;
@@ -207,22 +201,28 @@ export function EntitiesTable({
   }, [previewItemId]);
   const size = React.useContext(ResponsiveContext);
   const isPrintView = usePrint();
-  const headerColumnsAux = [
-    ...headerColumns,
-    {
-      id: 'auxColumns',
-      title: 'CC',
-      type: 'auxColumns',
-    },
-  ];
-  const columnsAux = [
-    ...columns,
-    {
-      type: 'spacer',
-      content: '',
-    },
-  ];
+  const hasAuxColumns = !inSingleView && isMinSize(size, 'medium');
+  const headerColumnsAux = hasAuxColumns
+    ? [
+      ...headerColumns,
+      {
+        id: 'auxColumns',
+        title: 'CC',
+        type: 'auxColumns',
+      },
+    ]
+    : headerColumns;
+  const columnsAux = hasAuxColumns
+    ? [
+      ...columns,
+      {
+        type: 'spacer',
+        content: '',
+      },
+    ]
+    : columns;
   const headerColumnsByType = headerColumnsAux && groupBy(headerColumnsAux, 'type');
+  console.log('headerColumns', headerColumnsAux)
   // console.log('headerColumnsAux', headerColumnsAux)
   return (
     <Box fill="horizontal">
@@ -261,7 +261,7 @@ export function EntitiesTable({
                           onUpdateHiddenColumns={(options) => { console.log('update', options); }}
                         />
                       )}
-                      {(isMinSize(size, 'large') || isPrintView) && col.type !== 'main' && col.type !== 'auxColumns' && (
+                      {col.type !== 'main' && col.type !== 'auxColumns' && (
                         <CellHeaderPlain column={col} />
                       )}
                     </TableCellHeaderInner>
@@ -274,7 +274,7 @@ export function EntitiesTable({
         <TableBody>
           {entities.length > 0 && entities.map((entity, key) => (
             <TableRow key={key}>
-              {columnsAux.map((col, i) => (isMinSize(size, 'large') || isPrintView || col.type === 'main') && (
+              {columnsAux.map((col, i) => (
                 <TableCellBody
                   key={i}
                   scope="row"
