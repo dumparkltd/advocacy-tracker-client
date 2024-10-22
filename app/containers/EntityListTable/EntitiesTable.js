@@ -258,6 +258,7 @@ export function EntitiesTable({
                         <CellHeaderAuxColumns
                           column={col}
                           columnOptions={headerColumns}
+                          onUpdateHiddenColumns={(options) => { console.log('update', options); }}
                         />
                       )}
                       {(isMinSize(size, 'large') || isPrintView) && col.type !== 'main' && col.type !== 'auxColumns' && (
