@@ -11,6 +11,10 @@ import Icon from 'components/Icon';
 
 import { isMinSize } from 'utils/responsive';
 
+const Styled = styled((p) => <Box {...p} />)`
+  position: relative;
+`;
+
 const AuxButton = styled(ButtonFlatIconOnly)`
   color: inherit;
   padding: 0;
@@ -34,15 +38,11 @@ const Dot = styled.div`
   background-color: white;
   margin: 0 auto;
 `;
-const DropContent = styled((p) => (
-  <Box
-    flex={{ shrink: 0 }}
-    responsive={false}
-    {...p}
-  />
-))`
+const DropContent = styled.div`
   max-width: none;
+  height: 400px;
   @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+    height: 400px;
     width: 300px;
   }
 `;
@@ -64,8 +64,19 @@ const CloseButton = styled((p) => <Button plain {...p} />)`
     opacity: 0.9;
   };
 `;
-const ColumnOptionWrapper = styled((p) => <Box {...p} />)`
+const ColumnOptionWrapper = styled((p) => (
+  <Box
+    pad={{ vertical: 'xsmall' }}
+    direction="row"
+    gap="small"
+    flex={{ shrink: 0 }}
+    {...p}
+  />
+))`
   border-bottom: 1px solid ${palette('light', 4)};
+  &:first-child {
+    border-top: 1px solid ${palette('light', 4)};
+  }
 `;
 const ColumnTitle = styled((p) => <Text {...p} />)`
   color: ${({ isDisabled }) => isDisabled ? palette('dark', 3) : 'black'}
@@ -86,6 +97,37 @@ const ConfirmButton = styled((p) => <ActionButton {...p} />)`
 const CancelButton = styled((p) => <ActionButton {...p} />)`
   color: ${palette('light', 4)};
 `;
+
+const DropAnchor = styled.div`
+  position: absolute;
+  top: -${({ theme }) => theme.global.edgeSize.ms};
+  right: -${({ theme }) => theme.global.edgeSize.ms};
+`;
+
+const HeaderInDrop = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 50px;
+  background: white;
+`;
+const BodyInDrop = styled.div`
+  position: absolute;
+  top: 50px;
+  right: 0;
+  left: 0;
+  bottom: 50px;
+  overflow-y: auto;
+`;
+const FooterInDrop = styled.div`
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  left: 0;
+  height: 50px;
+  background: white;
+`;
 export function CellHeaderAuxColumns({ column, columnOptions, onUpdateHiddenColumns }) {
   const [updatedColumnOptions, setUpdatedColumnOptions] = useState([...columnOptions]);
   const [open, setOpen] = useState(false);
@@ -100,12 +142,13 @@ export function CellHeaderAuxColumns({ column, columnOptions, onUpdateHiddenColu
   }, [open]);
 
   // console.log('CellHeaderAuxColumns', column, columnOptions);
-  const areAllColumnsSelected = updatedColumnOptions.filter((option) => option.hidden).length === 0;
+  // const areAllColumnsSelected = updatedColumnOptions.filter((option) => option.hidden).length === 0;
   const { align = 'start' } = column;
   return (
-    <Box direction="row" align="center" justify={align}>
+    <Styled direction="row" align="center" justify={align}>
+      <DropAnchor ref={ref} />
       <BoxPrint printHide>
-        <AuxButton onClick={() => setOpen(!open)} ref={ref}>
+        <AuxButton onClick={() => setOpen(!open)}>
           <Box gap="2px" justify="center" fill="horizontal">
             <Dot />
             <Dot />
@@ -122,72 +165,72 @@ export function CellHeaderAuxColumns({ column, columnOptions, onUpdateHiddenColu
             style={{
               animation: 'none',
               opacity: '1',
-              marginTop: '-2',
-              marginRight: '-2',
             }}
             animate={false}
-            overflow={{
-              vertical: 'auto',
-              horizontal: 'hidden',
-            }}
+            overflow="hidden"
           >
-            <DropContent direction="column" pad="medium">
-              <Box direction="row" justify="between" align="center">
-                <DropLayerTitle>Configure columns</DropLayerTitle>
-                <CloseButton onClick={() => setOpen(false)}>
-                  <Icon name="close" size="25px" />
-                </CloseButton>
-              </Box>
-              <Box direction="column" gap="none">
-                <ColumnOptionWrapper pad={{ vertical: 'xsmall' }} direction="row" gap="small">
-                  <Checkbox
-                    type="checkbox"
-                    checked={areAllColumnsSelected}
-                    disabled={areAllColumnsSelected}
-                  // onChange={(evt) => {
-                  // select all
-                  // }}
-                  />
-                  <ColumnTitle isDisabled={areAllColumnsSelected}>
-                    Select All
-                  </ColumnTitle>
-                </ColumnOptionWrapper>
-                {updatedColumnOptions && updatedColumnOptions.map((option, i) => (
-                  option && (
-                    <ColumnOptionWrapper pad={{ vertical: 'xsmall' }} direction="row" gap="small" key={i}>
-                      <Checkbox
-                        type="checkbox"
-                        checked={!(option.hidden)}
-                        onChange={(evt) => {
-                          evt.stopPropagation();
-                          const updatedOptions = [...updatedColumnOptions];
-                          updatedOptions[i] = { ...updatedOptions[i], hidden: !evt.target.checked };
-                          setUpdatedColumnOptions([...updatedOptions]);
-                        }}
-                      />
-                      <ColumnTitle>
-                        {option.title}
-                      </ColumnTitle>
-                    </ColumnOptionWrapper>
-                  )
-                ))}
-              </Box>
-              <Box direction="row" justify="end" gap="small" margin={{ top: 'small' }}>
-                <CancelButton onClick={() => setOpen(false)}>Cancel</CancelButton>
-                <ConfirmButton
-                  onClick={() => {
-                    onUpdateHiddenColumns(updatedColumnOptions);
-                    setOpen(false);
-                  }}
+            <DropContent>
+              <HeaderInDrop>
+                <Box
+                  pad={{ horizontal: 'ms', top: 'ms' }}
+                  direction="row"
+                  justify="between"
+                  align="center"
+                  flex={{ shrink: 0 }}
                 >
-                  Confirm
-                </ConfirmButton>
-              </Box>
+                  <DropLayerTitle>Configure columns</DropLayerTitle>
+                  <CloseButton onClick={() => setOpen(false)}>
+                    <Icon name="close" size="25px" />
+                  </CloseButton>
+                </Box>
+              </HeaderInDrop>
+              <BodyInDrop>
+                <Box pad="ms" gap="none" flex={{ shrink: 0 }}>
+                  {updatedColumnOptions && updatedColumnOptions.map(
+                    (option, i) => option && (
+                      <ColumnOptionWrapper key={i}>
+                        <Checkbox
+                          type="checkbox"
+                          checked={!(option.hidden)}
+                          onChange={(evt) => {
+                            evt.stopPropagation();
+                            const updatedOptions = [...updatedColumnOptions];
+                            updatedOptions[i] = { ...updatedOptions[i], hidden: !evt.target.checked };
+                            setUpdatedColumnOptions([...updatedOptions]);
+                          }}
+                        />
+                        <ColumnTitle>
+                          {option.title}
+                        </ColumnTitle>
+                      </ColumnOptionWrapper>
+                    )
+                  )}
+                </Box>
+              </BodyInDrop>
+              <FooterInDrop>
+                <Box
+                  pad={{ horizontal: 'ms', bottom: 'ms', top: 'small' }}
+                  direction="row"
+                  justify="end"
+                  gap="small"
+                  flex={{ shrink: 0 }}
+                >
+                  <CancelButton onClick={() => setOpen(false)}>Cancel</CancelButton>
+                  <ConfirmButton
+                    onClick={() => {
+                      onUpdateHiddenColumns(updatedColumnOptions);
+                      setOpen(false);
+                    }}
+                  >
+                    Confirm
+                  </ConfirmButton>
+                </Box>
+              </FooterInDrop>
             </DropContent>
           </Drop>
         )}
       </BoxPrint>
-    </Box>
+    </Styled>
   );
 }
 
