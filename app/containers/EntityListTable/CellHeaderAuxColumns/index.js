@@ -37,7 +37,6 @@ const Dot = styled.div`
   width: 3px;
   height: 3px;
   background-color: white;
-  margin: 0 auto;
 `;
 const DropContent = styled.div`
   max-width: none;
@@ -65,7 +64,12 @@ const BodyInDrop = styled.div`
   overflow-y: auto;
 `;
 export function CellHeaderAuxColumns({
-  column, columnOptions, onUpdate, open, setOpen, dropAnchorReference,
+  column,
+  columnOptions,
+  onUpdate,
+  open,
+  setOpen,
+  dropAnchorReference,
 }) {
   const size = React.useContext(ResponsiveContext);
   const { align = 'start' } = column;
@@ -73,7 +77,7 @@ export function CellHeaderAuxColumns({
     <Styled direction="row" align="center" justify={align}>
       <BoxPrint printHide>
         <AuxButton onClick={() => setOpen(true)}>
-          <Box gap="2px" justify="center" fill="horizontal">
+          <Box gap="2px" direction="row" justify="center" align="center" fill>
             <Dot />
             <Dot />
             <Dot />

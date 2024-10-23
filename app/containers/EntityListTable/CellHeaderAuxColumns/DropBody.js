@@ -114,7 +114,7 @@ export function DropBody({ options, onUpdate }) {
                     }}
                   />
                   <OptionLabel htmlFor={`list-column-option-${i}`}>
-                    {option.title || option.label}
+                    {option.mainTitle || option.title || option.label}
                   </OptionLabel>
                 </Box>
                 {option.onSort && (
