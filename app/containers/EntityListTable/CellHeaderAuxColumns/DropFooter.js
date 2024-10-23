@@ -13,15 +13,11 @@ const ActionButton = styled((p) => <Button plain {...p} />)`
   font-size: 18px;
   text-transform: uppercase;
 `;
-const ConfirmButton = styled((p) => <ActionButton {...p} />)`
-  background: ${palette('primary', 1)};
-  color: white;
-`;
 const CancelButton = styled((p) => <ActionButton {...p} />)`
   color: ${palette('light', 4)};
 `;
 
-export function DropFooter({ onCancel, onConfirm }) {
+export function DropFooter({ onCancel }) {
   return (
     <Box
       pad={{ horizontal: 'ms', bottom: 'ms', top: 'small' }}
@@ -33,16 +29,12 @@ export function DropFooter({ onCancel, onConfirm }) {
       <CancelButton onClick={() => onCancel()}>
         Cancel
       </CancelButton>
-      <ConfirmButton disabled={!onConfirm} onClick={() => onConfirm && onConfirm()}>
-        Confirm
-      </ConfirmButton>
     </Box>
   );
 }
 
 DropFooter.propTypes = {
   onCancel: PropTypes.func,
-  onConfirm: PropTypes.func,
 };
 
 export default DropFooter;

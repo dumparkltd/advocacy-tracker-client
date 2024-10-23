@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Box, ResponsiveContext } from 'grommet';
 import styled, { css, withTheme } from 'styled-components';
@@ -130,6 +130,13 @@ const TableCellBodyInner = styled((p) => <Box {...p} />)`
   padding: 6px 0;
 `;
 
+const ColumnOptionsDropAnchor = styled.div`
+  position: absolute;
+  top: -${({ theme }) => theme.global.edgeSize.ms};
+  right: -${({ theme }) => theme.global.edgeSize.ms};
+  margin-top: ${({ theme }) => theme.global.edgeSize.xsmall};
+`;
+
 const MAX_VALUE_COUNTRIES = 100;
 
 const getColorForColumn = (col, theme) => {
@@ -167,6 +174,7 @@ export function EntitiesTable({
   sortedEntities,
   searchedEntities,
 }) {
+  const [columnOptionsOpen, setColumnOptionsOpen] = useState(false);
   // console.log('sortedEntities', sortedEntities)
   // console.log('searchedEntities', searchedEntities && searchedEntities.toJS())
   useEffect(() => {
@@ -229,9 +237,14 @@ export function EntitiesTable({
     ]
     : visibleColumns;
   const headerColumnsByType = headerColumnsAux && groupBy(headerColumnsAux, 'type');
-
+  const ref = useRef(null);
   return (
-    <Box fill="horizontal">
+    <Box
+      fill="horizontal"
+      responsive={false}
+      style={{ position: 'relative' }}
+    >
+      <ColumnOptionsDropAnchor ref={ref} />
       <Table isPrint={isPrintView}>
         {headerColumnsAux && (
           <TableHeader>
@@ -262,6 +275,7 @@ export function EntitiesTable({
                       )}
                       {col.type === 'auxColumns' && (
                         <CellHeaderAuxColumns
+                          dropAnchorReference={ref}
                           column={col}
                           columnOptions={availableHeaderColumns
                               && availableHeaderColumns.filter((column) => column.type !== 'main')
@@ -270,6 +284,8 @@ export function EntitiesTable({
                             addToHidden: options.filter((o) => o.changed && !o.hidden).map((o) => o.id), // hide previously unhidden
                             removeFromHidden: options.filter((o) => o.changed && o.hidden).map((o) => o.id), // show previously hidden
                           })}
+                          open={columnOptionsOpen}
+                          setOpen={setColumnOptionsOpen}
                         />
                       )}
                       {col.type !== 'main' && col.type !== 'auxColumns' && (

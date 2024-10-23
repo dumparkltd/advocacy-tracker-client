@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
@@ -11,7 +11,6 @@ import { isMinSize } from 'utils/responsive';
 import asArray from 'utils/as-array';
 import DropHeader from './DropHeader';
 import DropBody from './DropBody';
-import DropFooter from './DropFooter';
 
 const Styled = styled((p) => <Box {...p} />)`
   position: relative;
@@ -42,17 +41,11 @@ const Dot = styled.div`
 `;
 const DropContent = styled.div`
   max-width: none;
-  height: 400px;
+  height: 300px;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    height: 400px;
+    height: 350px;
     width: 300px;
   }
-`;
-
-const DropAnchor = styled.div`
-  position: absolute;
-  top: -${({ theme }) => theme.global.edgeSize.ms};
-  right: -${({ theme }) => theme.global.edgeSize.ms};
 `;
 
 const HeaderInDrop = styled.div`
@@ -68,53 +61,27 @@ const BodyInDrop = styled.div`
   top: 50px;
   right: 0;
   left: 0;
-  bottom: 50px;
+  bottom: 0;
   overflow-y: auto;
 `;
-const FooterInDrop = styled.div`
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  height: 50px;
-  background: white;
-`;
-export function CellHeaderAuxColumns({ column, columnOptions, onUpdate }) {
-  const [changedToHidden, setChangedToHidden] = useState([]);
-  const [changedToVisible, setChangedToVisible] = useState([]);
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
+export function CellHeaderAuxColumns({
+  column, columnOptions, onUpdate, open, setOpen, dropAnchorReference,
+}) {
   const size = React.useContext(ResponsiveContext);
-  // console.log(columnOptions && columnOptions.toJS())
-  // console.log('CellHeaderAuxColumns', column, columnOptions);
-  // const areAllColumnsSelected = updatedColumnOptions.filter((option) => option.hidden).length === 0;
-  const changedColumns = [...changedToVisible, ...changedToHidden];
-  const updatedColumnOptions = columnOptions.map((col) => {
-    const checkedInitially = !col.hidden;
-    const changed = changedColumns.indexOf(col.id) > -1;
-    const checked = ((checkedInitially && !changed) || (!checkedInitially && changed));
-    return ({
-      ...col,
-      changed,
-      checked,
-    });
-  });
   const { align = 'start' } = column;
-  const hasChanges = changedColumns.length > 0;
   return (
     <Styled direction="row" align="center" justify={align}>
-      <DropAnchor ref={ref} />
       <BoxPrint printHide>
-        <AuxButton onClick={() => setOpen(!open)}>
+        <AuxButton onClick={() => setOpen(true)}>
           <Box gap="2px" justify="center" fill="horizontal">
             <Dot />
             <Dot />
             <Dot />
           </Box>
         </AuxButton>
-        {open && isMinSize(size, 'medium') && (
+        {dropAnchorReference && dropAnchorReference.current && open && isMinSize(size, 'medium') && (
           <Drop
-            target={ref.current}
+            target={dropAnchorReference.current}
             responsive={false}
             align={{ top: 'top', right: 'right' }}
             onClickOutside={() => setOpen(false)}
@@ -130,59 +97,34 @@ export function CellHeaderAuxColumns({ column, columnOptions, onUpdate }) {
           >
             <DropContent>
               <HeaderInDrop>
-                <DropHeader
-                  onClose={() => {
-                    setOpen(false);
-                    setChangedToVisible([]);
-                    setChangedToHidden([]);
-                  }}
-                />
+                <DropHeader onClose={() => setOpen(false)} />
               </HeaderInDrop>
               <BodyInDrop>
                 <DropBody
-                  options={updatedColumnOptions}
+                  options={columnOptions}
                   onUpdate={(columnIds, checked) => {
-                    let hidden = [...changedToHidden];
-                    let visible = [...changedToVisible];
+                    let changedToHidden = [];
+                    let changedToVisible = [];
                     asArray(columnIds).forEach((columnId) => {
                       if (checked) {
-                        // remove from unchecked list if checking again enabled (back to original)
-                        if (hidden.indexOf(columnId) > -1) {
-                          hidden = hidden.filter((id) => id !== columnId);
-                        // add to checked list if not previously unchecked
-                        } else {
-                          visible = [...visible, columnId];
-                        }
+                        changedToVisible = [...changedToVisible, columnId];
                       }
                       if (!checked) {
-                        if (visible.indexOf(columnId) > -1) {
-                          visible = visible.filter((id) => id !== columnId);
-                        } else {
-                          hidden = [...hidden, columnId];
-                        }
+                        changedToHidden = [...changedToHidden, columnId];
                       }
                     });
-                    setChangedToHidden(hidden);
-                    setChangedToVisible(visible);
+                    const changedColumns = [...changedToVisible, ...changedToHidden];
+                    const updatedColumnOptions = columnOptions.map((col) => {
+                      const colChanged = changedColumns.indexOf(col.id) > -1;
+                      return ({
+                        ...col,
+                        changed: colChanged,
+                      });
+                    });
+                    onUpdate(updatedColumnOptions);
                   }}
                 />
               </BodyInDrop>
-              <FooterInDrop>
-                <DropFooter
-                  onCancel={() => {
-                    setOpen(false);
-                    setChangedToVisible([]);
-                    setChangedToHidden([]);
-                  }}
-                  onConfirm={hasChanges
-                    ? () => {
-                      setOpen(false);
-                      onUpdate(updatedColumnOptions);
-                    }
-                    : null
-                  }
-                />
-              </FooterInDrop>
             </DropContent>
           </Drop>
         )}
@@ -227,6 +169,9 @@ CellHeaderAuxColumns.propTypes = {
   column: PropTypes.object,
   columnOptions: PropTypes.array,
   onUpdate: PropTypes.func,
+  setOpen: PropTypes.func,
+  open: PropTypes.bool,
+  dropAnchorReference: PropTypes.object,
 };
 
 export default CellHeaderAuxColumns;
