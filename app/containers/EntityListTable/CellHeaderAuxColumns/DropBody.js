@@ -23,7 +23,7 @@ const ColumnOptionWrapper = styled((p) => (
     pad={{ vertical: 'xsmall' }}
     direction="row"
     justify="between"
-    align="middle"
+    align="center"
     flex={{ shrink: 0 }}
     {...p}
   />

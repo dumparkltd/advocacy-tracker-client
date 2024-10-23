@@ -18,9 +18,12 @@ import {
   selectCategories,
   selectIncludeInofficialStatements,
   selectAssociationTypeQuery,
+  selectLocationQuery,
 } from 'containers/App/selectors';
+import { getValueFromPositions } from 'containers/EntityListTable/utils';
 
 import qe from 'utils/quasi-equals';
+import asList from 'utils/as-list';
 import {
   getEntityCategories,
   filterEntitiesByConnection,
@@ -94,25 +97,58 @@ const selectCountriesWithAssociations = createSelector(
   }
 );
 
-const selectCountriesByAssociation = createSelector(
+const selectCountriesByRegion = createSelector(
   selectCountriesWithAssociations,
   (state) => selectAssociationTypeQuery(state, { typeId: ACTORTYPES.REG }),
-  (state) => selectAssociationTypeQuery(state, { typeId: ACTORTYPES.GROUP }),
-  (countries, queryRegion, queryGroup) => {
-    let result = countries;
+  (countries, queryRegion) => {
     if (queryRegion) {
-      result = filterEntitiesByConnection(result, queryRegion, 'associations');
+      return filterEntitiesByConnection(countries, queryRegion, 'associations');
     }
+    return countries;
+  }
+);
+const selectCountriesByGroup = createSelector(
+  selectCountriesByRegion,
+  (state) => selectAssociationTypeQuery(state, { typeId: ACTORTYPES.GROUP }),
+  (countries, queryGroup) => {
     if (queryGroup) {
-      result = filterEntitiesByConnection(result, queryGroup, 'associations');
+      return filterEntitiesByConnection(countries, queryGroup, 'associations');
     }
-    return result;
+    return countries;
+  }
+);
+
+const selectCountriesByTopicPosition = createSelector(
+  selectCountriesByGroup,
+  selectLocationQuery,
+  (countries, locationQuery) => {
+    if (locationQuery.get('indicators')) {
+      const locationQueryValue = locationQuery.get('indicators');
+      // console.log('locationQueryValue', locationQueryValue)
+      return countries.filter((country) => {
+        const countryPositions = country.get('indicatorPositions');
+        // countries pass when they pass all queried indicators
+        const pass = countryPositions && asList(locationQueryValue).reduce(
+          (memo, queryValue) => {
+            if (!memo) return memo;
+            const indicatorId = queryValue.split('>')[0];
+            const countrySupportLevel = getValueFromPositions(countryPositions.get(indicatorId));
+            const levels = queryValue.indexOf('=') > -1
+              && queryValue.split('=')[1].split('|');
+            return levels.indexOf(`${countrySupportLevel}`) > -1;
+          },
+          true,
+        );
+        return pass;
+      });
+    }
+    return countries;
   }
 );
 
 export const selectCountries = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectCountriesByAssociation,
+  selectCountriesByTopicPosition,
   selectConnections,
   selectActorActionsGroupedByActor,
   selectMembershipsGroupedByParent,

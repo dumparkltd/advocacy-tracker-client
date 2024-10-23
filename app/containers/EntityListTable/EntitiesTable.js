@@ -10,6 +10,7 @@ import { scaleColorCount } from 'containers/MapContainer/utils';
 import { usePrint } from 'containers/App/PrintContext';
 
 import { MAP_OPTIONS } from 'themes/config';
+import { checkColumnFilterOptions } from './utils';
 
 import CellBodyMain from './CellBodyMain';
 import CellBodyPlain from './CellBodyPlain';
@@ -25,6 +26,7 @@ import CellBodyBarChart from './CellBodyBarChart';
 import CellBodyStackedBarChart from './CellBodyStackedBarChart';
 import CellHeaderMain from './CellHeaderMain';
 import CellHeaderPlain from './CellHeaderPlain';
+import CellHeaderSmart from './CellHeaderSmart';
 import CellHeaderAuxColumns from './CellHeaderAuxColumns';
 
 const Table = styled.table`
@@ -84,6 +86,7 @@ const TableCellHeader = styled.th`
   text-align: inherit;
   height: 100%;
   text-align: start;
+  vertical-align: bottom;
   border-bottom: solid 1px;
   border-bottom-color: ${({ utility, col }) => {
     if (utility && col.type === 'options') return 'rgba(0,0,0,0.05)';
@@ -100,10 +103,9 @@ const TableCellHeader = styled.th`
   }}px;
   padding-top: 6px;
   padding-bottom: 6px;
-  width: ${getColWidth};
+  width: ${({ col }) => col && col.colWidth}};
 `;
-const TableCellHeaderInner = styled((p) => <Box {...p} />)`
-`;
+
 const TableCellBody = styled.td`
   margin: 0;
   padding: 0;
@@ -124,7 +126,7 @@ const TableCellBody = styled.td`
   padding-bottom: 6px;
   word-wrap:break-word;
   overflow: hidden;
-  width: ${getColWidth};
+  width: ${({ col }) => col && col.colWidth}};
 `;
 const TableCellBodyInner = styled((p) => <Box {...p} />)`
   padding: 6px 0;
@@ -217,7 +219,7 @@ export function EntitiesTable({
   const size = React.useContext(ResponsiveContext);
   const isPrintView = usePrint();
   const hasAuxColumns = !inSingleView && isMinSize(size, 'medium');
-  const headerColumnsAux = hasAuxColumns
+  let headerColumnsAux = hasAuxColumns
     ? [
       ...visibleHeaderColumns,
       {
@@ -227,7 +229,7 @@ export function EntitiesTable({
       },
     ]
     : visibleHeaderColumns;
-  const columnsAux = hasAuxColumns
+  let columnsAux = hasAuxColumns
     ? [
       ...visibleColumns,
       {
@@ -238,6 +240,24 @@ export function EntitiesTable({
     : visibleColumns;
   const headerColumnsByType = headerColumnsAux && groupBy(headerColumnsAux, 'type');
   const ref = useRef(null);
+  console.log('headerColumnsAux', headerColumnsAux)
+
+  const topicPositionLength = headerColumnsByType
+    && headerColumnsByType.topicPosition
+    && headerColumnsByType.topicPosition.length;
+
+  headerColumnsAux = headerColumnsAux.map((col) => ({
+    ...col,
+    colWidth: getColWidth(
+      { col, count: headerColumnsAux.length, topicPositionLength }
+    ),
+  }));
+  columnsAux = columnsAux.map((col) => ({
+    ...col,
+    colWidth: getColWidth(
+      { col, count: headerColumnsAux.length, topicPositionLength }
+    ),
+  }));
   return (
     <Box
       fill="horizontal"
@@ -250,50 +270,54 @@ export function EntitiesTable({
           <TableHeader>
             <TableRow>
               {headerColumnsAux.map(
-                (col, i) => (
-                  <TableCellHeader
-                    key={i}
-                    scope="col"
-                    col={col}
-                    count={headerColumnsAux.length}
-                    topicPositionLength={
-                      headerColumnsByType
-                      && headerColumnsByType.topicPosition
-                      && headerColumnsByType.topicPosition.length
-                    }
-                    first={i === 0}
-                    last={i === headerColumnsAux.length - 1}
-                    plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
-                  >
-                    <TableCellHeaderInner fill={false} flex={{ grow: 0 }} justify="start">
-                      {col.type === 'main' && (
-                        <CellHeaderMain
-                          column={col}
-                          canEdit={canEdit && !isPrintView}
-                          isPrintView={isPrintView}
-                        />
-                      )}
-                      {col.type === 'auxColumns' && (
-                        <CellHeaderAuxColumns
-                          dropAnchorReference={ref}
-                          column={col}
-                          columnOptions={availableHeaderColumns
-                              && availableHeaderColumns.filter((column) => column.type !== 'main')
-                          }
-                          onUpdate={(options) => onUpdateHiddenColumns({
-                            addToHidden: options.filter((o) => o.changed && !o.hidden).map((o) => o.id), // hide previously unhidden
-                            removeFromHidden: options.filter((o) => o.changed && o.hidden).map((o) => o.id), // show previously hidden
-                          })}
-                          open={columnOptionsOpen}
-                          setOpen={setColumnOptionsOpen}
-                        />
-                      )}
-                      {col.type !== 'main' && col.type !== 'auxColumns' && (
-                        <CellHeaderPlain column={col} />
-                      )}
-                    </TableCellHeaderInner>
-                  </TableCellHeader>
-                )
+                (col, i) => {
+                  const checkedFilterOptions = col.filterOptions && checkColumnFilterOptions(
+                    col,
+                    searchedEntities,
+                  );
+                  console.log('checkedFilterOptions', col.id, checkedFilterOptions)
+                  return (
+                    <TableCellHeader
+                      key={i}
+                      scope="col"
+                      col={col}
+                      first={i === 0}
+                      last={i === headerColumnsAux.length - 1}
+                      plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
+                    >
+                      <Box fill={false} flex={{ grow: 0 }} justify="start">
+                        {col.type === 'main' && (
+                          <CellHeaderMain
+                            column={col}
+                            canEdit={canEdit && !isPrintView}
+                            isPrintView={isPrintView}
+                          />
+                        )}
+                        {col.type === 'auxColumns' && (
+                          <CellHeaderAuxColumns
+                            dropAnchorReference={ref}
+                            column={col}
+                            columnOptions={availableHeaderColumns
+                                && availableHeaderColumns.filter((column) => column.type !== 'main')
+                            }
+                            onUpdate={(options) => onUpdateHiddenColumns({
+                              addToHidden: options.filter((o) => o.changed && !o.hidden).map((o) => o.id), // hide previously unhidden
+                              removeFromHidden: options.filter((o) => o.changed && o.hidden).map((o) => o.id), // show previously hidden
+                            })}
+                            open={columnOptionsOpen}
+                            setOpen={setColumnOptionsOpen}
+                          />
+                        )}
+                        {col.type === 'topicPosition' && (
+                          <CellHeaderSmart column={col} />
+                        )}
+                        {col.type !== 'main' && col.type !== 'auxColumns' && col.type !== 'topicPosition' && (
+                          <CellHeaderPlain column={col} />
+                        )}
+                      </Box>
+                    </TableCellHeader>
+                  );
+                }
               )}
             </TableRow>
           </TableHeader>
@@ -306,15 +330,9 @@ export function EntitiesTable({
                   key={i}
                   scope="row"
                   col={col}
-                  count={headerColumnsAux.length}
                   first={i === 0}
                   last={i === headerColumnsAux.length - 1}
                   plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
-                  topicPositionLength={
-                    headerColumnsByType
-                    && headerColumnsByType.topicPosition
-                    && headerColumnsByType.topicPosition.length
-                  }
                 >
                   {col.id && entity[col.id] && (
                     <TableCellBodyInner>

@@ -7,12 +7,7 @@ import { Map } from 'immutable';
 import { palette } from 'styled-theme';
 import styled from 'styled-components';
 
-import {
-  Box,
-  Text,
-  Heading,
-  // ResponsiveContext,
-} from 'grommet';
+import { Box, Text, Heading } from 'grommet';
 
 import {
   ACTORTYPES,
@@ -23,6 +18,7 @@ import {
 
 import qe from 'utils/quasi-equals';
 import asArray from 'utils/as-array';
+import asList from 'utils/as-list';
 
 import {
   getIndicatorMainTitle,
@@ -46,6 +42,7 @@ import {
   selectIncludeInofficialStatements,
   selectAssociationTypeQuery,
   selectActorsByType,
+  selectLocationQuery,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -95,7 +92,23 @@ const prepareDropdownOptions = (entities, query) => entities
     [],
   )
   : [];
-
+const getActiveSupportLevels = (locationQuery, indicatorId) => {
+  const locationQueryValue = locationQuery.get('indicators');
+  if (!locationQueryValue) return null;
+  const supportLevels = asList(locationQueryValue).reduce(
+    (memo, queryValue) => {
+      const value = queryValue.split('>')[0];
+      if (qe(value, indicatorId)) {
+        const levels = queryValue.indexOf('=') > -1
+          && queryValue.split('=')[1].split('|');
+        return [...memo, ...levels];
+      }
+      return memo;
+    },
+    [],
+  );
+  return supportLevels;
+};
 const ID = 'positions-list';
 export function PositionsList({
   dataReady,
@@ -113,6 +126,7 @@ export function PositionsList({
   associationGroupQuery,
   actorsByType,
   onUpdateAssociationQuery,
+  locationQuery,
 }) {
   const [search, setSearch] = useState('');
   useEffect(() => {
@@ -149,21 +163,33 @@ export function PositionsList({
       }]),
     },
   ];
+
   const topicColumns = dataReady && indicators && indicators.reduce(
     (memo, indicator) => {
       const no = getIndicatorNumber(indicator.getIn(['attributes', 'title']));
       const abbrev = getIndicatorAbbreviation(indicator.getIn(['attributes', 'title']));
       const title = no ? `${no}.${abbrev}` : abbrev;
+      const id = `topic_${indicator.get('id')}`;
+      const activeSupportLevels = getActiveSupportLevels(locationQuery, indicator.get('id'));
       return [
         ...memo,
         {
-          id: `topic_${indicator.get('id')}`,
+          id,
           type: 'topicPosition',
           indicatorId: indicator.get('id'),
           indicatorCount: indicators.size,
           positions: 'indicatorPositions',
           title,
           mainTitle: getIndicatorMainTitle(indicator.getIn(['attributes', 'title'])),
+          queryArg: 'indicators',
+          queryValue: indicator.get('id'),
+          queryArgRelated: 'supportlevel_id',
+          filterOptions: supportLevels.map((level) => ({
+            ...level,
+            active: (activeSupportLevels && activeSupportLevels.length > 0)
+              ? !!activeSupportLevels.find((val) => qe(val, level.value))
+              : true,
+          })),
         },
       ];
     },
@@ -426,6 +452,7 @@ PositionsList.propTypes = {
   associationRegionQuery: PropTypes.string,
   associationGroupQuery: PropTypes.string,
   actorsByType: PropTypes.object, // immutable Map
+  locationQuery: PropTypes.object, // immutable Map
   intl: intlShape.isRequired,
 };
 
@@ -439,6 +466,7 @@ const mapStateToProps = (state) => ({
   associationRegionQuery: selectAssociationTypeQuery(state, { typeId: ACTORTYPES.REG }),
   associationGroupQuery: selectAssociationTypeQuery(state, { typeId: ACTORTYPES.GROUP }),
   actorsByType: selectActorsByType(state),
+  locationQuery: selectLocationQuery(state),
 });
 
 export function mapDispatchToProps(dispatch) {

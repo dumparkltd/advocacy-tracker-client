@@ -53,7 +53,7 @@
   "app.containers.EntityListTable.entityListHeader.allSelected": "All {total} {type} selected. ",
   "app.containers.EntityListTable.entityListHeader.allSelectedOnPage": "All {total} items on page selected. ",
   "app.containers.EntityListTable.entityListHeader.selected": "{total} {type} selected. ",
-  "app.containers.EntityListTable.entityListHeader.noneSelected": "{type} (showing {pageTotal} of {entitiesTotal}{filtered})",
+  "app.containers.EntityListTable.entityListHeader.noneSelected": "{type} ({pageTotal} of {entitiesTotal}{filtered})",
   "app.containers.EntityListTable.entityListHeader.notPaged": "{entitiesTotal} {type}{filtered}",
   "app.components.EntityListGroupBy.groupBy": "Grouped by",
   "app.components.EntityListGroupBy.subgroupBy": "Subgrouped by",

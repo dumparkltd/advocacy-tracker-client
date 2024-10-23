@@ -428,7 +428,6 @@ EntityListTable.propTypes = {
   taxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   entityIdsSelected: PropTypes.instanceOf(List),
-  // locationQuery: PropTypes.instanceOf(Map),
   errors: PropTypes.instanceOf(Map),
   // showValueForAction: PropTypes.instanceOf(Map),
   entityTitle: PropTypes.object,

@@ -257,6 +257,13 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
+      case 'topicPosition':
+        return ({
+          ...col,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'desc',
+          onSort,
+        });
       default:
         return col;
     }
@@ -314,9 +321,13 @@ const getSingleRelatedValueFromAttributes = (relatedEntity) => relatedEntity
   ? relatedEntity.get('name') || relatedEntity.get('title')
   : null;
 
-const getColorFromPositions = (positions) => {
+// TODO move to utils/entities
+export const getValueFromPositions = (positions) => {
   const latest = positions && positions.first();
-  const value = latest && latest.get('supportlevel_id');
+  return latest && latest.get('supportlevel_id') && parseInt(latest.get('supportlevel_id'), 10);
+};
+const getColorFromPositions = (positions) => {
+  const value = getValueFromPositions(positions);
   const level = value && ACTION_INDICATOR_SUPPORTLEVELS[parseInt(value, 10)];
   if (level) {
     return level.color;
@@ -772,6 +783,7 @@ export const prepareEntityRows = ({
               [col.id]: {
                 ...col,
                 color: getColorFromPositions(temp),
+                sortValue: getValueFromPositions(temp),
               },
             };
           default:
@@ -787,6 +799,36 @@ export const prepareEntityRows = ({
   },
   [],
 );
+
+export const checkColumnFilterOptions = (column, entities) => {
+  const {
+    filterOptions,
+    type,
+    positions,
+    indicatorId,
+  } = column;
+  return type === 'topicPosition' && filterOptions && filterOptions.reduce(
+    (memo, option) => {
+      const existEntities = !!entities.find(
+        (entity) => {
+          const entityPositions = entity.getIn([positions, indicatorId]);
+          if (qe(option.value, 99) && !getValueFromPositions(entityPositions)) {
+            return true;
+          }
+          return qe(option.value, getValueFromPositions(entityPositions));
+        }
+      );
+      return [
+        ...memo,
+        {
+          ...option,
+          exists: existEntities,
+        },
+      ];
+    },
+    [],
+  );
+};
 
 export const getListHeaderLabel = ({
   intl,
