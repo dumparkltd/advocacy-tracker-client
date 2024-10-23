@@ -33,7 +33,7 @@ export function DropFooter({ onCancel, onConfirm }) {
       <CancelButton onClick={() => onCancel()}>
         Cancel
       </CancelButton>
-      <ConfirmButton onClick={() => onConfirm()}>
+      <ConfirmButton disabled={!onConfirm} onClick={() => onConfirm && onConfirm()}>
         Confirm
       </ConfirmButton>
     </Box>

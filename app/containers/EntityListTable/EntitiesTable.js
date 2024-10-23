@@ -152,9 +152,12 @@ const ID = 'entities-table';
 export function EntitiesTable({
   entities,
   canEdit,
-  columns,
-  headerColumns,
+  visibleHeaderColumns,
+  availableHeaderColumns,
+  visibleColumns,
+  availableColumns,
   onEntityClick,
+  onUpdateHiddenColumns,
   columnMaxValues,
   inSingleView,
   theme,
@@ -164,6 +167,8 @@ export function EntitiesTable({
   sortedEntities,
   searchedEntities,
 }) {
+  // console.log('sortedEntities', sortedEntities)
+  // console.log('searchedEntities', searchedEntities && searchedEntities.toJS())
   useEffect(() => {
     if (!!reducePreviewItem && sortedEntities) {
       if (previewItemId) {
@@ -187,7 +192,7 @@ export function EntitiesTable({
                 prevPreviewItem: prevIndex !== entityIndex && `${ID}|${path}|${entityIds[prevIndex]}`,
               },
               item: mainItem,
-              columns: columns,
+              columns: availableColumns,
             };
             onSetPreviewContent(content);
           } else if (itemId && path) {
@@ -206,26 +211,25 @@ export function EntitiesTable({
   const hasAuxColumns = !inSingleView && isMinSize(size, 'medium');
   const headerColumnsAux = hasAuxColumns
     ? [
-      ...headerColumns,
+      ...visibleHeaderColumns,
       {
         id: 'auxColumns',
         title: 'CC',
         type: 'auxColumns',
       },
     ]
-    : headerColumns;
+    : visibleHeaderColumns;
   const columnsAux = hasAuxColumns
     ? [
-      ...columns,
+      ...visibleColumns,
       {
         type: 'spacer',
         content: '',
       },
     ]
-    : columns;
+    : visibleColumns;
   const headerColumnsByType = headerColumnsAux && groupBy(headerColumnsAux, 'type');
-  console.log('headerColumns', headerColumnsAux)
-  // console.log('headerColumnsAux', headerColumnsAux)
+
   return (
     <Box fill="horizontal">
       <Table isPrint={isPrintView}>
@@ -259,8 +263,13 @@ export function EntitiesTable({
                       {col.type === 'auxColumns' && (
                         <CellHeaderAuxColumns
                           column={col}
-                          columnOptions={headerColumns}
-                          onUpdateHiddenColumns={(options) => { console.log('update', options); }}
+                          columnOptions={availableHeaderColumns
+                              && availableHeaderColumns.filter((column) => column.type !== 'main')
+                          }
+                          onUpdate={(options) => onUpdateHiddenColumns({
+                            addToHidden: options.filter((o) => o.changed && !o.hidden).map((o) => o.id), // hide previously unhidden
+                            removeFromHidden: options.filter((o) => o.changed && o.hidden).map((o) => o.id), // show previously hidden
+                          })}
                         />
                       )}
                       {col.type !== 'main' && col.type !== 'auxColumns' && (
@@ -291,137 +300,139 @@ export function EntitiesTable({
                     && headerColumnsByType.topicPosition.length
                   }
                 >
-                  <TableCellBodyInner>
-                    {col.type === 'main' && (
-                      <CellBodyMain
-                        entity={entity[col.id]}
-                        canEdit={canEdit && !isPrintView}
-                        column={col}
-                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
-                      />
-                    )}
-                    {(
-                      col.type === 'plain'
-                      || col.type === 'attribute'
-                      || col.type === 'amount'
-                      || col.type === 'userrole'
-                      || col.type === 'date'
-                      || col.type === 'supportlevel'
-                      || col.type === 'topicPosition'
-                    ) && (
-                      <CellBodyPlain
-                        entity={entity[col.id]}
-                        column={col}
-                        primary={col.type === 'userrole'}
-                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
-                      />
-                    )}
-                    {col.type === 'plainWithDate' && (
-                      <CellBodyPlainWithDate
-                        entity={entity[col.id]}
-                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'position' && (
-                      <CellBodyPosition
-                        entity={entity[col.id]}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'users' && (
-                      <CellBodyUsers
-                        entity={entity[col.id]}
-                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'indicators' && (
-                      <CellBodyIndicators
-                        entity={entity[col.id]}
-                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
-                        column={col}
-                      />
-                    )}
-                    {(
-                      col.type === 'actorsSimple'
-                      || col.type === 'actors'
-                      || col.type === 'actorsViaChildren'
-                      || col.type === 'members'
-                      || col.type === 'associations'
-                      || col.type === 'userActors'
-                      || col.type === 'viaGroups'
-                    ) && (
-                      <CellBodyActors
-                        entity={entity[col.id]}
-                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
-                        column={col}
-                      />
-                    )}
-                    {(
-                      col.type === 'taxonomy'
-                      || col.type === 'positionStatementAuthority'
-                    ) && (
-                      <CellBodyCategories
-                        entity={entity[col.id]}
-                        column={col}
-                      />
-                    )}
-                    {col.type === 'hasResources' && (
-                      <CellBodyHasResource
-                        entity={entity[col.id]}
-                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
-                        column={col}
-                      />
-                    )}
-                    {(
-                      col.type === 'actionsSimple'
-                      || col.type === 'resourceActions'
-                      || col.type === 'indicatorActions'
-                      || col.type === 'userActions'
-                      || col.type === 'positionStatement'
-                      || col.type === 'childActions'
-                      || col.type === 'parentActions'
-                      || (col.simple && (
+                  {col.id && entity[col.id] && (
+                    <TableCellBodyInner>
+                      {col.type === 'main' && (
+                        <CellBodyMain
+                          entity={entity[col.id]}
+                          canEdit={canEdit && !isPrintView}
+                          column={col}
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                        />
+                      )}
+                      {(
+                        col.type === 'plain'
+                        || col.type === 'attribute'
+                        || col.type === 'amount'
+                        || col.type === 'userrole'
+                        || col.type === 'date'
+                        || col.type === 'supportlevel'
+                        || col.type === 'topicPosition'
+                      ) && (
+                        <CellBodyPlain
+                          entity={entity[col.id]}
+                          column={col}
+                          primary={col.type === 'userrole'}
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                        />
+                      )}
+                      {col.type === 'plainWithDate' && (
+                        <CellBodyPlainWithDate
+                          entity={entity[col.id]}
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                          column={col}
+                        />
+                      )}
+                      {col.type === 'position' && (
+                        <CellBodyPosition
+                          entity={entity[col.id]}
+                          column={col}
+                        />
+                      )}
+                      {col.type === 'users' && (
+                        <CellBodyUsers
+                          entity={entity[col.id]}
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                          column={col}
+                        />
+                      )}
+                      {col.type === 'indicators' && (
+                        <CellBodyIndicators
+                          entity={entity[col.id]}
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                          column={col}
+                        />
+                      )}
+                      {(
+                        col.type === 'actorsSimple'
+                        || col.type === 'actors'
+                        || col.type === 'actorsViaChildren'
+                        || col.type === 'members'
+                        || col.type === 'associations'
+                        || col.type === 'userActors'
+                        || col.type === 'viaGroups'
+                      ) && (
+                        <CellBodyActors
+                          entity={entity[col.id]}
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                          column={col}
+                        />
+                      )}
+                      {(
+                        col.type === 'taxonomy'
+                        || col.type === 'positionStatementAuthority'
+                      ) && (
+                        <CellBodyCategories
+                          entity={entity[col.id]}
+                          column={col}
+                        />
+                      )}
+                      {col.type === 'hasResources' && (
+                        <CellBodyHasResource
+                          entity={entity[col.id]}
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                          column={col}
+                        />
+                      )}
+                      {(
+                        col.type === 'actionsSimple'
+                        || col.type === 'resourceActions'
+                        || col.type === 'indicatorActions'
+                        || col.type === 'userActions'
+                        || col.type === 'positionStatement'
+                        || col.type === 'childActions'
+                        || col.type === 'parentActions'
+                        || (col.simple && (
+                          col.type === 'actorActions'
+                          || col.type === 'actiontype'
+                        ))
+                      ) && (
+                        <CellBodyActions
+                          entity={entity[col.id]}
+                          column={col}
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                        />
+                      )}
+                      {(
                         col.type === 'actorActions'
                         || col.type === 'actiontype'
-                      ))
-                    ) && (
-                      <CellBodyActions
-                        entity={entity[col.id]}
-                        column={col}
-                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
-                      />
-                    )}
-                    {(
-                      col.type === 'actorActions'
-                      || col.type === 'actiontype'
-                    ) && !col.simple && (
-                      <CellBodyBarChart
-                        value={entity[col.id].value}
-                        maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
-                        subject={col.subject}
-                        column={col}
-                        issecondary={col.type !== 'actiontype' && (col.members || col.children)}
-                        color={getColorForColumn(col, theme)}
-                        entityType="actions"
-                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
-                        rowConfig={entity[col.id]}
-                      />
-                    )}
-                    {col.type === 'stackedBarActions' && (
-                      <CellBodyStackedBarChart
-                        values={entity[col.id] && entity[col.id].values
-                          ? Object.values(entity[col.id].values)
-                          : null
-                        }
-                        maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
-                        column={col}
-                        entityType="actors"
-                        onEntityClick={(id, path) => onEntityClick(id, path, ID)}
-                      />
-                    )}
-                  </TableCellBodyInner>
+                      ) && !col.simple && (
+                        <CellBodyBarChart
+                          value={entity[col.id].value}
+                          maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
+                          subject={col.subject}
+                          column={col}
+                          issecondary={col.type !== 'actiontype' && (col.members || col.children)}
+                          color={getColorForColumn(col, theme)}
+                          entityType="actions"
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                          rowConfig={entity[col.id]}
+                        />
+                      )}
+                      {col.type === 'stackedBarActions' && (
+                        <CellBodyStackedBarChart
+                          values={entity[col.id] && entity[col.id].values
+                            ? Object.values(entity[col.id].values)
+                            : null
+                          }
+                          maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
+                          column={col}
+                          entityType="actors"
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                        />
+                      )}
+                    </TableCellBodyInner>
+                  )}
                 </TableCellBody>
               ))}
             </TableRow>
@@ -436,16 +447,19 @@ EntitiesTable.propTypes = {
   entities: PropTypes.array.isRequired,
   sortedEntities: PropTypes.array,
   searchedEntities: PropTypes.object,
-  columns: PropTypes.array,
   columnMaxValues: PropTypes.object,
   theme: PropTypes.object,
-  headerColumns: PropTypes.array,
   canEdit: PropTypes.bool,
   inSingleView: PropTypes.bool,
   onEntityClick: PropTypes.func,
+  onUpdateHiddenColumns: PropTypes.func,
   previewItemId: PropTypes.string,
   reducePreviewItem: PropTypes.func,
   onSetPreviewContent: PropTypes.func,
+  visibleHeaderColumns: PropTypes.array,
+  availableHeaderColumns: PropTypes.array,
+  visibleColumns: PropTypes.array,
+  availableColumns: PropTypes.array,
 };
 
 export default withTheme(EntitiesTable);

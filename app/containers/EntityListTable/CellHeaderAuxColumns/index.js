@@ -1,13 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
-  Box, ResponsiveContext, Drop, Layer
+  Box, ResponsiveContext, Drop,
 } from 'grommet';
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import BoxPrint from 'components/styled/BoxPrint';
 
 import { isMinSize } from 'utils/responsive';
+import asArray from 'utils/as-array';
 import DropHeader from './DropHeader';
 import DropBody from './DropBody';
 import DropFooter from './DropFooter';
@@ -78,22 +79,28 @@ const FooterInDrop = styled.div`
   height: 50px;
   background: white;
 `;
-export function CellHeaderAuxColumns({ column, columnOptions, onUpdateHiddenColumns }) {
-  const [updatedColumnOptions, setUpdatedColumnOptions] = useState([...columnOptions]);
+export function CellHeaderAuxColumns({ column, columnOptions, onUpdate }) {
+  const [changedToHidden, setChangedToHidden] = useState([]);
+  const [changedToVisible, setChangedToVisible] = useState([]);
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const size = React.useContext(ResponsiveContext);
-
-  useEffect(() => {
-    // reset column options on drop open
-    if (open) {
-      setUpdatedColumnOptions([...columnOptions]);
-    }
-  }, [open]);
-
+  // console.log(columnOptions && columnOptions.toJS())
   // console.log('CellHeaderAuxColumns', column, columnOptions);
   // const areAllColumnsSelected = updatedColumnOptions.filter((option) => option.hidden).length === 0;
+  const changedColumns = [...changedToVisible, ...changedToHidden];
+  const updatedColumnOptions = columnOptions.map((col) => {
+    const checkedInitially = !col.hidden;
+    const changed = changedColumns.indexOf(col.id) > -1;
+    const checked = ((checkedInitially && !changed) || (!checkedInitially && changed));
+    return ({
+      ...col,
+      changed,
+      checked,
+    });
+  });
   const { align = 'start' } = column;
+  const hasChanges = changedColumns.length > 0;
   return (
     <Styled direction="row" align="center" justify={align}>
       <DropAnchor ref={ref} />
@@ -105,37 +112,6 @@ export function CellHeaderAuxColumns({ column, columnOptions, onUpdateHiddenColu
             <Dot />
           </Box>
         </AuxButton>
-        {open && !isMinSize(size, 'medium') && (
-          <Layer
-            full
-            responsive
-            onClickOutside={() => setOpen(false)}
-            onEsc={() => setOpen(false)}
-            animation={false}
-            style={{ overflowY: 'auto', borderRadius: '0' }}
-          >
-            <DropHeader
-              onClose={() => {
-                setOpen(false);
-                // onResetActiveColumns
-              }}
-            />
-            <DropBody
-              options={updatedColumnOptions}
-              onUpdate={(args) => console.log('onUpdate', args)}
-            />
-            <DropFooter
-              onConfirm={(args) => {
-                console.log('onConfirm', args);
-                onUpdateHiddenColumns('heyhey');
-              }}
-              onCancel={() => {
-                setOpen(false);
-                // onResetActiveColumns
-              }}
-            />
-          </Layer>
-        )}
         {open && isMinSize(size, 'medium') && (
           <Drop
             target={ref.current}
@@ -157,26 +133,54 @@ export function CellHeaderAuxColumns({ column, columnOptions, onUpdateHiddenColu
                 <DropHeader
                   onClose={() => {
                     setOpen(false);
-                    // onResetActiveColumns
+                    setChangedToVisible([]);
+                    setChangedToHidden([]);
                   }}
                 />
               </HeaderInDrop>
               <BodyInDrop>
                 <DropBody
                   options={updatedColumnOptions}
-                  onUpdate={(args) => console.log('onUpdate', args)}
+                  onUpdate={(columnIds, checked) => {
+                    let hidden = [...changedToHidden];
+                    let visible = [...changedToVisible];
+                    asArray(columnIds).forEach((columnId) => {
+                      if (checked) {
+                        // remove from unchecked list if checking again enabled (back to original)
+                        if (hidden.indexOf(columnId) > -1) {
+                          hidden = hidden.filter((id) => id !== columnId);
+                        // add to checked list if not previously unchecked
+                        } else {
+                          visible = [...visible, columnId];
+                        }
+                      }
+                      if (!checked) {
+                        if (visible.indexOf(columnId) > -1) {
+                          visible = visible.filter((id) => id !== columnId);
+                        } else {
+                          hidden = [...hidden, columnId];
+                        }
+                      }
+                    });
+                    setChangedToHidden(hidden);
+                    setChangedToVisible(visible);
+                  }}
                 />
               </BodyInDrop>
               <FooterInDrop>
                 <DropFooter
-                  onConfirm={(args) => {
-                    console.log('onConfirm', args);
-                    onUpdateHiddenColumns('heyhey');
-                  }}
                   onCancel={() => {
                     setOpen(false);
-                    // onResetActiveColumns
+                    setChangedToVisible([]);
+                    setChangedToHidden([]);
                   }}
+                  onConfirm={hasChanges
+                    ? () => {
+                      setOpen(false);
+                      onUpdate(updatedColumnOptions);
+                    }
+                    : null
+                  }
                 />
               </FooterInDrop>
             </DropContent>
@@ -186,11 +190,43 @@ export function CellHeaderAuxColumns({ column, columnOptions, onUpdateHiddenColu
     </Styled>
   );
 }
+// responsive support
+// {open && !isMinSize(size, 'medium') && (
+//   <Layer
+//   full
+//   responsive
+//   onClickOutside={() => setOpen(false)}
+//   onEsc={() => setOpen(false)}
+//   animation={false}
+//   style={{ overflowY: 'auto', borderRadius: '0' }}
+//   >
+//   <DropHeader
+//   onClose={() => {
+//     setOpen(false);
+//     // onResetActiveColumns
+//   }}
+//   />
+//   <DropBody
+//   options={columnOptions && columnOptions.filter((col) => col.type !== 'main')}
+//   onUpdate={(args) => console.log('onUpdate', args)}
+//   />
+//   <DropFooter
+//   onConfirm={(args) => {
+//     console.log('onConfirm', args);
+//     onUpdateHiddenColumns('heyhey');
+//   }}
+//   onCancel={() => {
+//     setOpen(false);
+//     // onResetActiveColumns
+//   }}
+//   />
+//   </Layer>
+// )}
 
 CellHeaderAuxColumns.propTypes = {
   column: PropTypes.object,
   columnOptions: PropTypes.array,
-  onUpdateHiddenColumns: PropTypes.func,
+  onUpdate: PropTypes.func,
 };
 
 export default CellHeaderAuxColumns;

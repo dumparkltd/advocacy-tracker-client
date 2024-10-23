@@ -473,6 +473,14 @@ export function invalidateEntities(path) {
   };
 }
 
+// will call updatePath with current path and arguments:
+// query[{ arg, value, remove, add, replace }]:
+//   arg: the query parameter
+//   value: the query value
+//   add: true if adding to existing parameters (same arg)
+//   remove: true if removing from existing parameters (same arg)
+//   replace: true if replacing any existing parameters (same arg)
+// extend: true if fully replacing existing query
 export function updateRouteQuery(query, extend) {
   return {
     type: UPDATE_ROUTE_QUERY,

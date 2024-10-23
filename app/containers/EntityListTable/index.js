@@ -20,11 +20,12 @@ import {
   selectIsPrintView,
   selectPrintConfig,
   selectPreviewQuery,
-  selectInactiveColumnQuery,
+  selectHiddenColumns,
 } from 'containers/App/selectors';
 import {
   setPreviewContent,
   setListPreview,
+  updateRouteQuery,
 } from 'containers/App/actions';
 import {
   updateQuery,
@@ -112,7 +113,8 @@ export function EntityListTable({
   onSetPreviewItemId,
   onSetPreviewContent,
   reducePreviewItem,
-  inactiveColumns,
+  hiddenColumns,
+  onUpdateHiddenColumns,
 }) {
   if (!columns) return null;
   const size = React.useContext(ResponsiveContext);
@@ -136,14 +138,6 @@ export function EntityListTable({
   };
   const [showAllConnections, setShowAllConnections] = useState(false);
   const [localSort, setLocalSort] = useState(sortDefault);
-  const cleanSortOrder = inSingleView ? localSort.order : (sortOrder || sortDefault.order);
-  const cleanSortBy = inSingleView ? localSort.sort : (sortBy || sortDefault.sort);
-  const cleanOnSort = inSingleView
-    ? (sort, order) => setLocalSort({
-      sort: sort || cleanSortBy,
-      order: order || cleanSortOrder,
-    })
-    : onSort;
 
   // filter entitities by keyword
   const searchAttributes = (
@@ -162,7 +156,7 @@ export function EntityListTable({
       searchAttributes,
     );
   }
-  const activeColumns = columns
+  const availableColumns = columns
     .filter((col) => {
       if ((!isMinSize(size, 'medium') || isPrintView) && col.type !== 'main') {
         return false;
@@ -174,13 +168,16 @@ export function EntityListTable({
     })
     .map((col) => ({
       ...col,
-      hidden: inactiveColumns && inactiveColumns.includes(col.id),
+      hidden: hiddenColumns && hiddenColumns.includes(col.id),
     }));
+  const visibleColumns = inSingleView
+    ? availableColumns
+    : availableColumns.filter((col) => !col.hidden);
 
   // warning converting List to Array
   const entityRows = prepareEntityRows({
     entities: searchedEntities,
-    columns: activeColumns,
+    columns: availableColumns,
     entityIdsSelected,
     config,
     url,
@@ -195,12 +192,20 @@ export function EntityListTable({
   });
   const columnMaxValues = getColumnMaxValues(
     entityRows,
-    activeColumns,
+    visibleColumns,
   );
   const errorsWithoutEntities = errors && errors.filter(
     (error, id) => !searchedEntities.find((entity) => qe(entity.get('id'), id))
   );
   // sort entities
+  const cleanSortBy = inSingleView ? localSort.sort : (sortBy || sortDefault.sort);
+  const cleanSortOrder = inSingleView ? localSort.order : (sortOrder || sortDefault.order);
+  const cleanOnSort = inSingleView
+    ? (sort, order) => setLocalSort({
+      sort: sort || cleanSortBy,
+      order: order || cleanSortOrder,
+    })
+    : onSort;
   const sortedEntities = entityRows && entityRows.sort(
     (a, b) => {
       const aSortValue = a[cleanSortBy]
@@ -277,8 +282,8 @@ export function EntityListTable({
       : (sortedEntities.slice(0, CONNECTIONMAX));
   }
   const entityIdsOnPage = entitiesOnPage.map((entity) => entity.id);
-  const headerColumns = prepareHeader({
-    columns: activeColumns,
+  const availableHeaderColumns = prepareHeader({
+    columns: availableColumns,
     // config,
     sortBy: cleanSortBy,
     sortOrder: cleanSortOrder,
@@ -307,7 +312,9 @@ export function EntityListTable({
     && (searchQueryClean.length > 0 || hasFilters);
   const listEmptyAfterQueryAndErrors = listEmptyAfterQuery
     && (errors && errors.size > 0);
-
+  const visibleHeaderColumns = inSingleView
+    ? availableHeaderColumns
+    : availableHeaderColumns.filter((c) => !c.hidden);
   return (
     <div>
       {options && (
@@ -328,13 +335,16 @@ export function EntityListTable({
         sortedEntities={sortedEntities}
         searchedEntities={searchedEntities}
         canEdit={canEdit}
-        columns={activeColumns}
-        headerColumns={headerColumns || []}
+        visibleHeaderColumns={visibleHeaderColumns || []}
+        availableHeaderColumns={availableHeaderColumns || []}
+        visibleColumns={visibleColumns || []}
+        availableColumns={availableColumns || []}
         onEntityClick={(id, path, componentId) => {
           if (onSetPreviewItemId && componentId) {
             onSetPreviewItemId(`${componentId}|${path}|${id}`);
           }
         }}
+        onUpdateHiddenColumns={onUpdateHiddenColumns}
         columnMaxValues={columnMaxValues}
         inSingleView={inSingleView}
         previewItemId={previewItemId}
@@ -456,7 +466,8 @@ EntityListTable.propTypes = {
   reducePreviewItem: PropTypes.func,
   onSetPreviewContent: PropTypes.func,
   onSetPreviewItemId: PropTypes.func,
-  inactiveColumns: PropTypes.object, // immutable List
+  onUpdateHiddenColumns: PropTypes.func,
+  hiddenColumns: PropTypes.object, // immutable List
 };
 
 const mapStateToProps = (state) => ({
@@ -471,7 +482,7 @@ const mapStateToProps = (state) => ({
   isPrintView: selectIsPrintView(state),
   printConfig: selectPrintConfig(state),
   previewItemId: selectPreviewQuery(state),
-  inactiveColumns: selectInactiveColumnQuery(state),
+  hiddenColumns: selectHiddenColumns(state),
 });
 function mapDispatchToProps(dispatch) {
   return {
@@ -496,6 +507,28 @@ function mapDispatchToProps(dispatch) {
     },
     onSetPreviewContent: (value) => dispatch(setPreviewContent(value)),
     onSetPreviewItemId: (value) => dispatch(setListPreview(value)),
+    onUpdateHiddenColumns: ({ addToHidden, removeFromHidden }) => {
+      let query = [];
+      if (addToHidden && addToHidden.length > 0) {
+        query = addToHidden.reduce(
+          (memo, value) => ([
+            ...memo,
+            { arg: 'xcol', add: true, value },
+          ]),
+          query,
+        );
+      }
+      if (removeFromHidden && removeFromHidden.length > 0) {
+        query = removeFromHidden.reduce(
+          (memo, value) => ([
+            ...memo,
+            { arg: 'xcol', remove: true, value },
+          ]),
+          query,
+        );
+      }
+      dispatch(updateRouteQuery(query, true));
+    },
   };
 }
 
