@@ -16,7 +16,6 @@ const CloseButton = styled((p) => <Button plain {...p} />)`
   color: white;
   height: 25px;
   width: 25px;
-  padding: 0px 4px 4px 0px;
   background-color: ${palette('primary', 1)};
   &:hover {
     opacity: 0.9;

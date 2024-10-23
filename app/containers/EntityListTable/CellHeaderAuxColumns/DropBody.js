@@ -23,6 +23,7 @@ const ColumnOptionWrapper = styled((p) => (
     pad={{ vertical: 'xsmall' }}
     direction="row"
     justify="between"
+    align="middle"
     flex={{ shrink: 0 }}
     {...p}
   />
@@ -33,6 +34,14 @@ const ColumnOptionWrapper = styled((p) => (
   }
 `;
 
+const LabelHeader = styled((p) => <Text size="xsmall" {...p} />)`
+opacity: 0.66;
+font-weight: 500;
+`;
+const OptionLabelHeader = styled((p) => <Text as="label" size="xsmall" {...p} />)`
+opacity: 0.66;
+font-weight: 500;
+`;
 const OptionLabel = styled((p) => <Text as="label" size="small" {...p} />)``;
 export function DropBody({ options, onUpdate }) {
   const optionCount = options.length;
@@ -44,37 +53,45 @@ export function DropBody({ options, onUpdate }) {
   } else if (selectedCount > 0) {
     selectAllState = STATES.INDETERMINATE;
   }
+  const hasSort = !!options.find((o) => !!o.onSort);
 
   return (
     <Box pad="ms" flex={{ shrink: 0 }}>
       <Box
         pad={{ vertical: 'xsmall' }}
         direction="row"
-        gap="small"
+        justify="between"
         flex={{ shrink: 0 }}
+        align="center"
       >
-        <IndeterminateCheckbox
-          id="list-column-option-all"
-          checked={selectAllState}
-          onChange={(checked) => {
-            if (checked === STATES.CHECKED) {
-              // only consider previously unchecked
-              const changedToChecked = options
-                .filter((o) => o.hidden)
-                .map((o) => o.id);
-              onUpdate(changedToChecked, true);
-            } else if (checked === STATES.UNCHECKED) {
-              // only consider previously checked
-              const changedToUnchecked = options
-                .filter((o) => !o.hidden)
-                .map((o) => o.id);
-              onUpdate(changedToUnchecked, false);
-            }
-          }}
-        />
-        <OptionLabel htmlFor="list-column-option-all">
-          Select All
-        </OptionLabel>
+        <Box direction="row" gap="small" align="center">
+          <IndeterminateCheckbox
+            id="list-column-option-all"
+            checked={selectAllState}
+            onChange={(checked) => {
+              if (checked === STATES.CHECKED) {
+                // only consider previously unchecked
+                const changedToChecked = options
+                  .filter((o) => o.hidden)
+                  .map((o) => o.id);
+                onUpdate(changedToChecked, true);
+              } else if (checked === STATES.UNCHECKED) {
+                // only consider previously checked
+                const changedToUnchecked = options
+                  .filter((o) => !o.hidden)
+                  .map((o) => o.id);
+                onUpdate(changedToUnchecked, false);
+              }
+            }}
+          />
+          <OptionLabelHeader htmlFor="list-column-option-all">
+            {selectAllState !== STATES.CHECKED && ('Select all columns')}
+            {selectAllState === STATES.CHECKED && ('Unselect all columns')}
+          </OptionLabelHeader>
+        </Box>
+        {hasSort && (
+          <LabelHeader>Sort</LabelHeader>
+        )}
       </Box>
       <Box flex={{ shrink: 0 }}>
         {options && options.map(
@@ -84,7 +101,7 @@ export function DropBody({ options, onUpdate }) {
             );
             return option && (
               <ColumnOptionWrapper key={i}>
-                <Box direction="row" gap="small">
+                <Box direction="row" gap="small" align="center">
                   <IndeterminateCheckbox
                     id={`list-column-option-${i}`}
                     checked={!option.hidden}
