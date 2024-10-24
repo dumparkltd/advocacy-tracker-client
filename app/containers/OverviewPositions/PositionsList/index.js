@@ -149,7 +149,7 @@ export function PositionsList({
   }, []);
 
   let supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
-    // .filter((level) => parseInt(level.value, 10) > 0) // exclude 0
+    .filter((level) => parseInt(level.value, 10) > 0) // exclude 0
     .sort((a, b) => a.order > b.order ? 1 : -1);
 
   supportLevels = supportLevels
