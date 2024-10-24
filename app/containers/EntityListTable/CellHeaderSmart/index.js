@@ -13,6 +13,7 @@ import TextPrint from 'components/styled/TextPrint';
 import PrintHide from 'components/styled/PrintHide';
 import DropHeader from './DropHeader';
 import DropFilter from './DropFilter';
+import DropSort from './DropSort';
 
 const SortButton = styled(ButtonFlatIconOnly)`
   color: inherit;
@@ -63,7 +64,14 @@ const DropContent = styled.div`
     width: 300px;
   }
 `;
-
+const BodyInDrop = styled.div`
+  position: absolute;
+  top: 50px;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  overflow-y: auto;
+`;
 
 export function CellHeaderSmart({ column, filterOptions, onUpdateFilterOptions }) {
   const [open, setOpen] = useState(false);
@@ -76,7 +84,7 @@ export function CellHeaderSmart({ column, filterOptions, onUpdateFilterOptions }
     (option) => !!option.active
   );
   // check if some options are disabled
-  const hasFilters = filterOptions && activeFilterOptions.length < filterOptions.length;
+  const hasFilters = filterOptions && activeFilterOptions.length > 0;
   const isActive = hasFilters || column.sortActive;
   // console.log('column', column, filterOptions, isActive, open)
   const size = React.useContext(ResponsiveContext);
@@ -90,7 +98,7 @@ export function CellHeaderSmart({ column, filterOptions, onUpdateFilterOptions }
         <Box flex={false} style={{ position: 'relative' }}>
           <DropAnchor ref={ref} />
           <ColumnButton onClick={() => setOpen(true)} isActive={isActive}>
-            <Box gap="3px" justify="center" align="center" fill>
+            <Box gap="2px" justify="center" align="center" fill>
               <Line size="L" isActive={isActive} />
               <Line size="M" isActive={isActive} />
               <Line size="S" isActive={isActive} />
@@ -118,32 +126,37 @@ export function CellHeaderSmart({ column, filterOptions, onUpdateFilterOptions }
           <DropContent>
             <DropHeader
               onClose={() => setOpen(false)}
-              title="Filter by value"
+              title={column.filterOptionsTitle || column.mainTitle || 'Column options'}
             />
-            <DropFilter
-              options={column.filterOptions}
-              onUpdate={(filterIds, checked) => {
-                let changedToChecked = [];
-                let changedToUnchecked = [];
-                asArray(filterIds).forEach((filterId) => {
-                  if (checked) {
-                    changedToChecked = [...changedToChecked, filterId];
-                  }
-                  if (!checked) {
-                    changedToUnchecked = [...changedToUnchecked, filterId];
-                  }
-                });
-                const changedFilters = [...changedToChecked, ...changedToUnchecked];
-                const updatedFilterOptions = column.filterOptions.map((option) => {
-                  const optionChanged = changedFilters.indexOf(option.value) > -1;
-                  return ({
-                    ...option,
-                    changed: optionChanged,
+            <BodyInDrop>
+              {column.onSort && (
+                <DropSort column={column} />
+              )}
+              <DropFilter
+                options={column.filterOptions}
+                onUpdate={(filterIds, checked) => {
+                  let changedToChecked = [];
+                  let changedToUnchecked = [];
+                  asArray(filterIds).forEach((filterId) => {
+                    if (checked) {
+                      changedToChecked = [...changedToChecked, filterId];
+                    }
+                    if (!checked) {
+                      changedToUnchecked = [...changedToUnchecked, filterId];
+                    }
                   });
-                });
-                onUpdateFilterOptions(updatedFilterOptions);
-              }}
-            />
+                  const changedFilters = [...changedToChecked, ...changedToUnchecked];
+                  const updatedFilterOptions = column.filterOptions.map((option) => {
+                    const optionChanged = changedFilters.indexOf(option.value) > -1;
+                    return ({
+                      ...option,
+                      changed: optionChanged,
+                    });
+                  });
+                  onUpdateFilterOptions(updatedFilterOptions);
+                }}
+              />
+            </BodyInDrop>
           </DropContent>
         </Drop>
       )}

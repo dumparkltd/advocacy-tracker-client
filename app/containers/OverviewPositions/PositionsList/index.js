@@ -136,7 +136,7 @@ export function PositionsList({
   }, []);
 
   let supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
-    .filter((level) => parseInt(level.value, 10) > 0) // exclude 0
+    // .filter((level) => parseInt(level.value, 10) > 0) // exclude 0
     .sort((a, b) => a.order > b.order ? 1 : -1);
 
   supportLevels = supportLevels
@@ -190,7 +190,7 @@ export function PositionsList({
             ...level,
             active: (activeSupportLevels && activeSupportLevels.length > 0)
               ? !!activeSupportLevels.find((val) => qe(val, level.value))
-              : true,
+              : false,
           })),
         },
       ];
@@ -368,7 +368,7 @@ export function PositionsList({
                 <EntityListTable
                   entityPath={ROUTES.ACTOR}
                   reducePreviewItem={reducePreviewItem}
-                  onUpdateColumnFilters={onUpdateColumnFilters}
+                  onUpdateColumnFilters={(...args) => onUpdateColumnFilters(...args, locationQuery)}
                   columns={[
                     {
                       id: 'main',
@@ -481,10 +481,53 @@ export function mapDispatchToProps(dispatch) {
     onSetIncludeActorMembers: (value) => dispatch(setIncludeActorMembers(value)),
     onUpdateQuery: (value) => dispatch(updateRouteQuery(value)),
     onUpdatePath: (path) => dispatch(updatePath(path)),
-    onUpdateColumnFilters: ({ column, addToFilters, removeFromFilters }) => {
-      console.log('column', column);
-      console.log('addToFilters', addToFilters);
-      console.log('removeFromFilters', removeFromFilters);
+    onUpdateColumnFilters: ({
+      column, addToFilters, removeFromFilters,
+    }, locationQuery) => {
+      const indicatorQueryList = asList(locationQuery.get('indicators'));
+      const currentFilterForColumn = indicatorQueryList.find((query) => {
+        const indicatorQuery = query && query.split('>')[0];
+        return qe(indicatorQuery, column.indicatorId);
+      });
+      // update column filter
+      if (currentFilterForColumn) {
+        const currentLevels = currentFilterForColumn.split('=')[1]
+          && currentFilterForColumn.split('=')[1].split('|');
+        let updatedLevels = [];
+        if (currentLevels && addToFilters && addToFilters.length > 0) {
+          updatedLevels = [...currentLevels, ...addToFilters];
+        }
+        if (currentLevels && removeFromFilters && removeFromFilters.length > 0) {
+          updatedLevels = currentLevels.filter(
+            (level) => removeFromFilters.indexOf(level) === -1
+          );
+        }
+        if (updatedLevels && updatedLevels.length > 0) {
+          const newValue = `${column.indicatorId}>supportlevel_id=${updatedLevels.join('|')}`;
+          dispatch(updateRouteQuery({
+            arg: 'indicators',
+            value: newValue,
+            prevValue: currentFilterForColumn,
+            replace: true,
+          }));
+        } else {
+          dispatch(updateRouteQuery({
+            arg: 'indicators',
+            value: currentFilterForColumn,
+            remove: true,
+            add: false,
+          }));
+        }
+      // add new column filter
+      } else if (addToFilters) {
+        const newValue = `${column.indicatorId}>supportlevel_id=${addToFilters.join('|')}`;
+        dispatch(updateRouteQuery({
+          arg: 'indicators',
+          value: newValue,
+          remove: false,
+          add: true,
+        }));
+      }
     },
     onUpdateAssociationQuery: ({ value, type }) => {
       if (!value) {

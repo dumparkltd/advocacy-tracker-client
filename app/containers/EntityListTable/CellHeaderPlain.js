@@ -42,10 +42,7 @@ export function CellHeaderPlain({ column }) {
             <SortButton
               onClick={() => {
                 if (column.sortActive) {
-                  const nextSortOrderOption = SORT_ORDER_OPTIONS.find(
-                    (option) => sortOrderOption.nextValue === option.value
-                  );
-                  column.onSort(column.id || column.type, nextSortOrderOption.value);
+                  column.onSort(column.id || column.type, sortOrderOption.nextValue);
                 } else {
                   column.onSort(column.id || column.type, sortOrderOption.value);
                 }

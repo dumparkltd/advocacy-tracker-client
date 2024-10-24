@@ -132,7 +132,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
   0: {
     value: '0',
     default: true,
-    color: '#EDEFF0',
+    color: '#d8d9d9',
     order: 100,
   },
   // strong
@@ -175,6 +175,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#67402E', // teal-brown
     order: 5,
   },
+  // proxy for no statement
   99: {
     value: '99',
     color: '#EDEFF0',

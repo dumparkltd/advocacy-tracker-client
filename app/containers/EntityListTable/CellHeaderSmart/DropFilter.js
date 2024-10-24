@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import { Box, Text } from 'grommet';
 
+import Dot from 'components/styled/Dot';
 import IndeterminateCheckbox, { STATES } from 'components/forms/IndeterminateCheckbox';
 
 const ColumnOptionWrapper = styled((p) => (
@@ -28,75 +29,85 @@ font-weight: 500;
 `;
 const OptionLabel = styled((p) => <Text as="label" size="small" {...p} />)``;
 
+const Title = styled((p) => <Text size="xsmall" {...p} />)`
+  font-weight: bold;
+`;
+
 export function DropFilter({ options, onUpdate }) {
   const optionCount = options.length;
   const selectedCount = options.filter((o) => o.active).length;
-  console.log('options', options)
   let selectAllState = STATES.UNCHECKED;
   if (selectedCount === optionCount) {
     selectAllState = STATES.CHECKED;
   } else if (selectedCount > 0) {
     selectAllState = STATES.INDETERMINATE;
   }
-
   return (
-    <Box pad="ms" flex={{ shrink: 0 }}>
-      <Box
-        pad={{ vertical: 'xsmall' }}
-        direction="row"
-        justify="between"
-        flex={{ shrink: 0 }}
-        align="center"
-      >
-        <Box direction="row" gap="small" align="center">
-          <IndeterminateCheckbox
-            id="list-column-option-all"
-            checked={selectAllState}
-            onChange={(checked) => {
-              if (checked === STATES.CHECKED) {
-                // only consider previously unchecked
-                const changedToChecked = options
-                  .filter((o) => !o.active)
-                  .map((o) => o.value);
-                onUpdate(changedToChecked, true);
-              } else if (checked === STATES.UNCHECKED) {
-                // only consider previously checked
-                const changedToUnchecked = options
-                  .filter((o) => o.active)
-                  .map((o) => o.value);
-                onUpdate(changedToUnchecked, false);
-              }
-            }}
-          />
-          <OptionLabelHeader htmlFor="list-column-option-all">
-            {selectAllState !== STATES.CHECKED && ('Select all values')}
-            {selectAllState === STATES.CHECKED && ('Unselect all values')}
-          </OptionLabelHeader>
-        </Box>
-      </Box>
+    <Box pad="ms" gap="small" flex={{ shrink: 0 }}>
+      <Title>Filter by value (multiple)</Title>
       <Box flex={{ shrink: 0 }}>
-        {options && options.map(
-          (option, i) => option && (
-            <ColumnOptionWrapper key={i}>
-              <Box direction="row" gap="small" align="center">
-                <IndeterminateCheckbox
-                  id={`list-column-option-${i}`}
-                  checked={option.active}
-                  onChange={(checked) => {
-                    if (checked === STATES.CHECKED) {
-                      onUpdate(option.value, true);
-                    } else if (checked === STATES.UNCHECKED) {
-                      onUpdate(option.value, false);
-                    }
-                  }}
-                />
-                <OptionLabel htmlFor={`list-column-option-${i}`}>
-                  {option.mainTitle || option.title || option.label}
-                </OptionLabel>
-              </Box>
-            </ColumnOptionWrapper>
-          )
-        )}
+        <Box
+          pad={{ vertical: 'xsmall' }}
+          direction="row"
+          justify="between"
+          flex={{ shrink: 0 }}
+          align="center"
+        >
+          <Box direction="row" gap="small" align="center">
+            <IndeterminateCheckbox
+              id="list-column-option-all"
+              checked={selectAllState}
+              onChange={(checked) => {
+                if (checked === STATES.CHECKED) {
+                  // only consider previously unchecked
+                  const changedToChecked = options
+                    .filter((o) => !o.active)
+                    .map((o) => o.value);
+                  onUpdate(changedToChecked, true);
+                } else if (checked === STATES.UNCHECKED) {
+                  // only consider previously checked
+                  const changedToUnchecked = options
+                    .filter((o) => o.active)
+                    .map((o) => o.value);
+                  onUpdate(changedToUnchecked, false);
+                }
+              }}
+            />
+            <OptionLabelHeader htmlFor="list-column-option-all">
+              {selectAllState !== STATES.CHECKED && ('Select all values')}
+              {selectAllState === STATES.CHECKED && ('Unselect all values')}
+            </OptionLabelHeader>
+          </Box>
+        </Box>
+        <Box flex={{ shrink: 0 }}>
+          {options && options.map(
+            (option, i) => option && (
+              <ColumnOptionWrapper key={i}>
+                <Box direction="row" gap="small" align="center">
+                  <IndeterminateCheckbox
+                    id={`list-column-option-${i}`}
+                    checked={option.active}
+                    onChange={(checked) => {
+                      if (checked === STATES.CHECKED) {
+                        onUpdate(option.value, true);
+                      } else if (checked === STATES.UNCHECKED) {
+                        onUpdate(option.value, false);
+                      }
+                    }}
+                  />
+                  <OptionLabel htmlFor={`list-column-option-${i}`}>
+                    <Box direction="row" gap="xsmall" align="center">
+                      {option.color && <Dot color={option.color} />}
+                      <Box>
+                        {option.mainTitle || option.title || option.label}
+                      </Box>
+                    </Box>
+                  </OptionLabel>
+                </Box>
+              </ColumnOptionWrapper>
+            )
+          )}
+        </Box>
       </Box>
     </Box>
   );
