@@ -196,6 +196,7 @@ export function PositionsList({
           title,
           align: 'center',
           mainTitle: getIndicatorMainTitle(indicator.getIn(['attributes', 'title'])),
+          mouseOverTitleSupTitle: intl.formatMessage(appMessages.entities.indicators.single),
           queryArg: 'indicators',
           queryValue: indicator.get('id'),
           queryArgRelated: 'supportlevel_id',

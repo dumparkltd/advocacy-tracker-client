@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Box, ResponsiveContext } from 'grommet';
+import { Box, Text, ResponsiveContext } from 'grommet';
 import styled, { css, withTheme } from 'styled-components';
 import { groupBy } from 'lodash/collection';
 
@@ -83,6 +83,7 @@ const TableCellHeader = styled.th`
   padding-bottom: 6px;
   width: ${({ col }) => col && col.colWidth}};
 `;
+// box-shadow: ${({ isMouseOver }) => isMouseOver ? '0px 2px 4px rgba(0,0,0,0.20)' : 'none'};
 
 const TableCellBody = styled.td`
   margin: 0;
@@ -117,6 +118,28 @@ const ColumnOptionsOuter = styled.div`
 const ColumnOptionsInner = styled.div`
   transform: translateY(-100%);
   margin-top: -${({ theme }) => theme.global.edgeSize.xsmall};
+`;
+
+const ColumnHighlight = styled.div`
+  display: block;
+  position: absolute;
+  top: 0;
+  width: ${({ columnWidth }) => columnWidth}px;
+  left: ${({ columnOffset }) => columnOffset}px;
+  height: ${({ columnHeight }) => columnHeight}px;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.20);
+  pointer-events: none;
+  margin-top: -1px
+`;
+const ColumnHighlightTitle = styled.div`
+  display: block;
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  white-space: nowrap;
+  box-shadow: 0px 2px 4px rgba(0,0,0,0.20);
+  background: #6d7576;
+  padding: 5px 8px;
 `;
 
 const MAX_VALUE_COUNTRIES = 100;
@@ -185,7 +208,13 @@ export function EntitiesTable({
   searchedEntities,
 }) {
   const headerRef = useRef(null);
+  const tableRef = useRef(null);
+  // const cellHeaderRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(0);
+  const [mouseOverColumnWidth, setMouseOverColumnWidth] = useState(null);
+  const [mouseOverColumnOffset, setMouseOverColumnOffset] = useState(null);
+  const [dropOpen, setDropOpen] = useState(false);
+  const [columnMouseOver, setColumnMouseOver] = useState(null);
   useEffect(() => {
     setHeaderHeight(headerRef.current.clientHeight);
   });
@@ -231,6 +260,35 @@ export function EntitiesTable({
   }, [previewItemId]);
   const size = React.useContext(ResponsiveContext);
   const isPrintView = usePrint();
+
+  const handleColumnMouseOver = (evt, col, isHeader) => {
+    if (col) {
+      setColumnMouseOver(col.id);
+    }
+    if (evt) {
+      evt.persist();
+      const hoveredCell = evt.currentTarget;
+      const tableRow = hoveredCell.closest(isHeader ? 'tr' : 'td');
+      if (tableRow) {
+        // Get bounding rectangles of the hovered element and the <tr>
+        const hoveredRect = hoveredCell.getBoundingClientRect();
+        const rowRect = tableRow.getBoundingClientRect();
+
+        // Calculate the horizontal offset of the hovered element relative to its <tr>
+        const horizontalOffset = hoveredRect.left - rowRect.left;
+        setMouseOverColumnOffset(`${horizontalOffset}`);
+      }
+      if (hoveredCell) {
+        setMouseOverColumnWidth(`${hoveredCell.clientWidth}`);
+      }
+    }
+  };
+  const handleTableMouseOut = () => {
+    setColumnMouseOver(null);
+    setMouseOverColumnOffset(null);
+    setMouseOverColumnWidth(null);
+  };
+
   const hasColumnOptions = !inSingleView && isMinSize(size, 'medium');
   let headerColumnsAux = hasColumnOptions
     ? [
@@ -269,6 +327,7 @@ export function EntitiesTable({
       { col, count: headerColumnsAux.length, topicPositionLength }
     ),
   }));
+  const mouseOverColumn = headerColumnsAux.find((col) => col.id === columnMouseOver);
   return (
     <Box
       fill="horizontal"
@@ -290,7 +349,34 @@ export function EntitiesTable({
           </ColumnOptionsInner>
         </ColumnOptionsOuter>
       )}
-      <Table isPrint={isPrintView}>
+      {!dropOpen && mouseOverColumnWidth !== null && mouseOverColumnOffset !== null && (
+        <ColumnHighlight
+          columnWidth={mouseOverColumnWidth}
+          columnOffset={mouseOverColumnOffset}
+          columnHeight={tableRef && tableRef.current && tableRef.current.clientHeight}
+        >
+          {mouseOverColumn && (
+            <ColumnHighlightTitle>
+              <Box gap="xxsmall">
+                {mouseOverColumn.mouseOverTitleSupTitle && (
+                  <Text size="xxxsmall" color="white" style={{ fontWeight: 500, textTransform: 'uppercase' }}>
+                    {mouseOverColumn.mouseOverTitleSupTitle}
+                  </Text>
+                )}
+                <Text size="xxsmall" color="white" style={{ textTransform: 'capitalize' }}>
+                  {mouseOverColumn.mouseOverTitle || mouseOverColumn.mainTitle || mouseOverColumn.title}
+                </Text>
+              </Box>
+            </ColumnHighlightTitle>
+          )}
+        </ColumnHighlight>
+      )}
+      <Table
+        isPrint={isPrintView}
+        onMouseOut={() => handleTableMouseOut()}
+        onBlur={() => handleTableMouseOut()}
+        ref={tableRef}
+      >
         <TableHeader ref={headerRef}>
           <TableRow>
             {headerColumnsAux && headerColumnsAux.map(
@@ -302,6 +388,8 @@ export function EntitiesTable({
                   first={i === 0}
                   last={i === headerColumnsAux.length - 1}
                   plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
+                  onMouseOver={col.type === 'topicPosition' ? (evt) => handleColumnMouseOver(evt, col, true) : null}
+                  onFocus={col.type === 'topicPosition' ? (evt) => handleColumnMouseOver(evt, col, true) : null}
                 >
                   <Box fill={false} flex={{ grow: 0 }} justify="start">
                     {col.type === 'main' && (
@@ -318,6 +406,10 @@ export function EntitiesTable({
                           col,
                           searchedEntities,
                         )}
+                        onDropChange={(open) => {
+                          console.log('open onDropChange', open)
+                          setDropOpen(open);
+                        }}
                         onUpdateFilterOptions={
                           (options) => onUpdateColumnFilters({
                             column: col,
@@ -347,6 +439,8 @@ export function EntitiesTable({
                   first={i === 0}
                   last={i === headerColumnsAux.length - 1}
                   plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
+                  onMouseOver={col.type === 'topicPosition' ? (evt) => handleColumnMouseOver(evt, col, true) : null}
+                  onFocus={col.type === 'topicPosition' ? (evt) => handleColumnMouseOver(evt, col, true) : null}
                 >
                   {col.id && entity[col.id] && (
                     <TableCellBodyInner>

@@ -3,6 +3,14 @@ import { reduce } from 'lodash/collection';
 import { TEXT_TRUNCATE } from 'themes/config';
 
 export const lowerCase = (str) => toLower(str);
+export const capitalize = (str) => str
+  && str.split(' ').reduce(
+    (m, word) => ([
+      ...m,
+      String(word[0]).toUpperCase() + String(lowerCase(word)).slice(1),
+    ]),
+    [],
+  ).join(' ');
 
 export const getPathFromUrl = (url) => url.split(/[?#]/)[0];
 

@@ -35,7 +35,7 @@ const ColumnButton = styled(ButtonFlatIconOnly)`
   background-color: ${({ theme, isActive }) => isActive ? theme.global.colors.highlight : 'transparent'};
   &:hover {
     color: ${({ isActive }) => isActive ? 'white' : 'inherit'};
-    background-color: ${({ theme, isActive }) => isActive ? theme.global.colors.highlightHover : 'transparent'};
+    background-color: ${({ theme, isActive }) => isActive ? theme.global.colors.highlightHover : '#EDEFF0'};
   }
 `;
 
@@ -73,7 +73,12 @@ const BodyInDrop = styled.div`
   overflow-y: auto;
 `;
 
-export function CellHeaderSmart({ column, filterOptions, onUpdateFilterOptions }) {
+export function CellHeaderSmart({
+  column,
+  filterOptions,
+  onUpdateFilterOptions,
+  onDropChange,
+}) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
   const sortOrderOption = column.onSort && SORT_ORDER_OPTIONS.find(
@@ -91,13 +96,19 @@ export function CellHeaderSmart({ column, filterOptions, onUpdateFilterOptions }
 
   return (
     <Box direction="row" align="center" justify={align} flex={false} wrap>
-      <TextPrint weight={500} size="xsmall" textAlign={align} wordBreak="keep-all">
+      <TextPrint weight={500} size="xxsmall" textAlign={align} wordBreak="keep-all">
         {column.label || column.title}
       </TextPrint>
       {column.filterOptions && (
         <Box flex={false} style={{ position: 'relative' }}>
           <DropAnchor ref={ref} />
-          <ColumnButton onClick={() => setOpen(true)} isActive={isActive}>
+          <ColumnButton
+            onClick={() => {
+              if (onDropChange) onDropChange(true);
+              setOpen(true);
+            }}
+            isActive={isActive}
+          >
             <Box gap="2px" justify="center" align="center" fill>
               <Line size="L" isActive={isActive} />
               <Line size="M" isActive={isActive} />
@@ -111,8 +122,14 @@ export function CellHeaderSmart({ column, filterOptions, onUpdateFilterOptions }
           target={ref.current}
           responsive={false}
           align={{ top: 'top', right: 'right' }}
-          onClickOutside={() => setOpen(false)}
-          onEsc={() => setOpen(false)}
+          onClickOutside={() => {
+            setOpen(false);
+            if (onDropChange) onDropChange(false);
+          }}
+          onEsc={() => {
+            setOpen(false);
+            if (onDropChange) onDropChange(false);
+          }}
           style={{
             animation: 'none',
             opacity: '1',
@@ -125,7 +142,10 @@ export function CellHeaderSmart({ column, filterOptions, onUpdateFilterOptions }
         >
           <DropContent>
             <DropHeader
-              onClose={() => setOpen(false)}
+              onClose={() => {
+                setOpen(false);
+                if (onDropChange) onDropChange(false);
+              }}
               title={column.filterOptionsTitle || column.mainTitle || 'Column options'}
             />
             <BodyInDrop>
@@ -196,6 +216,7 @@ export function CellHeaderSmart({ column, filterOptions, onUpdateFilterOptions }
 CellHeaderSmart.propTypes = {
   column: PropTypes.object,
   filterOptions: PropTypes.array,
+  onDropChange: PropTypes.func,
   onUpdateFilterOptions: PropTypes.func,
 };
 

@@ -18,6 +18,7 @@ import {
   regExMultipleWords,
   truncateText,
   startsWith,
+  capitalize,
 } from 'utils/string';
 import asList from 'utils/as-list';
 import isNumber from 'utils/is-number';
@@ -1328,14 +1329,14 @@ export const getIndicatorShortTitle = (title) => {
       short = short.split('-')[1].trim();
     }
   }
-  return short;
+  return capitalize(short);
 };
 export const getIndicatorMainTitle = (title) => {
   let short = title;
   if (short.indexOf(':') > -1) {
     short = short.split(':')[0].trim();
   }
-  return short;
+  return capitalize(short);
 };
 export const getIndicatorNiceTitle = (title) => {
   const no = getIndicatorNumber(title);
@@ -1344,7 +1345,7 @@ export const getIndicatorNiceTitle = (title) => {
 };
 export const getIndicatorSecondaryTitle = (title) => {
   if (title && title.indexOf(':') > -1) {
-    return title.split(':')[1].trim();
+    return capitalize(title.split(':')[1].trim());
   }
   return null;
 };
