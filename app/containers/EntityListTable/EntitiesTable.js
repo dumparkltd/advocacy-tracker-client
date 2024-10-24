@@ -65,7 +65,7 @@ const TableCellHeader = styled.th`
   height: 100%;
   text-align: start;
   vertical-align: bottom;
-  border-bottom: solid 1px;
+  border-bottom: 1px solid;
   border-bottom-color: ${({ utility, col, isActive }) => {
     if (utility && col.type === 'options') return 'rgba(0,0,0,0.05)';
     if (utility) return 'transparent';
@@ -93,7 +93,8 @@ const TableCellBody = styled.td`
   text-align: inherit;
   height: 100%;
   text-align: start;
-  border-bottom: ${({ isActive }) => !isActive ? 'solid 1px #DADADA' : 'none'};
+  border-bottom: 1px solid;
+  border-bottom-color: ${({ isActive }) => !isActive ? '#DADADA' : 'transparent'};
   padding-left: ${({ col, first, plain }) => {
     if (plain) return 0;
     return (col.align !== 'end' && !first) ? 8 : 4;
