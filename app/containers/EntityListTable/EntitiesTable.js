@@ -66,9 +66,10 @@ const TableCellHeader = styled.th`
   text-align: start;
   vertical-align: bottom;
   border-bottom: solid 1px;
-  border-bottom-color: ${({ utility, col }) => {
+  border-bottom-color: ${({ utility, col, isActive }) => {
     if (utility && col.type === 'options') return 'rgba(0,0,0,0.05)';
     if (utility) return 'transparent';
+    if (isActive) return 'rgba(0,0,0,0.1)';
     return 'rgba(0,0,0,0.33)';
   }};
   padding-left: ${({ col, first, plain }) => {
@@ -92,7 +93,7 @@ const TableCellBody = styled.td`
   text-align: inherit;
   height: 100%;
   text-align: start;
-  border-bottom: solid 1px #DADADA;
+  border-bottom: ${({ isActive }) => !isActive ? 'solid 1px #DADADA' : 'none'};
   padding-left: ${({ col, first, plain }) => {
     if (plain) return 0;
     return (col.align !== 'end' && !first) ? 8 : 4;
@@ -107,9 +108,7 @@ const TableCellBody = styled.td`
   overflow: hidden;
   width: ${({ col }) => col && col.colWidth}};
 `;
-const TableCellBodyInner = styled((p) => <Box {...p} />)`
-  padding: 6px 0;
-`;
+const TableCellBodyInner = styled((p) => <Box {...p} />)``;
 
 const ColumnOptionsOuter = styled.div`
   position: absolute;
@@ -126,10 +125,9 @@ const ColumnHighlight = styled.div`
   top: 0;
   width: ${({ columnWidth }) => columnWidth}px;
   left: ${({ columnOffset }) => columnOffset}px;
-  height: ${({ columnHeight }) => columnHeight}px;
+  height: ${({ columnHeight }) => columnHeight + 8}px;
   box-shadow: 0px 2px 4px rgba(0,0,0,0.20);
   pointer-events: none;
-  margin-top: -1px
 `;
 const ColumnHighlightTitle = styled.div`
   display: block;
@@ -168,7 +166,7 @@ const getColWidth = ({ col, count, topicPositionLength }) => {
   } else if (col.type === 'topicPosition') {
     result = '33px';
   } else if (topicPositionLength > 0) {
-    if (col.type === 'main') {
+    if (col.type === 'main' && (count - topicPositionLength > 2)) {
       result = '25%';
     }
   } else if (count > 2) {
@@ -388,6 +386,7 @@ export function EntitiesTable({
                   first={i === 0}
                   last={i === headerColumnsAux.length - 1}
                   plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
+                  isActive={col.id === columnMouseOver}
                   onMouseOver={col.type === 'topicPosition' ? (evt) => handleColumnMouseOver(evt, col, true) : null}
                   onFocus={col.type === 'topicPosition' ? (evt) => handleColumnMouseOver(evt, col, true) : null}
                 >
@@ -407,7 +406,6 @@ export function EntitiesTable({
                           searchedEntities,
                         )}
                         onDropChange={(open) => {
-                          console.log('open onDropChange', open)
                           setDropOpen(open);
                         }}
                         onUpdateFilterOptions={
@@ -438,6 +436,7 @@ export function EntitiesTable({
                   col={col}
                   first={i === 0}
                   last={i === headerColumnsAux.length - 1}
+                  isActive={col.id === columnMouseOver}
                   plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
                   onMouseOver={col.type === 'topicPosition' ? (evt) => handleColumnMouseOver(evt, col, true) : null}
                   onFocus={col.type === 'topicPosition' ? (evt) => handleColumnMouseOver(evt, col, true) : null}
