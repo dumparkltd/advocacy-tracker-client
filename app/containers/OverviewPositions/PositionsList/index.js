@@ -80,8 +80,20 @@ const Label = styled.span`
   font-size: ${({ theme }) => theme.text.xsmall.size};
 `;
 
-const prepareDropdownOptions = (entities, query) => entities
-  ? sortEntities(entities, 'asc', 'title', null, false).reduce(
+const prepareDropdownOptions = (entities, query, countries) => entities
+  ? sortEntities(
+    entities.filter(
+      (entity) => !!countries.find(
+        (country) => country.get('associations') && !!country.get('associations').find(
+          (associationId) => qe(associationId, entity.get('id'))
+        )
+      )
+    ),
+    'asc',
+    'title',
+    null,
+    false,
+  ).reduce(
     (memo, entity) => ([
       ...memo, {
         title: getEntityTitle(entity),
@@ -92,6 +104,7 @@ const prepareDropdownOptions = (entities, query) => entities
     [],
   )
   : [];
+
 const getActiveSupportLevels = (locationQuery, indicatorId) => {
   const locationQueryValue = locationQuery.get('indicators');
   if (!locationQueryValue) return null;
@@ -316,6 +329,7 @@ export function PositionsList({
                     options={prepareDropdownOptions(
                       actorsByType.get(parseInt(ACTORTYPES.REG, 10)),
                       associationRegionQuery,
+                      countries,
                     )}
                     onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.REG })}
                     onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.REG })}
@@ -326,6 +340,7 @@ export function PositionsList({
                     options={prepareDropdownOptions(
                       actorsByType.get(parseInt(ACTORTYPES.GROUP, 10)),
                       associationGroupQuery,
+                      countries,
                     )}
                     onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.GROUP })}
                     onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.GROUP })}
