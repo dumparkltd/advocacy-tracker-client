@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
@@ -12,7 +12,9 @@ import asArray from 'utils/as-array';
 import DropHeader from './DropHeader';
 import DropBody from './DropBody';
 
-const Styled = styled((p) => <Box {...p} />)`
+const Styled = styled(
+  React.forwardRef((p, ref) => <Box plain {...p} ref={ref} />)
+)`
   position: relative;
 `;
 
@@ -63,19 +65,26 @@ const BodyInDrop = styled.div`
   bottom: 0;
   overflow-y: auto;
 `;
+// const ColumnOptionsDropAnchor = styled.div`
+//   position: absolute;
+//   top: -${({ theme }) => theme.global.edgeSize.ms};
+//   right: -${({ theme }) => theme.global.edgeSize.ms};
+//   margin-top: ${({ theme }) => theme.global.edgeSize.xsmall};
+//   width: 2px;
+//   height: 2px;
+//   background: red;
+// `;
 export function CellHeaderAuxColumns({
-  column,
   columnOptions,
   onUpdate,
-  open,
-  setOpen,
-  dropAnchorReference,
+  // theme,
 }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
   const size = React.useContext(ResponsiveContext);
-  const { align = 'start' } = column;
   return (
-    <Styled direction="row" align="center" justify={align}>
-      <BoxPrint printHide>
+    <Styled ref={ref}>
+      <BoxPrint margin={{ right: 'ms', top: 'ms' }} printHide>
         <AuxButton onClick={() => setOpen(true)}>
           <Box gap="2px" direction="row" justify="center" align="center" fill>
             <Dot />
@@ -83,56 +92,57 @@ export function CellHeaderAuxColumns({
             <Dot />
           </Box>
         </AuxButton>
-        {dropAnchorReference && dropAnchorReference.current && open && isMinSize(size, 'medium') && (
-          <Drop
-            target={dropAnchorReference.current}
-            responsive={false}
-            align={{ top: 'top', right: 'right' }}
-            onClickOutside={() => setOpen(false)}
-            onEsc={() => setOpen(false)}
-            style={{
-              animation: 'none',
-              opacity: '1',
-              zIndex: '999999999',
-            }}
-            animate={false}
-            overflow="hidden"
-            inline
-          >
-            <DropContent>
-              <HeaderInDrop>
-                <DropHeader onClose={() => setOpen(false)} />
-              </HeaderInDrop>
-              <BodyInDrop>
-                <DropBody
-                  options={columnOptions}
-                  onUpdate={(columnIds, checked) => {
-                    let changedToHidden = [];
-                    let changedToVisible = [];
-                    asArray(columnIds).forEach((columnId) => {
-                      if (checked) {
-                        changedToVisible = [...changedToVisible, columnId];
-                      }
-                      if (!checked) {
-                        changedToHidden = [...changedToHidden, columnId];
-                      }
-                    });
-                    const changedColumns = [...changedToVisible, ...changedToHidden];
-                    const updatedColumnOptions = columnOptions.map((col) => {
-                      const colChanged = changedColumns.indexOf(col.id) > -1;
-                      return ({
-                        ...col,
-                        changed: colChanged,
-                      });
-                    });
-                    onUpdate(updatedColumnOptions);
-                  }}
-                />
-              </BodyInDrop>
-            </DropContent>
-          </Drop>
-        )}
       </BoxPrint>
+      {ref && ref.current && open && isMinSize(size, 'medium') && (
+        <Drop
+          target={ref.current}
+          responsive={false}
+          align={{ top: 'top', right: 'right' }}
+          onClickOutside={() => setOpen(false)}
+          onEsc={() => setOpen(false)}
+          style={{
+            animation: 'none',
+            opacity: '1',
+            zIndex: '999999999',
+          }}
+          animate={false}
+          overflow="hidden"
+          inline
+          stretch={false}
+        >
+          <DropContent>
+            <HeaderInDrop>
+              <DropHeader onClose={() => setOpen(false)} />
+            </HeaderInDrop>
+            <BodyInDrop>
+              <DropBody
+                options={columnOptions}
+                onUpdate={(columnIds, checked) => {
+                  let changedToHidden = [];
+                  let changedToVisible = [];
+                  asArray(columnIds).forEach((columnId) => {
+                    if (checked) {
+                      changedToVisible = [...changedToVisible, columnId];
+                    }
+                    if (!checked) {
+                      changedToHidden = [...changedToHidden, columnId];
+                    }
+                  });
+                  const changedColumns = [...changedToVisible, ...changedToHidden];
+                  const updatedColumnOptions = columnOptions.map((col) => {
+                    const colChanged = changedColumns.indexOf(col.id) > -1;
+                    return ({
+                      ...col,
+                      changed: colChanged,
+                    });
+                  });
+                  onUpdate(updatedColumnOptions);
+                }}
+              />
+            </BodyInDrop>
+          </DropContent>
+        </Drop>
+      )}
     </Styled>
   );
 }
@@ -170,12 +180,8 @@ export function CellHeaderAuxColumns({
 // )}
 
 CellHeaderAuxColumns.propTypes = {
-  column: PropTypes.object,
   columnOptions: PropTypes.array,
   onUpdate: PropTypes.func,
-  setOpen: PropTypes.func,
-  open: PropTypes.bool,
-  dropAnchorReference: PropTypes.object,
 };
 
 export default CellHeaderAuxColumns;

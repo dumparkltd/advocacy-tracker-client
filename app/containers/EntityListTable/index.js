@@ -115,6 +115,7 @@ export function EntityListTable({
   reducePreviewItem,
   hiddenColumns,
   onUpdateHiddenColumns,
+  onUpdateColumnFilters,
 }) {
   if (!columns) return null;
   const size = React.useContext(ResponsiveContext);
@@ -345,6 +346,7 @@ export function EntityListTable({
           }
         }}
         onUpdateHiddenColumns={onUpdateHiddenColumns}
+        onUpdateColumnFilters={onUpdateColumnFilters}
         columnMaxValues={columnMaxValues}
         inSingleView={inSingleView}
         previewItemId={previewItemId}
@@ -466,6 +468,7 @@ EntityListTable.propTypes = {
   onSetPreviewContent: PropTypes.func,
   onSetPreviewItemId: PropTypes.func,
   onUpdateHiddenColumns: PropTypes.func,
+  onUpdateColumnFilters: PropTypes.func,
   hiddenColumns: PropTypes.object, // immutable List
 };
 

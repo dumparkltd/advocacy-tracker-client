@@ -101,7 +101,7 @@ const getActiveSupportLevels = (locationQuery, indicatorId) => {
       if (qe(value, indicatorId)) {
         const levels = queryValue.indexOf('=') > -1
           && queryValue.split('=')[1].split('|');
-        return [...memo, ...levels];
+        return levels ? [...memo, ...levels] : memo;
       }
       return memo;
     },
@@ -127,6 +127,7 @@ export function PositionsList({
   actorsByType,
   onUpdateAssociationQuery,
   locationQuery,
+  onUpdateColumnFilters,
 }) {
   const [search, setSearch] = useState('');
   useEffect(() => {
@@ -180,6 +181,7 @@ export function PositionsList({
           indicatorCount: indicators.size,
           positions: 'indicatorPositions',
           title,
+          align: 'center',
           mainTitle: getIndicatorMainTitle(indicator.getIn(['attributes', 'title'])),
           queryArg: 'indicators',
           queryValue: indicator.get('id'),
@@ -366,6 +368,7 @@ export function PositionsList({
                 <EntityListTable
                   entityPath={ROUTES.ACTOR}
                   reducePreviewItem={reducePreviewItem}
+                  onUpdateColumnFilters={onUpdateColumnFilters}
                   columns={[
                     {
                       id: 'main',
@@ -449,6 +452,7 @@ PositionsList.propTypes = {
   includeInofficialStatements: PropTypes.bool,
   onUpdateQuery: PropTypes.func,
   onUpdatePath: PropTypes.func,
+  onUpdateColumnFilters: PropTypes.func,
   associationRegionQuery: PropTypes.string,
   associationGroupQuery: PropTypes.string,
   actorsByType: PropTypes.object, // immutable Map
@@ -477,6 +481,11 @@ export function mapDispatchToProps(dispatch) {
     onSetIncludeActorMembers: (value) => dispatch(setIncludeActorMembers(value)),
     onUpdateQuery: (value) => dispatch(updateRouteQuery(value)),
     onUpdatePath: (path) => dispatch(updatePath(path)),
+    onUpdateColumnFilters: ({ column, addToFilters, removeFromFilters }) => {
+      console.log('column', column);
+      console.log('addToFilters', addToFilters);
+      console.log('removeFromFilters', removeFromFilters);
+    },
     onUpdateAssociationQuery: ({ value, type }) => {
       if (!value) {
         dispatch(updateRouteQuery({

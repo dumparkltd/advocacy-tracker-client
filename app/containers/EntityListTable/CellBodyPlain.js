@@ -6,7 +6,11 @@ import Dot from 'components/styled/Dot';
 
 const LabelWrap = styled((p) => <Box direction="row" gap="xsmall" align="center" {...p} />)``;
 const Link = styled((p) => <Button as="a" plain {...p} />)`
-  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
+  text-align: ${({ align }) => {
+    if (align === 'end') return 'right';
+    if (align === 'start') return 'left';
+    return 'center';
+  }};
   line-height: 12px;
 `;
 const Label = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
@@ -21,7 +25,7 @@ export function CellBodyPlain({
   const { value, color, path } = entity;
   const { align = 'start', primary } = column;
   return (
-    <Box>
+    <Box align={align}>
       {path && onEntityClick && (
         <Link
           href={path}
@@ -32,8 +36,8 @@ export function CellBodyPlain({
           title={value}
         >
           {color && (
-            <LabelWrap>
-              <Box flex={{ shrink: 0 }}>
+            <LabelWrap textAlign={align}>
+              <Box flex={{ shrink: 0 }} align={align}>
                 <Dot size={!value ? '33px' : null} color={color} />
               </Box>
               {value && (
@@ -53,8 +57,8 @@ export function CellBodyPlain({
       {(!path || !onEntityClick) && (
         <>
           {color && (
-            <LabelWrap>
-              <Box flex={{ shrink: 0 }}>
+            <LabelWrap textAlign={align}>
+              <Box flex={{ shrink: 0 }} align={align}>
                 <Dot size={!value ? '25px' : null} color={color} />
               </Box>
               {value && (

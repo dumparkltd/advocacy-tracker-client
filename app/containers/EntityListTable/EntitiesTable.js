@@ -41,7 +41,10 @@ const Table = styled.table`
     page-break-inside: auto;
   }
 `;
-const TableHeader = styled.thead``;
+const TableHeader = styled(
+  React.forwardRef((p, ref) => <thead {...p} ref={ref} />)
+)``;
+
 const TableBody = styled.tbody``;
 const TableRow = styled.tr`
   height: 100%;
@@ -50,31 +53,6 @@ const TableRow = styled.tr`
     page-break-inside: avoid;
   }
 `;
-const getColWidth = ({ col, count, topicPositionLength }) => {
-  let result = 'auto';
-  if (col.type === 'auxColumns') {
-    result = '22px';
-  } else if (col.type === 'topicPosition') {
-    result = '33px';
-  } else if (topicPositionLength > 0) {
-    if (col.type === 'main') {
-      result = '25%';
-    }
-  } else if (count > 2) {
-    if (col.type === 'main') {
-      result = '35%';
-    } else if (col.isSingleActionColumn) {
-      result = '25%';
-    }
-  }
-  // if (count === 4) {
-  //   return col.type === 'main' ? 30 : (70 / (count - 1)) * colSpan;
-  // }
-  // if (count > 4) {
-  //   return col.type === 'main' ? 25 : (75 / (count - 1)) * colSpan;
-  // }
-  return result;
-};
 // background-color: ${({ utility, col }) => {
 //   if (utility && col.type === 'options') return '#f9f9f9';
 //   return 'transparent';
@@ -132,11 +110,13 @@ const TableCellBodyInner = styled((p) => <Box {...p} />)`
   padding: 6px 0;
 `;
 
-const ColumnOptionsDropAnchor = styled.div`
+const ColumnOptionsOuter = styled.div`
   position: absolute;
-  top: -${({ theme }) => theme.global.edgeSize.ms};
   right: -${({ theme }) => theme.global.edgeSize.ms};
-  margin-top: ${({ theme }) => theme.global.edgeSize.xsmall};
+`;
+const ColumnOptionsInner = styled.div`
+  transform: translateY(-100%);
+  margin-top: -${({ theme }) => theme.global.edgeSize.xsmall};
 `;
 
 const MAX_VALUE_COUNTRIES = 100;
@@ -157,6 +137,33 @@ const getColorForColumn = (col, theme) => {
   }
   return scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[col.subject], false)(100);
 };
+
+const getColWidth = ({ col, count, topicPositionLength }) => {
+  let result = 'auto';
+  if (col.type === 'auxColumns') {
+    result = '22px';
+  } else if (col.type === 'topicPosition') {
+    result = '33px';
+  } else if (topicPositionLength > 0) {
+    if (col.type === 'main') {
+      result = '25%';
+    }
+  } else if (count > 2) {
+    if (col.type === 'main') {
+      result = '35%';
+    } else if (col.isSingleActionColumn) {
+      result = '25%';
+    }
+  }
+  // if (count === 4) {
+  //   return col.type === 'main' ? 30 : (70 / (count - 1)) * colSpan;
+  // }
+  // if (count > 4) {
+  //   return col.type === 'main' ? 25 : (75 / (count - 1)) * colSpan;
+  // }
+  return result;
+};
+
 const ID = 'entities-table';
 export function EntitiesTable({
   entities,
@@ -167,6 +174,7 @@ export function EntitiesTable({
   availableColumns,
   onEntityClick,
   onUpdateHiddenColumns,
+  onUpdateColumnFilters,
   columnMaxValues,
   inSingleView,
   theme,
@@ -176,7 +184,12 @@ export function EntitiesTable({
   sortedEntities,
   searchedEntities,
 }) {
-  const [columnOptionsOpen, setColumnOptionsOpen] = useState(false);
+  const headerRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(0);
+  useEffect(() => {
+    setHeaderHeight(headerRef.current.clientHeight);
+  });
+
   // console.log('sortedEntities', sortedEntities)
   // console.log('searchedEntities', searchedEntities && searchedEntities.toJS())
   useEffect(() => {
@@ -218,18 +231,17 @@ export function EntitiesTable({
   }, [previewItemId]);
   const size = React.useContext(ResponsiveContext);
   const isPrintView = usePrint();
-  const hasAuxColumns = !inSingleView && isMinSize(size, 'medium');
-  let headerColumnsAux = hasAuxColumns
+  const hasColumnOptions = !inSingleView && isMinSize(size, 'medium');
+  let headerColumnsAux = hasColumnOptions
     ? [
       ...visibleHeaderColumns,
       {
         id: 'auxColumns',
-        title: 'CC',
         type: 'auxColumns',
       },
     ]
     : visibleHeaderColumns;
-  let columnsAux = hasAuxColumns
+  let columnsAux = hasColumnOptions
     ? [
       ...visibleColumns,
       {
@@ -239,8 +251,7 @@ export function EntitiesTable({
     ]
     : visibleColumns;
   const headerColumnsByType = headerColumnsAux && groupBy(headerColumnsAux, 'type');
-  const ref = useRef(null);
-  console.log('headerColumnsAux', headerColumnsAux)
+  // console.log('headerColumnsAux', headerColumnsAux)
 
   const topicPositionLength = headerColumnsByType
     && headerColumnsByType.topicPosition
@@ -264,64 +275,67 @@ export function EntitiesTable({
       responsive={false}
       style={{ position: 'relative' }}
     >
-      <ColumnOptionsDropAnchor ref={ref} />
+      {hasColumnOptions && (
+        <ColumnOptionsOuter style={{ top: headerHeight }}>
+          <ColumnOptionsInner>
+            <CellHeaderAuxColumns
+              columnOptions={availableHeaderColumns
+                  && availableHeaderColumns.filter((column) => column.type !== 'main')
+              }
+              onUpdate={(options) => onUpdateHiddenColumns({
+                addToHidden: options.filter((o) => o.changed && !o.hidden).map((o) => o.id), // hide previously unhidden
+                removeFromHidden: options.filter((o) => o.changed && o.hidden).map((o) => o.id), // show previously hidden
+              })}
+            />
+          </ColumnOptionsInner>
+        </ColumnOptionsOuter>
+      )}
       <Table isPrint={isPrintView}>
-        {headerColumnsAux && (
-          <TableHeader>
-            <TableRow>
-              {headerColumnsAux.map(
-                (col, i) => {
-                  const checkedFilterOptions = col.filterOptions && checkColumnFilterOptions(
-                    col,
-                    searchedEntities,
-                  );
-                  console.log('checkedFilterOptions', col.id, checkedFilterOptions)
-                  return (
-                    <TableCellHeader
-                      key={i}
-                      scope="col"
-                      col={col}
-                      first={i === 0}
-                      last={i === headerColumnsAux.length - 1}
-                      plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
-                    >
-                      <Box fill={false} flex={{ grow: 0 }} justify="start">
-                        {col.type === 'main' && (
-                          <CellHeaderMain
-                            column={col}
-                            canEdit={canEdit && !isPrintView}
-                            isPrintView={isPrintView}
-                          />
+        <TableHeader ref={headerRef}>
+          <TableRow>
+            {headerColumnsAux && headerColumnsAux.map(
+              (col, i) => (
+                <TableCellHeader
+                  key={i}
+                  scope="col"
+                  col={col}
+                  first={i === 0}
+                  last={i === headerColumnsAux.length - 1}
+                  plain={col.type === 'topicPosition' || col.type === 'auxColumns' || col.type === 'spacer'}
+                >
+                  <Box fill={false} flex={{ grow: 0 }} justify="start">
+                    {col.type === 'main' && (
+                      <CellHeaderMain
+                        column={col}
+                        canEdit={canEdit && !isPrintView}
+                        isPrintView={isPrintView}
+                      />
+                    )}
+                    {col.type === 'topicPosition' && (
+                      <CellHeaderSmart
+                        column={col}
+                        filterOptions={col.filterOptions && checkColumnFilterOptions(
+                          col,
+                          searchedEntities,
                         )}
-                        {col.type === 'auxColumns' && (
-                          <CellHeaderAuxColumns
-                            dropAnchorReference={ref}
-                            column={col}
-                            columnOptions={availableHeaderColumns
-                                && availableHeaderColumns.filter((column) => column.type !== 'main')
-                            }
-                            onUpdate={(options) => onUpdateHiddenColumns({
-                              addToHidden: options.filter((o) => o.changed && !o.hidden).map((o) => o.id), // hide previously unhidden
-                              removeFromHidden: options.filter((o) => o.changed && o.hidden).map((o) => o.id), // show previously hidden
-                            })}
-                            open={columnOptionsOpen}
-                            setOpen={setColumnOptionsOpen}
-                          />
-                        )}
-                        {col.type === 'topicPosition' && (
-                          <CellHeaderSmart column={col} />
-                        )}
-                        {col.type !== 'main' && col.type !== 'auxColumns' && col.type !== 'topicPosition' && (
-                          <CellHeaderPlain column={col} />
-                        )}
-                      </Box>
-                    </TableCellHeader>
-                  );
-                }
-              )}
-            </TableRow>
-          </TableHeader>
-        )}
+                        onUpdateFilterOptions={
+                          (options) => onUpdateColumnFilters({
+                            column: col,
+                            addToFilters: options.filter((o) => o.changed && !o.active).map((o) => o.value), // hide previously unhidden
+                            removeFromFilters: options.filter((o) => o.changed && o.active).map((o) => o.value), // show previously hidden
+                          })
+                        }
+                      />
+                    )}
+                    {col.type !== 'main' && col.type !== 'topicPosition' && (
+                      <CellHeaderPlain column={col} />
+                    )}
+                  </Box>
+                </TableCellHeader>
+              )
+            )}
+          </TableRow>
+        </TableHeader>
         <TableBody>
           {entities.length > 0 && entities.map((entity, key) => (
             <TableRow key={key}>
@@ -487,6 +501,7 @@ EntitiesTable.propTypes = {
   inSingleView: PropTypes.bool,
   onEntityClick: PropTypes.func,
   onUpdateHiddenColumns: PropTypes.func,
+  onUpdateColumnFilters: PropTypes.func,
   previewItemId: PropTypes.string,
   reducePreviewItem: PropTypes.func,
   onSetPreviewContent: PropTypes.func,

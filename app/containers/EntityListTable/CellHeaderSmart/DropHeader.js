@@ -21,25 +21,30 @@ const CloseButton = styled((p) => <Button plain {...p} />)`
     opacity: 0.9;
   };
 `;
-export function DropHeader({ onClose }) {
+export function DropHeader({ onClose, title }) {
   return (
     <Box
       pad={{ horizontal: 'ms', top: 'ms' }}
       direction="row"
-      justify="between"
+      justify={title ? 'between' : 'end'}
       align="center"
       responsive={false}
       flex={{ shrink: 0 }}
     >
-      <DropLayerTitle>Configure columns</DropLayerTitle>
-      <CloseButton onClick={() => onClose()}>
-        <Icon name="close" size="25px" />
-      </CloseButton>
+      {title && (
+        <DropLayerTitle>{title}</DropLayerTitle>
+      )}
+      {onClose && (
+        <CloseButton onClick={() => onClose()}>
+          <Icon name="close" size="25px" />
+        </CloseButton>
+      )}
     </Box>
   );
 }
 
 DropHeader.propTypes = {
+  title: PropTypes.string,
   onClose: PropTypes.func,
 };
 
