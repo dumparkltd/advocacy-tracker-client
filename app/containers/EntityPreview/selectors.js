@@ -6,15 +6,21 @@ import {
 } from 'themes/config';
 import {
   selectEntity,
+  selectEntities,
   selectIndicators,
   selectIndicatorConnections,
   selectActionIndicatorsGroupedByAction,
   selectActionIndicatorsGroupedByIndicator,
   selectActionIndicatorsGroupedByActionAttributes,
+  selectTaxonomiesSorted,
+  selectCategories,
 } from 'containers/App/selectors';
 
 import qe from 'utils/quasi-equals';
-import { setIndicatorConnections } from 'utils/entities';
+import {
+  setIndicatorConnections,
+  prepareTaxonomiesIsAssociated,
+} from 'utils/entities';
 
 const selectIndicatorAssociations = createSelector(
   (state, { id }) => id,
@@ -111,3 +117,17 @@ export const selectPreviewEntity = createSelector(
 //     return null;
 //   }
 // );
+export const selectViewTaxonomies = createSelector(
+  (state, id) => id,
+  selectTaxonomiesSorted,
+  selectCategories,
+  (state) => selectEntities(state, API.ACTION_CATEGORIES),
+  (id, taxonomies, categories, associations) => prepareTaxonomiesIsAssociated(
+    taxonomies,
+    categories,
+    associations,
+    'tags_actions',
+    'measure_id',
+    id,
+  )
+);
