@@ -14,7 +14,7 @@ import EntityForm from 'containers/EntityForm';
 export function FormWrapper({
   viewDomain,
   model,
-  fields,
+  fieldsByStep,
   onServerErrorDismiss,
   onErrorDismiss,
   handleSubmitFail,
@@ -48,19 +48,21 @@ export function FormWrapper({
           onDismiss={onServerErrorDismiss}
         />
       )}
-      {(saving || !fields) && <Loading />}
-      {fields && (
+      {(saving || !fieldsByStep) && <Loading />}
+      {fieldsByStep && (
         <EntityForm
           model={model}
           inModal={inModal}
           formData={viewDomain.getIn(['form', 'data'])}
+          formDataTracked={viewDomain.getIn(['form', 'forms', 'data'])}
           saving={saving}
           handleSubmit={handleSubmit}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
           handleUpdate={handleUpdate}
-          fields={fields}
+          fieldsByStep={fieldsByStep}
           scrollContainer={scrollContainer}
+          isNewEntityView
         />
       )}
       {saving && <Loading />}
@@ -74,7 +76,7 @@ FormWrapper.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   viewDomain: PropTypes.object,
-  fields: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+  fieldsByStep: PropTypes.oneOfType([PropTypes.array, PropTypes.bool]),
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   scrollContainer: PropTypes.object,

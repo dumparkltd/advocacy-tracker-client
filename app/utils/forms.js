@@ -979,6 +979,7 @@ export const getFormField = ({
     placeholder: appMessages.placeholders[placeholder || attribute] && formatMessage(appMessages.placeholders[placeholder || attribute]),
     label: appMessages.attributes[label || attribute] && formatMessage(appMessages.attributes[label || attribute]),
     validators: {},
+    hasrequired: !!required,
     errorMessages: {},
     hint,
   };

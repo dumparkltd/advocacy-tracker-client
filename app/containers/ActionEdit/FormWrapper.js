@@ -19,7 +19,7 @@ import {
 export function FormWrapper({
   viewDomain,
   model,
-  fields,
+  fieldsByStep,
   onServerErrorDismiss,
   onErrorDismiss,
   handleSubmitFail,
@@ -49,18 +49,19 @@ export function FormWrapper({
         />
       )}
       {deleteError && <Messages type="error" messages={deleteError} />}
-      {(saveSending || deleteSending || !fields) && <Loading />}
-      {fields && (
+      {(saveSending || deleteSending || !fieldsByStep) && <Loading />}
+      {fieldsByStep && (
         <EntityForm
           model={model}
           formData={viewDomain.getIn(['form', 'data'])}
+          formDataTracked={viewDomain.getIn(['form', 'forms', 'data'])}
           saving={saveSending}
           handleSubmit={handleSubmit}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
           handleUpdate={handleUpdate}
           handleDelete={handleDelete}
-          fields={fields}
+          fieldsByStep={fieldsByStep}
           scrollContainer={scrollContainer}
         />
       )}
@@ -76,7 +77,7 @@ FormWrapper.propTypes = {
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func,
   viewDomain: PropTypes.object,
-  fields: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+  fieldsByStep: PropTypes.oneOfType([PropTypes.array, PropTypes.bool]),
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   scrollContainer: PropTypes.object,

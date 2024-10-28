@@ -525,13 +525,19 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                 handleDelete={canDelete ? () => handleDelete(typeId) : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
-                fields={dataReady && {
-                  header: {
-                    main: this.getHeaderMainFields(viewEntity, isAdmin),
-                    aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
+                scrollContainer={this.scrollContainer.current}
+                fieldsByStep={[
+                  {
+                    id: 'header-main',
+                    fields: this.getHeaderMainFields(viewEntity, isAdmin),
                   },
-                  body: {
-                    main: this.getBodyMainFields({
+                  {
+                    id: 'header-aside',
+                    fields: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
+                  },
+                  {
+                    id: 'body-main',
+                    fields: this.getBodyMainFields({
                       entity: viewEntity,
                       connectedTaxonomies,
                       actorsByActortype,
@@ -542,7 +548,10 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       entityIndicatorConnections,
                       isAdmin,
                     }),
-                    aside: this.getBodyAsideFields(
+                  },
+                  {
+                    id: 'body-aside',
+                    fields: this.getBodyAsideFields(
                       viewEntity,
                       taxonomies,
                       connectedTaxonomies,
@@ -552,8 +561,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                       isAdmin,
                     ),
                   },
-                }}
-                scrollContainer={this.scrollContainer.current}
+                ]}
               />
             )
           }
