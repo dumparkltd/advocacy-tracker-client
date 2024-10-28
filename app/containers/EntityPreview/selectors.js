@@ -6,20 +6,16 @@ import {
 } from 'themes/config';
 import {
   selectEntity,
-  selectEntities,
   selectIndicators,
   selectIndicatorConnections,
   selectActionIndicatorsGroupedByAction,
   selectActionIndicatorsGroupedByIndicator,
   selectActionIndicatorsGroupedByActionAttributes,
-  selectTaxonomiesSorted,
-  selectCategories,
 } from 'containers/App/selectors';
 
 import qe from 'utils/quasi-equals';
 import {
   setIndicatorConnections,
-  prepareTaxonomiesIsAssociated,
 } from 'utils/entities';
 
 const selectIndicatorAssociations = createSelector(
