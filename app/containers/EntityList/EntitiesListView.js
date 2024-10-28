@@ -112,6 +112,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       searchQuery,
       isAdmin,
       onScrollToTop,
+      onEntityClick,
     } = this.props;
 
     const { viewType } = this.state;
@@ -508,6 +509,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             ]}
             entities={entityActors.get(parseInt(viewTypeClean, 10))}
             entityPath={ROUTES.ACTOR}
+            onEntityClick={onEntityClick}
             entityTitle={{
               single: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].single),
               plural: intl.formatMessage(appMessages.entities[`actors_${viewTypeClean}`].plural),
@@ -560,6 +562,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
               ]}
               entities={entityUsers}
               entityPath={ROUTES.USER}
+              onEntityClick={onEntityClick}
               entityTitle={{
                 single: intl.formatMessage(appMessages.entities.users.single),
                 plural: intl.formatMessage(appMessages.entities.users.plural),
@@ -612,6 +615,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             canEdit={isMember}
             isVisitor={isVisitor}
 
+            onEntityClick={onEntityClick}
             onEntitySelect={onEntitySelect}
             onEntitySelectAll={onEntitySelectAll}
             onResetScroll={onScrollToTop}
@@ -659,6 +663,7 @@ EntitiesListView.propTypes = {
   allEntityCount: PropTypes.number,
   // functions
   onEntitySelect: PropTypes.func.isRequired,
+  onEntityClick: PropTypes.func.isRequired,
   onEntitySelectAll: PropTypes.func.isRequired,
   onDismissError: PropTypes.func.isRequired,
   onSetMapSubject: PropTypes.func,

@@ -55,6 +55,7 @@ import {
   saveMultipleEntities,
   newMultipleEntities,
   deleteMultipleEntities,
+  updatePath,
 } from 'containers/App/actions';
 import appMessages from 'containers/App/messages';
 
@@ -664,6 +665,11 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                     this.onHideDeleteConfirm();
                     onEntitySelectAll(ids);
                   }}
+                  onEntityClick={(id, path, componentId) => onEntityClick(
+                    {
+                      id, path, componentId, errors: viewDomain.get('errors'),
+                    }
+                  )}
                   onDismissError={onDismissError}
                   typeId={typeId}
                   hasFilters={filters && filters.length > 0}
@@ -690,7 +696,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 config={config}
                 dataReady={dataReady}
                 onEntityClick={(id, path, componentId) => onEntityClick(
-                  id, path, componentId, viewDomain.get('errors')
+                  {
+                    id, path, componentId, errors: viewDomain.get('errors'),
+                  }
                 )}
                 typeId={typeId}
                 hasFilters={filters && filters.length > 0}
@@ -894,7 +902,9 @@ function mapDispatchToProps(dispatch, props) {
     onEntitySelect: (id, checked) => {
       dispatch(selectEntity({ id, checked }));
     },
-    onEntityClick: (id, path, componentId, errors) => {
+    onEntityClick: ({
+      id, path, componentId, errors,
+    }) => {
       if (errors && errors.size) {
         dispatch(resetProgress());
         errors.forEach((error, key) => {
@@ -903,7 +913,11 @@ function mapDispatchToProps(dispatch, props) {
           }
         });
       }
-      dispatch(setListPreview(`${componentId}|${path}|${id}`));
+      if (componentId) {
+        dispatch(setListPreview(`${componentId}|${path}|${id}`));
+      } else {
+        dispatch(updatePath(`${path || props.config.clientPath}/${id}`));
+      }
     },
     onEntitySelectAll: (ids) => {
       dispatch(selectMultipleEntities(ids));

@@ -116,9 +116,10 @@ export function EntityListTable({
   hiddenColumns,
   onUpdateHiddenColumns,
   onUpdateColumnFilters,
+  onEntityClick,
 }) {
   if (!columns) return null;
-  if (!entityTitle) return null;
+
   const size = React.useContext(ResponsiveContext);
   // list options
   const {
@@ -342,7 +343,10 @@ export function EntityListTable({
         visibleColumns={visibleColumns || []}
         availableColumns={availableColumns || []}
         onEntityClick={(id, path, componentId) => {
-          if (onSetPreviewItemId && componentId) {
+          if (inSingleView && onEntityClick) {
+            onEntityClick(id, path);
+          }
+          if (!inSingleView && onSetPreviewItemId && componentId) {
             onSetPreviewItemId(`${componentId}|${path}|${id}`);
           }
         }}
@@ -355,7 +359,7 @@ export function EntityListTable({
         onSetPreviewContent={onSetPreviewContent}
       />
       <ListEntitiesMain>
-        {listEmpty && (
+        {entityTitle && listEmpty && (
           <ListEntitiesEmpty>
             {!listEmptyAfterQuery && (
               <FormattedMessage
@@ -439,6 +443,7 @@ EntityListTable.propTypes = {
   headerColumnsUtility: PropTypes.array,
   canEdit: PropTypes.bool,
   onPageSelect: PropTypes.func,
+  onEntityClick: PropTypes.func,
   onPageItemsSelect: PropTypes.func,
   onEntitySelect: PropTypes.func,
   onEntitySelectAll: PropTypes.func,
