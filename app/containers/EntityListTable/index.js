@@ -118,6 +118,7 @@ export function EntityListTable({
   onUpdateColumnFilters,
 }) {
   if (!columns) return null;
+  if (!entityTitle) return null;
   const size = React.useContext(ResponsiveContext);
   // list options
   const {

@@ -314,19 +314,19 @@ export function EntitiesTable({
     && headerColumnsByType.topicPosition
     && headerColumnsByType.topicPosition.length;
 
-  headerColumnsAux = headerColumnsAux.map((col) => ({
+  headerColumnsAux = headerColumnsAux && headerColumnsAux.map((col) => ({
     ...col,
     colWidth: getColWidth(
       { col, count: headerColumnsAux.length, topicPositionLength }
     ),
   }));
-  columnsAux = columnsAux.map((col) => ({
+  columnsAux = columnsAux && headerColumnsAux && columnsAux.map((col) => ({
     ...col,
     colWidth: getColWidth(
       { col, count: headerColumnsAux.length, topicPositionLength }
     ),
   }));
-  const mouseOverColumn = headerColumnsAux.find((col) => col.id === columnMouseOver);
+  const mouseOverColumn = headerColumnsAux && headerColumnsAux.find((col) => col.id === columnMouseOver);
   return (
     <Box
       fill="horizontal"
@@ -430,7 +430,7 @@ export function EntitiesTable({
         <TableBody>
           {entities.length > 0 && entities.map((entity, key) => (
             <TableRow key={key}>
-              {columnsAux.map((col, i) => (
+              {columnsAux && columnsAux.map((col, i) => (
                 <TableCellBody
                   key={i}
                   scope="row"

@@ -21,50 +21,46 @@ export function PreviewCountryTopicStatementList({ content, onUpdatePath }) {
       responsive={false}
       flex={{ shrink: 0 }}
     >
-      <Box gap="medium">
-        <Box fill="horizontal" direction="row" justify="between" align="end">
+      {options && (
+        <Box>
+          {options.map((option) => (
+            <MapOption
+              key={option.id}
+              option={option}
+            />
+          ))}
+        </Box>
+      )}
+      {indicatorPositions && indicatorPositions.length > 0 && (
+        <Box gap="medium">
           <Box>
             <SectionTitle>
               <FormattedMessage {...messages.countryTopicStatementList.latestSectionTitle} />
             </SectionTitle>
           </Box>
-          {options && (
-            <Box direction="column" justify="end">
-              {options.map((option) => (
-                <MapOption
-                  key={option.id}
-                  option={option}
-                />
-              ))}
-            </Box>
-          )}
-        </Box>
-        {indicatorPositions && (
           <Box>
             <EntitiesTable
-              headerColumns={indicatorPositionsTableColumns}
-              columns={indicatorPositionsTableColumns}
+              visibleHeaderColumns={indicatorPositionsTableColumns}
+              visibleColumns={indicatorPositionsTableColumns}
               entities={[indicatorPositions[0]]}
               inSingleView
               onEntityClick={(path) => onUpdatePath(path)}
             />
           </Box>
-        )}
-      </Box>
+        </Box>
+      )}
       {indicatorPositions && indicatorPositions.length > 1 && (
         <Box gap="medium">
-          <Box fill="horizontal" direction="row" justify="between" align="end">
-            <Box>
-              <SectionTitle>
-                <FormattedMessage {...messages.countryTopicStatementList.previousSectionTitle} />
-              </SectionTitle>
-            </Box>
+          <Box>
+            <SectionTitle>
+              <FormattedMessage {...messages.countryTopicStatementList.previousSectionTitle} />
+            </SectionTitle>
           </Box>
           {indicatorPositions && (
             <Box>
               <EntitiesTable
-                headerColumns={indicatorPositionsTableColumns}
-                columns={indicatorPositionsTableColumns}
+                visibleHeaderColumns={indicatorPositionsTableColumns}
+                visibleColumns={indicatorPositionsTableColumns}
                 entities={indicatorPositions.slice(1)}
                 inSingleView
                 onEntityClick={(path) => onUpdatePath(path)}
