@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
+import { Map } from 'immutable';
 // import { injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 import FieldFactory from 'components/fields/FieldFactory';
@@ -13,15 +14,14 @@ import qe from 'utils/quasi-equals';
 import {
   getActorConnectionField,
   getActionConnectionField,
-  hasTaxonomyCategories,
   getTaxonomyFields,
   getDateField,
   getTextField,
+  getUserConnectionField,
 } from 'utils/fields';
 import {
   checkActionAttribute,
   getActortypeColumns,
-  checkActorAttribute,
 } from 'utils/entities';
 
 import {
@@ -32,16 +32,15 @@ import {
 
 import {
   selectReady,
-  selectActorConnections,
+  selectTaxonomies,
+  // selectTaxonomiesWithCategories,
+  // selectIsUserAdmin,
+  selectCategories,
   selectActionConnections,
-  selectTaxonomiesWithCategories,
-  selectIsUserAdmin,
+  selectActorConnections,
 } from 'containers/App/selectors';
 
-import {
-  selectViewTaxonomies,
-  // selectPreviewContent,
-} from './selectors';
+// import { selectPreviewContent } from './selectors';
 
 export const DEPENDENCIES = [
   API.USERS,
@@ -50,6 +49,7 @@ export const DEPENDENCIES = [
   API.ACTORS,
   API.ACTIONS,
   API.ACTOR_ACTIONS,
+  API.ACTOR_CATEGORIES,
   API.MEMBERSHIPS,
   API.ACTION_CATEGORIES,
   API.INDICATORS,
@@ -59,18 +59,17 @@ export const DEPENDENCIES = [
 export function PreviewContent({
   item,
   columns,
+  taxonomies,
+  categories,
   actorConnections,
   actionConnections,
-  taxonomies,
-  // categories,
   // onSetPreviewItemId,
   // previewEntity,
   // onUpdatePath,
   onEntityClick,
-  viewTaxonomies,
   // intl,
   // dataReady,
-  isAdmin,
+  // isAdmin,
 }) {
   // check date comment for date spceficity
   // const DATE_SPECIFICITIES = ['y', 'm', 'd'];
@@ -86,15 +85,47 @@ export function PreviewContent({
     datesEqual = ds === de;
   }
   const typeId = item && item.getIn(['attributes', 'measuretype_id']);
-
   // console.log(item.toJS());
   // console.log(columns.toJS());
   // console.log(actionConnections.toJS());
+  // console.log(categories.toJS());
   // console.log(actorConnections.toJS());
-  let fields = hasTaxonomyCategories(viewTaxonomies) ? getTaxonomyFields(viewTaxonomies) : [];
+  let fields = [];
   fields = columns.reduce(
     (memo, column) => {
-      if (actorConnections && column.get('type') === 'associations' && item.get('associationsByType')) {
+      // categories action + actor
+      // categories
+      if (qe(column.get('type'), 'taxonomy') && item.get('categories')) {
+        const taxId = column.get('taxonomy_id').toString();
+        const itemTaxonomy = taxonomies.filter(
+          (tax) => qe(tax.get('id'), taxId)
+        );
+        if (itemTaxonomy) {
+          const taxonomyWithCategories = item.get('categories').reduce(
+            (memo2, categoryId) => {
+              const category = categories.get(categoryId.toString());
+              if (category && qe(category.getIn(['attributes', 'taxonomy_id']), parseInt(taxId, 10))) {
+                let updatedTaxWithCategories = memo2.get(taxId);
+                if (!updatedTaxWithCategories.get('categories')) {
+                  updatedTaxWithCategories = updatedTaxWithCategories.set('categories', Map());
+                }
+                updatedTaxWithCategories = updatedTaxWithCategories.setIn(
+                  ['categories', category.get('id')], category
+                );
+                return memo2.set(taxId, updatedTaxWithCategories);
+              }
+              return memo2;
+            }, itemTaxonomy
+          );
+          return [
+            ...memo,
+            ...getTaxonomyFields(taxonomyWithCategories),
+          ];
+        }
+      }
+      // actor view
+      // member of
+      if (actorConnections && qe(column.get('type'), 'associations') && item.get('associationsByType')) {
         return item.get('associationsByType').reduce(
           (memo2, actorIds, typeid) => {
             const actors = actorConnections.get(API.ACTORS).filter(
@@ -112,7 +143,8 @@ export function PreviewContent({
           memo,
         );
       }
-      if (actorConnections && column.get('type') === 'members' && item.get('membersByType')) {
+      // members
+      if (actorConnections && qe(column.get('type'), 'members') && item.get('membersByType')) {
         return item.get('membersByType').reduce(
           (memo2, actorIds, typeid) => {
             const actors = actorConnections.get(API.ACTORS).filter(
@@ -130,9 +162,10 @@ export function PreviewContent({
           memo,
         );
       }
-      if (column.get('type') === 'date') {
-        return [
-          ...memo,
+      // action view
+      // date
+      if (qe(column.get('type'), 'date')) {
+        return [...memo,
           ...[checkActionAttribute(typeId, 'date_start')
             && getDateField(
               item,
@@ -152,7 +185,8 @@ export function PreviewContent({
           && getTextField(item, 'date_comment'),
           ]];
       }
-      if (actorConnections && column.get('type') === 'actors' && item.get('actorsByType')) {
+      // stakeholders
+      /* if (actorConnections && qe(column.get('type'), 'actors') && item.get('actorsByType')) {
         return item.get('actorsByType').reduce(
           (memo2, actorIds, typeid) => {
             const actors = actorConnections.get(API.ACTORS).filter(
@@ -172,8 +206,9 @@ export function PreviewContent({
               })];
           }, memo
         );
-      }
-      if (actionConnections && column.get('type') === 'childActions' && item.get('childrenByType')) {
+      } */
+      // child activities
+      if (actionConnections && qe(column.get('type'), 'childActions') && item.get('childrenByType')) {
         return item.get('childrenByType').reduce(
           (memo2, actionIds, actiontypeid) => {
             const actions = actionConnections.get(API.ACTIONS).filter(
@@ -192,8 +227,8 @@ export function PreviewContent({
           }, memo
         );
       }
-
-      if (column.get('type') === 'parentActions' && item.get('parentsByType')) {
+      // parent activities
+      /* if (qe(column.get('type'), 'parentActions') && item.get('parentsByType')) {
         return item.get('parentsByType').reduce(
           (memo2, actionIds, actiontypeid) => {
             const actions = actionConnections.get(API.ACTIONS).filter(
@@ -211,11 +246,31 @@ export function PreviewContent({
             ];
           }, memo
         );
-      }
+      } */
       return memo;
     },
     fields,
   );
+  // users action + actor
+  if (actionConnections && item.get('users')) {
+    const users = item.get('users').map(
+      (actorId) => {
+        const user = actionConnections.get(API.USERS).filter(
+          (actor) => qe(actorId, parseInt(actor.get('id'), 10))
+        );
+        return user && user.get(actorId.toString());
+      }
+    );
+    fields = [
+      ...fields,
+      getUserConnectionField({
+        users,
+        onEntityClick,
+        connections: actorConnections,
+        skipLabel: true,
+      }),
+    ];
+  }
   console.log('fields', fields);
   return (
     <>
@@ -241,11 +296,11 @@ PreviewContent.propTypes = {
   item: PropTypes.object, // immutable Map
   columns: PropTypes.object, // immutable List
   // previewEntity: PropTypes.object, // immutable Map
-  actorConnections: PropTypes.object, // immutable Map
-  actionConnections: PropTypes.object, // immutable Map
-  viewTaxonomies: PropTypes.object, // immutable Map
-  isAdmin: PropTypes.bool,
+  categories: PropTypes.object, // immutable Map
+  // isAdmin: PropTypes.bool,
   taxonomies: PropTypes.object, // immutable Map
+  actionConnections: PropTypes.object, // immutable Map
+  actorConnections: PropTypes.object, // immutable Map
   onEntityClick: PropTypes.func,
   // onUpdatePath: PropTypes.func,
   // dataReady: PropTypes.bool,
@@ -253,15 +308,14 @@ PreviewContent.propTypes = {
 };
 
 // const mapStateToProps = (state, { item }) => ({
-const mapStateToProps = (state, { item }) => ({
+const mapStateToProps = (state) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   // previewEntity: selectPreviewContent(state, { item }),
+  // isAdmin: selectIsUserAdmin(state),
+  taxonomies: selectTaxonomies(state),
+  categories: selectCategories(state),
   actionConnections: selectActionConnections(state),
   actorConnections: selectActorConnections(state),
-  taxonomies: selectTaxonomiesWithCategories(state),
-  viewTaxonomies: selectViewTaxonomies(state, item.get('id')),
-  isAdmin: selectIsUserAdmin(state),
-  // categories: selectCategories(state),
 });
 export function mapDispatchToProps(dispatch) {
   return {

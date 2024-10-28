@@ -117,17 +117,3 @@ export const selectPreviewEntity = createSelector(
 //     return null;
 //   }
 // );
-export const selectViewTaxonomies = createSelector(
-  (state, id) => id,
-  selectTaxonomiesSorted,
-  selectCategories,
-  (state) => selectEntities(state, API.ACTION_CATEGORIES),
-  (id, taxonomies, categories, associations) => prepareTaxonomiesIsAssociated(
-    taxonomies,
-    categories,
-    associations,
-    'tags_actions',
-    'measure_id',
-    id,
-  )
-);
