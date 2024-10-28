@@ -47,7 +47,7 @@ export function PreviewHeader({ content, onSetPreviewItemId }) {
   const contentClean = content || {};
   const {
     title,
-    aboveTitle,
+    entityType,
     prevPreviewItem,
     nextPreviewItem,
   } = contentClean;
@@ -73,8 +73,10 @@ export function PreviewHeader({ content, onSetPreviewItemId }) {
         gap="xsmall"
         pad={{ top: 'medium' }}
       >
-        {aboveTitle && (
-          <Reference>{aboveTitle}</Reference>
+        {entityType && (
+          <Reference>
+            <FormattedMessage {...appMessages.entities[entityType].single} />
+          </Reference>
         )}
         <Box direction="row" justify="between">
           <Title>

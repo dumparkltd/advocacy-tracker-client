@@ -243,7 +243,7 @@ export function PositionsList({
       );
       const content = {
         header: {
-          aboveTitle: 'Country',
+          entityType: `actors_${item.getIn(['attributes', 'actortype_id'])}`,
           title: item.getIn(['attributes', 'title']),
           code: item.getIn(['attributes', 'code']),
         },

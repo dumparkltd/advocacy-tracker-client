@@ -137,7 +137,7 @@ const reducePreviewItem = ({ item, id, path }) => {
   if (item && qe(item.get('type'), API.ACTORS)) {
     const content = {
       header: {
-        aboveTitle: 'Actor',
+        entityType: `actors_${item.getIn(['attributes', 'actortype_id'])}`,
         title: item && item.getIn(['attributes', 'title']),
       },
       item,
@@ -153,7 +153,7 @@ const reducePreviewItem = ({ item, id, path }) => {
   if (item && qe(item.get('type'), API.ACTIONS)) {
     const content = {
       header: {
-        aboveTitle: 'Action',
+        entityType: `actions_${item.getIn(['attributes', 'measuretype_id'])}`,
         title: item && item.getIn(['attributes', 'title']),
       },
       item,
