@@ -9,7 +9,7 @@ import { isMinSize } from 'utils/responsive';
 import { scaleColorCount } from 'containers/MapContainer/utils';
 import { usePrint } from 'containers/App/PrintContext';
 
-import { MAP_OPTIONS } from 'themes/config';
+import { MAP_OPTIONS, API_FOR_ROUTE } from 'themes/config';
 import { checkColumnFilterOptions } from './utils';
 
 import CellBodyMain from './CellBodyMain';
@@ -226,7 +226,7 @@ export function EntitiesTable({
         const [componentId, path, itemId] = previewItemId.split('|');
         if (qe(componentId, ID)) {
           const mainItem = searchedEntities && itemId && searchedEntities.find(
-            (item) => qe(item.get('id'), itemId)
+            (item) => qe(item.get('id'), itemId) && item.get('type') === API_FOR_ROUTE[path]
           );
           if (mainItem) {
             const entityIds = sortedEntities.map((e) => e.id);
