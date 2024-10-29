@@ -16,11 +16,11 @@ import {
   entityOptions,
   taxonomyOptions,
   getTitleFormField,
-  getEmailField,
-  getHighestUserRoleId,
+  getEmailFormField,
   getRoleFormField,
   renderActorsByActortypeControl,
   renderActionsByActiontypeControl,
+  getHighestUserRoleId,
   getConnectionUpdatesFromFormData,
 } from 'utils/forms';
 
@@ -140,9 +140,13 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
   getHeaderMainFields = () => {
     const { intl } = this.context;
     return ([{ // fieldGroup
-      fields: [getTitleFormField(intl.formatMessage, 'title', 'name')],
+      fields: [getTitleFormField({
+        formatMessage: intl.formatMessage,
+        attribute: 'name',
+        required: true,
+      })],
     }, {
-      fields: [getEmailField(intl.formatMessage)],
+      fields: [getEmailFormField({ formatMessage: intl.formatMessage })],
     }]);
   };
 
@@ -151,7 +155,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
     return ([
       {
         fields: (roles && roles.size > 0) ? [
-          getRoleFormField(intl.formatMessage, roles),
+          getRoleFormField({ formatMessage: intl.formatMessage, roleOptions: roles }),
           getMetaField(entity, true),
         ]
           : [

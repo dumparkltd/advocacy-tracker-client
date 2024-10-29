@@ -15,9 +15,9 @@ import { Map, fromJS } from 'immutable';
 import {
   entityOptions,
   getTitleFormField,
-  getStatusField,
+  getStatusFormField,
   getMarkdownFormField,
-  getDateField,
+  getDateFormField,
   getLinkFormField,
   renderActionsByActiontypeControl,
   getConnectionUpdatesFromFormData,
@@ -125,12 +125,10 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
       [ // fieldGroups
         { // fieldGroup
           fields: [
-            checkResourceAttribute(typeId, 'title') && getTitleFormField(
-              intl.formatMessage,
-              'title',
-              'title',
-              checkResourceRequired(typeId, 'title'),
-            ),
+            checkResourceAttribute(typeId, 'title') && getTitleFormField({
+              formatMessage: intl.formatMessage,
+              required: checkResourceRequired(typeId, 'title'),
+            }),
           ],
         },
       ]
@@ -142,9 +140,9 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     return ([
       {
         fields: [
-          getStatusField(intl.formatMessage),
-          (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
-          isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
+          getStatusFormField({ formatMessage: intl.formatMessage }),
+          (isAdmin || isMine) && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
+          isAdmin && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'is_archive' }),
           getMetaField(entity),
         ],
       },
@@ -163,26 +161,24 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     const groups = [];
     groups.push({ // fieldGroup
       fields: [
-        checkResourceAttribute(typeId, 'url') && getLinkFormField(
-          intl.formatMessage,
-          checkResourceRequired(typeId, 'url'),
-          'url',
-        ),
+        checkResourceAttribute(typeId, 'url') && getLinkFormField({
+          formatMessage: intl.formatMessage,
+          required: checkResourceRequired(typeId, 'url'),
+        }),
       ],
     });
     groups.push(
       {
         fields: [
-          checkResourceAttribute(typeId, 'description') && getMarkdownFormField(
-            intl.formatMessage,
-            checkResourceRequired(typeId, 'description'),
-            'description',
-          ),
-          checkResourceAttribute(typeId, 'status') && getMarkdownFormField(
-            intl.formatMessage,
-            checkResourceRequired(typeId, 'status'),
-            'status',
-          ),
+          checkResourceAttribute(typeId, 'description') && getMarkdownFormField({
+            formatMessage: intl.formatMessage,
+            required: checkResourceRequired(typeId, 'description'),
+          }),
+          checkResourceAttribute(typeId, 'status') && getMarkdownFormField({
+            formatMessage: intl.formatMessage,
+            required: checkResourceRequired(typeId, 'status'),
+            attribute: 'status',
+          }),
         ],
       },
     );
@@ -213,16 +209,16 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          checkResourceAttribute(typeId, 'publication_date') && getDateField(
-            intl.formatMessage,
-            'publication_date',
-            checkResourceRequired(typeId, 'publication_date'),
-          ),
-          checkResourceAttribute(typeId, 'access_date') && getDateField(
-            intl.formatMessage,
-            'access_date',
-            checkResourceRequired(typeId, 'access_date'),
-          ),
+          checkResourceAttribute(typeId, 'publication_date') && getDateFormField({
+            formatMessage: intl.formatMessage,
+            required: checkResourceRequired(typeId, 'publication_date'),
+            attribute: 'publication_date',
+          }),
+          checkResourceAttribute(typeId, 'access_date') && getDateFormField({
+            formatMessage: intl.formatMessage,
+            required: checkResourceRequired(typeId, 'access_date'),
+            attribute: 'access_date',
+          }),
         ],
       },
     ]);

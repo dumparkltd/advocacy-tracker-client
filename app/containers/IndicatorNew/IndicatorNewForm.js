@@ -15,9 +15,9 @@ import {
   getConnectionUpdatesFromFormData,
   getTitleFormField,
   getMarkdownFormField,
-  renderActionsByActiontypeControl,
-  getStatusField,
+  getStatusFormField,
   getCodeFormField,
+  renderActionsByActiontypeControl,
 } from 'utils/forms';
 
 // import { qe } from 'utils/quasi-equals';
@@ -97,17 +97,14 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          checkIndicatorAttribute('code', isAdmin) && getCodeFormField(
-            intl.formatMessage,
-            'code',
-            checkIndicatorRequired('code'),
-          ),
-          getTitleFormField(
-            intl.formatMessage,
-            'title',
-            'title',
-            true,
-          ),
+          checkIndicatorAttribute('code', isAdmin) && getCodeFormField({
+            formatMessage: intl.formatMessage,
+            required: checkIndicatorRequired('code'),
+          }),
+          getTitleFormField({
+            formatMessage: intl.formatMessage,
+            required: true,
+          }),
         ],
       },
     ]);
@@ -118,8 +115,8 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
     return ([
       {
         fields: [
-          getStatusField(intl.formatMessage),
-          getStatusField(intl.formatMessage, 'private'),
+          getStatusFormField({ formatMessage: intl.formatMessage }),
+          getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
         ],
       },
     ]);
@@ -135,11 +132,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
     const groups = [];
     groups.push({
       fields: [
-        getMarkdownFormField(
-          intl.formatMessage,
-          false,
-          'description',
-        ),
+        getMarkdownFormField({ formatMessage: intl.formatMessage }),
       ],
     });
     if (actionsByActiontype) {

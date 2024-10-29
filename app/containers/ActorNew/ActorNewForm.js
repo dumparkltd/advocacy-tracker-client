@@ -14,17 +14,17 @@ import { Map, List, fromJS } from 'immutable';
 import {
   getConnectionUpdatesFromFormData,
   getTitleFormField,
-  getStatusField,
+  getStatusFormField,
   getMarkdownFormField,
   getCodeFormField,
-  renderTaxonomyControl,
   getLinkFormField,
+  getEmailFormField,
+  getTextFormField,
+  getTextareaFormField,
+  renderTaxonomyControl,
   renderActionsByActiontypeControl,
   renderAssociationsByActortypeControl,
   renderMembersByActortypeControl,
-  getEmailField,
-  getTextFormField,
-  getTextareaField,
   renderUserMultiControl,
 } from 'utils/forms';
 
@@ -126,29 +126,25 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          checkActorAttribute(typeId, 'code', isAdmin) && getCodeFormField(
-            intl.formatMessage,
-            'code',
-            checkActorRequired(typeId, 'code'),
-          ),
-          checkActorAttribute(typeId, 'prefix') && getCodeFormField(
-            intl.formatMessage,
-            'prefix',
-            checkActorRequired(typeId, 'prefix'),
-          ),
-          checkActorAttribute(typeId, 'title') && getTitleFormField(
-            intl.formatMessage,
-            'title',
-            'title',
-            checkActorRequired(typeId, 'title'),
-          ),
-          checkActorAttribute(typeId, 'name') && getTitleFormField(
-            intl.formatMessage,
-            'title',
-            'title',
-            checkActorRequired(typeId, 'name'),
-            'name' // label
-          ),
+          checkActorAttribute(typeId, 'code', isAdmin) && getCodeFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'code'),
+            attribute: 'code',
+          }),
+          checkActorAttribute(typeId, 'prefix') && getCodeFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'prefix'),
+            attribute: 'prefix',
+          }),
+          checkActorAttribute(typeId, 'title') && getTitleFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'title'),
+          }),
+          checkActorAttribute(typeId, 'name') && getTitleFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'name'),
+            label: 'name',
+          }),
         ],
       },
     ]);
@@ -159,8 +155,8 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
     return ([
       {
         fields: [
-          getStatusField(intl.formatMessage),
-          getStatusField(intl.formatMessage, 'private'),
+          getStatusFormField({ formatMessage: intl.formatMessage }),
+          getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
         ],
       },
     ]);
@@ -178,16 +174,15 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
     const groups = [];
     groups.push({
       fields: [
-        checkActorAttribute(typeId, 'description') && getMarkdownFormField(
-          intl.formatMessage,
-          checkActorRequired(typeId, 'description'),
-          'description',
-        ),
-        checkActorAttribute(typeId, 'activity_summary') && getMarkdownFormField(
-          intl.formatMessage,
-          checkActorRequired(typeId, 'activity_summary'),
-          'activity_summary',
-        ),
+        checkActorAttribute(typeId, 'description') && getMarkdownFormField({
+          formatMessage: intl.formatMessage,
+          required: checkActorRequired(typeId, 'description'),
+        }),
+        checkActorAttribute(typeId, 'activity_summary') && getMarkdownFormField({
+          formatMessage: intl.formatMessage,
+          required: checkActorRequired(typeId, 'activity_summary'),
+          attribute: 'activity_summary',
+        }),
       ],
     });
     if (actionsByActiontype) {
@@ -243,7 +238,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
         {
           label: intl.formatMessage(appMessages.nav.userActors),
           fields: [
-            renderUserMultiControl(userOptions, null, intl),
+            renderUserMultiControl({ options: userOptions, intl }),
           ],
         },
       );
@@ -251,14 +246,24 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
     groups.push(
       { // fieldGroup
         fields: [
-          checkActorAttribute(typeId, 'email') && getEmailField(intl.formatMessage, checkActorRequired(typeId, 'email')),
-          checkActorAttribute(typeId, 'phone') && getTextFormField(intl.formatMessage, 'phone', checkActorRequired(typeId, 'phone')),
-          checkActorAttribute(typeId, 'address') && getTextareaField(intl.formatMessage, 'address', checkActorRequired(typeId, 'address')),
-          checkActorAttribute(typeId, 'url') && getLinkFormField(
-            intl.formatMessage,
-            checkActorRequired(typeId, 'url'),
-            'url',
-          ),
+          checkActorAttribute(typeId, 'email') && getEmailFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'email'),
+          }),
+          checkActorAttribute(typeId, 'phone') && getTextFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'phone'),
+            attribute: 'phone',
+          }),
+          checkActorAttribute(typeId, 'address') && getTextareaFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'address'),
+            attribute: 'address',
+          }),
+          checkActorAttribute(typeId, 'url') && getLinkFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'url'),
+          }),
         ],
       },
     );

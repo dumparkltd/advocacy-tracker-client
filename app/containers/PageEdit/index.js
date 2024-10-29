@@ -18,7 +18,7 @@ import {
   getMenuTitleFormField,
   getMenuOrderFormField,
   getMarkdownFormField,
-  getStatusField,
+  getStatusFormField,
 } from 'utils/forms';
 
 import {
@@ -111,9 +111,9 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          getTitleFormField(intl.formatMessage),
-          getMenuTitleFormField(intl.formatMessage),
-          getMenuOrderFormField(intl.formatMessage),
+          getTitleFormField({ formatMessage: intl.formatMessage }),
+          getMenuTitleFormField({ formatMessage: intl.formatMessage }),
+          getMenuOrderFormField({ formatMessage: intl.formatMessage }),
         ],
       },
     ]);
@@ -124,8 +124,8 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
     return ([
       {
         fields: [
-          getStatusField(intl.formatMessage),
-          (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
+          getStatusFormField({ formatMessage: intl.formatMessage }),
+          (isAdmin || isMine) && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
           getMetaField(entity),
         ],
       },
@@ -135,7 +135,11 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
   getBodyMainFields = () => {
     const { intl } = this.context;
     return ([{
-      fields: [getMarkdownFormField(intl.formatMessage, true, 'content')],
+      fields: [getMarkdownFormField({
+        formatMessage: intl.formatMessage,
+        required: true,
+        attribute: 'content',
+      })],
     }]);
   };
 

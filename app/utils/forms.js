@@ -152,6 +152,7 @@ export const renderIndicatorControl = ({
   connections,
   connectionAttributes,
   showCode,
+  hidden,
 }) => entities
   ? {
     id: 'indicators',
@@ -167,16 +168,17 @@ export const renderIndicatorControl = ({
     selectAll: true,
     connections,
     connectionAttributes,
+    hidden,
     // onCreate: onCreateOption
     //   ? () => onCreateOption({ path: API.INDICATORS })
     //   : null,
   }
   : null;
-export const renderUserMultiControl = (
+export const renderUserMultiControl = ({
   entities,
-  onCreateOption,
   intl,
-) => entities
+  hidden,
+}) => entities
   ? {
     id: 'users',
     model: '.associatedUsers',
@@ -188,37 +190,12 @@ export const renderUserMultiControl = (
     }),
     advanced: true,
     selectAll: true,
+    hidden,
     // onCreate: onCreateOption
     //   ? () => onCreateOption({ path: API.INDICATORS })
     //   : null,
   }
   : null;
-// export const renderActorControl = (
-//   actortypeId,
-//   entities,
-//   taxonomies,
-//   onCreateOption,
-//   intl,
-//   showCode,
-// ) => entities
-//   ? {
-//     id: `actors.${actortypeId}`,
-//     model: `.associatedActorsByActortype.${actortypeId}`,
-//     dataPath: ['associatedActorsByActortype', actortypeId],
-//     label: intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].plural),
-//     controlType: 'multiselect',
-//     options: entityOptions({
-//       entities,
-//       showCode,
-//     }),
-//     advanced: true,
-//     selectAll: true,
-//     tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
-//     onCreate: onCreateOption
-//       ? () => onCreateOption({ path: API.ACTORS })
-//       : null,
-//   }
-//   : null;
 
 // actors grouped by actortype
 export const renderActorsByActortypeControl = ({
@@ -227,6 +204,7 @@ export const renderActorsByActortypeControl = ({
   onCreateOption,
   intl,
   isAdmin,
+  hidden,
 }) => entitiesByActortype
   ? entitiesByActortype.reduce(
     (controls, entities, typeid) => controls.concat({
@@ -249,6 +227,7 @@ export const renderActorsByActortypeControl = ({
           attributes: { actortype_id: typeid },
         })
         : null,
+      hidden,
     }),
     [],
   ).sort((a, b) => {
@@ -264,6 +243,7 @@ export const renderTargetsByActortypeControl = ({
   onCreateOption,
   intl,
   isAdmin,
+  hidden,
 }) => entitiesByActortype
   ? entitiesByActortype.reduce(
     (controls, entities, typeid) => controls.concat({
@@ -286,6 +266,7 @@ export const renderTargetsByActortypeControl = ({
           attributes: { actortype_id: typeid },
         })
         : null,
+      hidden,
     }),
     [],
   ).sort((a, b) => {
@@ -301,6 +282,7 @@ export const renderMembersByActortypeControl = ({
   onCreateOption,
   intl,
   isAdmin,
+  hidden,
 }) => entitiesByActortype
   ? entitiesByActortype.reduce(
     (controls, entities, typeid) => controls.concat({
@@ -323,6 +305,7 @@ export const renderMembersByActortypeControl = ({
           attributes: { actortype_id: typeid },
         })
         : null,
+      hidden,
     }),
     [],
   ).sort((a, b) => {
@@ -337,6 +320,7 @@ export const renderAssociationsByActortypeControl = ({
   onCreateOption,
   intl,
   isAdmin,
+  hidden,
 }) => entitiesByActortype
   ? entitiesByActortype.reduce(
     (controls, entities, typeid) => controls.concat({
@@ -359,6 +343,7 @@ export const renderAssociationsByActortypeControl = ({
           attributes: { actortype_id: typeid },
         })
         : null,
+      hidden,
     }),
     [],
   ).sort((a, b) => {
@@ -376,6 +361,7 @@ export const renderActionsByActiontypeControl = ({
   connectionAttributesForType,
   model = 'associatedActionsByActiontype',
   isAdmin,
+  hidden,
 }) => entitiesByActiontype
   ? entitiesByActiontype.reduce(
     (controls, entities, typeid) => controls.concat({
@@ -396,6 +382,7 @@ export const renderActionsByActiontypeControl = ({
           attributes: { measuretype_id: typeid },
         })
         : null,
+      hidden,
     }),
     [],
   ).sort((a, b) => {
@@ -411,6 +398,7 @@ export const renderActionsAsTargetByActiontypeControl = ({
   onCreateOption,
   intl,
   isAdmin,
+  hidden,
 }) => entitiesByActiontype
   ? entitiesByActiontype.reduce(
     (controls, entities, typeid) => controls.concat({
@@ -430,6 +418,7 @@ export const renderActionsAsTargetByActiontypeControl = ({
           attributes: { measuretype_id: typeid },
         })
         : null,
+      hidden,
     }),
     [],
   ).sort((a, b) => {
@@ -445,6 +434,7 @@ export const renderResourcesByResourcetypeControl = ({
   onCreateOption,
   intl,
   isAdmin,
+  hidden,
 }) => entitiesByResourcetype
   ? entitiesByResourcetype.reduce(
     (controls, entities, typeid) => controls.concat({
@@ -462,6 +452,7 @@ export const renderResourcesByResourcetypeControl = ({
           attributes: { resourcetype_id: typeid },
         })
         : null,
+      hidden,
     }),
     [],
   ).sort((a, b) => a.id > b.id ? 1 : -1)
@@ -472,6 +463,7 @@ export const renderTaxonomyControl = ({
   taxonomies,
   onCreateOption,
   intl,
+  hidden,
 }) => taxonomies
   ? taxonomies.toList().reduce(
     (controls, taxonomy) => controls.concat({
@@ -491,6 +483,7 @@ export const renderTaxonomyControl = ({
           attributes: { taxonomy_id: taxonomy.get('id') },
         })
         : null,
+      hidden,
     }),
     [],
   )
@@ -508,7 +501,9 @@ export const renderTaxonomyControl = ({
 //   }
 //   : null;
 
-export const renderParentCategoryControl = ({ entities, label, activeParentId }) => entities
+export const renderParentCategoryControl = ({
+  entities, label, activeParentId, hidden,
+}) => entities
   ? {
     id: 'associatedCategory',
     model: '.associatedCategory',
@@ -517,6 +512,7 @@ export const renderParentCategoryControl = ({ entities, label, activeParentId })
     controlType: 'multiselect',
     multiple: false,
     options: parentCategoryOptions(entities, activeParentId),
+    hidden,
   }
   : null;
 // export const renderParentActionControl = ({ entities, label, activeParentId }) => entities
@@ -704,16 +700,19 @@ export const getHighestUserRoleId = (roles) => roles.reduce(
   USER_ROLES.DEFAULT.value
 );
 
-export const getRoleFormField = (formatMessage, roleOptions) => ({
+export const getRoleFormField = ({ formatMessage, roleOptions, hidden }) => ({
   id: 'role',
   controlType: 'select',
   model: '.associatedRole',
   label: formatMessage(appMessages.entities.roles.single),
   options: Object.values(filter(USER_ROLES, (userRole) => roleOptions.map((roleOption) => parseInt(roleOption.get('id'), 10)).includes(userRole.value)
     || userRole.value === USER_ROLES.DEFAULT.value)),
+  hidden,
 });
 
-export const getStatusField = (formatMessage, attribute = 'draft', options) => {
+export const getStatusFormField = ({
+  formatMessage, attribute = 'draft', options, hidden,
+}) => {
   let myOptions = options;
   if (attribute === 'draft') {
     myOptions = PUBLISH_STATUSES;
@@ -733,100 +732,129 @@ export const getStatusField = (formatMessage, attribute = 'draft', options) => {
     model: `.attributes.${attribute}`,
     label: formatMessage(appMessages.attributes[attribute]),
     options: myOptions,
+    hidden,
   };
 };
 
-export const getTitleFormField = (
+export const getTitleFormField = ({
   formatMessage,
   controlType = 'title',
   attribute = 'title',
   required,
   label,
-) => getFormField({
+  hidden,
+}) => getFormField({
   formatMessage,
   controlType,
   attribute,
   required,
   label,
+  hidden,
 });
 
-export const getReferenceFormField = (formatMessage, required = false, isAutoReference = false) => getFormField({
+export const getReferenceFormField = ({
+  formatMessage, required = false, isAutoReference = false, hidden,
+}) => getFormField({
   formatMessage,
   controlType: 'short',
   attribute: 'reference',
   required,
   label: required ? 'reference' : 'referenceOptional',
   hint: isAutoReference ? formatMessage(appMessages.hints.autoReference) : null,
+  hidden,
 });
-export const getCodeFormField = (formatMessage, att = 'code', required = false) => getFormField({
+export const getCodeFormField = ({
+  formatMessage, attribute = 'code', required = false, hidden,
+}) => getFormField({
   formatMessage,
   controlType: 'short',
-  attribute: att,
-  label: att,
+  attribute,
+  label: attribute,
   required,
+  hidden,
 });
-export const getShortTextFormField = (formatMessage, att, required = false) => getFormField({
+export const getShortTextFormField = ({
+  formatMessage, attribute, required = false, hidden,
+}) => getFormField({
   formatMessage,
   controlType: 'short',
-  attribute: att,
-  label: att,
+  attribute,
+  label: attribute,
   required,
+  hidden,
 });
-export const getTextFormField = (formatMessage, att, required = false) => getFormField({
+export const getTextFormField = ({
+  formatMessage, attribute, required = false, hidden,
+}) => getFormField({
   formatMessage,
   controlType: 'input',
-  attribute: att,
-  label: att,
+  attribute,
+  label: attribute,
   required,
+  hidden,
 });
-export const getAmountFormField = (formatMessage, required, att = 'amount') => getFormField({
+export const getAmountFormField = ({
+  formatMessage, required, attribute = 'amount', hidden,
+}) => getFormField({
   formatMessage,
-  controlType: att,
-  attribute: att,
+  controlType: attribute,
+  attribute,
   required,
   hint: formatMessage(appMessages.hints.amount),
+  hidden,
   // TODO: validate
 });
-export const getNumberFormField = (formatMessage, required, att = 'value') => getFormField({
+export const getNumberFormField = ({
+  formatMessage, required, attribute = 'value', hidden,
+}) => getFormField({
   formatMessage,
-  controlType: att,
-  attribute: att,
+  controlType: attribute,
+  attribute,
   required,
-  hint: appMessages.hints[att] && formatMessage(appMessages.hints[att]),
+  hint: appMessages.hints[attribute] && formatMessage(appMessages.hints[attribute]),
+  hidden,
   // TODO: validate
 });
-export const getLinkFormField = (formatMessage, required, att = 'url') => getFormField({
+export const getLinkFormField = ({
+  formatMessage, required, attribute = 'url', hidden,
+}) => getFormField({
   formatMessage,
-  controlType: att,
-  attribute: att,
+  controlType: attribute,
+  attribute,
   required,
+  hidden,
   // TODO: validate
 });
-export const getShortTitleFormField = (formatMessage) => getFormField({
+export const getShortTitleFormField = ({ formatMessage, hidden }) => getFormField({
   formatMessage,
   controlType: 'short',
   attribute: 'short_title',
+  hidden,
 });
 
-export const getMenuTitleFormField = (formatMessage) => getFormField({
+export const getMenuTitleFormField = ({ formatMessage, hidden }) => getFormField({
   formatMessage,
   controlType: 'short',
   attribute: 'menu_title',
   required: true,
+  hidden,
 });
 
-export const getMenuOrderFormField = (formatMessage) => {
+export const getMenuOrderFormField = ({ formatMessage, hidden }) => {
   const field = getFormField({
     formatMessage,
     controlType: 'short',
     attribute: 'order',
+    hidden,
   });
   field.validators.number = validateNumber;
   field.errorMessages.number = formatMessage(appMessages.forms.numberError);
   return field;
 };
 
-export const getMarkdownFormField = (formatMessage, required, attribute = 'description', label, placeholder, hint) => getFormField({
+export const getMarkdownFormField = ({
+  formatMessage, required, attribute = 'description', label, placeholder, hint, hidden,
+}) => getFormField({
   formatMessage,
   controlType: 'markdown',
   required,
@@ -836,16 +864,22 @@ export const getMarkdownFormField = (formatMessage, required, attribute = 'descr
   hint: hint
     ? (appMessages.hints[hint] && formatMessage(appMessages.hints[hint]))
     : (appMessages.hints[attribute] && formatMessage(appMessages.hints[attribute])),
+  hidden,
 });
 
-export const getTextareaField = (formatMessage, attribute = 'description', required) => getFormField({
+export const getTextareaFormField = ({
+  formatMessage, attribute = 'description', required, hidden,
+}) => getFormField({
   formatMessage,
   controlType: 'textarea',
   attribute,
   required,
+  hidden,
 });
 
-export const getDateField = (formatMessage, attribute, required = false, label, onChange) => {
+export const getDateFormField = ({
+  formatMessage, attribute, required = false, label, onChange, hidden,
+}) => {
   const field = getFormField({
     formatMessage,
     controlType: 'date',
@@ -853,13 +887,19 @@ export const getDateField = (formatMessage, attribute, required = false, label, 
     required,
     label,
     onChange,
+    hidden,
   });
   field.validators.date = validateDateFormat;
   field.errorMessages.date = formatMessage(appMessages.forms.dateFormatError, { format: DATE_FORMAT });
   return field;
 };
 
-export const getCheckboxField = (formatMessage, attribute, onChange) => (
+export const getCheckboxFormField = ({
+  formatMessage,
+  attribute,
+  onChange,
+  hidden,
+}) => (
   {
     id: attribute,
     controlType: 'checkbox',
@@ -868,16 +908,20 @@ export const getCheckboxField = (formatMessage, attribute, onChange) => (
     // value: entity && entity.getIn(['attributes', attribute]) ? entity.getIn(['attributes', attribute]) : false,
     changeAction: onChange,
     hint: appMessages.hints[attribute] && formatMessage(appMessages.hints[attribute]),
+    hidden,
   });
 
-export const getUploadField = (formatMessage) => getFormField({
+export const getUploadFormField = ({ formatMessage, hidden }) => getFormField({
   formatMessage,
   controlType: 'uploader',
   attribute: 'document_url',
   placeholder: 'url',
+  hidden,
 });
 
-export const getEmailField = (formatMessage, required = true, model = '.attributes.email') => {
+export const getEmailFormField = ({
+  formatMessage, required = true, model = '.attributes.email', hidden,
+}) => {
   const field = getFormField({
     formatMessage,
     controlType: 'email',
@@ -885,24 +929,30 @@ export const getEmailField = (formatMessage, required = true, model = '.attribut
     type: 'email',
     required,
     model,
+    hidden,
   });
   field.validators.email = validateEmailFormat;
   field.errorMessages.email = formatMessage(appMessages.forms.emailFormatError);
   return field;
 };
 
-export const getNameField = (formatMessage, model = '.attributes.name') => {
+export const getNameFormField = ({
+  formatMessage, model = '.attributes.name', hidden,
+}) => {
   const field = getFormField({
     formatMessage,
     controlType: 'input',
     attribute: 'name',
     required: true,
     model,
+    hidden,
   });
   return field;
 };
 
-export const getPasswordField = (formatMessage, model = '.attributes.password') => {
+export const getPasswordFormField = ({
+  formatMessage, model = '.attributes.password', hidden,
+}) => {
   const field = getFormField({
     formatMessage,
     controlType: 'input',
@@ -910,13 +960,16 @@ export const getPasswordField = (formatMessage, model = '.attributes.password') 
     type: 'password',
     required: true,
     model,
+    hidden,
   });
   field.validators.passwordLength = (val) => validateLength(val, 6);
   field.errorMessages.passwordLength = formatMessage(appMessages.forms.passwordShortError);
   return field;
 };
 
-export const getPasswordCurrentField = (formatMessage, model = '.attributes.password') => {
+export const getPasswordCurrentFormField = ({
+  formatMessage, model = '.attributes.password', hidden,
+}) => {
   const field = getFormField({
     formatMessage,
     controlType: 'input',
@@ -925,13 +978,16 @@ export const getPasswordCurrentField = (formatMessage, model = '.attributes.pass
     type: 'password',
     required: true,
     model,
+    hidden,
   });
   // field.validators.email = validateEmailFormat;
   // field.errorMessages.email = formatMessage(appMessages.forms.emailFormatError);
   return field;
 };
 
-export const getPasswordNewField = (formatMessage, model = '.attributes.passwordNew') => {
+export const getPasswordNewFormField = ({
+  formatMessage, model = '.attributes.passwordNew',
+}) => {
   const field = getFormField({
     formatMessage,
     controlType: 'input',
@@ -945,7 +1001,9 @@ export const getPasswordNewField = (formatMessage, model = '.attributes.password
   return field;
 };
 
-export const getPasswordConfirmationField = (formatMessage, model = '.attributes.passwordConfirmation') => {
+export const getPasswordConfirmationFormField = ({
+  formatMessage, model = '.attributes.passwordConfirmation',
+}) => {
   const field = getFormField({
     formatMessage,
     controlType: 'input',
@@ -970,6 +1028,7 @@ export const getFormField = ({
   onChange,
   type,
   model,
+  hidden,
 }) => {
   const field = {
     id: attribute,
@@ -982,6 +1041,7 @@ export const getFormField = ({
     hasrequired: !!required,
     errorMessages: {},
     hint,
+    hidden: required ? false : hidden,
   };
   if (onChange) {
     field.changeAction = onChange;

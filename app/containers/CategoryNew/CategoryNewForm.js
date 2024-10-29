@@ -15,9 +15,9 @@ import {
   renderParentCategoryControl,
   getTitleFormField,
   getMarkdownFormField,
-  getFormField,
-  getCheckboxField,
-  getStatusField,
+  getLinkFormField,
+  getCheckboxFormField,
+  getStatusFormField,
   getShortTitleFormField,
 } from 'utils/forms';
 
@@ -94,8 +94,8 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
     const groups = [];
     groups.push({ // fieldGroup
       fields: [
-        getTitleFormField(intl.formatMessage),
-        getShortTitleFormField(intl.formatMessage),
+        getTitleFormField({ formatMessage: intl.formatMessage }),
+        getShortTitleFormField({ formatMessage: intl.formatMessage }),
       ],
     });
     return groups;
@@ -106,17 +106,17 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
     const groups = []; // fieldGroups
     groups.push({
       fields: [
-        getStatusField(intl.formatMessage),
-        getStatusField(intl.formatMessage, 'private'),
+        getStatusFormField({ formatMessage: intl.formatMessage }),
+        getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
       ],
     });
     if (taxonomy && taxonomy.getIn(['attributes', 'tags_users'])) {
       groups.push({
         fields: [
-          getCheckboxField(
-            intl.formatMessage,
-            'user_only',
-          ),
+          getCheckboxFormField({
+            formatMessage: intl.formatMessage,
+            attribute: 'user_only',
+          }),
         ],
       });
     }
@@ -137,7 +137,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
     const { intl } = this.context;
     const groups = [];
     groups.push({
-      fields: [getMarkdownFormField(intl.formatMessage)],
+      fields: [getMarkdownFormField({ formatMessage: intl.formatMessage })],
     });
     return groups;
   };
@@ -147,11 +147,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
     const fields = []; // fieldGroups
     fields.push({
       fields: [
-        getFormField({
-          formatMessage: intl.formatMessage,
-          controlType: 'url',
-          attribute: 'url',
-        }),
+        getLinkFormField({ formatMessage: intl.formatMessage }),
       ],
     });
     return fields;

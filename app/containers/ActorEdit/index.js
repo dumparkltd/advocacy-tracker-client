@@ -16,20 +16,20 @@ import {
   entityOptions,
   taxonomyOptions,
   getTitleFormField,
-  getStatusField,
+  getStatusFormField,
   getMarkdownFormField,
   getCodeFormField,
-  renderTaxonomyControl,
   getLinkFormField,
   getCategoryUpdatesFromFormData,
+  renderTaxonomyControl,
   renderActionsByActiontypeControl,
   renderAssociationsByActortypeControl,
   renderMembersByActortypeControl,
-  getConnectionUpdatesFromFormData,
-  getEmailField,
-  getTextFormField,
-  getTextareaField,
   renderUserMultiControl,
+  getConnectionUpdatesFromFormData,
+  getEmailFormField,
+  getTextFormField,
+  getTextareaFormField,
 } from 'utils/forms';
 import { getMetaField } from 'utils/fields';
 
@@ -151,29 +151,24 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       [ // fieldGroups
         { // fieldGroup
           fields: [
-            checkActorAttribute(typeId, 'code', isAdmin) && getCodeFormField(
-              intl.formatMessage,
-              'code',
-              checkActorRequired(typeId, 'code'),
-            ),
-            checkActorAttribute(typeId, 'prefix') && getCodeFormField(
-              intl.formatMessage,
-              'prefix',
-              checkActorRequired(typeId, 'prefix'),
-            ),
-            checkActorAttribute(typeId, 'title') && getTitleFormField(
-              intl.formatMessage,
-              'title',
-              'title',
-              checkActorRequired(typeId, 'title'),
-            ),
-            checkActorAttribute(typeId, 'name') && getTitleFormField(
-              intl.formatMessage,
-              'title',
-              'title',
-              checkActorRequired(typeId, 'name'),
-              'name' // label
-            ),
+            checkActorAttribute(typeId, 'code', isAdmin) && getCodeFormField({
+              formatMessage: intl.formatMessage,
+              required: checkActorRequired(typeId, 'code'),
+            }),
+            checkActorAttribute(typeId, 'prefix') && getCodeFormField({
+              formatMessage: intl.formatMessage,
+              attribute: 'prefix',
+              required: checkActorRequired(typeId, 'prefix'),
+            }),
+            checkActorAttribute(typeId, 'title') && getTitleFormField({
+              formatMessage: intl.formatMessage,
+              required: checkActorRequired(typeId, 'title'),
+            }),
+            checkActorAttribute(typeId, 'name') && getTitleFormField({
+              formatMessage: intl.formatMessage,
+              required: checkActorRequired(typeId, 'name'),
+              label: 'name',
+            }),
           ],
         },
       ]
@@ -185,9 +180,9 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
     return ([
       {
         fields: [
-          getStatusField(intl.formatMessage),
-          (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
-          isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
+          getStatusFormField({ formatMessage: intl.formatMessage }),
+          (isAdmin || isMine) && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
+          isAdmin && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'is_archive' }),
           getMetaField(entity, true),
         ],
       },
@@ -208,16 +203,15 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
     groups.push(
       {
         fields: [
-          checkActorAttribute(typeId, 'description') && getMarkdownFormField(
-            intl.formatMessage,
-            checkActorRequired(typeId, 'description'),
-            'description',
-          ),
-          checkActorAttribute(typeId, 'activity_summary') && getMarkdownFormField(
-            intl.formatMessage,
-            checkActorRequired(typeId, 'activity_summary'),
-            'activity_summary',
-          ),
+          checkActorAttribute(typeId, 'description') && getMarkdownFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'description'),
+          }),
+          checkActorAttribute(typeId, 'activity_summary') && getMarkdownFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'activity_summary'),
+            attribute: 'activity_summary',
+          }),
         ],
       },
     );
@@ -276,7 +270,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         {
           label: intl.formatMessage(appMessages.nav.userActors),
           fields: [
-            renderUserMultiControl(userOptions, null, intl),
+            renderUserMultiControl({ entities: userOptions, intl }),
           ],
         },
       );
@@ -284,14 +278,24 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
     groups.push(
       { // fieldGroup
         fields: [
-          checkActorAttribute(typeId, 'email') && getEmailField(intl.formatMessage, checkActorRequired(typeId, 'email')),
-          checkActorAttribute(typeId, 'phone') && getTextFormField(intl.formatMessage, 'phone', checkActorRequired(typeId, 'phone')),
-          checkActorAttribute(typeId, 'address') && getTextareaField(intl.formatMessage, 'address', checkActorRequired(typeId, 'address')),
-          checkActorAttribute(typeId, 'url') && getLinkFormField(
-            intl.formatMessage,
-            checkActorRequired(typeId, 'url'),
-            'url',
-          ),
+          checkActorAttribute(typeId, 'email') && getEmailFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'email'),
+          }),
+          checkActorAttribute(typeId, 'phone') && getTextFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'phone'),
+            attribute: 'phone',
+          }),
+          checkActorAttribute(typeId, 'address') && getTextareaFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'address'),
+            attribute: 'address',
+          }),
+          checkActorAttribute(typeId, 'url') && getLinkFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActorRequired(typeId, 'url'),
+          }),
         ],
       },
     );

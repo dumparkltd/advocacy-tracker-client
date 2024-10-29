@@ -16,15 +16,15 @@ import {
   entityOptions,
   taxonomyOptions,
   getTitleFormField,
-  getStatusField,
+  getStatusFormField,
   getMarkdownFormField,
-  getDateField,
-  getTextareaField,
-  renderTaxonomyControl,
+  getDateFormField,
+  getTextareaFormField,
   getCodeFormField,
   getLinkFormField,
   getCategoryUpdatesFromFormData,
   getConnectionUpdatesFromFormData,
+  renderTaxonomyControl,
   renderActorsByActortypeControl,
   renderResourcesByResourcetypeControl,
   renderIndicatorControl,
@@ -174,17 +174,14 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       [ // fieldGroups
         { // fieldGroup
           fields: [
-            checkActionAttribute(typeId, 'code', isAdmin) && getCodeFormField(
-              intl.formatMessage,
-              'code',
-              checkActionRequired(typeId, 'code'),
-            ),
-            checkActionAttribute(typeId, 'title', true) && getTitleFormField(
-              intl.formatMessage,
-              'title',
-              'title',
-              checkActionRequired(typeId, 'title'),
-            ),
+            checkActionAttribute(typeId, 'code', isAdmin) && getCodeFormField({
+              formatMessage: intl.formatMessage,
+              required: checkActionRequired(typeId, 'code'),
+            }),
+            checkActionAttribute(typeId, 'title', true) && getTitleFormField({
+              formatMessage: intl.formatMessage,
+              required: checkActionRequired(typeId, 'title'),
+            }),
           ],
         },
       ]
@@ -197,10 +194,10 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
 
     groups.push({
       fields: [
-        getStatusField(intl.formatMessage),
-        (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
-        isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
-        getStatusField(intl.formatMessage, 'notifications'),
+        getStatusFormField({ formatMessage: intl.formatMessage }),
+        (isAdmin || isMine) && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
+        isAdmin && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'is_archive' }),
+        getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'notifications' }),
         getMetaField(entity, true),
       ],
     });
@@ -225,30 +222,29 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     groups.push(
       {
         fields: [
-          checkActionAttribute(typeId, 'description', true) && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'description'),
-            'description',
-          ),
-          checkActionAttribute(typeId, 'comment', true) && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'comment'),
-            'comment',
-          ),
+          checkActionAttribute(typeId, 'description', true) && getMarkdownFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActionRequired(typeId, 'description'),
+          }),
+          checkActionAttribute(typeId, 'comment', true) && getMarkdownFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActionRequired(typeId, 'comment'),
+            attribute: 'comment',
+          }),
         ],
       },
       {
         fields: [
-          checkActionAttribute(typeId, 'target_comment', true) && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'target_comment'),
-            'target_comment',
-          ),
-          checkActionAttribute(typeId, 'status_comment', true) && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'status_comment'),
-            'status_comment',
-          ),
+          checkActionAttribute(typeId, 'target_comment', true) && getMarkdownFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActionRequired(typeId, 'target_comment'),
+            attribute: 'target_comment',
+          }),
+          checkActionAttribute(typeId, 'status_comment', true) && getMarkdownFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActionRequired(typeId, 'status_comment'),
+            attribute: 'status_comment',
+          }),
         ],
       },
     );
@@ -352,11 +348,10 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     const typeId = entity.getIn(['attributes', 'measuretype_id']);
     const groups = [];
     if (userOptions) {
-      const userConnections = renderUserMultiControl(
-        userOptions,
-        null,
+      const userConnections = renderUserMultiControl({
+        entities: userOptions,
         intl,
-      );
+      });
       if (userConnections) {
         groups.push(
           {
@@ -369,32 +364,31 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     groups.push( // fieldGroups
       { // fieldGroup
         fields: [
-          checkActionAttribute(typeId, 'url') && getLinkFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'url'),
-            'url',
-          ),
+          checkActionAttribute(typeId, 'url') && getLinkFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActionRequired(typeId, 'url'),
+          }),
         ],
       },
     );
     groups.push(
       { // fieldGroup
         fields: [
-          checkActionAttribute(typeId, 'date_start') && getDateField(
-            intl.formatMessage,
-            'date_start',
-            checkActionRequired(typeId, 'date_start'),
-          ),
-          checkActionAttribute(typeId, 'date_end') && getDateField(
-            intl.formatMessage,
-            'date_end',
-            checkActionRequired(typeId, 'date_end'),
-          ),
-          checkActionAttribute(typeId, 'date_comment') && getTextareaField(
-            intl.formatMessage,
-            'date_comment',
-            checkActionRequired(typeId, 'date_comment'),
-          ),
+          checkActionAttribute(typeId, 'date_start') && getDateFormField({
+            formatMessage: intl.formatMessage,
+            attribute: 'date_start',
+            required: checkActionRequired(typeId, 'date_start'),
+          }),
+          checkActionAttribute(typeId, 'date_end') && getDateFormField({
+            formatMessage: intl.formatMessage,
+            attribute: 'date_end',
+            required: checkActionRequired(typeId, 'date_end'),
+          }),
+          checkActionAttribute(typeId, 'date_comment') && getTextareaFormField({
+            formatMessage: intl.formatMessage,
+            attribute: 'date_comment',
+            required: checkActionRequired(typeId, 'date_comment'),
+          }),
         ],
       },
     );

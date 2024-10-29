@@ -18,12 +18,12 @@ import {
   entityOptions,
   renderParentCategoryControl,
   getTitleFormField,
-  getMarkdownFormField,
-  getFormField,
-  getCheckboxField,
-  getStatusField,
-  parentCategoryOptions,
   getShortTitleFormField,
+  getMarkdownFormField,
+  getLinkFormField,
+  getCheckboxFormField,
+  getStatusFormField,
+  parentCategoryOptions,
   // renderUserControl,
   // renderActionControl,
   // renderActorsByActortypeControl,
@@ -139,8 +139,8 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
     const groups = [];
     groups.push({ // fieldGroup
       fields: [
-        getTitleFormField(intl.formatMessage),
-        getShortTitleFormField(intl.formatMessage),
+        getTitleFormField({ formatMessage: intl.formatMessage }),
+        getShortTitleFormField({ formatMessage: intl.formatMessage }),
       ],
     });
     return groups;
@@ -152,19 +152,19 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
     const groups = []; // fieldGroups
     groups.push({
       fields: [
-        getStatusField(intl.formatMessage),
-        (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
-        isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
+        getStatusFormField({ formatMessage: intl.formatMessage }),
+        (isAdmin || isMine) && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
+        isAdmin && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'is_archive' }),
         getMetaField(entity),
       ],
     });
     if (entity.getIn(['taxonomy', 'attributes', 'tags_users'])) {
       groups.push({
         fields: [
-          getCheckboxField(
-            intl.formatMessage,
-            'user_only',
-          ),
+          getCheckboxFormField({
+            formatMessage: intl.formatMessage,
+            attribute: 'user_only',
+          }),
         ],
       });
     }
@@ -184,7 +184,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
     const { intl } = this.context;
     const groups = [];
     groups.push({
-      fields: [getMarkdownFormField(intl.formatMessage)],
+      fields: [getMarkdownFormField({ formatMessage: intl.formatMessage })],
     });
     if (parentOptions && parentTaxonomy) {
       groups.push({
@@ -204,29 +204,9 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
   getBodyAsideFields = () => {
     const { intl } = this.context;
     const fields = []; // fieldGroups
-    // if (isAdmin && !!entity.getIn(['taxonomy', 'attributes', 'has_manager'])) {
-    //   // fields.push({
-    //   //   fields: [
-    //   //     renderUserControl(
-    //   //       users,
-    //   //       intl.formatMessage(appMessages.attributes.manager_id.categories),
-    //   //       entity.getIn(['attributes', 'manager_id'])
-    //   //     ),
-    //   //   ],
-    //   // });
-    // }
     fields.push({
       fields: [
-        // entity.getIn(['taxonomy', 'attributes', 'has_date'])
-        //   && getDateField(
-        //     intl.formatMessage,
-        //     'date',
-        //   ),
-        getFormField({
-          formatMessage: intl.formatMessage,
-          controlType: 'url',
-          attribute: 'url',
-        }),
+        getLinkFormField({ formatMessage: intl.formatMessage }),
       ],
     });
     return fields;

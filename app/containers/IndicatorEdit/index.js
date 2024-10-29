@@ -15,7 +15,7 @@ import { Map, fromJS } from 'immutable';
 import {
   entityOptions,
   getTitleFormField,
-  getStatusField,
+  getStatusFormField,
   getCodeFormField,
   getMarkdownFormField,
   renderActionsByActiontypeControl,
@@ -130,17 +130,14 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
       [ // fieldGroups
         { // fieldGroup
           fields: [
-            checkIndicatorAttribute('code', isAdmin) && getCodeFormField(
-              intl.formatMessage,
-              'code',
-              checkIndicatorRequired('code'),
-            ),
-            getTitleFormField(
-              intl.formatMessage,
-              'title',
-              'title',
-              true,
-            ),
+            checkIndicatorAttribute('code', isAdmin) && getCodeFormField({
+              formatMessage: intl.formatMessage,
+              required: checkIndicatorRequired('code'),
+            }),
+            getTitleFormField({
+              formatMessage: intl.formatMessage,
+              required: true,
+            }),
           ],
         },
       ]
@@ -152,9 +149,9 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
     return ([
       {
         fields: [
-          getStatusField(intl.formatMessage),
-          (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
-          isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
+          getStatusFormField({ formatMessage: intl.formatMessage }),
+          (isAdmin || isMine) && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
+          isAdmin && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'is_archive' }),
           getMetaField(entity, true),
         ],
       },
@@ -173,11 +170,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
     groups.push(
       {
         fields: [
-          getMarkdownFormField(
-            intl.formatMessage,
-            false,
-            'description',
-          ),
+          getMarkdownFormField({ formatMessage: intl.formatMessage }),
         ],
       },
     );

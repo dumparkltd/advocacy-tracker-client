@@ -13,7 +13,7 @@ import {
   getTitleFormField,
   getMenuTitleFormField,
   getMarkdownFormField,
-  getStatusField,
+  getStatusFormField,
   getMenuOrderFormField,
 } from 'utils/forms';
 
@@ -72,9 +72,9 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
     return ([ // fieldGroups
       { // fieldGroup
         fields: [
-          getTitleFormField(intl.formatMessage),
-          getMenuTitleFormField(intl.formatMessage),
-          getMenuOrderFormField(intl.formatMessage),
+          getTitleFormField({ formatMessage: intl.formatMessage }),
+          getMenuTitleFormField({ formatMessage: intl.formatMessage }),
+          getMenuOrderFormField({ formatMessage: intl.formatMessage }),
         ],
       },
     ]);
@@ -84,8 +84,8 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
     const { intl } = this.context;
     return ([{
       fields: [
-        getStatusField(intl.formatMessage),
-        getStatusField(intl.formatMessage, 'private'),
+        getStatusFormField({ formatMessage: intl.formatMessage }),
+        getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
       ],
     }]);
   };
@@ -93,7 +93,11 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
   getBodyMainFields = () => {
     const { intl } = this.context;
     return ([{
-      fields: [getMarkdownFormField(intl.formatMessage, true, 'content')],
+      fields: [getMarkdownFormField({
+        formatMessage: intl.formatMessage,
+        required: true,
+        attribute: 'content',
+      })],
     }]);
   };
 

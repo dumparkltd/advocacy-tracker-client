@@ -14,13 +14,13 @@ import { Map, List, fromJS } from 'immutable';
 import {
   getConnectionUpdatesFromFormData,
   getTitleFormField,
-  getStatusField,
+  getStatusFormField,
   getMarkdownFormField,
   getCodeFormField,
   renderActorsByActortypeControl,
   renderResourcesByResourcetypeControl,
-  getDateField,
-  getTextareaField,
+  getDateFormField,
+  getTextareaFormField,
   renderTaxonomyControl,
   getLinkFormField,
   renderActionsByActiontypeControl,
@@ -137,42 +137,38 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     groups.push(
       { // fieldGroup
         fields: [
-          checkActionAttribute(typeId, 'date_start') && getDateField(
-            intl.formatMessage,
-            'date_start',
-            checkActionRequired(typeId, 'date_start'),
-          ),
-          checkActionAttribute(typeId, 'date_end') && getDateField(
-            intl.formatMessage,
-            'date_end',
-            checkActionRequired(typeId, 'date_end'),
-          ),
-          checkActionAttribute(typeId, 'date_comment') && getTextareaField(
-            intl.formatMessage,
-            'date_comment',
-            checkActionRequired(typeId, 'date_comment'),
-          ),
+          checkActionAttribute(typeId, 'date_start') && getDateFormField({
+            formatMessage: intl.formatMessage,
+            attribute: 'date_start',
+            required: checkActionRequired(typeId, 'date_start'),
+          }),
+          checkActionAttribute(typeId, 'date_end') && getDateFormField({
+            formatMessage: intl.formatMessage,
+            attribute: 'date_end',
+            required: checkActionRequired(typeId, 'date_end'),
+          }),
+          checkActionAttribute(typeId, 'date_comment') && getTextareaFormField({
+            formatMessage: intl.formatMessage,
+            attribute: 'date_comment',
+            required: checkActionRequired(typeId, 'date_comment'),
+          }),
         ],
       },
     );
     groups.push({ // fieldGroup
       fields: [
-        checkActionAttribute(typeId, 'code', isAdmin) && getCodeFormField(
-          intl.formatMessage,
-          'code',
-          checkActionRequired(typeId, 'code'),
-        ),
-        checkActionAttribute(typeId, 'title') && getTitleFormField(
-          intl.formatMessage,
-          'title',
-          'title',
-          checkActionRequired(typeId, 'title'),
-        ),
-        checkActionAttribute(typeId, 'url') && getLinkFormField(
-          intl.formatMessage,
-          checkActionRequired(typeId, 'url'),
-          'url',
-        ),
+        checkActionAttribute(typeId, 'code', isAdmin) && getCodeFormField({
+          formatMessage: intl.formatMessage,
+          required: checkActionRequired(typeId, 'code'),
+        }),
+        checkActionAttribute(typeId, 'title') && getTitleFormField({
+          formatMessage: intl.formatMessage,
+          required: checkActionRequired(typeId, 'title'),
+        }),
+        checkActionAttribute(typeId, 'url') && getLinkFormField({
+          formatMessage: intl.formatMessage,
+          required: checkActionRequired(typeId, 'url'),
+        }),
       ],
     });
     groups.push(
@@ -187,16 +183,15 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     groups.push({
       fields: [
         // description
-        checkActionAttribute(typeId, 'description') && getMarkdownFormField(
-          intl.formatMessage,
-          checkActionRequired(typeId, 'description'),
-          'description',
-        ),
-        checkActionAttribute(typeId, 'comment') && getMarkdownFormField(
-          intl.formatMessage,
-          checkActionRequired(typeId, 'comment'),
-          'comment',
-        ),
+        checkActionAttribute(typeId, 'description') && getMarkdownFormField({
+          formatMessage: intl.formatMessage,
+          required: checkActionRequired(typeId, 'description'),
+        }),
+        checkActionAttribute(typeId, 'comment') && getMarkdownFormField({
+          formatMessage: intl.formatMessage,
+          required: checkActionRequired(typeId, 'comment'),
+          attribute: 'comment',
+        }),
       ],
     });
     return groups;
@@ -322,8 +317,8 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         {
           label: intl.formatMessage(appMessages.nav.userActions),
           fields: [
-            getStatusField(intl.formatMessage, 'notifications'),
-            renderUserMultiControl(userOptions, null, intl),
+            getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'notifications' }),
+            renderUserMultiControl({ entities: userOptions, intl }),
           ],
         },
       );
@@ -331,16 +326,16 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     groups.push(
       {
         fields: [
-          checkActionAttribute(typeId, 'target_comment') && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'target_comment'),
-            'target_comment',
-          ),
-          checkActionAttribute(typeId, 'status_comment') && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'status_comment'),
-            'status_comment',
-          ),
+          checkActionAttribute(typeId, 'target_comment') && getMarkdownFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActionRequired(typeId, 'target_comment'),
+            attribute: 'target_comment',
+          }),
+          checkActionAttribute(typeId, 'status_comment') && getMarkdownFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActionRequired(typeId, 'status_comment'),
+            attribute: 'status_comment',
+          }),
         ],
       },
     );
@@ -514,8 +509,8 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             {
               id: 'footer',
               fields: [
-                getStatusField(intl.formatMessage),
-                getStatusField(intl.formatMessage, 'private'),
+                getStatusFormField({ formatMessage: intl.formatMessage }),
+                getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
               ],
             },
           ]}

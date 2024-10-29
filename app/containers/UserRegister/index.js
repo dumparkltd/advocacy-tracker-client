@@ -13,10 +13,10 @@ import styled from 'styled-components';
 import { actions as formActions } from 'react-redux-form/immutable';
 
 import {
-  getNameField,
-  getEmailField,
-  getPasswordField,
-  getPasswordConfirmationField,
+  getNameFormField,
+  getEmailFormField,
+  getPasswordFormField,
+  getPasswordConfirmationFormField,
 } from 'utils/forms';
 
 import Icon from 'components/Icon';
@@ -94,10 +94,10 @@ export class UserRegister extends React.PureComponent { // eslint-disable-line r
                 handleCancel={this.props.handleCancel}
                 labels={{ submit: intl.formatMessage(messages.submit) }}
                 fields={[
-                  getNameField(intl.formatMessage),
-                  getEmailField(intl.formatMessage),
-                  getPasswordField(intl.formatMessage),
-                  getPasswordConfirmationField(intl.formatMessage),
+                  getNameFormField({ formatMessage: intl.formatMessage }),
+                  getEmailFormField({ formatMessage: intl.formatMessage }),
+                  getPasswordFormField({ formatMessage: intl.formatMessage }),
+                  getPasswordConfirmationFormField({ formatMessage: intl.formatMessage }),
                 ]}
               />
             )
