@@ -149,7 +149,6 @@ export function PositionsList({
     // kick off loading of data
     onLoadData();
   }, []);
-
   let supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
     .filter((level) => parseInt(level.value, 10) > 0) // exclude 0
     .sort((a, b) => a.order > b.order ? 1 : -1);
@@ -243,6 +242,15 @@ export function PositionsList({
         },
         Map(),
       );
+      let countryAssociations;
+      if (item.get('associationsByType') && actorsByType) {
+        countryAssociations = item.get('associationsByType').reduce(
+          (memo, association, typeid) => association.reduce((memo2, value) => memo2.setIn(
+            [typeid, value.toString()], actorsByType.getIn([typeid, value.toString()])
+          ), memo),
+          Map()
+        );
+      }
       const content = {
         header: {
           aboveTitle: actortypes.getIn(
@@ -287,6 +295,7 @@ export function PositionsList({
             plural: intl.formatMessage(appMessages.entities.indicators.plural),
           },
           indicators: indicatorsWithSupport,
+          countryAssociations,
         },
         footer: {
           primaryLink: item && {
@@ -306,6 +315,7 @@ export function PositionsList({
     }
     return {};
   };
+
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
       <Box pad={{ top: 'small', bottom: 'xsmall' }}>

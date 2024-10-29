@@ -19,6 +19,7 @@ import {
   selectIncludeInofficialStatements,
   selectAssociationTypeQuery,
   selectLocationQuery,
+  selectActorConnections,
 } from 'containers/App/selectors';
 import { getValueFromPositions } from 'containers/EntityListTable/utils';
 
@@ -72,12 +73,12 @@ export const selectConnections = createSelector(
 const selectCountriesWithAssociations = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
-  selectConnections,
+  selectActorConnections,
   selectMembershipsGroupedByMember,
   (
     ready,
     actors,
-    connections,
+    actorConnections,
     associationConnectionsGrouped,
   ) => {
     if (ready) {
@@ -86,7 +87,8 @@ const selectCountriesWithAssociations = createSelector(
           const actorId = parseInt(actor.get('id'), 10);
           // memberships
           const actorAssociations = associationConnectionsGrouped.get(actorId);
-          const actorAssociationsByType = actorsByType(actorAssociations, connections.get(API.ACTORS));
+          const actorAssociationsByType = actorsByType(actorAssociations, actorConnections.get(API.ACTORS));
+
           return actor
             .set('associations', actorAssociations)
             .set('associationsByType', actorAssociationsByType);
