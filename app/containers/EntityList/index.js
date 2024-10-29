@@ -129,15 +129,18 @@ const STATE_INITIAL = {
   deleteConfirm: null,
   downloadActive: false,
 };
-
-const reducePreviewItem = ({ item, id, path }) => {
+const reducePreviewItem = ({
+  item, id, path, intl,
+}) => {
   if (id && path) {
     return { entity: { path, id } };
   }
   if (item && qe(item.get('type'), API.ACTORS)) {
     const content = {
       header: {
-        entityType: `actors_${item.getIn(['attributes', 'actortype_id'])}`,
+        aboveTitle: intl.formatMessage(
+          appMessages.entities[`actors_${item.getIn(['attributes', 'actortype_id'])}`].single
+        ),
         title: item && item.getIn(['attributes', 'title']),
       },
       item,
@@ -153,7 +156,9 @@ const reducePreviewItem = ({ item, id, path }) => {
   if (item && qe(item.get('type'), API.ACTIONS)) {
     const content = {
       header: {
-        entityType: `actions_${item.getIn(['attributes', 'measuretype_id'])}`,
+        aboveTitle: intl.formatMessage(
+          appMessages.entities[`actions_${item.getIn(['attributes', 'measuretype_id'])}`].single
+        ),
         title: item && item.getIn(['attributes', 'title']),
       },
       item,
@@ -624,7 +629,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               )}
               {showList && dataReady && (
                 <EntitiesListView
-                  reducePreviewItem={reducePreviewItem}
+                  reducePreviewItem={({ item, id, path }) => reducePreviewItem({
+                    item, id, path, intl,
+                  })}
                   onScrollToTop={this.scrollToTop}
                   searchQuery={searchQuery}
                   isPrintView={isPrintView}

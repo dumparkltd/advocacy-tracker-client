@@ -43,6 +43,7 @@ import {
   selectAssociationTypeQuery,
   selectActorsByType,
   selectLocationQuery,
+  selectActortypes,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -141,6 +142,7 @@ export function PositionsList({
   onUpdateAssociationQuery,
   locationQuery,
   onUpdateColumnFilters,
+  actortypes,
 }) {
   const [search, setSearch] = useState('');
   useEffect(() => {
@@ -243,7 +245,9 @@ export function PositionsList({
       );
       const content = {
         header: {
-          entityType: `actors_${item.getIn(['attributes', 'actortype_id'])}`,
+          aboveTitle: actortypes.getIn(
+            [item.getIn(['attributes', 'actortype_id']).toString(), 'attributes', 'title']
+          ),
           title: item.getIn(['attributes', 'title']),
           code: item.getIn(['attributes', 'code']),
         },
@@ -473,6 +477,7 @@ PositionsList.propTypes = {
   associationGroupQuery: PropTypes.string,
   actorsByType: PropTypes.object, // immutable Map
   locationQuery: PropTypes.object, // immutable Map
+  actortypes: PropTypes.object, // immutable Map
   intl: intlShape.isRequired,
 };
 
@@ -487,6 +492,7 @@ const mapStateToProps = (state) => ({
   associationGroupQuery: selectAssociationTypeQuery(state, { typeId: ACTORTYPES.GROUP }),
   actorsByType: selectActorsByType(state),
   locationQuery: selectLocationQuery(state),
+  actortypes: selectActortypes(state),
 });
 
 export function mapDispatchToProps(dispatch) {
