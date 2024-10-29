@@ -107,7 +107,6 @@ export function CellHeaderAuxColumns({
           }}
           animate={false}
           overflow="hidden"
-          inline
           stretch={false}
         >
           <DropContent>
