@@ -7,7 +7,9 @@ import { Map } from 'immutable';
 import { palette } from 'styled-theme';
 import styled from 'styled-components';
 
-import { Box, Text, Heading } from 'grommet';
+import {
+  Box, Text, Heading, ResponsiveContext,
+} from 'grommet';
 
 import {
   ACTORTYPES,
@@ -19,6 +21,7 @@ import {
 import qe from 'utils/quasi-equals';
 import asArray from 'utils/as-array';
 import asList from 'utils/as-list';
+import { isMinSize } from 'utils/responsive';
 
 import {
   getIndicatorMainTitle,
@@ -144,6 +147,7 @@ export function PositionsList({
   onUpdateColumnFilters,
   actortypes,
 }) {
+  const size = React.useContext(ResponsiveContext);
   const [search, setSearch] = useState('');
   useEffect(() => {
     // kick off loading of data
@@ -333,13 +337,13 @@ export function PositionsList({
           <Loading loading={!dataReady} />
           {dataReady && (
             <Box gap="small">
-              <Box direction="row" justify="between">
+              <Box direction={isMinSize(size, 'large') ? 'row' : 'column'} justify="between">
                 <Box gap="small" margin={{ vertical: 'small' }}>
                   <ComponentTitle>
                     Countries
                   </ComponentTitle>
                 </Box>
-                <Box direction="row" gap="small">
+                <Box direction={isMinSize(size, 'large') ? 'row' : 'column'} gap="small">
                   <FilterDropdown
                     options={prepareDropdownOptions(
                       actorsByType.get(parseInt(ACTORTYPES.REG, 10)),
@@ -376,7 +380,7 @@ export function PositionsList({
                 direction="row"
                 justify="between"
                 gap="small"
-                align="end"
+                align={isMinSize(size, 'large') ? 'end' : 'start'}
               >
                 <Box gap="xsmall">
                   <Text weight={600}>Levels of support</Text>

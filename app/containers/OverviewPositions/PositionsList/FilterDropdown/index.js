@@ -89,9 +89,15 @@ export function FilterDropdown({
             direction="row"
             gap="medium"
             align="center"
+            justify="between"
             pad={{ left: 'small', right: 'xsmall' }}
           >
-            <Box direction="row" gap="small" align="center">
+            <Box
+              direction="row"
+              gap="small"
+              align="center"
+              justify="between"
+            >
               <Icon
                 size="24px"
                 name="filter"
@@ -129,6 +135,7 @@ export function FilterDropdown({
             direction="row"
             gap="small"
             align="center"
+            justify="between"
             pad={{ left: 'small', right: 'xsmall' }}
           >
             <ButtonLabelActive>
