@@ -183,9 +183,7 @@ export function PreviewContent({
           ]];
       }
       // stakeholders
-      if (actorConnections && qe(column.get('type'), 'actors')
-        && item.get('actorsByType') && qe(item.getIn(['attributes', 'measuretype_id']), ACTIONTYPES.EXPRESS)
-      ) {
+      if (actorConnections && qe(column.get('type'), 'actors') && item.get('actorsByType')) {
         return item.get('actorsByType').reduce(
           (memo2, actorIds, typeid) => {
             const actors = actorConnections.get(API.ACTORS).filter(
