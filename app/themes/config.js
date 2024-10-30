@@ -284,15 +284,18 @@ export const ACTION_FIELDS = {
       table: API.ACTIONTYPES,
       exportColumn: 'activity_type',
       export: true,
+      editable: false,
     },
     code: {
       optional: Object.values(ACTIONTYPES), // all types
       adminOnly: true,
       type: 'text',
+      section: 2,
     },
     title: {
       required: Object.values(ACTIONTYPES), // all types
       type: 'text',
+      section: 2,
       // exportRequired: true,
     },
     // parent_id: {
@@ -303,32 +306,42 @@ export const ACTION_FIELDS = {
     description: {
       optional: Object.values(ACTIONTYPES),
       type: 'markdown',
+      section: 2,
     },
     comment: {
       optional: Object.values(ACTIONTYPES),
       type: 'markdown',
+      hideByDefault: true,
+      section: 2,
     },
     url: {
       optional: Object.values(ACTIONTYPES),
       type: 'url',
+      section: 2,
+      hideByDefault: true,
     },
     date_start: {
       optional: Object.values(ACTIONTYPES),
       preview: Object.values(ACTIONTYPES),
+      section: 1,
       type: 'date',
     },
     date_end: {
       optional: [ACTIONTYPES.EVENT],
+      section: 1,
       type: 'date',
     },
     date_comment: {
       optional: Object.values(ACTIONTYPES),
       type: 'text',
+      section: 1,
+      hideByDefault: true,
     },
     draft: {
       defaultValue: true,
       required: Object.values(ACTIONTYPES), // all types
       type: 'bool',
+      section: 'footer',
       // ui: 'dropdown',
       skipImport: true,
       // options: [
@@ -339,14 +352,17 @@ export const ACTION_FIELDS = {
     private: {
       defaultValue: false,
       type: 'bool',
+      section: 'footer',
     },
     is_archive: {
       defaultValue: false,
       type: 'bool',
+      section: 'footer',
     },
     notifications: {
       defaultValue: true,
       type: 'bool',
+      section: 'other',
     },
     created_at: {
       skipImport: true,
@@ -1399,6 +1415,165 @@ export const ACTIONTYPES_CONFIG = {
         adminOnly: true,
       },
     ],
+    form: [
+      {
+        id: 'footer',
+        fields: [
+          { attribute: 'archive', needsAdmin: true },
+          { attribute: 'private', needsAdminOrOwn: true },
+          { attribute: 'draft', needsAdminOrOwn: true },
+        ],
+      },
+      {
+        id: 'main',
+        title: 'Main',
+        sections: [
+          {
+            id: 'main',
+            title: 'Main info',
+            rows: [
+              [{
+                attribute: 'date_start',
+                prepopulate: true, // today
+              },
+              {
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EVENT,
+                parents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                attribute: 'date_comment',
+                hideByDefault: true,
+              }],
+            ],
+          },
+          {
+            id: 'content',
+            title: 'Main content',
+            rows: [
+              [{
+                attribute: 'title',
+                required: true,
+              }],
+              [{
+                attribute: 'description',
+              }],
+              [{
+                attribute: 'comment',
+                hideByDefault: true,
+              }],
+            ], // rows
+          }, // section
+        ], //
+      }, // step
+      {
+        id: 'stakeholders',
+        title: 'Participants',
+        sections: [
+          {
+            id: 'interaction',
+            title: 'Type and participants of interaction',
+            rows: [
+              [{
+                taxonomy: 12, // interaction type,
+                type: 'pills',
+              }],
+              [
+                {
+                  connection: API.USERS,
+                  prepopulate: true, // current user
+                },
+                {
+                  attribute: 'notifications',
+                },
+              ],
+            ],
+          },
+          {
+            id: 'other-stakeholders',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.CONTACT,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.GROUP,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ], // sections
+      }, // step
+      {
+        id: 'outreach',
+        title: 'Related outreach',
+        sections: [
+          {
+            id: 'outreach',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.TASK,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.OP,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.AP,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+      {
+        id: 'other',
+        title: 'Statements & resources',
+        sections: [
+          {
+            id: 'statements',
+            title: 'Related statements',
+            rows: [[{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.EXPRESS,
+              asChildren: true,
+              prepopulateIfPrevious: true,
+            }]],
+          },
+          {
+            id: 'resources',
+            title: 'Related resources',
+            rows: [
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.WEB,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.DOC,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+    ], // steps
   },
 };
 

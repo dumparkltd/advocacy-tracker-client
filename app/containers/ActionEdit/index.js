@@ -32,10 +32,6 @@ import {
   renderUserMultiControl,
 } from 'utils/forms';
 
-import {
-  getMetaField,
-} from 'utils/fields';
-
 import { checkActionAttribute, checkActionRequired } from 'utils/entities';
 
 import { scrollToTop } from 'utils/scroll-to-component';
@@ -167,87 +163,102 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       : Map();
   };
 
-  getHeaderMainFields = (entity, isAdmin) => {
+  getMainFields = ({
+    typeId, isAdmin, taxonomies, onCreateOption,
+  }) => {
     const { intl } = this.context;
-    const typeId = entity.getIn(['attributes', 'measuretype_id']);
-    return (
-      [ // fieldGroups
-        { // fieldGroup
-          fields: [
-            checkActionAttribute(typeId, 'code', isAdmin) && getCodeFormField({
-              formatMessage: intl.formatMessage,
-              required: checkActionRequired(typeId, 'code'),
-            }),
-            checkActionAttribute(typeId, 'title', true) && getTitleFormField({
-              formatMessage: intl.formatMessage,
-              required: checkActionRequired(typeId, 'title'),
-            }),
-          ],
-        },
-      ]
+    const groups = [];
+    groups.push(
+      { // fieldGroup
+        fields: [
+          checkActionAttribute(typeId, 'date_start') && getDateFormField({
+            formatMessage: intl.formatMessage,
+            attribute: 'date_start',
+            required: checkActionRequired(typeId, 'date_start'),
+          }),
+          checkActionAttribute(typeId, 'date_end') && getDateFormField({
+            formatMessage: intl.formatMessage,
+            attribute: 'date_end',
+            required: checkActionRequired(typeId, 'date_end'),
+          }),
+          checkActionAttribute(typeId, 'date_comment') && getTextareaFormField({
+            formatMessage: intl.formatMessage,
+            attribute: 'date_comment',
+            hideByDefault: true,
+          }),
+        ],
+      },
     );
-  };
-
-  getHeaderAsideFields = (entity, isAdmin, isMine) => {
-    const { intl } = this.context;
-    const groups = []; // fieldGroups
-
+    groups.push({ // fieldGroup
+      fields: [
+        checkActionAttribute(typeId, 'code', isAdmin) && getCodeFormField({
+          formatMessage: intl.formatMessage,
+          required: checkActionRequired(typeId, 'code'),
+        }),
+        checkActionAttribute(typeId, 'title') && getTitleFormField({
+          formatMessage: intl.formatMessage,
+          required: checkActionRequired(typeId, 'title'),
+        }),
+        checkActionAttribute(typeId, 'url') && getLinkFormField({
+          formatMessage: intl.formatMessage,
+          required: checkActionRequired(typeId, 'url'),
+        }),
+      ],
+    });
+    groups.push(
+      { // fieldGroup
+        label: intl.formatMessage(appMessages.entities.taxonomies.plural),
+        icon: 'categories',
+        fields: renderTaxonomyControl({
+          taxonomies, onCreateOption, intl,
+        }),
+      },
+    );
     groups.push({
       fields: [
-        getStatusFormField({ formatMessage: intl.formatMessage }),
-        (isAdmin || isMine) && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
-        isAdmin && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'is_archive' }),
-        getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'notifications' }),
-        getMetaField(entity, true),
+        // description
+        checkActionAttribute(typeId, 'description') && getMarkdownFormField({
+          formatMessage: intl.formatMessage,
+          required: checkActionRequired(typeId, 'description'),
+        }),
+        checkActionAttribute(typeId, 'comment') && getMarkdownFormField({
+          formatMessage: intl.formatMessage,
+          required: checkActionRequired(typeId, 'comment'),
+          attribute: 'comment',
+        }),
       ],
     });
     return groups;
   };
 
-  getBodyMainFields = ({
-    entity,
-    connectedTaxonomies,
-    actorsByActortype,
-    resourcesByResourcetype,
-    subActionsByActiontype,
-    indicatorOptions,
-    onCreateOption,
-    entityIndicatorConnections,
+  getStakeholderFields = ({
+    typeId,
     isAdmin,
+    actorsByActortype,
+    connectedTaxonomies,
+    onCreateOption,
+    indicatorOptions,
+    entityIndicatorConnections,
   }) => {
     const { intl } = this.context;
-    const typeId = entity.getIn(['attributes', 'measuretype_id']);
-
     const groups = [];
-    groups.push(
-      {
-        fields: [
-          checkActionAttribute(typeId, 'description', true) && getMarkdownFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActionRequired(typeId, 'description'),
-          }),
-          checkActionAttribute(typeId, 'comment', true) && getMarkdownFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActionRequired(typeId, 'comment'),
-            attribute: 'comment',
-          }),
-        ],
-      },
-      {
-        fields: [
-          checkActionAttribute(typeId, 'target_comment', true) && getMarkdownFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActionRequired(typeId, 'target_comment'),
-            attribute: 'target_comment',
-          }),
-          checkActionAttribute(typeId, 'status_comment', true) && getMarkdownFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActionRequired(typeId, 'status_comment'),
-            attribute: 'status_comment',
-          }),
-        ],
-      },
-    );
+    if (actorsByActortype) {
+      const actorConnections = renderActorsByActortypeControl({
+        entitiesByActortype: actorsByActortype,
+        taxonomies: connectedTaxonomies,
+        onCreateOption,
+        intl,
+        isAdmin,
+      });
+      if (actorConnections) {
+        groups.push(
+          {
+            label: intl.formatMessage(appMessages.nav.actors),
+            fields: actorConnections,
+          },
+        );
+      }
+    }
     if (indicatorOptions) {
       let connectionAttributes = [];
       if (ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId]) {
@@ -281,19 +292,34 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         );
       }
     }
-    if (actorsByActortype) {
-      const actorConnections = renderActorsByActortypeControl({
-        entitiesByActortype: actorsByActortype,
+    return groups;
+  };
+
+  getOutreachFields = ({
+    connectedTaxonomies,
+    topActionsByActiontype,
+    subActionsByActiontype,
+    onCreateOption,
+    isAdmin,
+  }) => {
+    const { intl } = this.context;
+    // if (!type) return [];
+    // const typeId = type.get('id');
+    const groups = [];
+    if (topActionsByActiontype) {
+      const actionConnections = renderActionsByActiontypeControl({
+        entitiesByActiontype: topActionsByActiontype,
         taxonomies: connectedTaxonomies,
         onCreateOption,
         intl,
+        model: 'associatedTopActionsByActiontype',
         isAdmin,
       });
-      if (actorConnections) {
+      if (actionConnections) {
         groups.push(
           {
-            label: intl.formatMessage(appMessages.nav.actors),
-            fields: actorConnections,
+            label: intl.formatMessage(appMessages.nav.topActions),
+            fields: actionConnections,
           },
         );
       }
@@ -316,6 +342,47 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         );
       }
     }
+    return groups;
+  };
+
+  getOtherFields = ({
+    typeId,
+    resourcesByResourcetype,
+    userOptions,
+    onCreateOption,
+    isAdmin,
+  }) => {
+    const { intl } = this.context;
+    // const typeId = type.get('id');
+    const groups = [];
+    if (userOptions) {
+      groups.push(
+        {
+          label: intl.formatMessage(appMessages.nav.userActions),
+          fields: [
+            getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'notifications' }),
+            renderUserMultiControl({ entities: userOptions, intl }),
+          ],
+        },
+      );
+    }
+    groups.push(
+      {
+        fields: [
+          checkActionAttribute(typeId, 'target_comment') && getMarkdownFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActionRequired(typeId, 'target_comment'),
+            attribute: 'target_comment',
+          }),
+          checkActionAttribute(typeId, 'status_comment') && getMarkdownFormField({
+            formatMessage: intl.formatMessage,
+            required: checkActionRequired(typeId, 'status_comment'),
+            attribute: 'status_comment',
+          }),
+        ],
+      },
+    );
+
     if (resourcesByResourcetype) {
       const resourceConnections = renderResourcesByResourcetypeControl({
         entitiesByResourcetype: resourcesByResourcetype,
@@ -335,92 +402,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     return groups;
   };
 
-  getBodyAsideFields = (
-    entity,
-    taxonomies,
-    connectedTaxonomies,
-    topActionsByActiontype,
-    userOptions,
-    onCreateOption,
-    isAdmin,
-  ) => {
-    const { intl } = this.context;
-    const typeId = entity.getIn(['attributes', 'measuretype_id']);
-    const groups = [];
-    if (userOptions) {
-      const userConnections = renderUserMultiControl({
-        entities: userOptions,
-        intl,
-      });
-      if (userConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.userActions),
-            fields: [userConnections],
-          },
-        );
-      }
-    }
-    groups.push( // fieldGroups
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'url') && getLinkFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActionRequired(typeId, 'url'),
-          }),
-        ],
-      },
-    );
-    groups.push(
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'date_start') && getDateFormField({
-            formatMessage: intl.formatMessage,
-            attribute: 'date_start',
-            required: checkActionRequired(typeId, 'date_start'),
-          }),
-          checkActionAttribute(typeId, 'date_end') && getDateFormField({
-            formatMessage: intl.formatMessage,
-            attribute: 'date_end',
-            required: checkActionRequired(typeId, 'date_end'),
-          }),
-          checkActionAttribute(typeId, 'date_comment') && getTextareaFormField({
-            formatMessage: intl.formatMessage,
-            attribute: 'date_comment',
-            required: checkActionRequired(typeId, 'date_comment'),
-          }),
-        ],
-      },
-    );
-    groups.push(
-      { // fieldGroup
-        label: intl.formatMessage(appMessages.entities.taxonomies.plural),
-        icon: 'categories',
-        fields: renderTaxonomyControl({
-          taxonomies, onCreateOption, intl,
-        }),
-      },
-    );
-    if (topActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl({
-        entitiesByActiontype: topActionsByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        model: 'associatedTopActionsByActiontype',
-        isAdmin,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.topActions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
 
   render() {
     const {
@@ -522,38 +503,54 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                 scrollContainer={this.scrollContainer.current}
                 fieldsByStep={[
                   {
-                    id: 'header-main',
-                    fields: this.getHeaderMainFields(viewEntity, isAdmin),
+                    id: 'main',
+                    title: 'Main',
+                    fields: this.getMainFields({
+                      typeId, isAdmin, taxonomies, onCreateOption,
+                    }),
                   },
                   {
-                    id: 'header-aside',
-                    fields: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
-                  },
-                  {
-                    id: 'body-main',
-                    fields: this.getBodyMainFields({
-                      entity: viewEntity,
-                      connectedTaxonomies,
+                    id: 'stakeholders',
+                    title: 'Stakeholders',
+                    fields: this.getStakeholderFields({
+                      typeId,
+                      isAdmin,
                       actorsByActortype,
-                      resourcesByResourcetype,
-                      subActionsByActiontype,
-                      indicatorOptions,
+                      connectedTaxonomies,
                       onCreateOption,
+                      indicatorOptions,
                       entityIndicatorConnections,
+                    }),
+                  },
+                  {
+                    id: 'outreach',
+                    title: 'Related activities',
+                    fields: this.getOutreachFields({
+                      connectedTaxonomies,
+                      topActionsByActiontype,
+                      subActionsByActiontype,
+                      onCreateOption,
                       isAdmin,
                     }),
                   },
                   {
-                    id: 'body-aside',
-                    fields: this.getBodyAsideFields(
-                      viewEntity,
-                      taxonomies,
-                      connectedTaxonomies,
-                      topActionsByActiontype,
+                    id: 'other',
+                    title: 'Other',
+                    fields: this.getOtherFields({
+                      typeId,
+                      resourcesByResourcetype,
                       userOptions,
                       onCreateOption,
                       isAdmin,
-                    ),
+                    }),
+                  },
+                  {
+                    id: 'footer',
+                    fields: [
+                      isAdmin && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'is_archive' }),
+                      (isAdmin || isMine) && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
+                      getStatusFormField({ formatMessage: intl.formatMessage }),
+                    ],
                   },
                 ]}
               />

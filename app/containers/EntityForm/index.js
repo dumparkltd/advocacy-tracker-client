@@ -39,7 +39,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     return true;
   }
 
-  preDelete = (confirm = true) => {
+  setDeleteConfirmed = (confirm = true) => {
     this.setState({ deleteConfirmed: confirm });
   }
 
@@ -117,44 +117,59 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
         >
           {byStep && byStep.length > 1 && (
             <FilterSteps>
-              {byStep.map((step) => {
+              {byStep.map((step, idx) => {
                 const currentStepActive = step.id === cleanStepActive;
                 const stepSeen = stepsSeen.indexOf(step.id) > -1 || currentStepActive;
-                const hasEmptyRequired = step.fields && step.fields.some(
-                  (field) => {
-                    if (!field.fields) return false;
-                    return field.fields.some(
-                      (actualField) => {
-                        if (!actualField) return false;
-                        const modelPath = actualField.model && actualField.model.split('.').filter((val) => val !== '');
-                        const fieldTracked = get(formDataTracked, modelPath);
-                        return actualField && fieldTracked && actualField.hasrequired && fieldTracked.value === '';
+                const hasEmptyRequired = step.sections && step.sections.some(
+                  (section) => {
+                    if (!section.rows) return false;
+                    return section.rows.some(
+                      (row) => {
+                        if (!row.fields) return false;
+                        return row.fields.some(
+                          (field) => {
+                            if (!field) return false;
+                            const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
+                            const fieldTracked = get(formDataTracked, modelPath);
+                            return field && fieldTracked && field.hasrequired && fieldTracked.value === '';
+                          },
+                        );
                       }
                     );
                   },
                   false,
                 );
-                const hasAutofill = isNewEntityView && !stepSeen && step.fields && step.fields.some(
-                  (field) => {
-                    if (!field.fields) return false;
-                    return field.fields.some(
-                      (actualField) => {
-                        if (!actualField) return false;
-                        const modelPath = actualField.model && actualField.model.split('.').filter((val) => val !== '');
-                        const fieldTracked = get(formDataTracked, modelPath);
-                        if (
-                          fieldTracked
-                          && actualField
-                          && (actualField.controlType === 'select' || actualField.controlType === 'multiselect' || !!actualField.options)
-                        ) {
-                          return !!Object.values(fieldTracked).some((options) => !!options.autofill);
+                const hasAutofill = isNewEntityView
+                  && idx !== 0
+                  && !stepSeen
+                  && step.sections
+                  && step.sections.some(
+                    (section) => {
+                      if (!section.rows) return false;
+                      return section.rows.some(
+                        (row) => {
+                          if (!row.fields) return false;
+                          return row.fields.some(
+                            (field) => {
+                              if (!field) return false;
+                              const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
+                              const fieldTracked = get(formDataTracked, modelPath);
+                              if (
+                                fieldTracked
+                                && field
+                                && (field.controlType === 'select' || field.controlType === 'multiselect' || !!field.options)
+                              ) {
+                                return !!Object.values(fieldTracked).some((options) => !!options.autofill);
+                              }
+                              return field.autofill;
+                            }
+                          );
                         }
-                        return fieldTracked && fieldTracked.autofill;
-                      }
-                    );
-                  },
-                  false,
-                );
+                      );
+                    },
+                    false,
+                  );
+
                 return (
                   <Button
                     key={step.id}
@@ -175,14 +190,17 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
           )}
           <FormBodyWrapper
             fields={activeStep && activeStep.fields}
+            sections={activeStep && activeStep.sections}
             footerFields={footerFields}
             closeMultiselectOnClickOutside={closeMultiselectOnClickOutside}
             scrollContainer={scrollContainer}
             formData={formData}
+            formDataTracked={formDataTracked}
             handleUpdate={handleUpdate}
             handleDelete={handleDelete}
             handleCancel={handleCancel}
             deleteConfirmed={deleteConfirmed}
+            onSetDeleteConfirmed={this.setDeleteConfirmed}
             isSaving={saving}
           />
         </StyledForm>

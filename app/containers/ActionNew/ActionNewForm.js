@@ -8,7 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { actions as formActions } from 'react-redux-form/immutable';
-
+import { format } from 'date-fns';
 import { Map, List, fromJS } from 'immutable';
 
 import {
@@ -17,13 +17,13 @@ import {
   getStatusFormField,
   getMarkdownFormField,
   getCodeFormField,
-  renderActorsByActortypeControl,
-  renderResourcesByResourcetypeControl,
+  getActorsFormControl,
+  getActionsFormControl,
+  getResourcesFormControl,
   getDateFormField,
   getTextareaFormField,
-  renderTaxonomyControl,
+  getSingleTaxonomyFormControl,
   getLinkFormField,
-  renderActionsByActiontypeControl,
   renderIndicatorControl,
   renderUserMultiControl,
 } from 'utils/forms';
@@ -32,7 +32,7 @@ import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
-import { checkActionAttribute, checkActionRequired, getEntityTitle } from 'utils/entities';
+import { getEntityTitle } from 'utils/entities';
 import { lowerCase } from 'utils/string';
 
 import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
@@ -41,6 +41,8 @@ import {
   USER_ROLES,
   ROUTES,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
+  ACTIONTYPES_CONFIG,
+  API_DATE_FORMAT,
 } from 'themes/config';
 
 import {
@@ -114,250 +116,201 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     const props = nextProps || this.props;
     const { typeId, sessionUser } = props;
     const dataWithType = FORM_INITIAL.setIn(['attributes', 'measuretype_id'], typeId);
+    const nowFormatted = format(new Date(), API_DATE_FORMAT);
     return sessionUser
       && sessionUser.getIn(['attributes', 'id'])
-      ? dataWithType.set(
-        'associatedUsers',
-        fromJS([{
-          value: sessionUser.getIn(['attributes', 'id']).toString(),
-          checked: true,
-          label: sessionUser.getIn(['attributes', 'name']),
-          reference: sessionUser.getIn(['attributes', 'id']).toString(),
-          autofill: true,
-        }])
-      )
+      ? dataWithType
+        .set(
+          'associatedUsers',
+          fromJS([{
+            value: sessionUser.getIn(['attributes', 'id']).toString(),
+            checked: true,
+            label: sessionUser.getIn(['attributes', 'name']),
+            reference: sessionUser.getIn(['attributes', 'id']).toString(),
+            autofill: true,
+          }])
+        ).setIn(
+          ['attributes', 'date_start'],
+          nowFormatted,
+        )
       : dataWithType;
   };
 
-  getMainFields = ({
-    typeId, isAdmin, taxonomies, onCreateOption,
-  }) => {
+  getFormField = (
+    field,
+    {
+      isAdmin,
+      typeId,
+      taxonomies,
+      connectedTaxonomies,
+      userOptions,
+      indicatorOptions,
+      actorsByActortype,
+      topActionsByActiontype,
+      subActionsByActiontype,
+      resourcesByResourcetype,
+      onCreateOption,
+    }
+  ) => {
     const { intl } = this.context;
-    const groups = [];
-    groups.push(
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'date_start') && getDateFormField({
-            formatMessage: intl.formatMessage,
-            attribute: 'date_start',
-            required: checkActionRequired(typeId, 'date_start'),
-          }),
-          checkActionAttribute(typeId, 'date_end') && getDateFormField({
-            formatMessage: intl.formatMessage,
-            attribute: 'date_end',
-            required: checkActionRequired(typeId, 'date_end'),
-          }),
-          checkActionAttribute(typeId, 'date_comment') && getTextareaFormField({
-            formatMessage: intl.formatMessage,
-            attribute: 'date_comment',
-            required: checkActionRequired(typeId, 'date_comment'),
-          }),
-        ],
-      },
+    const { formatMessage } = intl;
+    const {
+      attribute,
+      connection,
+      taxonomy,
+      required,
+      prepopulate,
+      hideByDefault,
+      needsAdmin,
+      type,
+      asParents,
+      asChildren,
+    } = field;
+    let result;
+    if (needsAdmin && !isAdmin) return null;
+    if (attribute) {
+      if (attribute === 'title') {
+        result = getTitleFormField({
+          formatMessage, attribute, required, hideByDefault,
+        });
+      } else if (
+        attribute === 'description'
+        || attribute === 'comment'
+        || attribute === 'target_comment'
+        || attribute === 'status_comment'
+      ) {
+        result = getMarkdownFormField({
+          formatMessage, attribute, required, hideByDefault,
+        });
+      } else if (attribute === 'code') {
+        result = getCodeFormField({
+          formatMessage, attribute, required, hideByDefault,
+        });
+      } else if (attribute === 'date_start' || attribute === 'date_end') {
+        result = getDateFormField({
+          formatMessage, attribute, required, hideByDefault,
+        });
+      } else if (attribute === 'date_comment') {
+        result = getTextareaFormField({
+          formatMessage, attribute, required, hideByDefault,
+        });
+      } else if (attribute === 'url') {
+        result = getLinkFormField({
+          formatMessage, attribute, required, hideByDefault,
+        });
+      } else if (attribute === 'notifications') {
+        result = getStatusFormField({
+          formatMessage, attribute, required, hideByDefault,
+        });
+      }
+    } else if (connection) {
+      if (connection === API.ACTORS && actorsByActortype) {
+        result = getActorsFormControl({
+          typeId: type,
+          entities: actorsByActortype.get(type),
+          taxonomies: connectedTaxonomies,
+          onCreateOption,
+          isAdmin,
+          intl,
+        });
+      } else if (connection === API.ACTIONS) {
+        let entities;
+        let path;
+        if (asParents && topActionsByActiontype) {
+          entities = topActionsByActiontype.get(type);
+          path = 'associatedTopActionsByActiontype';
+        } else if (asChildren && subActionsByActiontype) {
+          entities = subActionsByActiontype.get(type);
+          path = 'associatedSubActionsByActiontype';
+        }
+        if (entities) {
+          result = getActionsFormControl({
+            typeId: type,
+            entities,
+            taxonomies: connectedTaxonomies,
+            onCreateOption,
+            isAdmin,
+            intl,
+            path,
+          });
+        }
+      }
+      if (connection === API.INDICATORS && indicatorOptions) {
+        result = renderIndicatorControl({
+          entities: indicatorOptions,
+          intl,
+          connectionAttributes: [{
+            attribute: 'supportlevel_id',
+            type: 'select',
+            showCode: isAdmin,
+            options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId].map(
+              (level) => ({
+                label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                ...level,
+              }),
+            ),
+          }],
+        });
+      } else if (connection === API.RESOURCES && resourcesByResourcetype) {
+        result = getResourcesFormControl({
+          typeId: type,
+          entities: resourcesByResourcetype.get(type),
+          onCreateOption,
+          isAdmin,
+          intl,
+        });
+      } else if (connection === API.USERS && userOptions) {
+        result = renderUserMultiControl({ entities: userOptions, intl });
+      }
+    } else if (taxonomy && taxonomies) {
+      const theTaxonomy = taxonomies.get(`${taxonomy}`);
+      if (theTaxonomy) {
+        result = getSingleTaxonomyFormControl({
+          taxonomy: theTaxonomy,
+          onCreateOption,
+          intl,
+          hideByDefault,
+        });
+      }
+    }
+    if (!result) return null;
+    result = {
+      ...result,
+      required,
+      hasrequired: !!required,
+      autofill: !!prepopulate,
+      hideByDefault,
+    };
+    return result;
+  }
+
+  getFields = (args) => {
+    const { typeId } = args;
+    const shape = ACTIONTYPES_CONFIG[parseInt(typeId, 10)]
+      && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].form;
+    const steps = shape && shape.map(
+      (step) => ({
+        id: step.id,
+        title: step.title, // id: footer w/out title
+        sections: step.sections && step.sections.map(
+          (section) => ({
+            ...section,
+            rows: section.rows.map(
+              (row) => ({
+                fields: row.map(
+                  (field) => this.getFormField(field, args),
+                ),
+              })
+            ),
+          })
+        ),
+        fields: step.fields && step.fields.map(
+          (field) => this.getFormField(field, args),
+        ),
+      })
     );
-    groups.push({ // fieldGroup
-      fields: [
-        checkActionAttribute(typeId, 'code', isAdmin) && getCodeFormField({
-          formatMessage: intl.formatMessage,
-          required: checkActionRequired(typeId, 'code'),
-        }),
-        checkActionAttribute(typeId, 'title') && getTitleFormField({
-          formatMessage: intl.formatMessage,
-          required: checkActionRequired(typeId, 'title'),
-        }),
-        checkActionAttribute(typeId, 'url') && getLinkFormField({
-          formatMessage: intl.formatMessage,
-          required: checkActionRequired(typeId, 'url'),
-        }),
-      ],
-    });
-    groups.push(
-      { // fieldGroup
-        label: intl.formatMessage(appMessages.entities.taxonomies.plural),
-        icon: 'categories',
-        fields: renderTaxonomyControl({
-          taxonomies, onCreateOption, intl,
-        }),
-      },
-    );
-    groups.push({
-      fields: [
-        // description
-        checkActionAttribute(typeId, 'description') && getMarkdownFormField({
-          formatMessage: intl.formatMessage,
-          required: checkActionRequired(typeId, 'description'),
-        }),
-        checkActionAttribute(typeId, 'comment') && getMarkdownFormField({
-          formatMessage: intl.formatMessage,
-          required: checkActionRequired(typeId, 'comment'),
-          attribute: 'comment',
-        }),
-      ],
-    });
-    return groups;
-  };
-
-  getStakeholderFields = ({
-    typeId,
-    isAdmin,
-    actorsByActortype,
-    connectedTaxonomies,
-    onCreateOption,
-    indicatorOptions,
-  }) => {
-    const { intl } = this.context;
-    const groups = [];
-    if (actorsByActortype) {
-      const actorConnections = renderActorsByActortypeControl({
-        entitiesByActortype: actorsByActortype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (actorConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.actors),
-            fields: actorConnections,
-          },
-        );
-      }
-    }
-    if (indicatorOptions) {
-      const indicatorConnections = renderIndicatorControl({
-        entities: indicatorOptions,
-        intl,
-        connectionAttributes: [{
-          attribute: 'supportlevel_id',
-          type: 'select',
-          showCode: isAdmin,
-          options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId].map(
-            (level) => ({
-              label: intl.formatMessage(appMessages.supportlevels[level.value]),
-              ...level,
-            }),
-          ),
-        }],
-      });
-      if (indicatorConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.indicators),
-            fields: [indicatorConnections],
-          },
-        );
-      }
-    }
-    return groups;
-  };
-
-  getOutreachFields = ({
-    connectedTaxonomies,
-    topActionsByActiontype,
-    subActionsByActiontype,
-    onCreateOption,
-    isAdmin,
-  }) => {
-    const { intl } = this.context;
-    // if (!type) return [];
-    // const typeId = type.get('id');
-    const groups = [];
-    if (topActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl({
-        entitiesByActiontype: topActionsByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        model: 'associatedTopActionsByActiontype',
-        isAdmin,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.topActions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    if (subActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl({
-        entitiesByActiontype: subActionsByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        model: 'associatedSubActionsByActiontype',
-        isAdmin,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.subActions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
-
-  getOtherFields = ({
-    typeId,
-    resourcesByResourcetype,
-    userOptions,
-    onCreateOption,
-    isAdmin,
-  }) => {
-    const { intl } = this.context;
-    // const typeId = type.get('id');
-    const groups = [];
-    if (userOptions) {
-      groups.push(
-        {
-          label: intl.formatMessage(appMessages.nav.userActions),
-          fields: [
-            getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'notifications' }),
-            renderUserMultiControl({ entities: userOptions, intl }),
-          ],
-        },
-      );
-    }
-    groups.push(
-      {
-        fields: [
-          checkActionAttribute(typeId, 'target_comment') && getMarkdownFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActionRequired(typeId, 'target_comment'),
-            attribute: 'target_comment',
-          }),
-          checkActionAttribute(typeId, 'status_comment') && getMarkdownFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActionRequired(typeId, 'status_comment'),
-            attribute: 'status_comment',
-          }),
-        ],
-      },
-    );
-
-    if (resourcesByResourcetype) {
-      const resourceConnections = renderResourcesByResourcetypeControl({
-        entitiesByResourcetype: resourcesByResourcetype,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (resourceConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.resources),
-            fields: resourceConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
+    return steps;
+  }
 
   render() {
     const { intl } = this.context;
@@ -464,56 +417,19 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fieldsByStep={[
-            {
-              id: 'main',
-              title: 'Main',
-              fields: this.getMainFields({
-                typeId, isAdmin, taxonomies, onCreateOption,
-              }),
-            },
-            {
-              id: 'stakeholders',
-              title: 'Stakeholders',
-              fields: this.getStakeholderFields({
-                typeId,
-                isAdmin,
-                actorsByActortype,
-                connectedTaxonomies,
-                onCreateOption,
-                indicatorOptions,
-              }),
-            },
-            {
-              id: 'outreach',
-              title: 'Related activities',
-              fields: this.getOutreachFields({
-                connectedTaxonomies,
-                topActionsByActiontype,
-                subActionsByActiontype,
-                onCreateOption: inModal ? null : onCreateOption,
-                isAdmin,
-              }),
-            },
-            {
-              id: 'other',
-              title: 'Other',
-              fields: this.getOtherFields({
-                typeId,
-                resourcesByResourcetype,
-                userOptions,
-                onCreateOption: inModal ? null : onCreateOption,
-                isAdmin,
-              }),
-            },
-            {
-              id: 'footer',
-              fields: [
-                getStatusFormField({ formatMessage: intl.formatMessage }),
-                getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
-              ],
-            },
-          ]}
+          fieldsByStep={this.getFields({
+            isAdmin,
+            typeId,
+            taxonomies,
+            connectedTaxonomies,
+            userOptions,
+            indicatorOptions,
+            actorsByActortype,
+            topActionsByActiontype,
+            subActionsByActiontype,
+            resourcesByResourcetype,
+            onCreateOption: inModal ? null : onCreateOption,
+          })}
         />
       </Content>
     );

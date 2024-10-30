@@ -53,7 +53,6 @@ import {
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_ACTIONTYPES,
   INDICATOR_ACTIONTYPES,
-  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
 import { PRINT_TYPES } from 'containers/App/constants';
@@ -520,8 +519,7 @@ export function ActionView(props) {
                         !datesEqual
                         && checkActionAttribute(typeId, 'date_end')
                         && getDateField(viewEntity, 'date_end', { specificity: dateSpecificity }),
-                        !dateSpecificity
-                        && checkActionAttribute(typeId, 'date_comment')
+                        checkActionAttribute(typeId, 'date_comment')
                         && getTextField(viewEntity, 'date_comment'),
                       ],
                     }}
