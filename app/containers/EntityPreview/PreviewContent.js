@@ -21,6 +21,7 @@ import {
 } from 'utils/fields';
 import {
   checkActionAttribute,
+  checkActorAttribute,
   getActortypeColumns,
 } from 'utils/entities';
 
@@ -34,7 +35,7 @@ import {
   selectReady,
   selectTaxonomies,
   // selectTaxonomiesWithCategories,
-  // selectIsUserAdmin,
+  selectIsUserAdmin,
   selectCategories,
   selectActionConnections,
   selectActorConnections,
@@ -69,7 +70,7 @@ export function PreviewContent({
   onEntityClick,
   // intl,
   // dataReady,
-  // isAdmin,
+  isAdmin,
 }) {
   // check date comment for date spceficity
   // const DATE_SPECIFICITIES = ['y', 'm', 'd'];
@@ -85,11 +86,7 @@ export function PreviewContent({
     datesEqual = ds === de;
   }
   const typeId = item && item.getIn(['attributes', 'measuretype_id']);
-  // console.log(item.toJS());
-  // console.log(columns.toJS());
-  // console.log(actionConnections.toJS());
-  // console.log(categories.toJS());
-  // console.log(actorConnections.toJS());
+
   let fields = [];
   fields = columns.reduce(
     (memo, column) => {
@@ -186,7 +183,9 @@ export function PreviewContent({
           ]];
       }
       // stakeholders
-      /* if (actorConnections && qe(column.get('type'), 'actors') && item.get('actorsByType')) {
+      if (actorConnections && qe(column.get('type'), 'actors')
+        && item.get('actorsByType') && qe(item.getIn(['attributes', 'measuretype_id']), ACTIONTYPES.EXPRESS)
+      ) {
         return item.get('actorsByType').reduce(
           (memo2, actorIds, typeid) => {
             const actors = actorConnections.get(API.ACTORS).filter(
@@ -206,7 +205,7 @@ export function PreviewContent({
               })];
           }, memo
         );
-      } */
+      }
       // child activities
       if (actionConnections && qe(column.get('type'), 'childActions') && item.get('childrenByType')) {
         return item.get('childrenByType').reduce(
@@ -297,7 +296,7 @@ PreviewContent.propTypes = {
   columns: PropTypes.object, // immutable List
   // previewEntity: PropTypes.object, // immutable Map
   categories: PropTypes.object, // immutable Map
-  // isAdmin: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   taxonomies: PropTypes.object, // immutable Map
   actionConnections: PropTypes.object, // immutable Map
   actorConnections: PropTypes.object, // immutable Map
@@ -311,7 +310,7 @@ PreviewContent.propTypes = {
 const mapStateToProps = (state) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   // previewEntity: selectPreviewContent(state, { item }),
-  // isAdmin: selectIsUserAdmin(state),
+  isAdmin: selectIsUserAdmin(state),
   taxonomies: selectTaxonomies(state),
   categories: selectCategories(state),
   actionConnections: selectActionConnections(state),
