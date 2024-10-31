@@ -19,12 +19,15 @@ import {
   selectActorCategoriesGroupedByActor,
   selectCategories,
   selectActorConnections,
+  selectTaxonomiesSorted,
+  selectEntities,
 } from 'containers/App/selectors';
 
 import qe from 'utils/quasi-equals';
 import {
   setIndicatorConnections,
   setActorConnections,
+  prepareTaxonomiesIsAssociated,
 } from 'utils/entities';
 
 const selectIndicatorAssociations = createSelector(
@@ -152,6 +155,48 @@ export const selectActorAssociationsByType = createSelector(
   }
 );
 
+const selectActorViewTaxonomyOptions = createSelector(
+  (state, { id, path }) => selectEntity(state, { id, path }),
+  selectTaxonomiesSorted,
+  (state) => selectEntities(state, API.ACTORTYPE_TAXONOMIES),
+  selectCategories,
+  (state) => selectEntities(state, API.ACTOR_CATEGORIES),
+  (
+    entity,
+    taxonomies,
+    typeTaxonomies,
+    categories,
+    associations,
+  ) => {
+    if (
+      entity
+      && taxonomies
+      && typeTaxonomies
+      && categories
+      && associations
+    ) {
+      const id = entity.get('id');
+      const taxonomiesForType = taxonomies.filter((tax) => typeTaxonomies.some(
+        (type) => qe(
+          type.getIn(['attributes', 'taxonomy_id']),
+          tax.get('id'),
+        ) && qe(
+          type.getIn(['attributes', 'actortype_id']),
+          entity.getIn(['attributes', 'actortype_id']),
+        )
+      ));
+      return prepareTaxonomiesIsAssociated(
+        taxonomiesForType,
+        categories,
+        associations,
+        'tags_actions',
+        'actor_id',
+        id,
+      );
+    }
+    return null;
+  }
+);
 export const selectPreviewEntity = createSelector(
   (state, { id, path }) => selectEntity(state, { id, path }),
   selectIndicatorsAssociated,
@@ -160,6 +205,7 @@ export const selectPreviewEntity = createSelector(
   selectActionIndicatorsGroupedByIndicator,
   selectActorMembersByType,
   selectActorAssociationsByType,
+  selectActorViewTaxonomyOptions,
   (
     previewEntity,
     indicators,
@@ -168,6 +214,7 @@ export const selectPreviewEntity = createSelector(
     actionIndicators,
     actorMembersByType,
     actorAssociationsByType,
+    actorTaxonomiesWithCategories,
   ) => {
     if (
       !previewEntity
@@ -208,7 +255,8 @@ export const selectPreviewEntity = createSelector(
     if (previewEntity.get('type') === API.ACTORS) {
       return previewEntity
         .set('membersByType', actorMembersByType)
-        .set('associationsByType', actorAssociationsByType);
+        .set('associationsByType', actorAssociationsByType)
+        .set('taxonomiesByType', actorTaxonomiesWithCategories);
     }
     return previewEntity;
   }

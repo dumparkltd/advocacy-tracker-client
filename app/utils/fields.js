@@ -748,6 +748,7 @@ export const getActorPreviewFields = ({
   actor,
   membersByType,
   associationsByType,
+  taxonomiesWithCategoriesByType,
   // indicators,
   // onEntityClick,
   // intl,
@@ -776,10 +777,10 @@ export const getActorPreviewFields = ({
   // member of
   if (associationsByType) {
     fields = associationsByType.reduce(
-      (memo2, actors, typeid) => {
+      (memo, actors, typeid) => {
         if (actors) {
           return ([
-            ...memo2,
+            ...memo,
             getActorConnectionField({
               actors,
               // onEntityClick,
@@ -787,7 +788,7 @@ export const getActorPreviewFields = ({
             }),
           ]);
         }
-        return memo2;
+        return memo;
       },
       fields,
     );
@@ -795,20 +796,27 @@ export const getActorPreviewFields = ({
   // members
   if (membersByType) {
     fields = membersByType.reduce(
-      (memo2, actors, typeid) => {
+      (memo, actors, typeid) => {
         if (actors) {
-          return ([
-            ...memo2,
+          return [
+            ...memo,
             getActorConnectionField({
               actors,
               // onEntityClick,
               typeid,
             }),
-          ]);
+          ];
         }
-        return memo2;
+        return memo;
       }, fields
     );
+  }
+  // associated taxonomies
+  if (taxonomiesWithCategoriesByType) {
+    fields = [
+      ...fields,
+      ...getTaxonomyFields(taxonomiesWithCategoriesByType),
+    ];
   }
   return fields;
 };

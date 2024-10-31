@@ -83,11 +83,12 @@ export function PreviewEntity({
     footerContent = previewEntity && getActionPreviewFooter(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.ACTOR)) {
-    headerContent = previewEntity && getActorPreviewHeader(previewEntity, intl);
+    headerContent = getActorPreviewHeader(previewEntity, intl);
     mainContent = dataReady && getActorPreviewFields({
       actor: previewEntity,
-      associationsByType: previewEntity && previewEntity.get('associationsByType'),
-      membersByType: previewEntity && previewEntity.get('membersByType'),
+      associationsByType: previewEntity.get('associationsByType'),
+      membersByType: previewEntity.get('membersByType'),
+      taxonomiesWithCategoriesByType: previewEntity.get('taxonomiesByType'),
       onEntityClick,
       intl,
     });
