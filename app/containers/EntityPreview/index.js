@@ -32,7 +32,7 @@ export function EntityPreview({
       pad={{ horizontal: 'large', vertical: 'small' }}
       gap="small"
       overflow="auto"
-      style={{ position: 'relative' }}
+      style={{ position: 'relative', display: 'block' }}
     >
       {content && content.get('entity') && (
         <PreviewEntity content={content.get('entity')} />
