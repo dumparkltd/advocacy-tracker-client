@@ -69,6 +69,7 @@ const SkipButton = styled(
   color: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlight};
   stroke: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlight};
   fill: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlight};
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
   &:hover {
     color: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlightHover};
     stroke: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlightHover};
@@ -88,8 +89,12 @@ const ButtonStep = styled(
   border-left: 1px solid transparent;
   padding: 4px 8px;
   opacity: 1;
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
   &:hover {
-    color: ${({ theme, highlight }) => highlight ? 'white' : theme.global.colors.highlightHover};
+    color: ${({ theme, highlight, disabled }) => {
+    if (disabled) return highlight ? 'white' : '#777E7E';
+    return highlight ? 'white' : theme.global.colors.highlightHover;
+  }};
   }
 `;
 const ButtonStepLabel = styled.span`
@@ -110,6 +115,7 @@ const SkipButtonInner = styled(
 
 const ButtonSubmitSubtle = styled(ButtonForm)`
   color: ${({ theme, disabled }) => disabled ? '#DADDE0' : theme.global.colors.highlight};
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
   &:hover {
     color: ${({ theme, disabled }) => disabled ? '#DADDE0' : theme.global.colors.highlightHover};
   }
@@ -208,6 +214,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     // console.log('activeStepIndex, byStep[activeStepIndex]', activeStepIndex, byStep[activeStepIndex])
     // console.log('prevStepIndex, byStep[prevStepIndex]', prevStepIndex, byStep[prevStepIndex])
     // console.log('nextStepIndex, byStep[nextStepIndex]', nextStepIndex, byStep[nextStepIndex], activeStepIndex + 1 <= byStep.length)
+    // console.log('formDataTracked', formDataTracked)
     const stepsWithStatus = byStep && byStep.map(
       (step, idx) => {
         if (!step.sections) return step;
@@ -236,18 +243,18 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                     let hasFieldAutofill = isNewEntityView && field.autofill;
                     if (
                       isNewEntityView
-                      && fieldTracked
                       && (field.controlType === 'select' || field.controlType === 'multiselect' || !!field.options)
                     ) {
                       hasFieldAutofill = !!Object.values(fieldTracked).some((options) => !!options.autofill);
                     }
-                    let hasChanges = fieldTracked && (fieldTracked.touched || !fieldTracked.pristine);
-                    let isValid = hasChanges && fieldTracked && typeof fieldTracked.valid !== 'undefined' && fieldTracked.valid;
-                    if (field.controlType === 'multiselect' && fieldTracked && fieldTracked.$form) {
+                    let hasChanges = (fieldTracked.touched || !fieldTracked.pristine);
+                    let isValid = hasChanges && typeof fieldTracked.valid !== 'undefined' && fieldTracked.valid;
+                    if (fieldTracked.$form && field.controlType === 'multiselect') {
                       hasChanges = (fieldTracked.$form.touched || !fieldTracked.$form.pristine);
                       isValid = hasChanges
                         && typeof fieldTracked.$form.valid !== 'undefined' && fieldTracked.$form.valid;
                     }
+                    // WARNING: validity/errors are reset when field component unmount (on step change)
                     const hasError = hasChanges && !isValid;
                     const resultField = [
                       memo3[0] || isRequiredEmpty,
@@ -278,13 +285,14 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       }
     );
     const isBlocked = stepsWithStatus && stepsWithStatus.some(
-      (step) => (step.hasEmptyRequired || step.hasUnseenAutofill)
+      (step) => (step.hasEmptyRequired || step.hasUnseenAutofill || step.hasErrors)
     );
     const activeStep = stepsWithStatus && stepsWithStatus.find(
       (step) => step.id === cleanStepActive,
     );
     // console.log('stepsWithStatus', stepsWithStatus, isBlocked)
     // console.log('formDataTracked', formDataTracked, isBlocked)
+    const activeStepHasErrors = activeStep.hasErrors;
     return (
       <>
         <Box direction="row" justify="end">
@@ -321,16 +329,15 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   const {
                     hasEmptyRequired,
                     hasUnseenAutofill,
-                    hasErrors,
-                    // stepSeen,
                     active,
-                    // currentStepPreviouslySeen,
+                    hasErrors,
                   } = step;
                   // const isStepBlocked = hasEmptyRequired || hasUnseenAutofill;
                   return (
                     <Box key={step.id} basis={`1/${byStep.length}`}>
                       <ButtonStep
                         highlight={active}
+                        disabled={activeStepHasErrors}
                         onClick={(evt) => {
                           if (evt !== undefined && evt.preventDefault) evt.preventDefault();
                           if (step.id !== cleanStepActive) {
@@ -348,7 +355,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                             {hasErrors && (
                               <WarningDot type="error" />
                             )}
-                            {hasEmptyRequired && (
+                            {!hasErrors && hasEmptyRequired && (
                               <WarningDot type="required" />
                             )}
                             {hasUnseenAutofill && (
@@ -378,7 +385,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
               margin={{ vertical: 'medium', horizontal: 'medium' }}
             >
               <SkipButton
-                disabled={prevStepIndex === null}
+                disabled={activeStepHasErrors || prevStepIndex === null}
                 plain
                 onClick={(evt) => {
                   if (evt && evt.preventDefault) evt.preventDefault();
@@ -388,17 +395,17 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   }
                 }}
               >
-                <SkipButtonInner disabled={prevStepIndex === null}>
+                <SkipButtonInner>
                   <SkipIconNext reverse />
                   <ButtonStepLabelUpper
-                    disabled={prevStepIndex === null}
+                    disabled={activeStepHasErrors || prevStepIndex === null}
                   >
                     Previous
                   </ButtonStepLabelUpper>
                 </SkipButtonInner>
               </SkipButton>
               <SkipButton
-                disabled={nextStepIndex === null}
+                disabled={activeStepHasErrors || nextStepIndex === null}
                 plain
                 onClick={(evt) => {
                   if (evt && evt.preventDefault) evt.preventDefault();
@@ -408,13 +415,13 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   }
                 }}
               >
-                <SkipButtonInner disabled={nextStepIndex === null}>
+                <SkipButtonInner>
                   <ButtonStepLabelUpper
-                    disabled={nextStepIndex === null}
+                    disabled={activeStepHasErrors || nextStepIndex === null}
                   >
                     Next
                   </ButtonStepLabelUpper>
-                  <SkipIconNext disabled={nextStepIndex === null} />
+                  <SkipIconNext disabled={activeStepHasErrors || nextStepIndex === null} />
                 </SkipButtonInner>
               </SkipButton>
             </Box>

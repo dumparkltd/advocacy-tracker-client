@@ -3,18 +3,12 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 
-const Outer = styled.div`
-  border-radius: 99999px;
-  background: white;
-  width: 16px;
-  height: 16px;
-`;
 const Inner = styled.div`
   border-radius: 99999px;
   background-color: ${({ palleteName, paletteIndex }) => palette(palleteName, paletteIndex)};
-  width: 12px;
-  height: 12px;
-  transform: translate(2px, 2px);
+  width: 14px;
+  height: 14px;
+  border: 2px solid white;
 `;
 
 export function WarningDot({ type }) {
@@ -35,9 +29,7 @@ export function WarningDot({ type }) {
     paletteIndex = 4;
   }
   return (
-    <Outer>
-      <Inner palleteName={palleteName} paletteIndex={paletteIndex} />
-    </Outer>
+    <Inner palleteName={palleteName} paletteIndex={paletteIndex} />
   );
 }
 

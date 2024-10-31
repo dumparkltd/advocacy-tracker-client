@@ -247,20 +247,20 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
                   { field.label }
                 </FieldLabel>
               )}
-              {fieldRequired && (
-                <AutoFillWrap>
-                  {!hasError && isEmpty && (
-                    <WarningDot type="required" />
-                  )}
-                  {hasError && (
-                    <WarningDot type="error" />
-                  )}
-                  <InfoText>(required)</InfoText>
-                </AutoFillWrap>
-              )}
               {hasError && !fieldRequired && (
                 <AutoFillWrap>
                   <WarningDot type="error" />
+                </AutoFillWrap>
+              )}
+              {fieldRequired && (
+                <AutoFillWrap>
+                  {hasError && (
+                    <WarningDot type="error" />
+                  )}
+                  {!hasError && isEmpty && (
+                    <WarningDot type="required" />
+                  )}
+                  <InfoText>(required)</InfoText>
                 </AutoFillWrap>
               )}
               {fieldAutofilledUnseen && (
