@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
@@ -56,15 +56,19 @@ export const DEPENDENCIES = [
 ];
 
 export function PreviewEntity({
+  dataReady,
+  onLoadEntitiesIfNeeded,
   content,
   onSetPreviewItemId,
   previewEntity,
   onUpdatePath,
   onEntityClick,
   intl,
-  dataReady,
 }) {
-  // console.log(previewEntity && previewEntity.toJS())
+  useEffect(() => {
+    if (!dataReady) onLoadEntitiesIfNeeded();
+  }, [dataReady]);
+
   let headerContent;
   let mainContent;
   let footerContent;
@@ -82,6 +86,8 @@ export function PreviewEntity({
     headerContent = previewEntity && getActorPreviewHeader(previewEntity, intl);
     mainContent = dataReady && getActorPreviewFields({
       actor: previewEntity,
+      associationsByType: previewEntity && previewEntity.get('associationsByType'),
+      membersByType: previewEntity && previewEntity.get('membersByType'),
       onEntityClick,
       intl,
     });
@@ -147,6 +153,7 @@ export function PreviewEntity({
 }
 
 PreviewEntity.propTypes = {
+  onLoadEntitiesIfNeeded: PropTypes.func,
   content: PropTypes.object, // immutable Map
   previewEntity: PropTypes.object, // immutable Map
   onSetPreviewItemId: PropTypes.func,
@@ -168,7 +175,7 @@ const mapStateToProps = (state, { content }) => ({
 });
 export function mapDispatchToProps(dispatch) {
   return {
-    loadEntitiesIfNeeded: () => {
+    onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
     onSetPreviewItemId: (val) => {

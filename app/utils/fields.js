@@ -745,7 +745,9 @@ export const getActorPreviewFooter = (actor, intl) => {
   });
 };
 export const getActorPreviewFields = ({
-  action,
+  actor,
+  membersByType,
+  associationsByType,
   // indicators,
   // onEntityClick,
   // intl,
@@ -756,14 +758,14 @@ export const getActorPreviewFields = ({
     (memo, key) => {
       const attribute = ACTOR_FIELDS.ATTRIBUTES[key];
       if (
-        action
+        actor
         && attribute.preview
-        && attribute.preview.indexOf(`${action.getIn(['attributes', 'actortype_id'])}`) > -1
+        && attribute.preview.indexOf(`${actor.getIn(['attributes', 'actortype_id'])}`) > -1
       ) {
         if (key === 'date_start') {
           return [
             ...memo,
-            getDateField(action, key, { showEmpty: false }),
+            getDateField(actor, key, { showEmpty: false }),
           ];
         }
       }
@@ -771,6 +773,43 @@ export const getActorPreviewFields = ({
     },
     [],
   );
+  // member of
+  if (associationsByType) {
+    fields = associationsByType.reduce(
+      (memo2, actors, typeid) => {
+        if (actors) {
+          return ([
+            ...memo2,
+            getActorConnectionField({
+              actors,
+              // onEntityClick,
+              typeid,
+            }),
+          ]);
+        }
+        return memo2;
+      },
+      fields,
+    );
+  }
+  // members
+  if (membersByType) {
+    fields = membersByType.reduce(
+      (memo2, actors, typeid) => {
+        if (actors) {
+          return ([
+            ...memo2,
+            getActorConnectionField({
+              actors,
+              // onEntityClick,
+              typeid,
+            }),
+          ]);
+        }
+        return memo2;
+      }, fields
+    );
+  }
   return fields;
 };
 
