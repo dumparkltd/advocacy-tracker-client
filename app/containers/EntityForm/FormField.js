@@ -11,7 +11,6 @@ import { lowerCase } from 'utils/string';
 import Button from 'components/buttons/Button';
 import FieldFactory from 'components/fields/FieldFactory';
 import FieldWrap from 'components/fields/FieldWrap';
-import Icon from 'components/Icon';
 
 import FieldLabel from 'components/forms/Label';
 import ErrorWrapper from 'components/forms/ErrorWrapper';
@@ -25,10 +24,11 @@ import ControlSelect from 'components/forms/ControlSelect';
 import MarkdownControl from 'components/forms/MarkdownControl';
 import DateControl from 'components/forms/DateControl';
 import RadioControl from 'components/forms/RadioControl';
-import Required from 'components/forms/Required';
 import MultiSelectField from 'components/forms/MultiSelectField';
 import messages from 'components/forms/MultiSelectField/messages';
 import { FORM_NON_CONTROL_PROPS } from 'themes/config';
+
+import WarningDot from './WarningDot';
 
 const Hint = styled.div`
   color: ${palette('text', 1)};
@@ -41,8 +41,7 @@ const Hint = styled.div`
 
 const InfoText = styled.span`
   color: ${palette('primary', 1)};
-  font-weight: bold;
-  font-size: ${(props) => props.theme.sizes.text.small};
+  font-size: ${(props) => props.theme.text.xxsmall.size};
 `;
 const AutoFillWrap = styled(
   (p) => <Box direction="row" align="center" gap="xxsmall" {...p} />
@@ -180,7 +179,16 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
   );
 
   renderFormField = ({
-    field, nested, formData, closeMultiselectOnClickOutside, scrollContainer, handleUpdate, inline,
+    field,
+    fieldTracked,
+    nested,
+    formData,
+    closeMultiselectOnClickOutside,
+    scrollContainer,
+    handleUpdate,
+    inline,
+    step,
+    isEmpty,
   }) => {
     const { intl } = this.context;
     let formField;
@@ -207,6 +215,18 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
           formField = this.renderComponent(field);
       }
     }
+    let hasChanges = fieldTracked && (fieldTracked.touched || !fieldTracked.pristine);
+    let isValid = hasChanges && fieldTracked && typeof fieldTracked.valid !== 'undefined' && fieldTracked.valid;
+    if (field.controlType === 'multiselect' && fieldTracked && fieldTracked.$form) {
+      hasChanges = (fieldTracked.$form.touched || !fieldTracked.$form.pristine);
+      isValid = hasChanges
+        && typeof fieldTracked.$form.valid !== 'undefined' && fieldTracked.$form.valid;
+    }
+    const hasError = hasChanges && !isValid;
+    const fieldRequired = field.validators && field.validators.required;
+    const stepSeen = step && step.previouslySeen;
+    const fieldAutofilledUnseen = !stepSeen && field.autofill && !hasChanges;
+
     return (
       <FormFieldWrap
         direction={inline ? 'row' : 'column'}
@@ -227,16 +247,26 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
                   { field.label }
                 </FieldLabel>
               )}
-              { field.validators && field.validators.required && (
+              {fieldRequired && (
                 <AutoFillWrap>
+                  {!hasError && isEmpty && (
+                    <WarningDot type="required" />
+                  )}
+                  {hasError && (
+                    <WarningDot type="error" />
+                  )}
                   <InfoText>(required)</InfoText>
-                  <Icon name="warning" size="32px" />
                 </AutoFillWrap>
               )}
-              {field.autofill && (
+              {hasError && !fieldRequired && (
                 <AutoFillWrap>
+                  <WarningDot type="error" />
+                </AutoFillWrap>
+              )}
+              {fieldAutofilledUnseen && (
+                <AutoFillWrap>
+                  <WarningDot type="autofill" />
                   <InfoText>(pre-populated)</InfoText>
-                  <Icon name="warning" size="32px" />
                 </AutoFillWrap>
               )}
             </FieldLabelWrap>
@@ -247,13 +277,10 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
             <FieldLabel>
               { field.controlType === 'checkbox' && formField }
               { field.label }
-              {field.validators && field.validators.required && (
-                <Required>*</Required>
-              )}
-              {field.autofill && (
+              {fieldAutofilledUnseen && (
                 <AutoFillWrap>
-                  <InfoText> (pre-populated)</InfoText>
-                  <Icon name="warning" />
+                  <WarningDot type="autofill" />
+                  <InfoText>(pre-populated)</InfoText>
                 </AutoFillWrap>
               )}
             </FieldLabel>
@@ -273,10 +300,11 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
       closeMultiselectOnClickOutside,
       handleUpdate,
       inline,
+      step,
     } = this.props;
+    const isEmpty = fieldTracked && fieldTracked.value ? fieldTracked.value === '' : true;
     let isHidden = field.hideByDefault && this.state.hidden;
     if (isHidden) {
-      const isEmpty = fieldTracked && fieldTracked.value ? fieldTracked.value === '' : true;
       isHidden = isHidden && !!isEmpty;
     }
 
@@ -291,12 +319,14 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
           <FieldInnerWrapper>
             {this.renderFormField({
               field,
-              nested: false,
               formData,
               closeMultiselectOnClickOutside,
               scrollContainer,
               handleUpdate,
               inline,
+              step,
+              fieldTracked,
+              isEmpty,
             })}
             {field.errorMessages && (
               <ErrorWrapper>
@@ -316,6 +346,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
 }
 
 FormField.propTypes = {
+  step: PropTypes.object,
   formData: PropTypes.object,
   scrollContainer: PropTypes.object,
   field: PropTypes.object,

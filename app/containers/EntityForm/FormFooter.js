@@ -23,7 +23,7 @@ export function FormFooter({
   formData,
   formDataTracked,
   handleCancel,
-  isSaving,
+  isBlocked,
 }) {
   // console.log('isNewEntityView', isNewEntityView)
   // // console.log('formData', formData && formData.toJS())
@@ -39,7 +39,7 @@ export function FormFooter({
       </Box>
       <Box direction="row" gap="small">
         {fields && fields.length > 0 && (
-          <Box direction="row" gap="small">
+          <Box direction="row" gap="small" align="center">
             {fields.map((field, j) => {
               if (!field) return null;
               const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
@@ -57,8 +57,8 @@ export function FormFooter({
             })}
           </Box>
         )}
-        <ButtonSubmit type="submit" disabled={isSaving}>
-          <FormattedMessage {...appMessages.buttons.save} />
+        <ButtonSubmit type="submit" disabled={isBlocked}>
+          Save & Close
         </ButtonSubmit>
       </Box>
     </Styled>
@@ -70,7 +70,7 @@ FormFooter.propTypes = {
   formDataTracked: PropTypes.object,
   fields: PropTypes.array,
   // sections: PropTypes.array,
-  isSaving: PropTypes.bool,
+  isBlocked: PropTypes.bool,
   handleCancel: PropTypes.func,
 };
 

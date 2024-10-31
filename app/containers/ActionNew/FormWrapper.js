@@ -21,6 +21,7 @@ export function FormWrapper({
   handleCancel,
   handleUpdate,
   handleSubmit,
+  handleSubmitRemote,
   scrollContainer,
   inModal,
 }) {
@@ -31,7 +32,6 @@ export function FormWrapper({
     submitValid,
   } = viewDomain.get('page').toJS();
   const saving = isAnySending || saveSending;
-
   return (
     <div>
       {!submitValid && (
@@ -57,6 +57,7 @@ export function FormWrapper({
           formDataTracked={viewDomain.getIn(['form', 'forms', 'data'])}
           saving={saving}
           handleSubmit={handleSubmit}
+          handleSubmitRemote={handleSubmitRemote}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
           handleUpdate={handleUpdate}
@@ -73,6 +74,7 @@ export function FormWrapper({
 FormWrapper.propTypes = {
   handleSubmitFail: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
+  handleSubmitRemote: PropTypes.func,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   viewDomain: PropTypes.object,

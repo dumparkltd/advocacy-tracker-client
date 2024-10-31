@@ -41,6 +41,7 @@ export function FormContentWrapper({
   scrollContainer,
   closeMultiselectOnClickOutside,
   handleUpdate,
+  step,
 }) {
   // console.log('isNewEntityView', isNewEntityView)
   // // console.log('formData', formData && formData.toJS())
@@ -71,6 +72,7 @@ export function FormContentWrapper({
                             return (
                               <Box key={j} basis={field.basis || 'full'}>
                                 <FormField
+                                  step={step}
                                   field={field}
                                   fieldTracked={fieldTracked}
                                   formData={formData}
@@ -147,6 +149,7 @@ export function FormContentWrapper({
 }
 
 FormContentWrapper.propTypes = {
+  step: PropTypes.object,
   formData: PropTypes.object,
   formDataTracked: PropTypes.object,
   scrollContainer: PropTypes.object,

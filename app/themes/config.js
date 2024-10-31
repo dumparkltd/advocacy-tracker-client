@@ -1844,4 +1844,5 @@ export const FORM_NON_CONTROL_PROPS = [
   'prepopulate',
   'autofill',
   'basis',
+  'isBlocked',
 ];

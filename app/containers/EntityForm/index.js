@@ -17,10 +17,12 @@ import ButtonCancel from 'components/buttons/ButtonCancel';
 import Icon from 'components/Icon';
 
 import FormWrapper from 'components/forms/FormWrapper';
+import appMessages from 'containers/App/messages';
 
 import FormContentWrapper from './FormContentWrapper';
 import FormFooter from './FormFooter';
 import SkipIconNext from './SkipIconNext';
+import WarningDot from './WarningDot';
 
 import messages from './messages';
 
@@ -86,6 +88,9 @@ const ButtonStep = styled(
   border-left: 1px solid transparent;
   padding: 4px 8px;
   opacity: 1;
+  &:hover {
+    color: ${({ theme, highlight }) => highlight ? 'white' : theme.global.colors.highlightHover};
+  }
 `;
 const ButtonStepLabel = styled.span`
   font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -102,6 +107,13 @@ const ButtonStepLabelUpper = styled(ButtonStepLabel)`
 const SkipButtonInner = styled(
   (p) => <Box direction="row" gap="small" align="center" {...p} />
 )``;
+
+const ButtonSubmitSubtle = styled(ButtonForm)`
+  color: ${({ theme, disabled }) => disabled ? '#DADDE0' : theme.global.colors.highlight};
+  &:hover {
+    color: ${({ theme, disabled }) => disabled ? '#DADDE0' : theme.global.colors.highlightHover};
+  }
+`;
 
 class EntityForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor() {
@@ -152,6 +164,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       handleDelete,
       isNewEntityView,
       saving,
+      handleSubmitRemote,
     } = this.props;
     const { deleteConfirmed, stepActive, stepsSeen } = this.state;
     const closeMultiselectOnClickOutside = !newEntityModal || inModal;
@@ -188,9 +201,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     // the active step id
     const cleanStepActive = stepActive || (byStep && byStep[0] && byStep[0].id);
     // the active step
-    const activeStep = byStep && byStep.find(
-      (step) => step.id === cleanStepActive,
-    );
     // the order of the active step
     const activeStepIndex = byStep.map((step) => step.id).indexOf(cleanStepActive);
     const nextStepIndex = activeStepIndex + 1 < byStep.length ? activeStepIndex + 1 : null;
@@ -198,8 +208,106 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     // console.log('activeStepIndex, byStep[activeStepIndex]', activeStepIndex, byStep[activeStepIndex])
     // console.log('prevStepIndex, byStep[prevStepIndex]', prevStepIndex, byStep[prevStepIndex])
     // console.log('nextStepIndex, byStep[nextStepIndex]', nextStepIndex, byStep[nextStepIndex], activeStepIndex + 1 <= byStep.length)
+    const stepsWithStatus = byStep && byStep.map(
+      (step, idx) => {
+        if (!step.sections) return step;
+        const currentStepActive = idx <= activeStepIndex;
+        const currentStepPreviouslySeen = stepsSeen.indexOf(step.id) > -1;
+        const stepSeen = currentStepPreviouslySeen || currentStepActive;
+        const [
+          hasEmptyRequired,
+          hasAutofill,
+          hasErrors,
+        ] = step.sections.reduce(
+          (memo, section) => {
+            if (!section.rows) return memo;
+            const resultSection = section.rows.reduce(
+              (memo2, row) => {
+                if (!row.fields) return memo2;
+                const resultRow = row.fields.reduce(
+                  (memo3, field) => {
+                    if (!field) return memo3;
+                    const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
+                    const fieldTracked = get(formDataTracked, modelPath);
+                    if (!fieldTracked) return memo3;
+                    const isRequiredEmpty = fieldTracked
+                      && field.hasrequired
+                      && fieldTracked.value === '';
+                    let hasFieldAutofill = isNewEntityView && field.autofill;
+                    if (
+                      isNewEntityView
+                      && fieldTracked
+                      && (field.controlType === 'select' || field.controlType === 'multiselect' || !!field.options)
+                    ) {
+                      hasFieldAutofill = !!Object.values(fieldTracked).some((options) => !!options.autofill);
+                    }
+                    let hasChanges = fieldTracked && (fieldTracked.touched || !fieldTracked.pristine);
+                    let isValid = hasChanges && fieldTracked && typeof fieldTracked.valid !== 'undefined' && fieldTracked.valid;
+                    if (field.controlType === 'multiselect' && fieldTracked && fieldTracked.$form) {
+                      hasChanges = (fieldTracked.$form.touched || !fieldTracked.$form.pristine);
+                      isValid = hasChanges
+                        && typeof fieldTracked.$form.valid !== 'undefined' && fieldTracked.$form.valid;
+                    }
+                    const hasError = hasChanges && !isValid;
+                    const resultField = [
+                      memo3[0] || isRequiredEmpty,
+                      memo3[1] || hasFieldAutofill,
+                      memo3[2] || hasError,
+                    ];
+                    return resultField;
+                  },
+                  memo2,
+                );
+                return resultRow;
+              },
+              memo,
+            );
+            return resultSection;
+          },
+          [false, false, false],
+        );
+        return ({
+          ...step,
+          hasEmptyRequired,
+          hasUnseenAutofill: isNewEntityView && !stepSeen && hasAutofill,
+          seen: stepSeen,
+          active: currentStepActive,
+          previouslySeen: currentStepPreviouslySeen,
+          hasErrors,
+        });
+      }
+    );
+    const isBlocked = stepsWithStatus && stepsWithStatus.some(
+      (step) => (step.hasEmptyRequired || step.hasUnseenAutofill)
+    );
+    const activeStep = stepsWithStatus && stepsWithStatus.find(
+      (step) => step.id === cleanStepActive,
+    );
+    // console.log('stepsWithStatus', stepsWithStatus, isBlocked)
+    // console.log('formDataTracked', formDataTracked, isBlocked)
     return (
       <>
+        <Box direction="row" justify="end">
+          {handleCancel && (
+            <Box>
+              <ButtonCancel
+                type="button"
+                onClick={handleCancel}
+              >
+                <FormattedMessage {...appMessages.buttons.cancel} />
+              </ButtonCancel>
+            </Box>
+          )}
+          <Box>
+            <ButtonSubmitSubtle
+              type="button"
+              disabled={isBlocked}
+              onClick={handleSubmitRemote}
+            >
+              Save & Close
+            </ButtonSubmitSubtle>
+          </Box>
+        </Box>
         <FormWrapper withoutShadow={inModal} hasMarginBottom={!inModal}>
           <StyledForm
             model={model}
@@ -207,86 +315,46 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
             onSubmitFailed={handleSubmitFail}
             validators={validators}
           >
-            {byStep && byStep.length > 1 && (
+            {stepsWithStatus && stepsWithStatus.length > 1 && (
               <FilterSteps>
-                {byStep.map((step, idx) => {
-                  const currentStepActive = idx <= activeStepIndex;
-                  const stepSeen = stepsSeen.indexOf(step.id) > -1 || currentStepActive;
-                  const hasEmptyRequired = step.sections && step.sections.some(
-                    (section) => {
-                      if (!section.rows) return false;
-                      return section.rows.some(
-                        (row) => {
-                          if (!row.fields) return false;
-                          return row.fields.some(
-                            (field) => {
-                              if (!field) return false;
-                              const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
-                              const fieldTracked = get(formDataTracked, modelPath);
-                              return field && fieldTracked && field.hasrequired && fieldTracked.value === '';
-                            },
-                          );
-                        }
-                      );
-                    },
-                    false,
-                  );
-                  const hasAutofill = isNewEntityView
-                    && idx !== 0
-                    && !stepSeen
-                    && step.sections
-                    && step.sections.some(
-                      (section) => {
-                        if (!section.rows) return false;
-                        return section.rows.some(
-                          (row) => {
-                            if (!row.fields) return false;
-                            return row.fields.some(
-                              (field) => {
-                                if (!field) return false;
-                                const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
-                                const fieldTracked = get(formDataTracked, modelPath);
-                                if (
-                                  fieldTracked
-                                  && field
-                                  && (field.controlType === 'select' || field.controlType === 'multiselect' || !!field.options)
-                                ) {
-                                  return !!Object.values(fieldTracked).some((options) => !!options.autofill);
-                                }
-                                return field.autofill;
-                              }
-                            );
-                          }
-                        );
-                      },
-                      false,
-                    );
-
+                {stepsWithStatus.map((step, idx) => {
+                  const {
+                    hasEmptyRequired,
+                    hasUnseenAutofill,
+                    hasErrors,
+                    // stepSeen,
+                    active,
+                    // currentStepPreviouslySeen,
+                  } = step;
+                  // const isStepBlocked = hasEmptyRequired || hasUnseenAutofill;
                   return (
                     <Box key={step.id} basis={`1/${byStep.length}`}>
                       <ButtonStep
-                        highlight={currentStepActive}
+                        highlight={active}
                         onClick={(evt) => {
                           if (evt !== undefined && evt.preventDefault) evt.preventDefault();
                           if (step.id !== cleanStepActive) {
                             this.setStepActive(step.id);
-                            this.addStepSeen(step.id);
+                            this.addStepSeen(cleanStepActive);
                           }
                         }}
                         lastItem={idx + 1 === byStep.length}
                       >
-                        <Box direction="row" align="center">
+                        <Box direction="row" align="center" gap="small">
                           <ButtonStepLabel>
                             {`${idx + 1}. ${step.title || step.id}`}
                           </ButtonStepLabel>
-                          {(hasEmptyRequired || hasAutofill) && (
-                            <Icon name="warning" />
-                          )}
-                          {!hasEmptyRequired && !hasAutofill && (
-                            <span style={{ color: 'transparent' }}>
-                              <Icon name="warning" />
-                            </span>
-                          )}
+                          <Box direction="row" align="center" gap="xxsmall">
+                            {hasErrors && (
+                              <WarningDot type="error" />
+                            )}
+                            {hasEmptyRequired && (
+                              <WarningDot type="required" />
+                            )}
+                            {hasUnseenAutofill && (
+                              <WarningDot type="autofill" />
+                            )}
+                          </Box>
                         </Box>
                       </ButtonStep>
                     </Box>
@@ -295,6 +363,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
               </FilterSteps>
             )}
             <FormContentWrapper
+              step={activeStep}
               fields={activeStep && activeStep.fields}
               sections={activeStep && activeStep.sections}
               formData={formData}
@@ -315,7 +384,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   if (evt && evt.preventDefault) evt.preventDefault();
                   if (byStep[prevStepIndex]) {
                     this.setStepActive(byStep[prevStepIndex].id);
-                    this.addStepSeen(byStep[prevStepIndex].id);
+                    this.addStepSeen(activeStep.id);
                   }
                 }}
               >
@@ -357,7 +426,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
               handleCancel={handleCancel}
               deleteConfirmed={deleteConfirmed}
               onSetDeleteConfirmed={this.setDeleteConfirmed}
-              isSaving={saving}
+              isBlocked={isBlocked || saving}
             />
           </StyledForm>
         </FormWrapper>
@@ -397,6 +466,7 @@ EntityForm.propTypes = {
   handleSubmitFail: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
+  handleSubmitRemote: PropTypes.func,
   handleDelete: PropTypes.func,
   handleUpdate: PropTypes.func,
   model: PropTypes.string,

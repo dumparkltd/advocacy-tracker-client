@@ -321,7 +321,6 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
   render() {
     const { intl } = this.context;
     const {
-      dataReady,
       viewDomain,
       actorsByActortype,
       resourcesByResourcetype,
@@ -347,8 +346,6 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       invalidateEntitiesOnSuccess,
       isAdmin,
     } = this.props;
-    const { saveSending, isAnySending } = viewDomain.get('page').toJS();
-    const saving = isAnySending || saveSending;
     const type = intl.formatMessage(appMessages.entities[`actions_${typeId}`].single);
     let subTitle;
     if (inModal && modalConnect && modalConnect.get('create')) {
@@ -390,22 +387,12 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           title={intl.formatMessage(messages.pageTitle, { type })}
           subTitle={subTitle}
           type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
-          buttons={
-            dataReady ? [{
-              type: 'cancel',
-              onClick: () => handleCancel(typeId),
-            },
-            {
-              type: 'save',
-              disabled: saving,
-              onClick: () => handleSubmitRemote(formDataPath),
-            }] : null
-          }
         />
         <FormWrapper
           model={formDataPath}
           inModal={inModal}
           viewDomain={viewDomain}
+          handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleSubmit={(formData) => handleSubmit(
             formData,
             actiontype,
