@@ -1430,20 +1430,23 @@ export const ACTIONTYPES_CONFIG = {
         sections: [
           {
             id: 'main',
-            title: 'Main info',
+            title: 'General info',
             rows: [
               [{
                 attribute: 'date_start',
                 prepopulate: true, // today
+                basis: '1/3',
               },
               {
                 connection: API.ACTIONS,
                 type: ACTIONTYPES.EVENT,
-                parents: true,
+                asParents: true,
                 prepopulateIfPrevious: true,
+                basis: '2/3',
               }],
               [{
                 attribute: 'date_comment',
+                fieldType: 'textarea',
                 hideByDefault: true,
               }],
             ],
@@ -1473,25 +1476,34 @@ export const ACTIONTYPES_CONFIG = {
         sections: [
           {
             id: 'interaction',
-            title: 'Type and participants of interaction',
+            title: 'Type of interaction',
             rows: [
               [{
                 taxonomy: 12, // interaction type,
                 type: 'pills',
               }],
+            ],
+          },
+          {
+            id: 'staff-stakeholders',
+            title: 'WWF Staff',
+            rows: [
               [
                 {
                   connection: API.USERS,
                   prepopulate: true, // current user
+                  basis: '2/3',
                 },
                 {
                   attribute: 'notifications',
+                  basis: '1/3',
                 },
               ],
             ],
           },
           {
             id: 'other-stakeholders',
+            title: 'Participating stakeholders',
             rows: [
               [{
                 connection: API.ACTORS,
@@ -1818,3 +1830,18 @@ export const MAP_OPTIONS = {
     },
   },
 };
+
+
+export const FORM_NON_CONTROL_PROPS = [
+  'hint',
+  'label',
+  'component',
+  'controlType',
+  'children',
+  'errorMessages',
+  'hasrequired',
+  'hideByDefault',
+  'prepopulate',
+  'autofill',
+  'basis',
+];

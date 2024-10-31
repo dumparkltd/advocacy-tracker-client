@@ -22,6 +22,7 @@ import {
   getResourcesFormControl,
   getDateFormField,
   getTextareaFormField,
+  getTextFormField,
   getSingleTaxonomyFormControl,
   getLinkFormField,
   renderIndicatorControl,
@@ -42,6 +43,7 @@ import {
   ROUTES,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
   ACTIONTYPES_CONFIG,
+  ACTION_FIELDS,
   API_DATE_FORMAT,
 } from 'themes/config';
 
@@ -126,7 +128,6 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             value: sessionUser.getIn(['attributes', 'id']).toString(),
             checked: true,
             label: sessionUser.getIn(['attributes', 'name']),
-            reference: sessionUser.getIn(['attributes', 'id']).toString(),
             autofill: true,
           }])
         ).setIn(
@@ -165,40 +166,44 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       type,
       asParents,
       asChildren,
+      fieldType,
+      basis,
     } = field;
     let result;
     if (needsAdmin && !isAdmin) return null;
     if (attribute) {
+      const fieldConfig = ACTION_FIELDS.ATTRIBUTES[attribute];
+      const attributeType = fieldConfig.type;
+      const cleanFieldType = fieldType || attributeType;
       if (attribute === 'title') {
         result = getTitleFormField({
-          formatMessage, attribute, required, hideByDefault,
-        });
-      } else if (
-        attribute === 'description'
-        || attribute === 'comment'
-        || attribute === 'target_comment'
-        || attribute === 'status_comment'
-      ) {
-        result = getMarkdownFormField({
           formatMessage, attribute, required, hideByDefault,
         });
       } else if (attribute === 'code') {
         result = getCodeFormField({
           formatMessage, attribute, required, hideByDefault,
         });
-      } else if (attribute === 'date_start' || attribute === 'date_end') {
+      } else if (cleanFieldType === 'markdown') {
+        result = getMarkdownFormField({
+          formatMessage, attribute, required, hideByDefault,
+        });
+      } else if (cleanFieldType === 'date') {
         result = getDateFormField({
           formatMessage, attribute, required, hideByDefault,
         });
-      } else if (attribute === 'date_comment') {
+      } else if (cleanFieldType === 'text') {
+        result = getTextFormField({
+          formatMessage, attribute, required, hideByDefault,
+        });
+      } else if (cleanFieldType === 'textarea') {
         result = getTextareaFormField({
           formatMessage, attribute, required, hideByDefault,
         });
-      } else if (attribute === 'url') {
+      } else if (cleanFieldType === 'url') {
         result = getLinkFormField({
           formatMessage, attribute, required, hideByDefault,
         });
-      } else if (attribute === 'notifications') {
+      } else if (cleanFieldType === 'bool') {
         result = getStatusFormField({
           formatMessage, attribute, required, hideByDefault,
         });
@@ -280,6 +285,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       hasrequired: !!required,
       autofill: !!prepopulate,
       hideByDefault,
+      basis, // relative width within row
     };
     return result;
   }

@@ -187,6 +187,7 @@ export const renderUserMultiControl = ({
     controlType: 'multiselect',
     options: entityOptions({
       entities,
+      showCode: false,
     }),
     advanced: true,
     selectAll: true,
@@ -722,7 +723,7 @@ export const getStatusFormField = ({
     myOptions = NOTIFICATION_STATUSES;
   }
   return {
-    id: 'status',
+    id: `status-${attribute}`,
     controlType: 'select',
     model: `.attributes.${attribute}`,
     label: formatMessage(appMessages.attributes[attribute]),
@@ -896,7 +897,7 @@ export const getCheckboxFormField = ({
   hideByDefault,
 }) => (
   {
-    id: attribute,
+    id: `checkbox-${attribute}`,
     controlType: 'checkbox',
     model: `.attributes.${attribute}`,
     label: appMessages.attributes[attribute] && formatMessage(appMessages.attributes[attribute]),

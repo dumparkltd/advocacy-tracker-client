@@ -4,17 +4,17 @@ import { Control, Errors } from 'react-redux-form/immutable';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import { omit } from 'lodash/object';
-
+import { Box } from 'grommet';
 import appMessage from 'utils/app-message';
+import { lowerCase } from 'utils/string';
 
 import Button from 'components/buttons/Button';
 import FieldFactory from 'components/fields/FieldFactory';
 import FieldWrap from 'components/fields/FieldWrap';
-import Field from 'components/fields/Field';
+import Icon from 'components/Icon';
 
 import FieldLabel from 'components/forms/Label';
 import ErrorWrapper from 'components/forms/ErrorWrapper';
-import FormFieldWrap from 'components/forms/FormFieldWrap';
 import ControlTitle from 'components/forms/ControlTitle';
 import ControlTitleText from 'components/forms/ControlTitleText';
 import ControlShort from 'components/forms/ControlShort';
@@ -27,6 +27,8 @@ import DateControl from 'components/forms/DateControl';
 import RadioControl from 'components/forms/RadioControl';
 import Required from 'components/forms/Required';
 import MultiSelectField from 'components/forms/MultiSelectField';
+import messages from 'components/forms/MultiSelectField/messages';
+import { FORM_NON_CONTROL_PROPS } from 'themes/config';
 
 const Hint = styled.div`
   color: ${palette('text', 1)};
@@ -36,6 +38,46 @@ const Hint = styled.div`
     font-size: ${(props) => props.theme.sizes.print.small};
   }
 `;
+
+const InfoText = styled.span`
+  color: ${palette('primary', 1)};
+  font-weight: bold;
+  font-size: ${(props) => props.theme.sizes.text.small};
+`;
+const AutoFillWrap = styled(
+  (p) => <Box direction="row" align="center" gap="xxsmall" {...p} />
+)`
+  color: ${palette('primary', 1)};
+`;
+const FieldLabelWrap = styled(
+  (p) => <Box direction="row" align="center" gap="xsmall" {...p} />
+)`
+  min-height: 32px;
+`;
+
+const Field = styled.div`
+  @media print {
+    display: ${({ printHide }) => (printHide) ? 'none !important' : 'block'};
+  };
+`;
+
+const FieldInnerWrapper = styled.div`
+  margin-top: 10px;
+`;
+
+const ShowButton = styled(
+  (p) => <Button plain {...p} />
+)`
+  font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  text-transform: uppercase;
+  font-size: 18px;
+  padding: 0;
+  color: ${({ theme }) => theme.global.colors.highlight};
+`;
+
+const FormFieldWrap = styled(
+  (p) => <Box {...p} />
+)``;
 
 const controls = {
   input: ControlInput,
@@ -53,12 +95,6 @@ const controls = {
   button: Control.button,
 };
 
-// These props will be omitted before being passed to the Control component
-const NON_CONTROL_PROPS = [
-  'hint', 'label', 'component', 'controlType', 'children', 'errorMessages', 'hasrequired', 'hideByDefault', 'prepopulate', 'autofill',
-];
-
-
 class FormField extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor() {
     super();
@@ -70,9 +106,9 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
   getControlProps = (field) => {
     switch (field.controlType) {
       case 'select': // we will render select options as children, so don't pass options prop directly to the control
-        return omit(field, NON_CONTROL_PROPS.concat(['options']));
+        return omit(field, FORM_NON_CONTROL_PROPS.concat(['options']));
       default:
-        return omit(field, NON_CONTROL_PROPS);
+        return omit(field, FORM_NON_CONTROL_PROPS);
     }
   }
 
@@ -144,8 +180,9 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
   );
 
   renderFormField = ({
-    field, nested, formData, closeMultiselectOnClickOutside, scrollContainer, handleUpdate,
+    field, nested, formData, closeMultiselectOnClickOutside, scrollContainer, handleUpdate, inline,
   }) => {
+    const { intl } = this.context;
     let formField;
     if (!field.controlType) {
       formField = this.renderComponent(field);
@@ -171,17 +208,54 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
       }
     }
     return (
-      <FormFieldWrap nested={nested}>
+      <FormFieldWrap
+        direction={inline ? 'row' : 'column'}
+        gap={inline ? 'small' : 'none'}
+      >
         {field.label
-          && field.controlType !== 'multiselect'
           && field.controlType !== 'info'
+          && field.controlType !== 'checkbox'
           && (
-            <FieldLabel htmlFor={field.id} inline={field.controlType === 'checkbox' || field.controlType === 'markdown'}>
+            <FieldLabelWrap>
+              {field.controlType === 'multiselect' && (
+                <FieldLabel htmlFor={field.id}>
+                  {intl.formatMessage(messages.update, { type: lowerCase(field.label) })}
+                </FieldLabel>
+              )}
+              {field.controlType !== 'multiselect' && (
+                <FieldLabel htmlFor={field.id}>
+                  { field.label }
+                </FieldLabel>
+              )}
+              { field.validators && field.validators.required && (
+                <AutoFillWrap>
+                  <InfoText>(required)</InfoText>
+                  <Icon name="warning" size="32px" />
+                </AutoFillWrap>
+              )}
+              {field.autofill && (
+                <AutoFillWrap>
+                  <InfoText>(pre-populated)</InfoText>
+                  <Icon name="warning" size="32px" />
+                </AutoFillWrap>
+              )}
+            </FieldLabelWrap>
+          )}
+        {field.label
+          && field.controlType === 'checkbox'
+          && (
+            <FieldLabel>
               { field.controlType === 'checkbox' && formField }
               { field.label }
-              { field.validators && field.validators.required
-              && <Required>*</Required>
-              }
+              {field.validators && field.validators.required && (
+                <Required>*</Required>
+              )}
+              {field.autofill && (
+                <AutoFillWrap>
+                  <InfoText> (pre-populated)</InfoText>
+                  <Icon name="warning" />
+                </AutoFillWrap>
+              )}
             </FieldLabel>
           )}
         {field.hint && <Hint>{field.hint}</Hint>}
@@ -194,11 +268,11 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
     const {
       field,
       fieldTracked,
-      fieldGroup,
       formData,
       scrollContainer,
       closeMultiselectOnClickOutside,
       handleUpdate,
+      inline,
     } = this.props;
     let isHidden = field.hideByDefault && this.state.hidden;
     if (isHidden) {
@@ -207,32 +281,34 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
     }
 
     return (
-      <Field
-        labelledGroup={fieldGroup && !!fieldGroup.label}
-        printHide={field.printHide}
-      >
-        {!isHidden && this.renderFormField({
-          field,
-          nested: false,
-          formData,
-          closeMultiselectOnClickOutside,
-          scrollContainer,
-          handleUpdate,
-        })}
+      <Field printHide={field.printHide}>
         {isHidden && (
-          <Button onClick={() => this.setHidden(false)}>
+          <ShowButton onClick={() => this.setHidden(false)}>
             {`Add ${field.label}`}
-          </Button>
+          </ShowButton>
         )}
-        {field.errorMessages && (
-          <ErrorWrapper>
-            <Errors
-              className="errors"
-              model={field.model}
-              show={(fieldValue) => fieldValue.touched || !fieldValue.pristine}
-              messages={field.errorMessages}
-            />
-          </ErrorWrapper>
+        {!isHidden && (
+          <FieldInnerWrapper>
+            {this.renderFormField({
+              field,
+              nested: false,
+              formData,
+              closeMultiselectOnClickOutside,
+              scrollContainer,
+              handleUpdate,
+              inline,
+            })}
+            {field.errorMessages && (
+              <ErrorWrapper>
+                <Errors
+                  className="errors"
+                  model={field.model}
+                  show={(fieldValue) => fieldValue.touched || !fieldValue.pristine}
+                  messages={field.errorMessages}
+                />
+              </ErrorWrapper>
+            )}
+          </FieldInnerWrapper>
         )}
       </Field>
     );
@@ -247,6 +323,7 @@ FormField.propTypes = {
   fieldGroup: PropTypes.object,
   closeMultiselectOnClickOutside: PropTypes.bool,
   handleUpdate: PropTypes.func,
+  inline: PropTypes.bool,
 };
 
 
