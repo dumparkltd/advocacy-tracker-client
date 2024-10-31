@@ -13,20 +13,7 @@ import { Map, List, fromJS } from 'immutable';
 
 import {
   getConnectionUpdatesFromFormData,
-  getTitleFormField,
-  getStatusFormField,
-  getMarkdownFormField,
-  getCodeFormField,
-  getActorsFormControl,
-  getActionsFormControl,
-  getResourcesFormControl,
-  getDateFormField,
-  getTextareaFormField,
-  getTextFormField,
-  getSingleTaxonomyFormControl,
-  getLinkFormField,
-  renderIndicatorControl,
-  renderUserMultiControl,
+  getActiontypeFormFields,
 } from 'utils/forms';
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
@@ -41,9 +28,6 @@ import {
   API,
   USER_ROLES,
   ROUTES,
-  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
-  ACTIONTYPES_CONFIG,
-  ACTION_FIELDS,
   API_DATE_FORMAT,
 } from 'themes/config';
 
@@ -137,187 +121,6 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       : dataWithType;
   };
 
-  getFormField = (
-    field,
-    {
-      isAdmin,
-      typeId,
-      taxonomies,
-      connectedTaxonomies,
-      userOptions,
-      indicatorOptions,
-      actorsByActortype,
-      topActionsByActiontype,
-      subActionsByActiontype,
-      resourcesByResourcetype,
-      onCreateOption,
-    }
-  ) => {
-    const { intl } = this.context;
-    const { formatMessage } = intl;
-    const {
-      attribute,
-      connection,
-      taxonomy,
-      required,
-      prepopulate,
-      hideByDefault,
-      needsAdmin,
-      type,
-      asParents,
-      asChildren,
-      fieldType,
-      basis,
-    } = field;
-    let result;
-    if (needsAdmin && !isAdmin) return null;
-    if (attribute) {
-      const fieldConfig = ACTION_FIELDS.ATTRIBUTES[attribute];
-      const attributeType = fieldConfig.type;
-      const cleanFieldType = fieldType || attributeType;
-      if (attribute === 'title') {
-        result = getTitleFormField({
-          formatMessage, attribute, required, hideByDefault,
-        });
-      } else if (attribute === 'code') {
-        result = getCodeFormField({
-          formatMessage, attribute, required, hideByDefault,
-        });
-      } else if (cleanFieldType === 'markdown') {
-        result = getMarkdownFormField({
-          formatMessage, attribute, required, hideByDefault,
-        });
-      } else if (cleanFieldType === 'date') {
-        result = getDateFormField({
-          formatMessage, attribute, required, hideByDefault,
-        });
-      } else if (cleanFieldType === 'text') {
-        result = getTextFormField({
-          formatMessage, attribute, required, hideByDefault,
-        });
-      } else if (cleanFieldType === 'textarea') {
-        result = getTextareaFormField({
-          formatMessage, attribute, required, hideByDefault,
-        });
-      } else if (cleanFieldType === 'url') {
-        result = getLinkFormField({
-          formatMessage, attribute, required, hideByDefault,
-        });
-      } else if (cleanFieldType === 'bool') {
-        result = getStatusFormField({
-          formatMessage, attribute, required, hideByDefault,
-        });
-      }
-    } else if (connection) {
-      if (connection === API.ACTORS && actorsByActortype) {
-        result = getActorsFormControl({
-          typeId: type,
-          entities: actorsByActortype.get(type),
-          taxonomies: connectedTaxonomies,
-          onCreateOption,
-          isAdmin,
-          intl,
-        });
-      } else if (connection === API.ACTIONS) {
-        let entities;
-        let path;
-        if (asParents && topActionsByActiontype) {
-          entities = topActionsByActiontype.get(type);
-          path = 'associatedTopActionsByActiontype';
-        } else if (asChildren && subActionsByActiontype) {
-          entities = subActionsByActiontype.get(type);
-          path = 'associatedSubActionsByActiontype';
-        }
-        if (entities) {
-          result = getActionsFormControl({
-            typeId: type,
-            entities,
-            taxonomies: connectedTaxonomies,
-            onCreateOption,
-            isAdmin,
-            intl,
-            path,
-          });
-        }
-      }
-      if (connection === API.INDICATORS && indicatorOptions) {
-        result = renderIndicatorControl({
-          entities: indicatorOptions,
-          intl,
-          connectionAttributes: [{
-            attribute: 'supportlevel_id',
-            type: 'select',
-            showCode: isAdmin,
-            options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId].map(
-              (level) => ({
-                label: intl.formatMessage(appMessages.supportlevels[level.value]),
-                ...level,
-              }),
-            ),
-          }],
-        });
-      } else if (connection === API.RESOURCES && resourcesByResourcetype) {
-        result = getResourcesFormControl({
-          typeId: type,
-          entities: resourcesByResourcetype.get(type),
-          onCreateOption,
-          isAdmin,
-          intl,
-        });
-      } else if (connection === API.USERS && userOptions) {
-        result = renderUserMultiControl({ entities: userOptions, intl });
-      }
-    } else if (taxonomy && taxonomies) {
-      const theTaxonomy = taxonomies.get(`${taxonomy}`);
-      if (theTaxonomy) {
-        result = getSingleTaxonomyFormControl({
-          taxonomy: theTaxonomy,
-          onCreateOption,
-          intl,
-          hideByDefault,
-        });
-      }
-    }
-    if (!result) return null;
-    result = {
-      ...result,
-      required,
-      hasrequired: !!required,
-      autofill: !!prepopulate,
-      hideByDefault,
-      basis, // relative width within row
-    };
-    return result;
-  }
-
-  getFields = (args) => {
-    const { typeId } = args;
-    const shape = ACTIONTYPES_CONFIG[parseInt(typeId, 10)]
-      && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].form;
-    const steps = shape && shape.map(
-      (step) => ({
-        id: step.id,
-        title: step.title, // id: footer w/out title
-        sections: step.sections && step.sections.map(
-          (section) => ({
-            ...section,
-            rows: section.rows.map(
-              (row) => ({
-                fields: row.map(
-                  (field) => this.getFormField(field, args),
-                ),
-              })
-            ),
-          })
-        ),
-        fields: step.fields && step.fields.map(
-          (field) => this.getFormField(field, args),
-        ),
-      })
-    );
-    return steps;
-  }
-
   render() {
     const { intl } = this.context;
     const {
@@ -389,10 +192,10 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
         />
         <FormWrapper
+          typeLabel={type}
           model={formDataPath}
           inModal={inModal}
           viewDomain={viewDomain}
-          handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleSubmit={(formData) => handleSubmit(
             formData,
             actiontype,
@@ -404,14 +207,16 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             userOptions,
             invalidateEntitiesOnSuccess,
           )}
+          handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleSubmitFail={handleSubmitFail}
           handleCancel={() => handleCancel(typeId)}
           handleUpdate={handleUpdate}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fieldsByStep={this.getFields({
+          fieldsByStep={getActiontypeFormFields({
             isAdmin,
+            isMine: true,
             typeId,
             taxonomies,
             connectedTaxonomies,
@@ -422,6 +227,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             subActionsByActiontype,
             resourcesByResourcetype,
             onCreateOption: inModal ? null : onCreateOption,
+            intl,
           })}
         />
       </Content>

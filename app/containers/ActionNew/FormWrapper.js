@@ -24,6 +24,7 @@ export function FormWrapper({
   handleSubmitRemote,
   scrollContainer,
   inModal,
+  typeLabel,
 }) {
   const {
     isAnySending,
@@ -64,6 +65,7 @@ export function FormWrapper({
           fieldsByStep={fieldsByStep}
           scrollContainer={scrollContainer}
           isNewEntityView
+          typeLabel={typeLabel}
         />
       )}
       {saving && <Loading />}
@@ -83,6 +85,7 @@ FormWrapper.propTypes = {
   onServerErrorDismiss: PropTypes.func.isRequired,
   scrollContainer: PropTypes.object,
   model: PropTypes.string,
+  typeLabel: PropTypes.string,
   inModal: PropTypes.bool,
 };
 

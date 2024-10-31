@@ -26,8 +26,10 @@ export function FormWrapper({
   handleCancel,
   handleUpdate,
   handleSubmit,
+  handleSubmitRemote,
   handleDelete,
   scrollContainer,
+  typeLabel,
 }) {
   const {
     saveSending, saveError, deleteSending, deleteError, submitValid,
@@ -57,12 +59,14 @@ export function FormWrapper({
           formDataTracked={viewDomain.getIn(['form', 'forms', 'data'])}
           saving={saveSending}
           handleSubmit={handleSubmit}
+          handleSubmitRemote={handleSubmitRemote}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
           handleUpdate={handleUpdate}
           handleDelete={handleDelete}
           fieldsByStep={fieldsByStep}
           scrollContainer={scrollContainer}
+          typeLabel={typeLabel}
         />
       )}
       {(saveSending || deleteSending) && <Loading />}
@@ -73,6 +77,7 @@ export function FormWrapper({
 FormWrapper.propTypes = {
   handleSubmitFail: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
+  handleSubmitRemote: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func,
@@ -82,6 +87,7 @@ FormWrapper.propTypes = {
   onServerErrorDismiss: PropTypes.func.isRequired,
   scrollContainer: PropTypes.object,
   model: PropTypes.string,
+  typeLabel: PropTypes.string,
 };
 
 const mapStateToProps = (state) => ({

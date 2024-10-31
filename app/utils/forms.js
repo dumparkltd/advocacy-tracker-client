@@ -27,6 +27,9 @@ import {
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
   ACTORTYPES,
+  ACTION_FIELDS,
+  // ACTOR_FIELDS,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
 import appMessages from 'containers/App/messages';
@@ -59,7 +62,7 @@ export const userOption = (entity, activeUserId) => Map({
   checked: activeUserId ? entity.get('id') === activeUserId.toString() : false,
 });
 
-export const userOptions = (entities, activeUserId) => entities
+export const getUserOptions = (entities, activeUserId) => entities
   ? entities.reduce((options, entity) => options.push(userOption(entity, activeUserId)), List())
   : List();
 
@@ -1047,4 +1050,197 @@ export const getFormField = ({
     field.errorMessages.required = formatMessage(appMessages.forms.fieldRequired);
   }
   return field;
+};
+
+
+const getActiontypeFormField = (
+  field,
+  {
+    isAdmin,
+    isMine,
+    typeId,
+    taxonomies,
+    connectedTaxonomies,
+    userOptions,
+    indicatorOptions,
+    actorsByActortype,
+    topActionsByActiontype,
+    subActionsByActiontype,
+    resourcesByResourcetype,
+    entityIndicatorConnections,
+    onCreateOption,
+    intl,
+  },
+) => {
+  const { formatMessage } = intl;
+  const {
+    attribute,
+    connection,
+    taxonomy,
+    required,
+    prepopulate,
+    hideByDefault,
+    needsAdmin,
+    needsAdminOrOwn,
+    type,
+    asParents,
+    asChildren,
+    fieldType,
+    basis,
+  } = field;
+  let result;
+  const passAdmin = needsAdmin ? isAdmin : true;
+  const passAdminOrMine = needsAdminOrOwn ? (isAdmin || isMine) : true;
+  console.log('isAdmin, needsAdmin', isAdmin, needsAdmin)
+  console.log('isMine, needsAdminOrOwn', isMine, needsAdmin)
+  console.log('passAdmin || !passAdminOrMine', passAdmin, passAdminOrMine)
+  if (!passAdmin || !passAdminOrMine) {
+    return null;
+  }
+  if (attribute) {
+    const fieldConfig = ACTION_FIELDS.ATTRIBUTES[attribute];
+    const attributeType = fieldConfig.type;
+    const cleanFieldType = fieldType || attributeType;
+    if (attribute === 'title') {
+      result = getTitleFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (attribute === 'code') {
+      result = getCodeFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (cleanFieldType === 'markdown') {
+      result = getMarkdownFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (cleanFieldType === 'date') {
+      result = getDateFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (cleanFieldType === 'text') {
+      result = getTextFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (cleanFieldType === 'textarea') {
+      result = getTextareaFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (cleanFieldType === 'url') {
+      result = getLinkFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (cleanFieldType === 'bool') {
+      result = getStatusFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    }
+  } else if (connection) {
+    if (connection === API.ACTORS && actorsByActortype) {
+      result = getActorsFormControl({
+        typeId: type,
+        entities: actorsByActortype.get(type),
+        taxonomies: connectedTaxonomies,
+        onCreateOption,
+        isAdmin,
+        intl,
+      });
+    } else if (connection === API.ACTIONS) {
+      let entities;
+      let path;
+      if (asParents && topActionsByActiontype) {
+        entities = topActionsByActiontype.get(type);
+        path = 'associatedTopActionsByActiontype';
+      } else if (asChildren && subActionsByActiontype) {
+        entities = subActionsByActiontype.get(type);
+        path = 'associatedSubActionsByActiontype';
+      }
+      if (entities) {
+        result = getActionsFormControl({
+          typeId: type,
+          entities,
+          taxonomies: connectedTaxonomies,
+          onCreateOption,
+          isAdmin,
+          intl,
+          path,
+        });
+      }
+    }
+    if (connection === API.INDICATORS && indicatorOptions) {
+      result = renderIndicatorControl({
+        entities: indicatorOptions,
+        intl,
+        connections: entityIndicatorConnections || null,
+        connectionAttributes: [{
+          attribute: 'supportlevel_id',
+          type: 'select',
+          showCode: isAdmin,
+          options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId].map(
+            (level) => ({
+              label: intl.formatMessage(appMessages.supportlevels[level.value]),
+              ...level,
+            }),
+          ),
+        }],
+      });
+    } else if (connection === API.RESOURCES && resourcesByResourcetype) {
+      result = getResourcesFormControl({
+        typeId: type,
+        entities: resourcesByResourcetype.get(type),
+        onCreateOption,
+        isAdmin,
+        intl,
+      });
+    } else if (connection === API.USERS && userOptions) {
+      result = renderUserMultiControl({ entities: userOptions, intl });
+    }
+  } else if (taxonomy && taxonomies) {
+    const theTaxonomy = taxonomies.get(`${taxonomy}`);
+    if (theTaxonomy) {
+      result = getSingleTaxonomyFormControl({
+        taxonomy: theTaxonomy,
+        onCreateOption,
+        intl,
+        hideByDefault,
+      });
+    }
+  }
+  if (!result) return null;
+  result = {
+    ...result,
+    required,
+    hasrequired: !!required,
+    autofill: !!prepopulate,
+    hideByDefault,
+    basis, // relative width within row
+  };
+  return result;
+};
+
+export const getActiontypeFormFields = (args) => {
+  const { typeId } = args;
+  const shape = ACTIONTYPES_CONFIG[parseInt(typeId, 10)]
+    && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].form;
+  const steps = shape && shape.map(
+    (step) => ({
+      id: step.id,
+      title: step.title, // id: footer w/out title
+      sections: step.sections && step.sections.map(
+        (section) => ({
+          ...section,
+          rows: section.rows.map(
+            (row) => ({
+              fields: row.map(
+                (field) => getActiontypeFormField(field, args),
+              ),
+            })
+          ),
+        })
+      ),
+      fields: step.fields && step.fields.map(
+        (field) => getActiontypeFormField(field, args),
+      ),
+    })
+  );
+  return steps;
 };

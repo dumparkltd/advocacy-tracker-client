@@ -14,7 +14,7 @@ import { actions as formActions } from 'react-redux-form/immutable';
 import { Map, List } from 'immutable';
 
 import {
-  userOptions,
+  getUserOptions,
   entityOptions,
   renderParentCategoryControl,
   getTitleFormField,
@@ -127,7 +127,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
         associatedActorsByActortype: actorsByActortype
           ? actorsByActortype.map((actors) => entityOptions({ entities: actors }))
           : Map(),
-        associatedUser: userOptions(users, viewEntity.getIn(['attributes', 'manager_id'])),
+        associatedUser: getUserOptions(users, viewEntity.getIn(['attributes', 'manager_id'])),
         associatedCategory: parentCategoryOptions(parentOptions, viewEntity.getIn(['attributes', 'parent_id'])),
         // TODO allow single value for singleSelect
       })

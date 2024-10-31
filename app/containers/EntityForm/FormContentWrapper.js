@@ -42,6 +42,7 @@ export function FormContentWrapper({
   closeMultiselectOnClickOutside,
   handleUpdate,
   step,
+  isNewEntityView,
 }) {
   // console.log('isNewEntityView', isNewEntityView)
   // // console.log('formData', formData && formData.toJS())
@@ -79,6 +80,7 @@ export function FormContentWrapper({
                                   closeMultiselectOnClickOutside={closeMultiselectOnClickOutside}
                                   scrollContainer={scrollContainer}
                                   handleUpdate={handleUpdate}
+                                  isNewEntityView={isNewEntityView}
                                 />
                               </Box>
                             );
@@ -157,6 +159,7 @@ FormContentWrapper.propTypes = {
   sections: PropTypes.array,
   closeMultiselectOnClickOutside: PropTypes.bool,
   handleUpdate: PropTypes.func,
+  isNewEntityView: PropTypes.bool,
 };
 
 

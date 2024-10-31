@@ -30,12 +30,13 @@ const DeleteConfirmText = styled.span`
   padding-left: 1em;
   padding-right: 1em;
 `;
-const DeleteWrapper = styled.div`
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
+const Styled = styled.div`
+  margin-bottom: 200px;
+
 `;
+const DeleteWrapper = styled(
+  (p) => <Box direction="row" align="center" pad={{ vertical: 'medium' }} {...p} />
+)``;
 
 const ButtonDelete = styled(ButtonForm)`
   color: ${palette('buttonFlat', 0)};
@@ -44,11 +45,7 @@ const ButtonDelete = styled(ButtonForm)`
   }
 `;
 
-const ButtonPreDelete = styled(Button)`
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
+const ButtonPreDelete = styled(ButtonForm)`
   color: ${palette('text', 1)};
   &:hover {
     color: ${palette('linkHover', 2)};
@@ -171,6 +168,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       isNewEntityView,
       saving,
       handleSubmitRemote,
+      typeLabel,
     } = this.props;
     const { deleteConfirmed, stepActive, stepsSeen } = this.state;
     const closeMultiselectOnClickOutside = !newEntityModal || inModal;
@@ -294,7 +292,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     // console.log('formDataTracked', formDataTracked, isBlocked)
     const activeStepHasErrors = activeStep.hasErrors;
     return (
-      <>
+      <Styled>
         <Box direction="row" justify="end">
           {handleCancel && (
             <Box>
@@ -316,7 +314,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
             </ButtonSubmitSubtle>
           </Box>
         </Box>
-        <FormWrapper withoutShadow={inModal} hasMarginBottom={!inModal}>
+        <FormWrapper withoutShadow={inModal} hasMarginBottom={false}>
           <StyledForm
             model={model}
             onSubmit={this.handleSubmit}
@@ -378,6 +376,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
               closeMultiselectOnClickOutside={closeMultiselectOnClickOutside}
               scrollContainer={scrollContainer}
               handleUpdate={handleUpdate}
+              isNewEntityView={isNewEntityView}
             />
             <Box
               direction="row"
@@ -440,12 +439,15 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
         {handleDelete && !deleteConfirmed && (
           <DeleteWrapper>
             <ButtonPreDelete type="button" onClick={this.setDeleteConfirmed}>
-              <Icon name="trash" sizes={{ mobile: '1.8em' }} />
+              <Box direction="row" gap="small" align="center">
+                <Icon name="trash" sizes={{ mobile: '1.8em' }} />
+                <span>{`Delete ${typeLabel}`}</span>
+              </Box>
             </ButtonPreDelete>
           </DeleteWrapper>
         )}
         {handleDelete && deleteConfirmed && (
-          <Box direction="row">
+          <DeleteWrapper>
             <DeleteConfirmText>
               <FormattedMessage {...messages.confirmDeleteQuestion} />
             </DeleteConfirmText>
@@ -458,9 +460,9 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
             <ButtonDelete type="button" onClick={handleDelete}>
               <FormattedMessage {...messages.buttons.confirmDelete} />
             </ButtonDelete>
-          </Box>
+          </DeleteWrapper>
         )}
-      </>
+      </Styled>
     );
   }
 }
@@ -484,9 +486,11 @@ EntityForm.propTypes = {
   inModal: PropTypes.bool,
   saving: PropTypes.bool,
   isNewEntityView: PropTypes.bool,
+  isMine: PropTypes.bool,
   newEntityModal: PropTypes.object,
   validators: PropTypes.object,
   scrollContainer: PropTypes.object,
+  typeLabel: PropTypes.string,
 };
 EntityForm.defaultProps = {
   saving: false,

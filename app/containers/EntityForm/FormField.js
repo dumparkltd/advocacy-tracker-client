@@ -166,12 +166,12 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
     );
   }
 
-  renderCombo = (field, formData, handleUpdate) => (
+  renderCombo = (field, formData, handleUpdate, isNewEntityView) => (
     <FieldWrap>
       {field && field.fields.map((comboField, i) => (
         <span key={i}>
           {this.renderFormField({
-            field: comboField, nested: true, formData, handleUpdate,
+            field: comboField, nested: true, formData, handleUpdate, isNewEntityView,
           })}
         </span>
       ))}
@@ -189,6 +189,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
     inline,
     step,
     isEmpty,
+    isNewEntityView,
   }) => {
     const { intl } = this.context;
     let formField;
@@ -200,7 +201,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
           formField = (<FieldFactory field={field} nested={nested} />);
           break;
         case 'combo':
-          formField = this.renderCombo(field, formData, handleUpdate);
+          formField = this.renderCombo(field, formData, handleUpdate, isNewEntityView);
           break;
         case 'multiselect':
           formField = this.renderMultiSelect(
@@ -225,7 +226,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
     const hasError = hasChanges && !isValid;
     const fieldRequired = field.validators && field.validators.required;
     const stepSeen = step && step.previouslySeen;
-    const fieldAutofilledUnseen = !stepSeen && field.autofill && !hasChanges;
+    const fieldAutofilledUnseen = isNewEntityView && !stepSeen && field.autofill && !hasChanges;
 
     return (
       <FormFieldWrap
@@ -301,6 +302,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
       handleUpdate,
       inline,
       step,
+      isNewEntityView,
     } = this.props;
     const isEmpty = fieldTracked && fieldTracked.value ? fieldTracked.value === '' : true;
     let isHidden = field.hideByDefault && this.state.hidden;
@@ -327,6 +329,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
               step,
               fieldTracked,
               isEmpty,
+              isNewEntityView,
             })}
             {field.errorMessages && (
               <ErrorWrapper>
@@ -355,6 +358,7 @@ FormField.propTypes = {
   closeMultiselectOnClickOutside: PropTypes.bool,
   handleUpdate: PropTypes.func,
   inline: PropTypes.bool,
+  isNewEntityView: PropTypes.bool,
 };
 
 
