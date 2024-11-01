@@ -6,8 +6,10 @@ import { FormattedMessage } from 'react-intl';
 import { Form } from 'react-redux-form/immutable';
 import styled from 'styled-components';
 import { get } from 'lodash/object';
-import { Box, Button } from 'grommet';
+import { Box, Button, ResponsiveContext } from 'grommet';
 import { palette } from 'styled-theme';
+
+import { isMinSize } from 'utils/responsive';
 
 import { selectNewEntityModal } from 'containers/App/selectors';
 
@@ -55,7 +57,7 @@ const StyledForm = styled(Form)`
   width: 100%;
 `;
 
-const FilterSteps = styled(
+const FormSteps = styled(
   (p) => <Box direction="row" fill="horizontal" responsive={false} {...p} />
 )``;
 
@@ -216,9 +218,9 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     const stepsWithStatus = byStep && byStep.map(
       (step, idx) => {
         if (!step.sections) return step;
-        const currentStepActive = idx <= activeStepIndex;
+        const currentStepBeforeActive = idx <= activeStepIndex;
         const currentStepPreviouslySeen = stepsSeen.indexOf(step.id) > -1;
-        const stepSeen = currentStepPreviouslySeen || currentStepActive;
+        const stepSeen = currentStepPreviouslySeen || currentStepBeforeActive;
         const [
           hasEmptyRequired,
           hasAutofill,
@@ -276,8 +278,9 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
           hasEmptyRequired,
           hasUnseenAutofill: isNewEntityView && !stepSeen && hasAutofill,
           seen: stepSeen,
-          active: currentStepActive,
+          highlighted: currentStepBeforeActive,
           previouslySeen: currentStepPreviouslySeen,
+          isActive: step.id === cleanStepActive,
           hasErrors,
         });
       }
@@ -285,189 +288,204 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     const isBlocked = stepsWithStatus && stepsWithStatus.some(
       (step) => (step.hasEmptyRequired || step.hasUnseenAutofill || step.hasErrors)
     );
-    const activeStep = stepsWithStatus && stepsWithStatus.find(
-      (step) => step.id === cleanStepActive,
-    );
+    const activeStep = stepsWithStatus && stepsWithStatus.find((step) => step.isActive);
     // console.log('stepsWithStatus', stepsWithStatus, isBlocked)
     // console.log('formDataTracked', formDataTracked, isBlocked)
     const activeStepHasErrors = activeStep.hasErrors;
     return (
-      <Styled>
-        <Box direction="row" justify="end">
-          {handleCancel && (
-            <Box>
-              <ButtonCancel
-                type="button"
-                onClick={handleCancel}
-              >
-                <FormattedMessage {...appMessages.buttons.cancel} />
-              </ButtonCancel>
+      <ResponsiveContext.Consumer>
+        {(size) => (
+          <Styled>
+            <Box direction="row" justify="end">
+              {handleCancel && (
+                <Box>
+                  <ButtonCancel
+                    type="button"
+                    onClick={handleCancel}
+                  >
+                    <FormattedMessage {...appMessages.buttons.cancel} />
+                  </ButtonCancel>
+                </Box>
+              )}
+              <Box>
+                <ButtonSubmitSubtle
+                  type="button"
+                  disabled={isBlocked}
+                  onClick={handleSubmitRemote}
+                >
+                  Save & Close
+                </ButtonSubmitSubtle>
+              </Box>
             </Box>
-          )}
-          <Box>
-            <ButtonSubmitSubtle
-              type="button"
-              disabled={isBlocked}
-              onClick={handleSubmitRemote}
-            >
-              Save & Close
-            </ButtonSubmitSubtle>
-          </Box>
-        </Box>
-        <FormWrapper withoutShadow={inModal} hasMarginBottom={false}>
-          <StyledForm
-            model={model}
-            onSubmit={this.handleSubmit}
-            onSubmitFailed={handleSubmitFail}
-            validators={validators}
-          >
-            {stepsWithStatus && stepsWithStatus.length > 1 && (
-              <FilterSteps>
-                {stepsWithStatus.map((step, idx) => {
-                  const {
-                    hasEmptyRequired,
-                    hasUnseenAutofill,
-                    active,
-                    hasErrors,
-                  } = step;
-                  // const isStepBlocked = hasEmptyRequired || hasUnseenAutofill;
-                  return (
-                    <Box key={step.id} basis={`1/${byStep.length}`}>
-                      <ButtonStep
-                        highlight={active}
-                        disabled={activeStepHasErrors}
-                        onClick={(evt) => {
-                          if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-                          if (step.id !== cleanStepActive) {
-                            this.setStepActive(step.id);
-                            this.addStepSeen(cleanStepActive);
-                          }
-                        }}
-                        lastItem={idx + 1 === byStep.length}
-                      >
-                        <Box direction="row" align="center" gap="small">
-                          <ButtonStepLabel>
-                            {`${idx + 1}. ${step.title || step.id}`}
-                          </ButtonStepLabel>
-                          <Box direction="row" align="center" gap="xxsmall">
-                            {hasErrors && (
-                              <WarningDot type="error" />
-                            )}
-                            {!hasErrors && hasEmptyRequired && (
-                              <WarningDot type="required" />
-                            )}
-                            {hasUnseenAutofill && (
-                              <WarningDot type="autofill" />
-                            )}
-                          </Box>
-                        </Box>
-                      </ButtonStep>
-                    </Box>
-                  );
-                })}
-              </FilterSteps>
-            )}
-            <FormContentWrapper
-              step={activeStep}
-              fields={activeStep && activeStep.fields}
-              sections={activeStep && activeStep.sections}
-              formData={formData}
-              formDataTracked={formDataTracked}
-              closeMultiselectOnClickOutside={closeMultiselectOnClickOutside}
-              scrollContainer={scrollContainer}
-              handleUpdate={handleUpdate}
-              isNewEntityView={isNewEntityView}
-            />
-            {stepsWithStatus && stepsWithStatus.length > 1 && (
-              <Box
-                direction="row"
-                justify="between"
-                pad={{ vertical: 'medium', horizontal: 'medium' }}
-                style={{
-                  borderTop: '2px solid #B7BCBF',
-                }}
+            <FormWrapper withoutShadow={inModal} hasMarginBottom={false}>
+              <StyledForm
+                model={model}
+                onSubmit={this.handleSubmit}
+                onSubmitFailed={handleSubmitFail}
+                validators={validators}
               >
-                <SkipButton
-                  disabled={activeStepHasErrors || prevStepIndex === null}
-                  plain
-                  onClick={(evt) => {
-                    if (evt && evt.preventDefault) evt.preventDefault();
-                    if (byStep[prevStepIndex]) {
-                      this.setStepActive(byStep[prevStepIndex].id);
-                      this.addStepSeen(activeStep.id);
-                    }
-                  }}
-                >
-                  <SkipButtonInner>
-                    <SkipIconNext reverse />
-                    <ButtonStepLabelUpper
+                {stepsWithStatus && stepsWithStatus.length > 1 && (
+                  <FormSteps>
+                    {stepsWithStatus.map((step, idx) => {
+                      const {
+                        hasEmptyRequired,
+                        hasUnseenAutofill,
+                        highlighted,
+                        isActive,
+                        hasErrors,
+                      } = step;
+                      let title = step.title || step.id;
+                      if (!isMinSize(size, 'ms')) {
+                        if (!isActive) {
+                          title = '';
+                        } else if (isActive && step.titleSmall) {
+                          title = step.titleSmall;
+                        }
+                      }
+                      title = `${idx + 1}.${title ? ' ' : ''}${title}`;
+                      return (
+                        <Box
+                          key={step.id}
+                          basis={isMinSize(size, 'medium') ? `1/${byStep.length}` : 'auto'}
+                          flex={!isMinSize(size, 'medium') && isActive ? { grow: 1 } : false}
+                        >
+                          <ButtonStep
+                            highlight={highlighted}
+                            disabled={activeStepHasErrors}
+                            onClick={(evt) => {
+                              if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+                              if (!isActive) {
+                                this.setStepActive(step.id);
+                                this.addStepSeen(cleanStepActive);
+                              }
+                            }}
+                            lastItem={idx + 1 === byStep.length}
+                          >
+                            <Box direction="row" align="center" gap="small">
+                              <ButtonStepLabel>
+                                {title}
+                              </ButtonStepLabel>
+                              <Box direction="row" align="center" gap="xxsmall">
+                                {hasErrors && (
+                                  <WarningDot type="error" />
+                                )}
+                                {!hasErrors && hasEmptyRequired && (
+                                  <WarningDot type="required" />
+                                )}
+                                {hasUnseenAutofill && (
+                                  <WarningDot type="autofill" />
+                                )}
+                              </Box>
+                            </Box>
+                          </ButtonStep>
+                        </Box>
+                      );
+                    })}
+                  </FormSteps>
+                )}
+                <FormContentWrapper
+                  step={activeStep}
+                  fields={activeStep && activeStep.fields}
+                  sections={activeStep && activeStep.sections}
+                  formData={formData}
+                  formDataTracked={formDataTracked}
+                  closeMultiselectOnClickOutside={closeMultiselectOnClickOutside}
+                  scrollContainer={scrollContainer}
+                  handleUpdate={handleUpdate}
+                  isNewEntityView={isNewEntityView}
+                />
+                {stepsWithStatus && stepsWithStatus.length > 1 && (
+                  <Box
+                    direction="row"
+                    justify="between"
+                    pad={{ vertical: 'medium', horizontal: 'medium' }}
+                    style={{
+                      borderTop: '1px solid #B7BCBF',
+                    }}
+                  >
+                    <SkipButton
                       disabled={activeStepHasErrors || prevStepIndex === null}
+                      plain
+                      onClick={(evt) => {
+                        if (evt && evt.preventDefault) evt.preventDefault();
+                        if (byStep[prevStepIndex]) {
+                          this.setStepActive(byStep[prevStepIndex].id);
+                          this.addStepSeen(activeStep.id);
+                        }
+                      }}
                     >
-                      Previous
-                    </ButtonStepLabelUpper>
-                  </SkipButtonInner>
-                </SkipButton>
-                <SkipButton
-                  disabled={activeStepHasErrors || nextStepIndex === null}
-                  plain
-                  onClick={(evt) => {
-                    if (evt && evt.preventDefault) evt.preventDefault();
-                    if (byStep[nextStepIndex]) {
-                      this.setStepActive(byStep[nextStepIndex].id);
-                      this.addStepSeen(byStep[nextStepIndex].id);
-                    }
-                  }}
-                >
-                  <SkipButtonInner>
-                    <ButtonStepLabelUpper
+                      <SkipButtonInner>
+                        <SkipIconNext reverse />
+                        <ButtonStepLabelUpper
+                          disabled={activeStepHasErrors || prevStepIndex === null}
+                        >
+                          Previous
+                        </ButtonStepLabelUpper>
+                      </SkipButtonInner>
+                    </SkipButton>
+                    <SkipButton
                       disabled={activeStepHasErrors || nextStepIndex === null}
+                      plain
+                      onClick={(evt) => {
+                        if (evt && evt.preventDefault) evt.preventDefault();
+                        if (byStep[nextStepIndex]) {
+                          this.setStepActive(byStep[nextStepIndex].id);
+                          this.addStepSeen(byStep[nextStepIndex].id);
+                        }
+                      }}
                     >
-                      Next
-                    </ButtonStepLabelUpper>
-                    <SkipIconNext disabled={activeStepHasErrors || nextStepIndex === null} />
-                  </SkipButtonInner>
-                </SkipButton>
-              </Box>
+                      <SkipButtonInner>
+                        <ButtonStepLabelUpper
+                          disabled={activeStepHasErrors || nextStepIndex === null}
+                        >
+                          Next
+                        </ButtonStepLabelUpper>
+                        <SkipIconNext disabled={activeStepHasErrors || nextStepIndex === null} />
+                      </SkipButtonInner>
+                    </SkipButton>
+                  </Box>
+                )}
+                <FormFooter
+                  fields={footerFields}
+                  formData={formData}
+                  formDataTracked={formDataTracked}
+                  handleDelete={handleDelete}
+                  handleCancel={handleCancel}
+                  deleteConfirmed={deleteConfirmed}
+                  onSetDeleteConfirmed={this.setDeleteConfirmed}
+                  isBlocked={isBlocked || saving}
+                />
+              </StyledForm>
+            </FormWrapper>
+            {handleDelete && !deleteConfirmed && (
+              <DeleteWrapper>
+                <ButtonPreDelete type="button" onClick={this.setDeleteConfirmed}>
+                  <Box direction="row" gap="small" align="center">
+                    <Icon name="trash" sizes={{ mobile: '1.8em' }} />
+                    <span>{`Delete ${typeLabel}`}</span>
+                  </Box>
+                </ButtonPreDelete>
+              </DeleteWrapper>
             )}
-            <FormFooter
-              fields={footerFields}
-              formData={formData}
-              formDataTracked={formDataTracked}
-              handleDelete={handleDelete}
-              handleCancel={handleCancel}
-              deleteConfirmed={deleteConfirmed}
-              onSetDeleteConfirmed={this.setDeleteConfirmed}
-              isBlocked={isBlocked || saving}
-            />
-          </StyledForm>
-        </FormWrapper>
-        {handleDelete && !deleteConfirmed && (
-          <DeleteWrapper>
-            <ButtonPreDelete type="button" onClick={this.setDeleteConfirmed}>
-              <Box direction="row" gap="small" align="center">
-                <Icon name="trash" sizes={{ mobile: '1.8em' }} />
-                <span>{`Delete ${typeLabel}`}</span>
-              </Box>
-            </ButtonPreDelete>
-          </DeleteWrapper>
+            {handleDelete && deleteConfirmed && (
+              <DeleteWrapper>
+                <DeleteConfirmText>
+                  <FormattedMessage {...messages.confirmDeleteQuestion} />
+                </DeleteConfirmText>
+                <ButtonCancel
+                  type="button"
+                  onClick={() => this.setDeleteConfirmed(false)}
+                >
+                  <FormattedMessage {...messages.buttons.cancelDelete} />
+                </ButtonCancel>
+                <ButtonDelete type="button" onClick={handleDelete}>
+                  <FormattedMessage {...messages.buttons.confirmDelete} />
+                </ButtonDelete>
+              </DeleteWrapper>
+            )}
+          </Styled>
         )}
-        {handleDelete && deleteConfirmed && (
-          <DeleteWrapper>
-            <DeleteConfirmText>
-              <FormattedMessage {...messages.confirmDeleteQuestion} />
-            </DeleteConfirmText>
-            <ButtonCancel
-              type="button"
-              onClick={() => this.setDeleteConfirmed(false)}
-            >
-              <FormattedMessage {...messages.buttons.cancelDelete} />
-            </ButtonCancel>
-            <ButtonDelete type="button" onClick={handleDelete}>
-              <FormattedMessage {...messages.buttons.confirmDelete} />
-            </ButtonDelete>
-          </DeleteWrapper>
-        )}
-      </Styled>
+      </ResponsiveContext.Consumer>
     );
   }
 }

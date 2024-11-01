@@ -8,7 +8,7 @@ const Inner = styled.div`
   background-color: ${({ palleteName, paletteIndex }) => palette(palleteName, paletteIndex)};
   width: 14px;
   height: 14px;
-  border: 2px solid white;
+  border: 1px solid white;
 `;
 
 export function WarningDot({ type }) {
@@ -26,7 +26,7 @@ export function WarningDot({ type }) {
   }
   if (type === 'autofill') {
     palleteName = 'alert';
-    paletteIndex = 4;
+    paletteIndex = 3;
   }
   return (
     <Inner palleteName={palleteName} paletteIndex={paletteIndex} />

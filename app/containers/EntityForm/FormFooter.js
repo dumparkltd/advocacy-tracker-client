@@ -3,8 +3,9 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { get } from 'lodash/object';
 import { FormattedMessage } from 'react-intl';
+import { Box, ResponsiveContext } from 'grommet';
 
-import { Box } from 'grommet';
+import { isMinSize } from 'utils/responsive';
 
 import ButtonCancel from 'components/buttons/ButtonCancel';
 import ButtonSubmit from 'components/buttons/ButtonSubmit';
@@ -25,21 +26,37 @@ export function FormFooter({
   handleCancel,
   isBlocked,
 }) {
+  const size = React.useContext(ResponsiveContext);
   // console.log('isNewEntityView', isNewEntityView)
   // // console.log('formData', formData && formData.toJS())
   return (
-    <Styled direction="row" justify="between" elevation="small">
-      <Box>
-        <ButtonCancel
-          type="button"
-          onClick={handleCancel}
-        >
-          <FormattedMessage {...appMessages.buttons.cancel} />
-        </ButtonCancel>
-      </Box>
-      <Box direction="row" gap="small">
+    <Styled
+      direction="row"
+      justify="between"
+      elevation="small"
+    >
+      {isMinSize(size, 'medium') && (
+        <Box>
+          <ButtonCancel
+            type="button"
+            onClick={handleCancel}
+          >
+            <FormattedMessage {...appMessages.buttons.cancel} />
+          </ButtonCancel>
+        </Box>
+      )}
+      <Box
+        direction={isMinSize(size, 'medium') ? 'row' : 'column'}
+        gap="small"
+        fill={isMinSize(size, 'medium') ? false : 'horizontal'}
+      >
         {fields && fields.length > 0 && (
-          <Box direction="row" gap="small" align="center">
+          <Box
+            direction={isMinSize(size, 'medium') ? 'row' : 'column'}
+            align={isMinSize(size, 'medium') ? 'center' : 'start'}
+            gap="small"
+            pad={isMinSize(size, 'medium') ? {} : { horizontal: 'small', vertical: 'small' }}
+          >
             {fields.map((field, j) => {
               if (!field) return null;
               const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
@@ -57,9 +74,28 @@ export function FormFooter({
             })}
           </Box>
         )}
-        <ButtonSubmit type="submit" disabled={isBlocked}>
-          Save & Close
-        </ButtonSubmit>
+        <Box
+          direction="row"
+          justify={!isMinSize(size, 'medium') ? 'between' : 'start'}
+          style={!isMinSize(size, 'medium')
+            ? { borderTop: '1px solid #B7BCBF' }
+            : {}
+          }
+        >
+          {!isMinSize(size, 'medium') && (
+            <Box>
+              <ButtonCancel
+                type="button"
+                onClick={handleCancel}
+              >
+                <FormattedMessage {...appMessages.buttons.cancel} />
+              </ButtonCancel>
+            </Box>
+          )}
+          <ButtonSubmit type="submit" disabled={isBlocked}>
+            Save & Close
+          </ButtonSubmit>
+        </Box>
       </Box>
     </Styled>
   );

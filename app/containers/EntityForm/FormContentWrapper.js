@@ -2,14 +2,16 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { get } from 'lodash/object';
-import { Box, Text } from 'grommet';
+import { Box, Text, ResponsiveContext } from 'grommet';
+
+import { isMinSize } from 'utils/responsive';
 
 import FormField from './FormField';
 
 const Section = styled(
-  (p) => <Box pad={{ vertical: 'large', horizontal: 'xxlarge' }} {...p} />
+  (p) => <Box {...p} />
 )`
-  border-bottom: 2px solid #B7BCBF;
+  border-bottom: 1px solid #B7BCBF;
   &:last-child {
     border-bottom: none;
   }
@@ -37,34 +39,64 @@ export function FormContentWrapper({
   step,
   isNewEntityView,
 }) {
+  const size = React.useContext(ResponsiveContext);
   // console.log('isNewEntityView', isNewEntityView)
   // // console.log('formData', formData && formData.toJS())
   // console.log('sections', sections)
+  let sectionPadding = { vertical: 'large', horizontal: 'small' };
+  if (isMinSize(size, 'large')) {
+    sectionPadding = { vertical: 'large', horizontal: 'xxlarge' };
+  } else if (isMinSize(size, 'medium')) {
+    sectionPadding = { vertical: 'large', horizontal: 'large' };
+  }
   return (
     <div>
       {sections && sections.length > 0 && sections.map(
         (section) => {
           if (!section.rows) return null;
+          const isColumnSection = typeof section.asColumns !== 'undefined';
           return (
-            <Section key={section.id}>
+            <Section
+              key={section.id}
+              responsive={false}
+              pad={sectionPadding}
+            >
               {section.title && (
                 <SectionTitle>
                   {section.title}
                 </SectionTitle>
               )}
-              <Box gap="ms">
+              <Box
+                gap="ms"
+                direction={isMinSize(size, 'medium') && isColumnSection ? 'row' : 'column'}
+              >
                 {section.rows.map(
                   (row, i) => {
                     if (!row.fields) return null;
                     return (
-                      <Row key={i}>
+                      <Row
+                        key={i}
+                        direction={isMinSize(size, 'medium') && !isColumnSection
+                          ? 'row'
+                          : 'column'
+                        }
+                        basis={
+                          isColumnSection && section.asColumns[i]
+                            ? section.asColumns[i]
+                            : 'auto'
+                        }
+                      >
                         {row.fields.map(
                           (field, j) => {
                             if (!field) return null;
                             const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
                             const fieldTracked = get(formDataTracked, modelPath);
                             return (
-                              <Box key={j} basis={field.basis || 'full'}>
+                              <Box
+                                key={j}
+                                basis={(field.basis && !isColumnSection) ? field.basis : 'auto'}
+                                fill="horizontal"
+                              >
                                 <FormField
                                   step={step}
                                   field={field}

@@ -1223,8 +1223,7 @@ export const getActiontypeFormFields = (args) => {
     && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].form;
   const steps = shape && shape.map(
     (step) => ({
-      id: step.id,
-      title: step.title, // id: footer w/out title
+      ...step,
       sections: step.sections && step.sections.map(
         (section) => ({
           ...section,

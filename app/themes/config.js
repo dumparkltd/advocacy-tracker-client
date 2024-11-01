@@ -1240,23 +1240,22 @@ export const ACTIONTYPES_CONFIG = {
           {
             id: 'main',
             title: 'General info',
+            asColumns: ['1/3', '2/3'],
             rows: [
               [{
                 attribute: 'date_start',
                 prepopulate: true, // today
-                basis: '1/3',
               },
               {
+                attribute: 'date_comment',
+                fieldType: 'textarea',
+                hideByDefault: true,
+              }],
+              [{
                 connection: API.ACTIONS,
                 type: ACTIONTYPES.EVENT,
                 asParents: true,
                 prepopulateIfPrevious: true,
-                basis: '2/3',
-              }],
-              [{
-                attribute: 'date_comment',
-                fieldType: 'textarea',
-                hideByDefault: true,
               }],
             ],
           },
@@ -1316,7 +1315,8 @@ export const ACTIONTYPES_CONFIG = {
       }, // step
       {
         id: 'stakeholders',
-        title: 'Issuing Stakeholder(s)',
+        title: 'Issuing Stakeholders',
+        titleSmall: 'Stakeholders',
         sections: [
           {
             id: 'stakeholders',
@@ -1348,6 +1348,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'outreach',
         title: 'Related Outreach',
+        titleSmall: 'Outreach',
         sections: [
           {
             id: 'outreach',
@@ -1371,6 +1372,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'other',
         title: 'Related Resources',
+        titleSmall: 'Resources',
         sections: [
           {
             id: 'resources',
@@ -1531,6 +1533,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'stakeholders',
         title: 'Participating stakeholders',
+        titleSmall: 'Stakeholders',
         sections: [
           {
             id: 'stakeholders',
@@ -1562,6 +1565,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'outreach',
         title: 'Related Outreach',
+        titleSmall: 'Outreach',
         sections: [
           {
             id: 'outreach',
@@ -1597,6 +1601,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'other',
         title: 'Related Resources',
+        titleSmall: 'Resources',
         sections: [
           {
             id: 'resources',
@@ -1674,13 +1679,13 @@ export const ACTIONTYPES_CONFIG = {
           {
             id: 'date',
             title: '(Target) date',
+            asColumns: ['1/3'],
             rows: [
               [{
                 attribute: 'date_start',
                 prepopulate: true, // today
-                basis: '1/3',
-              }],
-              [{
+              },
+              {
                 attribute: 'date_comment',
                 fieldType: 'textarea',
                 hideByDefault: true,
@@ -1748,6 +1753,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'stakeholders',
         title: 'Targeted stakeholders',
+        titleSmall: 'Stakeholders',
         sections: [
           {
             id: 'stakeholders',
@@ -1784,6 +1790,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'outreach',
         title: 'Related Outreach',
+        titleSmall: 'Outreach',
         sections: [
           {
             id: 'outreach',
@@ -1819,6 +1826,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'other',
         title: 'Related Resources',
+        titleSmall: 'Resources',
         sections: [
           {
             id: 'resources',
@@ -1894,13 +1902,13 @@ export const ACTIONTYPES_CONFIG = {
           {
             id: 'date',
             title: '(Target) date',
+            asColumns: ['1/3'],
             rows: [
               [{
                 attribute: 'date_start',
                 prepopulate: true, // today
-                basis: '1/3',
-              }],
-              [{
+              },
+              {
                 attribute: 'date_comment',
                 fieldType: 'textarea',
                 hideByDefault: true,
@@ -1967,7 +1975,8 @@ export const ACTIONTYPES_CONFIG = {
       }, // step
       {
         id: 'stakeholders',
-        title: 'Targeted stakeholders',
+        title: 'Targeted Stakeholders',
+        titleSmall: 'Stakeholders',
         sections: [
           {
             id: 'stakeholders',
@@ -2004,6 +2013,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'outreach',
         title: 'Related Outreach',
+        titleSmall: 'Outreach',
         sections: [
           {
             id: 'outreach',
@@ -2039,6 +2049,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'other',
         title: 'Related Resources',
+        titleSmall: 'Resources',
         sections: [
           {
             id: 'resources',
@@ -2113,13 +2124,13 @@ export const ACTIONTYPES_CONFIG = {
           {
             id: 'date',
             title: 'Target date',
+            asColumns: ['1/3'],
             rows: [
               [{
                 attribute: 'date_start',
                 prepopulate: true, // today
-                basis: '1/3',
-              }],
-              [{
+              },
+              {
                 attribute: 'date_comment',
                 fieldType: 'textarea',
                 hideByDefault: true,
@@ -2187,7 +2198,8 @@ export const ACTIONTYPES_CONFIG = {
       }, // step
       {
         id: 'stakeholders',
-        title: 'Targeted stakeholders',
+        title: 'Targeted Stakeholders',
+        titleSmall: 'Stakeholders',
         sections: [
           {
             id: 'stakeholders',
@@ -2224,6 +2236,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'outreach',
         title: 'Related Outreach',
+        titleSmall: 'Outreach',
         sections: [
           {
             id: 'outreach',
@@ -2259,6 +2272,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'other',
         title: 'Related Resources',
+        titleSmall: 'Resources',
         sections: [
           {
             id: 'resources',
@@ -2323,6 +2337,7 @@ export const ACTIONTYPES_CONFIG = {
           {
             id: 'main',
             title: 'General info',
+            asColumns: ['1/3', '2/3'],
             rows: [
               [{
                 attribute: 'date_start',
@@ -2330,16 +2345,17 @@ export const ACTIONTYPES_CONFIG = {
                 basis: '1/3',
               },
               {
+                attribute: 'date_comment',
+                fieldType: 'textarea',
+                hideByDefault: true,
+              },
+              ],
+              [{
                 connection: API.ACTIONS,
                 type: ACTIONTYPES.EVENT,
                 asParents: true,
                 prepopulateIfPrevious: true,
                 basis: '2/3',
-              }],
-              [{
-                attribute: 'date_comment',
-                fieldType: 'textarea',
-                hideByDefault: true,
               }],
             ],
           },
@@ -2431,6 +2447,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'outreach',
         title: 'Related Outreach',
+        titleSmall: 'Outreach',
         sections: [
           {
             id: 'outreach',
@@ -2460,6 +2477,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'other',
         title: 'Statements & resources',
+        titleSmall: 'Statements & more',
         sections: [
           {
             id: 'statements',

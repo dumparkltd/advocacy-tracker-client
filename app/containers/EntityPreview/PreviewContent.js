@@ -271,25 +271,22 @@ export function PreviewContent({
       }),
     ];
   }
-  console.log('fields', fields);
-  return (
-    <>
-      {fields && fields.length > 0 && (
-        <Box margin={{ vertical: 'medium' }} flex={{ shrink: 0 }}>
-          {fields.map(
-            (field, i) => field
-              ? (
-                <FieldFactory
-                  key={i}
-                  field={{ ...field }}
-                />
-              )
-              : null
-          )}
-        </Box>
-      )}
-    </>
-  );
+  return fields && fields.length > 0
+    ? (
+      <Box margin={{ vertical: 'medium' }} flex={{ shrink: 0 }}>
+        {fields.map(
+          (field, i) => field
+            ? (
+              <FieldFactory
+                key={i}
+                field={{ ...field }}
+              />
+            )
+            : null
+        )}
+      </Box>
+    )
+    : null;
 }
 
 PreviewContent.propTypes = {
