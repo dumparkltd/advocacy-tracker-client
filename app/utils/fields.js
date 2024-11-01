@@ -6,6 +6,7 @@ import {
   checkActorAttribute,
   checkIndicatorAttribute,
   getIndicatorColumnsForStatement,
+  getActortypeColumns,
 } from 'utils/entities';
 import isNumber from 'utils/is-number';
 import qe from 'utils/quasi-equals';
@@ -661,7 +662,11 @@ export const getActionPreviewFooter = (action, intl) => {
 };
 export const getActionPreviewFields = ({
   action,
+  actorsByType,
   indicators,
+  categories,
+  actorConnections,
+  taxonomies,
   onEntityClick,
   intl,
   isAdmin,
@@ -712,6 +717,35 @@ export const getActionPreviewFields = ({
             ...memo,
             field,
           ];
+        }
+        if (action
+          && categories
+          && key === 'categories') {
+          return [...memo, ...getTaxonomyFields(categories)];
+        }
+        if (action
+          && actorsByType
+          && key === 'actors') {
+          return actorsByType.reduce(
+            (memo2, actors, typeid) => {
+              if (actors) {
+                return [...memo2,
+                  getActorConnectionField({
+                    actors,
+                    taxonomies,
+                    onEntityClick,
+                    connections: actorConnections,
+                    typeid,
+                    columns: getActortypeColumns({
+                      typeId: typeid,
+                      showCode: checkActorAttribute(typeid, 'code', isAdmin),
+                    }),
+                  }),
+                ];
+              }
+              return memo2;
+            }, memo
+          );
         }
         return memo;
       },

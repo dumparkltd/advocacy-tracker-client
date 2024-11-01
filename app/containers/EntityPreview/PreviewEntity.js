@@ -36,6 +36,8 @@ import {
 
 import {
   selectReady,
+  selectTaxonomiesWithCategories,
+  selectActorConnections,
 } from 'containers/App/selectors';
 
 import PreviewHeader from './PreviewHeader';
@@ -59,6 +61,8 @@ export function PreviewEntity({
   dataReady,
   onLoadEntitiesIfNeeded,
   content,
+  taxonomies,
+  actorConnections,
   onSetPreviewItemId,
   previewEntity,
   onUpdatePath,
@@ -73,14 +77,18 @@ export function PreviewEntity({
   let mainContent;
   let footerContent;
   if (previewEntity && qe(content.get('path'), ROUTES.ACTION)) {
-    headerContent = previewEntity && getActionPreviewHeader(previewEntity, intl);
+    headerContent = getActionPreviewHeader(previewEntity, intl);
     mainContent = dataReady && getActionPreviewFields({
       action: previewEntity,
-      indicators: previewEntity && previewEntity.get('indicators'),
+      indicators: previewEntity.get('indicators'),
+      categories: previewEntity.get('categories'),
+      actorsByType: previewEntity.get('actorsByType'),
+      taxonomies,
+      actorConnections,
       onEntityClick,
       intl,
     });
-    footerContent = previewEntity && getActionPreviewFooter(previewEntity, intl);
+    footerContent = getActionPreviewFooter(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.ACTOR)) {
     headerContent = getActorPreviewHeader(previewEntity, intl);
@@ -157,6 +165,8 @@ PreviewEntity.propTypes = {
   onLoadEntitiesIfNeeded: PropTypes.func,
   content: PropTypes.object, // immutable Map
   previewEntity: PropTypes.object, // immutable Map
+  taxonomies: PropTypes.object, // immutable Map
+  actorConnections: PropTypes.object, // immutable Map
   onSetPreviewItemId: PropTypes.func,
   onUpdatePath: PropTypes.func,
   onEntityClick: PropTypes.func,
@@ -166,6 +176,8 @@ PreviewEntity.propTypes = {
 
 const mapStateToProps = (state, { content }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
+  taxonomies: selectTaxonomiesWithCategories(state),
+  actorConnections: selectActorConnections(state),
   previewEntity: selectPreviewEntity(
     state,
     {

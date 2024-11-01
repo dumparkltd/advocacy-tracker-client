@@ -12,9 +12,12 @@ import {
   selectActionIndicatorsGroupedByAction,
   selectActionIndicatorsGroupedByIndicator,
   selectActionIndicatorsGroupedByActionAttributes,
+  selectActorActionsGroupedByActionAttributes,
   selectActorActionsGroupedByActor,
   selectMembershipsGroupedByParent,
   selectMembershipsGroupedByMember,
+  selectUserActorsGroupedByActor,
+  selectActorActionsGroupedByAction,
   selectActors,
   selectActorCategoriesGroupedByActor,
   selectCategories,
@@ -155,6 +158,48 @@ export const selectActorAssociationsByType = createSelector(
   }
 );
 
+const selectActionViewTaxonomyOptions = createSelector(
+  (state, { id, path }) => selectEntity(state, { id, path }),
+  selectTaxonomiesSorted,
+  (state) => selectEntities(state, API.ACTIONTYPE_TAXONOMIES),
+  selectCategories,
+  (state) => selectEntities(state, API.ACTION_CATEGORIES),
+  (
+    entity,
+    taxonomies,
+    typeTaxonomies,
+    categories,
+    associations,
+  ) => {
+    if (
+      entity
+      && taxonomies
+      && typeTaxonomies
+      && categories
+      && associations
+    ) {
+      const id = entity.get('id');
+      const taxonomiesForType = taxonomies.filter((tax) => typeTaxonomies.some(
+        (type) => qe(
+          type.getIn(['attributes', 'taxonomy_id']),
+          tax.get('id')
+        ) && qe(
+          entity.getIn(['attributes', 'measuretype_id']),
+          type.getIn(['attributes', 'measuretype_id'])
+        )
+      ));
+      return prepareTaxonomiesIsAssociated(
+        taxonomiesForType,
+        categories,
+        associations,
+        'tags_actions',
+        'measure_id',
+        id,
+      );
+    }
+    return null;
+  }
+);
 const selectActorViewTaxonomyOptions = createSelector(
   (state, { id, path }) => selectEntity(state, { id, path }),
   selectTaxonomiesSorted,
@@ -197,21 +242,96 @@ const selectActorViewTaxonomyOptions = createSelector(
     return null;
   }
 );
+const selectActorAssociations = createSelector(
+  (state, { id }) => id,
+  selectActorActionsGroupedByAction,
+  (actionId, associationsByAction) => associationsByAction.get(
+    parseInt(actionId, 10)
+  )
+);
+const selectActorsAssociated = createSelector(
+  selectActors,
+  selectActorAssociations,
+  (actors, associations) => actors && associations && associations.reduce(
+    (memo, id) => {
+      const entity = actors.get(id.toString());
+      return entity
+        ? memo.set(id, entity)
+        : memo;
+    },
+    Map(),
+  )
+);
+// get associated actors with associoted actions and categories
+// - group by actortype
+export const selectActorsByType = createSelector(
+  selectActorsAssociated,
+  selectActorConnections,
+  selectActorActionsGroupedByActionAttributes,
+  selectActorActionsGroupedByActor,
+  selectMembershipsGroupedByMember,
+  selectMembershipsGroupedByParent,
+  selectActorCategoriesGroupedByActor,
+  selectUserActorsGroupedByActor,
+  selectCategories,
+  (
+    actors,
+    actorConnections,
+    actorActionsByActionFull,
+    actorActionsByActor,
+    memberships,
+    associations,
+    actorCategories,
+    userActorsByActor,
+    categories,
+  ) => {
+    if (!actors) return Map();
+    const actorsWithConnections = actors && actors
+      .filter((actor) => !!actor)
+      .map((actor) => setActorConnections({
+        actor,
+        actorConnections,
+        actorActions: actorActionsByActor,
+        categories,
+        actorCategories,
+        memberships,
+        associations,
+        users: userActorsByActor,
+      }));
+    return actorsWithConnections && actorsWithConnections
+      .groupBy((r) => r.getIn(['attributes', 'actortype_id']))
+      .sortBy(
+        (val, key) => key,
+        (a, b) => {
+          const configA = ACTORTYPES_CONFIG[a];
+          const configB = ACTORTYPES_CONFIG[b];
+          return configA.order < configB.order ? -1 : 1;
+        }
+      );
+  }
+);
 export const selectPreviewEntity = createSelector(
   (state, { id, path }) => selectEntity(state, { id, path }),
   selectIndicatorsAssociated,
   selectIndicatorConnections,
   selectActionIndicatorsGroupedByActionAttributes,
   selectActionIndicatorsGroupedByIndicator,
+  selectActionViewTaxonomyOptions,
+  selectActorsByType,
+
   selectActorMembersByType,
   selectActorAssociationsByType,
   selectActorViewTaxonomyOptions,
+
   (
     previewEntity,
     indicators,
     indicatorConnections,
     actionIndicatorsByActionFull,
     actionIndicators,
+    actionTaxonomiesWithCategories,
+    actionActorsByType,
+
     actorMembersByType,
     actorAssociationsByType,
     actorTaxonomiesWithCategories,
@@ -248,9 +368,10 @@ export const selectPreviewEntity = createSelector(
           );
         }
       }
-      return indicatorsWithConnections
-        ? previewEntity.set('indicators', indicatorsWithConnections.sortBy((val, key) => key))
-        : previewEntity;
+      return previewEntity
+        .set('indicators', indicatorsWithConnections ? indicatorsWithConnections.sortBy((val, key) => key) : Map())
+        .set('categories', actionTaxonomiesWithCategories)
+        .set('actorsByType', actionActorsByType);
     }
     if (previewEntity.get('type') === API.ACTORS) {
       return previewEntity
