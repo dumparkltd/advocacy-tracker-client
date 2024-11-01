@@ -3278,6 +3278,58 @@ export const ACTIONTYPES_CONFIG = {
   },
 };
 
+
+export const INDICATOR_CONFIG = {
+  form: [
+    {
+      id: 'footer',
+      fields: [
+        { attribute: 'is_archive', needsAdmin: true },
+        { attribute: 'private', needsAdminOrOwn: true },
+        { attribute: 'draft', needsAdminOrOwn: true },
+      ],
+    },
+    {
+      id: 'main',
+      title: 'All content',
+      sections: [
+        {
+          id: 'content',
+          title: 'Main content',
+          rows: [
+            [
+              {
+                attribute: 'title',
+                required: true,
+                basis: '2/3',
+              },
+              {
+                attribute: 'code',
+                needsAdmin: true,
+                basis: '1/3',
+              },
+            ],
+            [{
+              attribute: 'description',
+            }],
+          ], // rows
+        }, // section,
+        {
+          id: 'activities',
+          title: 'Statements (with Level of Support)',
+          rows: [
+            [{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.EXPRESS,
+              prepopulateIfPrevious: true,
+            }],
+          ],
+        }, // section,
+      ], // sections
+    }, // step
+  ],
+};
+
 export const KEEP_FILTERS = ['view', 'ms', 'subj', 'msubj', 'tm', 'am'];
 
 // Language and date settings ********************

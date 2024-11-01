@@ -57,9 +57,10 @@ import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
 
 import appMessages from 'containers/App/messages';
-import FormWrapper from './FormWrapper';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import {
+  selectDomain,
   selectDomainPage,
   selectViewEntity,
   selectTopActionsByActiontype,
@@ -152,6 +153,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     const {
       viewEntity,
       dataReady,
+      viewDomain,
       viewDomainPage,
       taxonomies,
       connectedTaxonomies,
@@ -215,7 +217,8 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
           }
           {viewEntity && !deleteSending
             && (
-              <FormWrapper
+              <EntityFormWrapper
+                viewDomain={viewDomain}
                 typeLabel={typeLabel}
                 model={formDataPath}
                 saving={saveSending}
@@ -272,8 +275,9 @@ ActionEdit.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func.isRequired,
-  viewDomainPage: PropTypes.object,
-  viewEntity: PropTypes.object,
+  viewDomain: PropTypes.object, // Map
+  viewDomainPage: PropTypes.object, // Map
+  viewEntity: PropTypes.object, // Map
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
@@ -299,6 +303,7 @@ ActionEdit.contextTypes = {
 };
 
 const mapStateToProps = (state, { params }) => ({
+  viewDomain: selectDomain(state),
   viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
   isUserMember: selectIsUserMember(state),

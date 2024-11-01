@@ -297,7 +297,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                 onSubmitFailed={handleSubmitFail}
                 validators={validators}
               >
-                {stepsWithStatus && stepsWithStatus.length > 1 && (
+                {stepsWithStatus && (
                   <FormSteps>
                     {stepsWithStatus.map((step, idx) => {
                       const {
@@ -315,12 +315,16 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                           title = step.titleSmall;
                         }
                       }
-                      title = `${idx + 1}.${title ? ' ' : ''}${title}`;
+                      if (byStep.length > 1) {
+                        title = `${idx + 1}.${title ? ' ' : ''}${title}`;
+                      }
                       return (
                         <Box
                           key={step.id}
-                          basis={isMinSize(size, 'medium') ? `1/${byStep.length}` : 'auto'}
-                          flex={!isMinSize(size, 'medium') && isActive ? { grow: 1 } : false}
+                          basis={(isMinSize(size, 'medium') && byStep.length > 1)
+                            ? `1/${byStep.length}`
+                            : 'auto'}
+                          flex={((!isMinSize(size, 'medium') && isActive) || byStep.length === 1) ? { grow: 1 } : false}
                         >
                           <ButtonStep
                             highlight={highlighted}

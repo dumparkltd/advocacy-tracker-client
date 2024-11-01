@@ -50,7 +50,7 @@ import {
 
 import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
-import FormWrapper from './FormWrapper';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import {
   selectDomainPage,
@@ -60,6 +60,7 @@ import {
   selectMembersByActortype,
   selectAssociationsByActortype,
   selectUserOptions,
+  selectDomain,
 } from './selectors';
 
 import messages from './messages';
@@ -135,6 +136,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
     const {
       viewEntity,
       dataReady,
+      viewDomain,
       viewDomainPage,
       taxonomies,
       connectedTaxonomies,
@@ -189,7 +191,8 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
           }
           {viewEntity && !deleteSending
             && (
-              <FormWrapper
+              <EntityFormWrapper
+                viewDomain={viewDomain}
                 typeLabel={typeLabel}
                 model={formDataPath}
                 saving={saveSending}
@@ -241,6 +244,7 @@ ActorEdit.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func.isRequired,
+  viewDomain: PropTypes.object,
   viewDomainPage: PropTypes.object,
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
@@ -264,6 +268,7 @@ ActorEdit.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 const mapStateToProps = (state, props) => ({
+  viewDomain: selectDomain(state),
   viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
   isUserMember: selectIsUserMember(state),

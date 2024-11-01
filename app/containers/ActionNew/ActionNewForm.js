@@ -57,7 +57,7 @@ import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
 
 import appMessages from 'containers/App/messages';
-import FormWrapper from './FormWrapper';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import {
   selectTopActionsByActiontype,
@@ -207,7 +207,8 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           subTitle={subTitle}
           type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
         />
-        <FormWrapper
+        <EntityFormWrapper
+          isNewEntityView
           typeLabel={type}
           model={formDataPath}
           inModal={inModal}

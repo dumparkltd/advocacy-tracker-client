@@ -26,6 +26,8 @@ import {
   API,
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
+  INDICATOR_CONFIG,
+  INDICATOR_FIELDS,
   ACTORTYPES,
   ACTION_FIELDS,
   ACTOR_FIELDS,
@@ -1052,8 +1054,7 @@ export const getFormField = ({
   return field;
 };
 
-
-const getActiontypeFormField = (
+const getEntityFormField = (
   field,
   {
     isAdmin,
@@ -1063,12 +1064,16 @@ const getActiontypeFormField = (
     connectedTaxonomies,
     userOptions,
     indicatorOptions,
-    actorsByActortype,
+    actionsByActiontype,
     topActionsByActiontype,
     subActionsByActiontype,
+    actorsByActortype,
+    associationsByActortype,
+    membersByActortype,
     resourcesByResourcetype,
     entityIndicatorConnections,
     onCreateOption,
+    connectionAttributesForType,
     intl,
   },
   fieldConfig,
@@ -1076,6 +1081,7 @@ const getActiontypeFormField = (
   const { formatMessage } = intl;
   const {
     attribute,
+    label,
     connection,
     taxonomy,
     required,
@@ -1098,55 +1104,61 @@ const getActiontypeFormField = (
   if (!passAdmin || !passAdminOrMine) {
     return null;
   }
+  if (attribute && !fieldConfig) {
+    console.log('attribute, fieldConfig', attribute, fieldConfig);
+  }
   if (attribute && fieldConfig) {
     const attributeType = fieldConfig.type;
     const cleanFieldType = fieldType || attributeType;
+    const fieldArgs = {
+      formatMessage, attribute, required, hideByDefault, label,
+    };
     if (attribute === 'title') {
-      result = getTitleFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
-    } else if (attribute === 'code') {
-      result = getCodeFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
+      result = getTitleFormField(fieldArgs);
+    } else if (attribute === 'code' || attribute === 'prefix') {
+      result = getCodeFormField(fieldArgs);
+    } else if (attribute === 'email') {
+      result = getEmailFormField(fieldArgs);
     } else if (cleanFieldType === 'markdown') {
-      result = getMarkdownFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
+      result = getMarkdownFormField(fieldArgs);
     } else if (cleanFieldType === 'date') {
-      result = getDateFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
+      result = getDateFormField(fieldArgs);
     } else if (cleanFieldType === 'text') {
-      result = getTextFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
+      result = getTextFormField(fieldArgs);
     } else if (cleanFieldType === 'textarea') {
-      result = getTextareaFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
+      result = getTextareaFormField(fieldArgs);
     } else if (cleanFieldType === 'url') {
-      result = getLinkFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
+      result = getLinkFormField(fieldArgs);
     } else if (cleanFieldType === 'bool') {
-      result = getStatusFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
+      result = getStatusFormField(fieldArgs);
     }
   } else if (connection) {
-    if (type && connection === API.ACTORS && actorsByActortype) {
-      result = getActorsFormControl({
-        typeId: type,
-        entities: actorsByActortype.get(type),
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        isAdmin,
-        intl,
-      });
+    if (type && connection === API.ACTORS) {
+      let entities = actorsByActortype
+      && actorsByActortype.get(type);
+      let path = 'associatedActorsByActortype';
+      if (asParents && associationsByActortype) {
+        entities = associationsByActortype.get(type);
+        path = 'associatedAssociationsByActortype';
+      } else if (asChildren && membersByActortype) {
+        entities = membersByActortype.get(type);
+        path = 'associatedMembersByActortype';
+      }
+      if (entities) {
+        result = getActorsFormControl({
+          typeId: type,
+          entities,
+          taxonomies: connectedTaxonomies,
+          onCreateOption,
+          isAdmin,
+          intl,
+          path,
+        });
+      }
     } else if (type && connection === API.ACTIONS) {
-      let entities;
-      let path;
+      let entities = actionsByActiontype
+        && actionsByActiontype.get(type);
+      let path = 'associatedActionsByActiontype';
       if (asParents && topActionsByActiontype) {
         entities = topActionsByActiontype.get(type);
         path = 'associatedTopActionsByActiontype';
@@ -1163,10 +1175,11 @@ const getActiontypeFormField = (
           isAdmin,
           intl,
           path,
+          connectionAttributesForType,
         });
       }
     }
-    if (connection === API.INDICATORS && indicatorOptions) {
+    if (typeId && connection === API.INDICATORS && indicatorOptions) {
       result = renderIndicatorControl({
         entities: indicatorOptions,
         intl,
@@ -1234,7 +1247,7 @@ export const getActiontypeFormFields = (args) => {
                   const fieldConfig = field.attribute
                     ? ACTION_FIELDS.ATTRIBUTES[field.attribute]
                     : null;
-                  return getActiontypeFormField(field, args, fieldConfig);
+                  return getEntityFormField(field, args, fieldConfig);
                 },
               ),
             })
@@ -1246,156 +1259,12 @@ export const getActiontypeFormFields = (args) => {
           const fieldConfig = field.attribute
             ? ACTION_FIELDS.ATTRIBUTES[field.attribute]
             : null;
-          return getActiontypeFormField(field, args, fieldConfig);
+          return getEntityFormField(field, args, fieldConfig);
         },
       ),
     })
   );
   return steps;
-};
-
-
-const getActortypeFormField = (
-  field,
-  {
-    isMine,
-    isAdmin,
-    // typeId, // the action type of the principal entity
-    taxonomies,
-    connectedTaxonomies,
-    userOptions,
-    actionsByActiontype,
-    associationsByActortype,
-    membersByActortype,
-    onCreateOption,
-    intl,
-  },
-  fieldConfig,
-) => {
-  const { formatMessage } = intl;
-  const {
-    attribute,
-    label,
-    connection,
-    taxonomy,
-    required,
-    prepopulate,
-    hideByDefault,
-    needsAdmin,
-    needsAdminOrOwn,
-    type, //  the type of the entities associated in field
-    asParents,
-    asChildren,
-    fieldType,
-    basis,
-  } = field;
-  let result;
-  const passAdmin = needsAdmin ? isAdmin : true;
-  const passAdminOrMine = needsAdminOrOwn ? (isAdmin || isMine) : true;
-  // console.log('isAdmin, needsAdmin', isAdmin, needsAdmin)
-  // console.log('isMine, needsAdminOrOwn', isMine, needsAdmin)
-  // console.log('passAdmin || !passAdminOrMine', passAdmin, passAdminOrMine)
-  if (!passAdmin || !passAdminOrMine) {
-    return null;
-  }
-  if (attribute && !fieldConfig) {
-    console.log('attribute, fieldConfig', attribute, fieldConfig);
-  }
-  if (attribute && fieldConfig) {
-    const attributeType = fieldConfig.type;
-    const cleanFieldType = fieldType || attributeType;
-    if (attribute === 'title') {
-      result = getTitleFormField({
-        formatMessage, attribute, required, hideByDefault, label,
-      });
-    } else if (attribute === 'code' || attribute === 'prefix') {
-      result = getCodeFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
-    } else if (attribute === 'email') {
-      result = getEmailFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
-    } else if (cleanFieldType === 'markdown') {
-      result = getMarkdownFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
-    } else if (cleanFieldType === 'date') {
-      result = getDateFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
-    } else if (cleanFieldType === 'text') {
-      result = getTextFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
-    } else if (cleanFieldType === 'textarea') {
-      result = getTextareaFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
-    } else if (cleanFieldType === 'url') {
-      result = getLinkFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
-    } else if (cleanFieldType === 'bool') {
-      result = getStatusFormField({
-        formatMessage, attribute, required, hideByDefault,
-      });
-    }
-  } else if (connection) {
-    if (type && connection === API.ACTIONS && actionsByActiontype) {
-      result = getActionsFormControl({
-        typeId: type,
-        entities: actionsByActiontype.get(type),
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        isAdmin,
-        intl,
-      });
-    } else if (type && connection === API.ACTORS) {
-      let entities;
-      let path;
-      if (asParents && associationsByActortype) {
-        entities = associationsByActortype.get(type);
-        path = 'associatedAssociationsByActortype';
-      } else if (asChildren && membersByActortype) {
-        entities = membersByActortype.get(type);
-        path = 'associatedMembersByActortype';
-      }
-      if (entities) {
-        result = getActorsFormControl({
-          typeId: type,
-          entities,
-          taxonomies: connectedTaxonomies,
-          onCreateOption,
-          isAdmin,
-          intl,
-          path,
-        });
-      }
-    } else if (connection === API.USERS && userOptions) {
-      result = renderUserMultiControl({ entities: userOptions, intl });
-    }
-  } else if (taxonomy && taxonomies) {
-    const theTaxonomy = taxonomies.get(`${taxonomy}`);
-    if (theTaxonomy) {
-      result = getSingleTaxonomyFormControl({
-        taxonomy: theTaxonomy,
-        onCreateOption,
-        intl,
-        hideByDefault,
-      });
-    }
-  }
-  if (!result) return null;
-  result = {
-    ...result,
-    required,
-    hasrequired: !!required,
-    autofill: !!prepopulate,
-    hideByDefault,
-    basis, // relative width within row
-  };
-  return result;
 };
 
 export const getActortypeFormFields = (args) => {
@@ -1415,7 +1284,7 @@ export const getActortypeFormFields = (args) => {
                   const fieldConfig = field.attribute
                     ? ACTOR_FIELDS.ATTRIBUTES[field.attribute]
                     : null;
-                  return getActortypeFormField(field, args, fieldConfig);
+                  return getEntityFormField(field, args, fieldConfig);
                 },
               ),
             })
@@ -1427,7 +1296,43 @@ export const getActortypeFormFields = (args) => {
           const fieldConfig = field.attribute
             ? ACTOR_FIELDS.ATTRIBUTES[field.attribute]
             : null;
-          return getActortypeFormField(field, args, fieldConfig);
+          return getEntityFormField(field, args, fieldConfig);
+        },
+      ),
+    })
+  );
+  return steps;
+};
+
+export const getIndicatorFormFields = (args) => {
+  const shape = INDICATOR_CONFIG.form;
+  const steps = shape && shape.map(
+    (step) => ({
+      ...step,
+      sections: step.sections && step.sections.map(
+        (section) => ({
+          ...section,
+          rows: section.rows.map(
+            (row) => ({
+              fields: row.map(
+                (field) => {
+                  const fieldConfig = field.attribute
+                    ? INDICATOR_FIELDS.ATTRIBUTES[field.attribute]
+                    : null;
+                  return getEntityFormField(field, args, fieldConfig);
+                },
+              ),
+            })
+          ),
+        })
+      ),
+      // footer fields
+      fields: step.fields && step.fields.map(
+        (field) => {
+          const fieldConfig = field.attribute
+            ? INDICATOR_FIELDS.ATTRIBUTES[field.attribute]
+            : null;
+          return getEntityFormField(field, args, fieldConfig);
         },
       ),
     })

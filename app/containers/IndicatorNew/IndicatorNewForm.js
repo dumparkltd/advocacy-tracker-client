@@ -13,20 +13,17 @@ import { fromJS } from 'immutable';
 
 import {
   getConnectionUpdatesFromFormData,
-  getTitleFormField,
-  getMarkdownFormField,
-  getStatusFormField,
-  getCodeFormField,
-  renderActionsByActiontypeControl,
+  // getTitleFormField,
+  // getMarkdownFormField,
+  // getStatusFormField,
+  // getCodeFormField,
+  // renderActionsByActiontypeControl,
+  getIndicatorFormFields,
 } from 'utils/forms';
 
 // import { qe } from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
-import {
-  checkIndicatorAttribute,
-  checkIndicatorRequired,
-} from 'utils/entities';
 // import { checkResourceAttribute, checkResourceRequired } from 'utils/entities';
 
 import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
@@ -59,7 +56,7 @@ import {
 import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
 
-import FormWrapper from './FormWrapper';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 import {
   selectActionsByActiontype,
 } from './selectors';
@@ -91,83 +88,28 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
       scrollToTop(this.scrollContainer.current);
     }
   }
-
-  getHeaderMainFields = (isAdmin) => {
-    const { intl } = this.context;
-    return ([ // fieldGroups
-      { // fieldGroup
-        fields: [
-          checkIndicatorAttribute('code', isAdmin) && getCodeFormField({
-            formatMessage: intl.formatMessage,
-            required: checkIndicatorRequired('code'),
-          }),
-          getTitleFormField({
-            formatMessage: intl.formatMessage,
-            required: true,
-          }),
-        ],
-      },
-    ]);
-  };
-
-  getHeaderAsideFields = () => {
-    const { intl } = this.context;
-    return ([
-      {
-        fields: [
-          getStatusFormField({ formatMessage: intl.formatMessage }),
-          getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
-        ],
-      },
-    ]);
-  };
-
-  getBodyMainFields = (
-    connectedTaxonomies,
-    actionsByActiontype,
-    onCreateOption,
-    isAdmin,
-  ) => {
-    const { intl } = this.context;
-    const groups = [];
-    groups.push({
-      fields: [
-        getMarkdownFormField({ formatMessage: intl.formatMessage }),
-      ],
-    });
-    if (actionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl({
-        entitiesByActiontype: actionsByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-        connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
-          ? [
-            {
-              attribute: 'supportlevel_id',
-              type: 'select',
-              options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId].map(
-                (level) => ({
-                  label: intl.formatMessage(appMessages.supportlevels[level.value]),
-                  ...level,
-                }),
-              ),
-            },
-          ]
-          : null,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.actions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
+  //   if (actionsByActiontype) {
+  //     const actionConnections = renderActionsByActiontypeControl({
+  //       entitiesByActiontype: actionsByActiontype,
+  //       taxonomies: connectedTaxonomies,
+  //       onCreateOption,
+  //       intl,
+  //       isAdmin,
+  //       connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
+  //         ? [
+  //           {
+  //             attribute: 'supportlevel_id',
+  //             type: 'select',
+  //             options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId].map(
+  //               (level) => ({
+  //                 label: intl.formatMessage(appMessages.supportlevels[level.value]),
+  //                 ...level,
+  //               }),
+  //             ),
+  //           },
+  //         ]
+  //         : null,
+  //     });
 
   render() {
     const { intl } = this.context;
@@ -190,25 +132,16 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
-    const type = intl.formatMessage(appMessages.entities.indicators.single);
+    const typeLabel = intl.formatMessage(appMessages.entities.indicators.single);
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
         <ContentHeader
-          title={intl.formatMessage(messages.pageTitle, { type })}
+          title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
           type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
-          buttons={
-            dataReady ? [{
-              type: 'cancel',
-              onClick: () => handleCancel(),
-            },
-            {
-              type: 'save',
-              disabled: saving,
-              onClick: () => handleSubmitRemote(formDataPath),
-            }] : null
-          }
         />
-        <FormWrapper
+        <EntityFormWrapper
+          isNewEntityView
+          typeLabel={typeLabel}
           model={formDataPath}
           inModal={inModal}
           viewDomain={viewDomain}
@@ -216,26 +149,36 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
             formData,
             actionsByActiontype,
           )}
+          saving={saving}
+          handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
           handleUpdate={handleUpdate}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={{ // isMember, taxonomies,
-            header: {
-              main: this.getHeaderMainFields(isAdmin),
-              aside: this.getHeaderAsideFields(),
-            },
-            body: {
-              main: this.getBodyMainFields(
-                connectedTaxonomies,
-                actionsByActiontype,
-                inModal ? null : onCreateOption,
-                isAdmin,
-              ),
-            },
-          }}
+          fieldsByStep={dataReady && getIndicatorFormFields({
+            isAdmin,
+            isMine: true,
+            connectedTaxonomies,
+            actionsByActiontype,
+            onCreateOption: inModal ? null : onCreateOption,
+            intl,
+            connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
+              ? [
+                {
+                  attribute: 'supportlevel_id',
+                  type: 'select',
+                  options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId].map(
+                    (level) => ({
+                      label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                      ...level,
+                    }),
+                  ),
+                },
+              ]
+              : null,
+          })}
         />
       </Content>
     );

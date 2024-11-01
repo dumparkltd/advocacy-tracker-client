@@ -228,6 +228,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
     const stepSeen = step && step.previouslySeen;
     const fieldAutofilledUnseen = isNewEntityView && !stepSeen && field.autofill && !hasChanges;
     // console.log('fieldRequired, hasChanges, isEmpty', fieldRequired, hasChanges, isEmpty)
+    // console.log('fieldAutofilledUnseen, hasChanges, isEmpty', fieldRequired, hasChanges, isEmpty)
     return (
       <FormFieldWrap
         direction={inline ? 'row' : 'column'}

@@ -49,7 +49,7 @@ import {
 import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
 
-import FormWrapper from './FormWrapper';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import {
   selectActionsByActiontype,
@@ -141,8 +141,9 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
           title={intl.formatMessage(messages.pageTitle, { type })}
           type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
         />
-        <FormWrapper
+        <EntityFormWrapper
           typeLabel={type}
+          isNewEntityView
           model={formDataPath}
           inModal={inModal}
           viewDomain={viewDomain}
