@@ -29,6 +29,7 @@ import {
   USER_ROLES,
   ROUTES,
   API_DATE_FORMAT,
+  ACTIONTYPES_CONFIG,
 } from 'themes/config';
 
 import {
@@ -101,11 +102,13 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
     const { typeId, sessionUser } = props;
+    const shape = ACTIONTYPES_CONFIG[parseInt(typeId, 10)]
+      && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].form;
     const dataWithType = FORM_INITIAL.setIn(['attributes', 'measuretype_id'], typeId);
     const nowFormatted = format(new Date(), API_DATE_FORMAT);
-    return sessionUser
-      && sessionUser.getIn(['attributes', 'id'])
-      ? dataWithType
+    let result = dataWithType;
+    if (sessionUser && sessionUser.getIn(['attributes', 'id'])) {
+      result = result
         .set(
           'associatedUsers',
           fromJS([{
@@ -114,11 +117,24 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             label: sessionUser.getIn(['attributes', 'name']),
             autofill: true,
           }])
-        ).setIn(
-          ['attributes', 'date_start'],
-          nowFormatted,
+        );
+    }
+    const hasAutoFillDate = shape.find(
+      (step) => step.sections && step.sections.find(
+        (section) => section.rows && section.rows.find(
+          (row) => row.length > 0 && row.find(
+            (att) => att.attribute === 'date_start' && att.prepopulate
+          )
         )
-      : dataWithType;
+      )
+    );
+    if (hasAutoFillDate) {
+      result = result.setIn(
+        ['attributes', 'date_start'],
+        nowFormatted,
+      );
+    }
+    return result;
   };
 
   render() {

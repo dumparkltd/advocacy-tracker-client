@@ -378,52 +378,57 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
               handleUpdate={handleUpdate}
               isNewEntityView={isNewEntityView}
             />
-            <Box
-              direction="row"
-              justify="between"
-              margin={{ vertical: 'medium', horizontal: 'medium' }}
-            >
-              <SkipButton
-                disabled={activeStepHasErrors || prevStepIndex === null}
-                plain
-                onClick={(evt) => {
-                  if (evt && evt.preventDefault) evt.preventDefault();
-                  if (byStep[prevStepIndex]) {
-                    this.setStepActive(byStep[prevStepIndex].id);
-                    this.addStepSeen(activeStep.id);
-                  }
+            {stepsWithStatus && stepsWithStatus.length > 1 && (
+              <Box
+                direction="row"
+                justify="between"
+                pad={{ vertical: 'medium', horizontal: 'medium' }}
+                style={{
+                  borderTop: '2px solid #B7BCBF',
                 }}
               >
-                <SkipButtonInner>
-                  <SkipIconNext reverse />
-                  <ButtonStepLabelUpper
-                    disabled={activeStepHasErrors || prevStepIndex === null}
-                  >
-                    Previous
-                  </ButtonStepLabelUpper>
-                </SkipButtonInner>
-              </SkipButton>
-              <SkipButton
-                disabled={activeStepHasErrors || nextStepIndex === null}
-                plain
-                onClick={(evt) => {
-                  if (evt && evt.preventDefault) evt.preventDefault();
-                  if (byStep[nextStepIndex]) {
-                    this.setStepActive(byStep[nextStepIndex].id);
-                    this.addStepSeen(byStep[nextStepIndex].id);
-                  }
-                }}
-              >
-                <SkipButtonInner>
-                  <ButtonStepLabelUpper
-                    disabled={activeStepHasErrors || nextStepIndex === null}
-                  >
-                    Next
-                  </ButtonStepLabelUpper>
-                  <SkipIconNext disabled={activeStepHasErrors || nextStepIndex === null} />
-                </SkipButtonInner>
-              </SkipButton>
-            </Box>
+                <SkipButton
+                  disabled={activeStepHasErrors || prevStepIndex === null}
+                  plain
+                  onClick={(evt) => {
+                    if (evt && evt.preventDefault) evt.preventDefault();
+                    if (byStep[prevStepIndex]) {
+                      this.setStepActive(byStep[prevStepIndex].id);
+                      this.addStepSeen(activeStep.id);
+                    }
+                  }}
+                >
+                  <SkipButtonInner>
+                    <SkipIconNext reverse />
+                    <ButtonStepLabelUpper
+                      disabled={activeStepHasErrors || prevStepIndex === null}
+                    >
+                      Previous
+                    </ButtonStepLabelUpper>
+                  </SkipButtonInner>
+                </SkipButton>
+                <SkipButton
+                  disabled={activeStepHasErrors || nextStepIndex === null}
+                  plain
+                  onClick={(evt) => {
+                    if (evt && evt.preventDefault) evt.preventDefault();
+                    if (byStep[nextStepIndex]) {
+                      this.setStepActive(byStep[nextStepIndex].id);
+                      this.addStepSeen(byStep[nextStepIndex].id);
+                    }
+                  }}
+                >
+                  <SkipButtonInner>
+                    <ButtonStepLabelUpper
+                      disabled={activeStepHasErrors || nextStepIndex === null}
+                    >
+                      Next
+                    </ButtonStepLabelUpper>
+                    <SkipIconNext disabled={activeStepHasErrors || nextStepIndex === null} />
+                  </SkipButtonInner>
+                </SkipButton>
+              </Box>
+            )}
             <FormFooter
               fields={footerFields}
               formData={formData}

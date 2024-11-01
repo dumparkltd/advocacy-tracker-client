@@ -1091,9 +1091,9 @@ const getActiontypeFormField = (
   let result;
   const passAdmin = needsAdmin ? isAdmin : true;
   const passAdminOrMine = needsAdminOrOwn ? (isAdmin || isMine) : true;
-  console.log('isAdmin, needsAdmin', isAdmin, needsAdmin)
-  console.log('isMine, needsAdminOrOwn', isMine, needsAdmin)
-  console.log('passAdmin || !passAdminOrMine', passAdmin, passAdminOrMine)
+  // console.log('isAdmin, needsAdmin', isAdmin, needsAdmin)
+  // console.log('isMine, needsAdminOrOwn', isMine, needsAdmin)
+  // console.log('passAdmin || !passAdminOrMine', passAdmin, passAdminOrMine)
   if (!passAdmin || !passAdminOrMine) {
     return null;
   }
@@ -1135,7 +1135,7 @@ const getActiontypeFormField = (
       });
     }
   } else if (connection) {
-    if (connection === API.ACTORS && actorsByActortype) {
+    if (type && connection === API.ACTORS && actorsByActortype) {
       result = getActorsFormControl({
         typeId: type,
         entities: actorsByActortype.get(type),
@@ -1144,7 +1144,7 @@ const getActiontypeFormField = (
         isAdmin,
         intl,
       });
-    } else if (connection === API.ACTIONS) {
+    } else if (type && connection === API.ACTIONS) {
       let entities;
       let path;
       if (asParents && topActionsByActiontype) {
@@ -1183,7 +1183,7 @@ const getActiontypeFormField = (
           ),
         }],
       });
-    } else if (connection === API.RESOURCES && resourcesByResourcetype) {
+    } else if (type && connection === API.RESOURCES && resourcesByResourcetype) {
       result = getResourcesFormControl({
         typeId: type,
         entities: resourcesByResourcetype.get(type),
