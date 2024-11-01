@@ -28,7 +28,7 @@ import {
   ACTORTYPES_CONFIG,
   ACTORTYPES,
   ACTION_FIELDS,
-  // ACTOR_FIELDS,
+  ACTOR_FIELDS,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
@@ -919,7 +919,7 @@ export const getUploadFormField = ({ formatMessage, hideByDefault }) => getFormF
 });
 
 export const getEmailFormField = ({
-  formatMessage, required = true, model = '.attributes.email', hideByDefault,
+  formatMessage, required, model = '.attributes.email', hideByDefault,
 }) => {
   const field = getFormField({
     formatMessage,
@@ -1058,7 +1058,7 @@ const getActiontypeFormField = (
   {
     isAdmin,
     isMine,
-    typeId,
+    typeId, // the action type of the principal entity
     taxonomies,
     connectedTaxonomies,
     userOptions,
@@ -1071,6 +1071,7 @@ const getActiontypeFormField = (
     onCreateOption,
     intl,
   },
+  fieldConfig,
 ) => {
   const { formatMessage } = intl;
   const {
@@ -1082,7 +1083,7 @@ const getActiontypeFormField = (
     hideByDefault,
     needsAdmin,
     needsAdminOrOwn,
-    type,
+    type, //  the type of the entities associated in field
     asParents,
     asChildren,
     fieldType,
@@ -1098,7 +1099,6 @@ const getActiontypeFormField = (
     return null;
   }
   if (attribute) {
-    const fieldConfig = ACTION_FIELDS.ATTRIBUTES[attribute];
     const attributeType = fieldConfig.type;
     const cleanFieldType = fieldType || attributeType;
     if (attribute === 'title') {
@@ -1230,14 +1230,203 @@ export const getActiontypeFormFields = (args) => {
           rows: section.rows.map(
             (row) => ({
               fields: row.map(
-                (field) => getActiontypeFormField(field, args),
+                (field) => {
+                  const fieldConfig = field.attribute
+                    ? ACTION_FIELDS.ATTRIBUTES[field.attribute]
+                    : null;
+                  return getActiontypeFormField(field, args, fieldConfig);
+                },
               ),
             })
           ),
         })
       ),
       fields: step.fields && step.fields.map(
-        (field) => getActiontypeFormField(field, args),
+        (field) => {
+          const fieldConfig = field.attribute
+            ? ACTION_FIELDS.ATTRIBUTES[field.attribute]
+            : null;
+          return getActiontypeFormField(field, args, fieldConfig);
+        },
+      ),
+    })
+  );
+  return steps;
+};
+
+
+const getActortypeFormField = (
+  field,
+  {
+    isMine,
+    isAdmin,
+    // typeId, // the action type of the principal entity
+    taxonomies,
+    connectedTaxonomies,
+    userOptions,
+    actionsByActiontype,
+    associationsByActortype,
+    membersByActortype,
+    onCreateOption,
+    intl,
+  },
+  fieldConfig,
+) => {
+  const { formatMessage } = intl;
+  const {
+    attribute,
+    label,
+    connection,
+    taxonomy,
+    required,
+    prepopulate,
+    hideByDefault,
+    needsAdmin,
+    needsAdminOrOwn,
+    type, //  the type of the entities associated in field
+    asParents,
+    asChildren,
+    fieldType,
+    basis,
+  } = field;
+  let result;
+  const passAdmin = needsAdmin ? isAdmin : true;
+  const passAdminOrMine = needsAdminOrOwn ? (isAdmin || isMine) : true;
+  // console.log('isAdmin, needsAdmin', isAdmin, needsAdmin)
+  // console.log('isMine, needsAdminOrOwn', isMine, needsAdmin)
+  // console.log('passAdmin || !passAdminOrMine', passAdmin, passAdminOrMine)
+  if (!passAdmin || !passAdminOrMine) {
+    return null;
+  }
+  if (attribute) {
+    const attributeType = fieldConfig.type;
+    const cleanFieldType = fieldType || attributeType;
+    if (attribute === 'title') {
+      result = getTitleFormField({
+        formatMessage, attribute, required, hideByDefault, label,
+      });
+    } else if (attribute === 'code' || attribute === 'prefix') {
+      result = getCodeFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (attribute === 'email') {
+      console.log(field)
+      result = getEmailFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (cleanFieldType === 'markdown') {
+      result = getMarkdownFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (cleanFieldType === 'date') {
+      result = getDateFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (cleanFieldType === 'text') {
+      result = getTextFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (cleanFieldType === 'textarea') {
+      result = getTextareaFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (cleanFieldType === 'url') {
+      result = getLinkFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    } else if (cleanFieldType === 'bool') {
+      result = getStatusFormField({
+        formatMessage, attribute, required, hideByDefault,
+      });
+    }
+  } else if (connection) {
+    if (type && connection === API.ACTIONS && actionsByActiontype) {
+      result = getActionsFormControl({
+        typeId: type,
+        entities: actionsByActiontype.get(type),
+        taxonomies: connectedTaxonomies,
+        onCreateOption,
+        isAdmin,
+        intl,
+      });
+    } else if (type && connection === API.ACTORS) {
+      let entities;
+      let path;
+      if (asParents && associationsByActortype) {
+        entities = associationsByActortype.get(type);
+        path = 'associatedAssociationsByActortype';
+      } else if (asChildren && membersByActortype) {
+        entities = membersByActortype.get(type);
+        path = 'associatedMembersByActortype';
+      }
+      if (entities) {
+        result = getActorsFormControl({
+          typeId: type,
+          entities,
+          taxonomies: connectedTaxonomies,
+          onCreateOption,
+          isAdmin,
+          intl,
+          path,
+        });
+      }
+    } else if (connection === API.USERS && userOptions) {
+      result = renderUserMultiControl({ entities: userOptions, intl });
+    }
+  } else if (taxonomy && taxonomies) {
+    const theTaxonomy = taxonomies.get(`${taxonomy}`);
+    if (theTaxonomy) {
+      result = getSingleTaxonomyFormControl({
+        taxonomy: theTaxonomy,
+        onCreateOption,
+        intl,
+        hideByDefault,
+      });
+    }
+  }
+  if (!result) return null;
+  result = {
+    ...result,
+    required,
+    hasrequired: !!required,
+    autofill: !!prepopulate,
+    hideByDefault,
+    basis, // relative width within row
+  };
+  return result;
+};
+
+export const getActortypeFormFields = (args) => {
+  const { typeId } = args;
+  const shape = ACTORTYPES_CONFIG[parseInt(typeId, 10)]
+    && ACTORTYPES_CONFIG[parseInt(typeId, 10)].form;
+  const steps = shape && shape.map(
+    (step) => ({
+      ...step,
+      sections: step.sections && step.sections.map(
+        (section) => ({
+          ...section,
+          rows: section.rows.map(
+            (row) => ({
+              fields: row.map(
+                (field) => {
+                  const fieldConfig = field.attribute
+                    ? ACTOR_FIELDS.ATTRIBUTES[field.attribute]
+                    : null;
+                  return getActortypeFormField(field, args, fieldConfig);
+                },
+              ),
+            })
+          ),
+        })
+      ),
+      fields: step.fields && step.fields.map(
+        (field) => {
+          const fieldConfig = field.attribute
+            ? ACTOR_FIELDS.ATTRIBUTES[field.attribute]
+            : null;
+          return getActortypeFormField(field, args, fieldConfig);
+        },
       ),
     })
   );

@@ -386,7 +386,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.REG}`].single),
           },
           {
-            path: `${ROUTES.ACTORS}${ACTORTYPES.COUNTRY}${ROUTES.NEW}`,
+            path: `${ROUTES.ACTORS}/${ACTORTYPES.COUNTRY}${ROUTES.NEW}`,
             title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.COUNTRY}`].single),
           },
         ],

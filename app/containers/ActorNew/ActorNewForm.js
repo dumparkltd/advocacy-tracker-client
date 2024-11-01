@@ -13,24 +13,11 @@ import { Map, List, fromJS } from 'immutable';
 
 import {
   getConnectionUpdatesFromFormData,
-  getTitleFormField,
-  getStatusFormField,
-  getMarkdownFormField,
-  getCodeFormField,
-  getLinkFormField,
-  getEmailFormField,
-  getTextFormField,
-  getTextareaFormField,
-  renderTaxonomyControl,
-  renderActionsByActiontypeControl,
-  renderAssociationsByActortypeControl,
-  renderMembersByActortypeControl,
-  renderUserMultiControl,
+  getActortypeFormFields,
 } from 'utils/forms';
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
-import { checkActorAttribute, checkActorRequired } from 'utils/entities';
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
@@ -121,185 +108,9 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       : dataWithType;
   };
 
-  getHeaderMainFields = (typeId, isAdmin) => {
-    const { intl } = this.context;
-    return ([ // fieldGroups
-      { // fieldGroup
-        fields: [
-          checkActorAttribute(typeId, 'code', isAdmin) && getCodeFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActorRequired(typeId, 'code'),
-            attribute: 'code',
-          }),
-          checkActorAttribute(typeId, 'prefix') && getCodeFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActorRequired(typeId, 'prefix'),
-            attribute: 'prefix',
-          }),
-          checkActorAttribute(typeId, 'title') && getTitleFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActorRequired(typeId, 'title'),
-          }),
-          checkActorAttribute(typeId, 'name') && getTitleFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActorRequired(typeId, 'name'),
-            label: 'name',
-          }),
-        ],
-      },
-    ]);
-  };
-
-  getHeaderAsideFields = () => {
-    const { intl } = this.context;
-    return ([
-      {
-        fields: [
-          getStatusFormField({ formatMessage: intl.formatMessage }),
-          getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
-        ],
-      },
-    ]);
-  };
-
-  getBodyMainFields = (
-    typeId,
-    connectedTaxonomies,
-    actionsByActiontype,
-    membersByActortype,
-    onCreateOption,
-    isAdmin,
-  ) => {
-    const { intl } = this.context;
-    const groups = [];
-    groups.push({
-      fields: [
-        checkActorAttribute(typeId, 'description') && getMarkdownFormField({
-          formatMessage: intl.formatMessage,
-          required: checkActorRequired(typeId, 'description'),
-        }),
-        checkActorAttribute(typeId, 'activity_summary') && getMarkdownFormField({
-          formatMessage: intl.formatMessage,
-          required: checkActorRequired(typeId, 'activity_summary'),
-          attribute: 'activity_summary',
-        }),
-      ],
-    });
-    if (actionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl({
-        entitiesByActiontype: actionsByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.actions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    if (membersByActortype) {
-      const memberConnections = renderMembersByActortypeControl({
-        entitiesByActortype: membersByActortype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (memberConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.members),
-            fields: memberConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
-
-  getBodyAsideFields = (
-    typeId,
-    taxonomies,
-    connectedTaxonomies,
-    associationsByActortype,
-    userOptions,
-    onCreateOption,
-    isAdmin,
-  ) => {
-    const { intl } = this.context;
-    const groups = []; // fieldGroups
-    if (userOptions) {
-      groups.push(
-        {
-          label: intl.formatMessage(appMessages.nav.userActors),
-          fields: [
-            renderUserMultiControl({ options: userOptions, intl }),
-          ],
-        },
-      );
-    }
-    groups.push(
-      { // fieldGroup
-        fields: [
-          checkActorAttribute(typeId, 'email') && getEmailFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActorRequired(typeId, 'email'),
-          }),
-          checkActorAttribute(typeId, 'phone') && getTextFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActorRequired(typeId, 'phone'),
-            attribute: 'phone',
-          }),
-          checkActorAttribute(typeId, 'address') && getTextareaFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActorRequired(typeId, 'address'),
-            attribute: 'address',
-          }),
-          checkActorAttribute(typeId, 'url') && getLinkFormField({
-            formatMessage: intl.formatMessage,
-            required: checkActorRequired(typeId, 'url'),
-          }),
-        ],
-      },
-    );
-    groups.push(
-      { // fieldGroup
-        label: intl.formatMessage(appMessages.entities.taxonomies.plural),
-        icon: 'categories',
-        fields: renderTaxonomyControl({
-          taxonomies, onCreateOption, intl,
-        }),
-      },
-    );
-    if (associationsByActortype) {
-      const associationConnections = renderAssociationsByActortypeControl({
-        entitiesByActortype: associationsByActortype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (associationConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.associations),
-            fields: associationConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
-
   render() {
     const { intl } = this.context;
     const {
-      dataReady,
       viewDomain,
       connectedTaxonomies,
       actionsByActiontype,
@@ -323,28 +134,15 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       invalidateEntitiesOnSuccess,
     } = this.props;
 
-    const { saveSending, isAnySending } = viewDomain.get('page').toJS();
-    const saving = isAnySending || saveSending;
-
     const type = intl.formatMessage(appMessages.entities[`actors_${typeId}`].single);
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
         <ContentHeader
           title={intl.formatMessage(messages.pageTitle, { type })}
           type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
-          buttons={
-            dataReady ? [{
-              type: 'cancel',
-              onClick: () => handleCancel(typeId),
-            },
-            {
-              type: 'save',
-              disabled: saving,
-              onClick: () => handleSubmitRemote(formDataPath),
-            }] : null
-          }
         />
         <FormWrapper
+          typeLabel={type}
           model={formDataPath}
           inModal={inModal}
           viewDomain={viewDomain}
@@ -358,36 +156,25 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
             invalidateEntitiesOnSuccess,
           )}
           handleSubmitFail={handleSubmitFail}
+          handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleCancel={() => handleCancel(typeId)}
           handleUpdate={handleUpdate}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={{ // isMember, taxonomies,
-            header: {
-              main: this.getHeaderMainFields(typeId, isAdmin),
-              aside: this.getHeaderAsideFields(),
-            },
-            body: {
-              main: this.getBodyMainFields(
-                typeId,
-                connectedTaxonomies,
-                actionsByActiontype,
-                membersByActortype,
-                inModal ? null : onCreateOption,
-                isAdmin,
-              ),
-              aside: this.getBodyAsideFields(
-                typeId,
-                taxonomies,
-                connectedTaxonomies,
-                associationsByActortype,
-                userOptions,
-                inModal ? null : onCreateOption,
-                isAdmin,
-              ),
-            },
-          }}
+          fieldsByStep={getActortypeFormFields({
+            isMine: true,
+            isAdmin,
+            typeId,
+            taxonomies,
+            connectedTaxonomies,
+            userOptions,
+            actionsByActiontype,
+            associationsByActortype,
+            membersByActortype,
+            onCreateOption: inModal ? null : onCreateOption,
+            intl,
+          })}
         />
       </Content>
     );

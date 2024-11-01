@@ -14,7 +14,7 @@ import EntityForm from 'containers/EntityForm';
 export function FormWrapper({
   viewDomain,
   model,
-  fields,
+  fieldsByStep,
   onServerErrorDismiss,
   onErrorDismiss,
   handleSubmitFail,
@@ -23,6 +23,8 @@ export function FormWrapper({
   handleSubmit,
   scrollContainer,
   inModal,
+  handleSubmitRemote,
+  typeLabel,
 }) {
   const {
     isAnySending,
@@ -47,19 +49,22 @@ export function FormWrapper({
           onDismiss={onServerErrorDismiss}
         />
       )}
-      {(saving || !fields) && <Loading />}
-      {fields && (
+      {(saving || !fieldsByStep) && <Loading />}
+      {fieldsByStep && (
         <EntityForm
           model={model}
           inModal={inModal}
           formData={viewDomain.getIn(['form', 'data'])}
+          formDataTracked={viewDomain.getIn(['form', 'forms', 'data'])}
           saving={saving}
           handleSubmit={handleSubmit}
+          handleSubmitRemote={handleSubmitRemote}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
           handleUpdate={handleUpdate}
-          fields={fields}
+          fieldsByStep={fieldsByStep}
           scrollContainer={scrollContainer}
+          typeLabel={typeLabel}
         />
       )}
       {saving && <Loading />}
@@ -72,13 +77,15 @@ FormWrapper.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
+  handleSubmitRemote: PropTypes.func,
   viewDomain: PropTypes.object,
-  fields: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+  fieldsByStep: PropTypes.oneOfType([PropTypes.array, PropTypes.bool]),
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   scrollContainer: PropTypes.object,
   model: PropTypes.string,
   inModal: PropTypes.bool,
+  typeLabel: PropTypes.string,
 };
 
 export default FormWrapper;
