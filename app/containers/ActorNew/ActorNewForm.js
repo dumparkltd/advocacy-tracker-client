@@ -281,6 +281,8 @@ function mapDispatchToProps(
       userOptions,
       invalidateEntitiesOnSuccess,
     ) => {
+      // console.log('formData', formData.toJS())
+
       let saveData = formData.setIn(
         ['attributes', 'actortype_id'],
         actortype.get('id'),

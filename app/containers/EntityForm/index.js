@@ -154,7 +154,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
 
   render() {
     const {
-      fields,
       fieldsByStep,
       model,
       handleCancel,
@@ -175,32 +174,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     const { deleteConfirmed, stepActive, stepsSeen } = this.state;
     const closeMultiselectOnClickOutside = !newEntityModal || inModal;
     let byStep = fieldsByStep;
-    if (!byStep) {
-      // fields: { header: { main: fields[], aside: fields[] }, body: { main: ... }}
-      byStep = Object.keys(fields).reduce(
-        (memo, fieldSectionKey) => {
-          // eg "header"
-          const fieldSection = fields[fieldSectionKey];
-          if (fieldSection) {
-            return Object.keys(fieldSection).reduce(
-              (memo2, fieldGroupKey) => {
-                const fieldGroup = fieldSection[fieldGroupKey];
-                return [
-                  ...memo2,
-                  {
-                    id: `${fieldSectionKey}-${fieldGroupKey}`,
-                    fields: fieldGroup,
-                  },
-                ];
-              },
-              memo,
-            );
-          }
-          return memo;
-        },
-        [],
-      );
-    }
     const footerStep = byStep.find((step) => step.id === 'footer');
     const footerFields = footerStep && footerStep.fields && footerStep.fields.filter((f) => !!f);
     byStep = byStep.filter((step) => step.id !== 'footer');
@@ -502,7 +475,6 @@ EntityForm.propTypes = {
   handleDelete: PropTypes.func,
   handleUpdate: PropTypes.func,
   model: PropTypes.string,
-  fields: PropTypes.object,
   fieldsByStep: PropTypes.array,
   formData: PropTypes.object,
   formDataTracked: PropTypes.object,

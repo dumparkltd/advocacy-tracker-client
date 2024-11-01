@@ -33,6 +33,8 @@ export function FormWrapper({
     submitValid,
   } = viewDomain.get('page').toJS();
   const saving = isAnySending || saveSending;
+  // console.log('viewDomain' && viewDomain && viewDomain.toJS())
+  // console.log('fieldsByStep' && viewDomain && viewDomain.toJS())
   return (
     <div>
       {!submitValid && (

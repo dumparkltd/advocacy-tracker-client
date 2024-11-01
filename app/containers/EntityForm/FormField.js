@@ -227,7 +227,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
     const fieldRequired = field.validators && field.validators.required;
     const stepSeen = step && step.previouslySeen;
     const fieldAutofilledUnseen = isNewEntityView && !stepSeen && field.autofill && !hasChanges;
-
+    // console.log('fieldRequired, hasChanges, isEmpty', fieldRequired, hasChanges, isEmpty)
     return (
       <FormFieldWrap
         direction={inline ? 'row' : 'column'}
@@ -304,12 +304,13 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
       step,
       isNewEntityView,
     } = this.props;
-    const isEmpty = fieldTracked && fieldTracked.value ? fieldTracked.value === '' : true;
+    const isEmpty = (fieldTracked && fieldTracked.value) ? fieldTracked.value === '' : true;
     let isHidden = field.hideByDefault && this.state.hidden;
     if (isHidden) {
       isHidden = isHidden && !!isEmpty;
     }
-
+    // console.log('fieldTracked', fieldTracked)
+    // console.log('field', field)
     return (
       <Field printHide={field.printHide}>
         {isHidden && (

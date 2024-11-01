@@ -77,7 +77,7 @@ export function FormWrapper({
 FormWrapper.propTypes = {
   handleSubmitFail: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
-  handleSubmitRemote: PropTypes.func.isRequired,
+  handleSubmitRemote: PropTypes.func,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func,

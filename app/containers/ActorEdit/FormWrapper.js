@@ -19,16 +19,20 @@ import {
 export function FormWrapper({
   viewDomain,
   model,
-  fields,
+  fieldsByStep,
   onServerErrorDismiss,
   onErrorDismiss,
   handleSubmitFail,
   handleCancel,
   handleUpdate,
   handleSubmit,
+  handleSubmitRemote,
   handleDelete,
   scrollContainer,
+  typeLabel,
 }) {
+  // console.log(fieldsByStep)
+  // console.log('viewDomain', viewDomain && viewDomain.toJS())
   const {
     saveSending, saveError, deleteSending, deleteError, submitValid,
   } = viewDomain.get('page').toJS();
@@ -49,19 +53,22 @@ export function FormWrapper({
         />
       )}
       {deleteError && <Messages type="error" messages={deleteError} />}
-      {(saveSending || deleteSending || !fields) && <Loading />}
-      {fields && (
+      {(saveSending || deleteSending || !fieldsByStep) && <Loading />}
+      {fieldsByStep && (
         <EntityForm
           model={model}
           formData={viewDomain.getIn(['form', 'data'])}
+          formDataTracked={viewDomain.getIn(['form', 'forms', 'data'])}
           saving={saveSending}
           handleSubmit={handleSubmit}
+          handleSubmitRemote={handleSubmitRemote}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
           handleUpdate={handleUpdate}
           handleDelete={handleDelete}
-          fields={fields}
+          fieldsByStep={fieldsByStep}
           scrollContainer={scrollContainer}
+          typeLabel={typeLabel}
         />
       )}
       {(saveSending || deleteSending) && <Loading />}
@@ -74,13 +81,15 @@ FormWrapper.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
+  handleSubmitRemote: PropTypes.func,
   handleDelete: PropTypes.func,
   viewDomain: PropTypes.object,
-  fields: PropTypes.oneOfType([PropTypes.object, PropTypes.bool]),
+  fieldsByStep: PropTypes.oneOfType([PropTypes.array, PropTypes.bool]),
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   scrollContainer: PropTypes.object,
   model: PropTypes.string,
+  typeLabel: PropTypes.string,
 };
 
 const mapStateToProps = (state) => ({

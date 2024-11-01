@@ -1098,7 +1098,7 @@ const getActiontypeFormField = (
   if (!passAdmin || !passAdminOrMine) {
     return null;
   }
-  if (attribute) {
+  if (attribute && fieldConfig) {
     const attributeType = fieldConfig.type;
     const cleanFieldType = fieldType || attributeType;
     if (attribute === 'title') {
@@ -1298,7 +1298,10 @@ const getActortypeFormField = (
   if (!passAdmin || !passAdminOrMine) {
     return null;
   }
-  if (attribute) {
+  if (attribute && !fieldConfig) {
+    console.log('attribute, fieldConfig', attribute, fieldConfig);
+  }
+  if (attribute && fieldConfig) {
     const attributeType = fieldConfig.type;
     const cleanFieldType = fieldType || attributeType;
     if (attribute === 'title') {
@@ -1310,7 +1313,6 @@ const getActortypeFormField = (
         formatMessage, attribute, required, hideByDefault,
       });
     } else if (attribute === 'email') {
-      console.log(field)
       result = getEmailFormField({
         formatMessage, attribute, required, hideByDefault,
       });
