@@ -13,11 +13,6 @@ import { fromJS } from 'immutable';
 
 import {
   getConnectionUpdatesFromFormData,
-  // getTitleFormField,
-  // getMarkdownFormField,
-  // getStatusFormField,
-  // getCodeFormField,
-  // renderActionsByActiontypeControl,
   getIndicatorFormFields,
 } from 'utils/forms';
 
@@ -88,28 +83,6 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
       scrollToTop(this.scrollContainer.current);
     }
   }
-  //   if (actionsByActiontype) {
-  //     const actionConnections = renderActionsByActiontypeControl({
-  //       entitiesByActiontype: actionsByActiontype,
-  //       taxonomies: connectedTaxonomies,
-  //       onCreateOption,
-  //       intl,
-  //       isAdmin,
-  //       connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
-  //         ? [
-  //           {
-  //             attribute: 'supportlevel_id',
-  //             type: 'select',
-  //             options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId].map(
-  //               (level) => ({
-  //                 label: intl.formatMessage(appMessages.supportlevels[level.value]),
-  //                 ...level,
-  //               }),
-  //             ),
-  //           },
-  //         ]
-  //         : null,
-  //     });
 
   render() {
     const { intl } = this.context;

@@ -869,16 +869,6 @@ export const RESOURCE_FIELDS = {
 };
 
 export const INDICATOR_FIELDS = {
-  // CONNECTIONS: {
-  //   actions: {
-  //     table: API.ACTIONS,
-  //     connection: API.ACTION_INDICATORS,
-  //     groupby: {
-  //       table: API.ACTIONTYPES,
-  //       on: 'measuretype_id',
-  //     },
-  //   },
-  // },
   ATTRIBUTES: {
     code: {
       type: 'text',
@@ -897,11 +887,6 @@ export const INDICATOR_FIELDS = {
       required: true,
       type: 'bool',
       skipImport: true,
-      // ui: 'dropdown',
-      // options: [
-      //   { value: true, message: 'ui.publishStatuses.draft' },
-      //   { value: false, message: 'ui.publishStatuses.public' },
-      // ],
     },
     private: {
       defaultValue: false,
@@ -3278,6 +3263,50 @@ export const ACTIONTYPES_CONFIG = {
   },
 };
 
+export const RESOURCETYPES_CONFIG = {
+  form: [
+    {
+      id: 'footer',
+      fields: [
+        { attribute: 'is_archive', needsAdmin: true },
+        { attribute: 'private', needsAdminOrOwn: true },
+        { attribute: 'draft', needsAdminOrOwn: true },
+      ],
+    },
+    {
+      id: 'main',
+      title: 'All content',
+      sections: [
+        {
+          id: 'content',
+          rows: [
+            [{
+              attribute: 'title',
+              required: true,
+              basis: '2/3',
+            }],
+            [{
+              attribute: 'url',
+              basis: '2/3',
+            }],
+            [{
+              attribute: 'publication_date',
+              basis: '1/2',
+            },
+            {
+              attribute: 'access_date',
+              basis: '1/2',
+            }],
+            [{
+              attribute: 'description',
+              hideByDefault: true,
+            }],
+          ], // rows
+        }, // section
+      ], // sectipms
+    },
+  ], // steps
+};
 
 export const INDICATOR_CONFIG = {
   form: [
@@ -3295,7 +3324,6 @@ export const INDICATOR_CONFIG = {
       sections: [
         {
           id: 'content',
-          title: 'Main content',
           rows: [
             [
               {

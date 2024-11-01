@@ -410,13 +410,27 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
         ],
       },
       {
-        title: 'Other',
+        title: 'Resources',
         hidden: true,
         items: [
           {
-            path: `${ROUTES.RESOURCES}${ROUTES.NEW}`,
-            title: intl.formatMessage(messages.entities.resources.single),
+            path: `${ROUTES.RESOURCES}/${RESOURCETYPES.WEB}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`resources_${RESOURCETYPES.WEB}`].single),
           },
+          {
+            path: `${ROUTES.RESOURCES}/${RESOURCETYPES.REF}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`resources_${RESOURCETYPES.REF}`].single),
+          },
+          {
+            path: `${ROUTES.RESOURCES}/${RESOURCETYPES.DOC}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`resources_${RESOURCETYPES.DOC}`].single),
+          },
+        ],
+      },
+      {
+        title: 'Other',
+        hidden: true,
+        items: [
           {
             path: `${ROUTES.PAGES}${ROUTES.NEW}`,
             title: intl.formatMessage(messages.entities.pages.single),

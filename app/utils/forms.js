@@ -26,8 +26,10 @@ import {
   API,
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
+  RESOURCETYPES_CONFIG,
   INDICATOR_CONFIG,
   INDICATOR_FIELDS,
+  RESOURCE_FIELDS,
   ACTORTYPES,
   ACTION_FIELDS,
   ACTOR_FIELDS,
@@ -1295,6 +1297,41 @@ export const getActortypeFormFields = (args) => {
         (field) => {
           const fieldConfig = field.attribute
             ? ACTOR_FIELDS.ATTRIBUTES[field.attribute]
+            : null;
+          return getEntityFormField(field, args, fieldConfig);
+        },
+      ),
+    })
+  );
+  return steps;
+};
+
+export const getResourcetypeFormFields = (args) => {
+  const shape = RESOURCETYPES_CONFIG.form;
+  const steps = shape && shape.map(
+    (step) => ({
+      ...step,
+      sections: step.sections && step.sections.map(
+        (section) => ({
+          ...section,
+          rows: section.rows.map(
+            (row) => ({
+              fields: row.map(
+                (field) => {
+                  const fieldConfig = field.attribute
+                    ? RESOURCE_FIELDS.ATTRIBUTES[field.attribute]
+                    : null;
+                  return getEntityFormField(field, args, fieldConfig);
+                },
+              ),
+            })
+          ),
+        })
+      ),
+      fields: step.fields && step.fields.map(
+        (field) => {
+          const fieldConfig = field.attribute
+            ? RESOURCE_FIELDS.ATTRIBUTES[field.attribute]
             : null;
           return getEntityFormField(field, args, fieldConfig);
         },
