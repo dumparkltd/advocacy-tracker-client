@@ -452,7 +452,7 @@ theme.breakpointsMin = {
 // grommet
 theme.global = {
   drop: {
-    zIndex: 200,
+    zIndex: 999999999,
   },
   breakpoints: {
     small: {

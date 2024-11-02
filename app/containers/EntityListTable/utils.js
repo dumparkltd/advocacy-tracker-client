@@ -306,10 +306,10 @@ const getRelatedEntities = (
 };
 const getRelatedSortValue = (relatedEntities) => getRelatedValue(relatedEntities);
 
-const getRelatedValue = (relatedEntities, typeLabel) => {
+const getRelatedValue = (relatedEntities, typeLabel, includeLabel = false) => {
   if (relatedEntities && relatedEntities.size > 0) {
     if (relatedEntities.size > 1) {
-      return typeLabel
+      return (typeLabel && includeLabel)
         ? `${relatedEntities.size} ${lowerCase(typeLabel)}`
         : relatedEntities.size;
     }

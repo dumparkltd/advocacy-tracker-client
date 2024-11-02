@@ -210,6 +210,7 @@ export function PositionsList({
         {
           id,
           type: 'topicPosition',
+          minSize: 'medium',
           indicatorId: indicator.get('id'),
           indicatorCount: indicators.size,
           positions: 'indicatorPositions',
@@ -438,6 +439,7 @@ export function PositionsList({
                       actionsMembers: 'actionsAsMemberByType',
                       actionsChildren: 'actionsAsParentByType',
                       isSingleActionColumn: false,
+                      minSize: 'medium',
                     },
                     {
                       id: `action_${ACTIONTYPES.INTERACTION}`,
@@ -447,6 +449,7 @@ export function PositionsList({
                       actionsMembers: 'actionsAsMemberByType',
                       actionsChildren: 'actionsAsParentByType',
                       isSingleActionColumn: false,
+                      minSize: 'large',
                     },
                     ...topicColumns,
                   ]}

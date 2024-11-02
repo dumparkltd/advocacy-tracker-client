@@ -161,6 +161,10 @@ export function EntityListTable({
   }
   const availableColumns = columns
     .filter((col) => {
+      if (col.minSize && col.type !== 'main') {
+        return isMinSize(size, col.minSize);
+      }
+      // only show main when smaller than medium
       if ((!isMinSize(size, 'medium') || isPrintView) && col.type !== 'main') {
         return false;
       }

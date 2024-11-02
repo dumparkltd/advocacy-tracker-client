@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import appMessages from 'containers/App/messages';
 
 import { ROUTES } from 'themes/config';
-const LinkTT = styled(
+const LinkTooltip = styled(
   React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
 )`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
@@ -41,13 +41,13 @@ export function CellBodyHasResource({
   return (
     <Box alignContent={align}>
       {entity.value && (
-        <LinkTT
+        <LinkTooltip
           ref={buttonRef}
           alignSelf={align}
           onClick={() => setShowContent(!showContent)}
         >
           <StatusGood size="small" color="dark-2" />
-        </LinkTT>
+        </LinkTooltip>
       )}
       {!entity.value && (
         <Box fill={false} align="end">

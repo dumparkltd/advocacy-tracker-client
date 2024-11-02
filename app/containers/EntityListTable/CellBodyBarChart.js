@@ -48,7 +48,7 @@ const BarButton = styled((p) => <Button plain {...p} />)`
   opacity: ${({ isHover }) => isHover ? 0.85 : 1};
 `;
 
-const LinkTT = styled(
+const LinkTooltip = styled(
   React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
 )`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
@@ -79,7 +79,7 @@ export function CellBodyBarChart({
               </Text>
             )}
             {rowConfig.tooltip && (
-              <LinkTT
+              <LinkTooltip
                 onClick={() => showInfo(!info)}
                 onMouseOver={() => isHover(true)}
                 onMouseLeave={() => isHover(false)}
@@ -90,7 +90,7 @@ export function CellBodyBarChart({
                 <Text size="small" weight={500} textAlign="end" wordBreak="keep-all">
                   {value}
                 </Text>
-              </LinkTT>
+              </LinkTooltip>
             )}
           </Value>
           <BarWrapper>

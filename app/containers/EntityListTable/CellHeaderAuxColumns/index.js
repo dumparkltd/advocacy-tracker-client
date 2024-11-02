@@ -86,7 +86,7 @@ export function CellHeaderAuxColumns({
     <Styled ref={ref}>
       <BoxPrint margin={{ right: 'ms', top: 'ms' }} printHide>
         <AuxButton onClick={() => setOpen(true)}>
-          <Box gap="2px" direction="row" justify="center" align="center" fill>
+          <Box gap="2px" direction="column" justify="center" align="center" fill>
             <Dot />
             <Dot />
             <Dot />

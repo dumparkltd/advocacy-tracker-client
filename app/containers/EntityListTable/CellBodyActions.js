@@ -8,6 +8,8 @@ import { truncateText } from 'utils/string';
 
 import { ROUTES } from 'themes/config';
 import DropEntityList from './DropEntityList';
+import LabelTooltip from './LabelTooltip';
+import LinkTooltip from './LinkTooltip';
 
 const Link = styled((p) => <Button as="a" plain {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
@@ -16,18 +18,7 @@ const Link = styled((p) => <Button as="a" plain {...p} />)`
 const Label = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
-`;
-
-const LinkTT = styled(
-  React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
-)`
-  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 12px;
-`;
-const LabelTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
-  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  font-style: italic;
-  line-height: 12px;
+  font-weight: 500;
 `;
 
 const getActionLink = (action) => `${ROUTES.ACTION}/${action.get('id')}`;
@@ -64,15 +55,18 @@ export function CellBodyActions({
         </Link>
       )}
       {entity.tooltip && (
-        <LinkTT
+        <LinkTooltip
           ref={buttonRef}
+          showContent={showContent}
           alignSelf={align}
           onClick={() => setShowContent(!showContent)}
         >
-          <LabelTT textAlign={align}>
-            {entity.value}
-          </LabelTT>
-        </LinkTT>
+          <Box align="center" justify="center">
+            <LabelTooltip textAlign={align}>
+              {entity.value}
+            </LabelTooltip>
+          </Box>
+        </LinkTooltip>
       )}
       {entity.tooltip && showContent && buttonRef.current && (
         <Drop

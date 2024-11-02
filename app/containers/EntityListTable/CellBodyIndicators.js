@@ -11,6 +11,8 @@ import { truncateText } from 'utils/string';
 import { ROUTES, ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
 import Dot from 'components/styled/Dot';
 import appMessages from 'containers/App/messages';
+import LabelTooltip from './LabelTooltip';
+import LinkTooltip from './LinkTooltip';
 
 const Link = styled((p) => <Button as="a" plain {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
@@ -21,17 +23,6 @@ const Label = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
   line-height: 12px;
 `;
 
-const LinkTT = styled(
-  React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
-)`
-  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 12px;
-`;
-const LabelTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
-  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  font-style: italic;
-  line-height: 12px;
-`;
 const LinkInTT = styled((p) => <Button as="a" plain {...p} />)`
   line-height: 13px;
 `;
@@ -82,15 +73,18 @@ export function CellBodyIndicators({
         </Link>
       )}
       {entity.multiple && (
-        <LinkTT
+        <LinkTooltip
           ref={buttonRef}
+          showContent={showContent}
           alignSelf={align}
           onClick={() => setShowContent(!showContent)}
         >
-          <LabelTT textAlign={align}>
-            {entity.value}
-          </LabelTT>
-        </LinkTT>
+          <Box align="center" justify="center">
+            <LabelTooltip textAlign={align}>
+              {entity.value}
+            </LabelTooltip>
+          </Box>
+        </LinkTooltip>
       )}
       {entity.multiple && showContent && buttonRef.current && (
         <Drop
