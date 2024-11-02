@@ -28,13 +28,11 @@ import {
   ACTORTYPES_CONFIG,
   RESOURCETYPES_CONFIG,
   INDICATOR_CONFIG,
-  PAGE_CONFIG,
   INDICATOR_FIELDS,
   RESOURCE_FIELDS,
   ACTORTYPES,
   ACTION_FIELDS,
   ACTOR_FIELDS,
-  PAGE_FIELDS,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
@@ -1062,7 +1060,6 @@ const getEntityFormField = (
   field,
   {
     isAdmin,
-    isMine,
     typeId, // the action type of the principal entity
     taxonomies,
     connectedTaxonomies,
@@ -1092,8 +1089,6 @@ const getEntityFormField = (
     required,
     prepopulate,
     hideByDefault,
-    needsAdmin,
-    needsAdminOrOwn,
     type, //  the type of the entities associated in field
     asParents,
     asChildren,
@@ -1101,14 +1096,6 @@ const getEntityFormField = (
     basis,
   } = field;
   let result;
-  const passAdmin = needsAdmin ? isAdmin : true;
-  const passAdminOrMine = needsAdminOrOwn ? (isAdmin || isMine) : true;
-  // console.log('isAdmin, needsAdmin', isAdmin, needsAdmin)
-  // console.log('isMine, needsAdminOrOwn', isMine, needsAdmin)
-  // console.log('passAdmin || !passAdminOrMine', passAdmin, passAdminOrMine)
-  if (!passAdmin || !passAdminOrMine) {
-    return null;
-  }
   if (attribute && !fieldConfig) {
     console.log('attribute, fieldConfig', attribute, fieldConfig);
   }
@@ -1251,38 +1238,75 @@ const getEntityFormField = (
   };
   return result;
 };
+const checkPermission = ({
+  permissions, // args
+  requirements, // section / step / field
+}) => {
+  const { isAdmin, isMember, isMine } = permissions;
+  const { needsAdmin, needsMember, needsAdminOrOwn } = requirements;
+  const passAdmin = needsAdmin ? isAdmin : true;
+  const passMember = needsMember ? (isMember || isAdmin) : true;
+  const passAdminOrMine = needsAdminOrOwn ? (isAdmin || isMine) : true;
+  return passAdmin && passAdminOrMine && passMember;
+};
 
 export const getEntityFormFields = (args, shape, attributes) => {
-  const steps = shape && shape.map(
-    (step) => ({
-      ...step,
-      sections: step.sections && step.sections.map(
-        (section) => ({
-          ...section,
-          rows: section.rows.map(
-            (row) => ({
-              fields: row.map(
-                (field) => {
-                  const fieldConfig = (field.attribute && attributes)
-                    ? attributes[field.attribute]
-                    : null;
-                  return getEntityFormField(field, args, fieldConfig);
+  console.log('shape', shape)
+  const steps = shape && shape.reduce(
+    (memo, step) => {
+      if (!checkPermission({ permissions: args, requirements: step })) {
+        return memo;
+      }
+      return [
+        ...memo,
+        {
+          ...step,
+          sections: step.sections && step.sections.reduce(
+            (memo2, section) => {
+              if (!checkPermission({ permissions: args, requirements: section })) {
+                return memo2;
+              }
+              return [
+                ...memo2,
+                {
+                  ...section,
+                  rows: section.rows.map(
+                    (row) => ({
+                      fields: row.reduce(
+                        (memo3, field) => {
+                          if (!checkPermission({ permissions: args, requirements: field })) {
+                            return memo3;
+                          }
+                          const fieldConfig = (field.attribute && attributes)
+                            ? attributes[field.attribute]
+                            : null;
+                          return [
+                            ...memo3,
+                            getEntityFormField(field, args, fieldConfig),
+                          ];
+                        },
+                        [],
+                      ),
+                    })
+                  ),
                 },
-              ),
-            })
+              ];
+            },
+            [],
           ),
-        })
-      ),
-      // footer fields
-      fields: step.fields && step.fields.map(
-        (field) => {
-          const fieldConfig = (field.attribute && attributes)
-            ? attributes[field.attribute]
-            : null;
-          return getEntityFormField(field, args, fieldConfig);
+          // footer fields
+          fields: step.fields && step.fields.map(
+            (field) => {
+              const fieldConfig = (field.attribute && attributes)
+                ? attributes[field.attribute]
+                : null;
+              return getEntityFormField(field, args, fieldConfig);
+            },
+          ),
         },
-      ),
-    })
+      ];
+    },
+    [],
   );
   return steps;
 };

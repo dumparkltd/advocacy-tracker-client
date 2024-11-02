@@ -127,84 +127,10 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
     });
   };
 
-  // getBodyMainFields = (
-  //   actorsByActortype,
-  //   actionsByActiontype,
-  //   connectedTaxonomies,
-  //   onCreateOption,
-  //   isAdmin,
-  // ) => {
-  //   const { intl } = this.context;
-  //   const groups = [];
-  //   if (actorsByActortype) {
-  //     const actorConnections = renderActorsByActortypeControl({
-  //       entitiesByActortype: actorsByActortype,
-  //       taxonomies: connectedTaxonomies,
-  //       onCreateOption,
-  //       intl,
-  //       isAdmin,
-  //     });
-  //     if (actorConnections) {
-  //       groups.push(
-  //         {
-  //           label: intl.formatMessage(appMessages.nav.actorUsers),
-  //           fields: actorConnections,
-  //         },
-  //       );
-  //     }
-  //   }
-  //   if (actionsByActiontype) {
-  //     const actionConnections = renderActionsByActiontypeControl({
-  //       entitiesByActiontype: actionsByActiontype,
-  //       taxonomies: connectedTaxonomies,
-  //       onCreateOption,
-  //       intl,
-  //       isAdmin,
-  //     });
-  //     if (actionConnections) {
-  //       groups.push(
-  //         {
-  //           label: intl.formatMessage(appMessages.nav.actionUsers),
-  //           fields: actionConnections,
-  //         },
-  //       );
-  //     }
-  //   }
-  //   return groups;
-  // };
-
   // only admins can assign any roles to any other user TODO check
   getEditableUserRoles = (roles, sessionUserHighestRoleId) => roles && (sessionUserHighestRoleId === USER_ROLES.ADMIN.value)
     ? roles
     : Map();
-  //   if (roles) {
-  //     // const userHighestRoleId = getHighestUserRoleId(roles);
-  //     // const userHighestRole = Object.values(USER_ROLES).find((r) => qe(r.value, userHighestRoleId));
-  //     // const sessionUserHighestRole = Object.values(USER_ROLES).find((r) => qe(r.value, sessionUserHighestRoleId));
-  //
-  //     // TODO check!!
-  //     // roles are editable by the session user (logged on user) if
-  //     // the session user is an ADMIN
-  //     // the session user can only assign roles "lower" (that is higher id) than his/her own role
-  //     // and when the session user has a "higher" (lower id) role than the user profile being edited
-  //     // only admins can assign any roles to any other user
-  //     // if (sessionUserHighestRoleId === USER_ROLES.ADMIN.value) {
-  //     // }
-  //     return sessionUserHighestRoleId === USER_ROLES.ADMIN.value ? roles : Map();
-  //     // // other users can only assign roles to users that have a lower role / higher order
-  //     // if (sessionUserHighestRole.order < userHighestRole.order) {
-  //     //   return roles.filter(
-  //     //     (role) => {
-  //     //       // also can only assign roles than their own role
-  //     //       const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(role.get('id'), 10)));
-  //     //       return sessionUserHighestRole.order < theRole.order;
-  //     //     }
-  //     //   );
-  //     // }
-  //     // return Map();
-  //   }
-  //   return Map();
-  // }
 
   render() {
     const { intl } = this.context;
@@ -227,10 +153,11 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       onServerErrorDismiss,
       isMember,
       isAdmin,
+      myId,
     } = this.props;
     const reference = this.props.params.id;
     const { saveSending } = viewDomain.get('page').toJS();
-
+    const isMine = qe(myId, reference);
     const editableRoles = this.getEditableUserRoles(roles, sessionUserHighestRoleId);
     const formDataPath = 'userEdit.form.data';
     return (
@@ -268,7 +195,8 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
               fieldsByStep={dataReady && getEntityFormFields(
                 {
                   isAdmin,
-                  // isMine,
+                  isMember,
+                  isMine,
                   roleOptions: editableRoles,
                   actorsByActortype,
                   actionsByActiontype,
@@ -303,6 +231,7 @@ UserEdit.propTypes = {
   roles: PropTypes.object,
   isAdmin: PropTypes.bool,
   isMember: PropTypes.bool,
+  myId: PropTypes.string,
   dataReady: PropTypes.bool,
   sessionUserHighestRoleId: PropTypes.number,
   params: PropTypes.object,

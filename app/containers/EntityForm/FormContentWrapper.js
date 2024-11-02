@@ -67,8 +67,8 @@ export function FormContentWrapper({
                 </SectionTitle>
               )}
               <Box
-                gap="ms"
-                direction={isMinSize(size, 'medium') && isColumnSection ? 'row' : 'column'}
+                gap={(isMinSize(size, 'medium') && isColumnSection) ? 'ms' : 'medium'}
+                direction={(isMinSize(size, 'medium') && isColumnSection) ? 'row' : 'column'}
               >
                 {section.rows.map(
                   (row, i) => {

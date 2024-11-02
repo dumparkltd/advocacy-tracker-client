@@ -3448,18 +3448,12 @@ export const USER_CONFIG = {
   },
   form: [
     {
-      id: 'footer',
-      fields: [
-        { attribute: 'private', needsAdminOrOwn: true },
-        { attribute: 'draft', needsAdminOrOwn: true },
-      ],
-    },
-    {
       id: 'main',
-      title: 'All content',
+      title: 'User data',
       sections: [
         {
           id: 'content',
+          title: 'User Details',
           rows: [
             [{
               attribute: 'name',
@@ -3473,12 +3467,102 @@ export const USER_CONFIG = {
                 basis: '2/3',
               },
             ],
-            [
-              {
-                connection: API.USERS,
-                basis: '2/3',
-              },
-            ],
+          ], // rows
+        }, // section,
+        {
+          id: 'role',
+          title: 'User Role',
+          needsAdmin: true,
+          rows: [
+            [{
+              connection: API.ROLES,
+              needsAdmin: true,
+              basis: '2/3',
+            }],
+          ], // rows
+        }, // section,
+      ], // sections
+    }, // step
+    {
+      id: 'stakeholders',
+      title: 'Stakeholders',
+      needsMember: true,
+      sections: [
+        {
+          id: 'content',
+          title: 'Contacts',
+          rows: [
+            [{
+              connection: API.ACTORS,
+              type: ACTORTYPES.CONTACT,
+            }],
+          ], // rows
+        }, // section,
+        {
+          id: 'content1',
+          title: 'Countries & Organisations',
+          rows: [
+            [{
+              connection: API.ACTORS,
+              type: ACTORTYPES.COUNTRY,
+            }],
+            [{
+              connection: API.ACTORS,
+              type: ACTORTYPES.ORG,
+            }],
+          ], // rows
+        }, // section,
+        {
+          id: 'content2',
+          title: 'Countries Groups & Regions',
+          rows: [
+            [{
+              connection: API.ACTORS,
+              type: ACTORTYPES.GROUP,
+            }],
+            [{
+              connection: API.ACTORS,
+              type: ACTORTYPES.REG,
+            }],
+          ], // rows
+        }, // section,
+      ], // sections
+    }, // step
+    {
+      id: 'outreach',
+      title: 'Outreach',
+      needsMember: true,
+      sections: [
+        {
+          id: 'content',
+          title: 'Assigned Tasks & Plans',
+          rows: [
+            [{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.TASK,
+            }],
+            [{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.OP,
+            }],
+            [{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.AP,
+            }],
+          ], // rows
+        }, // section,
+        {
+          id: 'content2',
+          title: 'Interactions & Events',
+          rows: [
+            [{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.INTERACTION,
+            }],
+            [{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.EVENT,
+            }],
           ], // rows
         }, // section,
       ], // sections
