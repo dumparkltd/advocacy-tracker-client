@@ -19,6 +19,7 @@ const PrimaryButton = styled((p) => (
   &:hover {
     box-shadow: none;
     background: ${palette('primary', 0)};
+    color: white;
   }
 `;
 

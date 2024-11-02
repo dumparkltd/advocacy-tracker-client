@@ -20,6 +20,8 @@ export function PreviewFooter({ content, onUpdatePath }) {
     >
       {secondaryLink && (
         <ButtonSecondary
+          as="a"
+          href={secondaryLink.path}
           gap="none"
           justify="center"
           onClick={(e) => {
@@ -43,16 +45,17 @@ export function PreviewFooter({ content, onUpdatePath }) {
       )}
       {primaryLink && (
         <ButtonPrimary
+          as="a"
+          href={primaryLink.path}
           onClick={(e) => {
             if (e && e.preventDefault) e.preventDefault();
             onUpdatePath(primaryLink.path);
           }}
-          label={(
-            <Text size="large">
-              {primaryLink.title}
-            </Text>
-          )}
-        />
+        >
+          <Text size="large">
+            {primaryLink.title}
+          </Text>
+        </ButtonPrimary>
       )}
     </Box>
   );
