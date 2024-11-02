@@ -36,9 +36,13 @@ const ActiveButton = styled((p) => <Button plain {...p} />)`
   background-color: ${({ theme }) => theme.global.colors.highlight};
   color: white;
   border: 1px solid ${palette('light', 3)};
-  min-height: ${({ small }) => small ? 35 : 45}px;
+  min-height: 45px;
+  min-width: 200px;
   border-radius: 999px;
   position: relative;
+  &:hover {
+    background-color: ${({ theme }) => theme.global.colors.highlightHover};
+  }
 `;
 
 const Label = styled.span`

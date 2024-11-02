@@ -386,7 +386,7 @@ export function PositionsList({
                   <Text weight={600}>Levels of support</Text>
                   <Box direction="row" wrap gap="xsmall">
                     {supportLevels && supportLevels.map((level) => (
-                      <Box key={level.value} direction="row" align="center" gap="xsmall" margin={{ bottom: 'small' }}>
+                      <Box key={level.value} direction="row" align="center" gap="xsmall" margin={{ bottom: 'xsmall' }}>
                         <Dot size="16px" color={level.color} />
                         <Text size="small">{level.label}</Text>
                       </Box>
@@ -398,7 +398,7 @@ export function PositionsList({
                   onUpdateQuery={onUpdateQuery}
                 />
               </Box>
-              <Box>
+              <Box height={{ min: '500px' }}>
                 <EntityListTable
                   entityPath={ROUTES.ACTOR}
                   reducePreviewItem={reducePreviewItem}

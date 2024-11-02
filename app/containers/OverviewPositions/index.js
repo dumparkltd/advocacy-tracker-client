@@ -58,7 +58,7 @@ export function OverviewPositions({ intl }) {
               <FormattedMessage {...messages.pageTitle} />
             </TitleMedium>
           </Box>
-          <Box gap="small">
+          <Box gap="medium" margin={{ bottom: 'xlarge' }}>
             <PositionsMap />
             <PositionsList />
           </Box>
