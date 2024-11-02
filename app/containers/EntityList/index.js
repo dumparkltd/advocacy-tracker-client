@@ -40,7 +40,6 @@ import {
   selectIsPrintView,
   selectSearchQuery,
   selectSessionUserId,
-  selectPreviewQuery,
 } from 'containers/App/selectors';
 
 import {
@@ -931,7 +930,6 @@ EntityList.propTypes = {
   onUpdateFilters: PropTypes.func,
   isPrintView: PropTypes.bool,
   currentUserId: PropTypes.string,
-  previewItemId: PropTypes.string,
   filteringOptions: PropTypes.array,
   secondaryNavItems: PropTypes.array,
 };
@@ -958,7 +956,6 @@ const mapStateToProps = (state) => ({
   isPrintView: selectIsPrintView(state),
   searchQuery: selectSearchQuery(state),
   currentUserId: selectSessionUserId(state),
-  previewItemId: selectPreviewQuery(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

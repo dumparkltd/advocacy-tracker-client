@@ -471,6 +471,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {showRelatedActorsForActions && (
           <EntityListTable
             isByOption
+            reducePreviewItem={reducePreviewItem}
             hasFilters={hasFilters}
             paginate
             hasSearch
@@ -544,6 +545,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {showRelatedUsersForActions && (
           <Box>
             <EntityListTable
+              reducePreviewItem={reducePreviewItem}
               isByOption
               hasFilters={hasFilters}
               columns={[
