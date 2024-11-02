@@ -492,6 +492,7 @@ export function PositionsMap({
                   reduceCountryAreas={reduceCountryAreas}
                   typeLabels={typeLabels}
                   mapData={{
+                    fitBounds: true,
                     typeLabels,
                     indicator: currentIndicatorId.toString(),
                     includeSecondaryMembers: true,
