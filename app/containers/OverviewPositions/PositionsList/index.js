@@ -32,6 +32,8 @@ import {
 
 import { sortEntities } from 'utils/sort';
 
+import { getValueFromPositions } from 'containers/EntityListTable/utils';
+
 import {
   loadEntitiesIfNeeded,
   setIncludeActorMembers,
@@ -126,6 +128,19 @@ const getActiveSupportLevels = (locationQuery, indicatorId) => {
   );
   return supportLevels;
 };
+
+const filterAvailableLevels = (levelValue, indicatorId, countries) => countries.find(
+  (country) => {
+    const countryPositions = country.get('indicatorPositions');
+    let countrySupportLevel;
+    if (countryPositions) {
+      countrySupportLevel = getValueFromPositions(countryPositions.get(indicatorId));
+    }
+    countrySupportLevel = countrySupportLevel || 99;
+    return qe(countrySupportLevel, levelValue);
+  },
+);
+
 const ID = 'positions-list';
 export function PositionsList({
   dataReady,
@@ -205,12 +220,14 @@ export function PositionsList({
           queryArg: 'indicators',
           queryValue: indicator.get('id'),
           queryArgRelated: 'supportlevel_id',
-          filterOptions: supportLevels.map((level) => ({
-            ...level,
-            active: (activeSupportLevels && activeSupportLevels.length > 0)
-              ? !!activeSupportLevels.find((val) => qe(val, level.value))
-              : false,
-          })),
+          filterOptions: supportLevels
+            .filter((level) => filterAvailableLevels(level.value, indicator.get('id'), countries))
+            .map((level) => ({
+              ...level,
+              active: (activeSupportLevels && activeSupportLevels.length > 0)
+                ? !!activeSupportLevels.find((val) => qe(val, level.value))
+                : false,
+            })),
         },
       ];
     },
@@ -319,7 +336,10 @@ export function PositionsList({
     }
     return {};
   };
-
+  const countriesFilteredByColumn = countries && countries.filter(
+    (country) => typeof country.get('passTopicPositionFilter') === 'undefined'
+      || country.get('passTopicPositionFilter')
+  );
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
       <Box pad={{ top: 'small', bottom: 'xsmall' }}>
@@ -348,7 +368,7 @@ export function PositionsList({
                     options={prepareDropdownOptions(
                       actorsByType.get(parseInt(ACTORTYPES.REG, 10)),
                       associationRegionQuery,
-                      countries,
+                      countriesFilteredByColumn,
                     )}
                     onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.REG })}
                     onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.REG })}
@@ -359,7 +379,7 @@ export function PositionsList({
                     options={prepareDropdownOptions(
                       actorsByType.get(parseInt(ACTORTYPES.GROUP, 10)),
                       associationGroupQuery,
-                      countries,
+                      countriesFilteredByColumn,
                     )}
                     onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.GROUP })}
                     onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.GROUP })}
@@ -444,7 +464,7 @@ export function PositionsList({
                   config={{
                     views: { list: { search: ['title', 'code'] } },
                   }}
-                  entities={countries.toList()}
+                  entities={countriesFilteredByColumn.toList()}
                   connections={connections}
                 />
               </Box>

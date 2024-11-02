@@ -127,17 +127,18 @@ const selectCountriesByTopicPosition = createSelector(
     if (locationQuery.get('indicators')) {
       const locationQueryValue = locationQuery.get('indicators');
       // console.log('locationQueryValue', locationQueryValue)
-      return countries.filter((country) => {
+      return countries.map((country) => {
         const countryPositions = country.get('indicatorPositions');
         // countries pass when they pass all queried indicators
         const pass = asList(locationQueryValue).reduce(
           (memo, queryValue) => {
             if (!memo) return memo;
             const indicatorId = queryValue.split('>')[0];
-            let countrySupportLevel = 99;
+            let countrySupportLevel;
             if (countryPositions) {
               countrySupportLevel = getValueFromPositions(countryPositions.get(indicatorId));
             }
+            countrySupportLevel = countrySupportLevel || 99;
             const levels = queryValue.indexOf('=') > -1
               && queryValue.split('=')[1].split('|');
             if (!levels) return memo;
@@ -145,7 +146,7 @@ const selectCountriesByTopicPosition = createSelector(
           },
           true,
         );
-        return pass;
+        return country.set('passTopicPositionFilter', pass);
       });
     }
     return countries;
