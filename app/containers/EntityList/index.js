@@ -136,52 +136,123 @@ const reducePreviewItem = ({
     return { entity: { path, id } };
   }
   if (item && qe(item.get('type'), API.ACTORS)) {
+    const label = intl.formatMessage(
+      appMessages.entities[`actors_${item.getIn(['attributes', 'actortype_id'])}`].single
+    );
     const content = {
       header: {
-        aboveTitle: intl.formatMessage(
-          appMessages.entities[`actors_${item.getIn(['attributes', 'actortype_id'])}`].single
-        ),
+        aboveTitle: label,
         title: item && item.getIn(['attributes', 'title']),
       },
       item,
       footer: {
         primaryLink: item && {
           path: `${ROUTES.ACTOR}/${item.get('id')}`,
-          title: 'Actor details',
+          title: `${label} details`,
         },
       },
     };
     return content;
   }
   if (item && qe(item.get('type'), API.ACTIONS)) {
+    const label = intl.formatMessage(
+      appMessages.entities[`actions_${item.getIn(['attributes', 'measuretype_id'])}`].single
+    );
     const content = {
       header: {
-        aboveTitle: intl.formatMessage(
-          appMessages.entities[`actions_${item.getIn(['attributes', 'measuretype_id'])}`].single
-        ),
+        aboveTitle: label,
         title: item && item.getIn(['attributes', 'title']),
       },
       item,
       footer: {
         primaryLink: item && {
           path: `${ROUTES.ACTION}/${item.get('id')}`,
-          title: 'Action details',
+          title: `${label} details`,
         },
       },
     };
     return content;
   }
   if (item && qe(item.get('type'), API.INDICATORS)) {
-    return { entity: { path: ROUTES.INDICATOR, id: item.get('id') } };
+    // return { entity: { path: ROUTES.INDICATOR, id: item.get('id') } };
+    const label = intl.formatMessage(
+      appMessages.entities.indicators.single
+    );
+    const content = {
+      header: {
+        aboveTitle: label,
+        title: item && item.getIn(['attributes', 'title']),
+      },
+      item,
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.INDICATOR}/${item.get('id')}`,
+          title: `${label} details`,
+        },
+      },
+    };
+    return content;
   }
   if (item && qe(item.get('type'), API.USERS)) {
-    return { entity: { path: ROUTES.USERS, id: item.get('id') } };
+    // return { entity: { path: ROUTES.USERS, id: item.get('id') } };
+    const label = intl.formatMessage(
+      appMessages.entities.users.single
+    );
+    const content = {
+      header: {
+        aboveTitle: label,
+        title: item && item.getIn(['attributes', 'title']),
+      },
+      item,
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.USER}/${item.get('id')}`,
+          title: `${label} details`,
+        },
+      },
+    };
+    return content;
   }
   if (item && qe(item.get('type'), API.CATEGORIES)) {
-    return { entity: { path: ROUTES.CATEGORY, id: item.get('id') } };
+    // return { entity: { path: ROUTES.CATEGORY, id: item.get('id') } };
+    const label = appMessages.entities.taxonomies[item.getIn(['attributes', 'taxonomy_id'])]
+      ? intl.formatMessage(
+        appMessages.entities.taxonomies[item.getIn(['attributes', 'taxonomy_id'])].single
+      )
+      : 'Category';
+    const content = {
+      header: {
+        aboveTitle: label,
+        title: item && item.getIn(['attributes', 'title']),
+      },
+      item,
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.CATEGORY}/${item.get('id')}`,
+          title: `${label} details`,
+        },
+      },
+    };
+    return content;
   }
   if (item && qe(item.get('type'), API.RESOURCES)) {
-    return { entity: { path: ROUTES.RESOURCE, id: item.get('id') } };
+    const label = intl.formatMessage(
+      appMessages.entities[`resources_${item.getIn(['attributes', 'resourcetype_id'])}`].single
+    );
+    const content = {
+      header: {
+        aboveTitle: label,
+        title: item && item.getIn(['attributes', 'title']),
+      },
+      item,
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.RESOURCE}/${item.get('id')}`,
+          title: `${label} details`,
+        },
+      },
+    };
+    return content;
   }
   return {};
 };

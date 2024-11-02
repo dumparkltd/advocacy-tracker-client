@@ -59,10 +59,10 @@ export function EntityPreview({
           content={content.get('countryPositions')}
         />
       )}
-      {content && content.get('item') && (
+      {content && content.get('item') && !content.get('entity') && (
         <PreviewContent item={content.get('item')} columns={content.get('columns')} />
       )}
-      {content && content.get('footer') && (
+      {content && content.get('footer') && !content.get('entity') && (
         <PreviewFooter
           content={content.get('footer').toJS()}
           onUpdatePath={onUpdatePath}
