@@ -132,6 +132,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       inModal,
       isAdmin,
       invalidateEntitiesOnSuccess,
+      dataReady,
     } = this.props;
 
     const type = intl.formatMessage(appMessages.entities[`actors_${typeId}`].single);
