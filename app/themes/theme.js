@@ -527,7 +527,7 @@ theme.accordion = {
   },
 };
 theme.layer = {
-  zIndex: 201,
+  zIndex: 999999999,
   overlay: {
     background: 'rgba(0, 0, 0, 0.80)',
   },
