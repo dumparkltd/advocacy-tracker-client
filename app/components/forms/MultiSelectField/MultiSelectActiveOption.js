@@ -32,9 +32,9 @@ const Styled = styled(
   (p) => <Box direction="column" {...p} />
 )`
   position: relative;
-  background-color: ${palette('mainListItem', 1)};
   margin-bottom: 4px;
   margin-top: 4px;
+  border-bottom: 1px solid black;
 `;
 
 const MultiselectActiveOptionRemove = styled(Button)`
@@ -75,7 +75,7 @@ export function MultiSelectActiveOption({
 }) {
   return (
     <Styled>
-      <Box direction="row" align="center" justify="between" pad={{ vertical: 'xsmall' }}>
+      <Box direction="row" align="center" justify="between" pad={{ vertical: 'small' }}>
         <TitleWrap>
           <Box direction="row" gap="small">
             {option.get('reference') && (
@@ -85,7 +85,7 @@ export function MultiSelectActiveOption({
               <Box><ItemStatus draft /></Box>
             )}
           </Box>
-          <Box>{option.get('label')}</Box>
+          <Box><Text size="small">{option.get('label')}</Text></Box>
         </TitleWrap>
         <Box>
           <Box>

@@ -970,6 +970,30 @@ const checkRequired = ({ typeId, att, attributes }) => {
   }
   return false;
 };
+const checkHidden = ({ typeId, att, attributes }) => {
+  if (typeId && attributes && attributes[att] && attributes[att].hideByDefault) {
+    return typeof attributes[att].hideByDefault === 'boolean'
+      ? attributes[att].hideByDefault
+      : attributes[att].hideByDefault[typeId.toString()];
+  }
+  return false;
+};
+const getFormStep = ({ typeId, att, attributes }) => {
+  if (typeId && attributes && attributes[att] && attributes[att].step) {
+    return typeof attributes[att].step === 'string'
+      ? attributes[att].step
+      : (attributes[att].step[typeId.toString()] || 'main');
+  }
+  return 'main';
+};
+const getFormSection = ({ typeId, att, attributes }) => {
+  if (typeId && attributes && attributes[att] && attributes[att].step) {
+    return isNumber(attributes[att].section)
+      ? attributes[att].section
+      : (attributes[att].section[typeId.toString()] || 1);
+  }
+  return 1;
+};
 export const checkActionAttribute = (typeId, att, isAdmin) => ACTION_FIELDS
   && ACTION_FIELDS.ATTRIBUTES
   && checkAttribute({
@@ -989,6 +1013,27 @@ export const checkIndicatorAttribute = (att, isAdmin) => INDICATOR_FIELDS
 export const checkActionRequired = (typeId, att) => ACTION_FIELDS
   && ACTION_FIELDS.ATTRIBUTES
   && checkRequired({
+    typeId,
+    att,
+    attributes: ACTION_FIELDS.ATTRIBUTES,
+  });
+export const checkActionHidden = (typeId, att) => ACTION_FIELDS
+  && ACTION_FIELDS.ATTRIBUTES
+  && checkHidden({
+    typeId,
+    att,
+    attributes: ACTION_FIELDS.ATTRIBUTES,
+  });
+export const getActionFormStep = (typeId, att) => ACTION_FIELDS
+  && ACTION_FIELDS.ATTRIBUTES
+  && getFormStep({
+    typeId,
+    att,
+    attributes: ACTION_FIELDS.ATTRIBUTES,
+  });
+export const getActionFormSection = (typeId, att) => ACTION_FIELDS
+  && ACTION_FIELDS.ATTRIBUTES
+  && getFormSection({
     typeId,
     att,
     attributes: ACTION_FIELDS.ATTRIBUTES,

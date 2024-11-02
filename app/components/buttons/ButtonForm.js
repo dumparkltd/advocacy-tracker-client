@@ -3,13 +3,14 @@ import styled from 'styled-components';
 import Button from 'components/buttons/Button';
 
 const ButtonForm = styled(Button)`
-  font-weight: bold;
   text-transform: uppercase;
   font-size: 0.9em;
   padding: 0.7em 0.5em;
+  font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 18px;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     letter-spacing: 1px;
-    font-size: 1em;
+    font-size: 24px;
     padding: 1em 1.2em;
   }
   @media print {

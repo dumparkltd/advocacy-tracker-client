@@ -58,6 +58,7 @@ const light = coolorsToHex('https://coolors.co/f1f0f1-f1f0f1-d5dddd-cdd6d6-c7d1d
 // 1: AA on white
 const error = coolorsToHex('https://coolors.co/b20e0e-c10f0f-d31717-f2e3e3-ffffff');
 const success = coolorsToHex('https://coolors.co/00632e-007034-007c3a-e1f2ed-ffffff');
+const alert = coolorsToHex('https://coolors.co/ff8800-ffa200-ffb700-ffd000-ffea00');
 // colour palettes, usage:
 //   import { palette } from 'styled-theme';
 //   color: ${palette('primary', 0)}
@@ -72,7 +73,7 @@ theme.palette = {
   // other palettes
   error,
   success,
-  // alert,
+  alert,
   // info,
 
   // taxonomy/category colours

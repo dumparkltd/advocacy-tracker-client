@@ -13,7 +13,7 @@ import styled from 'styled-components';
 import { actions as formActions } from 'react-redux-form/immutable';
 
 import {
-  getEmailField,
+  getEmailFormField,
 } from 'utils/forms';
 
 import Icon from 'components/Icon';
@@ -78,7 +78,11 @@ export class UserPasswordRecover extends React.PureComponent { // eslint-disable
                 handleCancel={this.props.handleCancel}
                 labels={{ submit: intl.formatMessage(messages.submit) }}
                 fields={[
-                  getEmailField(intl.formatMessage, true, '.email'),
+                  getEmailFormField({
+                    formatMessage: intl.formatMessage,
+                    required: true,
+                    model: '.email',
+                  }),
                 ]}
               />
             )

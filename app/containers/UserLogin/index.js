@@ -14,8 +14,8 @@ import { actions as formActions } from 'react-redux-form/immutable';
 import { Text, Box } from 'grommet';
 
 import {
-  getEmailField,
-  getPasswordField,
+  getEmailFormField,
+  getPasswordFormField,
 } from 'utils/forms';
 
 import Messages from 'components/Messages';
@@ -99,8 +99,8 @@ export class UserLogin extends React.PureComponent { // eslint-disable-line reac
             handleCancel={this.props.handleCancel}
             labels={{ submit: intl.formatMessage(messages.submit) }}
             fields={[
-              getEmailField(intl.formatMessage, true, '.email'),
-              getPasswordField(intl.formatMessage, '.password'),
+              getEmailFormField({ formatMessage: intl.formatMessage, required: true, model: '.email' }),
+              getPasswordFormField({ formatMessage: intl.formatMessage, model: '.password' }),
             ]}
           />
           <BottomLinks>

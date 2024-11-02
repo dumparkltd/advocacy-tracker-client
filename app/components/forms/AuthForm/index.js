@@ -27,7 +27,9 @@ import Required from '../Required';
 import ControlInput from '../ControlInput';
 
 // These props will be omitted before being passed to the Control component
-const nonControlProps = ['hint', 'label', 'component', 'controlType', 'children', 'errorMessages'];
+const nonControlProps = [
+  'hint', 'label', 'component', 'controlType', 'children', 'errorMessages', 'hasrequired', 'hideByDefault',
+];
 
 const StyledForm = styled(Form)`
   display: table;

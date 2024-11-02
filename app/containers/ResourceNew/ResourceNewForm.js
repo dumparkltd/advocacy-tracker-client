@@ -13,19 +13,12 @@ import { Map, fromJS } from 'immutable';
 
 import {
   getConnectionUpdatesFromFormData,
-  getTitleFormField,
-  getMarkdownFormField,
-  renderActionsByActiontypeControl,
-  getLinkFormField,
-  getStatusField,
-  getDateField,
+  getResourcetypeFormFields,
 } from 'utils/forms';
-import { getInfoField } from 'utils/fields';
 
 // import { qe } from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
-import { checkResourceAttribute, checkResourceRequired } from 'utils/entities';
 
 import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
 import { API, ROUTES, USER_ROLES } from 'themes/config';
@@ -52,7 +45,7 @@ import {
 
 import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
-import FormWrapper from './FormWrapper';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import {
   selectActionsByActiontype,
@@ -95,111 +88,6 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
     ));
   };
 
-  getHeaderMainFields = (typeId) => {
-    const { intl } = this.context;
-    return ([ // fieldGroups
-      { // fieldGroup
-        fields: [
-          getInfoField(
-            'resourcetype_id',
-            intl.formatMessage(appMessages.resourcetypes[typeId]),
-            true // large
-          ), // required
-          checkResourceAttribute(typeId, 'title') && getTitleFormField(
-            intl.formatMessage,
-            'title',
-            'title',
-            checkResourceRequired(typeId, 'title'),
-          ),
-        ],
-      },
-    ]);
-  };
-
-  getHeaderAsideFields = () => {
-    const { intl } = this.context;
-    return ([
-      {
-        fields: [
-          getStatusField(intl.formatMessage),
-          getStatusField(intl.formatMessage, 'private'),
-        ],
-      },
-    ]);
-  };
-
-  getBodyMainFields = (
-    typeId,
-    connectedTaxonomies,
-    actionsByActiontype,
-    onCreateOption,
-    isAdmin,
-  ) => {
-    const { intl } = this.context;
-    const groups = [];
-    groups.push({ // fieldGroup
-      fields: [
-        checkResourceAttribute(typeId, 'url') && getLinkFormField(
-          intl.formatMessage,
-          checkResourceRequired(typeId, 'url'),
-          'url',
-        ),
-      ],
-    });
-    groups.push({
-      fields: [
-        checkResourceAttribute(typeId, 'description') && getMarkdownFormField(
-          intl.formatMessage,
-          checkResourceRequired(typeId, 'description'),
-          'description',
-        ),
-        checkResourceAttribute(typeId, 'status') && getMarkdownFormField(
-          intl.formatMessage,
-          checkResourceRequired(typeId, 'status'),
-          'status',
-        ),
-      ],
-    });
-    if (actionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl({
-        entitiesByActiontype: actionsByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.actions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
-
-  getBodyAsideFields = (typeId) => {
-    const { intl } = this.context;
-    return ([ // fieldGroups
-      { // fieldGroup
-        fields: [
-          checkResourceAttribute(typeId, 'publication_date') && getDateField(
-            intl.formatMessage,
-            'publication_date',
-            checkResourceRequired(typeId, 'publication_date'),
-          ),
-          checkResourceAttribute(typeId, 'access_date') && getDateField(
-            intl.formatMessage,
-            'access_date',
-            checkResourceRequired(typeId, 'access_date'),
-          ),
-        ],
-      },
-    ]);
-  };
-
   render() {
     const { intl } = this.context;
     const {
@@ -224,59 +112,42 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
-    const type = intl.formatMessage(appMessages.entities[`resources_${typeId}`].single);
+    const typeLabel = intl.formatMessage(appMessages.entities[`resources_${typeId}`].single);
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
         <ContentHeader
-          title={intl.formatMessage(messages.pageTitle, { type })}
+          title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
           type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
-          buttons={
-            dataReady ? [{
-              type: 'cancel',
-              onClick: () => handleCancel(typeId),
-            },
-            {
-              type: 'save',
-              disabled: saving,
-              onClick: () => handleSubmitRemote(formDataPath),
-            }] : null
-          }
         />
-        <FormWrapper
+        <EntityFormWrapper
+          isNewEntityView
+          typeLabel={typeLabel}
           model={formDataPath}
           inModal={inModal}
           viewDomain={viewDomain}
+          saving={saving}
           handleSubmit={(formData) => handleSubmit(
             formData,
             resourcetype,
             actionsByActiontype,
             invalidateEntitiesOnSuccess,
-            // resourcetypeTaxonomies,
           )}
+          handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleSubmitFail={handleSubmitFail}
           handleCancel={() => handleCancel(typeId)}
           handleUpdate={handleUpdate}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={{ // isMember, taxonomies,
-            header: {
-              main: this.getHeaderMainFields(typeId),
-              aside: this.getHeaderAsideFields(),
-            },
-            body: {
-              main: this.getBodyMainFields(
-                typeId,
-                connectedTaxonomies,
-                actionsByActiontype,
-                inModal ? null : onCreateOption,
-                isAdmin,
-              ),
-              aside: this.getBodyAsideFields(
-                typeId,
-              ),
-            },
-          }}
+          fieldsByStep={dataReady && getResourcetypeFormFields({
+            typeId,
+            isAdmin,
+            isMine: true,
+            connectedTaxonomies,
+            actionsByActiontype,
+            onCreateOption: inModal ? null : onCreateOption,
+            intl,
+          })}
         />
       </Content>
     );

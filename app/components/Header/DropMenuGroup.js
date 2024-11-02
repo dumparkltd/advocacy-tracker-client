@@ -59,7 +59,7 @@ const DropMenuGroup = ({
             active={item.active}
             onClick={(evt) => {
               if (evt) evt.stopPropagation();
-              onHide();
+              if (onHide) onHide();
               onClick(item.path);
             }}
           >

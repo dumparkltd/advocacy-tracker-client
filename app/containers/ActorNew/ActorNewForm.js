@@ -13,24 +13,11 @@ import { Map, List, fromJS } from 'immutable';
 
 import {
   getConnectionUpdatesFromFormData,
-  getTitleFormField,
-  getStatusField,
-  getMarkdownFormField,
-  getCodeFormField,
-  renderTaxonomyControl,
-  getLinkFormField,
-  renderActionsByActiontypeControl,
-  renderAssociationsByActortypeControl,
-  renderMembersByActortypeControl,
-  getEmailField,
-  getTextFormField,
-  getTextareaField,
-  renderUserMultiControl,
+  getActortypeFormFields,
 } from 'utils/forms';
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
-import { checkActorAttribute, checkActorRequired } from 'utils/entities';
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
@@ -62,7 +49,7 @@ import {
 import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
 
-import FormWrapper from './FormWrapper';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import {
   selectActionsByActiontype,
@@ -121,180 +108,9 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       : dataWithType;
   };
 
-  getHeaderMainFields = (typeId, isAdmin) => {
-    const { intl } = this.context;
-    return ([ // fieldGroups
-      { // fieldGroup
-        fields: [
-          checkActorAttribute(typeId, 'code', isAdmin) && getCodeFormField(
-            intl.formatMessage,
-            'code',
-            checkActorRequired(typeId, 'code'),
-          ),
-          checkActorAttribute(typeId, 'prefix') && getCodeFormField(
-            intl.formatMessage,
-            'prefix',
-            checkActorRequired(typeId, 'prefix'),
-          ),
-          checkActorAttribute(typeId, 'title') && getTitleFormField(
-            intl.formatMessage,
-            'title',
-            'title',
-            checkActorRequired(typeId, 'title'),
-          ),
-          checkActorAttribute(typeId, 'name') && getTitleFormField(
-            intl.formatMessage,
-            'title',
-            'title',
-            checkActorRequired(typeId, 'name'),
-            'name' // label
-          ),
-        ],
-      },
-    ]);
-  };
-
-  getHeaderAsideFields = () => {
-    const { intl } = this.context;
-    return ([
-      {
-        fields: [
-          getStatusField(intl.formatMessage),
-          getStatusField(intl.formatMessage, 'private'),
-        ],
-      },
-    ]);
-  };
-
-  getBodyMainFields = (
-    typeId,
-    connectedTaxonomies,
-    actionsByActiontype,
-    membersByActortype,
-    onCreateOption,
-    isAdmin,
-  ) => {
-    const { intl } = this.context;
-    const groups = [];
-    groups.push({
-      fields: [
-        checkActorAttribute(typeId, 'description') && getMarkdownFormField(
-          intl.formatMessage,
-          checkActorRequired(typeId, 'description'),
-          'description',
-        ),
-        checkActorAttribute(typeId, 'activity_summary') && getMarkdownFormField(
-          intl.formatMessage,
-          checkActorRequired(typeId, 'activity_summary'),
-          'activity_summary',
-        ),
-      ],
-    });
-    if (actionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl({
-        entitiesByActiontype: actionsByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.actions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    if (membersByActortype) {
-      const memberConnections = renderMembersByActortypeControl({
-        entitiesByActortype: membersByActortype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (memberConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.members),
-            fields: memberConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
-
-  getBodyAsideFields = (
-    typeId,
-    taxonomies,
-    connectedTaxonomies,
-    associationsByActortype,
-    userOptions,
-    onCreateOption,
-    isAdmin,
-  ) => {
-    const { intl } = this.context;
-    const groups = []; // fieldGroups
-    if (userOptions) {
-      groups.push(
-        {
-          label: intl.formatMessage(appMessages.nav.userActors),
-          fields: [
-            renderUserMultiControl(userOptions, null, intl),
-          ],
-        },
-      );
-    }
-    groups.push(
-      { // fieldGroup
-        fields: [
-          checkActorAttribute(typeId, 'email') && getEmailField(intl.formatMessage, checkActorRequired(typeId, 'email')),
-          checkActorAttribute(typeId, 'phone') && getTextFormField(intl.formatMessage, 'phone', checkActorRequired(typeId, 'phone')),
-          checkActorAttribute(typeId, 'address') && getTextareaField(intl.formatMessage, 'address', checkActorRequired(typeId, 'address')),
-          checkActorAttribute(typeId, 'url') && getLinkFormField(
-            intl.formatMessage,
-            checkActorRequired(typeId, 'url'),
-            'url',
-          ),
-        ],
-      },
-    );
-    groups.push(
-      { // fieldGroup
-        label: intl.formatMessage(appMessages.entities.taxonomies.plural),
-        icon: 'categories',
-        fields: renderTaxonomyControl({
-          taxonomies, onCreateOption, intl,
-        }),
-      },
-    );
-    if (associationsByActortype) {
-      const associationConnections = renderAssociationsByActortypeControl({
-        entitiesByActortype: associationsByActortype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (associationConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.associations),
-            fields: associationConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
-
   render() {
     const { intl } = this.context;
     const {
-      dataReady,
       viewDomain,
       connectedTaxonomies,
       actionsByActiontype,
@@ -318,28 +134,16 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       invalidateEntitiesOnSuccess,
     } = this.props;
 
-    const { saveSending, isAnySending } = viewDomain.get('page').toJS();
-    const saving = isAnySending || saveSending;
-
     const type = intl.formatMessage(appMessages.entities[`actors_${typeId}`].single);
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
         <ContentHeader
           title={intl.formatMessage(messages.pageTitle, { type })}
           type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
-          buttons={
-            dataReady ? [{
-              type: 'cancel',
-              onClick: () => handleCancel(typeId),
-            },
-            {
-              type: 'save',
-              disabled: saving,
-              onClick: () => handleSubmitRemote(formDataPath),
-            }] : null
-          }
         />
-        <FormWrapper
+        <EntityFormWrapper
+          typeLabel={type}
+          isNewEntityView
           model={formDataPath}
           inModal={inModal}
           viewDomain={viewDomain}
@@ -353,36 +157,25 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
             invalidateEntitiesOnSuccess,
           )}
           handleSubmitFail={handleSubmitFail}
+          handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleCancel={() => handleCancel(typeId)}
           handleUpdate={handleUpdate}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={{ // isMember, taxonomies,
-            header: {
-              main: this.getHeaderMainFields(typeId, isAdmin),
-              aside: this.getHeaderAsideFields(),
-            },
-            body: {
-              main: this.getBodyMainFields(
-                typeId,
-                connectedTaxonomies,
-                actionsByActiontype,
-                membersByActortype,
-                inModal ? null : onCreateOption,
-                isAdmin,
-              ),
-              aside: this.getBodyAsideFields(
-                typeId,
-                taxonomies,
-                connectedTaxonomies,
-                associationsByActortype,
-                userOptions,
-                inModal ? null : onCreateOption,
-                isAdmin,
-              ),
-            },
-          }}
+          fieldsByStep={dataReady && getActortypeFormFields({
+            isMine: true,
+            isAdmin,
+            typeId,
+            taxonomies,
+            connectedTaxonomies,
+            userOptions,
+            actionsByActiontype,
+            associationsByActortype,
+            membersByActortype,
+            onCreateOption: inModal ? null : onCreateOption,
+            intl,
+          })}
         />
       </Content>
     );
@@ -489,6 +282,8 @@ function mapDispatchToProps(
       userOptions,
       invalidateEntitiesOnSuccess,
     ) => {
+      // console.log('formData', formData.toJS())
+
       let saveData = formData.setIn(
         ['attributes', 'actortype_id'],
         actortype.get('id'),

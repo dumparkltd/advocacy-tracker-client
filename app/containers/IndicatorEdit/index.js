@@ -14,18 +14,10 @@ import { Map, fromJS } from 'immutable';
 
 import {
   entityOptions,
-  getTitleFormField,
-  getStatusField,
-  getCodeFormField,
-  getMarkdownFormField,
-  renderActionsByActiontypeControl,
+  getIndicatorFormFields,
   getConnectionUpdatesFromFormData,
 } from 'utils/forms';
-import { getMetaField } from 'utils/fields';
-import {
-  checkIndicatorAttribute,
-  checkIndicatorRequired,
-} from 'utils/entities';
+
 import qe from 'utils/quasi-equals';
 
 import { scrollToTop } from 'utils/scroll-to-component';
@@ -62,12 +54,13 @@ import {
 
 import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
-import FormWrapper from './FormWrapper';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import {
   selectDomainPage,
   selectViewEntity,
   selectActionsByActiontype,
+  selectDomain,
 } from './selectors';
 
 import messages from './messages';
@@ -124,124 +117,12 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
       : Map();
   };
 
-  getHeaderMainFields = (isAdmin) => {
-    const { intl } = this.context;
-    return (
-      [ // fieldGroups
-        { // fieldGroup
-          fields: [
-            checkIndicatorAttribute('code', isAdmin) && getCodeFormField(
-              intl.formatMessage,
-              'code',
-              checkIndicatorRequired('code'),
-            ),
-            getTitleFormField(
-              intl.formatMessage,
-              'title',
-              'title',
-              true,
-            ),
-          ],
-        },
-      ]
-    );
-  };
-
-  getHeaderAsideFields = (entity, isAdmin, isMine) => {
-    const { intl } = this.context;
-    return ([
-      {
-        fields: [
-          getStatusField(intl.formatMessage),
-          (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
-          isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
-          getMetaField(entity, true),
-        ],
-      },
-    ]);
-  };
-
-  getBodyMainFields = (
-    entity,
-    connectedTaxonomies,
-    actionsByActiontype,
-    onCreateOption,
-    isAdmin,
-  ) => {
-    const { intl } = this.context;
-    const groups = [];
-    groups.push(
-      {
-        fields: [
-          getMarkdownFormField(
-            intl.formatMessage,
-            false,
-            'description',
-          ),
-        ],
-      },
-    );
-
-    if (actionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl({
-        entitiesByActiontype: actionsByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-        connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
-          ? [
-            {
-              attribute: 'supportlevel_id',
-              type: 'select',
-              options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId].map(
-                (level) => ({
-                  label: intl.formatMessage(appMessages.supportlevels[level.value]),
-                  ...level,
-                }),
-              ),
-            },
-          ]
-          : null,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.actions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
-
-  // getBodyAsideFields = (entity) => {
-  //   const { intl } = this.context;
-  //   const typeId = entity.getIn(['attributes', 'indicatortype_id']);
-  //   return ([ // fieldGroups
-  //     { // fieldGroup
-  //       fields: [
-  //         checkResourceAttribute(typeId, 'publication_date') && getDateField(
-  //           intl.formatMessage,
-  //           'publication_date',
-  //           checkResourceRequired(typeId, 'publication_date'),
-  //         ),
-  //         checkResourceAttribute(typeId, 'access_date') && getDateField(
-  //           intl.formatMessage,
-  //           'access_date',
-  //           checkResourceRequired(typeId, 'access_date'),
-  //         ),
-  //       ],
-  //     },
-  //   ]);
-  // };
-
   render() {
     const { intl } = this.context;
     const {
       viewEntity,
       dataReady,
+      viewDomain,
       viewDomainPage,
       connectedTaxonomies,
       actionsByActiontype,
@@ -261,7 +142,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
 
     const { saveSending, saveError, deleteSending } = viewDomainPage.toJS();
 
-    const type = intl.formatMessage(appMessages.entities.indicators.single);
+    const typeLabel = intl.formatMessage(appMessages.entities.indicators.single);
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
 
     // user can delete content
@@ -269,30 +150,19 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
     // if they are at least members and its their own content
     const canDelete = isAdmin
       || (isUserMember && viewEntity && qe(myId, viewEntity.getIn(['attributes', 'created_by_id'])));
-
+    const formDataPath = 'indicatorEdit.form.data';
     return (
       <div>
         <Helmet
-          title={`${intl.formatMessage(messages.pageTitle, { type })}`}
+          title={`${intl.formatMessage(messages.pageTitle, { type: typeLabel })}`}
           meta={[
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
         <Content ref={this.scrollContainer}>
           <ContentHeader
-            title={intl.formatMessage(messages.pageTitle, { type })}
+            title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
             type={CONTENT_SINGLE}
-            buttons={
-              viewEntity && dataReady ? [{
-                type: 'cancel',
-                onClick: handleCancel,
-              },
-              {
-                type: 'save',
-                disabled: saveSending,
-                onClick: () => handleSubmitRemote('indicatorEdit.form.data'),
-              }] : null
-            }
           />
           {!viewEntity && dataReady && !saveError && !deleteSending
             && (
@@ -303,37 +173,45 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
           }
           {viewEntity && !deleteSending
             && (
-              <FormWrapper
-                model="indicatorEdit.form.data"
+              <EntityFormWrapper
+                viewDomain={viewDomain}
+                typeLabel={typeLabel}
+                model={formDataPath}
                 saving={saveSending}
                 handleSubmit={(formData) => handleSubmit(
                   formData,
                   actionsByActiontype,
                 )}
                 handleSubmitFail={handleSubmitFail}
+                handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
                 handleCancel={handleCancel}
                 handleUpdate={handleUpdate}
                 handleDelete={canDelete ? handleDelete : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
-                fields={dataReady && {
-                  header: {
-                    main: this.getHeaderMainFields(isAdmin),
-                    aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
-                  },
-                  body: {
-                    main: this.getBodyMainFields(
-                      viewEntity,
-                      connectedTaxonomies,
-                      actionsByActiontype,
-                      onCreateOption,
-                      isAdmin,
-                    ),
-                    // aside: this.getBodyAsideFields(
-                    //   viewEntity
-                    // ),
-                  },
-                }}
+                fieldsByStep={dataReady && getIndicatorFormFields({
+                  isAdmin,
+                  viewEntity,
+                  isMine,
+                  connectedTaxonomies,
+                  actionsByActiontype,
+                  onCreateOption,
+                  intl,
+                  connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
+                    ? [
+                      {
+                        attribute: 'supportlevel_id',
+                        type: 'select',
+                        options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId].map(
+                          (level) => ({
+                            label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                            ...level,
+                          }),
+                        ),
+                      },
+                    ]
+                    : null,
+                })}
                 scrollContainer={this.scrollContainer.current}
               />
             )
@@ -354,6 +232,7 @@ IndicatorEdit.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func,
+  viewDomain: PropTypes.object,
   viewDomainPage: PropTypes.object,
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
@@ -373,6 +252,7 @@ IndicatorEdit.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 const mapStateToProps = (state, props) => ({
+  viewDomain: selectDomain(state),
   viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
   isUserMember: selectIsUserMember(state),
