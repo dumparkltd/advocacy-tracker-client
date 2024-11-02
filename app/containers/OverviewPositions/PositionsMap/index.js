@@ -404,9 +404,9 @@ export function PositionsMap({
           <FormattedMessage {...messages.title} />
         </Title>
       </Box>
-      <Card>
-        <Loading loading={!dataReady} />
-        {dataReady && (
+      <Loading loading={!dataReady} />
+      {dataReady && (
+        <Card>
           <Box direction={isMinSize(size, 'medium') ? 'row' : 'column'}>
             {isMinSize(size, 'medium') && (
               <IndicatorSidePanel>
@@ -560,8 +560,8 @@ export function PositionsMap({
               </Box>
             </Box>
           </Box>
-        )}
-      </Card>
+        </Card>
+      )}
     </Box>
   );
 }

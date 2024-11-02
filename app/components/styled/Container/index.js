@@ -3,7 +3,7 @@ import styled from 'styled-components';
 const Container = styled.div`
   margin-right: auto;
   margin-left: auto;
-  max-width: 100%;
+  max-width: ${({ isNarrow }) => isNarrow ? '960px' : '100%'};
   padding-bottom: ${({ noPaddingBottom, inModal, isPrint }) => (isPrint || noPaddingBottom || inModal) ? 0 : '3em'};
   padding-left: ${({ inModal }) => inModal ? 0 : 12}px;
   padding-right: ${({ inModal }) => inModal ? 0 : 12}px;
@@ -27,7 +27,7 @@ const Container = styled.div`
   @media (min-width: ${({ theme }) => theme.breakpointsMin.xlarge}) {
     max-width: ${({ isNarrow, isPrint, theme }) => {
     if (isPrint) return '100%';
-    return isNarrow ? '960px' : (parseInt(theme.breakpointsMin.xlarge, 10) - 20) + 'px';
+    return isNarrow ? '960px' : (parseInt(theme.breakpointsMin.xlarge, 10) + 50) + 'px';
   }};
 }
   @media print {

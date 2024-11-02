@@ -327,15 +327,15 @@ export function PositionsList({
           <FormattedMessage {...messages.title} />
         </Title>
       </Box>
-      <Card>
-        <Box
-          direction="column"
-          fill="horizontal"
-          pad={{ top: 'medium', horizontal: 'medium', bottom: 'none' }}
-          flex={{ grow: 1, shrink: 1 }}
-        >
-          <Loading loading={!dataReady} />
-          {dataReady && (
+      <Loading loading={!dataReady} />
+      {dataReady && (
+        <Card>
+          <Box
+            direction="column"
+            fill="horizontal"
+            pad={{ top: 'medium', horizontal: 'medium', bottom: 'none' }}
+            flex={{ grow: 1, shrink: 1 }}
+          >
             <Box gap="small">
               <Box direction={isMinSize(size, 'large') ? 'row' : 'column'} justify="between">
                 <Box gap="small" margin={{ vertical: 'small' }}>
@@ -377,16 +377,16 @@ export function PositionsList({
                 </Box>
               </Box>
               <Box
-                direction="row"
-                justify="between"
+                direction={isMinSize(size, 'ms') ? 'row' : 'column'}
+                justify={isMinSize(size, 'ms') ? 'between' : 'start'}
                 gap="small"
-                align={isMinSize(size, 'large') ? 'end' : 'start'}
+                align="start"
               >
                 <Box gap="xsmall">
                   <Text weight={600}>Levels of support</Text>
                   <Box direction="row" wrap gap="xsmall">
                     {supportLevels && supportLevels.map((level) => (
-                      <Box key={level.value} direction="row" align="center" gap="xsmall">
+                      <Box key={level.value} direction="row" align="center" gap="xsmall" margin={{ bottom: 'small' }}>
                         <Dot size="16px" color={level.color} />
                         <Text size="small">{level.label}</Text>
                       </Box>
@@ -467,9 +467,9 @@ export function PositionsList({
                 />
               </Box>
             </Box>
-          )}
-        </Box>
-      </Card>
+          </Box>
+        </Card>
+      )}
     </Box>
   );
 }
