@@ -563,7 +563,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                 },
               ]}
               entities={entityUsers}
-              entityPath={ROUTES.USER}
+              entityPath={ROUTES.USERS}
               onEntityClick={onEntityClick}
               entityTitle={{
                 single: intl.formatMessage(appMessages.entities.users.single),

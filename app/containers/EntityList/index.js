@@ -200,7 +200,7 @@ const reducePreviewItem = ({
     const content = {
       header: {
         aboveTitle: label,
-        title: item && item.getIn(['attributes', 'title']),
+        title: item && item.getIn(['attributes', 'name']),
       },
       item,
       footer: {

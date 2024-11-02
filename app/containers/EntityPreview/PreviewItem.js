@@ -57,7 +57,7 @@ export const DEPENDENCIES = [
   API.ACTION_INDICATORS,
 ];
 
-export function PreviewContent({
+export function PreviewItem({
   item,
   columns,
   taxonomies,
@@ -286,7 +286,7 @@ export function PreviewContent({
     : null;
 }
 
-PreviewContent.propTypes = {
+PreviewItem.propTypes = {
   item: PropTypes.object, // immutable Map
   columns: PropTypes.object, // immutable List
   // previewEntity: PropTypes.object, // immutable Map
@@ -328,4 +328,4 @@ export function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(PreviewContent));
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(PreviewItem));
