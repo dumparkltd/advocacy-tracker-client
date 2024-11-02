@@ -33,8 +33,7 @@ const DeleteConfirmText = styled.span`
   padding-right: 1em;
 `;
 const Styled = styled.div`
-  margin-bottom: 200px;
-
+  margin-bottom: ${({ inModal }) => inModal ? 0 : 300}px;
 `;
 const DeleteWrapper = styled(
   (p) => <Box direction="row" align="center" pad={{ vertical: 'medium' }} {...p} />
@@ -268,29 +267,31 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     return (
       <ResponsiveContext.Consumer>
         {(size) => (
-          <Styled>
-            <Box direction="row" justify="end">
-              {handleCancel && (
+          <Styled inModal={inModal}>
+            {!inModal && (
+              <Box direction="row" justify="end">
+                {handleCancel && (
+                  <Box>
+                    <ButtonCancel
+                      type="button"
+                      onClick={handleCancel}
+                    >
+                      <FormattedMessage {...appMessages.buttons.cancel} />
+                    </ButtonCancel>
+                  </Box>
+                )}
                 <Box>
-                  <ButtonCancel
+                  <ButtonSubmitSubtle
                     type="button"
-                    onClick={handleCancel}
+                    disabled={isBlocked}
+                    onClick={handleSubmitRemote}
                   >
-                    <FormattedMessage {...appMessages.buttons.cancel} />
-                  </ButtonCancel>
+                    Save & Close
+                  </ButtonSubmitSubtle>
                 </Box>
-              )}
-              <Box>
-                <ButtonSubmitSubtle
-                  type="button"
-                  disabled={isBlocked}
-                  onClick={handleSubmitRemote}
-                >
-                  Save & Close
-                </ButtonSubmitSubtle>
               </Box>
-            </Box>
-            <FormWrapper withoutShadow={inModal} hasMarginBottom={false}>
+            )}
+            <FormWrapper hasMarginBottom={false}>
               <StyledForm
                 model={model}
                 onSubmit={this.handleSubmit}

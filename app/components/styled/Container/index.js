@@ -7,7 +7,15 @@ const Container = styled.div`
   padding-bottom: ${({ noPaddingBottom, inModal, isPrint }) => (isPrint || noPaddingBottom || inModal) ? 0 : '3em'};
   padding-left: ${({ inModal }) => inModal ? 0 : 12}px;
   padding-right: ${({ inModal }) => inModal ? 0 : 12}px;
-  background-color: ${({ inModal, bg, theme }) => (inModal || bg) ? theme.global.colors.background : 'transparent'};
+  background-color: ${({ inModal, bg, theme }) => {
+    if (bg) {
+      return theme.global.colors.background;
+    }
+    if (inModal) {
+      return 'white';
+    }
+    return 'transparent';
+  }};
   margin-top: ${({ isSingle, isPrint }) => {
     if (isPrint) return 0;
     return isSingle ? 50 : 0;
