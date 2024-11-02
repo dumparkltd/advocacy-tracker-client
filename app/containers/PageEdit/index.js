@@ -14,23 +14,17 @@ import { actions as formActions } from 'react-redux-form/immutable';
 import { Map } from 'immutable';
 
 import {
-  getTitleFormField,
-  getMenuTitleFormField,
-  getMenuOrderFormField,
-  getMarkdownFormField,
-  getStatusFormField,
+  getEntityFormFields,
 } from 'utils/forms';
-
-import {
-  getMetaField,
-} from 'utils/fields';
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
 import qe from 'utils/quasi-equals';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES, USER_ROLES, API } from 'themes/config';
+import {
+  ROUTES, USER_ROLES, API, PAGE_CONFIG,
+} from 'themes/config';
 
 import {
   loadEntitiesIfNeeded,
@@ -51,9 +45,10 @@ import {
 
 import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
-import FormWrapper from './FormWrapper';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import {
+  selectDomain,
   selectDomainPage,
   selectViewEntity,
 } from './selectors';
@@ -106,48 +101,12 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
       : Map();
   };
 
-  getHeaderMainFields = () => {
-    const { intl } = this.context;
-    return ([ // fieldGroups
-      { // fieldGroup
-        fields: [
-          getTitleFormField({ formatMessage: intl.formatMessage }),
-          getMenuTitleFormField({ formatMessage: intl.formatMessage }),
-          getMenuOrderFormField({ formatMessage: intl.formatMessage }),
-        ],
-      },
-    ]);
-  };
-
-  getHeaderAsideFields = (entity, isAdmin, isMine) => {
-    const { intl } = this.context;
-    return ([
-      {
-        fields: [
-          getStatusFormField({ formatMessage: intl.formatMessage }),
-          (isAdmin || isMine) && getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
-          getMetaField(entity),
-        ],
-      },
-    ]);
-  };
-
-  getBodyMainFields = () => {
-    const { intl } = this.context;
-    return ([{
-      fields: [getMarkdownFormField({
-        formatMessage: intl.formatMessage,
-        required: true,
-        attribute: 'content',
-      })],
-    }]);
-  };
-
   render() {
     const { intl } = this.context;
     const {
       viewEntity,
       dataReady,
+      viewDomain,
       viewDomainPage,
       isAdmin,
       myId,
@@ -163,30 +122,21 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
     const reference = this.props.params.id;
     const { saveSending, saveError, deleteSending } = viewDomainPage.toJS();
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
-
+    const pageTitle = intl.formatMessage(messages.pageTitle);
+    const typeLabel = 'Page';
+    const formDataPath = 'pageEdit.form.data';
     return (
       <div>
         <Helmet
-          title={`${intl.formatMessage(messages.pageTitle)}: ${reference}`}
+          title={`${pageTitle}: ${reference}`}
           meta={[
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
         <Content ref={this.scrollContainer}>
           <ContentHeader
-            title={intl.formatMessage(messages.pageTitle)}
+            title={pageTitle}
             type={CONTENT_SINGLE}
-            buttons={
-              viewEntity && dataReady ? [{
-                type: 'cancel',
-                onClick: handleCancel,
-              },
-              {
-                type: 'save',
-                disabled: saveSending,
-                onClick: () => handleSubmitRemote('pageEdit.form.data'),
-              }] : null
-            }
           />
           {!viewEntity && dataReady && !saveError && !deleteSending
             && (
@@ -197,25 +147,28 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
           }
           {viewEntity && !deleteSending
             && (
-              <FormWrapper
-                model="pageEdit.form.data"
+              <EntityFormWrapper
+                viewDomain={viewDomain}
+                typeLabel={typeLabel}
+                model={formDataPath}
                 saving={saveSending}
                 handleSubmit={(formData) => handleSubmit(formData)}
+                handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={handleCancel}
                 handleUpdate={handleUpdate}
                 handleDelete={isAdmin ? handleDelete : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
-                fields={dataReady && {
-                  header: {
-                    main: this.getHeaderMainFields(),
-                    aside: this.getHeaderAsideFields(viewEntity, isAdmin, isMine),
+                fieldsByStep={dataReady && getEntityFormFields(
+                  {
+                    isAdmin: true,
+                    isMine,
+                    intl,
                   },
-                  body: {
-                    main: this.getBodyMainFields(viewEntity),
-                  },
-                }}
+                  PAGE_CONFIG.form, // shape
+                  PAGE_CONFIG.attributes, // attributes
+                )}
                 scrollContainer={this.scrollContainer.current}
               />
             )
@@ -236,6 +189,7 @@ PageEdit.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func.isRequired,
+  viewDomain: PropTypes.object,
   viewDomainPage: PropTypes.object,
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
@@ -252,6 +206,7 @@ PageEdit.contextTypes = {
 };
 
 const mapStateToProps = (state, props) => ({
+  viewDomain: selectDomain(state),
   viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),

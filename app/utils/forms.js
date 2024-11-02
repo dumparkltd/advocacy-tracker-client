@@ -28,11 +28,13 @@ import {
   ACTORTYPES_CONFIG,
   RESOURCETYPES_CONFIG,
   INDICATOR_CONFIG,
+  PAGE_CONFIG,
   INDICATOR_FIELDS,
   RESOURCE_FIELDS,
   ACTORTYPES,
   ACTION_FIELDS,
   ACTOR_FIELDS,
+  PAGE_FIELDS,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
@@ -1066,6 +1068,7 @@ const getEntityFormField = (
     connectedTaxonomies,
     userOptions,
     indicatorOptions,
+    roleOptions,
     actionsByActiontype,
     topActionsByActiontype,
     subActionsByActiontype,
@@ -1115,18 +1118,31 @@ const getEntityFormField = (
     const fieldArgs = {
       formatMessage, attribute, required, hideByDefault, label,
     };
+    // for attributes
     if (attribute === 'title') {
       result = getTitleFormField(fieldArgs);
     } else if (attribute === 'code' || attribute === 'prefix') {
       result = getCodeFormField(fieldArgs);
     } else if (attribute === 'email') {
       result = getEmailFormField(fieldArgs);
+    } else if (attribute === 'menu_title') {
+      result = getMenuTitleFormField(fieldArgs);
+    } else if (attribute === 'order') {
+      result = getMenuOrderFormField(fieldArgs);
+
+    // for field types
     } else if (cleanFieldType === 'markdown') {
       result = getMarkdownFormField(fieldArgs);
     } else if (cleanFieldType === 'date') {
       result = getDateFormField(fieldArgs);
     } else if (cleanFieldType === 'text') {
       result = getTextFormField(fieldArgs);
+    } else if (cleanFieldType === 'short') {
+      result = getFormField({
+        ...fieldArgs,
+        controlType: 'short',
+        hideByDefault,
+      });
     } else if (cleanFieldType === 'textarea') {
       result = getTextareaFormField(fieldArgs);
     } else if (cleanFieldType === 'url') {
@@ -1208,6 +1224,10 @@ const getEntityFormField = (
       });
     } else if (connection === API.USERS && userOptions) {
       result = renderUserMultiControl({ entities: userOptions, intl });
+    } else if (connection === API.ROLES && roleOptions) {
+      result = getRoleFormField(
+        { formatMessage, roleOptions, hideByDefault }
+      );
     }
   } else if (taxonomy && taxonomies) {
     const theTaxonomy = taxonomies.get(`${taxonomy}`);
@@ -1232,10 +1252,7 @@ const getEntityFormField = (
   return result;
 };
 
-export const getActiontypeFormFields = (args) => {
-  const { typeId } = args;
-  const shape = ACTIONTYPES_CONFIG[parseInt(typeId, 10)]
-    && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].form;
+export const getEntityFormFields = (args, shape, attributes) => {
   const steps = shape && shape.map(
     (step) => ({
       ...step,
@@ -1246,115 +1263,8 @@ export const getActiontypeFormFields = (args) => {
             (row) => ({
               fields: row.map(
                 (field) => {
-                  const fieldConfig = field.attribute
-                    ? ACTION_FIELDS.ATTRIBUTES[field.attribute]
-                    : null;
-                  return getEntityFormField(field, args, fieldConfig);
-                },
-              ),
-            })
-          ),
-        })
-      ),
-      fields: step.fields && step.fields.map(
-        (field) => {
-          const fieldConfig = field.attribute
-            ? ACTION_FIELDS.ATTRIBUTES[field.attribute]
-            : null;
-          return getEntityFormField(field, args, fieldConfig);
-        },
-      ),
-    })
-  );
-  return steps;
-};
-
-export const getActortypeFormFields = (args) => {
-  const { typeId } = args;
-  const shape = ACTORTYPES_CONFIG[parseInt(typeId, 10)]
-    && ACTORTYPES_CONFIG[parseInt(typeId, 10)].form;
-  const steps = shape && shape.map(
-    (step) => ({
-      ...step,
-      sections: step.sections && step.sections.map(
-        (section) => ({
-          ...section,
-          rows: section.rows.map(
-            (row) => ({
-              fields: row.map(
-                (field) => {
-                  const fieldConfig = field.attribute
-                    ? ACTOR_FIELDS.ATTRIBUTES[field.attribute]
-                    : null;
-                  return getEntityFormField(field, args, fieldConfig);
-                },
-              ),
-            })
-          ),
-        })
-      ),
-      fields: step.fields && step.fields.map(
-        (field) => {
-          const fieldConfig = field.attribute
-            ? ACTOR_FIELDS.ATTRIBUTES[field.attribute]
-            : null;
-          return getEntityFormField(field, args, fieldConfig);
-        },
-      ),
-    })
-  );
-  return steps;
-};
-
-export const getResourcetypeFormFields = (args) => {
-  const shape = RESOURCETYPES_CONFIG.form;
-  const steps = shape && shape.map(
-    (step) => ({
-      ...step,
-      sections: step.sections && step.sections.map(
-        (section) => ({
-          ...section,
-          rows: section.rows.map(
-            (row) => ({
-              fields: row.map(
-                (field) => {
-                  const fieldConfig = field.attribute
-                    ? RESOURCE_FIELDS.ATTRIBUTES[field.attribute]
-                    : null;
-                  return getEntityFormField(field, args, fieldConfig);
-                },
-              ),
-            })
-          ),
-        })
-      ),
-      fields: step.fields && step.fields.map(
-        (field) => {
-          const fieldConfig = field.attribute
-            ? RESOURCE_FIELDS.ATTRIBUTES[field.attribute]
-            : null;
-          return getEntityFormField(field, args, fieldConfig);
-        },
-      ),
-    })
-  );
-  return steps;
-};
-
-export const getIndicatorFormFields = (args) => {
-  const shape = INDICATOR_CONFIG.form;
-  const steps = shape && shape.map(
-    (step) => ({
-      ...step,
-      sections: step.sections && step.sections.map(
-        (section) => ({
-          ...section,
-          rows: section.rows.map(
-            (row) => ({
-              fields: row.map(
-                (field) => {
-                  const fieldConfig = field.attribute
-                    ? INDICATOR_FIELDS.ATTRIBUTES[field.attribute]
+                  const fieldConfig = (field.attribute && attributes)
+                    ? attributes[field.attribute]
                     : null;
                   return getEntityFormField(field, args, fieldConfig);
                 },
@@ -1366,8 +1276,8 @@ export const getIndicatorFormFields = (args) => {
       // footer fields
       fields: step.fields && step.fields.map(
         (field) => {
-          const fieldConfig = field.attribute
-            ? INDICATOR_FIELDS.ATTRIBUTES[field.attribute]
+          const fieldConfig = (field.attribute && attributes)
+            ? attributes[field.attribute]
             : null;
           return getEntityFormField(field, args, fieldConfig);
         },
@@ -1376,3 +1286,30 @@ export const getIndicatorFormFields = (args) => {
   );
   return steps;
 };
+
+
+export const getActiontypeFormFields = (args) => {
+  const { typeId } = args;
+  const shape = ACTIONTYPES_CONFIG[parseInt(typeId, 10)]
+    && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].form;
+  return shape && getEntityFormFields(
+    args, shape, ACTION_FIELDS.ATTRIBUTES
+  );
+};
+
+export const getActortypeFormFields = (args) => {
+  const { typeId } = args;
+  const shape = ACTORTYPES_CONFIG[parseInt(typeId, 10)]
+    && ACTORTYPES_CONFIG[parseInt(typeId, 10)].form;
+  return shape && getEntityFormFields(
+    args, shape, ACTOR_FIELDS.ATTRIBUTES
+  );
+};
+
+export const getResourcetypeFormFields = (args) => getEntityFormFields(
+  args, RESOURCETYPES_CONFIG.form, RESOURCE_FIELDS.ATTRIBUTES
+);
+
+export const getIndicatorFormFields = (args) => getEntityFormFields(
+  args, INDICATOR_CONFIG.form, INDICATOR_FIELDS.ATTRIBUTES
+);

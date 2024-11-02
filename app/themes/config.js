@@ -837,12 +837,12 @@ export const RESOURCE_FIELDS = {
     },
     private: {
       defaultValue: false,
-      required: Object.values(ACTIONTYPES), // all types
+      required: Object.values(RESOURCETYPES), // all types
       type: 'bool',
     },
     is_archive: {
       defaultValue: false,
-      required: Object.values(ACTIONTYPES), // all types
+      required: Object.values(RESOURCETYPES), // all types
       type: 'bool',
     },
     title: {
@@ -3352,6 +3352,134 @@ export const INDICATOR_CONFIG = {
               prepopulateIfPrevious: true,
             }],
           ],
+        }, // section,
+      ], // sections
+    }, // step
+  ],
+};
+export const PAGE_CONFIG = {
+  attributes: {
+    draft: {
+      defaultValue: true,
+      required: true, // all types
+      type: 'bool',
+    },
+    private: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    title: {
+      type: 'text',
+      required: true,
+    },
+    content: {
+      type: 'markdown',
+      required: true,
+    },
+    menu_title: {
+      type: 'short',
+    },
+    order: {
+      type: 'short',
+    },
+  },
+  form: [
+    {
+      id: 'footer',
+      fields: [
+        { attribute: 'private', needsAdminOrOwn: true },
+        { attribute: 'draft', needsAdminOrOwn: true },
+      ],
+    },
+    {
+      id: 'main',
+      title: 'All content',
+      sections: [
+        {
+          id: 'content',
+          rows: [
+            [{
+              attribute: 'title',
+              required: true,
+              basis: '2/3',
+            }],
+            [
+              {
+                attribute: 'menu_title',
+                basis: '1/3',
+              },
+              {
+                attribute: 'order',
+                basis: '1/3',
+              },
+            ],
+            [{
+              attribute: 'content',
+              required: true,
+            }],
+          ], // rows
+        }, // section,
+      ], // sections
+    }, // step
+  ],
+};
+export const USER_CONFIG = {
+  attributes: {
+    draft: {
+      defaultValue: true,
+      required: true, // all types
+      type: 'bool',
+    },
+    private: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    name: {
+      type: 'text',
+      required: true,
+    },
+    email: {
+      type: 'text',
+      required: true,
+    },
+
+  },
+  form: [
+    {
+      id: 'footer',
+      fields: [
+        { attribute: 'private', needsAdminOrOwn: true },
+        { attribute: 'draft', needsAdminOrOwn: true },
+      ],
+    },
+    {
+      id: 'main',
+      title: 'All content',
+      sections: [
+        {
+          id: 'content',
+          rows: [
+            [{
+              attribute: 'name',
+              required: true,
+              basis: '2/3',
+            }],
+            [
+              {
+                attribute: 'email',
+                required: true,
+                basis: '2/3',
+              },
+            ],
+            [
+              {
+                connection: API.USERS,
+                basis: '2/3',
+              },
+            ],
+          ], // rows
         }, // section,
       ], // sections
     }, // step

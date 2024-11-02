@@ -77,7 +77,7 @@ export function PageList({
       />
       <EntityList
         entities={entities}
-        allEntities={allEntities}
+        allEntities={allEntities ? allEntities.toList() : null}
         config={CONFIG}
         headerOptions={headerOptions}
         dataReady={dataReady}

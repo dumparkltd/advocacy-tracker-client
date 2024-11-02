@@ -8,26 +8,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
-import { FormattedMessage } from 'react-intl';
 import { actions as formActions } from 'react-redux-form/immutable';
 import { Map, List, fromJS } from 'immutable';
 
 import {
   entityOptions,
   taxonomyOptions,
-  getTitleFormField,
-  getEmailFormField,
-  getRoleFormField,
-  renderActorsByActortypeControl,
-  renderActionsByActiontypeControl,
   getHighestUserRoleId,
   getConnectionUpdatesFromFormData,
+  getEntityFormFields,
 } from 'utils/forms';
 
-import {
-  getMetaField,
-  getRoleField,
-} from 'utils/fields';
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
@@ -51,15 +42,14 @@ import {
 } from 'containers/App/selectors';
 
 import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES, USER_ROLES, ACTORTYPES } from 'themes/config';
+import {
+  ROUTES, USER_ROLES, ACTORTYPES, USER_CONFIG,
+} from 'themes/config';
 
-import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
-import EntityForm from 'containers/EntityForm';
-
-import appMessages from 'containers/App/messages';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import {
   selectDomain,
@@ -137,80 +127,51 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
     });
   };
 
-  getHeaderMainFields = () => {
-    const { intl } = this.context;
-    return ([{ // fieldGroup
-      fields: [getTitleFormField({
-        formatMessage: intl.formatMessage,
-        attribute: 'name',
-        required: true,
-      })],
-    }, {
-      fields: [getEmailFormField({ formatMessage: intl.formatMessage })],
-    }]);
-  };
-
-  getHeaderAsideFields = (entity, roles) => {
-    const { intl } = this.context;
-    return ([
-      {
-        fields: (roles && roles.size > 0) ? [
-          getRoleFormField({ formatMessage: intl.formatMessage, roleOptions: roles }),
-          getMetaField(entity, true),
-        ]
-          : [
-            getRoleField(entity),
-            getMetaField(entity, true),
-          ],
-      },
-    ]);
-  };
-
-  getBodyMainFields = (
-    actorsByActortype,
-    actionsByActiontype,
-    connectedTaxonomies,
-    onCreateOption,
-    isAdmin,
-  ) => {
-    const { intl } = this.context;
-    const groups = [];
-    if (actorsByActortype) {
-      const actorConnections = renderActorsByActortypeControl({
-        entitiesByActortype: actorsByActortype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (actorConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.actorUsers),
-            fields: actorConnections,
-          },
-        );
-      }
-    }
-    if (actionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl({
-        entitiesByActiontype: actionsByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.actionUsers),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
+  // getBodyMainFields = (
+  //   actorsByActortype,
+  //   actionsByActiontype,
+  //   connectedTaxonomies,
+  //   onCreateOption,
+  //   isAdmin,
+  // ) => {
+  //   const { intl } = this.context;
+  //   const groups = [];
+  //   if (actorsByActortype) {
+  //     const actorConnections = renderActorsByActortypeControl({
+  //       entitiesByActortype: actorsByActortype,
+  //       taxonomies: connectedTaxonomies,
+  //       onCreateOption,
+  //       intl,
+  //       isAdmin,
+  //     });
+  //     if (actorConnections) {
+  //       groups.push(
+  //         {
+  //           label: intl.formatMessage(appMessages.nav.actorUsers),
+  //           fields: actorConnections,
+  //         },
+  //       );
+  //     }
+  //   }
+  //   if (actionsByActiontype) {
+  //     const actionConnections = renderActionsByActiontypeControl({
+  //       entitiesByActiontype: actionsByActiontype,
+  //       taxonomies: connectedTaxonomies,
+  //       onCreateOption,
+  //       intl,
+  //       isAdmin,
+  //     });
+  //     if (actionConnections) {
+  //       groups.push(
+  //         {
+  //           label: intl.formatMessage(appMessages.nav.actionUsers),
+  //           fields: actionConnections,
+  //         },
+  //       );
+  //     }
+  //   }
+  //   return groups;
+  // };
 
   // only admins can assign any roles to any other user TODO check
   getEditableUserRoles = (roles, sessionUserHighestRoleId) => roles && (sessionUserHighestRoleId === USER_ROLES.ADMIN.value)
@@ -257,14 +218,21 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       actionsByActiontype,
       onCreateOption,
       connectedTaxonomies,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
+      onErrorDismiss,
+      onServerErrorDismiss,
       isMember,
       isAdmin,
     } = this.props;
     const reference = this.props.params.id;
-    const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
+    const { saveSending } = viewDomain.get('page').toJS();
 
     const editableRoles = this.getEditableUserRoles(roles, sessionUserHighestRoleId);
-
+    const formDataPath = 'userEdit.form.data';
     return (
       <div>
         <Helmet
@@ -277,78 +245,40 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
           <ContentHeader
             title={intl.formatMessage(messages.pageTitle)}
             type={CONTENT_SINGLE}
-            icon="users"
-            buttons={
-              viewEntity && [{
-                type: 'cancel',
-                onClick: () => this.props.handleCancel(this.props.params.id),
-              },
-              {
-                type: 'save',
-                disabled: saveSending,
-                onClick: () => this.props.handleSubmitRemote('userEdit.form.data'),
-              }]
-            }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {(saveSending || !dataReady)
-            && <Loading />
-          }
-          {!viewEntity && dataReady && !saveError
-            && (
-              <div>
-                <FormattedMessage {...messages.notFound} />
-              </div>
-            )
-          }
           {viewEntity && dataReady && (
-            <EntityForm
-              model="userEdit.form.data"
-              formData={viewDomain.getIn(['form', 'data'])}
-              saving={saveSending}
-              handleSubmit={(formData) => this.props.handleSubmit(
+            <EntityFormWrapper
+              typeLabel="User"
+              model={formDataPath}
+              viewDomain={viewDomain}
+              handleSubmit={(formData) => handleSubmit(
                 formData,
                 roles,
                 actorsByActortype,
                 actionsByActiontype,
               )}
-              handleSubmitFail={this.props.handleSubmitFail}
-              handleCancel={() => this.props.handleCancel(reference)}
-              handleUpdate={this.props.handleUpdate}
-              fields={{
-                header: {
-                  main: this.getHeaderMainFields(),
-                  aside: this.getHeaderAsideFields(viewEntity, editableRoles),
-                },
-                body: {
-                  main: isMember && this.getBodyMainFields(
-                    actorsByActortype,
-                    actionsByActiontype,
-                    connectedTaxonomies,
-                    onCreateOption,
-                    isAdmin,
-                  ),
-                  // aside: this.getBodyAsideFields(),
-                },
-              }}
+              handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
+              saving={saveSending}
+              handleSubmitFail={handleSubmitFail}
+              handleCancel={() => handleCancel(reference)}
+              handleUpdate={handleUpdate}
+              onErrorDismiss={onErrorDismiss}
+              onServerErrorDismiss={onServerErrorDismiss}
               scrollContainer={this.scrollContainer.current}
+              fieldsByStep={dataReady && getEntityFormFields(
+                {
+                  isAdmin,
+                  // isMine,
+                  roleOptions: editableRoles,
+                  actorsByActortype,
+                  actionsByActiontype,
+                  connectedTaxonomies,
+                  onCreateOption,
+                  intl,
+                },
+                USER_CONFIG.form, // shape
+                USER_CONFIG.attributes, // attributes
+              )}
             />
           )}
           {saveSending
