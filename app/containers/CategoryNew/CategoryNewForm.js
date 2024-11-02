@@ -9,25 +9,15 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { actions as formActions } from 'react-redux-form/immutable';
 
-import { List } from 'immutable';
-
-import {
-  renderParentCategoryControl,
-  getTitleFormField,
-  getMarkdownFormField,
-  getLinkFormField,
-  getCheckboxFormField,
-  getStatusFormField,
-  getShortTitleFormField,
-} from 'utils/forms';
+import { getEntityFormFields } from 'utils/forms';
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
 
-import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
-
 import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
-import { API, ROUTES, USER_ROLES } from 'themes/config';
+import {
+  API, ROUTES, USER_ROLES, CATEGORY_CONFIG,
+} from 'themes/config';
 
 import appMessages from 'containers/App/messages';
 
@@ -52,14 +42,7 @@ import {
 import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
 
-import { getEntityTitle } from 'utils/entities';
-
-import FormWrapper from './FormWrapper';
-
-import {
-  selectParentOptions,
-  selectParentTaxonomy,
-} from './selectors';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import messages from './messages';
 import { DEPENDENCIES, FORM_INITIAL } from './constants';
@@ -89,70 +72,6 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
     }
   }
 
-  getHeaderMainFields = () => {
-    const { intl } = this.context;
-    const groups = [];
-    groups.push({ // fieldGroup
-      fields: [
-        getTitleFormField({ formatMessage: intl.formatMessage }),
-        getShortTitleFormField({ formatMessage: intl.formatMessage }),
-      ],
-    });
-    return groups;
-  };
-
-  getHeaderAsideFields = (taxonomy, parentOptions, parentTaxonomy) => {
-    const { intl } = this.context;
-    const groups = []; // fieldGroups
-    groups.push({
-      fields: [
-        getStatusFormField({ formatMessage: intl.formatMessage }),
-        getStatusFormField({ formatMessage: intl.formatMessage, attribute: 'private' }),
-      ],
-    });
-    if (taxonomy && taxonomy.getIn(['attributes', 'tags_users'])) {
-      groups.push({
-        fields: [
-          getCheckboxFormField({
-            formatMessage: intl.formatMessage,
-            attribute: 'user_only',
-          }),
-        ],
-      });
-    }
-    if (parentOptions && parentTaxonomy) {
-      groups.push({
-        label: intl.formatMessage(appMessages.entities.taxonomies.parent),
-        icon: 'categories',
-        fields: [renderParentCategoryControl({
-          entities: parentOptions,
-          label: getEntityTitle(parentTaxonomy),
-        })],
-      });
-    }
-    return groups;
-  };
-
-  getBodyMainFields = () => {
-    const { intl } = this.context;
-    const groups = [];
-    groups.push({
-      fields: [getMarkdownFormField({ formatMessage: intl.formatMessage })],
-    });
-    return groups;
-  };
-
-  getBodyAsideFields = () => {
-    const { intl } = this.context;
-    const fields = []; // fieldGroups
-    fields.push({
-      fields: [
-        getLinkFormField({ formatMessage: intl.formatMessage }),
-      ],
-    });
-    return fields;
-  };
-
   /* eslint-disable react/destructuring-assignment */
   getTaxTitle = (id) => this.context.intl.formatMessage(appMessages.entities.taxonomies[id].single);
   /* eslint-enable react/destructuring-assignment */
@@ -163,8 +82,6 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
       taxonomy,
       dataReady,
       viewDomain,
-      parentOptions,
-      parentTaxonomy,
       onErrorDismiss,
       onServerErrorDismiss,
       handleCancel,
@@ -179,11 +96,12 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
-
+    let typeLabel = 'Category';
     let pageTitle = intl.formatMessage(messages.pageTitle);
     if (taxonomy && taxonomy.get('attributes')) {
+      typeLabel = this.getTaxTitle(taxonomy.get('id'));
       pageTitle = intl.formatMessage(messages.pageTitleTaxonomy, {
-        taxonomy: this.getTaxTitle(taxonomy.get('id')),
+        taxonomy: typeLabel,
       });
     }
 
@@ -192,19 +110,10 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
         <ContentHeader
           title={pageTitle}
           type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
-          buttons={
-            dataReady ? [{
-              type: 'cancel',
-              onClick: () => handleCancel(typeId),
-            },
-            {
-              type: 'save',
-              disabled: saving,
-              onClick: () => handleSubmitRemote(formDataPath),
-            }] : null
-          }
         />
-        <FormWrapper
+        <EntityFormWrapper
+          isNewEntityView
+          typeLabel={typeLabel}
           model={formDataPath}
           inModal={inModal}
           viewDomain={viewDomain}
@@ -214,25 +123,22 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
             invalidateEntitiesOnSuccess,
           )}
           handleSubmitFail={handleSubmitFail}
+          handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleCancel={() => handleCancel(typeId)}
           handleUpdate={handleUpdate}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={{ // isMember, taxonomies,
-            header: {
-              main: this.getHeaderMainFields(),
-              aside: this.getHeaderAsideFields(
-                taxonomy,
-                parentOptions,
-                parentTaxonomy,
-              ),
+          fieldsByStep={dataReady && getEntityFormFields(
+            {
+              isMine: true,
+              taxonomy,
+              intl,
             },
-            body: {
-              main: this.getBodyMainFields(),
-              aside: this.getBodyAsideFields(),
-            },
-          }}
+            CATEGORY_CONFIG.form,
+            CATEGORY_CONFIG.attributes,
+          )}
+          saving={saving}
         />
       </Content>
     );
@@ -251,8 +157,6 @@ CategoryNewForm.propTypes = {
   authReady: PropTypes.bool,
   viewDomain: PropTypes.object,
   taxonomy: PropTypes.object,
-  parentOptions: PropTypes.object,
-  parentTaxonomy: PropTypes.object,
   initialiseForm: PropTypes.func,
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
@@ -274,8 +178,6 @@ const mapStateToProps = (state, { typeId }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   taxonomy: selectTaxonomy(state, typeId),
-  parentOptions: selectParentOptions(state, typeId),
-  parentTaxonomy: selectParentTaxonomy(state, typeId),
 });
 
 function mapDispatchToProps(
@@ -312,13 +214,7 @@ function mapDispatchToProps(
     },
     // handleSubmit: (formData, actions, actorsByActortype, taxonomy) => {
     handleSubmit: (formData, taxonomy, invalidateEntitiesOnSuccess) => {
-      let saveData = formData.setIn(['attributes', 'taxonomy_id'], taxonomy.get('id'));
-      const formCategoryIds = getCheckedValuesFromOptions(formData.get('associatedCategory'));
-      if (List.isList(formCategoryIds) && formCategoryIds.size) {
-        saveData = saveData.setIn(['attributes', 'parent_id'], formCategoryIds.first());
-      } else {
-        saveData = saveData.setIn(['attributes', 'parent_id'], null);
-      }
+      const saveData = formData.setIn(['attributes', 'taxonomy_id'], taxonomy.get('id'));
       dispatch(
         newEntity({
           path: API.CATEGORIES,

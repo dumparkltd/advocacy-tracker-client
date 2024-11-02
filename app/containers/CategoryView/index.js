@@ -354,7 +354,7 @@ function CategoryView({
   // console.log('childActorsByActortype', childActorsByActortype && childActorsByActortype.toJS())
   // console.log('actortypes', actortypes && actortypes.toJS())
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
-
+console.log(viewEntity && getHeaderAsideFields(viewEntity, isMember, isAdmin, isMine))
   return (
     <div>
       <Helmet

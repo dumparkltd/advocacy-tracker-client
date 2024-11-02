@@ -1251,7 +1251,6 @@ const checkPermission = ({
 };
 
 export const getEntityFormFields = (args, shape, attributes) => {
-  console.log('shape', shape)
   const steps = shape && shape.reduce(
     (memo, step) => {
       if (!checkPermission({ permissions: args, requirements: step })) {
@@ -1322,6 +1321,14 @@ export const getActiontypeFormFields = (args) => {
 };
 
 export const getActortypeFormFields = (args) => {
+  const { typeId } = args;
+  const shape = ACTORTYPES_CONFIG[parseInt(typeId, 10)]
+    && ACTORTYPES_CONFIG[parseInt(typeId, 10)].form;
+  return shape && getEntityFormFields(
+    args, shape, ACTOR_FIELDS.ATTRIBUTES
+  );
+};
+export const getCategoryFormFields = (args) => {
   const { typeId } = args;
   const shape = ACTORTYPES_CONFIG[parseInt(typeId, 10)]
     && ACTORTYPES_CONFIG[parseInt(typeId, 10)].form;

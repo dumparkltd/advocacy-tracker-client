@@ -164,8 +164,9 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       modalConnect,
       invalidateEntitiesOnSuccess,
       isAdmin,
+      dataReady,
     } = this.props;
-    const type = intl.formatMessage(appMessages.entities[`actions_${typeId}`].single);
+    const typeLabel = intl.formatMessage(appMessages.entities[`actions_${typeId}`].single);
     let subTitle;
     if (inModal && modalConnect && modalConnect.get('create')) {
       // connect action to actor
@@ -203,13 +204,13 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
         <ContentHeader
-          title={intl.formatMessage(messages.pageTitle, { type })}
+          title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
           subTitle={subTitle}
           type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
         />
         <EntityFormWrapper
           isNewEntityView
-          typeLabel={type}
+          typeLabel={typeLabel}
           model={formDataPath}
           inModal={inModal}
           viewDomain={viewDomain}
@@ -231,7 +232,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fieldsByStep={getActiontypeFormFields({
+          fieldsByStep={dataReady && getActiontypeFormFields({
             isAdmin,
             isMine: true,
             typeId,

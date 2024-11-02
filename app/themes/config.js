@@ -3424,6 +3424,76 @@ export const PAGE_CONFIG = {
     }, // step
   ],
 };
+export const CATEGORY_CONFIG = {
+  attributes: {
+    draft: {
+      defaultValue: true,
+      required: true, // all types
+      type: 'bool',
+    },
+    private: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    title: {
+      type: 'text',
+      required: true,
+    },
+    short_title: {
+      type: 'short',
+    },
+    description: {
+      type: 'markdown',
+    },
+    url: {
+      type: 'url',
+    },
+  },
+  form: [
+    {
+      id: 'footer',
+      fields: [
+        { attribute: 'is_archive', needsAdmin: true },
+        { attribute: 'private', needsAdminOrOwn: true },
+        { attribute: 'draft', needsAdminOrOwn: true },
+      ],
+    },
+    {
+      id: 'main',
+      title: 'All content',
+      sections: [
+        {
+          id: 'content',
+          rows: [
+            [
+              {
+                attribute: 'title',
+                required: true,
+                basis: '2/3',
+              },
+              {
+                attribute: 'short_title',
+                basis: '1/3',
+              },
+            ],
+            [{
+              attribute: 'url',
+            }],
+            [{
+              attribute: 'description',
+            }],
+          ], // rows
+        }, // section,
+      ], // sections
+    }, // step
+  ],
+};
 export const USER_CONFIG = {
   attributes: {
     draft: {
