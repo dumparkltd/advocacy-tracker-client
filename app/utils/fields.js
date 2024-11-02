@@ -864,7 +864,7 @@ export const getIndicatorPreviewHeader = (indicator, intl) => ({
 });
 export const getIndicatorPreviewFooter = (indicator, intl) => ({
   primaryLink: indicator && {
-    path: `${ROUTES.ACTOR}/${indicator.get('id')}`,
+    path: `${ROUTES.INDICATOR}/${indicator.get('id')}`,
     title: `${intl.formatMessage(
       appMessages.entities.indicators.single
     )} details`,
