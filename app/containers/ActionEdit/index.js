@@ -240,7 +240,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
                 scrollContainer={this.scrollContainer.current}
-                fieldsByStep={getActiontypeFormFields({
+                fieldsByStep={dataReady && getActiontypeFormFields({
                   isAdmin,
                   isMine,
                   typeId,

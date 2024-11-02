@@ -211,7 +211,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
                 handleDelete={canDelete ? () => handleDelete(typeId) : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
-                fieldsByStep={getActortypeFormFields({
+                fieldsByStep={dataReady && getActortypeFormFields({
                   typeId,
                   isAdmin,
                   isMine,

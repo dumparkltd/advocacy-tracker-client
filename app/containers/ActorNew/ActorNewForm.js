@@ -163,7 +163,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fieldsByStep={getActortypeFormFields({
+          fieldsByStep={dataReady && getActortypeFormFields({
             isMine: true,
             isAdmin,
             typeId,
