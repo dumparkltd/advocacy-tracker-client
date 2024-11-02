@@ -40,7 +40,7 @@ import qe from 'utils/quasi-equals';
 import { scaleColorCount } from 'containers/MapContainer/utils';
 import MapKeySimple from 'containers/MapContainer/MapKeySimple';
 import { usePrint } from 'containers/App/PrintContext';
-import MapWrapper from 'containers/MapContainer/MapWrapper';
+import LeafletWrapper from 'containers/MapContainer/LeafletWrapper';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
 // import messages from './messages';
@@ -287,7 +287,7 @@ export function ActionMap({
   return (
     <Styled hasHeader noOverflow>
       <MapOuterWrapper>
-        <MapWrapper
+        <LeafletWrapper
           countryData={countryData}
           countryPointData={countryPointData}
           countryFeatures={countriesJSON.features}

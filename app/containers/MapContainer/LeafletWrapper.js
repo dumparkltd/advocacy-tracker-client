@@ -1,6 +1,6 @@
 /*
  *
- * MapWrapper
+ * LeafletWrapper
  *
  */
 import React, {
@@ -106,7 +106,7 @@ const getBBox = (bounds, xLat = 0.5, xLon = 180) => {
 };
 
 const TOOLTIP_INITIAL = { features: [] };
-export function MapWrapper({
+export function LeafletWrapper({
   countryFeatures,
   countryData,
   countryPointData,
@@ -677,7 +677,7 @@ export function MapWrapper({
   );
 }
 
-MapWrapper.propTypes = {
+LeafletWrapper.propTypes = {
   countryFeatures: PropTypes.array, // country basemap
   countryData: PropTypes.array, // country data overlay
   countryPointData: PropTypes.array, // country data overlay
@@ -705,4 +705,4 @@ MapWrapper.propTypes = {
   onSetPreviewItemId: PropTypes.func,
 };
 
-export default MapWrapper;
+export default LeafletWrapper;

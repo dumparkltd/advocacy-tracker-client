@@ -23,7 +23,7 @@ import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
 import isDate from 'utils/is-date';
 // import { hasGroupActors } from 'utils/entities';
-import MapWrapper from 'containers/MapContainer/MapWrapper';
+import LeafletWrapper from 'containers/MapContainer/LeafletWrapper';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 import MapKeySimple from 'containers/MapContainer/MapKeySimple';
 
@@ -173,7 +173,7 @@ export function CountryMap({
   return (
     <Styled hasHeader noOverflow>
       <MapOuterWrapper>
-        <MapWrapper
+        <LeafletWrapper
           countryData={countryData}
           countryPointData={countryPointData}
           countryFeatures={countriesJSON.features}

@@ -28,7 +28,7 @@ import { usePrint } from 'containers/App/PrintContext';
 
 // import appMessages from 'containers/App/messages';
 // import { hasGroupActors } from 'utils/entities';
-import MapWrapper from './MapWrapper';
+import LeafletWrapper from './LeafletWrapper';
 import MapOption from './MapInfoOptions/MapOption';
 import MapKey from './MapInfoOptions/MapKey';
 import MapInfoOptions from './MapInfoOptions';
@@ -209,7 +209,7 @@ export function MapContainer({
         orient={printArgs && printArgs.printOrientation}
         isOverviewMap={isOverviewMap}
       >
-        <MapWrapper
+        <LeafletWrapper
           fullMap={fullMap}
           isPrintView={isPrintView}
           printArgs={printArgs}
