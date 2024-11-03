@@ -96,7 +96,13 @@ export function CellHeaderSmart({
 
   return (
     <Box direction="row" align="center" justify={align} flex={false} wrap>
-      <TextPrint weight={500} size="xxsmall" textAlign={align} wordBreak="keep-all">
+      <TextPrint
+        weight={500}
+        size="xxsmall"
+        textAlign={align}
+        wordBreak="keep-all"
+        color="textSecondary"
+      >
         {column.label || column.title}
       </TextPrint>
       {column.filterOptions && (

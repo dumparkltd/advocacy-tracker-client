@@ -485,14 +485,14 @@ theme.global = {
     a: '#00728f',
     aHover: '#08586c',
     textLight: '#1c2121', // on light background (empowerment)
-    textSecondary: '#777b7e', // on light background (empowerment)
+    textSecondary: '#6D7576', // on light background (empowerment)
     hint: '#687271',
     text: {
       hint: '#687271',
       brand: '#000000',
       dark: '#FFFFFF', //  on dark background
       light: '#1c2121', // on light background (empowerment)
-      secondary: '#777b7e', // on light background (empowerment)
+      secondary: '#6D7576', // on light background (empowerment)
     },
     border: {
       light: '#CECED2',

@@ -10,7 +10,9 @@ import { palette } from 'styled-theme';
 import styled from 'styled-components';
 import PrintHide from 'components/styled/PrintHide';
 
-import { Box, Button, Drop } from 'grommet';
+import {
+  Box, Button, Drop, Text,
+} from 'grommet';
 
 import Icon from 'components/Icon';
 
@@ -45,9 +47,10 @@ const ActiveButton = styled((p) => <Button plain {...p} />)`
   }
 `;
 
-const Label = styled.span`
-  color: ${palette('dark', 2)};
-  font-size: ${({ theme }) => theme.text.xsmall.size};
+const Label = styled(
+  (p) => <Text {...p} color="textSecondary" size="xxsmall" />
+)`
+  line-height: 24px
 `;
 const ButtonLabel = styled.span`
   color: ${palette('dark', 2)};

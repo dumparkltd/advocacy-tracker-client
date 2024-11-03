@@ -74,9 +74,10 @@ import FilterDropdown from './FilterDropdown';
 
 import messages from './messages';
 
-const Label = styled.span`
-  color: ${palette('dark', 2)};
-  font-size: ${({ theme }) => theme.text.xsmall.size};
+const Label = styled(
+  (p) => <Text {...p} color="textSecondary" size="xxsmall" />
+)`
+  line-height: 24px
 `;
 
 const prepareDropdownOptions = (entities, query, countries) => entities
@@ -350,8 +351,12 @@ export function PositionsList({
             pad={{ top: 'medium', horizontal: 'medium', bottom: 'none' }}
             flex={{ grow: 1, shrink: 1 }}
           >
-            <Box gap="ms">
-              <Box direction={isMinSize(size, 'large') ? 'row' : 'column'} justify="between">
+            <Box gap="small">
+              <Box
+                direction={isMinSize(size, 'large') ? 'row' : 'column'}
+                justify="between"
+                margin={{ bottom: 'medium' }}
+              >
                 <Box margin={{ top: '30px' }}>
                   <TitleOnCard>
                     Countries
@@ -402,7 +407,7 @@ export function PositionsList({
                     {supportLevels && supportLevels.map((level) => (
                       <Box key={level.value} direction="row" align="center" gap="xsmall" margin={{ bottom: 'xsmall' }}>
                         <Dot size="16px" color={level.color} />
-                        <Text size="small">{level.label}</Text>
+                        <Text size="xxsmall" color="textSecondary">{level.label}</Text>
                       </Box>
                     ))}
                   </Box>

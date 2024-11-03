@@ -53,13 +53,18 @@ export function CellHeaderMain({ column, canEdit }) {
       )}
       {canEdit && (
         <Label htmlFor="select-all">
-          <TextPrint weight={500} size="small" wordBreak="keep-all">
+          <TextPrint
+            weight={500}
+            size="xxsmall"
+            wordBreak="keep-all"
+            color="textSecondary"
+          >
             {column.title}
           </TextPrint>
         </Label>
       )}
       {!canEdit && (
-        <TextPrint weight={500} size="small">
+        <TextPrint weight={500} size="xxsmall" color="textSecondary">
           {column.title}
         </TextPrint>
       )}

@@ -25,7 +25,13 @@ export function CellHeaderPlain({ column }) {
   const { align = 'start' } = column;
   return (
     <Box direction="row" align="center" justify={align} flex={false}>
-      <TextPrint weight={500} size="small" textAlign={align} wordBreak="keep-all">
+      <TextPrint
+        weight={500}
+        size="xxsmall"
+        textAlign={align}
+        wordBreak="keep-all"
+        color="textSecondary"
+      >
         {column.label || column.title}
       </TextPrint>
       {column.info && (

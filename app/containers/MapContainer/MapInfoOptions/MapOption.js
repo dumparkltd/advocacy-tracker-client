@@ -34,7 +34,7 @@ export function MapOption({
         checked={active}
         onChange={onClick}
       />
-      <Text as="label" htmlFor={`map-${optionType}-${id}`} size="xsmall">
+      <Text as="label" color="textSecondary" htmlFor={`map-${optionType}-${id}`} size="xsmall">
         {label}
         {info && (
           <InfoOverlay
