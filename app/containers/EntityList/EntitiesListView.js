@@ -316,6 +316,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           if (qe(typeId, ACTORTYPES.ORG)) {
             label = 'Include activities of organisation contacts';
           }
+          if (qe(typeId, ACTORTYPES.REG)) {
+            label = 'Include activities of region members';
+          }
           checkboxOptions = [
             ...checkboxOptions,
             {
