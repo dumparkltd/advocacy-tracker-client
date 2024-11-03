@@ -8,7 +8,7 @@ import { palette } from 'styled-theme';
 import styled from 'styled-components';
 
 import {
-  Box, Text, Heading, ResponsiveContext,
+  Box, Text, ResponsiveContext,
 } from 'grommet';
 
 import {
@@ -57,8 +57,11 @@ import ButtonPrimary from 'components/buttons/ButtonPrimaryNew';
 import Dot from 'components/styled/Dot';
 
 import EntityListSearch from 'components/EntityListSearch';
-import Card from 'containers/OverviewPositions/Card';
 import EntityListTable from 'containers/EntityListTable';
+
+import Card from 'containers/OverviewPositions/Card';
+import TitleOnCard from 'containers/OverviewPositions/TitleOnCard';
+import TitleAboveCard from 'containers/OverviewPositions/TitleAboveCard';
 
 import {
   selectCountries,
@@ -71,16 +74,6 @@ import FilterDropdown from './FilterDropdown';
 
 import messages from './messages';
 
-const ComponentTitle = styled((p) => <Heading level="3" {...p} />)`
-  color: black;
-  font-weight: bold;
-  margin: 0;
-`;
-const Title = styled((p) => <Heading level="5" {...p} />)`
-  color: black;
-  text-transform: uppercase;
-  font-weight: bold;
-`;
 const Label = styled.span`
   color: ${palette('dark', 2)};
   font-size: ${({ theme }) => theme.text.xsmall.size};
@@ -344,9 +337,9 @@ export function PositionsList({
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
       <Box pad={{ top: 'small', bottom: 'xsmall' }}>
-        <Title>
+        <TitleAboveCard>
           <FormattedMessage {...messages.title} />
-        </Title>
+        </TitleAboveCard>
       </Box>
       <Loading loading={!dataReady} />
       {dataReady && (
@@ -357,12 +350,12 @@ export function PositionsList({
             pad={{ top: 'medium', horizontal: 'medium', bottom: 'none' }}
             flex={{ grow: 1, shrink: 1 }}
           >
-            <Box gap="small">
+            <Box gap="ms">
               <Box direction={isMinSize(size, 'large') ? 'row' : 'column'} justify="between">
-                <Box gap="small" margin={{ vertical: 'small' }}>
-                  <ComponentTitle>
+                <Box margin={{ top: '30px' }}>
+                  <TitleOnCard>
                     Countries
-                  </ComponentTitle>
+                  </TitleOnCard>
                 </Box>
                 <Box direction={isMinSize(size, 'large') ? 'row' : 'column'} gap="small">
                   <FilterDropdown

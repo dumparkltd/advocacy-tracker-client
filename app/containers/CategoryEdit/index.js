@@ -20,7 +20,6 @@ import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
 import qe from 'utils/quasi-equals';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
 import {
   ROUTES, USER_ROLES, API, CATEGORY_CONFIG,
 } from 'themes/config';
@@ -155,7 +154,6 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
         <Content ref={this.scrollContainer}>
           <ContentHeader
             title={pageTitle}
-            type={CONTENT_SINGLE}
             icon="categories"
           />
           {!viewEntity && dataReady && !saveError && !deleteSending

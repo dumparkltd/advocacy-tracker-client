@@ -37,15 +37,22 @@ const Styled = styled.div`
 //   line-height: 1;
 //   margin-top: 10px;
 // `;
-const TitleMedium = styled.h3`
+export const TitleMedium = styled.h3`
+  font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  text-transform: uppercase;
   line-height: 1;
   margin: 15px 0;
   display: inline-block;
+  font-weight: normal;
+  font-size: 42px;
 `;
 const TitleMediumPrint = styled.h3`
+  font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  text-transform: uppercase;
   margin-bottom: 0px;
   margin-top: 22px;
-  font-size: 18pt;
+  font-size: 12pt;
+  font-weight: normal;
   @media print {
     margin-bottom: 5px;
   }

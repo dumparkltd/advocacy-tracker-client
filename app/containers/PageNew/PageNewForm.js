@@ -84,10 +84,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
     const typeLabel = 'Page';
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
-        <ContentHeader
-          title={pageTitle}
-          type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
-        />
+        <ContentHeader title={pageTitle} />
         <EntityFormWrapper
           isNewEntityView
           typeLabel={typeLabel}

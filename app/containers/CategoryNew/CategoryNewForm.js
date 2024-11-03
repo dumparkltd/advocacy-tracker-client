@@ -14,7 +14,6 @@ import { getEntityFormFields } from 'utils/forms';
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
 
-import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
 import {
   API, ROUTES, USER_ROLES, CATEGORY_CONFIG,
 } from 'themes/config';
@@ -109,7 +108,6 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
       <Content ref={this.scrollContainer} inModal={inModal}>
         <ContentHeader
           title={pageTitle}
-          type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
         />
         <EntityFormWrapper
           isNewEntityView

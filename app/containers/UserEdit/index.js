@@ -41,7 +41,6 @@ import {
   selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
 import {
   ROUTES, USER_ROLES, ACTORTYPES, USER_CONFIG,
 } from 'themes/config';
@@ -171,7 +170,6 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
         <Content ref={this.scrollContainer}>
           <ContentHeader
             title={intl.formatMessage(messages.pageTitle)}
-            type={CONTENT_SINGLE}
           />
           {viewEntity && dataReady && (
             <EntityFormWrapper

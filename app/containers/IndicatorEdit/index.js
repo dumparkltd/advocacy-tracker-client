@@ -23,7 +23,6 @@ import qe from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
 import {
   USER_ROLES,
   ROUTES,
@@ -162,7 +161,6 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
         <Content ref={this.scrollContainer}>
           <ContentHeader
             title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
-            type={CONTENT_SINGLE}
           />
           {!viewEntity && dataReady && !saveError && !deleteSending
             && (

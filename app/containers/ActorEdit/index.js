@@ -24,7 +24,6 @@ import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
 import qe from 'utils/quasi-equals';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
 import { USER_ROLES, ROUTES, API } from 'themes/config';
 import appMessages from 'containers/App/messages';
 
@@ -180,7 +179,6 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         <Content ref={this.scrollContainer}>
           <ContentHeader
             title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
-            type={CONTENT_SINGLE}
           />
           {!viewEntity && dataReady && !saveError && !deleteSending
             && (

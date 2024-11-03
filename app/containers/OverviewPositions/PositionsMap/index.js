@@ -11,7 +11,6 @@ import { palette } from 'styled-theme';
 import {
   Box,
   Text,
-  Heading,
   Button,
   ResponsiveContext,
 } from 'grommet';
@@ -62,6 +61,8 @@ import ButtonPrimary from 'components/buttons/ButtonPrimaryNew';
 import ButtonSecondary from 'components/buttons/ButtonSecondaryNew';
 
 import Card from 'containers/OverviewPositions/Card';
+import TitleOnCard from 'containers/OverviewPositions/TitleOnCard';
+import TitleAboveCard from 'containers/OverviewPositions/TitleAboveCard';
 
 import { DEPENDENCIES } from './constants';
 import { selectIndicatorId } from './selectors';
@@ -84,7 +85,7 @@ const IndicatorSidePanel = styled((p) => <Box {...p} />)`
 const IndicatorList = styled((p) => <Box {...p} />)`
   border-top: 1px solid ${palette('light', 2)};
 `;
-const IndicatorPanelHeader = styled((p) => <Box {...p} />)`
+const IndicatorPanelHeader = styled((p) => <Box {...p} pad="small" />)`
   position: relative;
 `;
 const IndicatorSelectButton = styled((p) => <Button plain {...p} />)`
@@ -141,16 +142,7 @@ const MapWrapper = styled((p) => <Box {...p} />)`
 const SearchWrapper = styled((p) => <Box {...p} />)`
   width: ${({ theme }) => theme.sizes.mapSearchBar.width}px;
 `;
-const MapTitle = styled((p) => <Heading level="3" {...p} />)`
-  color: black;
-  font-weight: bold;
-  margin: 0;
-`;
-const Title = styled((p) => <Heading level="5" {...p} />)`
-  color: black;
-  text-transform: uppercase;
-  font-weight: bold;
-`;
+
 const MapSecondaryTitle = styled((p) => <Text size="large" {...p} />)`
   margin: 0;
   color: black;
@@ -400,9 +392,9 @@ export function PositionsMap({
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
       <Box pad={{ top: 'small', bottom: 'xsmall' }}>
-        <Title>
+        <TitleAboveCard>
           <FormattedMessage {...messages.title} />
-        </Title>
+        </TitleAboveCard>
       </Box>
       <Loading loading={!dataReady} />
       {dataReady && (
@@ -464,15 +456,15 @@ export function PositionsMap({
             <Box
               direction="column"
               fill="horizontal"
-              pad={{ horizontal: 'medium', bottom: 'none' }}
+              pad={{ top: '42px', horizontal: 'medium', bottom: 'none' }}
               flex={{ grow: 1, shrink: 1 }}
             >
-              <Box direction="row" fill="horizontal" justify="between" margin={{ vertical: 'small' }}>
+              <Box direction="row" fill="horizontal" justify="between" margin={{ bottom: 'small' }}>
                 {isMinSize(size, 'medium') && (
-                  <Box gap="small">
-                    <MapTitle>
+                  <Box gap="small" pad={{ top: '5px' }}>
+                    <TitleOnCard>
                       {getIndicatorNiceTitle(currentIndicator.getIn(['attributes', 'title']))}
-                    </MapTitle>
+                    </TitleOnCard>
                     <MapSecondaryTitle>
                       {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title'])) || '$nbsp;'}
                     </MapSecondaryTitle>

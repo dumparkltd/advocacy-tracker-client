@@ -9,7 +9,6 @@ const ButtonForm = styled(Button)`
   font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 18px;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    letter-spacing: 1px;
     font-size: 24px;
     padding: 1em 1.2em;
   }

@@ -25,7 +25,6 @@ import { hasNewError } from 'utils/entity-form';
 import qe from 'utils/quasi-equals';
 
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
 import {
   USER_ROLES,
   API,
@@ -206,7 +205,6 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         <Content ref={this.scrollContainer}>
           <ContentHeader
             title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
-            type={CONTENT_SINGLE}
           />
           {!viewEntity && dataReady && !saveError && !deleteSending
             && (

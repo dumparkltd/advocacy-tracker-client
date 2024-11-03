@@ -21,7 +21,6 @@ import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
 // import { checkResourceAttribute, checkResourceRequired } from 'utils/entities';
 
-import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
 import {
   API,
   ROUTES,
@@ -110,7 +109,6 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
       <Content ref={this.scrollContainer} inModal={inModal}>
         <ContentHeader
           title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
-          type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
         />
         <EntityFormWrapper
           isNewEntityView

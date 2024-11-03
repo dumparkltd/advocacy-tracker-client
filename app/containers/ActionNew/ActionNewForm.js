@@ -23,7 +23,6 @@ import { hasNewErrorNEW } from 'utils/entity-form';
 import { getEntityTitle } from 'utils/entities';
 import { lowerCase } from 'utils/string';
 
-import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
 import {
   API,
   USER_ROLES,
@@ -206,7 +205,6 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         <ContentHeader
           title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
           subTitle={subTitle}
-          type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
         />
         <EntityFormWrapper
           isNewEntityView

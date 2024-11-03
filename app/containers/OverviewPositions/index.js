@@ -2,7 +2,7 @@ import React from 'react';
 // import PropTypes from 'prop-types';
 import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
-import { Box, Heading } from 'grommet';
+import { Box } from 'grommet';
 
 import { ROUTES, ACTIONTYPES } from 'themes/config';
 
@@ -11,6 +11,7 @@ import Footer from 'containers/Footer';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Container from 'components/styled/Container';
 import ContentSimple from 'components/styled/ContentSimple';
+import { TitleMedium } from 'containers/ContentHeader';
 
 import appMessages from 'containers/App/messages';
 import messages from './messages';
@@ -25,10 +26,9 @@ const ViewContainer = styled(Container)`
   }
 `;
 
-const TitleMedium = styled((p) => <Heading level="2" {...p} />)`
-  color: black;
-  text-transform: uppercase;
-  font-weight: bold;
+const Title = styled(TitleMedium)`
+  font-size: 48px;
+  margin: 0;
 `;
 
 export function OverviewPositions({ intl }) {
@@ -54,9 +54,9 @@ export function OverviewPositions({ intl }) {
       <ViewContainer>
         <ContentSimple>
           <Box pad={{ top: 'large' }}>
-            <TitleMedium>
+            <Title>
               <FormattedMessage {...messages.pageTitle} />
-            </TitleMedium>
+            </Title>
           </Box>
           <Box gap="medium" margin={{ bottom: 'xlarge' }}>
             <PositionsMap />

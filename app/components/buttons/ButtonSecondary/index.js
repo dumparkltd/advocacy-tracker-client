@@ -13,7 +13,6 @@ const getActiveHoverBackground = (disabled) => disabled
 
 // eslint-disable no-nested-ternary
 const ButtonDefault = styled(Button)`
-  letter-spacing: 1px;
   color: ${(props) => props.inactive
     ? palette('buttonToggleInactive', 0)
     : palette('buttonDefault', 0)

@@ -21,7 +21,6 @@ import { hasNewErrorNEW } from 'utils/entity-form';
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
-import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
 import { API, ROUTES, USER_ROLES } from 'themes/config';
 import appMessages from 'containers/App/messages';
 
@@ -140,7 +139,6 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       <Content ref={this.scrollContainer} inModal={inModal}>
         <ContentHeader
           title={intl.formatMessage(messages.pageTitle, { type })}
-          type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
         />
         <EntityFormWrapper
           typeLabel={type}
