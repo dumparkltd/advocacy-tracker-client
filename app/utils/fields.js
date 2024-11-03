@@ -958,11 +958,11 @@ export const getResourcePreviewFields = ({
   return fields;
 };
 
-export const getUserPreviewHeader = (indicator, intl) => ({
+export const getUserPreviewHeader = (user, intl) => ({
   aboveTitle: intl.formatMessage(
     appMessages.entities.users.single
   ),
-  title: getEntityTitle(indicator),
+  title: getEntityTitle(user),
 });
 export const getUserPreviewFooter = (user, intl) => ({
   primaryLink: user && {

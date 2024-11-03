@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import {
   ROUTES,
   ACTORTYPES,
+  ACTIONTYPES,
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPES_CONFIG,
   USER_ACTIONTYPES,
@@ -41,6 +42,9 @@ const LabelPrint = styled.span`
 const getOwnActivityColumns = (mapSubject, typeId) => {
   const actionTypeIds = Object.keys(ACTIONTYPE_ACTORTYPES).filter(
     (actionTypeId) => {
+      if (qe(actionTypeId, ACTIONTYPES.OP)) return false;
+      if (qe(actionTypeId, ACTIONTYPES.AP)) return false;
+      if (qe(actionTypeId, ACTIONTYPES.EVENT)) return false;
       const actiontypeActortypeId = ACTIONTYPE_ACTORTYPES[actionTypeId];
       return actiontypeActortypeId.indexOf(typeId.toString()) > -1;
     }
@@ -60,6 +64,7 @@ const getOwnActivityColumns = (mapSubject, typeId) => {
       actions: 'actionsByType',
       actionsMembers: 'actionsAsMemberByType',
       actionsChildren: 'actionsAsParentByType',
+      minSize: (id === ACTIONTYPES.EXPRESS) ? 'medium' : 'large',
     })
   );
 };

@@ -1087,10 +1087,6 @@ export const ACTORTYPES_CONFIG = {
         type: 'associations', // one row per type,
       },
       {
-        id: 'members', // one row per type,
-        type: 'members', // one row per type,
-      },
-      {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
       },
@@ -1268,10 +1264,6 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'associations', // one row per type,
         type: 'associations', // one row per type,
-      },
-      {
-        id: 'members', // one row per type,
-        type: 'members', // one row per type,
       },
       {
         id: 'users', // one row per type,
@@ -1948,7 +1940,7 @@ export const ACTORTYPES_CONFIG = {
 export const ACTIONTYPES_CONFIG = {
   1: {
     id: ACTIONTYPES.EXPRESS,
-    order: 3,
+    order: 1,
     columns: [
       {
         id: 'date',
@@ -2394,20 +2386,9 @@ export const ACTIONTYPES_CONFIG = {
         taxonomy_id: 10, // event type
       },
       {
-        id: 'childActions', // one row per type,
-        type: 'childActions', // one row per type,
-        showOnSingle: false,
-      },
-      {
         id: 'actors', // one row per type,
         type: 'actors', // one row per type,
         sort: 'title',
-      },
-      {
-        id: 'actorsViaChildren', // one row per type,
-        type: 'actorsViaChildren', // one row per type,
-        sort: 'title',
-        showOnSingle: false,
       },
       {
         id: 'users', // one row per type,
@@ -2618,18 +2599,8 @@ export const ACTIONTYPES_CONFIG = {
         taxonomy_id: 10, // priority
       },
       {
-        id: 'childActions', // one row per type,
-        type: 'childActions', // one row per type,
-        showOnSingle: false,
-      },
-      {
         id: 'actors',
         type: 'actors',
-        sort: 'title',
-      },
-      {
-        id: 'actorsViaChildren', // one row per type,
-        type: 'actorsViaChildren', // one row per type,
         sort: 'title',
       },
       {
@@ -2824,7 +2795,7 @@ export const ACTIONTYPES_CONFIG = {
   },
   5: {
     id: ACTIONTYPES.TASK,
-    order: 1,
+    order: 3,
     columns: [
       {
         id: 'date',
@@ -2844,11 +2815,6 @@ export const ACTIONTYPES_CONFIG = {
         id: 'taxonomy-10',
         type: 'taxonomy',
         taxonomy_id: 10, // priority
-      },
-      {
-        id: 'parentActions', // one row per type,
-        type: 'parentActions', // one row per type,
-        showOnSingle: false,
       },
       {
         id: 'actors', // one row per type,

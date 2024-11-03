@@ -172,7 +172,7 @@ const getColWidth = ({ col, count, topicPositionLength }) => {
     }
   } else if (count > 2) {
     if (col.type === 'main') {
-      result = '35%';
+      result = '30%';
     } else if (col.isSingleActionColumn) {
       result = '25%';
     }
