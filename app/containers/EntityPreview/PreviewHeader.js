@@ -25,7 +25,10 @@ const NavButton = styled((p) => <Button plain {...p} />)`
   border: 1px solid ${palette('light', 1)};
   color: ${({ isDisabled }) => isDisabled ? palette('light', 3) : 'black'};
   background: ${({ isDisabled }) => isDisabled ? palette('light', 1) : 'white'};
-  padding: ${({ isLeft }) => isLeft ? '2px 9px 2px 7px' : '2px 7px 2px 9px'};
+  padding: ${({ isLeft }) => isLeft ? '4px 9px 4px 7px' : '4px 7px 4px 9px'};
+  width: 34px;
+  height: 34px;
+  margin-top: 2px;
   path {
     stroke-width: 3px;
   }
@@ -78,12 +81,12 @@ export function PreviewHeader({ content, onSetPreviewItemId }) {
             {aboveTitle}
           </Reference>
         )}
-        <Box direction="row" justify="between">
+        <Box direction="row" justify="between" align="start">
           <Title>
             {title}
           </Title>
           {onSetPreviewItemId && (nextPreviewItem || prevPreviewItem) && (
-            <Box direction="row" flex={{ shrink: 0 }} width="120" gap="xsmall">
+            <Box direction="row" flex={{ shrink: 0, grow: 0 }} width="120" gap="xsmall" align="center">
               <NavButton
                 onClick={() => onSetPreviewItemId(prevPreviewItem)}
                 isDisabled={!prevPreviewItem}
