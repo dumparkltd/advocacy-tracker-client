@@ -146,7 +146,7 @@ const SearchWrapper = styled((p) => <Box {...p} />)`
 const MapSecondaryTitle = styled((p) => <Text size="large" {...p} />)`
   margin: 0;
   color: black;
-  font-weight: bold;
+  font-weight: 600;
 `;
 
 const ID = 'positions-map';

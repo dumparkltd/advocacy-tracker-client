@@ -120,29 +120,28 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
               isPrint={isPrintView}
             >
               <Box direction="row" justify="between">
-                <Box direction="row">
-                  <Brand
-                    as={isPrintView ? 'div' : 'a'}
-                    href={isPrintView ? '' : '/'}
-                    onClick={(evt) => {
-                      if (evt) evt.stopPropagation();
-                      if (!isPrintView) this.onClick('/');
-                    }}
-                    title={appTitle}
-                    isPrint={isPrintView}
-                  >
-                    <PrintHide>
-                      <LogoWrap>
-                        <Icon name="logo" size={isMinSize(size, 'medium') ? '72px' : '60px'} />
-                      </LogoWrap>
-                    </PrintHide>
-                    <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
-                      <BrandTitle isDev={IS_DEV}>
-                        {`${intl.formatMessage(appMessages.app.title)}${IS_DEV ? ' [TEST-DB]' : ''}`}
-                      </BrandTitle>
-                    </Box>
-                  </Brand>
-                  {isLarge
+                <Brand
+                  as={isPrintView ? 'div' : 'a'}
+                  href={isPrintView ? '' : '/'}
+                  onClick={(evt) => {
+                    if (evt) evt.stopPropagation();
+                    if (!isPrintView) this.onClick('/');
+                  }}
+                  title={appTitle}
+                  isPrint={isPrintView}
+                >
+                  <PrintHide>
+                    <LogoWrap>
+                      <Icon name="logo" size={isMinSize(size, 'medium') ? '72px' : '60px'} />
+                    </LogoWrap>
+                  </PrintHide>
+                  <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
+                    <BrandTitle isDev={IS_DEV}>
+                      {`${intl.formatMessage(appMessages.app.title)}${IS_DEV ? ' [TEST-DB]' : ''}`}
+                    </BrandTitle>
+                  </Box>
+                </Brand>
+                {isLarge
                     && navItems
                     && navItems.main
                     && navItems.main.length > 0
@@ -163,8 +162,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                           </LinkMenu>
                         ))}
                       </Box>
-                    )}
-                </Box>
+                  )}
                 {!isPrintView && (
                   <Box direction="row">
                     {navItems && navItems.create && navItems.create.length > 0 && (

@@ -24,7 +24,7 @@ import messages from './messages';
 const SupportTagsTitle = styled((p) => <Heading level="5" {...p} />)`
   margin: 0;
   color: black;
-  font-weight: bold;
+  font-weight: 600;
 `;
 const Hint = styled((p) => <Text {...p} />)`
   color: ${palette('dark', 4)};
@@ -103,7 +103,7 @@ const ComponentOptions = ({
             >
               <Box direction="row" align="center" gap="xsmall">
                 <Dot size="18px" color={tag.color} />
-                <Text>{tag.label}</Text>
+                <Text size="small">{tag.label}</Text>
               </Box>
             </TagButton>
           ))}
