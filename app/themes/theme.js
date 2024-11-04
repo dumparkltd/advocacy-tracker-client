@@ -358,6 +358,9 @@ theme.sizes = {
     width: 250,
     searchIconSize: 24,
   },
+  footer: {
+    height: 150,
+  },
   home: {
     // px or em
     text: {
