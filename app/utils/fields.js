@@ -876,25 +876,29 @@ export const getIndicatorPreviewFooter = (indicator, intl) => ({
 });
 
 export const getIndicatorPreviewFields = ({
-  action,
-  // indicators,
+  indicator,
   // onEntityClick,
   // intl,
-  // isAdmin,
 }) => {
   let fields = [];
   fields = Object.keys(INDICATOR_FIELDS.ATTRIBUTES).reduce(
     (memo, key) => {
-      const attribute = INDICATOR_FIELDS.ATTRIBUTES[key];
+      // const attribute = INDICATOR_FIELDS.ATTRIBUTES[key];
       if (
-        action
-        && attribute.preview
-        && attribute.preview.indexOf(`${action.getIn(['attributes', 'actortype_id'])}`) > -1
+        indicator
+        // && attribute.preview
+        //  && attribute.preview.indexOf(`${indicator.getIn(['attributes', 'actortype_id'])}`) > -1
       ) {
         if (key === 'date_start') {
           return [
             ...memo,
-            getDateField(action, key, { showEmpty: false }),
+            getDateField(indicator, key, { showEmpty: false }),
+          ];
+        }
+        if (key === 'description') {
+          return [
+            ...memo,
+            getMarkdownField(indicator, key, true),
           ];
         }
       }

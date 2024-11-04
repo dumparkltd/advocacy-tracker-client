@@ -18,6 +18,7 @@ import {
   getDateField,
   getTextField,
   getUserConnectionField,
+  getMarkdownField,
 } from 'utils/fields';
 import {
   checkActionAttribute,
@@ -85,11 +86,17 @@ export function PreviewItem({
     const [de] = item.getIn(['attributes', 'date_end']).split('T');
     datesEqual = ds === de;
   }
-  const typeId = item && item.getIn(['attributes', 'measuretype_id']);
+  let measureTypeId;
+  if (item.get('type') === API.ACTIONS) {
+    measureTypeId = item && item.getIn(['attributes', 'measuretype_id']);
+  }
 
   let fields = [];
   fields = columns.reduce(
     (memo, column) => {
+      if (!item) {
+        return memo;
+      }
       // categories action + actor
       // categories
       if (qe(column.get('type'), 'taxonomy') && item.get('categories')) {
@@ -161,29 +168,29 @@ export function PreviewItem({
       }
       // action view
       // date
-      if (qe(column.get('type'), 'date')) {
+      if (measureTypeId && qe(column.get('type'), 'date')) {
         return [...memo,
-          ...[checkActionAttribute(typeId, 'date_start')
+          ...[checkActionAttribute(measureTypeId, 'date_start')
             && getDateField(
               item,
               'date_start',
               {
                 specificity: dateSpecificity,
                 attributeLabel: datesEqual ? 'date' : 'date_start',
-                fallbackAttribute: qe(typeId, ACTIONTYPES.EXPRESS) ? 'created_at' : null,
+                fallbackAttribute: qe(measureTypeId, ACTIONTYPES.EXPRESS) ? 'created_at' : null,
                 fallbackAttributeLabel: 'created_at_fallback',
               },
             ),
           !datesEqual
-          && checkActionAttribute(typeId, 'date_end')
+          && checkActionAttribute(measureTypeId, 'date_end')
           && getDateField(item, 'date_end', { specificity: dateSpecificity }),
           !dateSpecificity
-          && checkActionAttribute(typeId, 'date_comment')
+          && checkActionAttribute(measureTypeId, 'date_comment')
           && getTextField(item, 'date_comment'),
           ]];
       }
       // stakeholders
-      if (actorConnections && qe(column.get('type'), 'actors') && item.get('actorsByType')) {
+      if (measureTypeId && actorConnections && qe(column.get('type'), 'actors') && item.get('actorsByType')) {
         return item.get('actorsByType').reduce(
           (memo2, actorIds, typeid) => {
             const actors = actorConnections.get(API.ACTORS).filter(
@@ -205,7 +212,7 @@ export function PreviewItem({
         );
       }
       // child activities
-      if (actionConnections && qe(column.get('type'), 'childActions') && item.get('childrenByType')) {
+      if (measureTypeId && actionConnections && qe(column.get('type'), 'childActions') && item.get('childrenByType')) {
         return item.get('childrenByType').reduce(
           (memo2, actionIds, actiontypeid) => {
             const actions = actionConnections.get(API.ACTIONS).filter(
@@ -249,7 +256,7 @@ export function PreviewItem({
     fields,
   );
   // users action + actor
-  if (actionConnections && item.get('users')) {
+  if (item && item.get('users') && actionConnections) {
     const users = item.get('users').map(
       (actorId) => {
         const user = actionConnections.get(API.USERS).filter(
@@ -268,6 +275,14 @@ export function PreviewItem({
       }),
     ];
   }
+  // topic description
+  if (item && item.get('type') === API.INDICATORS) {
+    fields = [
+      ...fields,
+      getMarkdownField(item, 'description', true),
+    ];
+  }
+
   return fields && fields.length > 0
     ? (
       <Box margin={{ vertical: 'medium' }} flex={{ shrink: 0 }}>
