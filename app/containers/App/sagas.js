@@ -560,9 +560,9 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
       err.response.json = yield err.response.json();
       yield put(saveError(err, dataTS));
     }
-    if (updateClient) {
-      yield put(invalidateEntities(data.path));
-    }
+    // if (updateClient) {
+    //   // yield put(invalidateEntities(data.path));
+    // }
   }
 }
 
