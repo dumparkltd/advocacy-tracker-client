@@ -67,7 +67,6 @@ export function FormFooter({
                     field={field}
                     fieldTracked={fieldTracked}
                     formData={formData}
-                    inline
                   />
                 </Box>
               );
