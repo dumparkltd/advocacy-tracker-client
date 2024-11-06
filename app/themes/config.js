@@ -1262,8 +1262,8 @@ export const ACTORTYPES_CONFIG = {
         taxonomy_id: 2, // sector
       },
       {
-        id: 'associations', // one row per type,
-        type: 'associations', // one row per type,
+        id: 'members', // one row per type,
+        type: 'members', // one row per type,
       },
       {
         id: 'users', // one row per type,
