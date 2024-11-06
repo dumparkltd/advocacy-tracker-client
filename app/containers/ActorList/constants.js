@@ -36,6 +36,16 @@ export const CONFIG = {
   batchDelete: true,
   hasMemberOption: [
     ACTORTYPES.CONTACT,
+    ACTORTYPES.COUNTRY,
+    ACTORTYPES.ORG,
+  ],
+  hasMemberFilterOption: [
+    ACTORTYPES.CONTACT,
+  ],
+  hasChildOption: [
+    ACTORTYPES.GROUP,
+    ACTORTYPES.COUNTRY,
+    ACTORTYPES.REGION,
   ],
   views: {
     list: {

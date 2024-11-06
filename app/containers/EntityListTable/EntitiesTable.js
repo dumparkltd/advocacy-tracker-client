@@ -138,6 +138,7 @@ export function EntitiesTable({
   columnMaxValues,
   headerColumnsUtility,
   memberOption,
+  childOption,
   subjectOptions,
   inSingleView,
   isPrintView,
@@ -173,6 +174,11 @@ export function EntitiesTable({
                           {memberOption && (
                             <Box>
                               {memberOption}
+                            </Box>
+                          )}
+                          {childOption && (
+                            <Box>
+                              {childOption}
                             </Box>
                           )}
                         </Box>
@@ -358,6 +364,7 @@ EntitiesTable.propTypes = {
   isPrintView: PropTypes.bool,
   onEntityClick: PropTypes.func,
   memberOption: PropTypes.node,
+  childOption: PropTypes.node,
   subjectOptions: PropTypes.node,
 };
 

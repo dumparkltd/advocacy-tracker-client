@@ -34,6 +34,8 @@ import {
   selectAssociationtypesForActortype,
   selectParentAssociationtypesForActortype,
   selectViewQuery,
+  selectIncludeActorMembers,
+  selectIncludeActorChildren,
 } from 'containers/App/selectors';
 
 import { checkActorAttribute } from 'utils/entities';
@@ -141,6 +143,8 @@ export function ActorList({
   onSetPrintView,
   view,
   intl,
+  includeActorMembers,
+  includeActorChildren,
 }) {
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
@@ -242,7 +246,10 @@ export function ActorList({
       isMember,
     });
   }
-
+  const hasMemberOption = (CONFIG.hasMemberOption && CONFIG.hasMemberOption.indexOf(typeId) > -1);
+  const filterAssociationtypes = hasMemberOption && parentAssociationtypes
+    ? associationtypes.merge(parentAssociationtypes)
+    : associationtypes;
   return (
     <div>
       <Helmet
@@ -268,7 +275,7 @@ export function ActorList({
         actiontypes={actiontypes}
         actiontypesForTarget={actiontypesForTarget}
         membertypes={membertypes}
-        parentAssociationtypes={parentAssociationtypes}
+        filterAssociationtypes={filterAssociationtypes}
         associationtypes={associationtypes}
         typeOptions={prepareTypeOptions(
           actortypes,
@@ -331,6 +338,8 @@ ActorList.propTypes = {
   location: PropTypes.object,
   params: PropTypes.object,
   onSetPrintView: PropTypes.func,
+  includeActorMembers: PropTypes.bool,
+  includeActorChildren: PropTypes.bool,
   intl: intlShape,
 };
 
@@ -350,6 +359,8 @@ const mapStateToProps = (state, props) => ({
   actortypes: selectActortypes(state),
   allEntities: selectActorsWithConnections(state, { type: props.params.id }),
   view: selectViewQuery(state),
+  includeActorMembers: selectIncludeActorMembers(state),
+  includeActorChildren: selectIncludeActorChildren(state),
 });
 
 function mapDispatchToProps(dispatch) {

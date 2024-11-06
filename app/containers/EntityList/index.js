@@ -25,7 +25,6 @@ import {
   selectCurrentPathname,
   selectAllTaxonomiesWithCategories,
   selectViewQuery,
-  selectIncludeMembersForFiltering,
   selectMapSubjectQuery,
   selectIncludeActorMembers,
   selectIncludeTargetMembers,
@@ -43,7 +42,6 @@ import {
   openNewEntityModal,
   setView,
   updateRouteQuery,
-  setIncludeMembersForFiltering,
   setMapSubject,
   setIncludeActorMembers,
   setIncludeTargetMembers,
@@ -258,7 +256,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       connections,
       onTagClick,
       actortypes,
-      parentActortypes,
+      filterActortypes,
       actiontypes,
       targettypes,
       resourcetypes,
@@ -271,8 +269,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       dataReady,
       showCode,
       onUpdateQuery,
+      memberFilterOption,
       includeMembers,
-      onSetFilterMemberOption,
       mapSubject,
       onSetMapSubject,
       onSetIncludeActorMembers,
@@ -299,7 +297,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onResetProgress,
       actiontypesForTarget,
       membertypes,
-      parentAssociationtypes,
+      filterAssociationtypes,
       associationtypes,
       handleEditSubmit,
       onCreateOption,
@@ -426,7 +424,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     // we only consider the search query for download when we are looking at the list and when we have the default map subject selected
     const isSearchQueryActiveForDownload = !!locationQuery.get('search') && showList;
     const isSelectionActiveForDownload = showList && entityIdsSelectedFiltered && entityIdsSelectedFiltered.size > 0;
-
+console.log(memberFilterOption)
     return (
       <div>
         {config.batchDelete && this.state.deleteConfirm && entityIdsSelectedFiltered && (
@@ -496,13 +494,13 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             entityIdsSelected={entityIdsSelectedFiltered}
             taxonomies={taxonomies}
             actortypes={actortypes}
-            parentActortypes={parentActortypes}
+            filterActortypes={filterActortypes}
             resourcetypes={resourcetypes}
             actiontypes={actiontypes}
             targettypes={targettypes}
             actiontypesForTarget={actiontypesForTarget}
             membertypes={membertypes}
-            parentAssociationtypes={parentAssociationtypes}
+            filterAssociationtypes={filterAssociationtypes}
             connections={connections}
             associationtypes={associationtypes}
             connectedTaxonomies={connectedTaxonomies}
@@ -535,8 +533,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             typeOptions={typeOptions}
             hasFilters={filters && filters.length > 0}
             onUpdateQuery={onUpdateQuery}
+            memberFilterOption={memberFilterOption}
             includeMembers={includeMembers}
-            onSetFilterMemberOption={onSetFilterMemberOption}
             headerActions={headerActions}
             onClearFilters={this.onClearFilters}
             isPrintView={isPrintView}
@@ -732,13 +730,13 @@ EntityList.propTypes = {
   taxonomies: PropTypes.instanceOf(Map),
   allTaxonomies: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
-  parentActortypes: PropTypes.instanceOf(Map),
+  filterActortypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   targettypes: PropTypes.instanceOf(Map),
   actiontypesForTarget: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
-  parentAssociationtypes: PropTypes.instanceOf(Map),
+  filterAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
   connectedTaxonomies: PropTypes.instanceOf(Map),
@@ -779,7 +777,7 @@ EntityList.propTypes = {
   listActions: PropTypes.array,
   onSelectType: PropTypes.func,
   onSetView: PropTypes.func,
-  onSetFilterMemberOption: PropTypes.func,
+  // onSetFilterMemberOption: PropTypes.func,
   view: PropTypes.string,
   mapSubject: PropTypes.string,
   searchQuery: PropTypes.string,
@@ -790,14 +788,15 @@ EntityList.propTypes = {
   onSetIncludeTargetChildren: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
   includeActorMembers: PropTypes.bool,
-  includeTargetMembers: PropTypes.bool,
   includeActorChildren: PropTypes.bool,
+  includeTargetMembers: PropTypes.bool,
   includeTargetChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
   onEntitiesDelete: PropTypes.func,
   onUpdateFilters: PropTypes.func,
   isPrintView: PropTypes.bool,
   currentUserId: PropTypes.string,
+  memberFilterOption: PropTypes.object,
 };
 
 EntityList.contextTypes = {
@@ -814,11 +813,10 @@ const mapStateToProps = (state) => ({
   currentPath: selectCurrentPathname(state),
   allTaxonomies: selectAllTaxonomiesWithCategories(state),
   view: selectViewQuery(state),
-  includeMembers: selectIncludeMembersForFiltering(state),
   mapSubject: selectMapSubjectQuery(state),
   includeActorMembers: selectIncludeActorMembers(state),
-  includeTargetMembers: selectIncludeTargetMembers(state),
   includeActorChildren: selectIncludeActorChildren(state),
+  includeTargetMembers: selectIncludeTargetMembers(state),
   includeTargetChildren: selectIncludeTargetChildren(state),
   includeInofficial: selectIncludeInofficialStatements(state),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
@@ -877,9 +875,6 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetView: (view) => {
       dispatch(setView(view));
-    },
-    onSetFilterMemberOption: (view) => {
-      dispatch(setIncludeMembersForFiltering(view));
     },
     onSetMapSubject: (subject) => {
       dispatch(setMapSubject(subject));

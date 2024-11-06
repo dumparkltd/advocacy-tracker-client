@@ -301,13 +301,13 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       connections,
       entityIdsSelected,
       actortypes,
-      parentActortypes,
+      filterActortypes,
       actiontypes,
       resourcetypes,
       targettypes,
       actiontypesForTarget,
       membertypes,
-      parentAssociationtypes,
+      filterAssociationtypes,
       associationtypes,
       currentFilters,
       onShowFilters,
@@ -322,7 +322,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       typeId,
       onUpdateQuery,
       includeMembers,
-      onSetFilterMemberOption,
+      memberFilterOption,
       headerActions,
       isAdmin,
       onClearFilters,
@@ -338,25 +338,19 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     let panelGroups = null;
 
     let formOptions = null;
-    const hasMemberOption = (config.hasMemberOption && config.hasMemberOption.indexOf(typeId) > -1);
-
     if (dataReady && showFilters) {
       panelGroups = makeFilterGroups({
         config,
         taxonomies,
         connectedTaxonomies,
         hasUserRole,
-        actortypes: (hasMemberOption && actortypes && parentActortypes)
-          ? actortypes.merge(parentActortypes)
-          : actortypes,
+        actortypes: filterActortypes || actortypes,
         resourcetypes,
         actiontypes,
         targettypes,
         actiontypesForTarget,
         membertypes,
-        associationtypes: (hasMemberOption && associationtypes && parentAssociationtypes)
-          ? associationtypes.merge(parentAssociationtypes)
-          : associationtypes,
+        associationtypes: filterAssociationtypes || associationtypes,
         activeFilterOption: activeOption,
         currentFilters,
         typeId,
@@ -700,19 +694,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     this.onHideForm();
                     onUpdateQuery(args);
                   }}
-                  memberOption={hasMemberOption
-                    ? {
-                      key: 'filter-member-option',
-                      active: !!includeMembers,
-                      label: 'Also consider members when filtering by region or group',
-                      info: 'When enabled and when filtering by region or group, the list will also include activities associated with any members of those regions or groups',
-                      onClick: () => {
-                        this.onHideForm();
-                        onSetFilterMemberOption(!includeMembers);
-                      },
-                    }
-                    : null
-                  }
+                  memberFilterOption={memberFilterOption}
                 />
               )}
               {showEditOptions && (
@@ -764,12 +746,12 @@ EntityListHeader.propTypes = {
   entityIdsSelected: PropTypes.instanceOf(List),
   taxonomies: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
-  parentActortypes: PropTypes.instanceOf(Map),
+  filterActortypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
   targettypes: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
-  parentAssociationtypes: PropTypes.instanceOf(Map),
+  filterAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
   actiontypesForTarget: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
@@ -793,10 +775,10 @@ EntityListHeader.propTypes = {
   dataReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
   includeMembers: PropTypes.bool,
+  memberFilterOption: PropTypes.object,
   isPrintView: PropTypes.bool,
   typeOptions: PropTypes.array,
   onSelectType: PropTypes.func,
-  onSetFilterMemberOption: PropTypes.func,
   onClearFilters: PropTypes.func,
   typeId: PropTypes.string,
   headerActions: PropTypes.array,
