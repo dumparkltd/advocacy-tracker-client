@@ -141,6 +141,7 @@ export function PreviewItem({
                 actors,
                 onEntityClick,
                 typeid,
+                columns: null,
               }),
             ]);
           },
@@ -160,6 +161,7 @@ export function PreviewItem({
                 actors,
                 onEntityClick,
                 typeid,
+                columns: null,
               }),
             ]);
           },
@@ -203,10 +205,11 @@ export function PreviewItem({
                 onEntityClick,
                 connections: actorConnections,
                 typeid,
-                columns: getActortypeColumns({
-                  typeId: typeid,
-                  showCode: checkActorAttribute(typeid, 'code', isAdmin),
-                }),
+                columns: null,
+                // columns: getActortypeColumns({
+                //   typeId: typeid,
+                //   showCode: checkActorAttribute(typeid, 'code', isAdmin),
+                // }),
               })];
           }, memo
         );
@@ -225,7 +228,8 @@ export function PreviewItem({
                 onEntityClick,
                 connections: actionConnections,
                 typeid: actiontypeid,
-                columns: getActortypeColumns(actiontypeid),
+                columns: null,
+                // columns: getActortypeColumns(actiontypeid),
               }),
             ];
           }, memo
@@ -272,6 +276,7 @@ export function PreviewItem({
         onEntityClick,
         connections: actorConnections,
         skipLabel: true,
+        columns: null,
       }),
     ];
   }
