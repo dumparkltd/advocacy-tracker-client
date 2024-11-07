@@ -60,21 +60,19 @@ const MultiSelectDropdownIcon = styled.div`
     padding-right: 16px;
   }
 `;
-const MultiSelectDropButton = styled(Button)`
+const MultiSelectDropButton = styled((p) => <Button plain {...p} />)`
   position: relative;
   width: 100%;
-  font-size: 0.85em;
   text-align: left;
   color: ${palette('multiSelectFieldButton', 0)};
   background-color: white;
+  font-size: 1em;
+  border: 1px solid #f1f0f1;
+  padding: 0.7em;
+  border-radius: 0.5em;
   &:hover {
     color: white;
     background-color: ${({ theme }) => theme.global.colors.highlight};
-  }
-  padding: 12px 0 12px 8px;
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    font-size: 0.85em;
-    padding: 12px 0 12px 16px;
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.smaller};
