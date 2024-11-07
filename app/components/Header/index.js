@@ -17,6 +17,11 @@ import LinkMenu from './LinkMenu';
 import DropMenu from './DropMenu';
 import messages from './messages';
 
+const SearchLinkMenu = styled((p) => <LinkMenu {...p} />)`
+  font-size: ${({ theme }) => theme.text.xsmall.size};
+  line-height: ${({ theme }) => theme.text.xsmall.size};
+  padding-top: 23px;
+`;
 
 const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
   margin: 0;
@@ -147,22 +152,45 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                     && navItems.main.length > 0
                     && (
                       <Box direction="row">
-                        {navItems.main.map((item, i) => (
-                          <LinkMenu
-                            flex={{ shrink: 0 }}
-                            key={i}
-                            href={item.path}
-                            active={item.active}
-                            onClick={(evt) => {
-                              if (evt) evt.stopPropagation();
-                              this.onClick(item.path);
-                            }}
-                          >
-                            {item.title}
-                          </LinkMenu>
-                        ))}
+                        {
+                          navItems.main.map((item, i) => {
+                            if (item.path === ROUTES.SEARCH) {
+                              return (
+                                <SearchLinkMenu
+                                  flex={{ shrink: 0 }}
+                                  key={i}
+                                  href={item.path}
+                                  active={item.active}
+                                  onClick={(evt) => {
+                                    if (evt) evt.stopPropagation();
+                                    this.onClick(item.path);
+                                  }}
+                                >
+                                  <Box as="span" align="center" direction="row" gap="4px">
+                                    {item.title}
+                                    <Icon name="search" size="20px" />
+                                  </Box>
+                                </SearchLinkMenu>
+                              );
+                            }
+                            return (
+                              <LinkMenu
+                                flex={{ shrink: 0 }}
+                                key={i}
+                                href={item.path}
+                                active={item.active}
+                                onClick={(evt) => {
+                                  if (evt) evt.stopPropagation();
+                                  this.onClick(item.path);
+                                }}
+                              >
+                                {item.title}
+                              </LinkMenu>
+                            );
+                          })
+                        }
                       </Box>
-                  )}
+                    )}
                 {!isPrintView && (
                   <Box direction="row">
                     {navItems && navItems.create && navItems.create.length > 0 && (
