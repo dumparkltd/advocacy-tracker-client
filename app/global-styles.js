@@ -39,6 +39,7 @@ const GlobalStyle = createGlobalStyle`
     margin: 0;
   }
   :focus, :visited:focus {
+    outline-offset: 2px !important;
     outline: 5px auto rgb(77, 144, 254); /* TODO: improve focus styles and individualise for specific buttons and links */
   }
   #app {

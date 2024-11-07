@@ -521,6 +521,14 @@ theme.global = {
     xlarge: '64px',
     xxlarge: '100px',
   },
+
+  focus: {
+    outline: {
+      size: '2px',
+      color: 'highlight',
+    },
+    shadow: 'none',
+  },
 };
 // also grommet but not global somehow
 theme.accordion = {
