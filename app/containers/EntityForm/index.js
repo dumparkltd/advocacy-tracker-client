@@ -58,8 +58,14 @@ const StyledForm = styled(Form)`
 
 const FormSteps = styled(
   (p) => <Box direction="row" fill="horizontal" responsive={false} {...p} />
-)``;
-
+)`
+  background: #DADDE0;
+  border: 1px solid white;
+`;
+const FormStepWrapper = styled(
+  (p) => <Box {...p} />
+)`
+`;
 const SkipButton = styled(
   (p) => <Button plain {...p} />
 )`
@@ -83,8 +89,6 @@ const ButtonStep = styled(
   text-align: left;
   background-color: ${({ theme, highlight }) => highlight ? theme.global.colors.highlight : '#DADDE0'};
   color: ${({ highlight }) => highlight ? 'white' : '#777E7E'};
-  border-right: 1px solid ${({ lastItem }) => lastItem ? 'transparent' : 'white'};
-  border-left: 1px solid transparent;
   padding: 4px 8px;
   opacity: 1;
   cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
@@ -94,6 +98,30 @@ const ButtonStep = styled(
     return highlight ? 'white' : theme.global.colors.highlightHover;
   }};
   }
+`;
+const ButtonStepArrow = styled.div`
+  display: ${({ lastItem }) => lastItem ? 'none' : 'block'}; 
+  content: '';
+  width: 0;
+  height: 0;
+  position: relative;
+  margin-right: 1px;
+  right: -1px;
+  top: 0px;
+  border-top: 26px solid ${({ theme, prevHighlighted }) => prevHighlighted ? theme.global.colors.highlight : 'transparent'};
+  border-bottom: 26px solid ${({ theme, prevHighlighted }) => prevHighlighted ? theme.global.colors.highlight : 'transparent'};
+  border-left: 13px solid white;
+  &:before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-top: 26px solid transparent;
+    border-bottom: 26px solid transparent;
+    border-left: 13px solid ${({ theme, highlight }) => highlight ? theme.global.colors.highlight : '#DADDE0'};
+    position: absolute;
+    top: -26px;
+    right: 1px;
+}
 `;
 const ButtonStepLabel = styled.span`
   font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
@@ -309,7 +337,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                         hasErrors,
                       } = step;
                       let title = step.title || step.id;
-                      if (!isMinSize(size, 'ms')) {
+                      if (!isMinSize(size, 'medium')) {
                         if (!isActive) {
                           title = '';
                         } else if (isActive && step.titleSmall) {
@@ -320,43 +348,47 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                         title = `${idx + 1}.${title ? ' ' : ''}${title}`;
                       }
                       return (
-                        <Box
+                        <FormStepWrapper
                           key={step.id}
                           basis={(isMinSize(size, 'medium') && byStep.length > 1)
                             ? `1/${byStep.length}`
                             : 'auto'}
                           flex={((!isMinSize(size, 'medium') && isActive) || byStep.length === 1) ? { grow: 1 } : false}
+                          direction="row"
                         >
-                          <ButtonStep
-                            highlight={highlighted}
-                            disabled={activeStepHasErrors}
-                            onClick={(evt) => {
-                              if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-                              if (!isActive) {
-                                this.setStepActive(step.id);
-                                this.addStepSeen(cleanStepActive);
-                              }
-                            }}
-                            lastItem={idx + 1 === byStep.length}
-                          >
-                            <Box direction="row" align="center" gap="small">
-                              <ButtonStepLabel>
-                                {title}
-                              </ButtonStepLabel>
-                              <Box direction="row" align="center" gap="xxsmall">
-                                {hasErrors && (
-                                  <WarningDot type="error" />
-                                )}
-                                {!hasErrors && hasEmptyRequired && (
-                                  <WarningDot type="required" />
-                                )}
-                                {hasUnseenAutofill && (
-                                  <WarningDot type="autofill" />
-                                )}
+                          <Box basis="full">
+                            <ButtonStep
+                              highlight={highlighted}
+                              disabled={activeStepHasErrors}
+                              onClick={(evt) => {
+                                if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+                                if (!isActive) {
+                                  this.setStepActive(step.id);
+                                  this.addStepSeen(cleanStepActive);
+                                }
+                              }}
+                              lastItem={idx + 1 === byStep.length}
+                            >
+                              <Box direction="row" align="center" gap="small">
+                                <ButtonStepLabel>
+                                  {title}
+                                </ButtonStepLabel>
+                                <Box direction="row" align="center" gap="xxsmall">
+                                  {hasErrors && (
+                                    <WarningDot type="error" />
+                                  )}
+                                  {!hasErrors && hasEmptyRequired && (
+                                    <WarningDot type="required" />
+                                  )}
+                                  {hasUnseenAutofill && (
+                                    <WarningDot type="autofill" />
+                                  )}
+                                </Box>
                               </Box>
-                            </Box>
-                          </ButtonStep>
-                        </Box>
+                            </ButtonStep>
+                          </Box>
+                          <ButtonStepArrow highlight={highlighted} lastItem={idx + 1 === byStep.length} prevHighlighted={activeStepIndex > idx} />
+                        </FormStepWrapper>
                       );
                     })}
                   </FormSteps>
