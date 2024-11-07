@@ -97,17 +97,14 @@ const StyledSearchBox = styled(StyledSearchBoxBase)`
   }
 `;
 const DropDown = styled.div`
-  display: none;
   background: white;
   box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
   z-index: 999;
   margin-top: 6px;
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    position: absolute;
-    left: 3px;
-    top: 100%;
-    display: block;
-  }
+  position: absolute;
+  left: 3px;
+  top: 100%;
+  display: block;
 `;
 
 export function Search({
