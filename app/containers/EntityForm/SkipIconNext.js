@@ -7,7 +7,7 @@ import { Next, Previous } from 'grommet-icons';
 const Styled = styled.div`
   border-radius: 99999px;
   background: white;
-  border: 1px solid #B7BCBF;
+  border: 1px solid #E6E7E8;
   padding: 10px;
 `;
 

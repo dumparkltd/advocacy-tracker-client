@@ -132,6 +132,7 @@ const ButtonStepLabel = styled.span`
 
 const ButtonStepLabelUpper = styled(ButtonStepLabel)`
   text-transform: uppercase;
+  font-size: ${({ theme }) => theme.text.medium.size};
   color: ${({ theme, disabled }) => disabled ? '' : theme.global.colors.highlight};
 `;
 
