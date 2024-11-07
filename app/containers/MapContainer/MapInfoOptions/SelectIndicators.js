@@ -90,13 +90,10 @@ export function SelectIndicators({ config }) {
           align={dropAlign || { bottom: 'top', left: 'left' }}
           onClickOutside={() => setShowOptions(false)}
         >
-          <Box
-            key="key"
-            pad={{ vertical: 'xsmall' }}
-          >
+          <Box pad={{ vertical: 'xsmall' }}>
             {indicatorOptions && indicatorOptions.map(
               (o) => (
-                <Box key={o.id} flex={{ shrink: 0 }}>
+                <Box key={o.value} flex={{ shrink: 0 }}>
                   <OptionButton
                     active={o.active}
                     isDefaultOption={o.id === 'all'}
