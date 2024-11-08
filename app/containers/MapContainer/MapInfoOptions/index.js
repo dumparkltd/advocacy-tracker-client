@@ -31,7 +31,14 @@ const Styled = styled.div`
     return '220px;';
   }}
   left: 0;
-  max-width: 320px;
+  @media (max-width: ${({ theme }) => theme.breakpoints.ms}) {
+    width: calc(100% - 20px);
+    left: 10px;
+    bottom: 30px;
+  }
+  @media (min-width: ${({ theme }) => theme.breakpoints.ms}) {
+    max-width: 320px;
+  }
   @media (min-width: 370px) {
     max-width: 420px;
     width: 100%;

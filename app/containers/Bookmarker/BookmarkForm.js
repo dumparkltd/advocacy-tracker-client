@@ -31,14 +31,15 @@ const Styled = styled.div`
   text-align: left;
   margin-top: 3px;
   width: 100%;
-  top: 0;
+  top: 100%;
   z-index: 10;
-  left: 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    top: 100%;
-    right: 0;
-    left: auto;
+  left: auto;
+  right:0;
+  @media (min-width: ${({ theme }) => theme.breakpoints.ms}) {
     width: 340px;
+  }
+  @media (max-width: ${({ theme }) => theme.breakpoints.ms}) {
+    width: 260px;
   }
 `;
 const StyledForm = styled.form`
