@@ -231,7 +231,7 @@ export function EntitiesTable({
           if (mainItem) {
             const entityIds = sortedEntities.map((e) => e.id);
             const entityIndex = entityIds.indexOf(mainItem.get('id'));
-            const nextIndex = entityIndex < entityIds.length ? entityIndex + 1 : 0;
+            const nextIndex = entityIndex < entityIds.length && entityIds.length > 1 ? entityIndex + 1 : 0;
             const prevIndex = entityIndex > 0 ? entityIndex - 1 : entityIds.length - 1;
 
             let content = reducePreviewItem({ item: mainItem, path });

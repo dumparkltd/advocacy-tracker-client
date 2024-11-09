@@ -182,7 +182,7 @@ export function PositionsMap({
           if (country) {
             const countryIds = countries.keySeq().toArray();
             const countryIndex = countryIds.indexOf(country.get('id'));
-            const nextIndex = countryIndex < countryIds.length ? countryIndex + 1 : 0;
+            const nextIndex = countryIndex < countryIds.length && countryIds.length > 1 ? countryIndex + 1 : 0;
             const prevIndex = countryIndex > 0 ? countryIndex - 1 : countryIds.length - 1;
 
             const currentIndicator = indicators && indicators.get(currentIndicatorId.toString());
