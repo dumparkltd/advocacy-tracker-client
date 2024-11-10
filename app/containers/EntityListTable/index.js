@@ -152,7 +152,7 @@ export function EntityListTable({
 
   let searchedEntities = entities;
   const searchQueryClean = search || searchQuery;
-  if (searchQueryClean && searchQueryClean.length > 2) {
+  if (!inSingleView && searchQueryClean && searchQueryClean.length > 2) {
     searchedEntities = filterEntitiesByKeywords(
       searchedEntities,
       searchQueryClean,
