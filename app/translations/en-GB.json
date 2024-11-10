@@ -5,7 +5,7 @@
   "app.containers.App.nav.login": "Sign in",
   "app.containers.App.nav.logout": "Sign out",
   "app.containers.App.nav.register": "Register",
-  "app.containers.App.actortypes_info.1": " ",
+  "app.containers.App.actortypes_info.1": "description placeholder",
   "app.containers.App.actortypes_info.2": " ",
   "app.containers.App.actortypes_info.3": " ",
   "app.containers.App.actortypes_info.4": " ",
