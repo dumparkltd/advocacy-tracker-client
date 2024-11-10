@@ -45,6 +45,8 @@ export const TitleMedium = styled.h3`
   display: inline-block;
   font-weight: normal;
   font-size: 42px;
+  position: relaive;
+  top: -0.07em
 `;
 const TitleMediumPrint = styled.h3`
   font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
