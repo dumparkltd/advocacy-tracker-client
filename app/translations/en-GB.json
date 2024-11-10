@@ -622,7 +622,7 @@
   "app.containers.App.entities.taxonomies.4.empty": "No region types assigned yet",
   "app.containers.App.entities.taxonomies.4.shortSingle": "Region type",
   "app.containers.App.entities.taxonomies.4.shortPlural": "Region types",
-  "app.containers.App.entities.taxonomies.4.description": "For cetegorising countries by grouping based on geographic classifications",
+  "app.containers.App.entities.taxonomies.4.description": "For categorising countries by grouping based on geographic classifications",
   "app.containers.App.entities.taxonomies.5.single": "Group type",
   "app.containers.App.entities.taxonomies.5.plural": "Group types",
   "app.containers.App.entities.taxonomies.5.empty": "No group types assigned yet",
