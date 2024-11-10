@@ -11,15 +11,13 @@ export default styled((p) => <Button plain {...p} />)`
   line-height: ${({ theme }) => theme.text.large.size};
   background-color: ${({ active }) => active ? 'transparent' : 'transparent'};
   border-bottom: 4px solid ${({ active }) => active ? 'black' : 'transparent'};
+  cursor: ${({ active }) => active ? 'default' : 'pointer'};
   &:hover {
     color: ${({ theme, active }) => active ? 'black' : theme.global.colors.highlight};
     border-bottom: 4px solid ${({ active }) => active ? 'black' : 'transparent'};
   }
-  height: ${(props) => props.theme.sizes.navSecondary.nav.heightMobile}px;
-  padding: 30px 0.5em 0;
+  padding: 5px 0.5em 5px;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    padding: 30px 0.5em 0;
-    height: ${(props) => props.theme.sizes.navSecondary.nav.height}px;
     font-size: ${({ theme }) => theme.text.xlarge.size};
     line-height: ${({ theme }) => theme.text.xlarge.size};
   }

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 // import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
-
+import { Box } from 'grommet';
 import { updatePath } from 'containers/App/actions';
 
 import PrintHide from 'components/styled/PrintHide';
@@ -30,6 +30,8 @@ const LinkTitle = styled.div``;
 
 const NavMain = styled(PrintHide)`
   white-space: nowrap;
+  height: ${({ theme }) => theme.sizes.navSecondary.nav.height}px;
+  position: relative;
 `;
 
 const StyledContainer = styled(Container)`
@@ -44,21 +46,23 @@ class NavSecondary extends React.PureComponent { // eslint-disable-line react/pr
         <StyledContainer>
           <Content>
             <NavMain>
-              {navItems && navItems.map((item, i) => (
-                <LinkMain
-                  key={i}
-                  href={item.path}
-                  active={item.active}
-                  onClick={(evt) => {
-                    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-                    onPageLink(item.path);
-                  }}
-                >
-                  <LinkTitle active={item.active}>
-                    {item.title}
-                  </LinkTitle>
-                </LinkMain>
-              ))}
+              <Box direction="row" align="end" fill>
+                {navItems && navItems.map((item, i) => (
+                  <LinkMain
+                    key={i}
+                    href={item.path}
+                    active={item.active}
+                    onClick={(evt) => {
+                      if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+                      onPageLink(item.path);
+                    }}
+                  >
+                    <LinkTitle active={item.active}>
+                      {item.title}
+                    </LinkTitle>
+                  </LinkMain>
+                ))}
+              </Box>
             </NavMain>
           </Content>
         </StyledContainer>
