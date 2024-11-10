@@ -28,8 +28,9 @@ const ButtonLabel = styled((p) => <Text size="small" {...p} />)`
 `;
 const ButtonOptions = styled((p) => <Button plain {...p} />)`
   color: ${({ isActive }) => isActive ? palette('dark', 2) : palette('dark', 4)};
-  border-radius: 999px;
+  border-radius: 5px;
   border: none;
+  padding: 5px;
   &:hover {
     box-shadow: none;
     color: ${palette('primary', 1)};
@@ -51,15 +52,13 @@ class EntityListViewOptions extends React.PureComponent { // eslint-disable-line
                     onClick={() => option.onClick()}
                     isActive={option.active}
                     label={(
-                      <Box direction="row" gap="none" align="center">
-                        <Box>
-                          <Icon
-                            name={option.icon}
-                            size="33px"
-                            paletteIndex={option.active ? 2 : 4}
-                            palette="dark"
-                          />
-                        </Box>
+                      <Box as="span" direction="row" gap="none" align="center">
+                        <Icon
+                          name={option.icon}
+                          size="33px"
+                          paletteIndex={option.active ? 2 : 4}
+                          palette="dark"
+                        />
                         {isMinSize(size, 'medium') && (
                           <ButtonLabel size="small" isActive={option.active}>
                             {option.title}

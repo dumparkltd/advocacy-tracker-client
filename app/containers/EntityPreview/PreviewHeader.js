@@ -32,6 +32,9 @@ const NavButton = styled((p) => <Button plain {...p} />)`
   path {
     stroke-width: 3px;
   }
+  &:hover {
+    color: ${palette('primary', 0)};
+  }
 `;
 const CloseButton = styled((p) => <Button plain {...p} />)`
   background-color: ${palette('primary', 1)};

@@ -58,8 +58,15 @@ const StyledForm = styled(Form)`
 
 const FormSteps = styled(
   (p) => <Box direction="row" fill="horizontal" responsive={false} {...p} />
-)``;
-
+)`
+  background: #DADDE0;
+  overflow: hidden;
+`;
+const FormStepWrapper = styled(
+  (p) => <Box {...p} />
+)`
+  position: relative;
+`;
 const SkipButton = styled(
   (p) => <Button plain {...p} />
 )`
@@ -74,6 +81,14 @@ const SkipButton = styled(
     fill: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlightHover};
   }
 `;
+const HighlightBackground = styled.div`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 13px;
+  left: 0;
+  background-color: ${({ theme }) => theme.global.colors.highlight};
+`;
 
 const ButtonStep = styled(
   (p) => <Button plain {...p} />
@@ -81,10 +96,7 @@ const ButtonStep = styled(
   position: relative;
   height: 52px;
   text-align: left;
-  background-color: ${({ theme, highlight }) => highlight ? theme.global.colors.highlight : '#DADDE0'};
   color: ${({ highlight }) => highlight ? 'white' : '#777E7E'};
-  border-right: 1px solid ${({ lastItem }) => lastItem ? 'transparent' : 'white'};
-  border-left: 1px solid transparent;
   padding: 4px 8px;
   opacity: 1;
   cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
@@ -95,6 +107,30 @@ const ButtonStep = styled(
   }};
   }
 `;
+const ButtonStepArrow = styled.div`
+  display: ${({ lastItem }) => lastItem ? 'none' : 'block'};
+  content: '';
+  width: 0;
+  height: 0;
+  position: absolute;
+  right: 0;
+  top: -4px;
+  z-index: 1;
+  border-top: 30px solid ${({ theme, prevHighlighted }) => prevHighlighted ? theme.global.colors.highlight : 'transparent'};
+  border-bottom: 30px solid ${({ theme, prevHighlighted }) => prevHighlighted ? theme.global.colors.highlight : 'transparent'};
+  border-left: 15px solid white;
+  &:before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-top: 30px solid transparent;
+    border-bottom: 30px solid transparent;
+    border-left: 15px solid ${({ theme, highlight }) => highlight ? theme.global.colors.highlight : '#DADDE0'};
+    position: absolute;
+    top: -30px;
+    right: 1.5px;
+}
+`;
 const ButtonStepLabel = styled.span`
   font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 20px;
@@ -104,6 +140,7 @@ const ButtonStepLabel = styled.span`
 
 const ButtonStepLabelUpper = styled(ButtonStepLabel)`
   text-transform: uppercase;
+  font-size: ${({ theme }) => theme.text.medium.size};
   color: ${({ theme, disabled }) => disabled ? '' : theme.global.colors.highlight};
 `;
 
@@ -309,7 +346,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                         hasErrors,
                       } = step;
                       let title = step.title || step.id;
-                      if (!isMinSize(size, 'ms')) {
+                      if (!isMinSize(size, 'medium')) {
                         if (!isActive) {
                           title = '';
                         } else if (isActive && step.titleSmall) {
@@ -320,43 +357,50 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                         title = `${idx + 1}.${title ? ' ' : ''}${title}`;
                       }
                       return (
-                        <Box
+                        <FormStepWrapper
                           key={step.id}
                           basis={(isMinSize(size, 'medium') && byStep.length > 1)
                             ? `1/${byStep.length}`
                             : 'auto'}
                           flex={((!isMinSize(size, 'medium') && isActive) || byStep.length === 1) ? { grow: 1 } : false}
+                          direction="row"
                         >
-                          <ButtonStep
-                            highlight={highlighted}
-                            disabled={activeStepHasErrors}
-                            onClick={(evt) => {
-                              if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-                              if (!isActive) {
-                                this.setStepActive(step.id);
-                                this.addStepSeen(cleanStepActive);
-                              }
-                            }}
-                            lastItem={idx + 1 === byStep.length}
-                          >
-                            <Box direction="row" align="center" gap="small">
-                              <ButtonStepLabel>
-                                {title}
-                              </ButtonStepLabel>
-                              <Box direction="row" align="center" gap="xxsmall">
-                                {hasErrors && (
-                                  <WarningDot type="error" />
-                                )}
-                                {!hasErrors && hasEmptyRequired && (
-                                  <WarningDot type="required" />
-                                )}
-                                {hasUnseenAutofill && (
-                                  <WarningDot type="autofill" />
-                                )}
+                          <ButtonStepArrow highlight={highlighted} lastItem={idx + 1 === byStep.length} prevHighlighted={activeStepIndex > idx} />
+                          {highlighted && (
+                            <HighlightBackground />
+                          )}
+                          <Box basis="full" style={{ position: 'relative', zIndex: 1 }}>
+                            <ButtonStep
+                              highlight={highlighted}
+                              disabled={activeStepHasErrors}
+                              onClick={(evt) => {
+                                if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+                                if (!isActive) {
+                                  this.setStepActive(step.id);
+                                  this.addStepSeen(cleanStepActive);
+                                }
+                              }}
+                              lastItem={idx + 1 === byStep.length}
+                            >
+                              <Box direction="row" align="center" gap="small">
+                                <ButtonStepLabel>
+                                  {title}
+                                </ButtonStepLabel>
+                                <Box direction="row" align="center" gap="xxsmall">
+                                  {hasErrors && (
+                                    <WarningDot type="error" />
+                                  )}
+                                  {!hasErrors && hasEmptyRequired && (
+                                    <WarningDot type="required" />
+                                  )}
+                                  {hasUnseenAutofill && (
+                                    <WarningDot type="autofill" />
+                                  )}
+                                </Box>
                               </Box>
-                            </Box>
-                          </ButtonStep>
-                        </Box>
+                            </ButtonStep>
+                          </Box>
+                        </FormStepWrapper>
                       );
                     })}
                   </FormSteps>

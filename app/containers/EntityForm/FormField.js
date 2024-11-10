@@ -42,6 +42,7 @@ const Hint = styled.div`
 const InfoText = styled.span`
   color: ${palette('primary', 1)};
   font-size: ${(props) => props.theme.text.xxsmall.size};
+  font-weight: bold;
 `;
 const AutoFillWrap = styled(
   (p) => <Box direction="row" align="center" gap="xxsmall" {...p} />
@@ -70,7 +71,7 @@ const ShowButton = styled(
 )`
   font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   text-transform: uppercase;
-  font-size: 18px;
+  font-size: ${({ theme }) => theme.text.medium.size};
   padding: 0;
   color: ${({ theme }) => theme.global.colors.highlight};
 `;
@@ -311,6 +312,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
     if (isHidden) {
       isHidden = isHidden && !!isEmpty;
     }
+    console.log(field);
     // console.log('fieldTracked', fieldTracked)
     // console.log('field', field)
     return (

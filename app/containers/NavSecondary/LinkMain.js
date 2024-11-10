@@ -12,7 +12,7 @@ export default styled((p) => <Button plain {...p} />)`
   background-color: ${({ active }) => active ? 'transparent' : 'transparent'};
   border-bottom: 4px solid ${({ active }) => active ? 'black' : 'transparent'};
   &:hover {
-    color:${({ theme }) => theme.global.colors.highlight};
+    color: ${({ theme, active }) => active ? 'black' : theme.global.colors.highlight};
     border-bottom: 4px solid ${({ active }) => active ? 'black' : 'transparent'};
   }
   height: ${(props) => props.theme.sizes.navSecondary.nav.heightMobile}px;

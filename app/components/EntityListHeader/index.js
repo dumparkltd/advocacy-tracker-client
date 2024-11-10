@@ -469,7 +469,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                                   alt={action.title}
                                   subtle
                                 >
-                                  <Multiple size="small" color={palette('dark', 3)} />
+                                  <Multiple size="small" style={{ stroke: 'currentColor' }} />
                                 </ButtonFlatIconOnly>
                               </Box>
                             );

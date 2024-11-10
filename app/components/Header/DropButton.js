@@ -5,7 +5,7 @@ import { Button } from 'grommet';
 
 const DropButton = styled((p) => <Button plain {...p} />)`
   display: block;
-  border-radius: 999px;
+  border-radius: ${({ menuType, inDrop }) => menuType === 'add' || inDrop ? '999px' : 'none'};
   z-index: 300;
   color: white;
   padding: 5px;
@@ -36,7 +36,7 @@ const DropButton = styled((p) => <Button plain {...p} />)`
     if (menuType === 'add' || inDrop) {
       return palette('primary', 0);
     }
-    return 'transparent';
+    return '#282a2c';
   }};
   }
 

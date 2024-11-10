@@ -140,7 +140,10 @@ const MapWrapper = styled((p) => <Box {...p} />)`
   position: relative;
 `;
 const SearchWrapper = styled((p) => <Box {...p} />)`
-  width: ${({ theme }) => theme.sizes.mapSearchBar.width}px;
+  width: 100%;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    width: ${({ theme }) => theme.sizes.mapSearchBar.width}px;
+  }
 `;
 
 const MapSecondaryTitle = styled((p) => <Text size="large" {...p} />)`
@@ -456,7 +459,7 @@ export function PositionsMap({
             <Box
               direction="column"
               fill="horizontal"
-              pad={{ top: '42px', horizontal: 'medium', bottom: 'none' }}
+              pad={{ top: isMinSize(size, 'medium') ? '42px' : 'small', horizontal: 'medium', bottom: 'none' }}
               flex={{ grow: 1, shrink: 1 }}
             >
               <Box direction="row" fill="horizontal" justify="between" margin={{ bottom: 'small' }}>
