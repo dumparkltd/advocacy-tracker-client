@@ -60,11 +60,12 @@ const FormSteps = styled(
   (p) => <Box direction="row" fill="horizontal" responsive={false} {...p} />
 )`
   background: #DADDE0;
-  border: 1px solid white;
+  overflow: hidden;
 `;
 const FormStepWrapper = styled(
   (p) => <Box {...p} />
 )`
+  position: relative;
 `;
 const SkipButton = styled(
   (p) => <Button plain {...p} />
@@ -80,6 +81,14 @@ const SkipButton = styled(
     fill: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlightHover};
   }
 `;
+const HighlightBackground = styled.div`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 13px;
+  left: 0;
+  background-color: ${({ theme }) => theme.global.colors.highlight};
+`;
 
 const ButtonStep = styled(
   (p) => <Button plain {...p} />
@@ -87,7 +96,6 @@ const ButtonStep = styled(
   position: relative;
   height: 52px;
   text-align: left;
-  background-color: ${({ theme, highlight }) => highlight ? theme.global.colors.highlight : '#DADDE0'};
   color: ${({ highlight }) => highlight ? 'white' : '#777E7E'};
   padding: 4px 8px;
   opacity: 1;
@@ -100,27 +108,27 @@ const ButtonStep = styled(
   }
 `;
 const ButtonStepArrow = styled.div`
-  display: ${({ lastItem }) => lastItem ? 'none' : 'block'}; 
+  display: ${({ lastItem }) => lastItem ? 'none' : 'block'};
   content: '';
   width: 0;
   height: 0;
-  position: relative;
-  margin-right: 1px;
-  right: -1px;
-  top: 0px;
-  border-top: 26px solid ${({ theme, prevHighlighted }) => prevHighlighted ? theme.global.colors.highlight : 'transparent'};
-  border-bottom: 26px solid ${({ theme, prevHighlighted }) => prevHighlighted ? theme.global.colors.highlight : 'transparent'};
-  border-left: 13px solid white;
+  position: absolute;
+  right: 0;
+  top: -4px;
+  z-index: 1;
+  border-top: 30px solid ${({ theme, prevHighlighted }) => prevHighlighted ? theme.global.colors.highlight : 'transparent'};
+  border-bottom: 30px solid ${({ theme, prevHighlighted }) => prevHighlighted ? theme.global.colors.highlight : 'transparent'};
+  border-left: 15px solid white;
   &:before {
     content: '';
     width: 0;
     height: 0;
-    border-top: 26px solid transparent;
-    border-bottom: 26px solid transparent;
-    border-left: 13px solid ${({ theme, highlight }) => highlight ? theme.global.colors.highlight : '#DADDE0'};
+    border-top: 30px solid transparent;
+    border-bottom: 30px solid transparent;
+    border-left: 15px solid ${({ theme, highlight }) => highlight ? theme.global.colors.highlight : '#DADDE0'};
     position: absolute;
-    top: -26px;
-    right: 1px;
+    top: -30px;
+    right: 1.5px;
 }
 `;
 const ButtonStepLabel = styled.span`
@@ -357,7 +365,11 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                           flex={((!isMinSize(size, 'medium') && isActive) || byStep.length === 1) ? { grow: 1 } : false}
                           direction="row"
                         >
-                          <Box basis="full">
+                          <ButtonStepArrow highlight={highlighted} lastItem={idx + 1 === byStep.length} prevHighlighted={activeStepIndex > idx} />
+                          {highlighted && (
+                            <HighlightBackground />
+                          )}
+                          <Box basis="full" style={{ position: 'relative', zIndex: 1 }}>
                             <ButtonStep
                               highlight={highlighted}
                               disabled={activeStepHasErrors}
@@ -388,7 +400,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                               </Box>
                             </ButtonStep>
                           </Box>
-                          <ButtonStepArrow highlight={highlighted} lastItem={idx + 1 === byStep.length} prevHighlighted={activeStepIndex > idx} />
                         </FormStepWrapper>
                       );
                     })}
