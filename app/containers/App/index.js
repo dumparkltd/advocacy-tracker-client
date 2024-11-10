@@ -282,14 +282,14 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       navItems = [
         ...navItems,
         {
-          path: ROUTES.REGISTER,
-          active: currentPath === ROUTES.REGISTER,
-          title: intl.formatMessage(messages.nav.register),
-        },
-        {
           path: ROUTES.LOGIN,
           active: currentPath === ROUTES.LOGIN,
           title: intl.formatMessage(messages.nav.login),
+        },
+        {
+          path: ROUTES.REGISTER,
+          active: currentPath === ROUTES.REGISTER,
+          title: intl.formatMessage(messages.nav.register),
         },
       ];
     }
@@ -480,9 +480,9 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             isAuth={isAuth}
             isPrintView={isPrintView}
             navItems={{
-              main: this.prepareMainMenuItems(location.pathname),
+              main: isUserSignedIn && this.prepareMainMenuItems(location.pathname),
               user: this.prepareUserMenuItems(location.pathname, user, isUserSignedIn),
-              other: this.prepareOtherMenuItems(location.pathname, pages),
+              other: isUserSignedIn && this.prepareOtherMenuItems(location.pathname, pages),
               create: isMember && this.prepareCreateMenuItems(),
             }}
             onPageLink={onPageLink}
