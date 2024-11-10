@@ -23,7 +23,6 @@ const ButtonGroup = styled((p) => <Box direction="row" margin="none" gap="medium
   background: white;
 `;
 const ButtonLabel = styled((p) => <Text size="small" {...p} />)`
-  color: ${({ isActive }) => isActive ? palette('dark', 1) : palette('dark', 4)};
   font-weight: normal;
 `;
 const ButtonOptions = styled((p) => <Button plain {...p} />)`
@@ -31,9 +30,10 @@ const ButtonOptions = styled((p) => <Button plain {...p} />)`
   border-radius: 5px;
   border: none;
   padding: 5px;
+  cursor: ${({ isActive }) => isActive ? 'default' : 'pointer'};
   &:hover {
     box-shadow: none;
-    color: ${palette('primary', 1)};
+    color: ${({ isActive, theme }) => isActive ? palette('dark', 2) : theme.global.colors.highlight};
   }
 `;
 
@@ -56,8 +56,6 @@ class EntityListViewOptions extends React.PureComponent { // eslint-disable-line
                         <Icon
                           name={option.icon}
                           size="33px"
-                          paletteIndex={option.active ? 2 : 4}
-                          palette="dark"
                         />
                         {isMinSize(size, 'medium') && (
                           <ButtonLabel size="small" isActive={option.active}>
