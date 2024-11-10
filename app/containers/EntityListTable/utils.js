@@ -120,7 +120,7 @@ export const prepareHeader = ({
       case 'users':
         return ({
           ...col,
-          title: 'Users (staff)',
+          title: 'WWF staff',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,

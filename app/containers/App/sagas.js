@@ -185,6 +185,7 @@ export function* loadEntitiesSaga({ path }) {
             throw new Error(response.statusText || 'error');
           }
         } catch (err) {
+          console.log('ERROR in loadEntitiesSaga');
           // console.log('error', err)
           // Whoops Save error
           // Clear the request time on error, This will cause us to try again next time, which we probably want to do?
@@ -229,6 +230,7 @@ export function* authenticateSaga(payload) {
     yield put(invalidateEntities()); // important invalidate before forward to allow for reloading of entities
     yield put(forwardOnAuthenticationChange());
   } catch (err) {
+    console.log('ERROR in authenticateSaga');
     if (err.response) {
       err.response.json = yield err.response.json();
     }
@@ -254,6 +256,7 @@ export function* recoverSaga(payload) {
       }
     ));
   } catch (err) {
+    console.log('ERROR in authenticateSaga');
     if (err.response) {
       err.response.json = yield err.response.json();
     }
@@ -281,6 +284,7 @@ export function* logoutSaga() {
     yield put(logoutSuccess());
     yield put(updatePath('/', { replace: true }));
   } catch (err) {
+    console.log('ERROR in logoutSaga');
     yield put(authenticateError(err));
   }
 }
@@ -311,10 +315,7 @@ export function* validateTokenSaga() {
       yield put(authenticateSuccess(response.data)); // need to store currentUserData
     }
   } catch (err) {
-    // if (err.response) {
-    //   err.response.json = yield err.response.json();
-    // }
-    // console.log('err', err);
+    console.log('ERROR in validateTokenSaga');
     yield put(authenticateReset());
     yield call(clearAuthValues);
     yield put(invalidateEntities());
@@ -556,10 +557,12 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
       );
     }
   } catch (err) {
+    console.log('ERROR in saveEntitySaga');
     if (err.response) {
       err.response.json = yield err.response.json();
       yield put(saveError(err, dataTS));
     }
+    // lets not invalidate on error so we dont lose any data entered
     // if (updateClient) {
     //   // yield put(invalidateEntities(data.path));
     // }
@@ -604,6 +607,7 @@ export function* deleteEntitySaga({ data }, updateClient = true, multiple = fals
     }
     yield put(deleteSuccess(dataTS));
   } catch (err) {
+    console.log('ERROR in deleteEntitySaga');
     if (err.response) {
       err.response.json = yield err.response.json();
       yield put(deleteError(err, dataTS));
@@ -777,13 +781,15 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
       );
     }
   } catch (err) {
+    console.log('ERROR in newEntitySaga');
     if (err.response) {
       err.response.json = yield err.response.json && err.response.json();
       yield put(saveError(err, dataTS));
     }
-    if (updateClient) {
-      yield put(invalidateEntities(data.path));
-    }
+    // lets not invalidate on error so we dont lose any data entered
+    // if (updateClient) {
+    //   yield put(invalidateEntities(data.path));
+    // }
   }
 }
 
@@ -827,11 +833,13 @@ export function* saveConnectionsSaga({ data }) {
       yield put(updateConnections(data.path, connectionsUpdated));
       yield put(saveSuccess(dataTS));
     } catch (err) {
+      console.log('ERROR in saveConnectionsSaga');
       if (err.response) {
         err.response.json = yield err.response && err.response.json && err.response.json();
         yield put(saveError(err, dataTS));
       }
-      yield put(invalidateEntities(data.path));
+      // lets not invalidate on error so we dont lose any data entered
+      // yield put(invalidateEntities(data.path));
     }
   }
 }

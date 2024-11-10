@@ -6,10 +6,23 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
+import { palette } from 'styled-theme';
+import { Text } from 'grommet';
 
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import EntityForm from 'containers/EntityForm';
+
+
+const HintP = styled.p`
+  margin-top: 40px;
+  max-width: 666px;
+`;
+
+const Hint = styled((p) => <Text size="small" {...p} />)`
+  color: ${palette('dark', 3)};
+`;
 
 export function EntityFormWrapper({
   viewDomain,
@@ -46,6 +59,13 @@ export function EntityFormWrapper({
           messages={saveError.messages}
           onDismiss={onServerErrorDismiss}
         />
+      )}
+      {saveError && (
+        <HintP>
+          <Hint>
+            To prevent losing your form data, it is recommended to load the Advocacy Tracker in a separate tab/window and renew your login. Once logged in, you should be able to proceed with saving your data
+          </Hint>
+        </HintP>
       )}
       {deleteError && <Messages type="error" messages={deleteError} />}
       {(saveSending || deleteSending || !fieldsByStep) && <Loading />}
