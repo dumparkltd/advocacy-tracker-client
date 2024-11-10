@@ -173,14 +173,13 @@ export function ActorList({
     supTitle: intl.formatMessage(messages.pageTitle),
     actions: [],
     info: appMessages.actortypes_info[typeId]
-      && intl.formatMessage(appMessages.actiontypes_info[typeId]).trim() !== ''
+      && intl.formatMessage(appMessages.actortypes_info[typeId]).trim() !== ''
       ? {
         title: 'Please note',
         content: intl.formatMessage(appMessages.actortypes_info[typeId]),
       }
       : null,
   };
-
   if (isVisitor) {
     headerOptions.actions.push({
       type: 'bookmarker',
