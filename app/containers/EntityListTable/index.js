@@ -231,19 +231,16 @@ export function EntityListTable({
       let result;
       if (aHasSortValue && bHasSortValue) {
         if (isNumber(aSortValue) && !isNumber(bSortValue)) {
-          result = -1;
-        } else if (isNumber(bSortValue) && !isNumber(aSortValue)) {
           result = 1;
+        } else if (isNumber(bSortValue) && !isNumber(aSortValue)) {
+          result = -1;
         } else if (
           isNumber(bSortValue) && isNumber(aSortValue)
         ) {
-          if (
-            a[cleanSortBy].type === 'amount'
-            || a[cleanSortBy].type === 'actorActions'
-          ) {
-            result = aSortValue > bSortValue ? 1 : -1;
+          if (a[cleanSortBy].type === 'topicPosition') {
+            result = aSortValue > bSortValue ? -1 : 1;
           } else {
-            result = aSortValue < bSortValue ? 1 : -1;
+            result = aSortValue < bSortValue ? -1 : 1;
           }
         } else {
           const aClean = prepSortTarget(aSortValue);

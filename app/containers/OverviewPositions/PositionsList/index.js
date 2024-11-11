@@ -4,7 +4,6 @@ import { injectIntl, intlShape, FormattedMessage } from 'react-intl';
 import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { Map } from 'immutable';
-import { palette } from 'styled-theme';
 import styled from 'styled-components';
 
 import {

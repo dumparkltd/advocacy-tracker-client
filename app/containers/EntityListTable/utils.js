@@ -361,6 +361,7 @@ export const prepareEntityRows = ({
         let temp;
         let attribute;
         let value;
+        let sortValue = null;
         // console.log(col)
         // let formattedDate;
         if (col.attribute) {
@@ -749,6 +750,24 @@ export const prepareEntityRows = ({
             };
           case 'stackedBarActions':
             temp = entity.get(col.values);
+            if (temp) {
+              if (col.values === 'supportlevels') {
+                sortValue = temp.reduce(
+                  (sum, val) => {
+                    if (val.count && [1, 2].indexOf(parseInt(val.value, 10)) > -1) {
+                      return val.count + sum;
+                    }
+                    return sum;
+                  },
+                  0,
+                );
+              } else {
+                sortValue = temp.reduce(
+                  (sum, val) => (val.count || 0) + sum,
+                  0,
+                );
+              }
+            }
             return {
               ...memoEntity,
               [col.id]: {
@@ -768,12 +787,7 @@ export const prepareEntityRows = ({
                     return val;
                   }
                 ).toJS(),
-                sortValue: temp
-                  ? temp.reduce(
-                    (sum, val) => (val.count || 0) + sum,
-                    0,
-                  )
-                  : null,
+                sortValue,
               },
             };
           case 'topicPosition':
