@@ -7,11 +7,15 @@ import Button from 'components/buttons/Button';
 
 const Styled = styled(Button)`
   position: absolute;
-  right:0;
-  top:0;
+  right: 0;
+  top: 0;
   color: ${palette('link', 3)};
   &:hover {
     color: ${palette('linkHover', 3)};
+  }
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    font-size: ${(props) => props.small ? 0.9 : 1}em;
+    padding: 1px 10px;
   }
 `;
 

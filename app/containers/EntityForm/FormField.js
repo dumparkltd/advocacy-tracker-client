@@ -312,7 +312,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
     if (isHidden) {
       isHidden = isHidden && !!isEmpty;
     }
-    console.log(field);
+    // console.log(field);
     // console.log('fieldTracked', fieldTracked)
     // console.log('field', field)
     return (

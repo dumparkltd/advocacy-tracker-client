@@ -73,6 +73,27 @@ export function FormContentWrapper({
                 {section.rows.map(
                   (row, i) => {
                     if (!row.fields) return null;
+                    let { fields } = row;
+                    const sumBasis = fields.reduce((memo, field) => {
+                      if (field.basis) {
+                        if (field.basis === '1/2') {
+                          return memo + 0.5;
+                        }
+                        if (field.basis === '1/3') {
+                          return memo + 0.33;
+                        }
+                      }
+                      return 0;
+                    }, 0);
+                    if (sumBasis === 0.5) {
+                      fields = [...fields, { basis: '1/2' }];
+                    }
+                    if (sumBasis === 0.66) {
+                      fields = [...fields, { basis: '1/3' }];
+                    }
+                    if (sumBasis === 0.33) {
+                      fields = [...fields, { basis: '2/3' }];
+                    }
                     return (
                       <Row
                         key={i}
@@ -86,7 +107,7 @@ export function FormContentWrapper({
                             : 'auto'
                         }
                       >
-                        {row.fields.map(
+                        {fields.map(
                           (field, j) => {
                             if (!field) return null;
                             const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
@@ -97,16 +118,18 @@ export function FormContentWrapper({
                                 basis={(field.basis && !isColumnSection) ? field.basis : 'auto'}
                                 fill="horizontal"
                               >
-                                <FormField
-                                  step={step}
-                                  field={field}
-                                  fieldTracked={fieldTracked}
-                                  formData={formData}
-                                  closeMultiselectOnClickOutside={closeMultiselectOnClickOutside}
-                                  scrollContainer={scrollContainer}
-                                  handleUpdate={handleUpdate}
-                                  isNewEntityView={isNewEntityView}
-                                />
+                                {field.controlType && (
+                                  <FormField
+                                    step={step}
+                                    field={field}
+                                    fieldTracked={fieldTracked}
+                                    formData={formData}
+                                    closeMultiselectOnClickOutside={closeMultiselectOnClickOutside}
+                                    scrollContainer={scrollContainer}
+                                    handleUpdate={handleUpdate}
+                                    isNewEntityView={isNewEntityView}
+                                  />
+                                )}
                               </Box>
                             );
                           }

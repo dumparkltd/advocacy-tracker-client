@@ -16,16 +16,19 @@ import appMessages from 'containers/App/messages';
 // import qe from 'utils/quasi-equals';
 
 const AttributeSelect = styled.select`
-  background:#ffffff;
-  border:1px solid #E0E1E2;
-  color:#000;
-  padding:5px;
+  background: #ffffff;
+  border: 1px solid #E0E1E2;
+  color: #000;
+  padding: 5px;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 500;
 `;
 const AttributeInput = styled.input`
-  background:#ffffff;
-  border:1px solid #E0E1E2;
-  color:#000;
-  padding:5px;
+  background: #ffffff;
+  border: 1px solid #E0E1E2;
+  color: #000;
+  padding: 5px;
 `;
 
 const Styled = styled(
@@ -34,7 +37,8 @@ const Styled = styled(
   position: relative;
   margin-bottom: 4px;
   margin-top: 4px;
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid #B7BCBF;
+  background: white;
 `;
 
 const MultiselectActiveOptionRemove = styled(Button)`
@@ -85,7 +89,7 @@ export function MultiSelectActiveOption({
               <Box><ItemStatus draft /></Box>
             )}
           </Box>
-          <Box><Text size="small">{option.get('label')}</Text></Box>
+          <Box><Text size="small" style={{ fontWeight: 500 }}>{option.get('label')}</Text></Box>
         </TitleWrap>
         <Box>
           <Box>

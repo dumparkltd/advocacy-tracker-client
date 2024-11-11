@@ -13,7 +13,7 @@ const Styled = styled.div`
   height: 40px;
   padding-left: 0.75em;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    height: 60px;
+    height: 50px;
     padding-left: 1em;
   }
 `;

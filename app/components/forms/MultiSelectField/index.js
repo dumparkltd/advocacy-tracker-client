@@ -55,7 +55,7 @@ const MultiSelectDropdownIcon = styled.div`
   position: absolute;
   right: 0;
   top: 0;
-  padding: 12px 8px 0 0;
+  padding: 15px 8px 0 0;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding-right: 16px;
   }
@@ -65,14 +65,14 @@ const MultiSelectDropButton = styled((p) => <Button plain {...p} />)`
   width: 100%;
   text-align: left;
   color: ${palette('multiSelectFieldButton', 0)};
-  background-color: white;
-  font-size: 1em;
+  background-color: #DADDE0;
+  font-size: 14px;
+  line-height: 18px;
   border: 1px solid #f1f0f1;
   padding: 0.7em;
-  border-radius: 0.5em;
+  min-height: 50px;
   &:hover {
-    color: white;
-    background-color: ${({ theme }) => theme.global.colors.highlight};
+    background-color: #B7BCBF;
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.smaller};

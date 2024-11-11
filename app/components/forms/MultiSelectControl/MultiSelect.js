@@ -59,7 +59,7 @@ const ControlMain = styled.div`
   padding:0;
   padding-bottom: ${(props) => props.hasChangeNote ? '59px' : '0px'};
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    top: 60px;
+    top: 50px;
   }
 `;
 const ControlFooter = styled.div`
