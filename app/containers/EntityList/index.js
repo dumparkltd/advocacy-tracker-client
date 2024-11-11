@@ -212,7 +212,7 @@ const reducePreviewItem = ({
       item,
       footer: {
         primaryLink: item && {
-          path: `${ROUTES.USER}/${item.get('id')}`,
+          path: `${ROUTES.USERS}/${item.get('id')}`,
           title: `${label} details`,
         },
       },

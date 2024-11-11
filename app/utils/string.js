@@ -2,7 +2,7 @@ import { toLower, deburr } from 'lodash/string';
 import { reduce } from 'lodash/collection';
 import { TEXT_TRUNCATE } from 'themes/config';
 
-export const lowerCase = (str) => toLower(str);
+export const lowerCase = (str) => toLower(str).replace('wwf', 'WWF');
 export const capitalize = (str) => str
   && str.split(' ').reduce(
     (m, word) => ([

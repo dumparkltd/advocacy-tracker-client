@@ -91,7 +91,10 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
-    const { typeId, sessionUser } = props;
+    const {
+      typeId,
+      sessionUser,
+    } = props;
     const dataWithType = FORM_INITIAL.setIn(['attributes', 'actortype_id'], typeId);
     return sessionUser
       && sessionUser.getIn(['attributes', 'id'])
@@ -243,7 +246,6 @@ function mapDispatchToProps(
   {
     formDataPath,
     modalAttributes,
-    modalConnect,
     inModal,
     onSaveSuccess,
     onCancel,
@@ -391,29 +393,11 @@ function mapDispatchToProps(
           })
         );
       }
-      // additional connections when created from modal
+      // console.log('modalAttributes', modalAttributes && modalAttributes.toJS(), inModal)
+      // // additional connections when created from modal
       if (inModal) {
         if (modalAttributes) {
           saveData = saveData.mergeIn(['attributes'], modalAttributes);
-        }
-        if (modalConnect
-          && (
-            modalConnect.get('type') === 'actorActions'
-            || modalConnect.get('type') === 'userActions'
-            || modalConnect.get('type') === 'subActions'
-          )
-        ) {
-          if (saveData.get('type')) {
-            saveData = saveData.mergeIn(
-              [modalConnect.get('type'), 'create'],
-              modalConnect.get('create'),
-            );
-          } else {
-            saveData = saveData.setIn(
-              [modalConnect.get('type'), 'create'],
-              modalConnect.get('create'),
-            );
-          }
         }
       }
       dispatch(

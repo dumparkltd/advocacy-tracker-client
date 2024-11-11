@@ -100,13 +100,25 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
-    const { typeId, sessionUser } = props;
+    const {
+      typeId,
+      sessionUser,
+      inModal,
+      modalConnect,
+      actorsByActortype,
+      topActionsByActiontype,
+      userOptions,
+    } = props;
     const shape = ACTIONTYPES_CONFIG[parseInt(typeId, 10)]
       && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].form;
     const dataWithType = FORM_INITIAL.setIn(['attributes', 'measuretype_id'], typeId);
     const nowFormatted = format(new Date(), API_DATE_FORMAT);
     let result = dataWithType;
-    if (sessionUser && sessionUser.getIn(['attributes', 'id'])) {
+    if (
+      sessionUser
+      && sessionUser.getIn(['attributes', 'id'])
+      && (!modalConnect || modalConnect.get('type') !== 'userActions')
+    ) {
       result = result
         .set(
           'associatedUsers',
@@ -127,11 +139,74 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         )
       )
     );
+
     if (hasAutoFillDate) {
       result = result.setIn(
         ['attributes', 'date_start'],
         nowFormatted,
       );
+    }
+    if (inModal && modalConnect && modalConnect.get('create')) {
+      // connect action to actor
+      if (modalConnect.get('type') === 'actorActions') {
+        const actorId = modalConnect
+          .get('create')
+          .find((item) => item.keySeq().includes('actor_id'))
+          .get('actor_id');
+        // console.log(actorId)
+        const actor = actorId && actorsByActortype.flatten(true).get(actorId);
+        result = result
+          .set(
+            'associatedActorsByActortype',
+            fromJS({
+              [actor.getIn(['attributes', 'actortype_id'])]: [{
+                value: actor.get('id').toString(),
+                checked: true,
+                label: actor.getIn(['attributes', 'title']),
+                autofill: true,
+              }],
+            })
+          );
+      }
+      // connect action with top action
+      if (modalConnect.get('type') === 'subActions') {
+        const actionId = modalConnect
+          .get('create')
+          .find((item) => item.keySeq().includes('other_measure_id'))
+          .get('other_measure_id');
+        // console.log(actorId)
+        const action = actionId && topActionsByActiontype.flatten(true).get(actionId);
+        result = result
+          .set(
+            'associatedTopActionsByActiontype',
+            fromJS({
+              [action.getIn(['attributes', 'measuretype_id'])]: [{
+                value: action.get('id').toString(),
+                checked: true,
+                label: action.getIn(['attributes', 'title']),
+                autofill: true,
+              }],
+            })
+          );
+      }
+      // connect action with user
+      if (modalConnect.get('type') === 'userActions') {
+        const userId = modalConnect
+          .get('create')
+          .find((item) => item.keySeq().includes('user_id'))
+          .get('user_id');
+        const user = userId && userOptions && userOptions.get(userId);
+        result = result
+          .set(
+            'associatedUsers',
+            fromJS([{
+              value: user.get('id').toString(),
+              checked: true,
+              label: user.getIn(['attributes', 'name']),
+              autofill: true,
+            }])
+          );
+      }
     }
     return result;
   };
@@ -318,7 +393,6 @@ function mapDispatchToProps(
   {
     formDataPath,
     modalAttributes,
-    modalConnect,
     inModal,
     onSaveSuccess,
     onCancel,
@@ -491,25 +565,6 @@ function mapDispatchToProps(
       if (inModal) {
         if (modalAttributes) {
           saveData = saveData.mergeIn(['attributes'], modalAttributes);
-        }
-        if (modalConnect
-          && (
-            modalConnect.get('type') === 'actorActions'
-            || modalConnect.get('type') === 'userActions'
-            || modalConnect.get('type') === 'subActions'
-          )
-        ) {
-          if (saveData.get('type')) {
-            saveData = saveData.mergeIn(
-              [modalConnect.get('type'), 'create'],
-              modalConnect.get('create'),
-            );
-          } else {
-            saveData = saveData.setIn(
-              [modalConnect.get('type'), 'create'],
-              modalConnect.get('create'),
-            );
-          }
         }
       }
       dispatch(

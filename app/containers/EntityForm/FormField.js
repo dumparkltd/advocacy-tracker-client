@@ -7,6 +7,7 @@ import { omit } from 'lodash/object';
 import { Box } from 'grommet';
 import appMessage from 'utils/app-message';
 import { lowerCase } from 'utils/string';
+import asArray from 'utils/as-array';
 
 import Button from 'components/buttons/Button';
 import FieldFactory from 'components/fields/FieldFactory';
@@ -228,7 +229,15 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
     const hasError = hasChanges && !isValid;
     const fieldRequired = field.validators && field.validators.required;
     const stepSeen = step && step.previouslySeen;
-    const fieldAutofilledUnseen = isNewEntityView && !stepSeen && field.autofill && !hasChanges;
+    const fieldData = field.dataPath && formData.getIn(field.dataPath) ? formData.getIn(field.dataPath).toJS() : null;
+    // console.log('field, fieldTracked, formData', field, fieldTracked, formData.toJS(), fieldData)
+    // if (field.controlType === 'multiselect') console.log('isNewEntityView, stepSeen, !hasChanges', isNewEntityView, stepSeen, !hasChanges)
+    let isAutofill = field.autofill;
+    // in case dynamic prepopulation
+    if (fieldData) {
+      isAutofill = asArray(fieldData).some((d) => d.autofill);
+    }
+    const fieldAutofilledUnseen = isNewEntityView && !stepSeen && isAutofill && !hasChanges;
     // console.log('fieldRequired, hasChanges, isEmpty', fieldRequired, hasChanges, isEmpty)
     // console.log('fieldAutofilledUnseen, hasChanges, isEmpty', fieldRequired, hasChanges, isEmpty)
     return (
