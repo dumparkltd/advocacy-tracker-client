@@ -118,6 +118,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       isAdmin,
       onScrollToTop,
       onEntityClick,
+      onClearFilters,
     } = this.props;
 
     const { viewType } = this.state;
@@ -473,6 +474,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             <TagList
               filters={filters}
               searchQuery={searchQuery}
+              onClear={onClearFilters}
             />
           </Box>
         )}
@@ -681,6 +683,7 @@ EntitiesListView.propTypes = {
   onSetIncludeActorChildren: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
   onScrollToTop: PropTypes.func,
+  onClearFilters: PropTypes.func,
   reducePreviewItem: PropTypes.func,
 };
 

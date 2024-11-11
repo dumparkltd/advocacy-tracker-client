@@ -31,7 +31,7 @@ export function* updateQuery({ value }) {
   ).toJS();
   yield params.push({
     arg: 'page',
-    value: '',
+    value: null,
     replace: true,
     remove: true,
   });
@@ -53,7 +53,7 @@ export function* updateQueryMultiple({ values }) {
   ).toJS();
   yield params.push({
     arg: 'page',
-    value: '',
+    value: null,
     replace: true,
     remove: true,
   });
@@ -63,7 +63,7 @@ export function* updateQueryMultiple({ values }) {
 export function* resetFilters({ values }) {
   const params = values.map((arg) => ({
     arg,
-    value: '',
+    value: null,
     replace: true,
     remove: true,
   }));
@@ -80,7 +80,7 @@ export function* updateGroup({ value }) {
   })).toJS();
   yield params.push({
     arg: 'page',
-    value: '',
+    value: null,
     replace: true,
     remove: true,
   });
