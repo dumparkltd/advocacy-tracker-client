@@ -124,7 +124,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
               hasBrand
               isPrint={isPrintView}
             >
-              <Box direction="row" justify="between">
+              <div style={{ position: 'relative', textAlign: 'center' }}>
                 <Brand
                   as={isPrintView ? 'div' : 'a'}
                   href={isPrintView ? '' : '/'}
@@ -134,6 +134,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                   }}
                   title={appTitle}
                   isPrint={isPrintView}
+                  style={{ position: 'absolute', left: 0 }}
                 >
                   <PrintHide>
                     <LogoWrap>
@@ -151,7 +152,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                     && navItems.main
                     && navItems.main.length > 0
                     && (
-                      <Box direction="row">
+                      <div>
                         {
                           navItems.main.map((item, i) => {
                             if (item.path === ROUTES.SEARCH) {
@@ -189,10 +190,10 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                             );
                           })
                         }
-                      </Box>
+                      </div>
                     )}
                 {!isPrintView && (
-                  <Box direction="row">
+                  <Box direction="row" style={{ position: 'absolute', right: 0, top: 0 }}>
                     {navItems && navItems.create && navItems.create.length > 0 && (
                       <DropMenu
                         title={intl.formatMessage(messages.addLabel)}
@@ -226,7 +227,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                     )}
                   </Box>
                 )}
-              </Box>
+              </div>
             </Styled>
           );
         }}
