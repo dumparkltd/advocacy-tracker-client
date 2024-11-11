@@ -99,11 +99,13 @@ import {
 import { currentFilters, currentFilterArgs } from './current-filters';
 
 const Progress = styled.div`
-  position: absolute;
+  position: fixed;
   width: 100%;
   display: block;
   background: white;
   bottom: 0;
+  left: 0;
+  right: 0;
   box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
   background-color: ${palette('primary', 4)};
   padding: ${({ error }) => error ? 0 : 40}px;

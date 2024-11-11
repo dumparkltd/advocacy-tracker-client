@@ -10,7 +10,7 @@ const ButtonForm = styled(Button)`
   font-size: 18px;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     font-size: 24px;
-    padding: 1em 1.2em;
+    padding: 14px 20px;
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.default};

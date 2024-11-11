@@ -59,7 +59,7 @@ const ControlMain = styled.div`
   padding:0;
   padding-bottom: ${(props) => props.hasChangeNote ? '59px' : '0px'};
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    top: 50px;
+    top: ${({ inSingleForm }) => inSingleForm ? 50 : 60}px;
   }
 `;
 const ControlFooter = styled.div`
@@ -421,11 +421,13 @@ class MultiSelect extends React.Component {
         <Header
           title={this.props.title}
           onCancel={this.props.onCancel}
+          inSingleForm={this.props.inSingleForm}
         />
         <ControlMain
           search={this.props.search}
           hasFooter={this.props.buttons}
           hasChangeNote={showChangeHint}
+          inSingleForm={this.props.inSingleForm}
         >
           {this.props.search && (
             <Search>
@@ -533,6 +535,7 @@ MultiSelect.propTypes = {
   threeState: PropTypes.bool,
   fixedOrder: PropTypes.bool,
   showNew: PropTypes.bool,
+  inSingleForm: PropTypes.bool,
   panelId: PropTypes.string,
   tagFilterGroups: PropTypes.array,
   intl: intlShape.isRequired,

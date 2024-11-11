@@ -14,9 +14,14 @@ import ContainerWithSidebar from 'components/styled/Container/ContainerWithSideb
 import MultiSelectControl from 'components/forms/MultiSelectControl';
 
 const Styled = styled(ContainerWithSidebar)`
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  top: 0;
   z-index: 101;
   background-color: rgba(0,0,0,0.2);
   @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
+    top: ${({ theme }) => theme.sizes.header.banner.height}px;
     z-index: 99;
   }
 `;

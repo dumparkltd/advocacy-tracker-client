@@ -212,6 +212,7 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
                   model={model || `.${id}`}
                   title={intl.formatMessage(messages.update, { type: lowerCase(field.label) })}
                   onCancel={this.onCloseMultiselect}
+                  inSingleForm
                   closeOnClickOutside={this.props.closeOnClickOutside}
                   buttons={[
                     field.onCreate

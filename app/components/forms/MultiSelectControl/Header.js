@@ -13,7 +13,7 @@ const Styled = styled.div`
   height: 40px;
   padding-left: 0.75em;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    height: 50px;
+    height: ${({ inSingleForm }) => inSingleForm ? 50 : 60}px;
     padding-left: 1em;
   }
 `;
@@ -31,10 +31,11 @@ const CloseWrap = styled.div`
   display: table-cell;
   width: 48px;
   vertical-align: middle;
+  padding-right: 10px;
 `;
 
 const Header = (props) => (
-  <Styled>
+  <Styled inSingleForm={props.inSingleForm}>
     <Title>
       { props.title }
     </Title>
@@ -51,5 +52,6 @@ const Header = (props) => (
 Header.propTypes = {
   onCancel: PropTypes.func,
   title: PropTypes.string,
+  inSingleForm: PropTypes.bool,
 };
 export default Header;

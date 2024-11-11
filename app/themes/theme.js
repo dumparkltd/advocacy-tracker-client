@@ -317,14 +317,8 @@ theme.sizes = {
     },
   },
   navSecondary: {
-    banner: {
-      height: 120,
-      heightMobile: 60,
-    },
-    nav: {
-      height: 60,
-      heightMobile: 60,
-    },
+    height: 60,
+    heightMobile: 60,
   },
   header: {
     banner: {

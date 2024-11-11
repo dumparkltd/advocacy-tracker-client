@@ -6,7 +6,7 @@ const Styled = styled.div`
   top: ${({ isOnMap, theme }) => {
     if (isOnMap) {
       // to fix: add dynamic navSecondary height
-      return theme.sizes.navSecondary.nav.heightMobile + 2;
+      return theme.sizes.navSecondary.heightMobile + 2;
     }
     return 0;
   }}px;
@@ -21,7 +21,7 @@ const Styled = styled.div`
     top: ${({ isOnMap, theme }) => {
     if (isOnMap) {
       // to fix: add dynamic navSecondary height
-      return theme.sizes.navSecondary.nav.height + 2;
+      return theme.sizes.navSecondary.height + 2;
     }
     return 0;
   }}px;

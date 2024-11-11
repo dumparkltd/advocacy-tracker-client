@@ -38,13 +38,14 @@ const ListEntitiesEmpty = styled.div`
 `;
 
 const SidebarWrapper = styled.div`
-  position: absolute;
+  position: fixed;
   top: 0;
   bottom: 0;
   right: 0;
   z-index: 100;
   width: 100%;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    top: ${({ theme }) => theme.sizes.header.banner.height}px;
     width: auto;
   }
 `;
