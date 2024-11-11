@@ -1850,7 +1850,7 @@ export default defineMessages({
       },
       empty: {
         id: 'app.containers.App.entities.users.empty',
-        defaultMessage: 'No users assigned yet',
+        defaultMessage: 'No WWF staff assigned yet',
       },
     },
     bookmarks: {

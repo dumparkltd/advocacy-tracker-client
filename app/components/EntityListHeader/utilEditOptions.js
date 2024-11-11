@@ -113,6 +113,7 @@ const makeTaxonomyEditOptions = (entities, taxonomies, activeEditOption, message
     required: false,
     selectAll: true,
     groups: null,
+    path: activeEditOption.path,
   };
 
   const taxonomy = taxonomies.get(activeEditOption.optionId);

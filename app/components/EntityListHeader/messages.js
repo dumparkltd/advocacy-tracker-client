@@ -178,7 +178,7 @@ export default defineMessages({
     },
     'connections-actor-users': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-actor-users',
-      defaultMessage: 'Update users assignments',
+      defaultMessage: 'Update WWF staff',
     },
     'connections-user-actions': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-user-actions',
