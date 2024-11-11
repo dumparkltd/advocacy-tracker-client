@@ -797,8 +797,12 @@ export const getEntityTitle = (entity, labels, intl) => {
       return appMessage(intl, label.message);
     }
   }
-  return entity.getIn(['attributes', 'title'])
+  let label = entity.getIn(['attributes', 'title'])
     || entity.getIn(['attributes', 'name']);
+  if (entity.getIn(['attributes', 'prefix']) && entity.getIn(['attributes', 'prefix']).trim().length > 0) {
+    label = `${label} (${entity.getIn(['attributes', 'prefix'])})`;
+  }
+  return label;
 };
 export const getEntityTitleTruncated = (
   entity,

@@ -5,6 +5,7 @@ import { formatNumber, checkEmpty } from 'utils/fields';
 import qe from 'utils/quasi-equals';
 import appMessage from 'utils/app-message';
 import { lowerCase } from 'utils/string';
+import { getEntityTitle } from 'utils/entities';
 import appMessages from 'containers/App/messages';
 import {
   API,
@@ -313,7 +314,7 @@ const getRelatedValue = (relatedEntities, typeLabel, includeLabel = false) => {
         ? `${relatedEntities.size} ${lowerCase(typeLabel)}`
         : relatedEntities.size;
     }
-    return relatedEntities.first().getIn(['attributes', 'name']) || relatedEntities.first().getIn(['attributes', 'title']);
+    return getEntityTitle(relatedEntities.first());
   }
   return null;
 };
