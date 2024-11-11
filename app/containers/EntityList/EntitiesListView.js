@@ -269,7 +269,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           id: 'main',
           type: 'main',
           sort: 'title',
-          attributes: showCode ? ['code', 'title'] : ['title'],
+          attributes: showCode ? ['code', 'title', 'prefix'] : ['title', 'prefix'],
         },
         ...typeColumns.map((tc) => ({
           ...tc,

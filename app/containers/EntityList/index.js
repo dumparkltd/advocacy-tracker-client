@@ -140,10 +140,15 @@ const reducePreviewItem = ({
     const label = intl.formatMessage(
       appMessages.entities[`actors_${item.getIn(['attributes', 'actortype_id'])}`].single
     );
+    let title = item ? item.getIn(['attributes', 'title']) : 'undefined';
+    if (item.getIn(['attributes', 'prefix']) && item.getIn(['attributes', 'prefix']).trim().length > 0) {
+      title = `${title} (${item.getIn(['attributes', 'prefix'])})`;
+    }
+
     const content = {
       header: {
         aboveTitle: label,
-        title: item && item.getIn(['attributes', 'title']),
+        title,
       },
       item,
       footer: {

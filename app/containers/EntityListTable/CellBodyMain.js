@@ -121,6 +121,17 @@ export function CellBodyMain({
                   </Label>
                 );
               }
+              if (
+                key === 'prefix'
+                && entity.values[key]
+                && entity.values[key].trim().length > -1
+              ) {
+                return (
+                  <Label size="small" key={key}>
+                    {` (${truncateText(entity.values[key], 5)})`}
+                  </Label>
+                );
+              }
               if (key === 'menu_title') {
                 return (
                   <Label
