@@ -53,10 +53,7 @@ class EntityListViewOptions extends React.PureComponent { // eslint-disable-line
                     isActive={option.active}
                     label={(
                       <Box as="span" direction="row" gap="none" align="center">
-                        <Icon
-                          name={option.icon}
-                          size="33px"
-                        />
+                        <Icon name={option.icon} size="33px" />
                         {isMinSize(size, 'medium') && (
                           <ButtonLabel size="small" isActive={option.active}>
                             {option.title}
