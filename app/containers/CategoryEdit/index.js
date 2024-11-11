@@ -166,7 +166,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
           {viewEntity && !deleteSending
             && (
               <EntityFormWrapper
-                typeLabel="User"
+                typeLabel="Category"
                 model={formDataPath}
                 saving={saveSending}
                 viewDomain={viewDomain}

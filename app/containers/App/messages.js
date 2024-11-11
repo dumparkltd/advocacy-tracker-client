@@ -969,7 +969,7 @@ export default defineMessages({
     },
     order: {
       id: 'app.containers.App.attributes.order',
-      defaultMessage: 'Menu order',
+      defaultMessage: 'Order',
     },
     user_only: {
       id: 'app.containers.App.attributes.user_only',

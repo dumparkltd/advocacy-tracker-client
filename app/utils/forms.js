@@ -767,15 +767,22 @@ export const getReferenceFormField = ({
   hideByDefault,
 });
 export const getCodeFormField = ({
-  formatMessage, attribute = 'code', required = false, hideByDefault,
-}) => getFormField({
+  formatMessage,
+  attribute = 'code',
+  required = false,
+  hideByDefault,
+  placeholder,
+  label,
+}) => {
+  return getFormField({
   formatMessage,
   controlType: 'short',
   attribute,
-  label: attribute,
+  label: label || attribute,
+  placeholder: placeholder || attribute,
   required,
   hideByDefault,
-});
+})};
 export const getShortTextFormField = ({
   formatMessage, attribute, required = false, hideByDefault,
 }) => getFormField({
@@ -1084,6 +1091,7 @@ const getEntityFormField = (
   const {
     attribute,
     label,
+    placeholder,
     connection,
     taxonomy,
     required,
@@ -1103,12 +1111,12 @@ const getEntityFormField = (
     const attributeType = fieldConfig.type;
     const cleanFieldType = fieldType || attributeType;
     const fieldArgs = {
-      formatMessage, attribute, required, hideByDefault, label,
+      formatMessage, attribute, required, hideByDefault, label, placeholder,
     };
     // for attributes
     if (attribute === 'title') {
       result = getTitleFormField(fieldArgs);
-    } else if (attribute === 'code' || attribute === 'prefix') {
+    } else if (attribute === 'code' || attribute === 'prefix' || attribute === 'reference') {
       result = getCodeFormField(fieldArgs);
     } else if (attribute === 'email') {
       result = getEmailFormField(fieldArgs);

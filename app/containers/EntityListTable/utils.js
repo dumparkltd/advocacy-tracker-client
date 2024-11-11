@@ -305,7 +305,19 @@ const getRelatedEntities = (
   }
   return null;
 };
-const getRelatedSortValue = (relatedEntities) => getRelatedValue(relatedEntities);
+const getRelatedSortValue = (relatedEntities) => {
+  if (relatedEntities && relatedEntities.size > 0) {
+    if (relatedEntities.size > 1) {
+      return getRelatedValue(relatedEntities);
+    }
+    const entity = relatedEntities.first();
+    return entity.getIn(['attributes', 'reference'])
+      && entity.getIn(['attributes', 'reference']).trim().length > 0
+      ? entity.getIn(['attributes', 'reference'])
+      : getEntityTitle(entity);
+  }
+  return null;
+};
 
 const getRelatedValue = (relatedEntities, typeLabel, includeLabel = false) => {
   if (relatedEntities && relatedEntities.size > 0) {

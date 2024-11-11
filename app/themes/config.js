@@ -3407,6 +3407,9 @@ export const CATEGORY_CONFIG = {
       required: true,
       type: 'bool',
     },
+    reference: {
+      type: 'short',
+    },
     title: {
       type: 'text',
       required: true,
@@ -3444,10 +3447,15 @@ export const CATEGORY_CONFIG = {
                 basis: '2/3',
               },
               {
-                attribute: 'short_title',
+                attribute: 'reference',
+                label: 'order',
+                placeholder: 'order',
                 basis: '1/3',
               },
             ],
+            [{
+              attribute: 'short_title',
+            }],
             [{
               attribute: 'url',
             }],

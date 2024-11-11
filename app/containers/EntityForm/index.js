@@ -85,7 +85,7 @@ const HighlightBackground = styled.div`
   position: absolute;
   top: 0;
   bottom: 0;
-  right: 13px;
+  right: ${({ lastItem }) => lastItem ? 0 : 13}px;
   left: 0;
   background-color: ${({ theme }) => theme.global.colors.highlight};
 `;
@@ -367,7 +367,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                         >
                           <ButtonStepArrow highlight={highlighted} lastItem={idx + 1 === byStep.length} prevHighlighted={activeStepIndex > idx} />
                           {highlighted && (
-                            <HighlightBackground />
+                            <HighlightBackground lastItem={idx + 1 === byStep.length} />
                           )}
                           <Box basis="full" style={{ position: 'relative', zIndex: 1 }}>
                             <ButtonStep
@@ -471,10 +471,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   fields={footerFields}
                   formData={formData}
                   formDataTracked={formDataTracked}
-                  handleDelete={handleDelete}
                   handleCancel={handleCancel}
-                  deleteConfirmed={deleteConfirmed}
-                  onSetDeleteConfirmed={this.setDeleteConfirmed}
                   isBlocked={isBlocked || saving}
                 />
               </StyledForm>
