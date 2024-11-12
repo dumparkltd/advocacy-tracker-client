@@ -312,6 +312,7 @@ const getRelatedSortValue = (relatedEntities) => {
     }
     const entity = relatedEntities.first();
     return typeof entity.getIn(['attributes', 'reference']) !== 'undefined'
+      && entity.getIn(['attributes', 'reference']) !== null
       && entity.getIn(['attributes', 'reference']).trim().length > 0
       ? entity.getIn(['attributes', 'reference'])
       : getEntityTitle(entity);

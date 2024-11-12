@@ -1391,11 +1391,21 @@ export const getIndicatorSecondaryTitle = (title) => {
 };
 export const getIndicatorAbbreviation = (title) => {
   const short = getIndicatorMainTitle(title);
-  const words = short.split(' ');
+  const words = short
+    .toUpperCase()
+    .replace('-', ' ')
+    .replace(' & ', ' ')
+    .split(' ');
   if (words.length === 1) {
     return words[0].length > 2 ? words[0].substr(0, 2) : words[0];
   }
-  return words.reduce((memo, word) => `${memo}${word.substr(0, 1)}`, '');
+  return truncateText(
+    words.reduce((memo, word) => `${memo}${word.substr(0, 1)}`, ''),
+    3, // limit
+    false, // keep words
+    false, // append ellipses
+    false, // grace
+  );
 };
 
 export const getIndicatorColumnsForStatement = ({

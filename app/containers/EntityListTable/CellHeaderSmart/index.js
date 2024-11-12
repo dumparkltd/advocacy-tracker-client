@@ -95,7 +95,7 @@ export function CellHeaderSmart({
   const size = React.useContext(ResponsiveContext);
 
   return (
-    <Box direction="row" align="center" justify={align} flex={false} wrap>
+    <Box direction="column" align="center" justify={align} flex={false}>
       <TextPrint
         weight={500}
         size="xxsmall"

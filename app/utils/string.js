@@ -67,10 +67,20 @@ export const regExMultipleWords = (str) => {
 // match multiple words
 export const regExMultipleWordsMatchStart = (str) => reduce(str.split(' '), (words, s) => `${words}(?=.*\\b${s})`, '');
 
-export const truncateText = (text, limit, keepWords = true) => {
-  if (text.length > (limit + TEXT_TRUNCATE.GRACE)) {
+export const truncateText = (
+  text,
+  limit,
+  keepWords = true,
+  appendEllipsis = true,
+  grace = true,
+) => {
+  const limitClean = grace ? limit + TEXT_TRUNCATE.GRACE : limit;
+  console.log(limitClean)
+  if (text.length > (limitClean)) {
     if (!keepWords) {
-      return `${text.substring(0, limit).trim()}\u2026`;
+      return appendEllipsis
+        ? `${text.substring(0, limit).trim()}\u2026`
+        : text.substring(0, limit).trim();
     }
     const words = text.split(' ');
     let truncated = '';
@@ -79,7 +89,10 @@ export const truncateText = (text, limit, keepWords = true) => {
       truncated = truncated.length > 0 ? `${truncated} ${word}` : word;
     }
     // check if really truncated (not a given as we accept full words)
-    return text.length > truncated.length ? `${truncated}\u2026` : text;
+    if (appendEllipsis) {
+      return text.length > truncated.length ? `${truncated}\u2026` : text;
+    }
+    return truncated;
   }
   return text;
 };
