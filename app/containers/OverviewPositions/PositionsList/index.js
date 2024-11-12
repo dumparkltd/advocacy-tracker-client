@@ -25,7 +25,6 @@ import { isMinSize } from 'utils/responsive';
 import {
   getIndicatorMainTitle,
   getIndicatorAbbreviation,
-  getIndicatorNumber,
   getEntityTitle,
 } from 'utils/entities';
 
@@ -193,9 +192,7 @@ export function PositionsList({
 
   const topicColumns = dataReady && indicators && indicators.reduce(
     (memo, indicator) => {
-      const no = getIndicatorNumber(indicator.getIn(['attributes', 'title']));
-      const abbrev = getIndicatorAbbreviation(indicator.getIn(['attributes', 'title']));
-      const title = no ? `${no}.${abbrev}` : abbrev;
+      const title = getIndicatorAbbreviation(indicator.getIn(['attributes', 'title']));
       const id = `topic_${indicator.get('id')}`;
       const activeSupportLevels = getActiveSupportLevels(locationQuery, indicator.get('id'));
       return [

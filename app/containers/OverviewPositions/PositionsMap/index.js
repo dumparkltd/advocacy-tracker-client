@@ -26,9 +26,7 @@ import asList from 'utils/as-list';
 import isDate from 'utils/is-date';
 import {
   getIndicatorMainTitle,
-  getIndicatorShortTitle,
   getIndicatorSecondaryTitle,
-  getIndicatorNiceTitle,
 } from 'utils/entities';
 import { isMinSize } from 'utils/responsive';
 
@@ -203,7 +201,7 @@ export function PositionsMap({
               topicPosition: {
                 topicId: currentIndicatorId,
                 topic: currentIndicator && {
-                  title: getIndicatorShortTitle(currentIndicator.getIn(['attributes', 'title'])),
+                  title: getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title'])),
                   viaGroup: indicatorPosition && indicatorPosition.get('viaGroups')
                   && indicatorPosition.get('viaGroups').first()
                   && indicatorPosition.get('viaGroups').first().getIn(['attributes', 'title']),
@@ -307,7 +305,7 @@ export function PositionsMap({
                 secondaryLink: currentIndicator && {
                   path: `${ROUTES.INDICATOR}/${currentIndicator.get('id')}`,
                   id: currentIndicator.get('id'),
-                  title: getIndicatorShortTitle(currentIndicator.getIn(['attributes', 'title'])),
+                  title: getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title'])),
                 },
               },
             };
@@ -418,7 +416,7 @@ export function PositionsMap({
                 <IndicatorList>
                   {indicators && indicators.valueSeq().map((indicator) => {
                     const active = qe(currentIndicatorId, indicator.get('id'));
-                    const label = getIndicatorNiceTitle(indicator.getIn(['attributes', 'title']));
+                    const label = getIndicatorMainTitle(indicator.getIn(['attributes', 'title']));
                     return (
                       <IndicatorSelectButton
                         active={active}
@@ -466,7 +464,7 @@ export function PositionsMap({
                 {isMinSize(size, 'medium') && (
                   <Box gap="small" pad={{ top: '5px' }}>
                     <TitleOnCard>
-                      {getIndicatorNiceTitle(currentIndicator.getIn(['attributes', 'title']))}
+                      {getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title']))}
                     </TitleOnCard>
                     <MapSecondaryTitle>
                       {getIndicatorSecondaryTitle(currentIndicator.getIn(['attributes', 'title'])) || '$nbsp;'}
@@ -549,7 +547,7 @@ export function PositionsMap({
                     <Text size="large">
                       {indicators
                         && currentIndicatorId
-                        && getIndicatorShortTitle(currentIndicator.getIn(['attributes', 'title']))}
+                        && getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title']))}
                     </Text>
                   )}
                 />

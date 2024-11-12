@@ -1370,28 +1370,16 @@ export const getActortypeColumns = ({
   return columns;
 };
 
-export const getIndicatorShortTitle = (title) => {
-  let short = title;
-  if (short.indexOf(':') > -1) {
-    short = short.split(':')[0].trim();
-    if (short.indexOf(' - ') > -1) {
-      short = short.split('-')[1].trim();
-    }
-  }
-  return capitalize(short);
-};
 export const getIndicatorMainTitle = (title) => {
   let short = title;
   if (short.indexOf(':') > -1) {
     short = short.split(':')[0].trim();
+  } else if (short.indexOf(' - ') > -1) {
+    short = short.split('-')[0].trim();
   }
   return capitalize(short);
 };
-export const getIndicatorNiceTitle = (title) => {
-  const no = getIndicatorNumber(title);
-  const label = getIndicatorShortTitle(title);
-  return no ? `${no}. ${label}` : label;
-};
+
 export const getIndicatorSecondaryTitle = (title) => {
   if (title && title.indexOf(':') > -1) {
     return capitalize(title.split(':')[1].trim());
@@ -1399,19 +1387,12 @@ export const getIndicatorSecondaryTitle = (title) => {
   return null;
 };
 export const getIndicatorAbbreviation = (title) => {
-  const short = getIndicatorShortTitle(title);
+  const short = getIndicatorMainTitle(title);
   const words = short.split(' ');
   if (words.length === 1) {
     return words[0].length > 2 ? words[0].substr(0, 2) : words[0];
   }
   return words.reduce((memo, word) => `${memo}${word.substr(0, 1)}`, '');
-};
-export const getIndicatorNumber = (title) => {
-  const short = getIndicatorMainTitle(title);
-  if (short.indexOf(' - ') > -1) {
-    return short.split('-')[0].trim();
-  }
-  return null;
 };
 
 export const getIndicatorColumnsForStatement = ({
