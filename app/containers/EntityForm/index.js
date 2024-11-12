@@ -108,6 +108,13 @@ const ButtonStep = styled(
     return highlight ? 'white' : theme.global.colors.highlightHover;
   }};
   }
+  &:focus {
+    outline: 0;
+    color: ${({ theme, highlight, disabled }) => {
+    if (disabled) return highlight ? 'white' : '#777E7E';
+    return highlight ? 'white' : theme.global.colors.highlightHover;
+  }};
+  }
 `;
 const ButtonStepArrow = styled.div`
   display: ${({ lastItem }) => lastItem ? 'none' : 'block'};
