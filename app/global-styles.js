@@ -268,8 +268,6 @@ const GlobalStyle = createGlobalStyle`
 
   [type="checkbox"] {
     vertical-align: middle;
-    position: relative;
-    bottom: 1px;
   }
 
   ._react-file-reader-input {

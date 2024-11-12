@@ -16,6 +16,18 @@ const Styled = styled((p) => <Box direction="row" align="center" gap="small" {..
   }
 `;
 
+const StyledInput = styled.input`
+  accent-color: black;
+  transform: scale(1.3);
+  cursor: pointer;
+  &:hover {
+    &:checked {
+      opacity: 0.666;
+    }
+  }
+`;
+
+
 export function MapOption({
   option,
   type = 'option',
@@ -28,13 +40,18 @@ export function MapOption({
   const isPrint = usePrint();
   return (
     <Styled plain={plain} isPrint={isPrint} printHide={printHide}>
-      <input
+      <StyledInput
         id={`map-${optionType}-${id}`}
         type="checkbox"
         checked={active}
         onChange={onClick}
       />
-      <Text as="label" color="textSecondary" htmlFor={`map-${optionType}-${id}`} size="xsmall">
+      <Text
+        as="label"
+        color="textSecondary"
+        htmlFor={`map-${optionType}-${id}`}
+        size="xsmall"
+      >
         {label}
         {info && (
           <InfoOverlay

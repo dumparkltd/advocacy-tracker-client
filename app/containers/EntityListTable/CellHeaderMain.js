@@ -30,7 +30,10 @@ const SortButton = styled(ButtonFlatIconOnly)`
   }
 `;
 
-const Label = styled.label``;
+const Label = styled.label`
+  position: relative;
+  top: -1px;
+`;
 
 
 export function CellHeaderMain({ column, canEdit }) {

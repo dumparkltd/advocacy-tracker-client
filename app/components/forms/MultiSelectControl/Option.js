@@ -9,6 +9,7 @@ import { lowerCase } from 'utils/string';
 import appMessage from 'utils/app-message';
 import IndeterminateCheckbox from 'components/forms/IndeterminateCheckbox';
 import InfoOverlay from 'components/InfoOverlay';
+import Checkbox from 'components/styled/Checkbox';
 
 import messages from './messages';
 
@@ -74,6 +75,7 @@ const IdSpacer = styled.span`
   padding-right: 0.25em;
   color: ${palette('text', 1)};
 `;
+
 // <Label bold={props.bold} italic={props.isNew}>
 function Option({
   option,
@@ -121,10 +123,9 @@ function Option({
           />
         )}
         {!isIndeterminate && (
-          <input
+          <Checkbox
             id={optionId}
             disabled={disabled}
-            type="checkbox"
             checked={checked}
             onChange={(evt) => {
               evt.stopPropagation();

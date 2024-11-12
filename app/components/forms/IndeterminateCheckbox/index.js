@@ -1,10 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-
-const StyledInput = styled.input`
-  accent-color: ${({ theme }) => theme.global.colors.highlight};
-`;
+import Checkbox from 'components/styled/Checkbox';
 
 export const STATES = {
   INDETERMINATE: null,
@@ -22,8 +18,7 @@ export default class IndeterminateCheckbox extends React.Component {
     const { onChange, checked, ...props } = this.props;
     /* eslint-disable no-param-reassign */
     return (
-      <StyledInput
-        type="checkbox"
+      <Checkbox
         ref={(ref) => { if (ref) ref.indeterminate = checked === STATES.INDETERMINATE; }}
         checked={!!checked}
         onChange={(evt) => onChange(evt.target.checked)}

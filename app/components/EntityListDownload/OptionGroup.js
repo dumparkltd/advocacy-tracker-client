@@ -12,6 +12,7 @@ import DebounceInput from 'react-debounce-input';
 import styled from 'styled-components';
 import { Box, Text } from 'grommet';
 
+import Checkbox from 'components/styled/Checkbox';
 import OptionGroupToggle from './OptionGroupToggle';
 import OptionListHeader from './OptionListHeader';
 
@@ -96,9 +97,8 @@ export function OptionGroup({
           {onSetActive && (
             <Box direction="row" gap="small" align="center" justify="start">
               <Select>
-                <StyledInput
+                <Checkbox
                   id={`check-${groupId}`}
-                  type="checkbox"
                   checked={active}
                   onChange={(evt) => onSetActive(evt.target.checked)}
                 />
@@ -133,9 +133,8 @@ export function OptionGroup({
                     <Box key={key} direction="row" gap="small" align="center" justify="between">
                       <Box direction="row" gap="small" align="center" justify="start">
                         <Select>
-                          <StyledInput
+                          <Checkbox
                             id={`check-${groupId}-${key}`}
-                            type="checkbox"
                             checked={option.exportRequired || option.active}
                             disabled={option.exportRequired}
                             onChange={(evt) => {
@@ -181,7 +180,7 @@ export function OptionGroup({
             <Box gap="edge">
               <Box direction="row" gap="small" align="center" justify="start">
                 <Select>
-                  <StyledInput
+                  <Checkbox
                     id={`check-${groupId}-as-columns`}
                     type="radio"
                     checked={!asRows}
@@ -198,7 +197,7 @@ export function OptionGroup({
               </Box>
               <Box direction="row" gap="small" align="center" justify="start">
                 <Select>
-                  <StyledInput
+                  <Checkbox
                     id={`check-${groupId}-as-rows`}
                     type="radio"
                     checked={asRows}
