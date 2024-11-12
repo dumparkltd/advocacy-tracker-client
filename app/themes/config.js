@@ -1056,6 +1056,7 @@ export const MEMBERSHIPS = {
   ],
   [ACTORTYPES.ORG]: [
     ACTORTYPES.GROUP,
+    ACTORTYPES.COUNTRY,
   ],
   [ACTORTYPES.CONTACT]: [
     ACTORTYPES.COUNTRY,
@@ -1355,8 +1356,14 @@ export const ACTORTYPES_CONFIG = {
         sections: [
           {
             id: 'stakeholders',
-            title: 'Groups the organisation belongs to',
+            title: 'Country and Groups the Organisation belongs to',
             rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
               [{
                 connection: API.ACTORS,
                 type: ACTORTYPES.GROUP,
