@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { Box, Text, Button } from 'grommet';
+import { Box, Text } from 'grommet';
+import Button from 'components/buttons/ButtonSimple';
 
 import Icon from 'components/Icon';
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
@@ -22,7 +23,7 @@ const Title = styled((p) => <Text size="xsmall" {...p} />)`
   font-weight: bold;
 `;
 
-const SortOptionButton = styled((p) => <Button plain {...p} />)`
+const SortOptionButton = styled((p) => <Button {...p} />)`
   cursor: ${({ disabled }) => disabled ? 'default' : 'pointer'};
   width: 100%;
   opacity: 1;

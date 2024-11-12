@@ -5,7 +5,7 @@ import styled from 'styled-components';
 import { palette } from 'styled-theme';
 
 import {
-  Box, Heading, Button,
+  Box, Heading,
 } from 'grommet';
 import Icon from 'components/Icon';
 
@@ -13,6 +13,7 @@ import appMessages from 'containers/App/messages';
 
 import Reference from 'components/fields/Reference';
 import ScreenReaderOnly from 'components/styled/ScreenReaderOnly';
+import Button from 'components/buttons/ButtonSimple';
 
 const Title = styled((p) => <Heading level={3} {...p} />)`
   font-family: ${({ theme }) => theme.fonts.title};
@@ -20,7 +21,7 @@ const Title = styled((p) => <Heading level={3} {...p} />)`
   font-weight: normal;
   margin: 0px;
 `;
-const NavButton = styled((p) => <Button plain {...p} />)`
+const NavButton = styled((p) => <Button {...p} />)`
   border-radius: 999px;
   border: 1px solid ${palette('light', 1)};
   color: ${({ isDisabled }) => isDisabled ? palette('light', 3) : 'black'};
@@ -36,7 +37,7 @@ const NavButton = styled((p) => <Button plain {...p} />)`
     color: ${palette('primary', 0)};
   }
 `;
-const CloseButton = styled((p) => <Button plain {...p} />)`
+const CloseButton = styled((p) => <Button {...p} />)`
   background-color: ${palette('primary', 1)};
   color: white;
   border-radius: 999px;

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 
 import {
-  Box, Text, Button, Drop,
+  Box, Text, Drop,
 } from 'grommet';
 import styled from 'styled-components';
 import { truncateText } from 'utils/string';
@@ -11,6 +11,8 @@ import { truncateText } from 'utils/string';
 import { ROUTES, ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
 import Dot from 'components/styled/Dot';
 import appMessages from 'containers/App/messages';
+import Button from 'components/buttons/ButtonTableCell';
+
 import LabelTooltip from './LabelTooltip';
 import LinkTooltip from './LinkTooltip';
 
@@ -23,7 +25,7 @@ const Label = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
   line-height: 12px;
 `;
 
-const LinkInTT = styled((p) => <Button as="a" plain {...p} />)`
+const LinkInTT = styled((p) => <Button as="a" {...p} />)`
   line-height: 13px;
 `;
 const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`

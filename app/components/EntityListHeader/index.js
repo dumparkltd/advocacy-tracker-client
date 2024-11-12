@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { Map, List } from 'immutable';
 import { palette } from 'styled-theme';
 import {
-  Box, Text, Button, ResponsiveContext,
+  Box, Text, ResponsiveContext,
 } from 'grommet';
 import { Multiple } from 'grommet-icons';
 
@@ -19,6 +19,7 @@ import { isMinSize } from 'utils/responsive';
 
 import { FILTER_FORM_MODEL, EDIT_FORM_MODEL } from 'containers/EntityListForm/constants';
 
+import Button from 'components/buttons/ButtonSimple';
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import Bookmarker from 'containers/Bookmarker';
 
@@ -53,7 +54,7 @@ const HeaderSection = styled((p) => <Box direction="row" {...p} />)`
   position: relative;
   flex: ${({ grow }) => grow ? '1' : '0'} ${({ shrink = '1' }) => shrink ? '1' : '0'} auto;
 `;
-const FilterButton = styled((p) => <Button plain {...p} />)`
+const FilterButton = styled((p) => <Button {...p} />)`
   color: ${palette('buttonFlat', 1)};
   background: ${palette('primary', 1)};
   color: white;
@@ -484,19 +485,18 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                   <HeaderSection align="center">
                     <FilterButton
                       onClick={onShowFilters}
-                      label={(
-                        <Box direction="row" gap="small" align="center">
-                          {isMinSize(size, 'medium') && (
-                            <Text style={{ marginTop: '-3px' }}>
-                              {intl.formatMessage(messages.listOptions.showFilter)}
-                            </Text>
-                          )}
-                          <Box>
-                            <Icon name="filter" size="33px" text />
-                          </Box>
+                    >
+                      <Box direction="row" gap="small" align="center">
+                        {isMinSize(size, 'medium') && (
+                          <Text style={{ marginTop: '-3px' }}>
+                            {intl.formatMessage(messages.listOptions.showFilter)}
+                          </Text>
+                        )}
+                        <Box>
+                          <Icon name="filter" size="33px" text />
                         </Box>
-                      )}
-                    />
+                      </Box>
+                    </FilterButton>
                   </HeaderSection>
                 )}
               </Box>

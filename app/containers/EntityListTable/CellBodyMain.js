@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Text, Button } from 'grommet';
+import { Box, Text } from 'grommet';
 import PrintHide from 'components/styled/PrintHide';
 import Checkbox from 'components/styled/Checkbox';
 
@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { injectIntl, intlShape } from 'react-intl';
 
 import { lowerCase, truncateText } from 'utils/string';
+import Button from 'components/buttons/ButtonTableCell';
 
 import appMessages from 'containers/App/messages';
 
@@ -17,7 +18,7 @@ const Select = styled(PrintHide)`
   padding-right: 6px;
 `;
 
-const Link = styled((p) => <Button as="a" plain {...p} />)`
+const Link = styled((p) => <Button as="a" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 16px;
 `;

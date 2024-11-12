@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Button } from 'grommet';
+import Button from 'components/buttons/ButtonSimple';
 
-export default styled((p) => <Button plain {...p} />)`
+export default styled((p) => <Button {...p} />)`
   vertical-align: bottom;
   text-align: center;
   color: black;

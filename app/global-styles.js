@@ -40,7 +40,10 @@ const GlobalStyle = createGlobalStyle`
   }
   :focus, :visited:focus {
     outline-offset: 2px !important;
-    outline: 5px auto rgb(77, 144, 254); /* TODO: improve focus styles and individualise for specific buttons and links */
+    outline: 2px auto #00728f; /* TODO: improve focus styles and individualise for specific buttons and links */
+  }
+  :focus-visible {
+    outline: 2px auto #00728f; /* TODO: improve focus styles and individualise for specific buttons and links */
   }
   #app {
     background-color: #FFF;

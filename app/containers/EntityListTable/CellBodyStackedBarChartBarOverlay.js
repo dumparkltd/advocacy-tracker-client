@@ -1,13 +1,14 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Button, Drop } from 'grommet';
+import { Drop } from 'grommet';
 
 import { ROUTES } from 'themes/config';
+import Button from 'components/buttons/ButtonSimple';
 import DropEntityList from './DropEntityList';
 
 const BarButton = styled(
-  React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
+  React.forwardRef((p, ref) => <Button {...p} ref={ref} />)
 )`
   width: ${({ value, maxvalue }) => value / maxvalue * 100}%;
   min-width: 0;

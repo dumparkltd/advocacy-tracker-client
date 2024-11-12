@@ -44,10 +44,6 @@ const Group = styled((p) => (
   }
 `;
 
-const StyledInput = styled.input`
-  accent-color: ${({ theme }) => theme.global.colors.highlight};
-`;
-
 const OptionLabel = styled((p) => <Text as="label" {...p} />)`
   opacity: ${({ disabled }) => disabled ? 0.5 : 1};
 `;
@@ -80,12 +76,13 @@ export function OptionGroup({
   return (
     <Group>
       <OptionGroupToggle
-        label={label}
         onToggle={() => onExpandGroup(!expandGroup ? groupId : null)}
         expanded={expandGroup}
         activeCount={activeOptionCount}
         optionCount={optionCount}
-      />
+      >
+        {label}
+      </OptionGroupToggle>
       {expandGroup && (
         <Box gap="small" margin={{ vertical: 'medium' }}>
           {intro && (

@@ -11,20 +11,24 @@ import PropTypes from 'prop-types';
 import { palette } from 'styled-theme';
 import styled from 'styled-components';
 
-import { Box, Button, ThemeContext } from 'grommet';
+import { Box, ThemeContext } from 'grommet';
 
 import PrintHide from 'components/styled/PrintHide';
 import Keyboard from 'components/Keyboard';
 
 import { setFocusByRef } from 'utils/accessibility';
 
+import Button from 'components/buttons/ButtonSimple';
+
 import Icon from 'components/Icon';
 import SearchResults from './SearchResults';
 import TextInput from './TextInput';
 
 import { prepOptions } from './utils';
-const SearchButtonBase = forwardRef((p, ref) => <Button plain {...p} ref={ref} />);
-const SearchButton = styled(SearchButtonBase)`
+const SearchButton = styled(
+  forwardRef((p, ref) => <Button {...p} ref={ref} />)
+)`
+  text-align: center;
   // removing extra space to reveal border + focus-visible outline
   height: ${({ theme }) => theme.sizes.mapSearchBar.height - 6}px;
   width: ${({ theme }) => theme.sizes.mapSearchBar.height - 6}px;
@@ -41,6 +45,7 @@ const SearchButton = styled(SearchButtonBase)`
   }
 `;
 const ClearButton = styled((p) => <Button {...p} />)`
+  text-align: center;
   // removing extra space to reveal border + focus-visible outline
   height: ${({ theme }) => theme.sizes.mapSearchBar.height - 6}px;
   width: ${({ theme }) => theme.sizes.mapSearchBar.height - 6}px;
@@ -48,11 +53,6 @@ const ClearButton = styled((p) => <Button {...p} />)`
   background: transparent;
   &:hover {
     color: ${palette('primary', 0)};
-  }
-  &:focus-visible {
-    z-index: 1;
-    outline: 2px auto  ${palette('primary', 0)};
-    box-shadow: none;
   }
   @media print {
     display: none;
@@ -256,11 +256,10 @@ export function Search({
                     setActiveResult(activeResetIndex);
                     setFocusByRef(textInputRef);
                   }}
-                  justify="center"
-                  align="center"
                   title="Clear"
-                  icon={<StyledCloseIcon />}
-                />
+                >
+                  <StyledCloseIcon />
+                </ClearButton>
               </Box>
             )}
           </Box>
@@ -280,8 +279,6 @@ export function Search({
             }}
           >
             <SearchButton
-              justify="center"
-              align="center"
               tabIndex={searchHasResults ? 0 : -1}
               ref={searchButtonRef}
               onClick={() => {
@@ -290,13 +287,12 @@ export function Search({
                 onToggle(true);
               }}
               title="Search"
-              icon={(
-                <Icon
-                  size={`${searchIconSize}px`}
-                  name="search"
-                />
-              )}
-            />
+            >
+              <Icon
+                size={`${searchIconSize}px`}
+                name="search"
+              />
+            </SearchButton>
           </Keyboard>
         </>
       </StyledSearchBox>

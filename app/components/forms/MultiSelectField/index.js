@@ -60,7 +60,7 @@ const MultiSelectDropdownIcon = styled.div`
     padding-right: 16px;
   }
 `;
-const MultiSelectDropButton = styled((p) => <Button plain {...p} />)`
+const MultiSelectDropButton = styled((p) => <Button {...p} />)`
   position: relative;
   width: 100%;
   text-align: left;

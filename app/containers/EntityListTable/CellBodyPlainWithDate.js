@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Text, Button } from 'grommet';
+import { Box, Text } from 'grommet';
 import styled from 'styled-components';
 import { truncateText } from 'utils/string';
+import Button from 'components/buttons/ButtonTableCell';
 
 const LabelWrap = styled((p) => (
   <Box
@@ -13,7 +14,7 @@ const LabelWrap = styled((p) => (
   />
 ))``;
 
-const Link = styled((p) => <Button as="a" plain {...p} />)`
+const Link = styled((p) => <Button as="a" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
 `;

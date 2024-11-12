@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Button } from 'grommet';
+import Button from 'components/buttons/ButtonSimple';
 
-const LinkMenu = styled((p) => <Button plain as="a" justify="center" fill="vertical" {...p} />)`
+const LinkMenu = styled((p) => <Button as="a" {...p} />)`
   color: ${({ active }) => active ? 'black' : 'white'};
   background-color: ${({ active }) => active ? 'white' : 'transparent'};
   text-transform: uppercase;

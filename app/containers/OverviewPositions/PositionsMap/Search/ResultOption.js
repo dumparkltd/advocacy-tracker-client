@@ -1,9 +1,9 @@
 import React, { forwardRef } from 'react';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { Button } from 'grommet';
+import Button from 'components/buttons/ButtonSimple';
 
-export default styled(forwardRef((props, ref) => (<Button plain {...props} ref={ref} />)))`
+export default styled(forwardRef((props, ref) => (<Button {...props} ref={ref} />)))`
   border-bottom: 1px solid;
   border-top: 1px solid transparent;
   border-bottom-color:  ${({ last, theme }) => last ? 'transparent' : theme.global.colors.border.light};

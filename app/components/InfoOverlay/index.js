@@ -9,13 +9,10 @@ import PropTypes from 'prop-types';
 import ReactMarkdown from 'react-markdown';
 
 import styled from 'styled-components';
-import {
-  Box,
-  Button,
-  Drop,
-} from 'grommet';
+import { Box, Drop } from 'grommet';
 import { CircleInformation, CircleQuestion } from 'grommet-icons';
 
+import Button from 'components/buttons/ButtonSimple';
 import PrintHide from 'components/styled/PrintHide';
 import Overlay from './Overlay';
 
@@ -67,8 +64,17 @@ function InfoOverlay({
         justify="center"
       >
         <Button
-          plain
-          icon={
+          fill={false}
+          onMouseOver={() => tooltip && showInfo(true)}
+          onMouseLeave={() => tooltip && showInfo(false)}
+          onFocus={() => tooltip && showInfo(true)}
+          onBlur={() => null}
+          onClick={(evt) => {
+            if (evt) evt.preventDefault();
+            if (!tooltip) showInfo(!info);
+          }}
+        >
+          {
             (tooltip || icon === 'question')
               ? (
                 <CircleQuestion
@@ -83,13 +89,7 @@ function InfoOverlay({
                 />
               )
           }
-          fill={false}
-          onMouseOver={() => tooltip && showInfo(true)}
-          onMouseLeave={() => tooltip && showInfo(false)}
-          onFocus={() => tooltip && showInfo(true)}
-          onBlur={() => null}
-          onClick={() => !tooltip && showInfo(!info)}
-        />
+        </Button>
       </Box>
       {info && infoRef && tooltip && (
         <Drop

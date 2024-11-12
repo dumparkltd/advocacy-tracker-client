@@ -476,12 +476,11 @@ export function PositionsList({
                     if (e && e.preventDefault) e.preventDefault();
                     onUpdatePath(`${ROUTES.ACTORS}/${ACTORTYPES.COUNTRY}`);
                   }}
-                  label={(
-                    <Text size="large">
-                      Full Country List
-                    </Text>
-                  )}
-                />
+                >
+                  <Text size="large">
+                    Full Country List
+                  </Text>
+                </ButtonPrimary>
               </Box>
             </Box>
           </Box>

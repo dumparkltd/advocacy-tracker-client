@@ -67,9 +67,7 @@ const FieldInnerWrapper = styled.div`
   margin-bottom: 5px;
 `;
 
-const ShowButton = styled(
-  (p) => <Button plain {...p} />
-)`
+const ShowButton = styled(Button)`
   font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   text-transform: uppercase;
   font-size: ${({ theme }) => theme.text.medium.size};

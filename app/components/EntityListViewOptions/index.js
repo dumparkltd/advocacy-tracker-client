@@ -2,13 +2,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-
 import {
-  Text, Box, Button, ResponsiveContext,
+  Text, Box, ResponsiveContext,
 } from 'grommet';
 
 import { isMinSize } from 'utils/responsive';
 
+import ButtonSimple from 'components/buttons/ButtonSimple';
 import Icon from 'components/Icon';
 
 const Styled = styled((p) => <Box {...p} />)`
@@ -25,7 +25,7 @@ const ButtonGroup = styled((p) => <Box direction="row" margin="none" gap="medium
 const ButtonLabel = styled((p) => <Text size="small" {...p} />)`
   font-weight: normal;
 `;
-const ButtonOptions = styled((p) => <Button plain {...p} />)`
+const ButtonOptions = styled((p) => <ButtonSimple {...p} />)`
   color: ${({ isActive }) => isActive ? palette('dark', 2) : palette('dark', 4)};
   border-radius: 5px;
   border: none;
@@ -51,19 +51,17 @@ class EntityListViewOptions extends React.PureComponent { // eslint-disable-line
                     key={i}
                     onClick={() => option.onClick()}
                     isActive={option.active}
-                    label={(
-                      <Box as="span" direction="row" gap="none" align="center">
-                        <Icon name={option.icon} size="33px" />
-                        {isMinSize(size, 'medium') && (
-                          <ButtonLabel size="small" isActive={option.active}>
-                            {option.title}
-                          </ButtonLabel>
-                        )}
-                      </Box>
-                    )}
-                  />
-                ))
-                }
+                  >
+                    <Box as="span" direction="row" gap="none" align="center">
+                      <Icon name={option.icon} size="33px" />
+                      {isMinSize(size, 'medium') && (
+                        <ButtonLabel size="small" isActive={option.active}>
+                          {option.title}
+                        </ButtonLabel>
+                      )}
+                    </Box>
+                  </ButtonOptions>
+                ))}
               </ButtonGroup>
             )}
           </Styled>

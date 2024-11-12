@@ -11,10 +11,12 @@ import styled from 'styled-components';
 import PrintHide from 'components/styled/PrintHide';
 
 import {
-  Box, Button, Drop, Text,
+  Box, Drop, Text,
 } from 'grommet';
 
 import Icon from 'components/Icon';
+
+import Button from 'components/buttons/ButtonSimple';
 
 import { truncateText } from 'utils/string';
 import DropdownSelect from './DropdownSelect';
@@ -25,7 +27,7 @@ const Styled = styled((p) => <Box {...p} />)`
 
 // eslint-disable-next-line react/no-multi-comp
 const DropButton = styled(forwardRef(
-  (p, ref) => <Button plain {...p} ref={ref} />
+  (p, ref) => <Button {...p} ref={ref} />
 ))`
   background-color: ${palette('light', 1)};
   color: ${palette('dark', 2)};
@@ -34,7 +36,7 @@ const DropButton = styled(forwardRef(
   border-radius: 999px;
   position: relative;
 `;
-const ActiveButton = styled((p) => <Button plain {...p} />)`
+const ActiveButton = styled((p) => <Button {...p} />)`
   background-color: ${({ theme }) => theme.global.colors.highlight};
   color: white;
   border: 1px solid ${palette('light', 3)};

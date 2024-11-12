@@ -1,14 +1,15 @@
 import React from 'react';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { Button } from 'grommet';
+import Button from 'components/buttons/ButtonSimple';
 
-const DropButton = styled((p) => <Button plain {...p} />)`
+const DropButton = styled((p) => <Button {...p} />)`
   display: block;
   border-radius: ${({ menuType, inDrop }) => menuType === 'add' || inDrop ? '999px' : 'none'};
   z-index: 300;
   color: white;
   padding: 5px;
+  text-align: center;
   background-color: ${({ menuType, inDrop }) => {
     if (menuType === 'add' || inDrop) {
       return palette('primary', 1);

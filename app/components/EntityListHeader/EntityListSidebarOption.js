@@ -10,8 +10,9 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import { injectIntl, intlShape } from 'react-intl';
-import { Box, Button, Text } from 'grommet';
+import { Box, Text } from 'grommet';
 import { FormPrevious } from 'grommet-icons';
+import Button from 'components/buttons/ButtonSimple';
 
 import appMessage from 'utils/app-message';
 import InfoOverlay from 'components/InfoOverlay';
@@ -31,7 +32,7 @@ const Styled = styled((p) => (
   color:  ${(props) => props.active ? palette('asideListItem', 1) : palette('asideListItem', 0)};
 `;
 
-const StyledButton = styled((p) => <Button plain fill="horizontal" focusIndicator={false} {...p} />)`
+const StyledButton = styled((p) => <Button fill="horizontal" focusIndicator={false} {...p} />)`
   padding: 0.25em 8px;
   padding-left: 2px;
   text-align: left;

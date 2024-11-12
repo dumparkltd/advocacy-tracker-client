@@ -5,9 +5,9 @@ import { palette } from 'styled-theme';
 import {
   Text,
   Box,
-  Button,
   Drop,
 } from 'grommet';
+import Button from 'components/buttons/ButtonSimple';
 
 import { TEXT_TRUNCATE } from 'themes/config';
 import Icon from 'components/Icon';
@@ -15,21 +15,15 @@ import Icon from 'components/Icon';
 import { truncateText } from 'utils/string';
 
 const SelectButton = styled(
-  React.forwardRef((p, ref) => (
-    <Button
-      plain
-      ref={ref}
-      fill="horizontal"
-      {...p}
-    />
-  ))
+  React.forwardRef((p, ref) => (<Button ref={ref} {...p} />))
 )`
   padding: 0px 2px;
   border-bottom: 1px solid;
   height: 30px;
+  width: 100%
 `;
 
-const OptionButton = styled((p) => <Button plain {...p} />)`
+const OptionButton = styled((p) => <Button {...p} />)`
   display: block;
   width: 100%;
   padding: 4px 8px;
@@ -59,8 +53,6 @@ export function SelectIndicators({ config }) {
     <Box fill="horizontal" direction="row" align="center">
       <SelectButton
         ref={buttonRef}
-        plain
-        fill="horizontal"
         onClick={() => setShowOptions(!showOptions)}
       >
         <Box direction="row" justify="between" align="center">

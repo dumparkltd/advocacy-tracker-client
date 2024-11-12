@@ -7,7 +7,6 @@ import { palette } from 'styled-theme';
 
 import {
   Box,
-  Button,
   Text,
   Heading,
   ResponsiveContext,
@@ -17,6 +16,7 @@ import { isMinSize } from 'utils/responsive';
 
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
+import Button from 'components/buttons/ButtonSimple';
 import Dot from 'components/styled/Dot';
 
 import messages from './messages';
@@ -31,7 +31,7 @@ const Hint = styled((p) => <Text {...p} />)`
   font-weight: 300;
   font-style: italic;
 `;
-const TagButton = styled((p) => <Button plain {...p} />)`
+const TagButton = styled((p) => <Button {...p} />)`
   color: ${({ selected }) => selected ? 'white' : 'black'};
   background: ${({ selected }) => selected ? palette('primary', 1) : 'transparent'};
   border: 1px solid ${({ selected }) => selected ? palette('primary', 1) : palette('light', 4)};
@@ -41,7 +41,7 @@ const TagButton = styled((p) => <Button plain {...p} />)`
     border: 1px solid ${({ selected }) => selected ? palette('primary', 0) : palette('dark', 3)};
   }
 `;
-const ResetSupportTagsButton = styled((p) => <Button plain {...p} />)`
+const ResetSupportTagsButton = styled((p) => <Button {...p} />)`
   color: ${palette('primary', 1)};
   font-family: ${({ theme }) => theme.fonts.title};
   text-transform: uppercase;

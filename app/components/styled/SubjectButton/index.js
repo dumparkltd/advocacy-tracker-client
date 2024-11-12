@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Button } from 'grommet';
+import Button from 'components/buttons/ButtonSimple';
 
-const SubjectButton = styled((p) => <Button plain {...p} />)`
+const SubjectButton = styled((p) => <Button {...p} />)`
   padding: 2px 4px;
   border-bottom: 2px solid;
   border-bottom-color: ${({ active }) => active ? 'brand' : 'transparent'};
