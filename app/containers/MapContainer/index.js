@@ -53,19 +53,24 @@ ${({ isPrint }) => isPrint && css`margin-left: 0`};
   margin-left: 0;
 }
 `;
-const getMapOuterWrapper = (fullMap) => fullMap
-  ? styled.div``
-  : styled(({ isOverviewMap, ...rest }) => (
-    <Box
-      margin={isOverviewMap ? null : { horizontal: 'medium' }}
-      {...rest}
-    />
-  ))`
+const MapOuterWrapper = styled(
+  ({ fullMap, isOverviewMap, ...rest }) => fullMap
+    ? <div {...rest} />
+    : (
+      <Box
+        margin={isOverviewMap ? null : { horizontal: 'medium' }}
+        {...rest}
+      />
+    )
+)`
     ${({ isPrint }) => isPrint && css`margin-left: 0;`}
     ${({ isPrint }) => isPrint && css`margin-right: 0;`}
-    position: relative;
+    position: ${({ fullMap }) => fullMap ? 'static' : 'relative'};
     overflow: hidden;
-    padding-top: ${({ isPrint, orient }) => (isPrint && orient) === 'landscape' ? '50%' : '56.25%'};
+    padding-top: ${({ isPrint, orient, fullMap }) => {
+    if (fullMap) return 0;
+    return (isPrint && orient) === 'landscape' ? '50%' : '56.25%';
+  }};
     @media print {
       margin-left: 0;
       margin-right: 0;
@@ -198,7 +203,6 @@ export function MapContainer({
     ];
   }
   const isPrintView = usePrint();
-  const MapOuterWrapper = getMapOuterWrapper(fullMap);
 
   return (
     <Styled
@@ -208,6 +212,7 @@ export function MapContainer({
         isPrint={isPrintView}
         orient={printArgs && printArgs.printOrientation}
         isOverviewMap={isOverviewMap}
+        fullMap={fullMap}
       >
         <LeafletWrapper
           fullMap={fullMap}
