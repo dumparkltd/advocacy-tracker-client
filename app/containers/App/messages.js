@@ -911,6 +911,10 @@ export default defineMessages({
       id: 'app.containers.App.attributes.status_comment',
       defaultMessage: 'Status comment',
     },
+    reference: {
+      id: 'app.containers.App.attributes.reference',
+      defaultMessage: 'reference',
+    },
     reference_ml: {
       id: 'app.containers.App.attributes.reference_ml',
       defaultMessage: 'reference_ml',

@@ -311,7 +311,7 @@ const getRelatedSortValue = (relatedEntities) => {
       return getRelatedValue(relatedEntities);
     }
     const entity = relatedEntities.first();
-    return entity.getIn(['attributes', 'reference'])
+    return typeof entity.getIn(['attributes', 'reference']) !== 'undefined'
       && entity.getIn(['attributes', 'reference']).trim().length > 0
       ? entity.getIn(['attributes', 'reference'])
       : getEntityTitle(entity);
@@ -390,10 +390,12 @@ export const prepareEntityRows = ({
               [col.id]: {
                 ...col,
                 values: col.attributes.reduce(
-                  (memo, att) => ({
-                    ...memo,
-                    [att]: entity.getIn(['attributes', att]),
-                  }),
+                  (memo, att) => {
+                    let attVal = att === 'title'
+                      ? attVal = getEntityTitle(entity)
+                      : entity.getIn(['attributes', att]);
+                    return ({ ...memo, [att]: attVal });
+                  },
                   {}
                 ),
                 draft: entity.getIn(['attributes', 'draft']),

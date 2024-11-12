@@ -198,8 +198,15 @@ export function IndicatorView({
                           viewEntity,
                           'code',
                           isAdmin,
+                          false, // showLabel,
                         ),
                         getTitleField(viewEntity),
+                        // order
+                        getReferenceField(
+                          viewEntity,
+                          'reference',
+                          isAdmin,
+                        ),
                       ],
                     }}
                   />

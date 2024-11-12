@@ -799,6 +799,9 @@ export const getEntityTitle = (entity, labels, intl) => {
   }
   let label = entity.getIn(['attributes', 'title'])
     || entity.getIn(['attributes', 'name']);
+  if (entity.get('type') === API.INDICATORS) {
+    label = getIndicatorMainTitle(label);
+  }
   if (entity.getIn(['attributes', 'prefix']) && entity.getIn(['attributes', 'prefix']).trim().length > 0) {
     label = `${label} (${entity.getIn(['attributes', 'prefix'])})`;
   }
@@ -1402,7 +1405,7 @@ export const getIndicatorColumnsForStatement = ({
   let columns = [{
     id: 'main',
     type: 'main',
-    sort: 'title',
+    sort: 'reference',
     attributes: isAdmin ? ['code', 'title'] : ['title'],
   }];
   if (

@@ -870,6 +870,11 @@ export const RESOURCE_FIELDS = {
 
 export const INDICATOR_FIELDS = {
   ATTRIBUTES: {
+    reference: {
+      type: 'text',
+      optional: true,
+      adminOnly: true,
+    },
     code: {
       type: 'text',
       optional: true,
@@ -3300,14 +3305,21 @@ export const INDICATOR_CONFIG = {
           rows: [
             [
               {
+                attribute: 'code',
+                needsAdmin: true,
+                basis: '1/3',
+              },
+            ],
+            [
+              {
                 attribute: 'title',
                 required: true,
                 basis: '2/3',
               },
               {
-                attribute: 'code',
-                needsAdmin: true,
-                basis: '1/3',
+                attribute: 'reference',
+                label: 'order',
+                placeholder: 'order',
               },
             ],
             [{

@@ -619,7 +619,7 @@ export const selectResource = createSelector(
 );
 export const selectIndicators = createSelector(
   (state) => selectEntities(state, API.INDICATORS),
-  (entities) => sortEntities(entities, 'asc', 'title', null, false)
+  (entities) => sortEntities(entities, 'asc', 'referenceThenTitle', null, false)
 );
 export const selectIndicator = createSelector(
   (state, id) => selectEntity(state, { id, path: API.INDICATOR }),

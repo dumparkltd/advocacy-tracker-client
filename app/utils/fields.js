@@ -64,10 +64,9 @@ export const getIdField = (entity) => checkEmpty(entity.get('id')) && ({
   large: true,
   label: appMessages.attributes.id,
 });
-export const getReferenceField = (entity, att, isAdmin) => {
-  const value = att
-    ? entity.getIn(['attributes', 'reference']) || entity.getIn(['attributes', att])
-    : entity.getIn(['attributes', 'reference']);
+export const getReferenceField = (entity, att, isAdmin, showLabel = true) => {
+  const attClean = att || 'reference';
+  const value = entity.getIn(['attributes', attClean]);
   if (checkEmpty(value)) {
     return ({
       controlType: 'info',
@@ -75,6 +74,7 @@ export const getReferenceField = (entity, att, isAdmin) => {
       value,
       large: true,
       isAdmin,
+      label: (showLabel && appMessages.attributes[attClean]) || null,
     });
   }
   return false;
