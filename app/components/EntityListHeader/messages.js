@@ -194,11 +194,11 @@ export default defineMessages({
     },
     'connections-action-parents': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-action-parents',
-      defaultMessage: 'Update parent activities',
+      defaultMessage: 'Update activities',
     },
     'connections-action-children': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-action-children',
-      defaultMessage: 'Update child activities',
+      defaultMessage: 'Update sub-activities',
     },
   },
   filterFormTitlePrefix: {

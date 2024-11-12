@@ -128,7 +128,7 @@ export function TabActorsAccordion({
               hasChildActors
                 ? {
                   id: 1,
-                  titleButton: 'Indirectly targeted (from child activities)',
+                  titleButton: 'Indirectly targeted (from sub-activities)',
                   content: actives.indexOf(1) > -1 && (
                     <div>
                       {childActionsByActiontype.flatten(true).entrySeq().map(

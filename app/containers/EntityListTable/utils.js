@@ -82,7 +82,7 @@ export const prepareHeader = ({
           info: {
             type: 'text',
             title: 'Indirect stakeholders',
-            text: 'From child activities, e.g tasks',
+            text: 'From sub-activities, e.g tasks',
           },
         });
       case 'actors':
@@ -163,7 +163,7 @@ export const prepareHeader = ({
       case 'childActions':
         return ({
           ...col,
-          title: col.title || 'Child activities',
+          title: col.title || 'Sub-activities',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -171,7 +171,7 @@ export const prepareHeader = ({
       case 'parentActions':
         return ({
           ...col,
-          title: col.title || 'Parent activities',
+          title: col.title || 'Activities',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,

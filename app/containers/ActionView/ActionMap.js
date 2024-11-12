@@ -236,7 +236,7 @@ export function ActionMap({
     mapKeyOptionMap = {
       ...mapKeyOptionMap,
       children: {
-        label: 'Countries associated with child activities',
+        label: 'Countries associated with sub-activities',
         colorValue: 30,
         color: scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT.actors, false)(30),
         order: 3,
@@ -277,12 +277,12 @@ export function ActionMap({
   const childrenOption = hasChildActorOption && ({
     active: includeActorChildren,
     onClick: () => onSetIncludeActorChildren(includeActorChildren ? '0' : '1'),
-    label: 'Include countries associated with child activities',
+    label: 'Include countries associated with sub-activities',
   });
   const memberChildrenOption = hasChildActorOption && hasMemberOption && includeActorChildren && ({
     active: includeActorChildrenMembers,
     onClick: () => onSetIncludeActorChildrenMembers(includeActorChildrenMembers ? '0' : '1'),
-    label: 'Include country members of regions or groups associated with child activities',
+    label: 'Include country members of regions or groups associated with sub-activities',
   });
   return (
     <Styled hasHeader noOverflow>
