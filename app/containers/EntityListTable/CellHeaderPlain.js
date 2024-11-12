@@ -1,22 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { Box } from 'grommet';
-import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
+import ButtonSort from 'components/buttons/ButtonSort';
 import Icon from 'components/Icon';
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
 import InfoOverlay from 'components/InfoOverlay';
 import TextPrint from 'components/styled/TextPrint';
 import PrintHide from 'components/styled/PrintHide';
 import CellHeaderInfoOverlay from './CellHeaderInfoOverlay';
-
-const SortButton = styled(ButtonFlatIconOnly)`
-  color: inherit;
-  padding: 0;
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    padding: 0;
-  }
-`;
 
 export function CellHeaderPlain({ column }) {
   const sortOrderOption = column.onSort && SORT_ORDER_OPTIONS.find(
@@ -45,7 +36,8 @@ export function CellHeaderPlain({ column }) {
       {column.onSort && (
         <PrintHide>
           <Box pad={{ left: 'xxsmall' }} flex={false}>
-            <SortButton
+            <ButtonSort
+              sortActive={column.sortActive}
               onClick={() => {
                 if (column.sortActive) {
                   column.onSort(column.id || column.type, sortOrderOption.nextValue);
@@ -59,12 +51,10 @@ export function CellHeaderPlain({ column }) {
                   ? sortOrderOption.icon
                   : 'sorting'
                 }
-                palette="dark"
-                paletteIndex={column.sortActive ? 1 : 4}
                 hidePrint={!column.sortActive}
                 size="20px"
               />
-            </SortButton>
+            </ButtonSort>
           </Box>
         </PrintHide>
       )}

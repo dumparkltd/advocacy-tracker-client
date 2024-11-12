@@ -5,18 +5,9 @@ import { palette } from 'styled-theme';
 import { Box, Text } from 'grommet';
 
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
-import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
+import ButtonSort from 'components/buttons/ButtonSort';
 import Icon from 'components/Icon';
 import IndeterminateCheckbox, { STATES } from 'components/forms/IndeterminateCheckbox';
-
-
-const SortButton = styled(ButtonFlatIconOnly)`
-  color: inherit;
-  padding: 0;
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    padding: 0;
-  }
-`;
 
 const ColumnOptionWrapper = styled((p) => (
   <Box
@@ -119,7 +110,8 @@ export function DropBody({ options, onUpdate }) {
                 </Box>
                 {option.onSort && (
                   <Box flex={{ grow: 0 }}>
-                    <SortButton
+                    <ButtonSort
+                      sortActive={!option.sortActive}
                       onClick={() => {
                         if (option.sortActive) {
                           const nextSortOrderOption = SORT_ORDER_OPTIONS.find(
@@ -136,12 +128,10 @@ export function DropBody({ options, onUpdate }) {
                           ? sortOrderOption.icon
                           : 'sorting'
                         }
-                        palette="dark"
-                        paletteIndex={option.sortActive ? 1 : 4}
                         hidePrint={!option.sortActive}
                         size="20px"
                       />
-                    </SortButton>
+                    </ButtonSort>
                   </Box>
                 )}
               </ColumnOptionWrapper>

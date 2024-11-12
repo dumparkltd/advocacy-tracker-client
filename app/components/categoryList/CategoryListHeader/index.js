@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import { reduce } from 'lodash/collection';
 
-import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
+import ButtonSort from 'components/buttons/ButtonSort';
 import Icon from 'components/Icon';
 import ColumnHeader from 'components/styled/ColumnHeader';
 import CategoryListKey from 'components/categoryList/CategoryListKey';
@@ -53,14 +53,6 @@ const SortWrapper = styled.div`
     display: none;
   }
 `;
-const SortButton = styled(ButtonFlatIconOnly)`
-  color: inherit;
-  padding: 0;
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    padding: 0;
-  }
-`;
-
 
 function CategoryListHeader({ columns, isPrintView }) {
   const keyCount = columns.reduce(
@@ -98,9 +90,9 @@ function CategoryListHeader({ columns, isPrintView }) {
             </Title>
             {col.onClick && !isPrintView && (
               <SortWrapper>
-                <SortButton onClick={col.onClick}>
+                <ButtonSort sortActive={col.active} onClick={col.onClick}>
                   <Icon name={col.sortIcon} printHide={!col.active} />
-                </SortButton>
+                </ButtonSort>
               </SortWrapper>
             )}
             {col.keys && (
