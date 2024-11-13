@@ -169,13 +169,13 @@ export function PositionsList({
       ...level,
       label: intl.formatMessage(appMessages.supportlevels[level.value]),
     }));
-
   const options = [
     {
       id: `${ID}-0`,
       active: includeActorMembers,
       label: intl.formatMessage(appMessages.ui.statementOptions.includeMemberships),
       onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+      queryArg: 'am',
     },
     {
       id: `${ID}-1`,
@@ -187,6 +187,8 @@ export function PositionsList({
         replace: true,
         multipleAttributeValues: false,
       }]),
+      queryArg: 'inofficial',
+      inverse: true,
     },
   ];
 
