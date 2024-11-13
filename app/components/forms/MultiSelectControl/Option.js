@@ -28,15 +28,10 @@ const Styled = styled((p) => (
   }
 `;
 
-const CheckboxWrapper = styled((p) => (
-  <Box
-    fill="vertical"
-    flex={{ shrink: 0 }}
-    align="center"
-    {...p}
-  />
-))`
-  width: 40px;
+const CheckboxWrapper = styled.div`
+  padding-left: 18px;
+  padding-right: 9px;
+  margin-top: -1px;
 `;
 
 const OptionLabel = styled((p) => <Box pad={{ vertical: 'small', right: 'xsmall' }} fill as="label" {...p} />)`

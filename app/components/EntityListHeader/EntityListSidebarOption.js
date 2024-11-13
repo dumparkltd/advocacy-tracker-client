@@ -31,10 +31,10 @@ const StyledButton = styled((p) => <Button {...p} />)`
   cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
   width: 100%;
   color: ${({ active }) => active ? 'white' : 'black'};
-  background-color: ${({ theme, active }) => active ? theme.global.colors.highlightHover : 'transparent'};
+  background-color: ${({ theme, active }) => active ? theme.global.colors.highlight : 'transparent'};
   &:hover {
     color: white;
-    background-color: ${({ theme }) => theme.global.colors.highlight};
+    background-color: ${({ theme }) => theme.global.colors.highlightHover};
   }
 `;
 
