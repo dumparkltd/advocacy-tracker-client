@@ -6,11 +6,10 @@ import {
 } from 'grommet';
 import styled from 'styled-components';
 
-// import { isMinSize } from 'utils/responsive';
-
 const Styled = styled((p) => <Box {...p} />)`
+  height: fit-content;
 `;
-const CardLink = styled((p) => <Button plain as="a" fill="vertical" {...p} />)`
+const CardLink = styled((p) => <Button plain as="a" {...p} />)`
   padding: 20px 15px;
   color: ${({ theme }) => theme.global.colors.text.brand};
   &:hover {
@@ -25,8 +24,7 @@ const Count = styled((p) => <Text {...p} />)`
 const Title = styled((p) => <Text size="xlarge" {...p} />)`
   font-family: ${({ theme }) => theme.fonts.title};
 `;
-const Description = styled((p) => <Text size="small" {...p} />)`
-`;
+const Description = styled((p) => <Text size="small" {...p} />)``;
 
 export function CardTeaser({
   // isInverted,
@@ -51,10 +49,10 @@ export function CardTeaser({
         href={`${path}`}
         onClick={onClick}
       >
-        <Box direction="column" justify="between" fill="vertical" gap="medium">
+        <Box direction="column" justify="start" gap="medium">
           <TitleWrap
             direction="column"
-            gap="small"
+            gap="medium"
           >
             <Title>
               {title}
