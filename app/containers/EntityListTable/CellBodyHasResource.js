@@ -2,23 +2,24 @@ import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import {
-  Box, Text, Button, Drop,
+  Box, Text, Drop,
 } from 'grommet';
 import { StatusGood, StatusCritical } from 'grommet-icons';
 import styled from 'styled-components';
 import appMessages from 'containers/App/messages';
+import Button from 'components/buttons/ButtonTableCell';
 
 import { ROUTES } from 'themes/config';
 const LinkTooltip = styled(
-  React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
+  React.forwardRef((p, ref) => <Button {...p} ref={ref} />)
 )`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
 `;
-const LinkInTT = styled((p) => <Button as="a" plain {...p} />)`
+const LinkInTT = styled((p) => <Button as="a" {...p} />)`
   line-height: 13px;
 `;
-const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
+const LabelInTT = styled((p) => <Text size="xxsmall" wordBreak="keep-all" {...p} />)`
   line-height: 13px;
 `;
 

@@ -34,6 +34,7 @@ export function FormFooter({
       direction="row"
       justify="between"
       elevation="small"
+      align="center"
     >
       {isMinSize(size, 'medium') && (
         <Box>

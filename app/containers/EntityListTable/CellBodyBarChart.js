@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 import {
   Box,
   Text,
-  Button,
   Drop,
 } from 'grommet';
 import styled from 'styled-components';
+
+import Button from 'components/buttons/ButtonSimple';
 
 import { ROUTES } from 'themes/config';
 
@@ -36,7 +37,7 @@ const Bar = styled.div`
   top: 0;
 `;
 
-const BarButton = styled((p) => <Button plain {...p} />)`
+const BarButton = styled((p) => <Button {...p} />)`
   width: ${({ value, maxvalue }) => value / maxvalue * 100}%;
   min-width: 1px;
   height: 20px;
@@ -49,7 +50,7 @@ const BarButton = styled((p) => <Button plain {...p} />)`
 `;
 
 const LinkTooltip = styled(
-  React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
+  React.forwardRef((p, ref) => <Button {...p} ref={ref} />)
 )`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
@@ -74,7 +75,7 @@ export function CellBodyBarChart({
         <Box direction="row" gap="none" flex={{ shrink: 0 }} align="center">
           <Value>
             {!rowConfig.tooltip && (
-              <Text size="small" weight={500} textAlign="end">
+              <Text size="xsmall" weight={500} textAlign="end">
                 {value}
               </Text>
             )}
@@ -103,7 +104,6 @@ export function CellBodyBarChart({
                 maxvalue={maxvalue}
                 issecondary={issecondary}
                 color={color}
-                fill={false}
                 isHover={hover}
                 onClick={() => showInfo(true)}
                 onMouseOver={() => isHover(true)}

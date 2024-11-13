@@ -388,7 +388,7 @@ export function ActionView(props) {
                               onClick={() => onSetSubject('children')}
                               active={viewSubject === 'children'}
                             >
-                              <Text size="large">Child activities</Text>
+                              <Text size="large">Sub-activities</Text>
                             </SubjectButton>
                           )}
                         </SubjectButtonGroup>
@@ -403,7 +403,7 @@ export function ActionView(props) {
                             <span key={vSubject}>
                               <PrintOnly>
                                 <PrintSectionTitleWrapper>
-                                  <Text size="large">Child Activities</Text>
+                                  <Text size="large">Sub-activities</Text>
                                 </PrintSectionTitleWrapper>
                               </PrintOnly>
                               <TabActivities

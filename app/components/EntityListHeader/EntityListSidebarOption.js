@@ -8,10 +8,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import styled from 'styled-components';
-import { palette } from 'styled-theme';
 import { injectIntl, intlShape } from 'react-intl';
-import { Box, Button, Text } from 'grommet';
+import { Box, Text } from 'grommet';
 import { FormPrevious } from 'grommet-icons';
+import Button from 'components/buttons/ButtonSimple';
 
 import appMessage from 'utils/app-message';
 import InfoOverlay from 'components/InfoOverlay';
@@ -19,28 +19,35 @@ import InfoOverlay from 'components/InfoOverlay';
 import messages from './messages';
 
 // TODO compare TaxonomySidebarItem
-const Styled = styled((p) => (
-  <Box
-    direction="row"
-    fill="horizontal"
-    align="center"
-    {...p}
-  />
-))`
-  background-color: ${({ theme, active }) => active ? theme.global.colors.highlightHover : 'transparent'};
-  color:  ${(props) => props.active ? palette('asideListItem', 1) : palette('asideListItem', 0)};
+const Styled = styled.div`
+  width: 100%;
+  position: relative;
 `;
 
-const StyledButton = styled((p) => <Button plain fill="horizontal" focusIndicator={false} {...p} />)`
+const StyledButton = styled((p) => <Button {...p} />)`
   padding: 0.25em 8px;
   padding-left: 2px;
   text-align: left;
-  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'}
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
+  width: 100%;
+  color: ${({ active }) => active ? 'white' : 'black'};
+  background-color: ${({ theme, active }) => active ? theme.global.colors.highlight : 'transparent'};
+  &:hover {
+    color: white;
+    background-color: ${({ theme }) => theme.global.colors.highlightHover};
+  }
+`;
+
+const InfoAnchor = styled.div`
+  position: absolute;
+  right: 0;
+  top: 2px;
 `;
 
 function EntityListSidebarOption({
   option, onShowForm, groupId, groupType, intl,
 }) {
+  const [mouseOver, setMouseOver] = React.useState(false);
   let label = option.get('message')
     ? appMessage(intl, option.get('message'))
     : option.get('label');
@@ -49,7 +56,11 @@ function EntityListSidebarOption({
     <Styled active={option.get('active')} disabled={option.get('disabled')}>
       <StyledButton
         disabled={option.get('disabled')}
-        plain
+        active={option.get('active')}
+        onMouseOver={() => setMouseOver(true)}
+        onFocus={() => false}
+        onMouseOut={() => setMouseOver(false)}
+        onBlur={() => false}
         onClick={
           () => !option.get('disabled')
            && onShowForm({
@@ -69,17 +80,19 @@ function EntityListSidebarOption({
         )}
       >
         <Box direction="row" justify="start" align="center" gap="xsmall">
-          <FormPrevious size="xsmall" color={option.get('active') ? 'white' : 'black'} />
+          <FormPrevious size="xsmall" color="currentColor" />
           <Text size="small" weight={500}>{label}</Text>
         </Box>
       </StyledButton>
       {option.get('info') && (
-        <InfoOverlay
-          title={label}
-          content={option.get('info')}
-          dark={option.get('active')}
-          markdown
-        />
+        <InfoAnchor>
+          <InfoOverlay
+            title={label}
+            content={option.get('info')}
+            dark={option.get('active') || mouseOver}
+            markdown
+          />
+        </InfoAnchor>
       )}
     </Styled>
   );

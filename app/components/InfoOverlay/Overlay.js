@@ -11,11 +11,11 @@ import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import {
   Box,
-  Button,
   Layer,
   Text,
 } from 'grommet';
 import { FormClose } from 'grommet-icons';
+import Button from 'components/buttons/ButtonSimple';
 
 import Loading from 'components/Loading';
 
@@ -57,7 +57,9 @@ function Overlay({
           </Box>
           {onClose && (
             <Box flex={{ grow: 0 }}>
-              <Button plain icon={<FormClose size="medium" />} onClick={onClose} />
+              <Button onClick={onClose}>
+                <FormClose size="medium" />
+              </Button>
             </Box>
           )}
         </LayerHeader>

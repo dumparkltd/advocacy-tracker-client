@@ -11,6 +11,7 @@ import {
   selectReady,
   selectActorsWithPositions,
   selectActions,
+  selectActors,
   selectActorActionsGroupedByActor,
   selectMembershipsGroupedByParent,
   selectMembershipsGroupedByMember,
@@ -20,6 +21,8 @@ import {
   selectAssociationTypeQuery,
   selectLocationQuery,
   selectActorConnections,
+  selectUsers,
+  selectUserActorsGroupedByActor,
 } from 'containers/App/selectors';
 import { getValueFromPositions } from 'containers/EntityListTable/utils';
 
@@ -37,33 +40,40 @@ import { DEPENDENCIES } from './constants';
 export const selectConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectActions,
+  selectActors,
+  selectUsers,
   selectActionCategoriesGroupedByAction,
   selectCategories,
   selectIncludeInofficialStatements,
   (
     ready,
     actions,
+    actors,
+    users,
     actionAssociationsGrouped,
     categories,
     includeInofficial,
   ) => {
     if (ready) {
-      const result = new Map().set(
-        API.ACTIONS,
-        includeInofficial ? actions : actions.filter(
-          (entity) => {
-            if (qe(entity.getIn(['attributes', 'measuretype_id']), ACTIONTYPES.EXPRESS)) {
-              const entityCategories = getEntityCategories(
-                parseInt(entity.get('id'), 10),
-                actionAssociationsGrouped,
-                categories,
-              );
-              return entityCategories && entityCategories.toList().includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+      const result = new Map()
+        .set(
+          API.ACTIONS,
+          includeInofficial ? actions : actions.filter(
+            (entity) => {
+              if (qe(entity.getIn(['attributes', 'measuretype_id']), ACTIONTYPES.EXPRESS)) {
+                const entityCategories = getEntityCategories(
+                  parseInt(entity.get('id'), 10),
+                  actionAssociationsGrouped,
+                  categories,
+                );
+                return entityCategories && entityCategories.toList().includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+              }
+              return true;
             }
-            return true;
-          }
+          )
         )
-      );
+        .set(API.ACTORS, actors)
+        .set(API.USERS, users);
       return result;
     }
     return new Map();
@@ -160,6 +170,7 @@ export const selectCountries = createSelector(
   selectActorActionsGroupedByActor,
   selectMembershipsGroupedByParent,
   selectMembershipsGroupedByMember,
+  selectUserActorsGroupedByActor,
   (
     ready,
     countries,
@@ -167,6 +178,7 @@ export const selectCountries = createSelector(
     actionsAsActorGrouped,
     memberConnectionsGrouped,
     associationConnectionsGrouped,
+    userConnectionsGrouped,
   ) => {
     const actions = ready && connections.get(API.ACTIONS);
     const result = ready && countries.map(
@@ -196,10 +208,12 @@ export const selectCountries = createSelector(
         }, Map());
         const actorActionsAsParentByType = actorActionsAsParent && actionsByType(actorActionsAsParent, actions);
 
+        const actorUsers = userConnectionsGrouped.get(actorId);
         return actor
           .set('actionsByType', actorActionsByType)
           .set('actionsAsMemberByType', actorActionsAsMemberByType)
-          .set('actionsAsParentByType', actorActionsAsParentByType);
+          .set('actionsAsParentByType', actorActionsAsParentByType)
+          .set('users', actorUsers);
       }
     );
     return result || null;

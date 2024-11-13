@@ -8,6 +8,7 @@ import React from 'react';
 import { intlShape, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Box, Text } from 'grommet';
+import Checkbox from 'components/styled/Checkbox';
 
 import appMessage from 'utils/app-message';
 
@@ -36,9 +37,8 @@ export function FilterOptionCheckboxes({
                 direction="row"
                 key={attributeOption.get('value')}
               >
-                <input
+                <Checkbox
                   id={checkboxId}
-                  type="checkbox"
                   checked={attributeOption.get('checked')}
                   onChange={() => onUpdateQuery([
                     {

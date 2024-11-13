@@ -2,9 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { Button } from 'grommet';
 
-const StyledButton = styled((p) => <Button plain {...p} />)`
+import Button from 'components/buttons/ButtonSimple';
+
+const StyledButton = styled((p) => <Button {...p} />)`
   width: 100%;
   line-height: 1.3;
   font-size: ${({ theme }) => theme.text.xsmall.size};

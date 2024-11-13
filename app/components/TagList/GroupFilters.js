@@ -13,7 +13,7 @@ import { Box, Text, Drop } from 'grommet';
 import { FormClose, FormDown, FormUp } from 'grommet-icons';
 
 import Button from 'components/buttons/Button';
-import ButtonTagFilterWrap from 'components/buttons//ButtonTagFilterWrap';
+import ButtonTagFilterWrap from 'components/buttons/ButtonTagFilterWrap';
 import ButtonTagFilter from 'components/buttons/ButtonTagFilter';
 import PrintHide from 'components/styled/PrintHide';
 

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import { palette } from 'styled-theme';
 import styled, { withTheme } from 'styled-components';
-import { Box, Text, Button } from 'grommet';
+import { Box, Text } from 'grommet';
 
 import {
   Bold,
@@ -18,6 +18,8 @@ import TextareaMarkdown from 'textarea-markdown-editor';
 import MarkdownField from 'components/fields/MarkdownField';
 import InfoOverlay from 'components/InfoOverlay';
 import A from 'components/styled/A';
+import Button from 'components/buttons/ButtonSimple';
+
 import messages from './messages';
 
 const MIN_TEXTAREA_HEIGHT = 320;
@@ -53,11 +55,7 @@ const Preview = styled((p) => <Box {...p} />)`
 `;
 
 const MDButton = styled((p) => (
-  <Button
-    plain
-    as="div"
-    {...p}
-  />
+  <Button as="div" {...p} />
 ))`
   min-width: 30px;
   min-height: 30px;
@@ -68,10 +66,7 @@ const MDButton = styled((p) => (
   }
 `;
 const ViewButton = styled((p) => (
-  <Button
-    plain
-    {...p}
-  />
+  <Button {...p} />
 ))`
   background: none;
   opacity: ${({ active }) => active ? 1 : 0.6};
@@ -212,8 +207,9 @@ function TextareaMarkdownWrapper(props) {
                   textareaRef.current.trigger('bold');
                 }
               }}
-              icon={<Bold size="xsmall" />}
-            />
+            >
+              <Bold size="xsmall" />
+            </MDButton>
             <MDButton
               title="Italic: _italic_"
               disabled={mdDisabled}
@@ -222,8 +218,9 @@ function TextareaMarkdownWrapper(props) {
                   textareaRef.current.trigger('italic');
                 }
               }}
-              icon={<Italic size="xsmall" />}
-            />
+            >
+              <Italic size="xsmall" />
+            </MDButton>
             <MDButton
               title="Link: (text)[url]"
               disabled={mdDisabled}
@@ -232,8 +229,9 @@ function TextareaMarkdownWrapper(props) {
                   textareaRef.current.trigger('link');
                 }
               }}
-              icon={<LinkIcon size="18px" />}
-            />
+            >
+              <LinkIcon size="18px" />
+            </MDButton>
             <MDButton
               title="Unordered list: -"
               disabled={mdDisabled}
@@ -242,8 +240,9 @@ function TextareaMarkdownWrapper(props) {
                   textareaRef.current.trigger('unordered-list');
                 }
               }}
-              icon={<List size="xsmall" />}
-            />
+            >
+              <List size="xsmall" />
+            </MDButton>
             <MDButton
               title="Ordered list: 1."
               disabled={mdDisabled}
@@ -253,7 +252,7 @@ function TextareaMarkdownWrapper(props) {
                 }
               }}
             >
-              <MDButtonText size="xxsmall" style={{ top: '-4px' }}>123</MDButtonText>
+              <MDButtonText size="xxsmall">123</MDButtonText>
             </MDButton>
           </Box>
         </Box>

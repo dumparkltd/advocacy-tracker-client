@@ -6,7 +6,7 @@ import { FormattedMessage } from 'react-intl';
 import { Form } from 'react-redux-form/immutable';
 import styled from 'styled-components';
 import { get } from 'lodash/object';
-import { Box, Button, ResponsiveContext } from 'grommet';
+import { Box, ResponsiveContext } from 'grommet';
 import { palette } from 'styled-theme';
 
 import { isMinSize } from 'utils/responsive';
@@ -15,10 +15,12 @@ import { selectNewEntityModal } from 'containers/App/selectors';
 
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonCancel from 'components/buttons/ButtonCancel';
+import Button from 'components/buttons/ButtonSimple';
 
 import Icon from 'components/Icon';
 
 import FormWrapper from 'components/forms/FormWrapper';
+
 import appMessages from 'containers/App/messages';
 
 import FormContentWrapper from './FormContentWrapper';
@@ -68,7 +70,7 @@ const FormStepWrapper = styled(
   position: relative;
 `;
 const SkipButton = styled(
-  (p) => <Button plain {...p} />
+  (p) => <Button {...p} />
 )`
   opacity: 1;
   color: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlight};
@@ -91,7 +93,7 @@ const HighlightBackground = styled.div`
 `;
 
 const ButtonStep = styled(
-  (p) => <Button plain {...p} />
+  (p) => <Button {...p} />
 )`
   position: relative;
   height: 52px;
@@ -101,6 +103,13 @@ const ButtonStep = styled(
   opacity: 1;
   cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
   &:hover {
+    color: ${({ theme, highlight, disabled }) => {
+    if (disabled) return highlight ? 'white' : '#777E7E';
+    return highlight ? 'white' : theme.global.colors.highlightHover;
+  }};
+  }
+  &:focus {
+    outline: 0;
     color: ${({ theme, highlight, disabled }) => {
     if (disabled) return highlight ? 'white' : '#777E7E';
     return highlight ? 'white' : theme.global.colors.highlightHover;
@@ -427,7 +436,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   >
                     <SkipButton
                       disabled={activeStepHasErrors || prevStepIndex === null}
-                      plain
                       onClick={(evt) => {
                         if (evt && evt.preventDefault) evt.preventDefault();
                         if (byStep[prevStepIndex]) {

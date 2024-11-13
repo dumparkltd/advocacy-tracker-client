@@ -1,21 +1,22 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Box, Text, Button, Drop,
+  Box, Text, Drop,
 } from 'grommet';
 import styled from 'styled-components';
 import { truncateText } from 'utils/string';
+import Button from 'components/buttons/ButtonTableCell';
 
 import { ROUTES } from 'themes/config';
 import DropEntityList from './DropEntityList';
 import LabelTooltip from './LabelTooltip';
 import LinkTooltip from './LinkTooltip';
 
-const Link = styled((p) => <Button as="a" plain {...p} />)`
+const Link = styled((p) => <Button as="a" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
 `;
-const Label = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
+const Label = styled((p) => <Text size="xxsmall" wordBreak="keep-all" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
   font-weight: 500;

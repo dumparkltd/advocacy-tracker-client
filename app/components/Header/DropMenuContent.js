@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import {
-  Box, Button, Text, ResponsiveContext,
+  Box, Text, ResponsiveContext,
 } from 'grommet';
 
 import { isMinSize } from 'utils/responsive';
@@ -12,6 +12,7 @@ import { isMinSize } from 'utils/responsive';
 import Icon from 'components/Icon';
 import ScreenReaderOnly from 'components/styled/ScreenReaderOnly';
 import appMessages from 'containers/App/messages';
+import Button from 'components/buttons/ButtonSimple';
 
 import DropMenuGroup from './DropMenuGroup';
 import DropButtonWrap from './DropButtonWrap';
@@ -39,7 +40,7 @@ const Title = styled((p) => <Text {...p} />)`
  line-height: 46px;
 `;
 
-const ExpandItems = styled((p) => <Button plain {...p} />)`
+const ExpandItems = styled((p) => <Button {...p} />)`
   color: ${palette('primary', 1)};
   font-family: ${({ theme }) => theme.fonts.title};
   font-weight: normal;

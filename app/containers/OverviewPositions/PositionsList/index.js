@@ -426,6 +426,20 @@ export function PositionsList({
                       attributes: ['title'],
                     },
                     {
+                      id: 'associations',
+                      type: 'associations',
+                      actors: 'associationsByType',
+                      isSingleActionColumn: false,
+                      minSize: 'medium',
+                      title: 'Regions & Groups',
+                    },
+                    {
+                      id: 'users',
+                      type: 'users',
+                      isSingleActionColumn: false,
+                      minSize: 'medium',
+                    },
+                    {
                       id: `action_${ACTIONTYPES.EXPRESS}`,
                       type: 'actiontype',
                       actiontype_id: ACTIONTYPES.EXPRESS,
@@ -433,7 +447,8 @@ export function PositionsList({
                       actionsMembers: 'actionsAsMemberByType',
                       actionsChildren: 'actionsAsParentByType',
                       isSingleActionColumn: false,
-                      minSize: 'medium',
+                      minSize: 'large',
+                      simple: true,
                     },
                     {
                       id: `action_${ACTIONTYPES.INTERACTION}`,
@@ -444,6 +459,7 @@ export function PositionsList({
                       actionsChildren: 'actionsAsParentByType',
                       isSingleActionColumn: false,
                       minSize: 'large',
+                      simple: true,
                     },
                     ...topicColumns,
                   ]}
@@ -476,12 +492,11 @@ export function PositionsList({
                     if (e && e.preventDefault) e.preventDefault();
                     onUpdatePath(`${ROUTES.ACTORS}/${ACTORTYPES.COUNTRY}`);
                   }}
-                  label={(
-                    <Text size="large">
-                      Full Country List
-                    </Text>
-                  )}
-                />
+                >
+                  <Text size="large">
+                    Full Country List
+                  </Text>
+                </ButtonPrimary>
               </Box>
             </Box>
           </Box>

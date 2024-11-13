@@ -3,15 +3,16 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import {
-  Box, Text, Button,
+  Box, Text,
 } from 'grommet';
 import Icon from 'components/Icon';
+import Button from 'components/buttons/ButtonSimple';
 
 const DropLayerTitle = styled((p) => <Text size="small" {...p} />)`
   text-transform: uppercase;
   font-weight: bold;
 `;
-const CloseButton = styled((p) => <Button plain {...p} />)`
+const CloseButton = styled((p) => <Button {...p} />)`
   border-radius: 999px;
   color: white;
   height: 25px;

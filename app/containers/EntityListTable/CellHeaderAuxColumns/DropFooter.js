@@ -2,9 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { Box, Button } from 'grommet';
+import { Box } from 'grommet';
+import Button from 'components/buttons/ButtonSimple';
 
-const ActionButton = styled((p) => <Button plain {...p} />)`
+const ActionButton = styled((p) => <Button {...p} />)`
   padding: 5px 10px 6px 10px;
   border-radius: 10px;
 

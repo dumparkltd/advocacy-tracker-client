@@ -1,9 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
-import { Button } from 'grommet';
+import Button from 'components/buttons/ButtonSimple';
 
 const LinkTooltip = styled(
-  React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
+  React.forwardRef((p, ref) => <Button {...p} ref={ref} />)
 )`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;

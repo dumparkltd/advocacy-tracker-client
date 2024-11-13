@@ -2,9 +2,9 @@ import React from 'react';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 
-import { Button } from 'grommet';
+import Button from 'components/buttons/ButtonSimple';
 const PrimaryButton = styled((p) => (
-  <Button plain {...p} />
+  <Button {...p} />
 ))`
   font-family: ${({ theme }) => theme.fonts.title};
   color: white;

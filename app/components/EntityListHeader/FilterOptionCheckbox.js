@@ -10,6 +10,7 @@ import PropTypes from 'prop-types';
 import { Box, Text } from 'grommet';
 import { lowerCase } from 'utils/string';
 import appMessage from 'utils/app-message';
+import Checkbox from 'components/styled/Checkbox';
 
 export function FilterOptionCheckbox({
   option,
@@ -32,9 +33,8 @@ export function FilterOptionCheckbox({
       direction="row"
       key={option.get('value')}
     >
-      <input
+      <Checkbox
         id={checkboxId}
-        type="checkbox"
         checked={option.get('checked')}
         onChange={() => onUpdateQuery([
           {

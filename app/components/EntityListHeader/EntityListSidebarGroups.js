@@ -57,13 +57,13 @@ class EntityListSidebarGroups extends React.PureComponent { // eslint-disable-li
             return (
               <Group key={groupId} expanded={this.props.expanded[groupId]}>
                 <EntityListSidebarGroupLabel
-                  label={group.get('label')}
                   optionsActiveCount={group.get('optionsActiveCount')}
                   expanded={this.props.expanded[groupId]}
                   onToggle={(evt) => {
                     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
                     this.props.onToggleGroup(groupId, !this.props.expanded[groupId]);
                   }}
+                  label={group.get('label')}
                 />
                 {this.props.expanded[groupId] && (
                   <Box margin={{ top: 'small', bottom: 'medium' }} gap="small">

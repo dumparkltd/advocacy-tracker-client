@@ -12,6 +12,7 @@ import DebounceInput from 'react-debounce-input';
 import styled from 'styled-components';
 import { Box, Text } from 'grommet';
 
+import Checkbox from 'components/styled/Checkbox';
 import OptionGroupToggle from './OptionGroupToggle';
 import OptionListHeader from './OptionListHeader';
 
@@ -41,10 +42,6 @@ const Group = styled((p) => (
   &:last-child {
     border-bottom: 1px solid ${palette('light', 2)};
   }
-`;
-
-const StyledInput = styled.input`
-  accent-color: ${({ theme }) => theme.global.colors.highlight};
 `;
 
 const OptionLabel = styled((p) => <Text as="label" {...p} />)`
@@ -79,12 +76,13 @@ export function OptionGroup({
   return (
     <Group>
       <OptionGroupToggle
-        label={label}
         onToggle={() => onExpandGroup(!expandGroup ? groupId : null)}
         expanded={expandGroup}
         activeCount={activeOptionCount}
         optionCount={optionCount}
-      />
+      >
+        {label}
+      </OptionGroupToggle>
       {expandGroup && (
         <Box gap="small" margin={{ vertical: 'medium' }}>
           {intro && (
@@ -96,9 +94,8 @@ export function OptionGroup({
           {onSetActive && (
             <Box direction="row" gap="small" align="center" justify="start">
               <Select>
-                <StyledInput
+                <Checkbox
                   id={`check-${groupId}`}
-                  type="checkbox"
                   checked={active}
                   onChange={(evt) => onSetActive(evt.target.checked)}
                 />
@@ -133,9 +130,8 @@ export function OptionGroup({
                     <Box key={key} direction="row" gap="small" align="center" justify="between">
                       <Box direction="row" gap="small" align="center" justify="start">
                         <Select>
-                          <StyledInput
+                          <Checkbox
                             id={`check-${groupId}-${key}`}
-                            type="checkbox"
                             checked={option.exportRequired || option.active}
                             disabled={option.exportRequired}
                             onChange={(evt) => {
@@ -181,7 +177,7 @@ export function OptionGroup({
             <Box gap="edge">
               <Box direction="row" gap="small" align="center" justify="start">
                 <Select>
-                  <StyledInput
+                  <Checkbox
                     id={`check-${groupId}-as-columns`}
                     type="radio"
                     checked={!asRows}
@@ -198,7 +194,7 @@ export function OptionGroup({
               </Box>
               <Box direction="row" gap="small" align="center" justify="start">
                 <Select>
-                  <StyledInput
+                  <Checkbox
                     id={`check-${groupId}-as-rows`}
                     type="radio"
                     checked={asRows}

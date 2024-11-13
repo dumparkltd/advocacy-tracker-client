@@ -3,20 +3,13 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import SelectReset from 'components/SelectReset';
-import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
+import ButtonSort from 'components/buttons/ButtonSort';
 import Icon from 'components/Icon';
 
 import ColumnHeader from 'components/styled/ColumnHeader';
 
 import messages from './messages';
 
-const SortButton = styled(ButtonFlatIconOnly)`
-  padding: 0;
-  color: inherit;
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    padding: 0;
-  }
-`;
 const Styled = styled(ColumnHeader)`
   padding-right: 0;
 `;
@@ -72,14 +65,15 @@ class ColumnSelect extends React.PureComponent { // eslint-disable-line react/pr
               />
               {nextSortOrderOption
               && (
-                <SortButton
+                <ButtonSort
+                  sortActive
                   onClick={(e) => {
                     e.preventDefault();
                     this.props.onSortOrder(nextSortOrderOption.value);
                   }}
                 >
                   <Icon name={sortOrderOption.icon} />
-                </SortButton>
+                </ButtonSort>
               )
               }
             </SelectWrapper>

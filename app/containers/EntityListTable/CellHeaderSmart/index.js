@@ -7,6 +7,7 @@ import { isMinSize } from 'utils/responsive';
 import asArray from 'utils/as-array';
 
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
+import ButtonSort from 'components/buttons/ButtonSort';
 import Icon from 'components/Icon';
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
 import TextPrint from 'components/styled/TextPrint';
@@ -14,14 +15,6 @@ import PrintHide from 'components/styled/PrintHide';
 import DropHeader from './DropHeader';
 import DropFilter from './DropFilter';
 import DropSort from './DropSort';
-
-const SortButton = styled(ButtonFlatIconOnly)`
-  color: inherit;
-  padding: 0;
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    padding: 0;
-  }
-`;
 
 const ColumnButton = styled(ButtonFlatIconOnly)`
   color: ${({ isActive }) => isActive ? 'white' : 'inherit'};
@@ -189,7 +182,8 @@ export function CellHeaderSmart({
       {!column.filterOptions && column.onSort && (
         <PrintHide>
           <Box pad={{ left: 'xxsmall' }} flex={false}>
-            <SortButton
+            <ButtonSort
+              sortActive={column.sortActive}
               onClick={() => {
                 if (column.sortActive) {
                   const nextSortOrderOption = SORT_ORDER_OPTIONS.find(
@@ -206,12 +200,11 @@ export function CellHeaderSmart({
                   ? sortOrderOption.icon
                   : 'sorting'
                 }
-                palette="dark"
-                paletteIndex={column.sortActive ? 1 : 4}
+
                 hidePrint={!column.sortActive}
                 size="20px"
               />
-            </SortButton>
+            </ButtonSort>
           </Box>
         </PrintHide>
       )}

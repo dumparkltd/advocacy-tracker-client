@@ -11,7 +11,6 @@ import { palette } from 'styled-theme';
 import {
   Box,
   Text,
-  Button,
   ResponsiveContext,
 } from 'grommet';
 
@@ -57,6 +56,7 @@ import SelectIndicators from 'containers/MapContainer/MapInfoOptions/SelectIndic
 import Icon from 'components/Icon';
 import ButtonPrimary from 'components/buttons/ButtonPrimaryNew';
 import ButtonSecondary from 'components/buttons/ButtonSecondaryNew';
+import Button from 'components/buttons/ButtonSimple';
 
 import Card from 'containers/OverviewPositions/Card';
 import TitleOnCard from 'containers/OverviewPositions/TitleOnCard';
@@ -86,15 +86,33 @@ const IndicatorList = styled((p) => <Box {...p} />)`
 const IndicatorPanelHeader = styled((p) => <Box {...p} pad="small" />)`
   position: relative;
 `;
-const IndicatorSelectButton = styled((p) => <Button plain {...p} />)`
+const IndicatorSelectButton = styled((p) => <Button {...p} />)`
   border-bottom: 1px solid ${palette('light', 2)};
   width: 100%;
   background: ${({ active }) => (active ? palette('primary', 1) : 'white')};
+  color: ${({ active }) => active ? 'white' : 'black'};
+  cursor: ${({ active }) => active ? 'default' : 'pointer'};
   position: relative;
   padding: ${({ theme }) => theme.global.edgeSize.small};
   &:focus {
     outline: none;
     box-shadow: none;
+  }
+  &:focus-visible {
+    color: ${({ active, theme }) => active
+    ? 'white'
+    : theme.global.colors.highlight
+};
+    background-color: ${({ active, theme }) => active
+    ? theme.global.colors.highlight
+    : 'white'
+};
+  }
+  &:hover {
+    color: ${({ active, theme }) => active
+    ? 'white'
+    : theme.global.colors.highlight
+};
   }
   /* extra width at the start, on selected item */
   &::before {
@@ -132,7 +150,7 @@ const IndicatorLabel = styled((p) => <Text size="small" weight={600} {...p} />)`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: ${({ active }) => active ? 'white' : 'black'};
+
 `;
 const MapWrapper = styled((p) => <Box {...p} />)`
   position: relative;
@@ -543,14 +561,13 @@ export function PositionsMap({
                     if (e && e.preventDefault) e.preventDefault();
                     onUpdatePath(`${ROUTES.INDICATOR}/${currentIndicatorId}`);
                   }}
-                  label={(
-                    <Text size="large">
-                      {indicators
-                        && currentIndicatorId
-                        && getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title']))}
-                    </Text>
-                  )}
-                />
+                >
+                  <Text size="large">
+                    {indicators
+                      && currentIndicatorId
+                      && getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title']))}
+                  </Text>
+                </ButtonPrimary>
               </Box>
             </Box>
           </Box>

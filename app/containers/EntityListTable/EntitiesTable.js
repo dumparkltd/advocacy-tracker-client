@@ -170,6 +170,8 @@ const getColWidth = ({ col, count, topicPositionLength }) => {
     if (col.type === 'main' && (count - topicPositionLength > 2)) {
       result = '25%';
     }
+  } else if (count > 6 && col.type === 'main') {
+    result = '25%';
   } else if (count > 2) {
     if (col.type === 'main') {
       result = '30%';

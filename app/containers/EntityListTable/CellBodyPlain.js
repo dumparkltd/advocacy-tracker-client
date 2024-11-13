@@ -1,11 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Text, Button } from 'grommet';
+import { Box, Text } from 'grommet';
 import styled from 'styled-components';
 import Dot from 'components/styled/Dot';
 
+import Button from 'components/buttons/ButtonTableCell';
+
 const LabelWrap = styled((p) => <Box direction="row" gap="xsmall" align="center" {...p} />)``;
-const Link = styled((p) => <Button as="a" plain {...p} />)`
+const Link = styled((p) => <Button as="a" {...p} />)`
   text-align: ${({ align }) => {
     if (align === 'end') return 'right';
     if (align === 'start') return 'left';
@@ -13,7 +15,7 @@ const Link = styled((p) => <Button as="a" plain {...p} />)`
   }};
   line-height: 12px;
 `;
-const Label = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
+const Label = styled((p) => <Text size="xxsmall" wordBreak="keep-all" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
 `;

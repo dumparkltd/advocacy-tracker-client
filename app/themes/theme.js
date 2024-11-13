@@ -517,11 +517,16 @@ theme.global = {
   },
 
   focus: {
-    outline: {
-      size: '2px',
+    border: {
       color: 'highlight',
     },
-    shadow: 'none',
+    outline: {
+      color: 'highlight',
+      size: '1px',
+    },
+    shadow: {
+      size: '0px',
+    },
   },
 };
 // also grommet but not global somehow

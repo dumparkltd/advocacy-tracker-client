@@ -37,6 +37,9 @@ import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonSubmit from 'components/buttons/ButtonSubmit';
+
+import Checkbox from 'components/styled/Checkbox';
+
 import { filterEntitiesByKeywords } from 'utils/entities';
 import { isMinSize } from 'utils/responsive';
 
@@ -768,9 +771,8 @@ export function EntityListDownload({
               <Box direction="row" align="center" fill={false}>
                 <Box direction="row" align="center">
                   <Select>
-                    <StyledInput
+                    <Checkbox
                       id="check-filter-keyword"
-                      type="checkbox"
                       checked={ignoreSearch}
                       onChange={(evt) => setIgnoreSearch(evt.target.checked)}
                     />
@@ -785,9 +787,8 @@ export function EntityListDownload({
               <Box direction="row" align="center" fill={false}>
                 <Box direction="row" align="center">
                   <Select>
-                    <StyledInput
+                    <Checkbox
                       id="check-filter-selection"
-                      type="checkbox"
                       checked={ignoreSelection}
                       onChange={(evt) => setIgnoreSelection(evt.target.checked)}
                     />
@@ -907,9 +908,8 @@ export function EntityListDownload({
               <Box direction="row" align="center" fill={false}>
                 <Box direction="row" align="center">
                   <Select>
-                    <StyledInput
+                    <Checkbox
                       id="check-timestamp"
-                      type="checkbox"
                       checked={csvSuffix}
                       onChange={(evt) => setCSVSuffix(evt.target.checked)}
                     />

@@ -21,6 +21,7 @@ const Styled = styled.div`
 
 // padding: 0.75em 2em;
 const Group = styled(Button)`
+  min-height: 28px;
   padding: 0 0.5em;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0 0.5em;
@@ -50,9 +51,9 @@ const Label = styled.div`
   display: inline-block;
   vertical-align: middle;
   position: relative;
-  top: 1px;
+  top: -2px;
   font-size: 0.9em;
-  font-weight: bold;
+  font-weight: 500;
   @media print {
     font-size: ${(props) => props.theme.sizes.print.small};
   }
