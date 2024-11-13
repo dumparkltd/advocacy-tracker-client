@@ -42,7 +42,6 @@ export function CellBodyStackedBarChartBarOverlay({
         offset={offset}
         maxvalue={maxvalue}
         bgColor={value.color}
-        fill={false}
         onClick={() => showInfo(true)}
       />
       {info && infoRef && tooltipConfig && (

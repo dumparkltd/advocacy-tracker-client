@@ -64,7 +64,6 @@ function InfoOverlay({
         justify="center"
       >
         <Button
-          fill={false}
           onMouseOver={() => tooltip && showInfo(true)}
           onMouseLeave={() => tooltip && showInfo(false)}
           onFocus={() => tooltip && showInfo(true)}

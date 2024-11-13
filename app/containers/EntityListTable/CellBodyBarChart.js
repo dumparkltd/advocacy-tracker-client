@@ -104,7 +104,6 @@ export function CellBodyBarChart({
                 maxvalue={maxvalue}
                 issecondary={issecondary}
                 color={color}
-                fill={false}
                 isHover={hover}
                 onClick={() => showInfo(true)}
                 onMouseOver={() => isHover(true)}
