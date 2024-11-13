@@ -41,8 +41,7 @@ const ContentPreview = ({ dataReady, navItems, onUpdatePath }) => {
           <FormattedMessage {...messages.allContent} />
         </SectionTitle>
         {navItems.map((navItem) => {
-          const basis = `${(1 / navItem.items.length) * 100}%`;
-          // const basis = '1/4';
+          const basis = `${Math.floor((1 / navItem.items.length) * 100)}%`;
           return (
             <Group key={navItem.id}>
               <Box margin={{ bottom: 'small' }}>
@@ -59,7 +58,7 @@ const ContentPreview = ({ dataReady, navItems, onUpdatePath }) => {
                     <CardTeaser
                       key={path + index}
                       basis={basis}
-                      isInverted={false}
+                      // isInverted={false}
                       path={path}
                       onClick={(evt) => {
                         if (evt && evt.preventDefault) evt.preventDefault();
