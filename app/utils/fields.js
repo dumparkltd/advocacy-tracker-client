@@ -255,10 +255,12 @@ export const getMarkdownField = (
   attribute,
   hasLabel = true,
   label,
+  moreLess,
 ) => checkEmpty(entity.getIn(['attributes', attribute])) && ({
   type: 'markdown',
   value: entity.getIn(['attributes', attribute]),
   label: hasLabel && (appMessages.attributes[label || attribute]),
+  moreLess,
 });
 
 export const getNumberField = (
