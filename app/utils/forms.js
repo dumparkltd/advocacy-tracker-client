@@ -42,6 +42,7 @@ export const entityOption = (entity, defaultToId, hasTags, showCode) => Map({
   value: entity.get('id'),
   label: getEntityTitle(entity),
   reference: showCode && getEntityReference(entity, defaultToId),
+  order: getEntityReference(entity, defaultToId),
   description: entity.getIn(['attributes', 'description']),
   checked: !!entity.get('associated'), // convert to boolean
   association: !!entity.get('associated') && entity.get('association'),
@@ -766,6 +767,7 @@ export const getReferenceFormField = ({
   hint: isAutoReference ? formatMessage(appMessages.hints.autoReference) : null,
   hideByDefault,
 });
+
 export const getCodeFormField = ({
   formatMessage,
   attribute = 'code',
@@ -773,8 +775,7 @@ export const getCodeFormField = ({
   hideByDefault,
   placeholder,
   label,
-}) => {
-  return getFormField({
+}) => getFormField({
   formatMessage,
   controlType: 'short',
   attribute,
@@ -782,7 +783,8 @@ export const getCodeFormField = ({
   placeholder: placeholder || attribute,
   required,
   hideByDefault,
-})};
+});
+
 export const getShortTextFormField = ({
   formatMessage, attribute, required = false, hideByDefault,
 }) => getFormField({
@@ -793,6 +795,7 @@ export const getShortTextFormField = ({
   required,
   hideByDefault,
 });
+
 export const getTextFormField = ({
   formatMessage, attribute, required = false, hideByDefault,
 }) => getFormField({
@@ -803,6 +806,7 @@ export const getTextFormField = ({
   required,
   hideByDefault,
 });
+
 export const getAmountFormField = ({
   formatMessage, required, attribute = 'amount', hideByDefault,
 }) => getFormField({
@@ -814,6 +818,7 @@ export const getAmountFormField = ({
   hideByDefault,
   // TODO: validate
 });
+
 export const getNumberFormField = ({
   formatMessage, required, attribute = 'value', hideByDefault,
 }) => getFormField({
@@ -825,6 +830,7 @@ export const getNumberFormField = ({
   hideByDefault,
   // TODO: validate
 });
+
 export const getLinkFormField = ({
   formatMessage, required, attribute = 'url', hideByDefault,
 }) => getFormField({
@@ -835,6 +841,7 @@ export const getLinkFormField = ({
   hideByDefault,
   // TODO: validate
 });
+
 export const getShortTitleFormField = ({ formatMessage, hideByDefault }) => getFormField({
   formatMessage,
   controlType: 'short',
