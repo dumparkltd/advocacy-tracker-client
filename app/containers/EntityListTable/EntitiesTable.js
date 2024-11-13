@@ -461,7 +461,6 @@ export function EntitiesTable({
                         || col.type === 'amount'
                         || col.type === 'userrole'
                         || col.type === 'date'
-                        || col.type === 'supportlevel'
                         || col.type === 'topicPosition'
                       ) && (
                         <CellBodyPlain
@@ -478,7 +477,10 @@ export function EntitiesTable({
                           column={col}
                         />
                       )}
-                      {col.type === 'position' && (
+                      {(
+                        col.type === 'position'
+                        || col.type === 'supportlevel'
+                      ) && (
                         <CellBodyPosition
                           entity={entity[col.id]}
                           column={col}
