@@ -333,6 +333,18 @@ export function PositionsMap({
                     ]);
                   }, []),
                 },
+                actorUsers: {
+                  title: 'Assigned staff',
+                },
+                groups: {
+                  type: 'associations',
+                  actortype: ACTORTYPES.REG,
+                  title: 'Groups',
+                },
+                associations: {
+                  actortype: ACTORTYPES.REG,
+                  title: 'Regions',
+                },
               },
               footer: {
                 primaryLink: country && {

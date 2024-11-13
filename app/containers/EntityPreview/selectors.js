@@ -24,6 +24,10 @@ import {
   selectActorConnections,
   selectTaxonomiesSorted,
   selectEntities,
+  selectUserConnections,
+  selectUserActorsGroupedByUser,
+  selectUserActionsGroupedByUser,
+  selectUsers,
 } from 'containers/App/selectors';
 
 import qe from 'utils/quasi-equals';
@@ -31,6 +35,7 @@ import {
   setIndicatorConnections,
   setActorConnections,
   prepareTaxonomiesIsAssociated,
+  setUserConnections,
 } from 'utils/entities';
 
 const selectIndicatorAssociations = createSelector(
@@ -404,3 +409,47 @@ export const selectPreviewEntity = createSelector(
 //     return null;
 //   }
 // );
+
+const selectUserAssociations = createSelector(
+  (state, id) => id,
+  selectUserActorsGroupedByActor,
+  (actorId, associationsByActor) => associationsByActor.get(
+    parseInt(actorId, 10)
+  )
+);
+const selectUsersAssociated = createSelector(
+  selectUsers,
+  selectUserAssociations,
+  (users, associations) => users && associations && associations.reduce(
+    (memo, id) => {
+      const entity = users.get(id.toString());
+      return entity
+        ? memo.set(id, entity)
+        : memo;
+    },
+    Map(),
+  )
+);
+
+export const selectEntityUsers = createSelector(
+  selectUsersAssociated,
+  selectUserConnections,
+  selectUserActorsGroupedByUser,
+  selectUserActionsGroupedByUser,
+  (
+    users,
+    userConnections,
+    userActors,
+    userActions,
+  ) => {
+    if (!users || !userConnections) return Map();
+    return users && users
+      .map((user) => setUserConnections({
+        user,
+        userConnections,
+        userActors,
+        userActions,
+      }))
+      .sortBy((val, key) => key);
+  }
+);

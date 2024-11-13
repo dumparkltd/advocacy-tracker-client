@@ -100,7 +100,6 @@ export function PreviewEntity({
       onEntityClick,
       intl,
     });
-    console.log('mainContent', mainContent)
     footerContent = previewEntity && getActorPreviewFooter(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.INDICATOR)) {

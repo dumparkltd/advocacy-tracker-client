@@ -276,10 +276,6 @@ export function PositionsList({
           code: item.getIn(['attributes', 'code']),
         },
         fields: {
-          users: {
-            title: 'Assigned staff',
-            columnId: 'users',
-          },
           countryPositions: {
             key: {
               title: 'Levels of support',
@@ -327,6 +323,10 @@ export function PositionsList({
               plural: intl.formatMessage(appMessages.entities.indicators.plural),
             },
             indicators: indicatorsWithSupport,
+          },
+          users: {
+            title: 'Assigned staff',
+            columnId: 'users',
           },
           groups: {
             columnId: 'associations',

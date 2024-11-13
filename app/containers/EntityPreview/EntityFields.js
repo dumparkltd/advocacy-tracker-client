@@ -4,9 +4,10 @@ import { injectIntl } from 'react-intl';
 import { Map } from 'immutable';
 // import { injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
-import FieldFactory from 'components/fields/FieldFactory';
 import styled from 'styled-components';
 import { Box, Text } from 'grommet';
+
+import FieldFactory from 'components/fields/FieldFactory';
 
 import {
   // ACTIONTYPES,
@@ -44,6 +45,8 @@ import {
 import PreviewCountryTopicPosition from './PreviewCountryTopicPosition';
 import PreviewCountryTopicStatementList from './PreviewCountryTopicStatementList';
 import PreviewCountryPositionsList from './PreviewCountryPositionsList';
+import ActorUsersField from './ActorUsersField';
+import AssociationsField from './AssociationsField';
 
 const Styled = styled((p) => <Box {...p} />)``;
 
@@ -193,6 +196,26 @@ export function EntityFields({
               key={fieldId}
               content={fieldContent}
               onUpdatePath={onUpdatePath}
+            />
+          );
+        }
+        if (fieldId === 'actorUsers' || fieldContent.get('type') === 'actorUsers') {
+          return (
+            <ActorUsersField
+              key={fieldId}
+              actorId={item.get('id')}
+              content={fieldContent}
+              onEntityClick={onEntityClick}
+            />
+          );
+        }
+        if (fieldId === 'associations' || fieldContent.get('type') === 'associations') {
+          return (
+            <AssociationsField
+              key={fieldId}
+              actorId={item.get('id')}
+              content={fieldContent}
+              onEntityClick={onEntityClick}
             />
           );
         }
