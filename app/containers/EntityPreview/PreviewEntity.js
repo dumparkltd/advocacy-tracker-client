@@ -100,6 +100,7 @@ export function PreviewEntity({
       onEntityClick,
       intl,
     });
+    console.log('mainContent', mainContent)
     footerContent = previewEntity && getActorPreviewFooter(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.INDICATOR)) {
@@ -144,7 +145,7 @@ export function PreviewEntity({
               ? (
                 <FieldFactory
                   key={i}
-                  field={{ ...field }}
+                  field={{ ...field, onEntityClick }}
                 />
               )
               : null

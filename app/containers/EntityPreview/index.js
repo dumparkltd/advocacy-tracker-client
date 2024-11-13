@@ -10,9 +10,7 @@ import PreviewHeader from './PreviewHeader';
 import PreviewEntity from './PreviewEntity';
 import PreviewItem from './PreviewItem';
 import PreviewFooter from './PreviewFooter';
-import PreviewCountryTopicPosition from './PreviewCountryTopicPosition';
-import PreviewCountryTopicStatementList from './PreviewCountryTopicStatementList';
-import PreviewCountryPositionsList from './PreviewCountryPositionsList';
+import EntityFields from './EntityFields';
 
 const Styled = styled((p) => <Box {...p} />)`
   margin-left: 5px;
@@ -22,6 +20,9 @@ export function EntityPreview({
   onSetPreviewItemId,
   onUpdatePath,
 }) {
+  // PreviewEntity: using item path and id, includes header and footer
+  // PreviewItem: using the main list item and its columns
+  // console.log('content', content && content.toJS())
   return (
     <Styled
       background="white"
@@ -35,7 +36,9 @@ export function EntityPreview({
       style={{ position: 'relative', display: 'block' }}
     >
       {content && content.get('entity') && (
-        <PreviewEntity content={content.get('entity')} />
+        <PreviewEntity
+          content={content.get('entity')}
+        />
       )}
       {content && content.get('header') && !content.get('entity') && (
         <PreviewHeader
@@ -43,24 +46,25 @@ export function EntityPreview({
           onSetPreviewItemId={onSetPreviewItemId}
         />
       )}
-      {content && content.get('topicPosition') && (
-        <PreviewCountryTopicPosition
-          content={content.get('topicPosition').toJS()}
+      {content
+        && content.get('item')
+        && content.get('fields')
+        && !content.get('entity')
+        && (
+          <EntityFields
+            fields={content.get('fields')}
+            item={content.get('item')}
+            itemContent={content.get('itemContent')}
+            columns={content.get('columns')}
+            onUpdatePath={onUpdatePath}
+          />
+        )}
+      {content && content.get('item') && !content.get('fields') && !content.get('entity') && (
+        <PreviewItem
+          item={content.get('item')}
+          itemContent={content.get('itemContent')}
+          columns={content.get('columns')}
         />
-      )}
-      {content && content.get('topicStatements') && (
-        <PreviewCountryTopicStatementList
-          content={content.get('topicStatements').toJS()}
-          onUpdatePath={onUpdatePath}
-        />
-      )}
-      {content && content.get('countryPositions') && (
-        <PreviewCountryPositionsList
-          content={content.get('countryPositions')}
-        />
-      )}
-      {content && content.get('item') && !content.get('entity') && (
-        <PreviewItem item={content.get('item')} columns={content.get('columns')} />
       )}
       {content && content.get('footer') && !content.get('entity') && (
         <PreviewFooter
@@ -77,7 +81,6 @@ EntityPreview.propTypes = {
   onSetPreviewItemId: PropTypes.func,
   onUpdatePath: PropTypes.func,
 };
-
 
 export function mapDispatchToProps(dispatch) {
   return {

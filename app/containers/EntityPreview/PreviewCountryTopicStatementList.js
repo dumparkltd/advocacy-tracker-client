@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box, Text } from 'grommet';
 import { FormattedMessage } from 'react-intl';
+import { ROUTES } from 'themes/config';
 
 import EntitiesTable from 'containers/EntityListTable/EntitiesTable';
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
 import messages from './messages';
 
@@ -14,23 +14,13 @@ const SectionTitle = styled((p) => <Text size="xsmall" {...p} />)`
   font-weight: bold;
 `;
 export function PreviewCountryTopicStatementList({ content, onUpdatePath }) {
-  const { options, indicatorPositions, indicatorPositionsTableColumns } = content;
+  const { indicatorPositions, indicatorPositionsTableColumns } = content.toJS();
   return (
     <Box
       gap="xlarge"
       responsive={false}
       flex={{ shrink: 0 }}
     >
-      {options && (
-        <Box>
-          {options.map((option) => (
-            <MapOption
-              key={option.id}
-              option={option}
-            />
-          ))}
-        </Box>
-      )}
       {indicatorPositions && indicatorPositions.length > 0 && (
         <Box gap="medium">
           <Box>
@@ -43,8 +33,11 @@ export function PreviewCountryTopicStatementList({ content, onUpdatePath }) {
               visibleHeaderColumns={indicatorPositionsTableColumns}
               visibleColumns={indicatorPositionsTableColumns}
               entities={[indicatorPositions[0]]}
+              entityPath={ROUTES.ACTION}
               inSingleView
-              onEntityClick={(path) => onUpdatePath(path)}
+              onEntityClick={(idOrPath, path) => {
+                onUpdatePath(path ? `${path}/${idOrPath}` : idOrPath);
+              }}
             />
           </Box>
         </Box>
@@ -62,8 +55,11 @@ export function PreviewCountryTopicStatementList({ content, onUpdatePath }) {
                 visibleHeaderColumns={indicatorPositionsTableColumns}
                 visibleColumns={indicatorPositionsTableColumns}
                 entities={indicatorPositions.slice(1)}
+                entityPath={ROUTES.ACTION}
                 inSingleView
-                onEntityClick={(path) => onUpdatePath(path)}
+                onEntityClick={(idOrPath, path) => {
+                  onUpdatePath(path ? `${path}/${idOrPath}` : idOrPath);
+                }}
               />
             </Box>
           )}

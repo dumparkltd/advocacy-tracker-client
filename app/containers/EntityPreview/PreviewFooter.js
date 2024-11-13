@@ -13,7 +13,7 @@ export function PreviewFooter({ content, onUpdatePath }) {
     <Box
       direction="row"
       justify="end"
-      pad={{ top: 'small' }}
+      pad={{ top: 'large' }}
       gap="none"
       responsive={false}
       flex={{ shrink: 0 }}

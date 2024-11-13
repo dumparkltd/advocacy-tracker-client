@@ -17,7 +17,7 @@ import Button from 'components/buttons/ButtonSimple';
 
 const Title = styled((p) => <Heading level={3} {...p} />)`
   font-family: ${({ theme }) => theme.fonts.title};
-  font-size: 34px;
+  font-size: ${({ largeTitle }) => largeTitle ? 48 : 42}px;
   font-weight: normal;
   margin: 0px;
 `;
@@ -43,11 +43,15 @@ const CloseButton = styled((p) => <Button {...p} />)`
   border-radius: 999px;
   border: none;
   box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
-  padding: 17px;
+  padding: 12px;
   &:hover {
     background-color: ${palette('primary', 0)};
     box-shadow: none;
   }
+`;
+
+const StyledReference = styled(Reference)`
+  text-transform: uppercase;
 `;
 
 export function PreviewHeader({ content, onSetPreviewItemId }) {
@@ -57,13 +61,14 @@ export function PreviewHeader({ content, onSetPreviewItemId }) {
     aboveTitle,
     prevPreviewItem,
     nextPreviewItem,
+    largeTitle,
   } = contentClean;
   return (
     <Box
       responsive={false}
       flex={{ shrink: 0 }}
       direction="column"
-      pad={{ vertical: 'medium' }}
+      pad={{ bottom: 'large' }}
     >
       <Box fill="horizontal" align="end">
         {onSetPreviewItemId && (
@@ -81,12 +86,12 @@ export function PreviewHeader({ content, onSetPreviewItemId }) {
         pad={{ top: 'medium' }}
       >
         {aboveTitle && (
-          <Reference>
+          <StyledReference>
             {aboveTitle}
-          </Reference>
+          </StyledReference>
         )}
         <Box direction="row" justify="between" align="start">
-          <Title>
+          <Title largeTitle={largeTitle}>
             {title}
           </Title>
           {onSetPreviewItemId && (nextPreviewItem || prevPreviewItem) && (

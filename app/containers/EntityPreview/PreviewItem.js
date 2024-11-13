@@ -22,8 +22,6 @@ import {
 } from 'utils/fields';
 import {
   checkActionAttribute,
-  checkActorAttribute,
-  getActortypeColumns,
 } from 'utils/entities';
 
 import {
@@ -36,7 +34,7 @@ import {
   selectReady,
   selectTaxonomies,
   // selectTaxonomiesWithCategories,
-  selectIsUserAdmin,
+  // selectIsUserAdmin,
   selectCategories,
   selectActionConnections,
   selectActorConnections,
@@ -65,13 +63,13 @@ export function PreviewItem({
   categories,
   actorConnections,
   actionConnections,
+  itemContent,
   // onSetPreviewItemId,
   // previewEntity,
   // onUpdatePath,
   onEntityClick,
   // intl,
   // dataReady,
-  isAdmin,
 }) {
   // check date comment for date spceficity
   // const DATE_SPECIFICITIES = ['y', 'm', 'd'];
@@ -92,6 +90,74 @@ export function PreviewItem({
   }
 
   let fields = [];
+  // date
+  if (item
+    && item.getIn(['attributes', 'date_start'])
+    && item.getIn(['attributes', 'date_start']).trim().length > 0
+    && measureTypeId
+  ) {
+    fields = [
+      ...fields,
+      getDateField(
+        item,
+        'date_start',
+        {
+          specificity: dateSpecificity,
+          attributeLabel: datesEqual ? 'date' : 'date_start',
+          fallbackAttribute: qe(measureTypeId, ACTIONTYPES.EXPRESS) ? 'created_at' : null,
+          fallbackAttributeLabel: 'created_at_fallback',
+        },
+      ),
+    ];
+  }
+  if (item
+    && !datesEqual
+    && item.getIn(['attributes', 'date_end'])
+    && item.getIn(['attributes', 'date_end']).trim().length > 0
+  ) {
+    fields = [
+      ...fields,
+      getDateField(item, 'date_end', { specificity: dateSpecificity }),
+    ];
+  }
+  // description
+  if (item
+    && item.getIn(['attributes', 'description'])
+    && item.getIn(['attributes', 'description']).trim().length > 0
+  ) {
+    fields = [
+      ...fields,
+      getMarkdownField(item, 'description', true, null, true),
+    ];
+    // export const getMarkdownField = (
+    //   entity,
+    //   attribute,
+    //   hasLabel = true,
+    //   label,
+    //   moreLess,
+    // )
+  }
+  // users action + actor
+  if (item && item.get('users') && actionConnections) {
+    const users = item.get('users').map(
+      (actorId) => {
+        const user = actionConnections.get(API.USERS).filter(
+          (actor) => qe(actorId, parseInt(actor.get('id'), 10))
+        );
+        return user && user.get(actorId.toString());
+      }
+    );
+    fields = [
+      ...fields,
+      getUserConnectionField({
+        users,
+        onEntityClick,
+        connections: actorConnections,
+        skipLabel: true,
+        columns: null,
+      }),
+    ];
+  }
   fields = columns.reduce(
     (memo, column) => {
       if (!item) {
@@ -168,29 +234,6 @@ export function PreviewItem({
           memo,
         );
       }
-      // action view
-      // date
-      if (measureTypeId && qe(column.get('type'), 'date')) {
-        return [...memo,
-          ...[checkActionAttribute(measureTypeId, 'date_start')
-            && getDateField(
-              item,
-              'date_start',
-              {
-                specificity: dateSpecificity,
-                attributeLabel: datesEqual ? 'date' : 'date_start',
-                fallbackAttribute: qe(measureTypeId, ACTIONTYPES.EXPRESS) ? 'created_at' : null,
-                fallbackAttributeLabel: 'created_at_fallback',
-              },
-            ),
-          !datesEqual
-          && checkActionAttribute(measureTypeId, 'date_end')
-          && getDateField(item, 'date_end', { specificity: dateSpecificity }),
-          !dateSpecificity
-          && checkActionAttribute(measureTypeId, 'date_comment')
-          && getTextField(item, 'date_comment'),
-          ]];
-      }
       // stakeholders
       if (measureTypeId && actorConnections && qe(column.get('type'), 'actors') && item.get('actorsByType')) {
         return item.get('actorsByType').reduce(
@@ -259,34 +302,6 @@ export function PreviewItem({
     },
     fields,
   );
-  // users action + actor
-  if (item && item.get('users') && actionConnections) {
-    const users = item.get('users').map(
-      (actorId) => {
-        const user = actionConnections.get(API.USERS).filter(
-          (actor) => qe(actorId, parseInt(actor.get('id'), 10))
-        );
-        return user && user.get(actorId.toString());
-      }
-    );
-    fields = [
-      ...fields,
-      getUserConnectionField({
-        users,
-        onEntityClick,
-        connections: actorConnections,
-        skipLabel: true,
-        columns: null,
-      }),
-    ];
-  }
-  // topic description
-  if (item && item.get('type') === API.INDICATORS) {
-    fields = [
-      ...fields,
-      getMarkdownField(item, 'description', true),
-    ];
-  }
 
   return fields && fields.length > 0
     ? (
@@ -311,7 +326,6 @@ PreviewItem.propTypes = {
   columns: PropTypes.object, // immutable List
   // previewEntity: PropTypes.object, // immutable Map
   categories: PropTypes.object, // immutable Map
-  isAdmin: PropTypes.bool,
   taxonomies: PropTypes.object, // immutable Map
   actionConnections: PropTypes.object, // immutable Map
   actorConnections: PropTypes.object, // immutable Map
@@ -325,7 +339,6 @@ PreviewItem.propTypes = {
 const mapStateToProps = (state) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   // previewEntity: selectPreviewContent(state, { item }),
-  isAdmin: selectIsUserAdmin(state),
   taxonomies: selectTaxonomies(state),
   categories: selectCategories(state),
   actionConnections: selectActionConnections(state),

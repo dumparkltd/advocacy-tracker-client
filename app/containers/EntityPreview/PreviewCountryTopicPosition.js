@@ -6,6 +6,7 @@ import { FormattedMessage } from 'react-intl';
 import { Box, Text, Heading } from 'grommet';
 
 import { ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
+import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
 import Dot from 'components/styled/Dot';
 import messages from './messages';
@@ -21,22 +22,19 @@ const TopicTitle = styled((p) => <Heading level="4" {...p} />)`
 `;
 const SupportLevelTitle = styled((p) => <Text size="xsmall" {...p} />)`
   text-transform: uppercase;
-  text-align: center;
   font-weight: bold;
 `;
-const LevelOfAuthorityLabel = styled((p) => <Text size="xsmall" {...p} />)`
-  text-align: center;
-`;
+const LevelOfAuthorityLabel = styled((p) => <Text size="xsmall" {...p} />)``;
 export function PreviewCountryTopicPosition({ content }) {
-  const { topic, position } = content;
+  const { topic, position, options } = content.toJS();
   return (
     <Box
-      direction="row"
-      justify="between"
       align="start"
-      gap="medium"
+      gap="large"
       responsive={false}
       flex={{ shrink: 0 }}
+      fill="horizontal"
+      margin={{ bottom: 'large' }}
     >
       <Box gap="small">
         <Box>
@@ -49,40 +47,41 @@ export function PreviewCountryTopicPosition({ content }) {
             <TopicTitle>{topic.title}</TopicTitle>
           </Box>
         )}
-        <Box>
-          {topic && topic.viaGroup && (
-            <Text>{`From group: ${topic.viaGroup}`}</Text>
-          )}
-          {topic && !topic.viaGroup && (
-            <Text>&nbsp;</Text>
+      </Box>
+      <Box direction="row" align="start" fill="horizontal">
+        <Box basis="1/2">
+          {position && (
+            <Box direction="row" gap="small" align="center" pad={{ left: '20px' }}>
+              <Box>
+                <Dot
+                  size="60px"
+                  color={
+                    ACTION_INDICATOR_SUPPORTLEVELS[position.supportlevelId || 0]
+                    && ACTION_INDICATOR_SUPPORTLEVELS[position.supportlevelId || 0].color
+                  }
+                />
+              </Box>
+              <Box align="start">
+                <Box>
+                  <SupportLevelTitle>{position.supportlevelTitle}</SupportLevelTitle>
+                </Box>
+                {position.levelOfAuthority && (
+                  <Box>
+                    <LevelOfAuthorityLabel>{position.levelOfAuthority}</LevelOfAuthorityLabel>
+                  </Box>
+                )}
+              </Box>
+            </Box>
           )}
         </Box>
-      </Box>
-      <Box>
-        {position && (
-          <Box align="center" gap="xsmall" flex={{ shrink: 0 }}>
-            <Box>
-              <Dot
-                size="60px"
-                color={
-                  ACTION_INDICATOR_SUPPORTLEVELS[position.supportlevelId || 0]
-                  && ACTION_INDICATOR_SUPPORTLEVELS[position.supportlevelId || 0].color
-                }
-              />
-            </Box>
-            <Box>
-              <SupportLevelTitle>{position.supportlevelTitle}</SupportLevelTitle>
-            </Box>
-            <Box>
-              {position.levelOfAuthority && (
-                <LevelOfAuthorityLabel>{position.levelOfAuthority}</LevelOfAuthorityLabel>
-              )}
-              {!position.levelOfAuthority && (
-                <Text textAlign="center">&nbsp;</Text>
-              )}
-            </Box>
-          </Box>
-        )}
+        <Box basis="1/2">
+          {options && options.map((option) => (
+            <MapOption
+              key={option.id}
+              option={option}
+            />
+          ))}
+        </Box>
       </Box>
     </Box>
   );

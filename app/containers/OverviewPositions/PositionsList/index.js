@@ -254,15 +254,17 @@ export function PositionsList({
         },
         Map(),
       );
-      let countryAssociations;
-      if (item.get('associationsByType') && actorsByType) {
-        countryAssociations = item.get('associationsByType').reduce(
-          (memo, association, typeid) => association.reduce((memo2, value) => memo2.setIn(
-            [typeid, value.toString()], actorsByType.getIn([typeid, value.toString()])
-          ), memo),
-          Map()
-        );
-      }
+      // let countryAssociations;
+      // if (item.get('associationsByType') && actorsByType) {
+      //   countryAssociations = item.get('associationsByType').reduce(
+      //     (memo, association, typeid) => association.reduce((memo2, value) => memo2.setIn(
+      //       [typeid, value.toString()], actorsByType.getIn([typeid, value.toString()])
+      //     ), memo),
+      //     Map()
+      //   );
+      // }
+      // console.log('actortypes', actortypes && actortypes.toJS())
+      // console.log('item', item && item.toJS())
       const content = {
         header: {
           aboveTitle: actortypes.getIn(
@@ -271,43 +273,75 @@ export function PositionsList({
           title: item.getIn(['attributes', 'title']),
           code: item.getIn(['attributes', 'code']),
         },
-        countryPositions: {
-          key: {
-            title: 'Levels of support',
-            items: supportLevels,
+        fields: {
+          users: {
+            title: 'Assigned staff',
+            columnId: 'users',
           },
-          options,
-          countryPositionsTableColumns: [
-            {
-              id: 'main',
-              type: 'main',
-              sort: 'title',
-              attributes: ['title'],
+          countryPositions: {
+            key: {
+              title: 'Levels of support',
+              items: supportLevels,
             },
-            {
-              id: 'positionStatement',
-              type: 'positionStatement',
+            options,
+            countryPositionsTableColumns: [
+              {
+                id: 'main',
+                type: 'main',
+                sort: 'title',
+                attributes: ['title'],
+              },
+              {
+                id: 'positionStatement',
+                type: 'positionStatement',
+              },
+              {
+                id: 'authority',
+                type: 'positionStatementAuthority',
+              },
+              {
+                id: 'viaGroups',
+                type: 'viaGroups',
+              },
+              {
+                id: 'supportlevel_id',
+                type: 'supportlevel',
+                title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+                align: 'center',
+                info: {
+                  type: 'key-categorical',
+                  attribute: 'supportlevel_id',
+                  options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+                    .sort((a, b) => a.order < b.order ? -1 : 1)
+                    .map((level) => ({
+                      ...level,
+                      label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                    })),
+                },
+              },
+            ],
+            entityTitle: {
+              single: intl.formatMessage(appMessages.entities.indicators.single),
+              plural: intl.formatMessage(appMessages.entities.indicators.plural),
             },
-            {
-              id: 'authority',
-              type: 'positionStatementAuthority',
-            },
-            {
-              id: 'viaGroups',
-              type: 'viaGroups',
-            },
-            {
-              id: 'supportlevel_id',
-              type: 'supportlevel',
-              title: intl.formatMessage(appMessages.attributes.supportlevel_id),
-            },
-          ],
-          entityTitle: {
-            single: intl.formatMessage(appMessages.entities.indicators.single),
-            plural: intl.formatMessage(appMessages.entities.indicators.plural),
+            indicators: indicatorsWithSupport,
           },
-          indicators: indicatorsWithSupport,
-          countryAssociations,
+          groups: {
+            columnId: 'associations',
+            type: ACTORTYPES.GROUP,
+            title: 'Groups',
+          },
+          regions: {
+            columnId: 'associations',
+            type: ACTORTYPES.REG,
+            title: 'Regions',
+          },
+          [`actions_${ACTIONTYPES.EXPRESS}`]: {
+            columnId: `actions_${ACTIONTYPES.EXPRESS}`,
+          },
+          [`actions_${ACTIONTYPES.INTERACTION}`]: {
+            columnId: `actions_${ACTIONTYPES.INTERACTION}`,
+          },
         },
         footer: {
           primaryLink: item && {
@@ -426,18 +460,18 @@ export function PositionsList({
                       attributes: ['title'],
                     },
                     {
+                      id: 'users',
+                      type: 'users',
+                      isSingleActionColumn: false,
+                      minSize: 'medium',
+                    },
+                    {
                       id: 'associations',
                       type: 'associations',
                       actors: 'associationsByType',
                       isSingleActionColumn: false,
                       minSize: 'medium',
                       title: 'Regions & Groups',
-                    },
-                    {
-                      id: 'users',
-                      type: 'users',
-                      isSingleActionColumn: false,
-                      minSize: 'medium',
                     },
                     {
                       id: `action_${ACTIONTYPES.EXPRESS}`,
