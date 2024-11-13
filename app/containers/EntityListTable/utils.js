@@ -813,7 +813,7 @@ export const prepareEntityRows = ({
               [col.id]: {
                 ...col,
                 color: getColorFromPositions(temp),
-                sortValue: getValueFromPositions(temp),
+                sortValue: getValueFromPositions(temp) || 99,
               },
             };
           default:
