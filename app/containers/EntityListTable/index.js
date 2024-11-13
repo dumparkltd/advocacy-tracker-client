@@ -21,6 +21,7 @@ import {
   selectPrintConfig,
   selectPreviewQuery,
   selectHiddenColumns,
+  selectLocationQuery,
 } from 'containers/App/selectors';
 import {
   setPreviewContent,
@@ -117,9 +118,9 @@ export function EntityListTable({
   onUpdateHiddenColumns,
   onUpdateColumnFilters,
   onEntityClick,
+  locationQuery,
 }) {
   if (!columns) return null;
-
   const size = React.useContext(ResponsiveContext);
   // list options
   const {
@@ -321,7 +322,7 @@ export function EntityListTable({
     : availableHeaderColumns.filter((c) => !c.hidden);
   return (
     <div>
-      {options && (
+      {options && Object.keys(options).length > 0 && (
         <EntityListTableOptions
           options={{
             ...options,
@@ -343,12 +344,12 @@ export function EntityListTable({
         availableHeaderColumns={availableHeaderColumns || []}
         visibleColumns={visibleColumns || []}
         availableColumns={availableColumns || []}
-        onEntityClick={(id, path, componentId) => {
+        onEntityClick={(idOrPath, path, componentId) => {
           if (inSingleView && onEntityClick) {
-            onEntityClick(id, path);
+            onEntityClick(idOrPath, path);
           }
           if (!inSingleView && onSetPreviewItemId && componentId) {
-            onSetPreviewItemId(`${componentId}|${path}|${id}`);
+            onSetPreviewItemId(`${componentId}|${path}|${idOrPath}`);
           }
         }}
         onUpdateHiddenColumns={onUpdateHiddenColumns}
@@ -358,6 +359,7 @@ export function EntityListTable({
         previewItemId={previewItemId}
         reducePreviewItem={reducePreviewItem}
         onSetPreviewContent={onSetPreviewContent}
+        locationQuery={locationQuery}
       />
       <ListEntitiesMain>
         {entityTitle && listEmpty && (
@@ -477,6 +479,7 @@ EntityListTable.propTypes = {
   onUpdateHiddenColumns: PropTypes.func,
   onUpdateColumnFilters: PropTypes.func,
   hiddenColumns: PropTypes.object, // immutable List
+  locationQuery: PropTypes.object, // immutable Map
 };
 
 const mapStateToProps = (state) => ({
@@ -492,6 +495,7 @@ const mapStateToProps = (state) => ({
   printConfig: selectPrintConfig(state),
   previewItemId: selectPreviewQuery(state),
   hiddenColumns: selectHiddenColumns(state),
+  locationQuery: selectLocationQuery(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

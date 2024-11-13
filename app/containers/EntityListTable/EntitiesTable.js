@@ -207,6 +207,7 @@ export function EntitiesTable({
   onSetPreviewContent,
   sortedEntities,
   searchedEntities,
+  locationQuery,
 }) {
   const headerRef = useRef(null);
   const tableRef = useRef(null);
@@ -258,7 +259,7 @@ export function EntitiesTable({
         onSetPreviewContent();
       }
     }
-  }, [previewItemId]);
+  }, [previewItemId, locationQuery]);
   const size = React.useContext(ResponsiveContext);
   const isPrintView = usePrint();
 
@@ -605,6 +606,7 @@ EntitiesTable.propTypes = {
   availableHeaderColumns: PropTypes.array,
   visibleColumns: PropTypes.array,
   availableColumns: PropTypes.array,
+  locationQuery: PropTypes.object,
 };
 
 export default withTheme(EntitiesTable);

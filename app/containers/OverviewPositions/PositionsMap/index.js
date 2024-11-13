@@ -47,6 +47,7 @@ import {
   selectIncludeInofficialStatements,
   selectSupportQuery,
   selectPreviewQuery,
+  selectLocationQuery,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -187,6 +188,7 @@ export function PositionsMap({
   onSetPreviewContent,
   onSetPreviewItemId,
   onUpdatePath,
+  locationQuery,
 }) {
   useEffect(() => {
     // kick off loading of data
@@ -212,6 +214,7 @@ export function PositionsMap({
               header: {
                 aboveTitle: 'Country',
                 title: country.getIn(['attributes', 'title']),
+                largeTitle: true,
                 code: country.getIn(['attributes', 'code']),
                 nextPreviewItem: `${ID}|${countryIds[nextIndex]}`,
                 prevPreviewItem: `${ID}|${countryIds[prevIndex]}`,
@@ -232,8 +235,6 @@ export function PositionsMap({
                   supportlevelId: 0,
                   supportlevelTitle: intl.formatMessage(appMessages.supportlevels[99]),
                 },
-              },
-              topicStatements: indicatorPositions && {
                 options: [
                   {
                     id: `${ID}-preview-0`,
@@ -253,16 +254,31 @@ export function PositionsMap({
                     }]),
                   },
                 ],
+              },
+              topicStatements: indicatorPositions && {
                 indicatorPositionsTableColumns: [
                   {
                     id: 'position',
                     type: 'position',
-                    label: 'Level of support',
+                    title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+                    width: '15%',
+                    align: 'center',
+                    info: {
+                      type: 'key-categorical',
+                      attribute: 'supportlevel_id',
+                      options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+                        .sort((a, b) => a.order < b.order ? -1 : 1)
+                        .map((level) => ({
+                          ...level,
+                          label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                        })),
+                    },
                   },
                   {
                     id: 'statement',
                     type: 'plainWithDate',
                     label: 'Statement',
+                    width: '35%',
                   },
                   {
                     id: 'levelOfAuthority',
@@ -336,7 +352,7 @@ export function PositionsMap({
         onSetPreviewContent();
       }
     }
-  }, [dataReady, previewItemId, countries]);
+  }, [dataReady, previewItemId, countries, locationQuery]);
 
   const size = React.useContext(ResponsiveContext);
 
@@ -592,6 +608,7 @@ PositionsMap.propTypes = {
   includeInofficialStatements: PropTypes.bool,
   currentIndicatorId: PropTypes.number,
   indicators: PropTypes.object,
+  locationQuery: PropTypes.object,
   previewItemId: PropTypes.string,
   onSetPreviewContent: PropTypes.func,
   onSetPreviewItemId: PropTypes.func,
@@ -608,6 +625,7 @@ const mapStateToProps = (state) => ({
   includeActorMembers: selectIncludeActorMembers(state),
   countries: selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
   previewItemId: selectPreviewQuery(state),
+  locationQuery: selectLocationQuery(state),
 });
 
 export function mapDispatchToProps(dispatch) {
