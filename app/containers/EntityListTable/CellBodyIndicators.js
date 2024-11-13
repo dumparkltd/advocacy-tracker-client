@@ -20,7 +20,7 @@ const Link = styled((p) => <Button as="a" plain {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
 `;
-const Label = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
+const Label = styled((p) => <Text size="xxsmall" wordBreak="keep-all" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
 `;

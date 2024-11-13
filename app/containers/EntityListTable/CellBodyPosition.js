@@ -26,13 +26,13 @@ export function CellBodyPosition({
           <Box flex={{ shrink: 0 }}>
             <Dot size="40px" color={color} />
           </Box>
-          <Text size="xsmall" textAlign="center" weight={primary ? 500 : 300} wordBreak="keep-all">
+          <Text size="xxsmall" textAlign="center" weight={primary ? 500 : 300} wordBreak="keep-all">
             {value}
           </Text>
         </LabelWrap>
       )}
       {!color && (
-        <Text size="xsmall" weight={primary ? 500 : 300} wordBreak="keep-all" textAlign={align}>
+        <Text size="xxsmall" weight={primary ? 500 : 300} wordBreak="keep-all" textAlign={align}>
           {value}
         </Text>
       )}

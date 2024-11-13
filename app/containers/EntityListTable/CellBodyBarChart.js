@@ -75,7 +75,7 @@ export function CellBodyBarChart({
         <Box direction="row" gap="none" flex={{ shrink: 0 }} align="center">
           <Value>
             {!rowConfig.tooltip && (
-              <Text size="small" weight={500} textAlign="end">
+              <Text size="xsmall" weight={500} textAlign="end">
                 {value}
               </Text>
             )}

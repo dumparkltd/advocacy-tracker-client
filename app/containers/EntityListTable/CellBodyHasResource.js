@@ -19,7 +19,7 @@ const LinkTooltip = styled(
 const LinkInTT = styled((p) => <Button as="a" {...p} />)`
   line-height: 13px;
 `;
-const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
+const LabelInTT = styled((p) => <Text size="xxsmall" wordBreak="keep-all" {...p} />)`
   line-height: 13px;
 `;
 

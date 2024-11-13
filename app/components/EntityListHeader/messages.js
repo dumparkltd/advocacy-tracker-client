@@ -108,11 +108,11 @@ export default defineMessages({
     },
     'connections-action-users': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-users',
-      defaultMessage: 'By assigned user',
+      defaultMessage: 'By assigned WWF staff',
     },
     'connections-actor-users': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-actor-users',
-      defaultMessage: 'By assigned user',
+      defaultMessage: 'By assigned WWF staff',
     },
     'connections-user-actions': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-user-actions',

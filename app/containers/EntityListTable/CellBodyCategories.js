@@ -11,7 +11,7 @@ import appMessages from 'containers/App/messages';
 import LabelTooltip from './LabelTooltip';
 import LinkTooltip from './LinkTooltip';
 
-const Label = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
+const Label = styled((p) => <Text size="xxsmall" wordBreak="keep-all" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
 `;
