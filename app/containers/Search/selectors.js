@@ -10,7 +10,18 @@ import {
   selectTaxonomies,
   selectReady,
   selectLocationQuery,
+  selectActions,
+  selectActiontypes,
+  selectActors,
+  selectActortypes,
+  selectIndicators,
+  selectActiontypeActions,
+  selectUsers,
+  selectResources,
+  selectPages,
 } from 'containers/App/selectors';
+
+import { ACTIONTYPES } from 'themes/config';
 
 import { filterEntitiesByKeywords } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
@@ -18,7 +29,6 @@ import { qe } from 'utils/quasi-equals';
 import { sortEntities, getSortOption } from 'utils/sort';
 
 import { CONFIG, DEPENDENCIES } from './constants';
-
 
 export const selectPathQuery = createSelector(
   selectLocationQuery,
@@ -155,4 +165,72 @@ export const selectEntitiesByQuery = createSelector(
       );
     });
   }
+);
+const selectPagesCount = createSelector(
+  selectPages,
+  (pages) => pages && pages.size
+);
+const selectResourcesCount = createSelector(
+  selectResources,
+  (resources) => resources && resources.size
+);
+const selectUsersCount = createSelector(
+  selectUsers,
+  (users) => users && users.size
+);
+const selectIndicatorsCount = createSelector(
+  selectIndicators,
+  (indicators) => indicators && indicators.size
+);
+const selectStatementsCount = createSelector(
+  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
+  (statements) => statements && statements.size
+);
+const selectActortypesWithCount = createSelector(
+  selectActors,
+  selectActortypes,
+  (actors, types) => actors && types && types.map((type) => {
+    const typeActors = actors.filter((actor) => qe(actor.getIn(['attributes', 'actortype_id']), type.get('id')));
+    return type.set('count', typeActors.size);
+  })
+);
+const selectActiontypesWithCount = createSelector(
+  selectActions,
+  selectActiontypes,
+  (actions, types) => actions && types && types.map((type) => {
+    const typeActions = actions.filter(
+      (action) => qe(
+        action.getIn(['attributes', 'measuretype_id']),
+        type.get('id'),
+      )
+    );
+    return type.set('count', typeActions.size);
+  })
+);
+
+export const selectAllTypeCounts = createSelector(
+  selectIndicatorsCount,
+  selectStatementsCount,
+  selectActortypesWithCount,
+  selectActiontypesWithCount,
+  selectUsersCount,
+  selectResourcesCount,
+  selectPagesCount,
+  (
+    indicatorsCount,
+    statementsCount,
+    actortypesWithCount,
+    actiontypesWithCount,
+    usersCount,
+    resourcesCount,
+    pagesCount,
+  ) => ({
+    indicatorsCount,
+    statementsCount,
+    actortypesWithCount,
+    actiontypesWithCount,
+    usersCount,
+    resourcesCount,
+    pagesCount,
+  })
 );

@@ -78,4 +78,20 @@ export default defineMessages({
       defaultMessage: 'Search results',
     },
   },
+  allContent: {
+    id: 'app.containers.Search.allContent',
+    defaultMessage: 'All content',
+  },
+  users_about: {
+    id: 'app.containers.Search.users_about',
+    defaultMessage: 'Overview users and user roles.',
+  },
+  resources_about: {
+    id: 'app.containers.Search.resources_about',
+    defaultMessage: 'References, websites and documents',
+  },
+  pages_about: {
+    id: 'app.containers.Search.pages_about',
+    defaultMessage: 'Some text here',
+  },
 });

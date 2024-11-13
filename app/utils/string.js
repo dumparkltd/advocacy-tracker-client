@@ -75,7 +75,6 @@ export const truncateText = (
   grace = true,
 ) => {
   const limitClean = grace ? limit + TEXT_TRUNCATE.GRACE : limit;
-  console.log(limitClean)
   if (text.length > (limitClean)) {
     if (!keepWords) {
       return appendEllipsis

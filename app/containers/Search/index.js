@@ -31,14 +31,25 @@ import Loading from 'components/Loading';
 import ContentHeader from 'containers/ContentHeader';
 import TagSearch from 'components/TagSearch';
 import ContentSimple from 'components/styled/ContentSimple';
-
 import EntityListItem from 'components/EntityListItem';
 
 import appMessages from 'containers/App/messages';
-// import { ROUTES } from 'themes/config';
+import {
+  ROUTES,
+  ACTORTYPES,
+  OUTREACH_ACTIONTYPES,
+  ACTIONTYPES,
+  RESOURCETYPES,
+} from 'themes/config';
 
 import { DEPENDENCIES } from './constants';
-import { selectEntitiesByQuery, selectPathQuery } from './selectors';
+
+import {
+  selectEntitiesByQuery,
+  selectPathQuery,
+  selectAllTypeCounts,
+} from './selectors';
+
 import {
   updateQuery,
   resetSearchQuery,
@@ -48,10 +59,16 @@ import {
 
 import messages from './messages';
 
+import ContentPreview from './ContentPreview';
+
+const StyledContainer = styled((p) => <Container {...p} />)`
+  max-width: 100%;
+  background: white;
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
+`;
 const EntityListSearch = styled.div`
   padding: 0 0 2em;
 `;
-
 // TODO compare EntityListSidebarOption
 const Target = styled(Button)`
   font-size: 0.85em;
@@ -62,7 +79,6 @@ const Target = styled(Button)`
     padding: 0;
   }
 `;
-
 const ListHint = styled.div`
   color:  ${palette('dark', 3)};
   margin-bottom: 50px;
@@ -97,6 +113,83 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
     return intl.formatMessage(msg.pluralLong || msg.plural);
   };
 
+  prepareContentPreviewItems = (intl, counts) => ([
+    {
+      title: 'Positions',
+      id: 'positions',
+      items: [
+        {
+          path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`,
+          title: intl.formatMessage(appMessages.entities.actions_1.plural),
+          description: intl.formatMessage(appMessages.actiontypes_about[1]),
+          count: (counts && counts.statementsCount) || 0,
+        },
+        {
+          path: `${ROUTES.INDICATORS}`,
+          title: intl.formatMessage(appMessages.entities.indicators.plural),
+          description: intl.formatMessage(appMessages.actiontypes_about[3]),
+          count: (counts && counts.indicatorsCount) || 0,
+        },
+      ],
+    },
+    {
+      title: 'Stakeholders',
+      id: 'stakeholders',
+      items: [...Object.values(ACTORTYPES).reduce(
+        (memo, actortypeId) => [
+          ...memo,
+          {
+            path: `${ROUTES.ACTORS}/${actortypeId}`,
+            title: intl.formatMessage(appMessages.actortypes_short[actortypeId]),
+            description: intl.formatMessage(appMessages.actortypes_about[actortypeId]),
+            count: (counts && counts.actortypesWithCount && counts.actortypesWithCount.getIn([actortypeId, 'count'])) || 0,
+          },
+        ],
+        [],
+      )],
+    },
+    {
+      title: 'Outreach',
+      id: 'outreach',
+      items: [...OUTREACH_ACTIONTYPES.reduce(
+        (memo, actionTypeId) => [
+          ...memo,
+          {
+            path: `${ROUTES.ACTIONS}/${actionTypeId}`,
+            title: intl.formatMessage(appMessages.actiontypes_short[actionTypeId]),
+            description: intl.formatMessage(appMessages.actiontypes_about[actionTypeId]),
+            count: (counts && counts.actiontypesWithCount && counts.actiontypesWithCount.getIn([actionTypeId, 'count'])) || 0,
+          },
+        ],
+        [],
+      )],
+    },
+    {
+      title: 'Admin',
+      id: 'admin',
+      items: [
+        {
+          path: `${ROUTES.RESOURCES}/${RESOURCETYPES.WEB}`,
+          title: intl.formatMessage(appMessages.entities.resources.plural),
+          description: 'resources description',
+          count: (counts && counts.resourcesCount) || 0,
+        },
+        {
+          path: `${ROUTES.USERS}`,
+          title: intl.formatMessage(appMessages.entities.users.plural),
+          description: 'users description',
+          count: (counts && counts.usersCount) || 0,
+        },
+        {
+          path: `${ROUTES.PAGES}`,
+          title: intl.formatMessage(appMessages.entities.pages.plural),
+          description: 'pages description',
+          count: (counts && counts.pagesCount) || 0,
+        },
+      ],
+    },
+  ]);
+
   render() {
     const { intl } = this.context;
     const {
@@ -107,6 +200,8 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
       entities,
       onEntityClick,
       activeTargetPath,
+      allTypeCounts,
+      onUpdatePath,
     } = this.props;
     const hasQuery = !!location.query.search;
     const countResults = dataReady && hasQuery && entities && entities.reduce(
@@ -138,6 +233,7 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
       icon: 'print',
     }];
 
+    const navItems = this.prepareContentPreviewItems(intl, allTypeCounts);
     return (
       <div>
         <Helmet
@@ -146,12 +242,12 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
-        <ContainerWrapper>
-          <Container>
+        <ContainerWrapper bg>
+          <StyledContainer>
             <ContentSimple>
               <ContentHeader
                 type={CONTENT_LIST}
-                supTitle={intl.formatMessage(messages.pageTitle)}
+                // supTitle={intl.formatMessage(messages.pageTitle)}
                 title={intl.formatMessage(messages.search)}
                 icon="search"
                 buttons={headerButtons}
@@ -276,7 +372,14 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
                 </div>
               )}
             </ContentSimple>
-          </Container>
+          </StyledContainer>
+          {!hasResults && (
+            <ContentPreview
+              navItems={navItems}
+              dataReady={dataReady}
+              onUpdatePath={onUpdatePath}
+            />
+          )}
         </ContainerWrapper>
       </div>
     );
@@ -295,7 +398,9 @@ Search.propTypes = {
   onEntityClick: PropTypes.func.isRequired,
   onSortOrder: PropTypes.func.isRequired,
   onSortBy: PropTypes.func.isRequired,
+  onUpdatePath: PropTypes.func.isRequired,
   theme: PropTypes.object,
+  allTypeCounts: PropTypes.object,
 };
 
 Search.contextTypes = {
@@ -306,6 +411,7 @@ const mapStateToProps = (state) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   entities: selectEntitiesByQuery(state),
   activeTargetPath: selectPathQuery(state),
+  allTypeCounts: selectAllTypeCounts(state),
 });
 function mapDispatchToProps(dispatch) {
   return {
@@ -345,6 +451,9 @@ function mapDispatchToProps(dispatch) {
     },
     onSortBy: (sort) => {
       dispatch(updateSortBy(sort));
+    },
+    onUpdatePath: (path) => {
+      dispatch(updatePath(path));
     },
   };
 }
