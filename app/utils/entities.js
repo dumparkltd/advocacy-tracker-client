@@ -10,6 +10,7 @@ import {
   ACTORTYPES_CONFIG,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
   API,
+  ROUTE_FOR_API,
 } from 'themes/config';
 import { find, reduce, every } from 'lodash/collection';
 
@@ -1424,3 +1425,5 @@ export const actorsByType = (actorActors, actors) => actorActors && actors && ac
     'actortype_id',
   ])
 ).sortBy((val, key) => key);
+
+export const getEntityPath = (entity) => ROUTE_FOR_API[entity.get('type')];

@@ -5,7 +5,7 @@ import { formatNumber, checkEmpty } from 'utils/fields';
 import qe from 'utils/quasi-equals';
 import appMessage from 'utils/app-message';
 import { lowerCase } from 'utils/string';
-import { getEntityTitle } from 'utils/entities';
+import { getEntityTitle, getEntityPath } from 'utils/entities';
 import appMessages from 'containers/App/messages';
 import {
   API,
@@ -353,9 +353,7 @@ export const prepareEntityRows = ({
   entities,
   columns,
   entityIdsSelected,
-  config,
   url,
-  entityPath,
   onEntitySelect,
   connections,
   taxonomies,
@@ -369,7 +367,7 @@ export const prepareEntityRows = ({
     // console.log(connections && connections.toJS())
     const entityValues = columns.reduce(
       (memoEntity, col) => {
-        const path = (config && config.clientPath) || entityPath;
+        const path = getEntityPath(entity);
         let relatedEntities;
         let relatedEntityIds;
         let temp;

@@ -19,7 +19,6 @@ const Link = styled((p) => <Button as="a" {...p} />)`
 const Label = styled((p) => <Text size="xxsmall" wordBreak="keep-all" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
-  font-weight: 500;
 `;
 
 const getActionLink = (action) => `${ROUTES.ACTION}/${action.get('id')}`;
