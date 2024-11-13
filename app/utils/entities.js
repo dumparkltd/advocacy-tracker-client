@@ -224,52 +224,6 @@ export const filterEntitiesByCategories = (
       )
   );
 
-// filter entities by association with one or more categories
-// assumes prior nesting of relationships
-export const filterEntitiesByConnectedCategories = (
-  entities,
-  connections,
-  query,
-  any = true,
-) => entities && entities.filter(
-  // consider replacing with .every()
-  (entity) => any
-    ? asList(query).some(
-      (queryArg) => {
-        const pathValue = queryArg.split(':');
-        const path = pathValue[0];
-        const connectionsForPath = connections.get(path);
-        return !connectionsForPath || connectionsForPath.some(
-          (connection) => testEntityEntityAssociation(
-            entity,
-            path,
-            connection.get('id'),
-          ) && testEntityCategoryAssociation(
-            connection,
-            pathValue[1],
-          )
-        );
-      },
-    )
-    : asList(query).every(
-      (queryArg) => {
-        const pathValue = queryArg.split(':');
-        const path = pathValue[0];
-        const connectionsForPath = connections.get(path);
-        return !connectionsForPath || connectionsForPath.some(
-          (connection) => testEntityEntityAssociation(
-            entity,
-            path,
-            connection.get('id'),
-          ) && testEntityCategoryAssociation(
-            connection,
-            pathValue[1],
-          )
-        );
-      },
-    )
-);
-
 export const checkQuery = ({
   queryValue,
   path,
