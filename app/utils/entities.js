@@ -1,4 +1,4 @@
-import { Map } from 'immutable';
+import { Map, fromJS } from 'immutable';
 
 import {
   TEXT_TRUNCATE,
@@ -338,10 +338,30 @@ export const filterEntitiesByMultipleConnections = (
   query,
   paths,
   any = true,
-) => entities && entities.filter(
-  // consider replacing with .every()
-  (entity) => any
-    ? asList(query).some(
+) => {
+  if (any) {
+    // we want to be inclusive (OR/any/some) within each group, but exclusive (AND/all/every) across groups
+    const queryGroups = asList(query).map(
+      (q) => {
+        const [group, value] = q.split(':');
+        return fromJS({ group, value });
+      }
+    ).groupBy((q) => q.get('group'));
+    return entities && entities.filter(
+      (entity) => queryGroups.every(
+        (group) => group.some(
+          (q) => {
+            const value = q.get('value');
+            return paths.some(
+              (path) => entity.get(path) && testEntityEntityAssociation(entity, path, value)
+            );
+          },
+        )
+      )
+    );
+  }
+  return entities && entities.filter(
+    (entity) => asList(query).every(
       (queryArg) => {
         const [, value] = queryArg.split(':');
         return paths.some(
@@ -349,15 +369,8 @@ export const filterEntitiesByMultipleConnections = (
         );
       },
     )
-    : asList(query).every(
-      (queryArg) => {
-        const [, value] = queryArg.split(':');
-        return paths.some(
-          (path) => entity.get(path) && testEntityEntityAssociation(entity, path, value)
-        );
-      },
-    )
-);
+  );
+};
 
 const fieldEmpty = (entity, attribute) => !entity.getIn(['attributes', attribute])
   || qe(entity.getIn(['attributes', attribute]).trim(), '');
