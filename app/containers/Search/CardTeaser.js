@@ -53,6 +53,7 @@ export function CardTeaser({
           <TitleWrap
             direction="column"
             gap="medium"
+            margin={{ bottom: 'small' }}
           >
             <Title>
               {title}

@@ -29,7 +29,7 @@ import Container from 'components/styled/Container';
 import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
 import Loading from 'components/Loading';
 import ContentHeader from 'containers/ContentHeader';
-import TagSearch from 'components/TagSearch';
+import EntityListSearch from 'components/EntityListSearch';
 import ContentSimple from 'components/styled/ContentSimple';
 import EntityListItem from 'components/EntityListItem';
 
@@ -52,7 +52,6 @@ import {
 
 import {
   updateQuery,
-  resetSearchQuery,
   updateSortBy,
   updateSortOrder,
 } from './actions';
@@ -66,8 +65,8 @@ const StyledContainer = styled((p) => <Container {...p} />)`
   background: white;
   box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
 `;
-const EntityListSearch = styled.div`
-  padding: 0 0 2em;
+const EntityListSearchWrapper = styled.div`
+  padding: 1.5em 0 2em 0;
 `;
 // TODO compare EntityListSidebarOption
 const Target = styled(Button)`
@@ -140,7 +139,7 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
           ...memo,
           {
             path: `${ROUTES.ACTORS}/${actortypeId}`,
-            title: intl.formatMessage(appMessages.actortypes_short[actortypeId]),
+            title: intl.formatMessage(appMessages.actortypes_long[actortypeId]),
             description: intl.formatMessage(appMessages.actortypes_about[actortypeId]),
             count: (counts && counts.actortypesWithCount && counts.actortypesWithCount.getIn([actortypeId, 'count'])) || 0,
           },
@@ -156,7 +155,7 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
           ...memo,
           {
             path: `${ROUTES.ACTIONS}/${actionTypeId}`,
-            title: intl.formatMessage(appMessages.actiontypes_short[actionTypeId]),
+            title: intl.formatMessage(appMessages.actiontypes_long[actionTypeId]),
             description: intl.formatMessage(appMessages.actiontypes_about[actionTypeId]),
             count: (counts && counts.actiontypesWithCount && counts.actiontypesWithCount.getIn([actionTypeId, 'count'])) || 0,
           },
@@ -196,7 +195,6 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
       dataReady,
       location,
       onSearch,
-      onClear,
       entities,
       onEntityClick,
       activeTargetPath,
@@ -247,23 +245,20 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
             <ContentSimple>
               <ContentHeader
                 type={CONTENT_LIST}
-                // supTitle={intl.formatMessage(messages.pageTitle)}
-                title={intl.formatMessage(messages.search)}
+                title={intl.formatMessage(messages.pageTitle)}
                 icon="search"
                 buttons={headerButtons}
               />
               {!dataReady && <Loading />}
               {dataReady && (
                 <div>
-                  <EntityListSearch>
-                    <TagSearch
-                      filters={[]}
+                  <EntityListSearchWrapper>
+                    <EntityListSearch
                       placeholder={intl.formatMessage(messages.placeholder)}
                       searchQuery={location.query.search || ''}
                       onSearch={onSearch}
-                      onClear={() => onClear(['search'])}
                     />
-                  </EntityListSearch>
+                  </EntityListSearchWrapper>
                   <ListWrapper>
                     {!hasQuery && (
                       <ListHint>
@@ -393,7 +388,6 @@ Search.propTypes = {
   location: PropTypes.object,
   activeTargetPath: PropTypes.string,
   onSearch: PropTypes.func.isRequired,
-  onClear: PropTypes.func.isRequired,
   onTargetSelect: PropTypes.func.isRequired,
   onEntityClick: PropTypes.func.isRequired,
   onSortOrder: PropTypes.func.isRequired,
@@ -428,9 +422,6 @@ function mapDispatchToProps(dispatch) {
           checked: value !== '',
         },
       ])));
-    },
-    onClear: (values) => {
-      dispatch(resetSearchQuery(values));
     },
     onTargetSelect: (value) => {
       // console.log('onTargetSelect')
