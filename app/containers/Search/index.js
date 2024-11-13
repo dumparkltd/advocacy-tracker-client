@@ -170,19 +170,19 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
         {
           path: `${ROUTES.RESOURCES}/${RESOURCETYPES.WEB}`,
           title: intl.formatMessage(appMessages.entities.resources.plural),
-          description: 'resources description',
+          description: intl.formatMessage(messages.resources_about),
           count: (counts && counts.resourcesCount) || 0,
         },
         {
           path: `${ROUTES.USERS}`,
           title: intl.formatMessage(appMessages.entities.users.plural),
-          description: 'users description',
+          description: intl.formatMessage(messages.users_about),
           count: (counts && counts.usersCount) || 0,
         },
         {
           path: `${ROUTES.PAGES}`,
           title: intl.formatMessage(appMessages.entities.pages.plural),
-          description: 'pages description',
+          description: intl.formatMessage(messages.pages_about),
           count: (counts && counts.pagesCount) || 0,
         },
       ],
@@ -368,7 +368,7 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
               )}
             </ContentSimple>
           </StyledContainer>
-          {!hasResults && (
+          {!hasResults && !hasQuery && (
             <ContentPreview
               navItems={navItems}
               dataReady={dataReady}
