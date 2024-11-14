@@ -53,7 +53,7 @@ export function EntityListTableOptions({
     >
       <Box direction="row" justify="between" align="center">
         {!isPrintView && subjectOptions && subjectOptions.length > 0 && (
-          <Box>
+          <Box style={{ position: 'relative', top: '5px' }}>
             <MapSubjectOptions
               inList
               options={subjectOptions}
@@ -94,6 +94,7 @@ export function EntityListTableOptions({
                 direction="row"
                 gap="xsmall"
                 wrap
+                margin={{ top: '5px' }}
               >
                 {typeOptions.map(
                   (type) => (
@@ -102,7 +103,7 @@ export function EntityListTableOptions({
                       onClick={() => type.onClick()}
                       active={type.active}
                     >
-                      <Text size="small">
+                      <Text size="small" style={{ position: 'relative', top: '-1px' }}>
                         {type.label}
                       </Text>
                     </ButtonPill>
