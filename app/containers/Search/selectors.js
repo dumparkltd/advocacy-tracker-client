@@ -19,6 +19,7 @@ import {
   selectUsers,
   selectResources,
   selectPages,
+  selectCategories,
 } from 'containers/App/selectors';
 
 import { ACTIONTYPES } from 'themes/config';
@@ -166,6 +167,10 @@ export const selectEntitiesByQuery = createSelector(
     });
   }
 );
+const selectCategoriesCount = createSelector(
+  selectCategories,
+  (categories) => categories && categories.size
+);
 const selectPagesCount = createSelector(
   selectPages,
   (pages) => pages && pages.size
@@ -216,6 +221,7 @@ export const selectAllTypeCounts = createSelector(
   selectUsersCount,
   selectResourcesCount,
   selectPagesCount,
+  selectCategoriesCount,
   (
     indicatorsCount,
     statementsCount,
@@ -224,6 +230,7 @@ export const selectAllTypeCounts = createSelector(
     usersCount,
     resourcesCount,
     pagesCount,
+    categoriesCount,
   ) => ({
     indicatorsCount,
     statementsCount,
@@ -232,5 +239,6 @@ export const selectAllTypeCounts = createSelector(
     usersCount,
     resourcesCount,
     pagesCount,
+    categoriesCount,
   })
 );

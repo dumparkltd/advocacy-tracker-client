@@ -185,6 +185,12 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
           description: intl.formatMessage(messages.pages_about),
           count: (counts && counts.pagesCount) || 0,
         },
+        {
+          path: `${ROUTES.TAXONOMIES}`,
+          title: intl.formatMessage(appMessages.entities.categories.plural),
+          description: intl.formatMessage(messages.categories_about),
+          count: (counts && counts.categoriesCount) || 0,
+        },
       ],
     },
   ]);

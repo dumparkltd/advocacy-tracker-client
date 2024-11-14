@@ -92,6 +92,10 @@ export default defineMessages({
   },
   pages_about: {
     id: 'app.containers.Search.pages_about',
-    defaultMessage: 'Some text here',
+    defaultMessage: 'View and maintain pages',
+  },
+  categories_about: {
+    id: 'app.containers.Search.categories_about',
+    defaultMessage: 'View and maintain categories',
   },
 });
