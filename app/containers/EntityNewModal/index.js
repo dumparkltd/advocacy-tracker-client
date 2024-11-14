@@ -1,6 +1,6 @@
 /*
  *
- * EntityNew
+ * EntityNewModal
  *
  */
 
@@ -19,7 +19,7 @@ import {
 
 import { selectDomain } from './selectors';
 
-export class EntityNew extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
+export class EntityNewModal extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   render() {
     const {
       path,
@@ -98,7 +98,7 @@ export class EntityNew extends React.PureComponent { // eslint-disable-line reac
   }
 }
 
-EntityNew.propTypes = {
+EntityNewModal.propTypes = {
   path: PropTypes.string.isRequired,
   attributes: PropTypes.object,
   connect: PropTypes.object,
@@ -117,4 +117,4 @@ const mapStateToProps = (state) => ({
 });
 
 
-export default reduxConnect(mapStateToProps, null)(EntityNew);
+export default reduxConnect(mapStateToProps, null)(EntityNewModal);

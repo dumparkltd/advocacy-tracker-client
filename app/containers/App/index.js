@@ -15,7 +15,7 @@ import { Box, Text } from 'grommet';
 
 import Header from 'components/Header';
 import Overlay from 'components/InfoOverlay/Overlay';
-import EntityNew from 'containers/EntityNew';
+import EntityNewModal from 'containers/EntityNewModal';
 import EntityPreview from 'containers/EntityPreview';
 import PrintUI from 'containers/PrintUI';
 
@@ -520,7 +520,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             }}
             appElement={document.getElementById('app')}
           >
-            <EntityNew
+            <EntityNewModal
               path={newEntityModal.get('path')}
               attributes={newEntityModal.get('attributes')}
               connect={newEntityModal.get('connect')}

@@ -1,6 +1,6 @@
 /*
  *
- * EntityNew reducer
+ * EntityNewModal reducer
  *
  */
 
