@@ -15,6 +15,7 @@ import {
   ACTION_INDICATOR_SUPPORTLEVELS,
   ROUTES,
   ACTIONTYPES,
+  API,
 } from 'themes/config';
 
 import qe from 'utils/quasi-equals';
@@ -37,6 +38,7 @@ import {
   setIncludeActorMembers,
   updateRouteQuery,
   updatePath,
+  openNewEntityModal,
 } from 'containers/App/actions';
 import {
   selectReady,
@@ -153,6 +155,7 @@ export function PositionsList({
   locationQuery,
   onUpdateColumnFilters,
   actortypes,
+  onCreateOption,
 }) {
   const size = React.useContext(ResponsiveContext);
   const [search, setSearch] = useState('');
@@ -160,6 +163,14 @@ export function PositionsList({
     // kick off loading of data
     onLoadData();
   }, []);
+  useEffect(() => {
+    // also kick off loading of data again once dataReady changes and becomes negative again
+    // required due to possible in-view creation of activities
+    if (!dataReady) {
+      onLoadData();
+    }
+  }, [dataReady]);
+
   let supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
     .filter((level) => parseInt(level.value, 10) > 0) // exclude 0
     .sort((a, b) => a.order > b.order ? 1 : -1);
@@ -273,7 +284,66 @@ export function PositionsList({
             [item.getIn(['attributes', 'actortype_id']).toString(), 'attributes', 'title']
           ),
           title: item.getIn(['attributes', 'title']),
+          titlePath: `${ROUTES.ACTOR}/${item.get('id')}`,
           code: item.getIn(['attributes', 'code']),
+          topActions: [
+            {
+              label: `Add ${intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`].single)}`,
+              path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}${ROUTES.NEW}`,
+              type: 'create',
+              onClick: (e) => {
+                if (e && e.preventDefault) e.preventDefault();
+                onCreateOption({
+                  path: API.ACTIONS,
+                  attributes: {
+                    measuretype_id: ACTIONTYPES.EXPRESS,
+                  },
+                  invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
+                  autoUser: true,
+                  connect: [
+                    {
+                      type: 'actorActions',
+                      create: [{
+                        actor_id: item.get('id'),
+                      }],
+                    },
+                  ],
+                });
+              },
+            },
+            {
+              label: `Add ${intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.INTERACTION}`].single)}`,
+              path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}${ROUTES.NEW}`,
+              type: 'create',
+              onClick: (e) => {
+                if (e && e.preventDefault) e.preventDefault();
+                onCreateOption({
+                  path: API.ACTIONS,
+                  attributes: {
+                    measuretype_id: ACTIONTYPES.INTERACTION,
+                  },
+                  invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
+                  autoUser: true,
+                  connect: [
+                    {
+                      type: 'actorActions',
+                      create: [{
+                        actor_id: item.get('id'),
+                      }],
+                    },
+                  ],
+                });
+              },
+            },
+            {
+              label: 'Edit',
+              path: `${ROUTES.ACTOR}${ROUTES.EDIT}/${item.get('id')}`,
+              onClick: (e) => {
+                if (e && e.preventDefault) e.preventDefault();
+                onUpdatePath(`${ROUTES.ACTOR}${ROUTES.EDIT}/${item.get('id')}`);
+              },
+            },
+          ],
         },
         fields: {
           countryPositions: {
@@ -560,6 +630,7 @@ PositionsList.propTypes = {
   actorsByType: PropTypes.object, // immutable Map
   locationQuery: PropTypes.object, // immutable Map
   actortypes: PropTypes.object, // immutable Map
+  onCreateOption: PropTypes.func,
   intl: intlShape.isRequired,
 };
 
@@ -585,6 +656,7 @@ export function mapDispatchToProps(dispatch) {
     onSetIncludeActorMembers: (value) => dispatch(setIncludeActorMembers(value)),
     onUpdateQuery: (value) => dispatch(updateRouteQuery(value)),
     onUpdatePath: (path) => dispatch(updatePath(path)),
+    onCreateOption: (args) => dispatch(openNewEntityModal(args)),
     onUpdateColumnFilters: ({
       column, addToFilters, removeFromFilters,
     }, locationQuery) => {

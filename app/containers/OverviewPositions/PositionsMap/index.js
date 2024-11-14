@@ -19,6 +19,7 @@ import {
   ACTION_INDICATOR_SUPPORTLEVELS,
   ACTIONTYPES,
   ROUTES,
+  API,
 } from 'themes/config';
 import qe from 'utils/quasi-equals';
 import asList from 'utils/as-list';
@@ -37,6 +38,7 @@ import {
   setPreviewContent,
   updatePath,
   setListPreview,
+  openNewEntityModal,
 } from 'containers/App/actions';
 
 import {
@@ -189,11 +191,19 @@ export function PositionsMap({
   onSetPreviewItemId,
   onUpdatePath,
   locationQuery,
+  onCreateOption,
 }) {
   useEffect(() => {
     // kick off loading of data
     onLoadData();
   }, []);
+  useEffect(() => {
+    // also kick off loading of data again once dataReady changes and becomes negative again
+    // required due to possible in-view creation of activities
+    if (!dataReady) {
+      onLoadData();
+    }
+  }, [dataReady]);
   useEffect(() => {
     if (dataReady) {
       if (previewItemId) {
@@ -215,19 +225,93 @@ export function PositionsMap({
               header: {
                 aboveTitle: 'Country',
                 title: country.getIn(['attributes', 'title']),
+                titlePath: `${ROUTES.ACTOR}/${country.get('id')}`,
                 largeTitle: true,
                 code: country.getIn(['attributes', 'code']),
                 nextPreviewItem: `${ID}|${countryIds[nextIndex]}`,
                 prevPreviewItem: `${ID}|${countryIds[prevIndex]}`,
+                topActions: [
+                  {
+                    label: `Add ${intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`].single)}`,
+                    path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}${ROUTES.NEW}`,
+                    type: 'create',
+                    onClick: (e) => {
+                      if (e && e.preventDefault) e.preventDefault();
+                      onCreateOption({
+                        path: API.ACTIONS,
+                        attributes: {
+                          measuretype_id: ACTIONTYPES.EXPRESS,
+                        },
+                        invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
+                        autoUser: true,
+                        connect: [
+                          {
+                            type: 'actorActions',
+                            create: [{
+                              actor_id: country.get('id'),
+                            }],
+                          },
+                          {
+                            type: 'actorIndicators',
+                            create: [{
+                              indicator_id: currentIndicator.get('id'),
+                            }],
+                          },
+                        ],
+                      });
+                    },
+                  },
+                  {
+                    label: `Add ${intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.INTERACTION}`].single)}`,
+                    path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}${ROUTES.NEW}`,
+                    type: 'create',
+                    onClick: (e) => {
+                      if (e && e.preventDefault) e.preventDefault();
+                      onCreateOption({
+                        path: API.ACTIONS,
+                        attributes: {
+                          measuretype_id: ACTIONTYPES.INTERACTION,
+                        },
+                        invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
+                        autoUser: true,
+                        connect: [
+                          {
+                            type: 'actorActions',
+                            create: [{
+                              actor_id: country.get('id'),
+                            }],
+                          },
+                        ],
+                      });
+                    },
+                  },
+                  {
+                    label: 'Edit',
+                    path: `${ROUTES.ACTOR}${ROUTES.EDIT}/${country.get('id')}`,
+                    onClick: (e) => {
+                      if (e && e.preventDefault) e.preventDefault();
+                      onUpdatePath(`${ROUTES.ACTOR}${ROUTES.EDIT}/${country.get('id')}`);
+                    },
+                  },
+                ],
+              },
+              footer: {
+                primaryLink: {
+                  path: `${ROUTES.ACTOR}/${country.get('id')}`,
+                  title: 'Country details',
+                },
+                secondaryLink: currentIndicator && {
+                  path: `${ROUTES.INDICATOR}/${currentIndicator.get('id')}`,
+                  id: currentIndicator.get('id'),
+                  title: getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title'])),
+                },
               },
               fields: {
                 topicPosition: {
                   topicId: currentIndicatorId,
                   topic: currentIndicator && {
                     title: getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title'])),
-                    viaGroup: indicatorPosition && indicatorPosition.get('viaGroups')
-                    && indicatorPosition.get('viaGroups').first()
-                    && indicatorPosition.get('viaGroups').first().getIn(['attributes', 'title']),
+                    titlePath: `${ROUTES.INDICATOR}/${currentIndicator.get('id')}`,
                   },
                   position: indicatorPosition ? {
                     supportlevelId: indicatorPosition.get('supportlevel_id'),
@@ -344,17 +428,6 @@ export function PositionsMap({
                 associations: {
                   actortype: ACTORTYPES.REG,
                   title: 'Regions',
-                },
-              },
-              footer: {
-                primaryLink: country && {
-                  path: `${ROUTES.ACTOR}/${country.get('id')}`,
-                  title: 'Country details',
-                },
-                secondaryLink: currentIndicator && {
-                  path: `${ROUTES.INDICATOR}/${currentIndicator.get('id')}`,
-                  id: currentIndicator.get('id'),
-                  title: getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title'])),
                 },
               },
             };
@@ -628,6 +701,7 @@ PositionsMap.propTypes = {
   onSetPreviewContent: PropTypes.func,
   onSetPreviewItemId: PropTypes.func,
   onUpdatePath: PropTypes.func,
+  onCreateOption: PropTypes.func,
   intl: intlShape.isRequired,
 };
 
@@ -654,6 +728,7 @@ export function mapDispatchToProps(dispatch) {
     onSetPreviewContent: (value) => dispatch(setPreviewContent(value)),
     onUpdatePath: (path) => dispatch(updatePath(path)),
     onSetPreviewItemId: (value) => dispatch(setListPreview(value)),
+    onCreateOption: (args) => dispatch(openNewEntityModal(args)),
   };
 }
 

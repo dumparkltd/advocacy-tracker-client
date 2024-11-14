@@ -14,6 +14,7 @@ import appMessages from 'containers/App/messages';
 import Reference from 'components/fields/Reference';
 import ScreenReaderOnly from 'components/styled/ScreenReaderOnly';
 import Button from 'components/buttons/ButtonSimple';
+import A from 'components/styled/A';
 
 const Title = styled((p) => <Heading level={3} {...p} />)`
   font-family: ${({ theme }) => theme.fonts.title};
@@ -54,14 +55,32 @@ const StyledReference = styled(Reference)`
   text-transform: uppercase;
 `;
 
-export function PreviewHeader({ content, onSetPreviewItemId }) {
+const TitleLink = styled(A)`
+  color: black;
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+const HeaderLink = styled(A)`
+  color: #6D7576;
+  text-transform: uppercase;
+  font-family: ${({ theme }) => theme.fonts.title};
+`;
+
+export function PreviewHeader({
+  content,
+  onSetPreviewItemId,
+  onUpdatePath,
+}) {
   const contentClean = content || {};
   const {
     title,
+    titlePath,
     aboveTitle,
     prevPreviewItem,
     nextPreviewItem,
     largeTitle,
+    topActions,
   } = contentClean;
   return (
     <Box
@@ -70,7 +89,28 @@ export function PreviewHeader({ content, onSetPreviewItemId }) {
       direction="column"
       pad={{ bottom: 'large' }}
     >
-      <Box fill="horizontal" align="end">
+      <Box direction="row" fill="horizontal" align="center" justify="end" gap="medium">
+        {topActions && (
+          <Box direction="row" align="center" gap="medium">
+            {topActions.map((action, i) => (
+              <HeaderLink
+                key={i}
+                onClick={action.onClick}
+                href={action.path}
+              >
+                {(!action.type || action.type !== 'create') && action.label}
+                {action.type === 'create' && (
+                  <Box direction="row" align="center" gap="xsmall">
+                    <span>
+                      {action.label}
+                    </span>
+                    <Icon name="add" size="14px" />
+                  </Box>
+                )}
+              </HeaderLink>
+            ))}
+          </Box>
+        )}
         {onSetPreviewItemId && (
           <CloseButton onClick={() => onSetPreviewItemId(null)}>
             <ScreenReaderOnly>
@@ -91,9 +131,25 @@ export function PreviewHeader({ content, onSetPreviewItemId }) {
           </StyledReference>
         )}
         <Box direction="row" justify="between" align="start">
-          <Title largeTitle={largeTitle}>
-            {title}
-          </Title>
+          {!titlePath && (
+            <Title largeTitle={largeTitle}>
+              {title}
+            </Title>
+          )}
+          {titlePath && (
+            <TitleLink
+              href={titlePath}
+              title={title}
+              onClick={(e) => {
+                if (e && e.preventDefault) e.preventDefault();
+                onUpdatePath(titlePath);
+              }}
+            >
+              <Title largeTitle={largeTitle}>
+                {title}
+              </Title>
+            </TitleLink>
+          )}
           {onSetPreviewItemId && (nextPreviewItem || prevPreviewItem) && (
             <Box direction="row" flex={{ shrink: 0, grow: 0 }} width="120" gap="xsmall" align="center">
               <NavButton
@@ -120,5 +176,6 @@ export function PreviewHeader({ content, onSetPreviewItemId }) {
 PreviewHeader.propTypes = {
   content: PropTypes.object,
   onSetPreviewItemId: PropTypes.func,
+  onUpdatePath: PropTypes.func,
 };
 export default PreviewHeader;

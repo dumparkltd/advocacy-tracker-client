@@ -7,9 +7,11 @@ import { Box, Text, Heading } from 'grommet';
 
 import { ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
-
+import A from 'components/styled/A';
 import Dot from 'components/styled/Dot';
+
 import messages from './messages';
+
 const SectionTitle = styled((p) => <Text size="xsmall" {...p} />)`
   text-transform: uppercase;
   font-weight: bold;
@@ -25,7 +27,15 @@ const SupportLevelTitle = styled((p) => <Text size="xsmall" {...p} />)`
   font-weight: bold;
 `;
 const LevelOfAuthorityLabel = styled((p) => <Text size="xsmall" {...p} />)``;
-export function PreviewCountryTopicPosition({ content }) {
+
+const TitleLink = styled(A)`
+  color: black;
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
+export function PreviewCountryTopicPosition({ content, onUpdatePath }) {
   const { topic, position, options } = content.toJS();
   return (
     <Box
@@ -41,11 +51,23 @@ export function PreviewCountryTopicPosition({ content }) {
             <FormattedMessage {...messages.countryTopicPosition.sectionTitle} />
           </SectionTitle>
         </Box>
-        {topic && (
-          <Box>
+        <Box>
+          {topic && !topic.titlePath && (
             <TopicTitle>{topic.title}</TopicTitle>
-          </Box>
-        )}
+          )}
+          {topic && topic.titlePath && (
+            <TitleLink
+              href={topic.titlePath}
+              title={topic.title}
+              onClick={(e) => {
+                if (e && e.preventDefault) e.preventDefault();
+                onUpdatePath(topic.titlePath);
+              }}
+            >
+              <TopicTitle>{topic.title}</TopicTitle>
+            </TitleLink>
+          )}
+        </Box>
       </Box>
       <Box direction="row" align="start" fill="horizontal">
         <Box basis="1/2">
@@ -88,5 +110,6 @@ export function PreviewCountryTopicPosition({ content }) {
 
 PreviewCountryTopicPosition.propTypes = {
   content: PropTypes.object,
+  onUpdatePath: PropTypes.func,
 };
 export default PreviewCountryTopicPosition;

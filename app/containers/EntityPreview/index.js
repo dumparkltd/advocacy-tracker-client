@@ -44,6 +44,7 @@ export function EntityPreview({
         <PreviewHeader
           content={content && content.get('header') && content.get('header').toJS()}
           onSetPreviewItemId={onSetPreviewItemId}
+          onUpdatePath={onUpdatePath}
         />
       )}
       {content

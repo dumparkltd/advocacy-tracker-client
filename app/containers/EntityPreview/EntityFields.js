@@ -86,7 +86,9 @@ export function EntityFields({
   return (
     <Styled gap="xlarge">
       {fields && fields.entrySeq().map(([fieldId, fieldContent]) => {
-        // console.log('field', fieldId, fieldContent && fieldContent.toJS())
+        if (!fieldContent) {
+          return null;
+        }
         if (columns && fieldContent.get('columnId')) {
           // console.log('columns', columns && columns.toJS())
           const column = columns.find((c) => c.get('id') === fieldContent.get('columnId'));

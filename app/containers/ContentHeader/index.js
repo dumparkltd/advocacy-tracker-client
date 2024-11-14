@@ -104,7 +104,6 @@ const InfoTitlePrintOnly = styled(Text)`
 const renderTitle = (type, title) => {
   switch (type) {
     case CONTENT_PAGE:
-    case CONTENT_MODAL:
     case CONTENT_SINGLE:
       return (
         <SupTitle title={title} />
