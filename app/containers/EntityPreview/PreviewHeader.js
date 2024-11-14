@@ -90,7 +90,7 @@ export function PreviewHeader({
       pad={{ bottom: 'large' }}
     >
       <Box direction="row" fill="horizontal" align="center" justify="end" gap="medium">
-        {topActions && (
+        {topActions && topActions.length > 0 && (
           <Box direction="row" align="center" gap="medium">
             {topActions.map((action, i) => (
               <HeaderLink

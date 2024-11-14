@@ -32,12 +32,14 @@ import {
   setListPreview,
   updatePath,
   loadEntitiesIfNeeded,
+  openNewEntityModal,
 } from 'containers/App/actions';
 
 import {
   selectReady,
   selectTaxonomiesWithCategories,
   selectActorConnections,
+  selectIsUserMember,
 } from 'containers/App/selectors';
 
 import PreviewHeader from './PreviewHeader';
@@ -45,6 +47,7 @@ import PreviewFooter from './PreviewFooter';
 import { selectPreviewEntity } from './selectors';
 
 export const DEPENDENCIES = [
+  API.ROLES,
   API.USERS,
   API.USER_ROLES,
   API.CATEGORIES,
@@ -68,6 +71,8 @@ export function PreviewEntity({
   onUpdatePath,
   onEntityClick,
   intl,
+  onCreateOption,
+  isMember,
 }) {
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
@@ -77,7 +82,7 @@ export function PreviewEntity({
   let mainContent;
   let footerContent;
   if (previewEntity && qe(content.get('path'), ROUTES.ACTION)) {
-    headerContent = getActionPreviewHeader(previewEntity, intl);
+    headerContent = getActionPreviewHeader(previewEntity, intl, onUpdatePath);
     mainContent = dataReady && getActionPreviewFields({
       action: previewEntity,
       indicators: previewEntity.get('indicators'),
@@ -91,7 +96,12 @@ export function PreviewEntity({
     footerContent = getActionPreviewFooter(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.ACTOR)) {
-    headerContent = getActorPreviewHeader(previewEntity, intl);
+    headerContent = getActorPreviewHeader(
+      previewEntity,
+      intl,
+      onUpdatePath,
+      onCreateOption,
+    );
     mainContent = dataReady && getActorPreviewFields({
       actor: previewEntity,
       associationsByType: previewEntity.get('associationsByType'),
@@ -103,7 +113,7 @@ export function PreviewEntity({
     footerContent = previewEntity && getActorPreviewFooter(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.INDICATOR)) {
-    headerContent = previewEntity && getIndicatorPreviewHeader(previewEntity, intl);
+    headerContent = previewEntity && getIndicatorPreviewHeader(previewEntity, intl, onUpdatePath);
     mainContent = dataReady && getIndicatorPreviewFields({
       indicator: previewEntity,
       onEntityClick,
@@ -112,7 +122,7 @@ export function PreviewEntity({
     footerContent = previewEntity && getIndicatorPreviewFooter(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.RESOURCE)) {
-    headerContent = previewEntity && getResourcePreviewHeader(previewEntity, intl);
+    headerContent = previewEntity && getResourcePreviewHeader(previewEntity, intl, onUpdatePath);
     mainContent = dataReady && getResourcePreviewFields({
       resource: previewEntity,
       onEntityClick,
@@ -121,11 +131,18 @@ export function PreviewEntity({
     footerContent = previewEntity && getResourcePreviewFooter(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.USERS)) {
-    headerContent = previewEntity && getUserPreviewHeader(previewEntity, intl);
+    headerContent = previewEntity && getUserPreviewHeader(
+      previewEntity,
+      intl,
+      onUpdatePath,
+      onCreateOption,
+    );
     mainContent = dataReady && getUserPreviewFields({
       user: previewEntity,
+      actionsByType: previewEntity.get('actionsByType'),
       onEntityClick,
       intl,
+      isMember,
     });
     footerContent = previewEntity && getUserPreviewFooter(previewEntity, intl);
   }
@@ -135,6 +152,7 @@ export function PreviewEntity({
         <PreviewHeader
           content={headerContent}
           onSetPreviewItemId={onSetPreviewItemId}
+          onUpdatePath={onUpdatePath}
         />
       )}
       {mainContent && (
@@ -167,9 +185,11 @@ PreviewEntity.propTypes = {
   previewEntity: PropTypes.object, // immutable Map
   taxonomies: PropTypes.object, // immutable Map
   actorConnections: PropTypes.object, // immutable Map
+  isMember: PropTypes.bool,
   onSetPreviewItemId: PropTypes.func,
   onUpdatePath: PropTypes.func,
   onEntityClick: PropTypes.func,
+  onCreateOption: PropTypes.func,
   dataReady: PropTypes.bool,
   intl: intlShape.isRequired,
 };
@@ -178,6 +198,7 @@ const mapStateToProps = (state, { content }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   taxonomies: selectTaxonomiesWithCategories(state),
   actorConnections: selectActorConnections(state),
+  isMember: selectIsUserMember(state),
   previewEntity: selectPreviewEntity(
     state,
     {
@@ -200,6 +221,7 @@ export function mapDispatchToProps(dispatch) {
     onEntityClick: (id, path) => {
       dispatch(updatePath(`${path}/${id}`));
     },
+    onCreateOption: (args) => dispatch(openNewEntityModal(args)),
   };
 }
 

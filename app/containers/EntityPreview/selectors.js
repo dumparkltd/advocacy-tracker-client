@@ -28,12 +28,18 @@ import {
   selectUserActorsGroupedByUser,
   selectUserActionsGroupedByUser,
   selectUsers,
+  selectActions,
+  selectActionConnections,
+  selectActionResourcesGroupedByAction,
+  selectUserActionsGroupedByAction,
+  selectActionCategoriesGroupedByAction,
 } from 'containers/App/selectors';
 
 import qe from 'utils/quasi-equals';
 import {
   setIndicatorConnections,
   setActorConnections,
+  setActionConnections,
   prepareTaxonomiesIsAssociated,
   setUserConnections,
 } from 'utils/entities';
@@ -315,6 +321,65 @@ export const selectActorsByType = createSelector(
       );
   }
 );
+
+
+const selectUserActionAssociations = createSelector(
+  (state, { id }) => id,
+  selectUserActionsGroupedByUser,
+  (actorId, associationsByUser) => associationsByUser.get(
+    parseInt(actorId, 10)
+  )
+);
+
+const selectUserActionsAssociated = createSelector(
+  selectActions,
+  selectUserActionAssociations,
+  (actions, associations) => actions && associations && associations.reduce(
+    (memo, id) => {
+      const entity = actions.get(id.toString());
+      return entity
+        ? memo.set(id, entity)
+        : memo;
+    },
+    Map(),
+  )
+);
+
+const selectUserActionsByType = createSelector(
+  selectUserActionsAssociated,
+  selectActionConnections,
+  selectActorActionsGroupedByAction,
+  selectActionResourcesGroupedByAction,
+  selectActionIndicatorsGroupedByAction,
+  selectUserActionsGroupedByAction,
+  selectCategories,
+  selectActionCategoriesGroupedByAction,
+  (
+    actions,
+    actionConnections,
+    actorActions,
+    actionResources,
+    actionIndicators,
+    userActions,
+    categories,
+    actionCategories,
+  ) => {
+    if (!actions) return Map();
+    return actions && actions
+      .filter((action) => !!action)
+      .map((action) => setActionConnections({
+        action,
+        actionConnections,
+        actorActions,
+        categories,
+        actionCategories,
+        users: userActions,
+      }))
+      .groupBy((r) => r.getIn(['attributes', 'measuretype_id']))
+      .sortBy((val, key) => key);
+  }
+);
+
 export const selectPreviewEntity = createSelector(
   (state, { id, path }) => selectEntity(state, { id, path }),
   selectIndicatorsAssociated,
@@ -328,6 +393,9 @@ export const selectPreviewEntity = createSelector(
   selectActorAssociationsByType,
   selectActorViewTaxonomyOptions,
 
+  (state) => selectEntities(state, API.USER_ROLES),
+  (state) => selectEntities(state, API.ROLES),
+  selectUserActionsByType,
   (
     previewEntity,
     indicators,
@@ -340,6 +408,10 @@ export const selectPreviewEntity = createSelector(
     actorMembersByType,
     actorAssociationsByType,
     actorTaxonomiesWithCategories,
+
+    userRoles,
+    roles,
+    userActionsByType,
   ) => {
     if (
       !previewEntity
@@ -384,34 +456,22 @@ export const selectPreviewEntity = createSelector(
         .set('associationsByType', actorAssociationsByType)
         .set('taxonomiesByType', actorTaxonomiesWithCategories);
     }
+    if (previewEntity.get('type') === API.USERS && userRoles) {
+      return previewEntity
+        .set(
+          'roles',
+          userRoles
+            .filter((association) => qe(association.getIn(['attributes', 'user_id']), previewEntity.get('id')))
+            .map((association) => roles.find((role) => qe(role.get('id'), association.getIn(['attributes', 'role_id']))))
+        )
+        .set('actionsByType', userActionsByType);
+    }
     return previewEntity;
   }
 );
-//
-// export const selectConnections = createSelector(
-//   (state, { item }) => item,
-//   select
-//   // selectIndicatorsAssociated,
-// export const selectPreviewContent = createSelector(
-//   (state, { item }) => item,
-//   // selectIndicatorsAssociated,
-//   // selectIndicatorConnections,
-//   // selectActionIndicatorsGroupedByActionAttributes,
-//   // selectActionIndicatorsGroupedByIndicator,
-//   (
-//     item,
-//     // indicators,
-//     // indicatorConnections,
-//     // actionIndicatorsByActionFull,
-//     // actionIndicators,
-//   ) => {
-//     if (!item) return null;
-//     return null;
-//   }
-// );
 
 const selectUserAssociations = createSelector(
-  (state, id) => id,
+  (state, { id }) => id,
   selectUserActorsGroupedByActor,
   (actorId, associationsByActor) => associationsByActor.get(
     parseInt(actorId, 10)
