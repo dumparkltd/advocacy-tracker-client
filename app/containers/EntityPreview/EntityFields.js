@@ -6,6 +6,7 @@ import { Map } from 'immutable';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { Box, Text } from 'grommet';
+// import { checkActorAttribute, getActortypeColumns } from 'utils/entities';
 
 import FieldFactory from 'components/fields/FieldFactory';
 
@@ -49,6 +50,7 @@ import PreviewCountryPositionsList from './PreviewCountryPositionsList';
 import ActorUsersField from './ActorUsersField';
 import AssociationsField from './AssociationsField';
 import AttributeField from './AttributeField';
+import StatementIndicatorsField from './StatementIndicatorsField';
 
 const Styled = styled((p) => <Box {...p} />)``;
 
@@ -81,6 +83,7 @@ export function EntityFields({
   actorConnections,
   actionConnections,
   onEntityClick,
+  isAdmin,
 }) {
   // console.log('fields', fields && fields.toJS())
   // console.log('item', item && item.toJS())
@@ -144,6 +147,48 @@ export function EntityFields({
                 }
               }
             }
+            if (actorConnections && qe(column.get('type'), 'actors') && item.get('actorsByType')) {
+              theField = item.get('actorsByType').reduce(
+                (memo, actorIds, typeid) => {
+                  if (actorIds) {
+                    const actors = actorConnections.get(API.ACTORS).filter(
+                      (actor) => actorIds.includes(parseInt(actor.get('id'), 10)),
+                    );
+                    return [
+                      ...memo,
+                      getActorConnectionField({
+                        actors,
+                        onEntityClick,
+                        typeid,
+                      }),
+                    ];
+                  }
+                  return memo;
+                },
+                [],
+              );
+            }
+            if (actorConnections && qe(column.get('type'), 'indicators') && item.get('actorsByType')) {
+              theField = item.get('actorsByType').reduce(
+                (memo, actorIds, typeid) => {
+                  if (actorIds) {
+                    const actors = actorConnections.get(API.ACTORS).filter(
+                      (actor) => actorIds.includes(parseInt(actor.get('id'), 10)),
+                    );
+                    return [
+                      ...memo,
+                      getActorConnectionField({
+                        actors,
+                        onEntityClick,
+                        typeid,
+                      }),
+                    ];
+                  }
+                  return memo;
+                },
+                [],
+              );
+            }
             if (actorConnections && qe(column.get('type'), 'associations') && item.get('associationsByType')) {
               if (fieldContent.get('type')) {
                 const actorIds = item.getIn(['associationsByType', parseInt(fieldContent.get('type'), 10)]);
@@ -193,6 +238,7 @@ export function EntityFields({
               key={fieldId}
               content={fieldContent}
               onUpdatePath={onUpdatePath}
+              isAdmin={isAdmin}
             />
           );
         }
@@ -202,6 +248,7 @@ export function EntityFields({
               key={fieldId}
               content={fieldContent}
               onUpdatePath={onUpdatePath}
+              isAdmin={isAdmin}
             />
           );
         }
@@ -211,6 +258,7 @@ export function EntityFields({
               key={fieldId}
               content={fieldContent}
               onUpdatePath={onUpdatePath}
+              isAdmin={isAdmin}
             />
           );
         }
@@ -221,6 +269,7 @@ export function EntityFields({
               actorId={item.get('id')}
               content={fieldContent}
               onEntityClick={onEntityClick}
+              isAdmin={isAdmin}
             />
           );
         }
@@ -231,6 +280,7 @@ export function EntityFields({
               actorId={item.get('id')}
               content={fieldContent}
               onEntityClick={onEntityClick}
+              isAdmin={isAdmin}
             />
           );
         }
@@ -240,6 +290,18 @@ export function EntityFields({
               key={fieldId}
               entity={item}
               content={fieldContent}
+              isAdmin={isAdmin}
+            />
+          );
+        }
+        if (fieldId === 'statementIndicators') {
+          return (
+            <StatementIndicatorsField
+              key={fieldId}
+              statement={item}
+              content={fieldContent}
+              onEntityClick={onEntityClick}
+              isAdmin={isAdmin}
             />
           );
         }
@@ -261,6 +323,7 @@ EntityFields.propTypes = {
   actionConnections: PropTypes.object, // immutable Map
   actorConnections: PropTypes.object, // immutable Map
   // onUpdatePath: PropTypes.func,
+  isAdmin: PropTypes.bool,
 };
 
 const mapStateToProps = (state) => ({

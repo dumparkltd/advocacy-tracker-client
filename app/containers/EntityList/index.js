@@ -182,11 +182,11 @@ const reducePreviewItem = ({
         date: {
           attribute: 'date',
         },
-        'taxonomy-7': {
-          columnId: 'taxonomy-7',
-        },
         'taxonomy-13': {
           columnId: 'taxonomy-13',
+        },
+        'taxonomy-7': {
+          columnId: 'taxonomy-7',
         },
         description: {
           attribute: 'description',
@@ -195,9 +195,8 @@ const reducePreviewItem = ({
           columnId: 'actors',
           title: 'Stakeholders',
         },
-        parents: {
-          columnId: 'parents',
-          title: 'Activities',
+        statementIndicators: {
+          title: 'Topics',
         },
       },
       item,

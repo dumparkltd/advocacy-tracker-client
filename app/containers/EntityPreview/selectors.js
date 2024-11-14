@@ -513,3 +513,50 @@ export const selectEntityUsers = createSelector(
       .sortBy((val, key) => key);
   }
 );
+
+export const selectEntityIndicators = createSelector(
+  (state, { id }) => id,
+  (state, { actionType }) => actionType,
+  selectIndicatorsAssociated,
+  selectIndicatorConnections,
+  selectActionIndicatorsGroupedByActionAttributes,
+  selectActionIndicatorsGroupedByIndicator,
+  (
+    actionId,
+    actionType,
+    indicators,
+    indicatorConnections,
+    actionIndicatorsByActionFull,
+    actionIndicators,
+  ) => {
+    if (!indicators) return Map();
+    let indicatorsWithConnections = indicators && indicators
+      .map((indicator) => setIndicatorConnections({
+        indicator,
+        indicatorConnections,
+        actionIndicators,
+      }));
+    const hasSupportLevel = actionType
+      && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actionType]
+      && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actionType].length > 0;
+    if (hasSupportLevel) {
+      const viewEntityActors = actionIndicatorsByActionFull.get(parseInt(actionId, 10));
+      if (viewEntityActors) {
+        indicatorsWithConnections = indicatorsWithConnections.map(
+          (indicator) => {
+            let indicatorX = indicator;
+            // console.log(actor && actor.toJS())
+            const indicatorConnection = viewEntityActors.find(
+              (connection) => qe(indicator.get('id'), connection.get('indicator_id'))
+            );
+            if (indicatorConnection) {
+              indicatorX = indicatorX.setIn(['supportlevel', actionId], indicatorConnection.get('supportlevel_id'));
+            }
+            return indicatorX;
+          }
+        );
+      }
+    }
+    return indicatorsWithConnections && indicatorsWithConnections.sortBy((val, key) => key);
+  }
+);

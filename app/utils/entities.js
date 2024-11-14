@@ -8,6 +8,7 @@ import {
   INDICATOR_FIELDS,
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
+  ACTION_INDICATOR_SUPPORTLEVELS,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
   API,
   ROUTE_FOR_API,
@@ -1397,6 +1398,16 @@ export const getIndicatorColumnsForStatement = ({
         type: 'supportlevel',
         actionId: action.get('id'),
         title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+        info: {
+          type: 'key-categorical',
+          attribute: 'supportlevel_id',
+          options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+            .sort((a, b) => a.order < b.order ? -1 : 1)
+            .map((level) => ({
+              ...level,
+              label: intl.formatMessage(appMessages.supportlevels[level.value]),
+            })),
+        },
       },
     ];
   }

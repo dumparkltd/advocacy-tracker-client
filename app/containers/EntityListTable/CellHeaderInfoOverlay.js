@@ -23,7 +23,7 @@ export function CellHeaderInfoOverlay({ info }) {
           }}
         >
           <Box border="bottom" flex={{ shrink: 0 }} margin={{ bottom: 'small' }}>
-            <Text size="small" weight={600}>
+            <Text size="small" weight={500}>
               {info.title}
               {!info.title && (<FormattedMessage {...appMessages.attributes[info.attribute]} />)}
             </Text>
@@ -32,7 +32,7 @@ export function CellHeaderInfoOverlay({ info }) {
             {info.options.map((option) => (
               <LabelWrap key={option.value}>
                 <Dot color={option.color} />
-                <Text size="small" weight={500}>
+                <Text size="small">
                   {option.label}
                 </Text>
               </LabelWrap>

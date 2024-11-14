@@ -15,7 +15,6 @@ import InfoOverlay from 'components/InfoOverlay';
 import { usePrint } from 'containers/App/PrintContext';
 
 const StyledFieldWrap = styled(FieldWrap)`
-  padding-top: 15px;
   ${({ isPrint }) => isPrint && css`pointer-events: none;`}
 `;
 
