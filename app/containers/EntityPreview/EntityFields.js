@@ -16,6 +16,7 @@ import {
 } from 'themes/config';
 
 import qe from 'utils/quasi-equals';
+import asArray from 'utils/as-array';
 import {
   getUserConnectionField,
   getActorConnectionField,
@@ -47,6 +48,7 @@ import PreviewCountryTopicStatementList from './PreviewCountryTopicStatementList
 import PreviewCountryPositionsList from './PreviewCountryPositionsList';
 import ActorUsersField from './ActorUsersField';
 import AssociationsField from './AssociationsField';
+import AttributeField from './AttributeField';
 
 const Styled = styled((p) => <Box {...p} />)``;
 
@@ -83,6 +85,7 @@ export function EntityFields({
   // console.log('fields', fields && fields.toJS())
   // console.log('item', item && item.toJS())
   // console.log('columns', columns && columns.toJS())
+  // console.log('categories', categories && categories.toJS())
   return (
     <Styled gap="xlarge">
       {fields && fields.entrySeq().map(([fieldId, fieldContent]) => {
@@ -94,7 +97,6 @@ export function EntityFields({
           const column = columns.find((c) => c.get('id') === fieldContent.get('columnId'));
           if (column) {
             let theField;
-            // console.log('column', column && column.toJS())
             if (column.get('type') === 'users' && item.get('users') && actionConnections) {
               const users = item.get('users').map(
                 (actorId) => {
@@ -135,7 +137,11 @@ export function EntityFields({
                     return memo2;
                   }, itemTaxonomy
                 );
-                theField = getTaxonomyFields(taxonomyWithCategories);
+
+                // console.log(taxonomyWithCategories && taxonomyWithCategories.toJS())
+                if (taxonomyWithCategories && taxonomyWithCategories.getIn([taxId, 'categories'])) {
+                  theField = getTaxonomyFields(taxonomyWithCategories);
+                }
               }
             }
             if (actorConnections && qe(column.get('type'), 'associations') && item.get('associationsByType')) {
@@ -154,24 +160,28 @@ export function EntityFields({
                 }
               }
             }
-            return theField
-              ? (
+            if (theField) {
+              return (
                 <Box key={fieldId} gap="small">
                   {fieldContent.get('title') && (
                     <SectionTitle>
                       {fieldContent.get('title')}
                     </SectionTitle>
                   )}
-                  <FieldFactory
-                    field={{
-                      ...theField,
-                      onEntityClick,
-                      noPadding: true,
-                    }}
-                  />
+                  {asArray(theField).map((f, i) => (
+                    <FieldFactory
+                      key={i}
+                      field={{
+                        ...f,
+                        onEntityClick,
+                        noPadding: true,
+                      }}
+                    />
+                  ))}
                 </Box>
-              )
-              : null;
+              );
+            }
+            return null;
           }
         }
         if (fieldId === 'countryPositions') {
@@ -218,6 +228,15 @@ export function EntityFields({
               actorId={item.get('id')}
               content={fieldContent}
               onEntityClick={onEntityClick}
+            />
+          );
+        }
+        if (fieldContent.get('attribute')) {
+          return (
+            <AttributeField
+              key={fieldId}
+              entity={item}
+              content={fieldContent}
             />
           );
         }

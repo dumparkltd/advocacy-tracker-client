@@ -31,7 +31,7 @@ import {
   API_DATE_FORMAT,
   ACTIONTYPES_CONFIG,
 } from 'themes/config';
-import { CONTENT_MODAL } from 'containers/App/constants';
+import { CONTENT_MODAL, CONTENT_SINGLE } from 'containers/App/constants';
 
 import {
   loadEntitiesIfNeeded,
@@ -309,8 +309,8 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         <ContentHeader
           title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
           subTitle={subTitle}
-          type={CONTENT_MODAL}
-          buttons={[{
+          type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
+          buttons={inModal && [{
             type: 'cancel',
             onClick: () => handleCancel(typeId),
           }]}

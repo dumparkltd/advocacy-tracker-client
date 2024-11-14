@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import { isMinSize } from 'utils/responsive';
 
 import {
-  CONTENT_SINGLE, CONTENT_PAGE, CONTENT_MODAL,
+  CONTENT_PAGE, CONTENT_MODAL,
 } from 'containers/App/constants';
 
 import SupTitle from 'components/SupTitle';
@@ -104,7 +104,6 @@ const InfoTitlePrintOnly = styled(Text)`
 const renderTitle = (type, title) => {
   switch (type) {
     case CONTENT_PAGE:
-    case CONTENT_SINGLE:
       return (
         <SupTitle title={title} />
       );

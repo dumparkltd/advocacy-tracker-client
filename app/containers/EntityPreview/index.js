@@ -60,13 +60,17 @@ export function EntityPreview({
             onUpdatePath={onUpdatePath}
           />
         )}
-      {content && content.get('item') && !content.get('fields') && !content.get('entity') && (
-        <PreviewItem
-          item={content.get('item')}
-          itemContent={content.get('itemContent')}
-          columns={content.get('columns')}
-        />
-      )}
+      {content
+        && content.get('item')
+        && !content.get('fields')
+        && !content.get('entity')
+        && (
+          <PreviewItem
+            item={content.get('item')}
+            itemContent={content.get('itemContent')}
+            columns={content.get('columns')}
+          />
+        )}
       {content && content.get('footer') && !content.get('entity') && (
         <PreviewFooter
           content={content.get('footer').toJS()}

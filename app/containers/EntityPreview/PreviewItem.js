@@ -16,12 +16,10 @@ import {
   getActionConnectionField,
   getTaxonomyFields,
   getDateField,
-  getTextField,
   getUserConnectionField,
   getMarkdownField,
 } from 'utils/fields';
 import {
-  checkActionAttribute,
 } from 'utils/entities';
 
 import {
@@ -63,7 +61,6 @@ export function PreviewItem({
   categories,
   actorConnections,
   actionConnections,
-  itemContent,
   // onSetPreviewItemId,
   // previewEntity,
   // onUpdatePath,

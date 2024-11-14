@@ -131,7 +131,7 @@ const STATE_INITIAL = {
   downloadActive: false,
 };
 const reducePreviewItem = ({
-  item, id, path, intl,
+  item, id, path, intl, onUpdatePath,
 }) => {
   if (id && path) {
     return { entity: { path, id } };
@@ -168,6 +168,37 @@ const reducePreviewItem = ({
       header: {
         aboveTitle: label,
         title: item && item.getIn(['attributes', 'title']),
+        titlePath: `${ROUTES.ACTION}/${item.get('id')}`,
+        topActions: [{
+          label: 'Edit',
+          path: `${ROUTES.ACTOR}${ROUTES.EDIT}/${item.get('id')}`,
+          onClick: (e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            onUpdatePath(`${ROUTES.ACTION}${ROUTES.EDIT}/${item.get('id')}`);
+          },
+        }],
+      },
+      fields: {
+        date: {
+          attribute: 'date',
+        },
+        'taxonomy-7': {
+          columnId: 'taxonomy-7',
+        },
+        'taxonomy-13': {
+          columnId: 'taxonomy-13',
+        },
+        description: {
+          attribute: 'description',
+        },
+        actors: {
+          columnId: 'actors',
+          title: 'Stakeholders',
+        },
+        parents: {
+          columnId: 'parents',
+          title: 'Activities',
+        },
       },
       item,
       footer: {
@@ -451,6 +482,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       searchQuery,
       currentUserId,
       secondaryNavItems,
+      onUpdatePath,
     } = this.props;
     // detect print to avoid expensive rendering
     const printing = isPrintView || !!(
@@ -707,7 +739,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               {showList && dataReady && (
                 <EntitiesListView
                   reducePreviewItem={({ item, id, path }) => reducePreviewItem({
-                    item, id, path, intl,
+                    item, id, path, intl, onUpdatePath,
                   })}
                   onScrollToTop={this.scrollToTop}
                   searchQuery={searchQuery}
@@ -935,6 +967,7 @@ EntityList.propTypes = {
   includeInofficial: PropTypes.bool,
   onEntitiesDelete: PropTypes.func,
   onUpdateFilters: PropTypes.func,
+  onUpdatePath: PropTypes.func,
   isPrintView: PropTypes.bool,
   currentUserId: PropTypes.string,
   filteringOptions: PropTypes.array,
@@ -1016,6 +1049,7 @@ function mapDispatchToProps(dispatch, props) {
     onUpdateQuery: (args) => {
       dispatch(updateRouteQuery(args));
     },
+    onUpdatePath: (path) => dispatch(updatePath(path)),
     onUpdateFilters: (values) => {
       dispatch(setFilters(values));
     },
