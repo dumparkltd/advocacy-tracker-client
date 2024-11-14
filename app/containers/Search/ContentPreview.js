@@ -15,7 +15,6 @@ import { isMaxSize } from 'utils/responsive';
 import ContentSimple from 'components/styled/ContentSimple';
 import Container from 'components/styled/Container';
 
-
 import messages from './messages';
 
 import CardTeaser from './CardTeaser';
@@ -25,9 +24,7 @@ const GroupTitle = styled((p) => <Text size="large" {...p} />)`
   text-transform: uppercase;
   font-family: ${({ theme }) => theme.fonts.title};
 `;
-const StyledContainer = styled((p) => <Container {...p} />)`
-  max-width: 100%;
-`;
+const StyledContainer = styled((p) => <Container {...p} />)``;
 const SectionTitle = styled.h2`
   font-weight: 500;
   font-family: ${({ theme }) => theme.fonts.title};
