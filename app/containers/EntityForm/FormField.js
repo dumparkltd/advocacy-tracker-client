@@ -33,7 +33,7 @@ import WarningDot from './WarningDot';
 
 const Hint = styled.div`
   color: ${palette('text', 1)};
-  font-size: ${(props) => props.theme.sizes.text.small};
+  font-size: ${(props) => props.theme.text.xsmall.size};
   margin-top: -6px;
   @media print {
     font-size: ${(props) => props.theme.sizes.print.small};

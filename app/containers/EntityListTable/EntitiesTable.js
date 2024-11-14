@@ -137,7 +137,7 @@ const ColumnHighlightTitle = styled.div`
   bottom: 100%;
   white-space: nowrap;
   box-shadow: 0px 2px 4px rgba(0,0,0,0.20);
-  background: #6d7576;
+  background: #898989;
   padding: 5px 8px;
 `;
 

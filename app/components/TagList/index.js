@@ -32,7 +32,7 @@ flex-wrap:${({ isPrint }) => isPrint ? 'wrap' : 'none'};
 
 const ConnectionGroupLabel = styled.span`
   color: ${palette('text', 1)};
-  font-size: ${({ theme }) => theme.sizes && theme.sizes.text.smaller};
+  font-size: ${({ theme }) => theme.sizes && theme.text.xsmall.sizeer};
   padding-top: 2px;
   white-space: nowrap;
   @media print {

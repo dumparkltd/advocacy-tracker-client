@@ -17,8 +17,7 @@ const Markdown = styled(ReactMarkdown)`
   font-size: ${({ theme }) => theme.text.mediumTall.size};
   line-height: ${({ theme }) => theme.text.mediumTall.height};
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    font-size: ${({ theme, isPrint }) => isPrint ? theme.textPrint.mediumTall.size : theme.text.largeTall.size};
-    line-height: ${({ theme }) => theme.text.largeTall.height};
+    font-size: ${({ theme, isPrint }) => isPrint ? theme.textPrint.mediumTall.size : theme.text.mediumTall.size};
   }
   @media print {
     font-size: ${({ theme }) => theme.textPrint.mediumTall.size};
@@ -44,13 +43,11 @@ export function MarkdownField({ field }) {
   }
   return (
     <FieldWrap>
-      {field.label
-        && (
-          <Label>
-            <FormattedMessage {...field.label} />
-          </Label>
-        )
-      }
+      {field.label && (
+        <Label>
+          <FormattedMessage {...field.label} />
+        </Label>
+      )}
       <Markdown source={value} className="react-markdown" isPrint={isPrint} />
       {field.moreLess && field.value && field.value.length > LIMIT && (
         <ToggleAllItems

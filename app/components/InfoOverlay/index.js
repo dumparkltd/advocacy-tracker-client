@@ -28,17 +28,26 @@ const DropContent = styled(({ dropBackground, ...p }) => (
 `;
 
 const Markdown = styled(ReactMarkdown)`
-  font-size: ${(props) => props.theme.sizes.text.markdownMobile};
+  font-size: ${(props) => props.theme.text.medium.size};
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    font-size: ${(props) => props.theme.sizes.text.markdown};
+    font-size: ${(props) => props.theme.text.medium.size};
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.markdown};
   }
 `;
 
+const StyledButton = styled(Button)`
+  color: ${({ theme, colorButton = 'hint' }) => theme.global.colors[colorButton]};
+  stroke: ${({ theme, colorButton = 'hint' }) => theme.global.colors[colorButton]};
+  &:hover {
+    color: ${({ theme }) => theme.global.colors.highlight};
+    stroke: ${({ theme }) => theme.global.colors.highlight};
+  }
+`;
+
 function InfoOverlay({
-  dark,
+  // dark,
   content,
   tooltip,
   title,
@@ -63,7 +72,8 @@ function InfoOverlay({
         align="center"
         justify="center"
       >
-        <Button
+        <StyledButton
+          colorButton={colorButton}
           onMouseOver={() => tooltip && showInfo(true)}
           onMouseLeave={() => tooltip && showInfo(false)}
           onFocus={() => tooltip && showInfo(true)}
@@ -77,18 +87,18 @@ function InfoOverlay({
             (tooltip || icon === 'question')
               ? (
                 <CircleQuestion
-                  color={colorButton || (dark ? 'light-5' : 'dark-5')}
-                  size="21px"
+                  color="currentColor"
+                  size="19px"
                 />
               )
               : (
                 <CircleInformation
-                  color={colorButton || (dark ? 'light-5' : 'dark-5')}
-                  size="21px"
+                  color="currentColor"
+                  size="19px"
                 />
               )
           }
-        </Button>
+        </StyledButton>
       </Box>
       {info && infoRef && tooltip && (
         <Drop
@@ -119,7 +129,7 @@ function InfoOverlay({
 }
 
 InfoOverlay.propTypes = {
-  dark: PropTypes.bool,
+  // dark: PropTypes.bool,
   markdown: PropTypes.bool,
   inline: PropTypes.bool,
   tooltip: PropTypes.bool,

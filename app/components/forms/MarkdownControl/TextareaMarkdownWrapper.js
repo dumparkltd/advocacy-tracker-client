@@ -128,7 +128,6 @@ function TextareaMarkdownWrapper(props) {
             <Box>
               <InfoOverlay
                 title="Format text using markdown"
-                colorButton={theme.global.colors.hint}
                 padButton="none"
                 content={(
                   <div>

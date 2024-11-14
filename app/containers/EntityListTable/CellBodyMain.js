@@ -88,7 +88,7 @@ export function CellBodyMain({
           <Box direction="row" align="end">
             {meta.map((item, i) => (
               <Meta key={i} direction="row" align="end">
-                <Label color={item.color || 'dark-5'} size={item.size || 'xsmall'}>
+                <Label color={item.color || '#898989'} size={item.size || 'xsmall'}>
                   {item.text}
                 </Label>
                 {i + 1 < meta.length && (

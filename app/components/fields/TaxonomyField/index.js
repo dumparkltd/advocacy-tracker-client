@@ -21,10 +21,17 @@ const StyledFieldWrap = styled(FieldWrap)`
 
 function TaxonomyField({ field, intl }) {
   const isPrint = usePrint();
+  const fill = typeof field.fill !== 'undefined'
+    ? field.fill
+    : true;
   return (
     <StyledFieldWrap isPrint={isPrint}>
-      <ListLabelWrap>
-        <Box>
+      <ListLabelWrap
+        fill={fill ? 'horizontal' : false}
+        justify={fill ? 'between' : 'start'}
+        gap="small"
+      >
+        <Box margin={{ top: '2px' }}>
           <ListLabel>
             <FormattedMessage {...field.label} />
           </ListLabel>
@@ -34,7 +41,6 @@ function TaxonomyField({ field, intl }) {
             title={intl.formatMessage(field.label)}
             content={intl.formatMessage(field.info)}
             padButton="none"
-            colorButton="dark-5"
           />
         )}
       </ListLabelWrap>
@@ -42,10 +48,10 @@ function TaxonomyField({ field, intl }) {
         <ListItem key={i}>
           <Box
             direction="row"
-            fill="horizontal"
             align="center"
-            justify="between"
-            flex={{ grow: 0, shrink: 0 }}
+            gap="small"
+            fill={fill ? 'horizontal' : false}
+            justify={fill ? 'between' : 'start'}
           >
             {value.linkTo
               ? (
@@ -64,7 +70,6 @@ function TaxonomyField({ field, intl }) {
                 title={value.label}
                 content={value.info}
                 padButton="none"
-                colorButton="dark-5"
                 markdown
               />
             )}

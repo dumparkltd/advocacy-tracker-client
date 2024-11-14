@@ -24,9 +24,9 @@ import LayerWrap from './LayerWrap';
 import LayerContent from './LayerContent';
 
 const Markdown = styled(ReactMarkdown)`
-  font-size: ${(props) => props.theme.sizes.text.markdownMobile};
+  font-size: ${(props) => props.theme.text.medium.size};
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    font-size: ${(props) => props.theme.sizes.text.markdown};
+    font-size: ${(props) => props.theme.text.medium.size};
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.markdown};

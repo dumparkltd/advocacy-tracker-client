@@ -19,6 +19,7 @@ import A from 'components/styled/A';
 const Title = styled((p) => <Heading level={3} {...p} />)`
   font-family: ${({ theme }) => theme.fonts.title};
   font-size: ${({ largeTitle }) => largeTitle ? 48 : 42}px;
+  line-height: ${({ largeTitle }) => largeTitle ? 52 : 45}px;
   font-weight: normal;
   margin: 0px;
 `;
@@ -35,7 +36,7 @@ const NavButton = styled((p) => <Button {...p} />)`
     stroke-width: 3px;
   }
   &:hover {
-    color: ${palette('primary', 0)};
+    color: ${({ isDisabled }) => isDisabled ? palette('light', 3) : palette('primary', 0)};
   }
 `;
 const CloseButton = styled((p) => <Button {...p} />)`
@@ -62,7 +63,7 @@ const TitleLink = styled(A)`
   }
 `;
 const HeaderLink = styled(A)`
-  color: #6D7576;
+  color: #898989;
   text-transform: uppercase;
   font-family: ${({ theme }) => theme.fonts.title};
 `;
@@ -130,7 +131,7 @@ export function PreviewHeader({
             {aboveTitle}
           </StyledReference>
         )}
-        <Box direction="row" justify="between" align="start">
+        <Box direction="row" justify="between" align="start" gap="xsmall">
           {!titlePath && (
             <Title largeTitle={largeTitle}>
               {title}
@@ -151,7 +152,14 @@ export function PreviewHeader({
             </TitleLink>
           )}
           {onSetPreviewItemId && (nextPreviewItem || prevPreviewItem) && (
-            <Box direction="row" flex={{ shrink: 0, grow: 0 }} width="120" gap="xsmall" align="center">
+            <Box
+              direction="row"
+              flex={{ shrink: 0, grow: 0 }}
+              width="120"
+              gap="xsmall"
+              align="center"
+              margin={{ top: largeTitle ? '12px' : '7px' }}
+            >
               <NavButton
                 onClick={() => onSetPreviewItemId(prevPreviewItem)}
                 isDisabled={!prevPreviewItem}

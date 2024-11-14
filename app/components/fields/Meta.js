@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { palette } from 'styled-theme';
 
 const Meta = styled.div`
-  font-size: ${(props) => props.theme.sizes.text.small};
+  font-size: ${(props) => props.theme.text.xsmall.size};
   color: ${palette('text', 1)};
   line-height: 1.6;
   @media print {

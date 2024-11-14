@@ -63,9 +63,9 @@ const Description = styled.div`
 `;
 
 const Markdown = styled(ReactMarkdown)`
-  font-size: ${({ theme }) => theme.sizes.text.markdownMobile};
+  font-size: ${({ theme }) => theme.text.medium.size};
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    font-size: ${({ theme }) => theme.sizes.text.markdown};
+    font-size: ${({ theme }) => theme.text.medium.size};
   }
   @media print {
     font-size: ${({ theme }) => theme.sizes.print.markdown};

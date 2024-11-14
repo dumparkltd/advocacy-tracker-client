@@ -87,7 +87,7 @@ export function EntityFields({
   // console.log('columns', columns && columns.toJS())
   // console.log('categories', categories && categories.toJS())
   return (
-    <Styled gap="xlarge">
+    <Styled gap="large">
       {fields && fields.entrySeq().map(([fieldId, fieldContent]) => {
         if (!fieldContent) {
           return null;
@@ -162,22 +162,25 @@ export function EntityFields({
             }
             if (theField) {
               return (
-                <Box key={fieldId} gap="small">
-                  {fieldContent.get('title') && (
-                    <SectionTitle>
-                      {fieldContent.get('title')}
-                    </SectionTitle>
-                  )}
-                  {asArray(theField).map((f, i) => (
-                    <FieldFactory
-                      key={i}
-                      field={{
-                        ...f,
-                        onEntityClick,
-                        noPadding: true,
-                      }}
-                    />
-                  ))}
+                <Box key={fieldId} direction="row" fill={false} flex={false}>
+                  <Box gap="small">
+                    {fieldContent.get('title') && (
+                      <SectionTitle>
+                        {fieldContent.get('title')}
+                      </SectionTitle>
+                    )}
+                    {asArray(theField).map((f, i) => (
+                      <FieldFactory
+                        key={i}
+                        field={{
+                          ...f,
+                          onEntityClick,
+                          noPadding: true,
+                          fill: false,
+                        }}
+                      />
+                    ))}
+                  </Box>
                 </Box>
               );
             }
