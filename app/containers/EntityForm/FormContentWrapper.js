@@ -75,6 +75,7 @@ export function FormContentWrapper({
                     if (!row.fields) return null;
                     let { fields } = row;
                     const sumBasis = fields.reduce((memo, field) => {
+                      if (!field) return null;
                       if (field.basis) {
                         if (field.basis === '1/2') {
                           return memo + 0.5;

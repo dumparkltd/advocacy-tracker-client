@@ -2365,7 +2365,7 @@ export const ACTIONTYPES_CONFIG = {
               [{
                 connection: API.ACTIONS,
                 type: ACTIONTYPES.OP,
-                asParents: true,
+                asChildren: true,
                 prepopulateIfPrevious: true,
               }],
               [{
