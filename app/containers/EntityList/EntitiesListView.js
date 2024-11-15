@@ -119,6 +119,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       onScrollToTop,
       onEntityClick,
       onClearFilters,
+      skipPreviews,
     } = this.props;
 
     const { viewType } = this.state;
@@ -480,6 +481,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         )}
         {showRelatedActorsForActions && (
           <EntityListTable
+            skipPreviews={skipPreviews}
             isByOption
             reducePreviewItem={reducePreviewItem}
             hasFilters={hasFilters}
@@ -555,6 +557,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {showRelatedUsersForActions && (
           <Box>
             <EntityListTable
+              skipPreviews={skipPreviews}
               reducePreviewItem={reducePreviewItem}
               isByOption
               hasFilters={hasFilters}
@@ -601,6 +604,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         )}
         {showMainEntities && (
           <EntityListTable
+            skipPreviews={skipPreviews}
             hasFilters={hasFilters}
             columns={columns}
             options={{
@@ -670,6 +674,7 @@ EntitiesListView.propTypes = {
   hasFilters: PropTypes.bool,
   typeId: PropTypes.string,
   showCode: PropTypes.bool,
+  skipPreviews: PropTypes.bool,
   mapSubject: PropTypes.string,
   searchQuery: PropTypes.string,
   allEntityCount: PropTypes.number,

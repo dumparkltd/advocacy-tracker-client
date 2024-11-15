@@ -86,6 +86,7 @@ export function PageList({
           plural: intl.formatMessage(appMessages.entities.pages.plural),
         }}
         locationQuery={fromJS(location.query)}
+        skipPreviews
       />
     </div>
   );

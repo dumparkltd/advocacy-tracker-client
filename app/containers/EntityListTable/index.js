@@ -119,6 +119,7 @@ export function EntityListTable({
   onUpdateColumnFilters,
   onEntityClick,
   locationQuery,
+  skipPreviews,
 }) {
   if (!columns) return null;
   const size = React.useContext(ResponsiveContext);
@@ -345,10 +346,10 @@ export function EntityListTable({
         visibleColumns={visibleColumns || []}
         availableColumns={availableColumns || []}
         onEntityClick={(idOrPath, path, componentId) => {
-          if (inSingleView && onEntityClick) {
+          if ((skipPreviews || inSingleView) && onEntityClick) {
             onEntityClick(idOrPath, path);
           }
-          if (!inSingleView && onSetPreviewItemId && componentId) {
+          if (!skipPreviews && !inSingleView && onSetPreviewItemId && componentId) {
             onSetPreviewItemId(`${componentId}|${path}|${idOrPath}`);
           }
         }}
@@ -468,6 +469,7 @@ EntityListTable.propTypes = {
   label: PropTypes.string,
   options: PropTypes.object,
   isByOption: PropTypes.bool,
+  skipPreviews: PropTypes.bool,
   isPrintView: PropTypes.bool,
   printConfig: PropTypes.object,
   pageItemSelectConfig: PropTypes.object,

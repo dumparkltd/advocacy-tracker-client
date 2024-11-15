@@ -475,6 +475,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       currentUserId,
       secondaryNavItems,
       onUpdatePath,
+      skipPreviews,
     } = this.props;
     // detect print to avoid expensive rendering
     const printing = isPrintView || !!(
@@ -749,7 +750,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                   connections={connections}
                   connectedTaxonomies={connectedTaxonomies}
                   entityIdsSelected={entityIdsSelectedFiltered}
-
+                  skipPreviews={skipPreviews}
                   config={config}
                   entityTitle={entityTitle}
 
@@ -964,6 +965,7 @@ EntityList.propTypes = {
   currentUserId: PropTypes.string,
   filteringOptions: PropTypes.array,
   secondaryNavItems: PropTypes.array,
+  skipPreviews: PropTypes.bool,
 };
 
 EntityList.contextTypes = {
@@ -1020,10 +1022,10 @@ function mapDispatchToProps(dispatch, props) {
           }
         });
       }
-      if (componentId) {
-        dispatch(setListPreview(`${componentId}|${path}|${id}`));
-      } else {
+      if (props.skipPreviews || !componentId) {
         dispatch(updatePath(`${path || props.config.clientPath}/${id}`));
+      } else {
+        dispatch(setListPreview(`${componentId}|${path}|${id}`));
       }
     },
     onEntitySelectAll: (ids) => {
