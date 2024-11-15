@@ -23,6 +23,7 @@ import {
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPES,
   ACTORTYPES,
+  MEMBERSHIPS,
 } from 'themes/config';
 
 import appMessages from 'containers/App/messages';
@@ -908,6 +909,13 @@ export const getActorPreviewFields = ({
     },
     [],
   );
+  // associated taxonomies
+  if (taxonomiesWithCategoriesByType) {
+    fields = [
+      ...fields,
+      ...getTaxonomyFields(taxonomiesWithCategoriesByType),
+    ];
+  }
   // member of
   if (associationsByType) {
     fields = associationsByType.reduce(
@@ -944,13 +952,6 @@ export const getActorPreviewFields = ({
         return memo;
       }, fields
     );
-  }
-  // associated taxonomies
-  if (taxonomiesWithCategoriesByType) {
-    fields = [
-      ...fields,
-      ...getTaxonomyFields(taxonomiesWithCategoriesByType),
-    ];
   }
   return fields;
 };
@@ -1164,4 +1165,88 @@ export const getUserPreviewFields = ({
     ];
   }
   return fields;
+};
+
+export const getActiontypePreviewFields = (typeId) => {
+  if (qe(typeId, ACTIONTYPES.EXPRESS)) {
+    return {
+      date: {
+        attribute: 'date',
+      },
+      'taxonomy-13': {
+        columnId: 'taxonomy-13',
+      },
+      'taxonomy-7': {
+        columnId: 'taxonomy-7',
+      },
+      description: {
+        attribute: 'description',
+      },
+      actors: {
+        columnId: 'actors',
+        title: 'Stakeholders',
+      },
+      statementIndicators: {
+        title: 'Topics',
+      },
+    };
+  }
+  return {
+    date: {
+      attribute: 'date',
+    },
+    description: {
+      attribute: 'description',
+    },
+    actionUsers: {
+      title: 'WWF staff',
+    },
+    actors: {
+      columnId: 'actors',
+      title: 'Stakeholders',
+    },
+  };
+};
+export const getActortypePreviewFields = (typeId) => {
+  let fields = {};
+  if (!qe(typeId, ACTORTYPES.REG)) {
+    fields = {
+      ...fields,
+      actorIndicators: {
+        withOptions: false,
+      },
+    };
+  }
+  if (!qe(typeId, ACTORTYPES.COUNTRY)) {
+    fields = {
+      ...fields,
+      description: {
+        attribute: 'description',
+      },
+    };
+  }
+  fields = {
+    ...fields,
+    actorUsers: {
+      title: 'WWF staff',
+    },
+  };
+  if (Object.keys(MEMBERSHIPS).indexOf(`${typeId}`) > -1) {
+    fields = {
+      ...fields,
+      regions: {
+        actortype: ACTORTYPES.REG,
+        title: 'Regions',
+        type: 'associations',
+      },
+      groups: {
+        actortype: ACTORTYPES.GROUP,
+        title: 'Groups',
+        type: 'associations',
+      },
+    };
+  }
+  return {
+    ...fields,
+  };
 };

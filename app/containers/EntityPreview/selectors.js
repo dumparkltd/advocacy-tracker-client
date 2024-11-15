@@ -33,6 +33,7 @@ import {
   selectActionResourcesGroupedByAction,
   selectUserActionsGroupedByAction,
   selectActionCategoriesGroupedByAction,
+  selectActorWithPositions,
 } from 'containers/App/selectors';
 
 import qe from 'utils/quasi-equals';
@@ -323,17 +324,17 @@ export const selectActorsByType = createSelector(
 );
 
 
-const selectUserActionAssociations = createSelector(
+const selectUserActionAssociationsForUser = createSelector(
   (state, { id }) => id,
   selectUserActionsGroupedByUser,
-  (actorId, associationsByUser) => associationsByUser.get(
-    parseInt(actorId, 10)
+  (userId, associationsByUser) => associationsByUser.get(
+    parseInt(userId, 10)
   )
 );
 
 const selectUserActionsAssociated = createSelector(
   selectActions,
-  selectUserActionAssociations,
+  selectUserActionAssociationsForUser,
   (actions, associations) => actions && associations && associations.reduce(
     (memo, id) => {
       const entity = actions.get(id.toString());
@@ -379,9 +380,13 @@ const selectUserActionsByType = createSelector(
       .sortBy((val, key) => key);
   }
 );
-
 export const selectPreviewEntity = createSelector(
   (state, { id, path }) => selectEntity(state, { id, path }),
+  (entity) => entity
+);
+
+export const selectPreviewEntityWithConnections = createSelector(
+  selectPreviewEntity,
   selectIndicatorsAssociated,
   selectIndicatorConnections,
   selectActionIndicatorsGroupedByActionAttributes,
@@ -469,17 +474,36 @@ export const selectPreviewEntity = createSelector(
     return previewEntity;
   }
 );
-
-const selectUserAssociations = createSelector(
+const selectUserActorAssociations = createSelector(
   (state, { id }) => id,
   selectUserActorsGroupedByActor,
   (actorId, associationsByActor) => associationsByActor.get(
     parseInt(actorId, 10)
   )
 );
-const selectUsersAssociated = createSelector(
+const selectUserActionAssociations = createSelector(
+  (state, { id }) => id,
+  selectUserActionsGroupedByAction,
+  (actionId, associationsByAction) => associationsByAction.get(
+    parseInt(actionId, 10)
+  )
+);
+const selectUsersAssociatedActors = createSelector(
   selectUsers,
-  selectUserAssociations,
+  selectUserActorAssociations,
+  (users, associations) => users && associations && associations.reduce(
+    (memo, id) => {
+      const entity = users.get(id.toString());
+      return entity
+        ? memo.set(id, entity)
+        : memo;
+    },
+    Map(),
+  )
+);
+const selectUsersAssociatedActions = createSelector(
+  selectUsers,
+  selectUserActionAssociations,
   (users, associations) => users && associations && associations.reduce(
     (memo, id) => {
       const entity = users.get(id.toString());
@@ -491,16 +515,14 @@ const selectUsersAssociated = createSelector(
   )
 );
 
-export const selectEntityUsers = createSelector(
-  selectUsersAssociated,
+export const selectActorUsers = createSelector(
+  selectUsersAssociatedActors,
   selectUserConnections,
   selectUserActorsGroupedByUser,
-  selectUserActionsGroupedByUser,
   (
     users,
     userConnections,
     userActors,
-    userActions,
   ) => {
     if (!users || !userConnections) return Map();
     return users && users
@@ -508,13 +530,31 @@ export const selectEntityUsers = createSelector(
         user,
         userConnections,
         userActors,
+      }))
+      .sortBy((val, key) => key);
+  }
+);
+export const selectActionUsers = createSelector(
+  selectUsersAssociatedActions,
+  selectUserConnections,
+  selectUserActionsGroupedByUser,
+  (
+    users,
+    userConnections,
+    userActions,
+  ) => {
+    if (!users || !userConnections) return Map();
+    return users && users
+      .map((user) => setUserConnections({
+        user,
+        userConnections,
         userActions,
       }))
       .sortBy((val, key) => key);
   }
 );
 
-export const selectEntityIndicators = createSelector(
+export const selectActionIndicators = createSelector(
   (state, { id }) => id,
   (state, { actionType }) => actionType,
   selectIndicatorsAssociated,
@@ -558,5 +598,42 @@ export const selectEntityIndicators = createSelector(
       }
     }
     return indicatorsWithConnections && indicatorsWithConnections.sortBy((val, key) => key);
+  }
+);
+
+export const selectIndicatorsWithSupport = createSelector(
+  (state, { id }) => id,
+  selectActorWithPositions,
+  selectIndicators,
+  (actorId, actorWithPositions, indicators) => {
+    const indicatorsWithSupport = indicators && indicators.reduce(
+      (memo, indicator, id) => {
+        const indicatorPositions = actorWithPositions
+          && actorWithPositions.get('indicatorPositions')
+          && actorWithPositions.getIn([
+            'indicatorPositions',
+            indicator.get('id'),
+          ]);
+        if (indicatorPositions) {
+          const relPos = indicatorPositions.first();
+          const result = relPos && indicator
+            .setIn(
+              ['supportlevel', actorId],
+              relPos.get('supportlevel_id')
+            )
+            .set(
+              'position',
+              relPos,
+            );
+          if (result) {
+            return memo.set(id, result);
+          }
+          return memo;
+        }
+        return memo;
+      },
+      Map()
+    );
+    return indicatorsWithSupport;
   }
 );

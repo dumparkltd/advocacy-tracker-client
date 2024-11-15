@@ -12,6 +12,8 @@ import {
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
   API,
   ROUTE_FOR_API,
+  MEMBERSHIPS,
+  ACTORTYPES,
 } from 'themes/config';
 import { find, reduce, every } from 'lodash/collection';
 
@@ -1438,3 +1440,53 @@ export const actorsByType = (actorActors, actors) => actorActors && actors && ac
 ).sortBy((val, key) => key);
 
 export const getEntityPath = (entity) => ROUTE_FOR_API[entity.get('type')];
+
+const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
+  && MEMBERSHIPS[typeId].length > 0
+  && !qe(typeId, ACTORTYPES.CONTACT);
+
+export const getIndicatorColumns = ({
+  typeId, intl, isAdmin,
+}) => {
+  let columns = [
+    {
+      id: 'main',
+      type: 'main',
+      sort: 'title',
+      attributes: isAdmin ? ['code', 'title'] : ['title'],
+    },
+    {
+      id: 'positionStatement',
+      type: 'positionStatement',
+    },
+    {
+      id: 'supportlevel_id',
+      type: 'supportlevel',
+      title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+      info: {
+        type: 'key-categorical',
+        attribute: 'supportlevel_id',
+        options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+          .sort((a, b) => a.order < b.order ? -1 : 1)
+          .map((level) => ({
+            ...level,
+            label: intl.formatMessage(appMessages.supportlevels[level.value]),
+          })),
+      },
+    },
+    {
+      id: 'authority',
+      type: 'positionStatementAuthority',
+    },
+  ];
+  if (hasMemberOption(typeId)) {
+    columns = [
+      ...columns,
+      {
+        id: 'viaGroups',
+        type: 'viaGroups',
+      },
+    ];
+  }
+  return columns;
+};

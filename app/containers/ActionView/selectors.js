@@ -373,7 +373,7 @@ const selectIndicatorsAssociated = createSelector(
 );
 // get associated actors with associoted actions and categories
 // - group by actortype
-export const selectEntityIndicators = createSelector(
+export const selectActionIndicators = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectViewEntity,
   selectIndicatorsAssociated,

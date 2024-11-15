@@ -53,7 +53,7 @@ export function EntityPreview({
         && !content.get('entity')
         && (
           <EntityFields
-            fields={content.get('fields')}
+            fields={content.get('fields').toJS()}
             item={content.get('item')}
             itemContent={content.get('itemContent')}
             columns={content.get('columns')}

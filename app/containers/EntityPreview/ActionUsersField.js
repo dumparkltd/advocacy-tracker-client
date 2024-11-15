@@ -4,14 +4,14 @@ import { connect } from 'react-redux';
 import FieldFactory from 'components/fields/FieldFactory';
 import styled from 'styled-components';
 import { Box, Text } from 'grommet';
-import { injectIntl, intlShape } from 'react-intl';
 
-import { API, ACTIONTYPES } from 'themes/config';
+import { API } from 'themes/config';
 
 // import qe from 'utils/quasi-equals';
 
-import { getIndicatorColumnsForStatement } from 'utils/entities';
-import { getIndicatorConnectionField } from 'utils/fields';
+import {
+  getUserConnectionField,
+} from 'utils/fields';
 
 import {
   loadEntitiesIfNeeded,
@@ -22,13 +22,14 @@ import {
 } from 'containers/App/selectors';
 
 import {
-  selectActionIndicators,
+  selectActionUsers,
 } from './selectors';
 
 export const DEPENDENCIES = [
-  API.INDICATORS,
-  API.ACTIONS,
-  API.ACTION_INDICATORS,
+  API.USERS,
+  API.USER_ROLES,
+  API.ACTORS,
+  API.USER_ACTORS,
 ];
 
 const SectionTitle = styled((p) => <Text size="xsmall" {...p} />)`
@@ -36,30 +37,20 @@ const SectionTitle = styled((p) => <Text size="xsmall" {...p} />)`
   font-weight: bold;
 `;
 
-export function StatementIndicatorsField({
+export function ActionUsersField({
   content,
   onEntityClick,
   onLoadEntitiesIfNeeded,
   dataReady,
-  statement,
-  intl,
-  isAdmin,
-  indicators,
+  users,
+  // actorId,
 }) {
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
   }, [dataReady]);
 
-  const field = getIndicatorConnectionField({
-    indicators,
-    onEntityClick,
-    // connections: indicatorConnections,
-    skipLabel: true,
-    columns: getIndicatorColumnsForStatement({
-      action: statement,
-      intl,
-      isAdmin,
-    }),
+  const field = getUserConnectionField({
+    users,
   });
 
   return (
@@ -80,26 +71,17 @@ export function StatementIndicatorsField({
   );
 }
 
-StatementIndicatorsField.propTypes = {
+ActionUsersField.propTypes = {
   onLoadEntitiesIfNeeded: PropTypes.func,
   content: PropTypes.object, // immutable Map
-  statement: PropTypes.object, // immutable Map
-  indicators: PropTypes.object, // immutable Map
+  users: PropTypes.object, // immutable Map
   onEntityClick: PropTypes.func,
   dataReady: PropTypes.bool,
-  isAdmin: PropTypes.bool,
-  intl: intlShape,
 };
 
-const mapStateToProps = (state, { statement }) => ({
+const mapStateToProps = (state, { actionId }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
-  indicators: selectActionIndicators(
-    state,
-    {
-      id: statement.get('id'),
-      actionType: ACTIONTYPES.EXPRESS,
-    },
-  ),
+  users: selectActionUsers(state, { id: actionId }),
 });
 export function mapDispatchToProps(dispatch) {
   return {
@@ -109,4 +91,4 @@ export function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(StatementIndicatorsField));
+export default connect(mapStateToProps, mapDispatchToProps)(ActionUsersField);

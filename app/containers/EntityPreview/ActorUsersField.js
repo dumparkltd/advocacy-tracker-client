@@ -22,7 +22,7 @@ import {
 } from 'containers/App/selectors';
 
 import {
-  selectEntityUsers,
+  selectActorUsers,
 } from './selectors';
 
 export const DEPENDENCIES = [
@@ -43,6 +43,7 @@ export function ActorUsersField({
   onLoadEntitiesIfNeeded,
   dataReady,
   users,
+  // actorId,
 }) {
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
@@ -51,6 +52,7 @@ export function ActorUsersField({
   const field = getUserConnectionField({
     users,
   });
+
   return (
     <Box gap="small">
       {content.get('title') && (
@@ -79,7 +81,7 @@ ActorUsersField.propTypes = {
 
 const mapStateToProps = (state, { actorId }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
-  users: selectEntityUsers(state, actorId),
+  users: selectActorUsers(state, { id: actorId }),
 });
 export function mapDispatchToProps(dispatch) {
   return {

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl } from 'react-intl';
-import { Map } from 'immutable';
+import { Map, fromJS } from 'immutable';
 // import { injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
@@ -48,9 +48,11 @@ import PreviewCountryTopicPosition from './PreviewCountryTopicPosition';
 import PreviewCountryTopicStatementList from './PreviewCountryTopicStatementList';
 import PreviewCountryPositionsList from './PreviewCountryPositionsList';
 import ActorUsersField from './ActorUsersField';
+import ActionUsersField from './ActionUsersField';
 import AssociationsField from './AssociationsField';
 import AttributeField from './AttributeField';
 import StatementIndicatorsField from './StatementIndicatorsField';
+import ActorIndicatorsField from './ActorIndicatorsField';
 
 const Styled = styled((p) => <Box {...p} />)``;
 
@@ -85,19 +87,21 @@ export function EntityFields({
   onEntityClick,
   isAdmin,
 }) {
-  // console.log('fields', fields && fields.toJS())
+  // console.log('fields', fields && fields)
   // console.log('item', item && item.toJS())
   // console.log('columns', columns && columns.toJS())
   // console.log('categories', categories && categories.toJS())
   return (
     <Styled gap="large">
-      {fields && fields.entrySeq().map(([fieldId, fieldContent]) => {
+      {fields && Object.keys(fields).map((fieldId) => {
+        const fieldContent = fields[fieldId];
         if (!fieldContent) {
           return null;
         }
-        if (columns && fieldContent.get('columnId')) {
+        // console.log(fieldContent)
+        if (columns && fieldContent.columnId) {
           // console.log('columns', columns && columns.toJS())
-          const column = columns.find((c) => c.get('id') === fieldContent.get('columnId'));
+          const column = columns.find((c) => c.get('id') === fieldContent.columnId);
           if (column) {
             let theField;
             if (column.get('type') === 'users' && item.get('users') && actionConnections) {
@@ -190,8 +194,8 @@ export function EntityFields({
               );
             }
             if (actorConnections && qe(column.get('type'), 'associations') && item.get('associationsByType')) {
-              if (fieldContent.get('type')) {
-                const actorIds = item.getIn(['associationsByType', parseInt(fieldContent.get('type'), 10)]);
+              if (fieldContent.type) {
+                const actorIds = item.getIn(['associationsByType', parseInt(fieldContent.type, 10)]);
                 if (actorIds) {
                   const actors = actorConnections.get(API.ACTORS).filter(
                     (actor) => actorIds.includes(parseInt(actor.get('id'), 10)),
@@ -199,7 +203,7 @@ export function EntityFields({
                   theField = getActorConnectionField({
                     actors,
                     onEntityClick,
-                    typeid: parseInt(fieldContent.get('type'), 10),
+                    typeid: parseInt(fieldContent.type, 10),
                     columns: null,
                   });
                 }
@@ -209,9 +213,9 @@ export function EntityFields({
               return (
                 <Box key={fieldId} direction="row" fill={false} flex={false}>
                   <Box gap="small">
-                    {fieldContent.get('title') && (
+                    {fieldContent.title && (
                       <SectionTitle>
-                        {fieldContent.get('title')}
+                        {fieldContent.title}
                       </SectionTitle>
                     )}
                     {asArray(theField).map((f, i) => (
@@ -236,7 +240,7 @@ export function EntityFields({
           return (
             <PreviewCountryPositionsList
               key={fieldId}
-              content={fieldContent}
+              content={fromJS(fieldContent)}
               onUpdatePath={onUpdatePath}
               isAdmin={isAdmin}
             />
@@ -246,7 +250,7 @@ export function EntityFields({
           return (
             <PreviewCountryTopicPosition
               key={fieldId}
-              content={fieldContent}
+              content={fromJS(fieldContent)}
               onUpdatePath={onUpdatePath}
               isAdmin={isAdmin}
             />
@@ -256,40 +260,51 @@ export function EntityFields({
           return (
             <PreviewCountryTopicStatementList
               key={fieldId}
-              content={fieldContent}
+              content={fromJS(fieldContent)}
               onUpdatePath={onUpdatePath}
               isAdmin={isAdmin}
             />
           );
         }
-        if (fieldId === 'actorUsers' || fieldContent.get('type') === 'actorUsers') {
+        if (fieldId === 'actorUsers' || fieldContent.type === 'actorUsers') {
           return (
             <ActorUsersField
               key={fieldId}
               actorId={item.get('id')}
-              content={fieldContent}
+              content={fromJS(fieldContent)}
               onEntityClick={onEntityClick}
               isAdmin={isAdmin}
             />
           );
         }
-        if (fieldId === 'associations' || fieldContent.get('type') === 'associations') {
+        if (fieldId === 'actionUsers' || fieldContent.type === 'actionUsers') {
+          return (
+            <ActionUsersField
+              key={fieldId}
+              actionId={item.get('id')}
+              content={fromJS(fieldContent)}
+              onEntityClick={onEntityClick}
+              isAdmin={isAdmin}
+            />
+          );
+        }
+        if (fieldId === 'associations' || fieldContent.type === 'associations') {
           return (
             <AssociationsField
               key={fieldId}
               actorId={item.get('id')}
-              content={fieldContent}
+              content={fromJS(fieldContent)}
               onEntityClick={onEntityClick}
               isAdmin={isAdmin}
             />
           );
         }
-        if (fieldContent.get('attribute')) {
+        if (fieldContent.attribute) {
           return (
             <AttributeField
               key={fieldId}
               entity={item}
-              content={fieldContent}
+              content={fromJS(fieldContent)}
               isAdmin={isAdmin}
             />
           );
@@ -299,10 +314,49 @@ export function EntityFields({
             <StatementIndicatorsField
               key={fieldId}
               statement={item}
-              content={fieldContent}
+              content={fromJS(fieldContent)}
               onEntityClick={onEntityClick}
               isAdmin={isAdmin}
             />
+          );
+        }
+        if (fieldId === 'statementIndicators') {
+          return (
+            <StatementIndicatorsField
+              key={fieldId}
+              statement={item}
+              content={fromJS(fieldContent)}
+              onEntityClick={onEntityClick}
+              isAdmin={isAdmin}
+            />
+          );
+        }
+        if (fieldId === 'actorIndicators') {
+          return (
+            <ActorIndicatorsField
+              key={fieldId}
+              actorId={item.get('id')}
+              content={fromJS(fieldContent)}
+            />
+          );
+        }
+        if (fieldId === 'fields') {
+          return (
+            <Box gap="large" key={fieldId}>
+              {fieldContent.map(
+                (field, i) => (
+                  <FieldFactory
+                    key={i}
+                    field={{
+                      ...field,
+                      onEntityClick,
+                      noPadding: true,
+                      fill: false,
+                    }}
+                  />
+                )
+              )}
+            </Box>
           );
         }
         return null;
@@ -312,7 +366,7 @@ export function EntityFields({
 }
 
 EntityFields.propTypes = {
-  fields: PropTypes.object, // immutable Map
+  fields: PropTypes.object,
   item: PropTypes.object, // immutable Map
   // itemContent: PropTypes.object, // immutable Map
   columns: PropTypes.object, // immutable Map

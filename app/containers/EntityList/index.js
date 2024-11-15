@@ -15,6 +15,10 @@ import ReactModal from 'react-modal';
 
 import { qe } from 'utils/quasi-equals';
 import { jumpToComponent } from 'utils/scroll-to-component';
+import {
+  getActiontypePreviewFields,
+  getActortypePreviewFields,
+} from 'utils/fields';
 
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
@@ -144,12 +148,21 @@ const reducePreviewItem = ({
     if (item.getIn(['attributes', 'prefix']) && item.getIn(['attributes', 'prefix']).trim().length > 0) {
       title = `${title} (${item.getIn(['attributes', 'prefix'])})`;
     }
-
     const content = {
       header: {
         aboveTitle: label,
         title,
+        titlePath: `${ROUTES.ACTOR}/${item.get('id')}`,
+        topActions: [{
+          label: 'Edit',
+          path: `${ROUTES.ACTOR}${ROUTES.EDIT}/${item.get('id')}`,
+          onClick: (e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            onUpdatePath(`${ROUTES.ACTOR}${ROUTES.EDIT}/${item.get('id')}`);
+          },
+        }],
       },
+      fields: getActortypePreviewFields(item.getIn(['attributes', 'actortype_id'])),
       item,
       footer: {
         primaryLink: item && {
@@ -171,34 +184,14 @@ const reducePreviewItem = ({
         titlePath: `${ROUTES.ACTION}/${item.get('id')}`,
         topActions: [{
           label: 'Edit',
-          path: `${ROUTES.ACTOR}${ROUTES.EDIT}/${item.get('id')}`,
+          path: `${ROUTES.ACTION}${ROUTES.EDIT}/${item.get('id')}`,
           onClick: (e) => {
             if (e && e.preventDefault) e.preventDefault();
             onUpdatePath(`${ROUTES.ACTION}${ROUTES.EDIT}/${item.get('id')}`);
           },
         }],
       },
-      fields: {
-        date: {
-          attribute: 'date',
-        },
-        'taxonomy-13': {
-          columnId: 'taxonomy-13',
-        },
-        'taxonomy-7': {
-          columnId: 'taxonomy-7',
-        },
-        description: {
-          attribute: 'description',
-        },
-        actors: {
-          columnId: 'actors',
-          title: 'Stakeholders',
-        },
-        statementIndicators: {
-          title: 'Topics',
-        },
-      },
+      fields: getActiontypePreviewFields(item.getIn(['attributes', 'measuretype_id'])),
       item,
       footer: {
         primaryLink: item && {
