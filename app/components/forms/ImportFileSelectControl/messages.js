@@ -16,7 +16,7 @@ export default defineMessages({
     },
     relationships: {
       id: 'app.components.ImportFileSelectControl.import.relationships',
-      defaultMessage: 'with {total} connections overall',
+      defaultMessage: '(with {total} connections)',
     },
   },
   selectFile: {
