@@ -431,11 +431,7 @@ export const ACTION_FIELDS = {
     },
     'actor-code': {
       type: 'text',
-      optional: [
-        ACTIONTYPES.EXPRESS,
-        ACTIONTYPES.EVENT,
-        ACTIONTYPES.INTERACTION,
-      ],
+      optional: Object.values(ACTIONTYPES),
       lookup: {
         table: API.ACTORS,
         attribute: 'code',
@@ -447,11 +443,7 @@ export const ACTION_FIELDS = {
     // column: country-code
     'actor-id': {
       type: 'text',
-      optional: [
-        ACTIONTYPES.EXPRESS,
-        ACTIONTYPES.EVENT,
-        ACTIONTYPES.INTERACTION,
-      ],
+      optional: Object.values(ACTIONTYPES),
       multiple: true,
       table: API.ACTOR_ACTIONS,
       keyPair: ['measure_id', 'actor_id'], // own, other
