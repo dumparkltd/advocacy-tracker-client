@@ -92,7 +92,6 @@ const IndicatorPanelHeader = styled((p) => <Box {...p} pad="small" />)`
 const IndicatorSelectButton = styled((p) => <Button {...p} />)`
   border-bottom: 1px solid ${palette('light', 2)};
   width: 100%;
-  background: ${({ active }) => (active ? palette('primary', 1) : 'white')};
   color: ${({ active }) => active ? 'white' : 'black'};
   cursor: ${({ active }) => active ? 'default' : 'pointer'};
   position: relative;
@@ -117,21 +116,19 @@ const IndicatorSelectButton = styled((p) => <Button {...p} />)`
     : theme.global.colors.highlight
 };
   }
-  /* extra width at the start, on selected item */
+  /* extra width at the start and background for selected item */
   &::before {
     display: ${({ active }) => (active ? 'block' : 'none')};
     position: absolute;
     content: '';
-    top: 50%;
+    top: 0;
     left: -5px;
-    transform: translateY(-50%);
-    width: 0;
-    height: 0;
-    border-top: 21px solid ${palette('primary', 1)};
-    border-bottom: 21px solid ${palette('primary', 1)};
-    border-right: 12px solid ${palette('primary', 1)};
+    bottom: 0;
+    right: 0;
+    background: ${palette('primary', 1)};
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
   }
-  /* arrow at the end, on selected item */
+  /* arrow at the end for selected item */
   &::after {
     display: ${({ active }) => (active ? 'inline-block' : 'none')};
     content: '';
@@ -148,11 +145,14 @@ const IndicatorListTitle = styled((p) => <Text size="small" {...p} />)`
   color: ${palette('dark', 4)};
   font-style: italic;
 `;
-const IndicatorLabel = styled((p) => <Text size="small" weight={600} {...p} />)`
+const IndicatorLabel = styled((p) => <Text size="small" weight={500} {...p} />)`
+  position: relative;
+  z-index: 1;
   display: block;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
 
 `;
 const MapWrapper = styled((p) => <Box {...p} />)`
