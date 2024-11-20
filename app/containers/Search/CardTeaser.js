@@ -19,9 +19,14 @@ const CardLink = styled((p) => <Button plain as="a" {...p} />)`
 const TitleWrap = styled((p) => <Box {...p} />)``;
 const Count = styled((p) => <Text {...p} />)`
   font-family: ${({ theme }) => theme.fonts.title};
-  font-size: 60px;
+  font-size: 54px;
+  line-height: 60px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    font-size: 72px;
+    line-height: 80px;
+  }
 `;
-const Title = styled((p) => <Text size="xlarge" {...p} />)`
+const Title = styled((p) => <Text size="xxlarge" {...p} />)`
   font-family: ${({ theme }) => theme.fonts.title};
 `;
 const Description = styled((p) => <Text size="small" {...p} />)``;
@@ -52,13 +57,12 @@ export function CardTeaser({
         <Box direction="column" justify="start" gap="medium">
           <TitleWrap
             direction="column"
-            gap="medium"
-            margin={{ bottom: 'small' }}
+            gap="xsmall"
           >
             <Title>
               {title}
             </Title>
-            {count && (
+            {typeof count !== 'undefined' && count !== null && (
               <Count>{count}</Count>
             )}
           </TitleWrap>

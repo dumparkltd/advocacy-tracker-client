@@ -63,7 +63,7 @@ import ContentPreview from './ContentPreview';
 const StyledContainer = styled((p) => <Container {...p} />)``;
 const SearchCardWrapper = styled.div`
   background: white;
-  box-shadow: ${({ hasResults }) => hasResults ? 'none' : '0px 0px 5px 0px rgba(0,0,0,0.5)'};
+  box-shadow: ${({ showAllContent }) => showAllContent ? '0px 0px 5px 0px rgba(0,0,0,0.5)' : 'none'};
 `;
 const EntityListSearchWrapper = styled.div`
   padding: 1.5em 0 2em 0;
@@ -112,88 +112,100 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
     return intl.formatMessage(msg.pluralLong || msg.plural);
   };
 
-  prepareContentPreviewItems = (intl, counts) => ([
-    {
-      title: 'Positions',
-      id: 'positions',
-      items: [
-        {
-          path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`,
-          title: intl.formatMessage(appMessages.entities.actions_1.plural),
-          description: intl.formatMessage(appMessages.actiontypes_about[1]),
-          count: (counts && counts.statementsCount) || 0,
-        },
-        {
-          path: `${ROUTES.INDICATORS}`,
-          title: intl.formatMessage(appMessages.entities.indicators.plural),
-          description: intl.formatMessage(appMessages.actiontypes_about[3]),
-          count: (counts && counts.indicatorsCount) || 0,
-        },
-      ],
-    },
-    {
-      title: 'Stakeholders',
-      id: 'stakeholders',
-      items: [...Object.values(ACTORTYPES).reduce(
-        (memo, actortypeId) => [
-          ...memo,
+  prepareContentPreviewItems = (intl, counts) => {
+    const statementsCount = (counts && counts.actiontypesCount && counts.actiontypesCount[ACTIONTYPES.EXPRESS]) || 0;
+    return ([
+      {
+        title: 'Positions',
+        id: 'positions',
+        items: [
           {
-            path: `${ROUTES.ACTORS}/${actortypeId}`,
-            title: intl.formatMessage(appMessages.actortypes_long[actortypeId]),
-            description: intl.formatMessage(appMessages.actortypes_about[actortypeId]),
-            count: (counts && counts.actortypesWithCount && counts.actortypesWithCount.getIn([actortypeId, 'count'])) || 0,
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`,
+            title: intl.formatMessage(
+              appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`][statementsCount === 1 ? 'single' : 'plural']
+            ),
+            description: intl.formatMessage(appMessages.actiontypes_about[ACTIONTYPES.EXPRESS]),
+            count: statementsCount,
+          },
+          {
+            path: `${ROUTES.INDICATORS}`,
+            title: intl.formatMessage(appMessages.entities.indicators[counts && counts.indicatorsCount === 1 ? 'single' : 'plural']),
+            description: intl.formatMessage(messages.indicators_about),
+            count: (counts && counts.indicatorsCount) || 0,
           },
         ],
-        [],
-      )],
-    },
-    {
-      title: 'Outreach',
-      id: 'outreach',
-      items: [...OUTREACH_ACTIONTYPES.reduce(
-        (memo, actionTypeId) => [
-          ...memo,
+      },
+      {
+        title: 'Stakeholders',
+        id: 'stakeholders',
+        items: Object.values(ACTORTYPES).map(
+          (typeId) => {
+            const count = (counts && counts.actortypesCount && counts.actortypesCount[typeId]) || 0;
+            return ({
+              path: `${ROUTES.ACTORS}/${typeId}`,
+              title: intl.formatMessage(appMessages.entities[`actors_${typeId}`][count === 1 ? 'single' : 'plural']),
+              description: intl.formatMessage(appMessages.actortypes_about[typeId]),
+              count,
+            });
+          },
+        ),
+      },
+      {
+        title: 'Outreach',
+        id: 'outreach',
+        items: OUTREACH_ACTIONTYPES.map(
+          (typeId) => {
+            const count = (counts && counts.actiontypesCount && counts.actiontypesCount[typeId]) || 0;
+            return ({
+              path: `${ROUTES.ACTIONS}/${typeId}`,
+              title: intl.formatMessage(appMessages.entities[`actions_${typeId}`][count === 1 ? 'single' : 'plural']),
+              description: intl.formatMessage(appMessages.actiontypes_about[typeId]),
+              count,
+            });
+          },
+        ),
+      },
+      {
+        title: 'Resources',
+        id: 'resources',
+        items: Object.values(RESOURCETYPES).map(
+          (typeId) => {
+            const count = (counts && counts.resourcetypesCount && counts.resourcetypesCount[typeId]) || 0;
+            return ({
+              path: `${ROUTES.RESOURCES}/${typeId}`,
+              title: intl.formatMessage(appMessages.entities[`resources_${typeId}`][count === 1 ? 'single' : 'plural']),
+              description: intl.formatMessage(appMessages.resourcetypes_about[typeId]),
+              count,
+            });
+          },
+        ),
+      },
+      {
+        title: 'Admin',
+        id: 'admin',
+        items: [
           {
-            path: `${ROUTES.ACTIONS}/${actionTypeId}`,
-            title: intl.formatMessage(appMessages.actiontypes_long[actionTypeId]),
-            description: intl.formatMessage(appMessages.actiontypes_about[actionTypeId]),
-            count: (counts && counts.actiontypesWithCount && counts.actiontypesWithCount.getIn([actionTypeId, 'count'])) || 0,
+            path: `${ROUTES.USERS}`,
+            title: intl.formatMessage(appMessages.entities.users[counts && counts.usersCount === 1 ? 'single' : 'plural']),
+            description: intl.formatMessage(messages.users_about),
+            count: (counts && counts.usersCount) || 0,
+          },
+          {
+            path: `${ROUTES.PAGES}`,
+            title: intl.formatMessage(appMessages.entities.pages[counts && counts.pagesCount === 1 ? 'single' : 'plural']),
+            description: intl.formatMessage(messages.pages_about),
+            count: (counts && counts.pagesCount) || 0,
+          },
+          {
+            path: `${ROUTES.TAXONOMIES}`,
+            title: intl.formatMessage(appMessages.entities.categories.plural),
+            description: intl.formatMessage(messages.categories_about),
+            count: (counts && counts.categoriesCount) || 0,
           },
         ],
-        [],
-      )],
-    },
-    {
-      title: 'Admin',
-      id: 'admin',
-      items: [
-        {
-          path: `${ROUTES.RESOURCES}/${RESOURCETYPES.WEB}`,
-          title: intl.formatMessage(appMessages.entities.resources.plural),
-          description: intl.formatMessage(messages.resources_about),
-          count: (counts && counts.resourcesCount) || 0,
-        },
-        {
-          path: `${ROUTES.USERS}`,
-          title: intl.formatMessage(appMessages.entities.users.plural),
-          description: intl.formatMessage(messages.users_about),
-          count: (counts && counts.usersCount) || 0,
-        },
-        {
-          path: `${ROUTES.PAGES}`,
-          title: intl.formatMessage(appMessages.entities.pages.plural),
-          description: intl.formatMessage(messages.pages_about),
-          count: (counts && counts.pagesCount) || 0,
-        },
-        {
-          path: `${ROUTES.TAXONOMIES}`,
-          title: intl.formatMessage(appMessages.entities.categories.plural),
-          description: intl.formatMessage(messages.categories_about),
-          count: (counts && counts.categoriesCount) || 0,
-        },
-      ],
-    },
-  ]);
+      },
+    ]);
+  };
 
   render() {
     const { intl } = this.context;
@@ -217,6 +229,7 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
       ),
       0
     );
+
     const hasResults = countResults > 0;
     const countTargets = dataReady && hasQuery && entities && entities.reduce(
       (memo, group) => group.get('targets').reduce(
@@ -230,14 +243,17 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
       ),
       0,
     );
-    const headerButtons = [{
-      type: 'icon',
-      onClick: () => window.print(),
-      title: 'Print',
-      icon: 'print',
-    }];
+    const headerButtons = [];
+    // TODO re-enable when optimising print view
+    // const headerButtons = [{
+    //   type: 'icon',
+    //   onClick: () => window.print(),
+    //   title: 'Print',
+    //   icon: 'print',
+    // }];
 
     const navItems = this.prepareContentPreviewItems(intl, allTypeCounts);
+    const showAllContent = dataReady && !hasResults;
     return (
       <div>
         <Helmet
@@ -246,8 +262,8 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
             { name: 'description', content: intl.formatMessage(messages.metaDescription) },
           ]}
         />
-        <ContainerWrapper bg={!hasResults}>
-          <SearchCardWrapper hasResults={hasResults}>
+        <ContainerWrapper bg={showAllContent}>
+          <SearchCardWrapper showAllContent={showAllContent}>
             <StyledContainer>
               <ContentSimple>
                 <ContentHeader
@@ -376,7 +392,7 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
               </ContentSimple>
             </StyledContainer>
           </SearchCardWrapper>
-          {!hasResults && (
+          {showAllContent && (
             <ContentPreview
               navItems={navItems}
               dataReady={dataReady}

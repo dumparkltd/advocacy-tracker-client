@@ -19,13 +19,22 @@ import messages from './messages';
 
 import CardTeaser from './CardTeaser';
 
-const Group = styled((p) => <Box margin={{ bottom: 'large', top: 'medium' }} fill="horizontal" {...p} />)``;
+const Group = styled(
+  (p) => (
+    <Box
+      margin={{ bottom: 'large', top: 'medium' }}
+      fill="horizontal"
+      {...p}
+    />
+  )
+)``;
 const GroupTitle = styled((p) => <Text size="large" {...p} />)`
   text-transform: uppercase;
   font-family: ${({ theme }) => theme.fonts.title};
 `;
 const StyledContainer = styled((p) => <Container {...p} />)``;
 const SectionTitle = styled.h2`
+  margin-top: 50px;
   font-weight: 500;
   font-family: ${({ theme }) => theme.fonts.title};
 `;

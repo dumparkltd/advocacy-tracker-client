@@ -94,4 +94,8 @@ export default defineMessages({
     id: 'app.containers.Search.categories_about',
     defaultMessage: 'View and maintain categories',
   },
+  indicators_about: {
+    id: 'app.containers.Search.indicators_about',
+    defaultMessage: 'Explore topics',
+  },
 });
