@@ -13,7 +13,7 @@ import messages from './messages';
 
 const Brand = styled.div`
   color: ${({ theme }) => theme.global.colors.text.brand} !important;
-  height: ${({ theme }) => theme.sizes.header.banner.heightMobile}px;
+  height: ${({ theme }) => theme.sizes.header.banner.heightMobileTop}px;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     height: ${({ theme }) => theme.sizes.header.banner.height}px;
   }

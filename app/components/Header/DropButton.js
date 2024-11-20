@@ -5,7 +5,7 @@ import Button from 'components/buttons/ButtonSimple';
 
 const DropButton = styled((p) => <Button {...p} />)`
   display: block;
-  border-radius: ${({ menuType, inDrop }) => menuType === 'add' || inDrop ? '999px' : 'none'};
+  border-radius: ${({ menuType, inDrop }) => menuType === 'add' || inDrop ? '999px' : '0'};
   z-index: 300;
   color: white;
   padding: 5px;
@@ -16,8 +16,8 @@ const DropButton = styled((p) => <Button {...p} />)`
     }
     return 'transparent';
   }};
-  box-shadow: ${({ inDrop }) => {
-    if (inDrop) {
+  box-shadow: ${({ menuType, inDrop }) => {
+    if (menuType === 'add' || inDrop) {
       return '0px 2px 4px 0px rgba(0,0,0,0.2)';
     }
     return 'none';
@@ -50,12 +50,8 @@ const DropButton = styled((p) => <Button {...p} />)`
     }
     return '5px';
   }};
-    height: ${({ theme, inDrop, menuType }) => (menuType !== 'add' && inDrop)
-    ? theme.sizes.header.banner.heightMobile
-    : theme.sizes.header.banner.height}px;
-    width: ${({ theme, inDrop, menuType }) => (menuType !== 'add' && inDrop)
-    ? theme.sizes.header.banner.heightMobile
-    : theme.sizes.header.banner.height}px;
+    height: ${({ theme }) => theme.sizes.header.banner.height}px;
+    width: ${({ theme }) => theme.sizes.header.banner.height}px;
   }
 `;
 export default DropButton;

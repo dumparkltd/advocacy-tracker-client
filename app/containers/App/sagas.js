@@ -1245,8 +1245,8 @@ export function* dismissQueryMessagesSaga() {
   ));
 }
 
-export function* updatePathSaga({ path, args }) {
-  const relativePath = path.startsWith('/') ? path : `/${path}`;
+export function* updatePathSaga({ path = '', args }) {
+  const relativePath = (path && path.startsWith('/')) ? path : `/${path}`;
   const location = yield select(selectLocation);
   let queryNext = {};
   let queryNextString = '';

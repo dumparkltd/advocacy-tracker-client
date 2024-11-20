@@ -6,8 +6,8 @@ const LogoWrap = styled.div`
   color: black;
   margin-left: ${({ theme, isPrint }) => isPrint ? 0 : (theme.sizes.header.paddingLeft.mobile || 6)}px;
   box-shadow:  ${({ isPrint }) => isPrint ? 'none' : 'rgb(0 0 0 / 20%) 0px 2px 4px'};
-  height: 67px;
-  width: 60px;
+  height: 55px;
+  width: 50px;
   @media print {
     padding-left: 0;
     height: 52px;

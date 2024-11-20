@@ -40,10 +40,17 @@ const Note = styled(Text)`
   line-height: ${({ theme }) => theme.text.medium.size};
   border-bottom: 4px solid transparent;
   padding: 5px 0.5em 5px;
-  opacity: 0.4;
+  opacity: 0.3;
   @media print {
     font-size: ${({ theme }) => theme.sizes.header.print.title};
   }
+  position: absolute;
+  top: ${({ theme }) => theme.global.edgeSize.hair};
+  right: 0;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    position: static;
+  }
+
 `;
 
 const StyledContainer = styled(Container)`
@@ -92,10 +99,6 @@ NavSecondary.propTypes = {
   onPageLink: PropTypes.func.isRequired,
   navItems: PropTypes.array,
 };
-// const mapStateToProps = (state) => ({
-//   currentPath: selectCurrentPathname(state),
-// });
-
 
 export function mapDispatchToProps(dispatch) {
   return {
