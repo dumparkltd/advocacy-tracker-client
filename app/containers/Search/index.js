@@ -376,7 +376,7 @@ export class Search extends React.PureComponent { // eslint-disable-line react/p
               </ContentSimple>
             </StyledContainer>
           </SearchCardWrapper>
-          {!hasResults && !hasQuery && (
+          {!hasResults && (
             <ContentPreview
               navItems={navItems}
               dataReady={dataReady}
