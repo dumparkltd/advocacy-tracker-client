@@ -68,7 +68,7 @@ const MultiSelectDropButton = styled((p) => <Button {...p} />)`
   background-color: #DADDE0;
   font-size: 14px;
   line-height: 18px;
-  border: 1px solid #f1f0f1;
+  border: 1px solid #f0f0f0;
   padding: 0.7em;
   min-height: 50px;
   &:hover {

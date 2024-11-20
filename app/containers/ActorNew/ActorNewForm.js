@@ -22,6 +22,8 @@ import { hasNewErrorNEW } from 'utils/entity-form';
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
 import { API, ROUTES, USER_ROLES } from 'themes/config';
+import { CONTENT_MODAL, CONTENT_SINGLE } from 'containers/App/constants';
+
 import appMessages from 'containers/App/messages';
 
 import {
@@ -142,6 +144,11 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       <Content ref={this.scrollContainer} inModal={inModal}>
         <ContentHeader
           title={intl.formatMessage(messages.pageTitle, { type })}
+          type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
+          buttons={inModal && [{
+            type: 'cancel',
+            onClick: () => handleCancel(typeId),
+          }]}
         />
         <EntityFormWrapper
           typeLabel={type}

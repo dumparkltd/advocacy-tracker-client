@@ -91,7 +91,7 @@ const Count = styled.div`
   white-space: nowrap;
   @media print, (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     display: block;
-    font-size: ${({ theme, multiple }) => multiple ? theme.sizes.text.default : theme.sizes.text.aaLargeBold};
+    font-size: ${({ theme, multiple }) => multiple ? theme.text.medium.size : theme.text.aaLarge.sizeBold};
     font-weight: bold;
     text-align: right;
     padding: 0 5px 0 0;
@@ -124,14 +124,14 @@ const Title = styled.div`
   display: inline-block;
   padding: ${({ isPrint }) => isPrint ? 0 : '0px 4px'};
   width: 100%;
-  font-size: ${({ theme }) => theme.sizes.text.smaller};
+  font-size: ${({ theme }) => theme.text.xsmall.sizeer};
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: ${({ isPrint }) => isPrint ? 0 : '4px 8px'};
-    font-size: ${({ theme }) => theme.sizes.text.default};
+    font-size: ${({ theme }) => theme.text.medium.size};
   }
   @media (min-width: ${({ theme }) => theme.breakpointsMin.xlarge}) {
     padding: ${({ isPrint }) => isPrint ? 0 : '8px 18px'};
-    font-size: ${({ theme }) => theme.sizes.text.aaLargeBold};
+    font-size: ${({ theme }) => theme.text.aaLarge.sizeBold};
   }
   @media print {
     font-size: ${({ theme }) => theme.sizes.print.default};

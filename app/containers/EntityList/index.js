@@ -15,6 +15,10 @@ import ReactModal from 'react-modal';
 
 import { qe } from 'utils/quasi-equals';
 import { jumpToComponent } from 'utils/scroll-to-component';
+import {
+  getActiontypePreviewFields,
+  getActortypePreviewFields,
+} from 'utils/fields';
 
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
@@ -131,7 +135,7 @@ const STATE_INITIAL = {
   downloadActive: false,
 };
 const reducePreviewItem = ({
-  item, id, path, intl,
+  item, id, path, intl, onUpdatePath,
 }) => {
   if (id && path) {
     return { entity: { path, id } };
@@ -144,12 +148,21 @@ const reducePreviewItem = ({
     if (item.getIn(['attributes', 'prefix']) && item.getIn(['attributes', 'prefix']).trim().length > 0) {
       title = `${title} (${item.getIn(['attributes', 'prefix'])})`;
     }
-
     const content = {
       header: {
         aboveTitle: label,
         title,
+        titlePath: `${ROUTES.ACTOR}/${item.get('id')}`,
+        topActions: [{
+          label: 'Edit',
+          path: `${ROUTES.ACTOR}${ROUTES.EDIT}/${item.get('id')}`,
+          onClick: (e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            onUpdatePath(`${ROUTES.ACTOR}${ROUTES.EDIT}/${item.get('id')}`);
+          },
+        }],
       },
+      fields: getActortypePreviewFields(item.getIn(['attributes', 'actortype_id'])),
       item,
       footer: {
         primaryLink: item && {
@@ -168,7 +181,17 @@ const reducePreviewItem = ({
       header: {
         aboveTitle: label,
         title: item && item.getIn(['attributes', 'title']),
+        titlePath: `${ROUTES.ACTION}/${item.get('id')}`,
+        topActions: [{
+          label: 'Edit',
+          path: `${ROUTES.ACTION}${ROUTES.EDIT}/${item.get('id')}`,
+          onClick: (e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            onUpdatePath(`${ROUTES.ACTION}${ROUTES.EDIT}/${item.get('id')}`);
+          },
+        }],
       },
+      fields: getActiontypePreviewFields(item.getIn(['attributes', 'measuretype_id'])),
       item,
       footer: {
         primaryLink: item && {
@@ -451,6 +474,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       searchQuery,
       currentUserId,
       secondaryNavItems,
+      onUpdatePath,
+      skipPreviews,
     } = this.props;
     // detect print to avoid expensive rendering
     const printing = isPrintView || !!(
@@ -707,7 +732,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
               {showList && dataReady && (
                 <EntitiesListView
                   reducePreviewItem={({ item, id, path }) => reducePreviewItem({
-                    item, id, path, intl,
+                    item, id, path, intl, onUpdatePath,
                   })}
                   onScrollToTop={this.scrollToTop}
                   searchQuery={searchQuery}
@@ -725,7 +750,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                   connections={connections}
                   connectedTaxonomies={connectedTaxonomies}
                   entityIdsSelected={entityIdsSelectedFiltered}
-
+                  skipPreviews={skipPreviews}
                   config={config}
                   entityTitle={entityTitle}
 
@@ -935,10 +960,12 @@ EntityList.propTypes = {
   includeInofficial: PropTypes.bool,
   onEntitiesDelete: PropTypes.func,
   onUpdateFilters: PropTypes.func,
+  onUpdatePath: PropTypes.func,
   isPrintView: PropTypes.bool,
   currentUserId: PropTypes.string,
   filteringOptions: PropTypes.array,
   secondaryNavItems: PropTypes.array,
+  skipPreviews: PropTypes.bool,
 };
 
 EntityList.contextTypes = {
@@ -995,10 +1022,10 @@ function mapDispatchToProps(dispatch, props) {
           }
         });
       }
-      if (componentId) {
-        dispatch(setListPreview(`${componentId}|${path}|${id}`));
-      } else {
+      if (props.skipPreviews || !componentId) {
         dispatch(updatePath(`${path || props.config.clientPath}/${id}`));
+      } else {
+        dispatch(setListPreview(`${componentId}|${path}|${id}`));
       }
     },
     onEntitySelectAll: (ids) => {
@@ -1016,6 +1043,7 @@ function mapDispatchToProps(dispatch, props) {
     onUpdateQuery: (args) => {
       dispatch(updateRouteQuery(args));
     },
+    onUpdatePath: (path) => dispatch(updatePath(path)),
     onUpdateFilters: (values) => {
       dispatch(setFilters(values));
     },

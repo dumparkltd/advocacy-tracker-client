@@ -4,6 +4,6 @@ import { Text } from 'grommet';
 
 const KeyLabel = styled((p) => <Text size="xxsmall" {...p} />)`
   white-space: nowrap;
-  font-size: ${(props) => props.theme.sizes.text.small};
+  font-size: ${(props) => props.theme.text.xsmall.size};
 `;
 export default KeyLabel;

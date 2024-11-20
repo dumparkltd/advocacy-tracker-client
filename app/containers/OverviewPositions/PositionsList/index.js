@@ -15,6 +15,7 @@ import {
   ACTION_INDICATOR_SUPPORTLEVELS,
   ROUTES,
   ACTIONTYPES,
+  API,
 } from 'themes/config';
 
 import qe from 'utils/quasi-equals';
@@ -37,6 +38,7 @@ import {
   setIncludeActorMembers,
   updateRouteQuery,
   updatePath,
+  openNewEntityModal,
 } from 'containers/App/actions';
 import {
   selectReady,
@@ -153,6 +155,7 @@ export function PositionsList({
   locationQuery,
   onUpdateColumnFilters,
   actortypes,
+  onCreateOption,
 }) {
   const size = React.useContext(ResponsiveContext);
   const [search, setSearch] = useState('');
@@ -160,6 +163,14 @@ export function PositionsList({
     // kick off loading of data
     onLoadData();
   }, []);
+  useEffect(() => {
+    // also kick off loading of data again once dataReady changes and becomes negative again
+    // required due to possible in-view creation of activities
+    if (!dataReady) {
+      onLoadData();
+    }
+  }, [dataReady]);
+
   let supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
     .filter((level) => parseInt(level.value, 10) > 0) // exclude 0
     .sort((a, b) => a.order > b.order ? 1 : -1);
@@ -169,13 +180,13 @@ export function PositionsList({
       ...level,
       label: intl.formatMessage(appMessages.supportlevels[level.value]),
     }));
-
   const options = [
     {
       id: `${ID}-0`,
       active: includeActorMembers,
       label: intl.formatMessage(appMessages.ui.statementOptions.includeMemberships),
       onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+      queryArg: 'am',
     },
     {
       id: `${ID}-1`,
@@ -187,6 +198,8 @@ export function PositionsList({
         replace: true,
         multipleAttributeValues: false,
       }]),
+      queryArg: 'inofficial',
+      inverse: true,
     },
   ];
 
@@ -254,60 +267,153 @@ export function PositionsList({
         },
         Map(),
       );
-      let countryAssociations;
-      if (item.get('associationsByType') && actorsByType) {
-        countryAssociations = item.get('associationsByType').reduce(
-          (memo, association, typeid) => association.reduce((memo2, value) => memo2.setIn(
-            [typeid, value.toString()], actorsByType.getIn([typeid, value.toString()])
-          ), memo),
-          Map()
-        );
-      }
+      // let countryAssociations;
+      // if (item.get('associationsByType') && actorsByType) {
+      //   countryAssociations = item.get('associationsByType').reduce(
+      //     (memo, association, typeid) => association.reduce((memo2, value) => memo2.setIn(
+      //       [typeid, value.toString()], actorsByType.getIn([typeid, value.toString()])
+      //     ), memo),
+      //     Map()
+      //   );
+      // }
+      // console.log('actortypes', actortypes && actortypes.toJS())
+      // console.log('item', item && item.toJS())
       const content = {
         header: {
           aboveTitle: actortypes.getIn(
             [item.getIn(['attributes', 'actortype_id']).toString(), 'attributes', 'title']
           ),
           title: item.getIn(['attributes', 'title']),
+          titlePath: `${ROUTES.ACTOR}/${item.get('id')}`,
           code: item.getIn(['attributes', 'code']),
-        },
-        countryPositions: {
-          key: {
-            title: 'Levels of support',
-            items: supportLevels,
-          },
-          options,
-          countryPositionsTableColumns: [
+          topActions: [
             {
-              id: 'main',
-              type: 'main',
-              sort: 'title',
-              attributes: ['title'],
+              label: `Add ${intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`].single)}`,
+              path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}${ROUTES.NEW}`,
+              type: 'create',
+              onClick: (e) => {
+                if (e && e.preventDefault) e.preventDefault();
+                onCreateOption({
+                  path: API.ACTIONS,
+                  attributes: {
+                    measuretype_id: ACTIONTYPES.EXPRESS,
+                  },
+                  invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
+                  autoUser: true,
+                  connect: [
+                    {
+                      type: 'actorActions',
+                      create: [{
+                        actor_id: item.get('id'),
+                      }],
+                    },
+                  ],
+                });
+              },
             },
             {
-              id: 'positionStatement',
-              type: 'positionStatement',
+              label: `Add ${intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.INTERACTION}`].single)}`,
+              path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}${ROUTES.NEW}`,
+              type: 'create',
+              onClick: (e) => {
+                if (e && e.preventDefault) e.preventDefault();
+                onCreateOption({
+                  path: API.ACTIONS,
+                  attributes: {
+                    measuretype_id: ACTIONTYPES.INTERACTION,
+                  },
+                  invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
+                  autoUser: true,
+                  connect: [
+                    {
+                      type: 'actorActions',
+                      create: [{
+                        actor_id: item.get('id'),
+                      }],
+                    },
+                  ],
+                });
+              },
             },
             {
-              id: 'authority',
-              type: 'positionStatementAuthority',
-            },
-            {
-              id: 'viaGroups',
-              type: 'viaGroups',
-            },
-            {
-              id: 'supportlevel_id',
-              type: 'supportlevel',
-              title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+              label: 'Edit',
+              path: `${ROUTES.ACTOR}${ROUTES.EDIT}/${item.get('id')}`,
+              onClick: (e) => {
+                if (e && e.preventDefault) e.preventDefault();
+                onUpdatePath(`${ROUTES.ACTOR}${ROUTES.EDIT}/${item.get('id')}`);
+              },
             },
           ],
-          entityTitle: {
-            single: intl.formatMessage(appMessages.entities.indicators.single),
-            plural: intl.formatMessage(appMessages.entities.indicators.plural),
+        },
+        fields: {
+          countryPositions: {
+            key: {
+              title: 'Levels of support',
+              items: supportLevels,
+            },
+            options,
+            countryPositionsTableColumns: [
+              {
+                id: 'main',
+                type: 'main',
+                sort: 'title',
+                attributes: ['title'],
+              },
+              {
+                id: 'positionStatement',
+                type: 'positionStatement',
+              },
+              {
+                id: 'authority',
+                type: 'positionStatementAuthority',
+              },
+              {
+                id: 'viaGroups',
+                type: 'viaGroups',
+              },
+              {
+                id: 'supportlevel_id',
+                type: 'supportlevel',
+                title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+                align: 'center',
+                info: {
+                  type: 'key-categorical',
+                  attribute: 'supportlevel_id',
+                  options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+                    .sort((a, b) => a.order < b.order ? -1 : 1)
+                    .map((level) => ({
+                      ...level,
+                      label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                    })),
+                },
+              },
+            ],
+            entityTitle: {
+              single: intl.formatMessage(appMessages.entities.indicators.single),
+              plural: intl.formatMessage(appMessages.entities.indicators.plural),
+            },
+            indicators: indicatorsWithSupport,
           },
-          indicators: indicatorsWithSupport,
-          countryAssociations,
+          users: {
+            title: 'Assigned staff',
+            columnId: 'users',
+          },
+          groups: {
+            columnId: 'associations',
+            type: ACTORTYPES.GROUP,
+            title: 'Groups',
+          },
+          regions: {
+            columnId: 'associations',
+            type: ACTORTYPES.REG,
+            title: 'Regions',
+          },
+          [`actions_${ACTIONTYPES.EXPRESS}`]: {
+            columnId: `actions_${ACTIONTYPES.EXPRESS}`,
+          },
+          [`actions_${ACTIONTYPES.INTERACTION}`]: {
+            columnId: `actions_${ACTIONTYPES.INTERACTION}`,
+          },
         },
         footer: {
           primaryLink: item && {
@@ -426,18 +532,17 @@ export function PositionsList({
                       attributes: ['title'],
                     },
                     {
+                      id: 'users',
+                      type: 'users',
+                      isSingleActionColumn: false,
+                    },
+                    {
                       id: 'associations',
                       type: 'associations',
                       actors: 'associationsByType',
                       isSingleActionColumn: false,
-                      minSize: 'medium',
+                      minSize: 'large',
                       title: 'Regions & Groups',
-                    },
-                    {
-                      id: 'users',
-                      type: 'users',
-                      isSingleActionColumn: false,
-                      minSize: 'medium',
                     },
                     {
                       id: `action_${ACTIONTYPES.EXPRESS}`,
@@ -458,7 +563,7 @@ export function PositionsList({
                       actionsMembers: 'actionsAsMemberByType',
                       actionsChildren: 'actionsAsParentByType',
                       isSingleActionColumn: false,
-                      minSize: 'large',
+                      minSize: 'xlarge',
                       simple: true,
                     },
                     ...topicColumns,
@@ -524,6 +629,7 @@ PositionsList.propTypes = {
   actorsByType: PropTypes.object, // immutable Map
   locationQuery: PropTypes.object, // immutable Map
   actortypes: PropTypes.object, // immutable Map
+  onCreateOption: PropTypes.func,
   intl: intlShape.isRequired,
 };
 
@@ -549,6 +655,7 @@ export function mapDispatchToProps(dispatch) {
     onSetIncludeActorMembers: (value) => dispatch(setIncludeActorMembers(value)),
     onUpdateQuery: (value) => dispatch(updateRouteQuery(value)),
     onUpdatePath: (path) => dispatch(updatePath(path)),
+    onCreateOption: (args) => dispatch(openNewEntityModal(args)),
     onUpdateColumnFilters: ({
       column, addToFilters, removeFromFilters,
     }, locationQuery) => {

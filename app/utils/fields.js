@@ -20,6 +20,10 @@ import {
   ACTOR_FIELDS,
   RESOURCE_FIELDS,
   INDICATOR_FIELDS,
+  ACTIONTYPE_ACTORTYPES,
+  ACTIONTYPES,
+  ACTORTYPES,
+  MEMBERSHIPS,
 } from 'themes/config';
 
 import appMessages from 'containers/App/messages';
@@ -255,10 +259,12 @@ export const getMarkdownField = (
   attribute,
   hasLabel = true,
   label,
+  moreLess,
 ) => checkEmpty(entity.getIn(['attributes', attribute])) && ({
   type: 'markdown',
   value: entity.getIn(['attributes', attribute]),
   label: hasLabel && (appMessages.attributes[label || attribute]),
+  moreLess,
 });
 
 export const getNumberField = (
@@ -635,13 +641,23 @@ export const getEmailField = (entity) => ({
   value: entity.getIn(['attributes', 'email']),
 });
 
-export const getActionPreviewHeader = (action, intl) => ({
+export const getActionPreviewHeader = (action, intl, onUpdatePath) => ({
   aboveTitle: intl.formatMessage(
     appMessages.entities[`actions_${action.getIn(['attributes', 'measuretype_id'])}`].single
   ),
-  path: `${ROUTES.ACTION}/${action.get('id')}`,
+  titlePath: `${ROUTES.ACTION}/${action.get('id')}`,
   title: getEntityTitle(action),
   code: checkActionAttribute(action, 'code'),
+  topActions: onUpdatePath && [
+    {
+      label: 'Edit',
+      path: `${ROUTES.ACTION}${ROUTES.EDIT}/${action.get('id')}`,
+      onClick: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        onUpdatePath(`${ROUTES.ACTION}${ROUTES.EDIT}/${action.get('id')}`);
+      },
+    },
+  ],
 });
 export const getActionPreviewFooter = (action, intl) => {
   const typeId = action && action.getIn(['attributes', 'measuretype_id']);
@@ -754,13 +770,98 @@ export const getActionPreviewFields = ({
   }
   return fields;
 };
-export const getActorPreviewHeader = (actor, intl) => ({
-  aboveTitle: intl.formatMessage(
-    appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].single
-  ),
-  title: getEntityTitle(actor),
-  code: checkActorAttribute(actor, 'code'),
-});
+export const getActorPreviewHeader = (actor, intl, onUpdatePath, onCreateOption) => {
+  let topActions = [];
+  if (onCreateOption) {
+    const hasStatements = ACTIONTYPE_ACTORTYPES[ACTIONTYPES.EXPRESS].indexOf(
+      actor.getIn(['attributes', 'actortype_id']).toString()
+    ) > -1;
+    if (hasStatements) {
+      topActions = [
+        ...topActions,
+        {
+          label: `Add ${intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`].single)}`,
+          path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}${ROUTES.NEW}`,
+          type: 'create',
+          onClick: (e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            onCreateOption({
+              path: API.ACTIONS,
+              attributes: {
+                measuretype_id: ACTIONTYPES.EXPRESS,
+              },
+              invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
+              autoUser: true,
+              connect: [
+                {
+                  type: 'actorActions',
+                  create: [{
+                    actor_id: actor.get('id'),
+                  }],
+                },
+              ],
+            });
+          },
+        },
+      ];
+    }
+    const hasInteractions = ACTIONTYPE_ACTORTYPES[ACTIONTYPES.INTERACTION].indexOf(
+      actor.getIn(['attributes', 'actortype_id']).toString()
+    ) > -1;
+    if (hasInteractions) {
+      topActions = [
+        ...topActions,
+        {
+          label: `Add ${intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.INTERACTION}`].single)}`,
+          path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}${ROUTES.NEW}`,
+          type: 'create',
+          onClick: (e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            onCreateOption({
+              path: API.ACTIONS,
+              attributes: {
+                measuretype_id: ACTIONTYPES.INTERACTION,
+              },
+              invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
+              autoUser: true,
+              connect: [
+                {
+                  type: 'actorActions',
+                  create: [{
+                    actor_id: actor.get('id'),
+                  }],
+                },
+              ],
+            });
+          },
+        },
+      ];
+    }
+  }
+
+  if (onUpdatePath) {
+    topActions = [
+      ...topActions,
+      {
+        label: 'Edit',
+        path: `${ROUTES.ACTOR}${ROUTES.EDIT}/${actor.get('id')}`,
+        onClick: (e) => {
+          if (e && e.preventDefault) e.preventDefault();
+          onUpdatePath(`${ROUTES.ACTOR}${ROUTES.EDIT}/${actor.get('id')}`);
+        },
+      },
+    ];
+  }
+  return ({
+    aboveTitle: intl.formatMessage(
+      appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].single
+    ),
+    title: getEntityTitle(actor),
+    titlePath: `${ROUTES.ACTOR}/${actor.get('id')}`,
+    code: checkActorAttribute(actor, 'code'),
+    topActions,
+  });
+};
 export const getActorPreviewFooter = (actor, intl) => {
   const typeId = actor && actor.getIn(['attributes', 'actortype_id']);
   return ({
@@ -808,6 +909,13 @@ export const getActorPreviewFields = ({
     },
     [],
   );
+  // associated taxonomies
+  if (taxonomiesWithCategoriesByType) {
+    fields = [
+      ...fields,
+      ...getTaxonomyFields(taxonomiesWithCategoriesByType),
+    ];
+  }
   // member of
   if (associationsByType) {
     fields = associationsByType.reduce(
@@ -845,22 +953,26 @@ export const getActorPreviewFields = ({
       }, fields
     );
   }
-  // associated taxonomies
-  if (taxonomiesWithCategoriesByType) {
-    fields = [
-      ...fields,
-      ...getTaxonomyFields(taxonomiesWithCategoriesByType),
-    ];
-  }
   return fields;
 };
 
-export const getIndicatorPreviewHeader = (indicator, intl) => ({
+export const getIndicatorPreviewHeader = (indicator, intl, onUpdatePath) => ({
   aboveTitle: intl.formatMessage(
     appMessages.entities.indicators.single
   ),
   title: getEntityTitle(indicator),
+  titlePath: `${ROUTES.INDICATOR}/${indicator.get('id')}`,
   code: checkIndicatorAttribute(indicator, 'code'),
+  topActions: onUpdatePath && [
+    {
+      label: 'Edit',
+      path: `${ROUTES.INDICATOR}${ROUTES.EDIT}/${indicator.get('id')}`,
+      onClick: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        onUpdatePath(`${ROUTES.INDICATOR}${ROUTES.EDIT}/${indicator.get('id')}`);
+      },
+    },
+  ],
 });
 export const getIndicatorPreviewFooter = (indicator, intl) => ({
   primaryLink: indicator && {
@@ -908,11 +1020,22 @@ export const getIndicatorPreviewFields = ({
   );
   return fields;
 };
-export const getResourcePreviewHeader = (resource, intl) => ({
+export const getResourcePreviewHeader = (resource, intl, onUpdatePath) => ({
   aboveTitle: intl.formatMessage(
     appMessages.entities[`resources_${resource.getIn(['attributes', 'resourcetype_id'])}`].single
   ),
   title: getEntityTitle(resource),
+  titlePath: `${ROUTES.RESOURCE}/${resource.get('id')}`,
+  topActions: onUpdatePath && [
+    {
+      label: 'Edit',
+      path: `${ROUTES.RESOURCE}${ROUTES.EDIT}/${resource.get('id')}`,
+      onClick: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        onUpdatePath(`${ROUTES.RESOURCE}${ROUTES.EDIT}/${resource.get('id')}`);
+      },
+    },
+  ],
 });
 export const getResourcePreviewFooter = (resource, intl) => {
   const typeId = resource && resource.getIn(['attributes', 'resourcetype_id']);
@@ -962,11 +1085,46 @@ export const getResourcePreviewFields = ({
   return fields;
 };
 
-export const getUserPreviewHeader = (user, intl) => ({
+export const getUserPreviewHeader = (user, intl, onUpdatePath, onCreateOption) => ({
   aboveTitle: intl.formatMessage(
     appMessages.entities.users.single
   ),
   title: getEntityTitle(user),
+  titlePath: `${ROUTES.USERS}/${user.get('id')}`,
+  topActions: onUpdatePath && onCreateOption && [
+    {
+      label: `Add ${intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.TASK}`].single)}`,
+      path: `${ROUTES.ACTIONS}/${ACTIONTYPES.TASK}${ROUTES.NEW}`,
+      type: 'create',
+      onClick: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        onCreateOption({
+          path: API.ACTIONS,
+          attributes: {
+            measuretype_id: ACTIONTYPES.TASK,
+          },
+          invalidateEntitiesOnSuccess: [API.USERS, API.ACTIONS],
+          autoUser: true,
+          connect: [
+            {
+              type: 'userActions',
+              create: [{
+                user_id: user.get('id'),
+              }],
+            },
+          ],
+        });
+      },
+    },
+    {
+      label: 'Edit',
+      path: `${ROUTES.USERS}${ROUTES.EDIT}/${user.get('id')}`,
+      onClick: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        onUpdatePath(`${ROUTES.USERS}${ROUTES.EDIT}/${user.get('id')}`);
+      },
+    },
+  ],
 });
 export const getUserPreviewFooter = (user, intl) => ({
   primaryLink: user && {
@@ -981,15 +1139,114 @@ export const getUserPreviewFooter = (user, intl) => ({
   },
 });
 
-export const getUserPreviewFields = (
-// {
-  // user,
-  // indicators,
+export const getUserPreviewFields = ({
+  user,
+  actionsByType,
   // onEntityClick,
   // intl,
   // isAdmin,
-// }) => {
-) => {
-  const fields = [];
+  isMember,
+}) => {
+  let fields = [];
+  if (isMember && user) {
+    fields = [
+      ...fields,
+      getRoleField(user),
+    ];
+  }
+  if (user && actionsByType) {
+    const tasks = actionsByType && actionsByType.get(parseInt(ACTIONTYPES.TASK, 10));
+    fields = [
+      ...fields,
+      getActionConnectionField({
+        actions: tasks,
+        typeid: ACTIONTYPES.TASK,
+      }),
+    ];
+  }
   return fields;
+};
+
+export const getActiontypePreviewFields = (typeId) => {
+  if (qe(typeId, ACTIONTYPES.EXPRESS)) {
+    return {
+      date: {
+        attribute: 'date',
+      },
+      'taxonomy-13': {
+        columnId: 'taxonomy-13',
+      },
+      'taxonomy-7': {
+        columnId: 'taxonomy-7',
+      },
+      description: {
+        attribute: 'description',
+      },
+      actors: {
+        columnId: 'actors',
+        title: 'Stakeholders',
+      },
+      statementIndicators: {
+        title: 'Topics',
+      },
+    };
+  }
+  return {
+    date: {
+      attribute: 'date',
+    },
+    description: {
+      attribute: 'description',
+    },
+    actionUsers: {
+      title: 'WWF staff',
+    },
+    actors: {
+      columnId: 'actors',
+      title: 'Stakeholders',
+    },
+  };
+};
+export const getActortypePreviewFields = (typeId) => {
+  let fields = {};
+  if (!qe(typeId, ACTORTYPES.REG)) {
+    fields = {
+      ...fields,
+      actorIndicators: {
+        withOptions: false,
+      },
+    };
+  }
+  if (!qe(typeId, ACTORTYPES.COUNTRY)) {
+    fields = {
+      ...fields,
+      description: {
+        attribute: 'description',
+      },
+    };
+  }
+  fields = {
+    ...fields,
+    actorUsers: {
+      title: 'WWF staff',
+    },
+  };
+  if (Object.keys(MEMBERSHIPS).indexOf(`${typeId}`) > -1) {
+    fields = {
+      ...fields,
+      regions: {
+        actortype: ACTORTYPES.REG,
+        title: 'Regions',
+        type: 'associations',
+      },
+      groups: {
+        actortype: ACTORTYPES.GROUP,
+        title: 'Groups',
+        type: 'associations',
+      },
+    };
+  }
+  return {
+    ...fields,
+  };
 };

@@ -80,7 +80,6 @@ const DropMenuGroup = ({
                   <Icon
                     name="add"
                     size="14px"
-                    hasStroke
                   />
                 </AddIconWrapper>
               )}

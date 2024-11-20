@@ -16,7 +16,7 @@ const Styled = styled.div`
   overflow-x: hidden;
   overflow-y: ${({ noOverflow }) => noOverflow ? 'hidden' : 'auto'};
   z-index: 90;
-  background-color: ${({ bg, isPrint }) => (bg && !isPrint) ? '#f1f0f1' : 'transparent'};
+  background-color: ${({ bg, isPrint }) => (bg && !isPrint) ? '#f0f0f0' : 'transparent'};
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     top: ${({ isOnMap, theme }) => {
     if (isOnMap) {

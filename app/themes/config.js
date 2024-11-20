@@ -100,6 +100,14 @@ export const API_FOR_ROUTE = {
   [ROUTES.RESOURCE]: API.RESOURCES,
   [ROUTES.USERS]: API.USERS,
 };
+export const ROUTE_FOR_API = {
+  [API.ACTORS]: ROUTES.ACTOR,
+  [API.ACTIONS]: ROUTES.ACTION,
+  [API.INDICATORS]: ROUTES.INDICATOR,
+  [API.CATEGORIES]: ROUTES.CATEGORY,
+  [API.RESOURCES]: ROUTES.RESOURCE,
+  [API.USERS]: ROUTES.USERS,
+};
 
 export const ACTIONTYPES = {
   EXPRESS: '1',
@@ -126,6 +134,7 @@ export const RESOURCETYPES = {
 
 export const OFFICIAL_STATEMENT_CATEGORY_ID = 55;
 export const AUTHORITY_TAXONOMY = 13;
+export const EXPRESSFORM_TAXONOMY = 7;
 
 export const ACTION_INDICATOR_SUPPORTLEVELS = {
   // not assigned
@@ -422,11 +431,7 @@ export const ACTION_FIELDS = {
     },
     'actor-code': {
       type: 'text',
-      optional: [
-        ACTIONTYPES.EXPRESS,
-        ACTIONTYPES.EVENT,
-        ACTIONTYPES.INTERACTION,
-      ],
+      optional: Object.values(ACTIONTYPES),
       lookup: {
         table: API.ACTORS,
         attribute: 'code',
@@ -438,11 +443,7 @@ export const ACTION_FIELDS = {
     // column: country-code
     'actor-id': {
       type: 'text',
-      optional: [
-        ACTIONTYPES.EXPRESS,
-        ACTIONTYPES.EVENT,
-        ACTIONTYPES.INTERACTION,
-      ],
+      optional: Object.values(ACTIONTYPES),
       multiple: true,
       table: API.ACTOR_ACTIONS,
       keyPair: ['measure_id', 'actor_id'], // own, other
@@ -1963,21 +1964,36 @@ export const ACTIONTYPES_CONFIG = {
         attribute: 'date_start',
         fallbackAttribute: 'created_at',
         primary: true,
+        minSize: 'medium', // default
       },
       {
         id: 'indicators',
         type: 'indicators',
         sort: 'title',
+        minSize: 'small',
       },
       {
         id: 'taxonomy-13',
         type: 'taxonomy',
         taxonomy_id: AUTHORITY_TAXONOMY, // level of authority
+        minSize: 'medium',
+      },
+      {
+        id: 'taxonomy-7',
+        type: 'taxonomy',
+        taxonomy_id: EXPRESSFORM_TAXONOMY, // level of authority
+        minSize: 'large',
       },
       {
         id: 'actors',
         type: 'actors',
         sort: 'title',
+      },
+      {
+        id: 'parents',
+        type: 'parentActions',
+        sort: 'title',
+        minSize: 'xlarge',
       },
     ],
     form: [
@@ -2341,7 +2357,7 @@ export const ACTIONTYPES_CONFIG = {
               [{
                 connection: API.ACTIONS,
                 type: ACTIONTYPES.OP,
-                asParents: true,
+                asChildren: true,
                 prepopulateIfPrevious: true,
               }],
               [{

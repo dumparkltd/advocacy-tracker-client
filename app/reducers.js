@@ -10,7 +10,7 @@ import { browserHistory } from 'react-router';
 import { LOGOUT_SUCCESS } from 'containers/App/constants';
 import globalReducer from 'containers/App/reducer';
 import languageProviderReducer from 'containers/LanguageProvider/reducer';
-import entityNewReducer from 'containers/EntityNew/reducer';
+import entityNewReducer from 'containers/EntityNewModal/reducer';
 import entityListReducer from 'containers/EntityList/reducer';
 import entityListFormReducer from 'containers/EntityListForm/reducer';
 

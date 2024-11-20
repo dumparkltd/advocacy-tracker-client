@@ -6,10 +6,8 @@ import { Box } from 'grommet';
 const ListLabelWrap = styled((p) => (
   <Box
     direction="row"
-    fill="horizontal"
     align="center"
-    justify="between"
-    flex={{ grow: 0, shrink: 0 }}
+    gap="small"
     {...p}
   />
 ))`

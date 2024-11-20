@@ -22,6 +22,7 @@ import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
 import { getEntityTitle } from 'utils/entities';
 import { lowerCase } from 'utils/string';
+import asList from 'utils/as-list';
 
 import {
   API,
@@ -30,6 +31,7 @@ import {
   API_DATE_FORMAT,
   ACTIONTYPES_CONFIG,
 } from 'themes/config';
+import { CONTENT_MODAL, CONTENT_SINGLE } from 'containers/App/constants';
 
 import {
   loadEntitiesIfNeeded,
@@ -108,6 +110,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       actorsByActortype,
       topActionsByActiontype,
       userOptions,
+      indicatorOptions,
     } = props;
     const shape = ACTIONTYPES_CONFIG[parseInt(typeId, 10)]
       && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].form;
@@ -146,67 +149,93 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         nowFormatted,
       );
     }
-    if (inModal && modalConnect && modalConnect.get('create')) {
-      // connect action to actor
-      if (modalConnect.get('type') === 'actorActions') {
-        const actorId = modalConnect
-          .get('create')
-          .find((item) => item.keySeq().includes('actor_id'))
-          .get('actor_id');
-        // console.log(actorId)
-        const actor = actorId && actorsByActortype.flatten(true).get(actorId);
-        result = result
-          .set(
-            'associatedActorsByActortype',
-            fromJS({
-              [actor.getIn(['attributes', 'actortype_id'])]: [{
-                value: actor.get('id').toString(),
-                checked: true,
-                label: actor.getIn(['attributes', 'title']),
-                autofill: true,
-              }],
-            })
-          );
-      }
-      // connect action with top action
-      if (modalConnect.get('type') === 'subActions') {
-        const actionId = modalConnect
-          .get('create')
-          .find((item) => item.keySeq().includes('other_measure_id'))
-          .get('other_measure_id');
-        // console.log(actorId)
-        const action = actionId && topActionsByActiontype.flatten(true).get(actionId);
-        result = result
-          .set(
-            'associatedTopActionsByActiontype',
-            fromJS({
-              [action.getIn(['attributes', 'measuretype_id'])]: [{
-                value: action.get('id').toString(),
-                checked: true,
-                label: action.getIn(['attributes', 'title']),
-                autofill: true,
-              }],
-            })
-          );
-      }
-      // connect action with user
-      if (modalConnect.get('type') === 'userActions') {
-        const userId = modalConnect
-          .get('create')
-          .find((item) => item.keySeq().includes('user_id'))
-          .get('user_id');
-        const user = userId && userOptions && userOptions.get(userId);
-        result = result
-          .set(
-            'associatedUsers',
-            fromJS([{
-              value: user.get('id').toString(),
-              checked: true,
-              label: user.getIn(['attributes', 'name']),
-              autofill: true,
-            }])
-          );
-      }
+    if (inModal && modalConnect) {
+      result = asList(modalConnect).reduce(
+        (memo, modalConnectItem) => {
+          if (modalConnectItem.get('create')) {
+            // connect action to actor
+            if (modalConnectItem.get('type') === 'actorActions') {
+              const actorId = modalConnectItem
+                .get('create')
+                .find((item) => item.keySeq().includes('actor_id'))
+                .get('actor_id');
+              // console.log(actorId)
+              const actor = actorId && actorsByActortype.flatten(true).get(actorId);
+              return memo
+                .set(
+                  'associatedActorsByActortype',
+                  fromJS({
+                    [actor.getIn(['attributes', 'actortype_id'])]: [{
+                      value: actor.get('id').toString(),
+                      checked: true,
+                      label: actor.getIn(['attributes', 'title']),
+                      autofill: true,
+                    }],
+                  })
+                );
+            }
+            // connect action with top action
+            if (modalConnectItem.get('type') === 'subActions') {
+              const actionId = modalConnectItem
+                .get('create')
+                .find((item) => item.keySeq().includes('other_measure_id'))
+                .get('other_measure_id');
+              // console.log(actorId)
+              const action = actionId && topActionsByActiontype.flatten(true).get(actionId);
+              return memo
+                .set(
+                  'associatedTopActionsByActiontype',
+                  fromJS({
+                    [action.getIn(['attributes', 'measuretype_id'])]: [{
+                      value: action.get('id').toString(),
+                      checked: true,
+                      label: action.getIn(['attributes', 'title']),
+                      autofill: true,
+                    }],
+                  })
+                );
+            }
+            // connect action with user
+            if (modalConnectItem.get('type') === 'userActions') {
+              const userId = modalConnectItem
+                .get('create')
+                .find((item) => item.keySeq().includes('user_id'))
+                .get('user_id');
+              const user = userId && userOptions && userOptions.get(userId);
+              return memo
+                .set(
+                  'associatedUsers',
+                  fromJS([{
+                    value: user.get('id').toString(),
+                    checked: true,
+                    label: user.getIn(['attributes', 'name']),
+                    autofill: true,
+                  }])
+                );
+            }
+            // connect action with topic
+            if (modalConnectItem.get('type') === 'actorIndicators') {
+              const indicatorId = modalConnectItem
+                .get('create')
+                .find((item) => item.keySeq().includes('indicator_id'))
+                .get('indicator_id');
+              const indicator = indicatorId && indicatorOptions && indicatorOptions.get(indicatorId);
+              return memo
+                .set(
+                  'associatedIndicators',
+                  fromJS([{
+                    value: indicator.get('id').toString(),
+                    checked: true,
+                    label: indicator.getIn(['attributes', 'title']),
+                    autofill: true,
+                  }])
+                );
+            }
+          }
+          return memo;
+        },
+        result,
+      );
     }
     return result;
   };
@@ -280,6 +309,11 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
         <ContentHeader
           title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
           subTitle={subTitle}
+          type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
+          buttons={inModal && [{
+            type: 'cancel',
+            onClick: () => handleCancel(typeId),
+          }]}
         />
         <EntityFormWrapper
           isNewEntityView
@@ -350,7 +384,10 @@ ActionNewForm.propTypes = {
   onCreateOption: PropTypes.func,
   connectedTaxonomies: PropTypes.instanceOf(Map),
   actiontype: PropTypes.instanceOf(Map),
-  modalConnect: PropTypes.instanceOf(Map),
+  modalConnect: PropTypes.oneOfType([
+    PropTypes.instanceOf(Map),
+    PropTypes.instanceOf(List),
+  ]),
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
   invalidateEntitiesOnSuccess: PropTypes.oneOfType([

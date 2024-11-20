@@ -101,7 +101,7 @@ import {
   selectResourcesByType,
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
-  selectEntityIndicators,
+  selectActionIndicators,
   selectEntityUsers,
 } from './selectors';
 
@@ -617,7 +617,7 @@ const mapStateToProps = (state, props) => ({
   topActionsByType: selectTopActionsByActiontype(state, props.params.id),
   subActionsByType: selectSubActionsByActiontype(state, props.params.id),
   subject: selectSubjectQuery(state),
-  indicators: selectEntityIndicators(state, props.params.id),
+  indicators: selectActionIndicators(state, props.params.id),
   // indicatorConnections: selectIndicatorConnections(state),
   users: selectEntityUsers(state, props.params.id),
   userConnections: selectUserConnections(state),

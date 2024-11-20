@@ -69,7 +69,7 @@ const Main = styled.div`
 
 const TTTitle = styled.h4`
 margin: 0;
-font-size: ${({ theme }) => theme.sizes.text.default};
+font-size: ${({ theme }) => theme.text.medium.size};
 `;
 
 const CountryButton = styled((p) => <Button {...p} />)`

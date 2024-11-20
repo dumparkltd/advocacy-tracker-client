@@ -20,7 +20,10 @@ import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 import appMessages from 'containers/App/messages';
 
 const EntityListSearchWrapper = styled((p) => <Box {...p} />)`
-  width: 500px;
+  width: 100%;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    width: 500px;
+  }
 `;
 
 export function EntityListTableOptions({
@@ -31,7 +34,6 @@ export function EntityListTableOptions({
   pageSelectValue,
   intl,
 }) {
-  const size = React.useContext(ResponsiveContext);
   const {
     checkboxOptions,
     typeOptions,
@@ -41,73 +43,101 @@ export function EntityListTableOptions({
     searchPlaceholder,
   } = options;
   const isPrintView = usePrint();
-
+  const size = React.useContext(ResponsiveContext);
   return (
     <Box
-      direction={isMinSize(size, 'medium') ? 'row' : 'column'}
-      justify={subjectOptions ? 'between' : 'end'}
+      justify="start"
       fill="horizontal"
-      margin={{ bottom: 'small' }}
+      margin={{ bottom: 'medium' }}
+      gap="small"
     >
-      {!isPrintView && (
+      <Box direction="row" justify="between" align="center">
+        {!isPrintView && subjectOptions && subjectOptions.length > 0 && (
+          <Box style={{ position: 'relative', top: '5px' }}>
+            <MapSubjectOptions
+              inList
+              options={subjectOptions}
+            />
+          </Box>
+        )}
+        {isMinSize(size, 'large') && hasPageSelect && (
+          <Box>
+            <SelectReset
+              value={pageSelectValue}
+              label={intl && intl.formatMessage(appMessages.labels.perPage)}
+              index="page-select"
+              options={PAGE_ITEM_OPTIONS && PAGE_ITEM_OPTIONS.map((option) => ({
+                value: option.value.toString(),
+                label: option.value.toString(),
+              }))}
+              isReset={false}
+              onChange={onPageItemsSelect}
+            />
+          </Box>
+        )}
+      </Box>
+      {(hasSearch || hasPageSelect || typeOptions || checkboxOptions) && (
         <Box
-          direction="column"
-          align="start"
-          gap="xsmall"
-          pad={{ vertical: 'small' }}
+          direction={isMinSize(size, 'large') ? 'row' : 'column'}
+          justify={isMinSize(size, 'large') ? 'between' : 'start'}
+          gap={isMinSize(size, 'large') ? 'none' : 'small'}
+          align={isMinSize(size, 'large') ? 'start' : 'end'}
         >
-          {subjectOptions && subjectOptions.length > 0 && (
-            <Box>
-              <MapSubjectOptions
-                inList
-                options={subjectOptions}
-              />
-            </Box>
-          )}
-          {typeOptions && typeOptions.length > 0 && (
-            <BoxPrint
-              isPrint={isPrintView}
-              printHide
-              direction="row"
-              gap="xsmall"
-              wrap
-            >
-              {typeOptions.map(
-                (type) => (
-                  <ButtonPill
-                    key={type.id}
-                    onClick={() => type.onClick()}
-                    active={type.active}
-                  >
-                    <Text size="small">
-                      {type.label}
-                    </Text>
-                  </ButtonPill>
-                )
-              )}
-            </BoxPrint>
-          )}
-          {checkboxOptions && checkboxOptions.length > 0 && (
-            <Box>
-              {checkboxOptions && checkboxOptions.map(
-                (option, i) => (
-                  <MapOption key={i} option={option} />
-                )
-              )}
-            </Box>
-          )}
-        </Box>
-      )}
-      {(hasSearch || hasPageSelect) && (
-        <Box
-          direction="column"
-          align="end"
-          gap="small"
-          pad={{ vertical: 'small' }}
-          justify="end"
-        >
-          {hasPageSelect && (
-            <Box>
+          <Box
+            gap="small"
+            basis={isMinSize(size, 'large') ? '1/2' : '1'}
+          >
+            {!isPrintView && typeOptions && typeOptions.length > 0 && (
+              <BoxPrint
+                isPrint={isPrintView}
+                printHide
+                direction="row"
+                gap="xsmall"
+                wrap
+                margin={{ top: '5px' }}
+              >
+                {typeOptions.map(
+                  (type) => (
+                    <ButtonPill
+                      key={type.id}
+                      onClick={() => type.onClick()}
+                      active={type.active}
+                    >
+                      <Text size="small" style={{ position: 'relative', top: '-1px' }}>
+                        {type.label}
+                      </Text>
+                    </ButtonPill>
+                  )
+                )}
+              </BoxPrint>
+            )}
+            {!isPrintView && checkboxOptions && checkboxOptions.length > 0 && (
+              <Box>
+                {checkboxOptions && checkboxOptions.map(
+                  (option, i) => (
+                    <MapOption key={i} option={option} />
+                  )
+                )}
+              </Box>
+            )}
+          </Box>
+          <Box
+            basis={isMinSize(size, 'large') ? '1/2' : 'auto'}
+            alignSelf={isMinSize(size, 'large') ? 'start' : 'end'}
+            fill={isMinSize(size, 'medium') ? false : 'horizontal'}
+          >
+            {hasSearch && (
+              <EntityListSearchWrapper>
+                <EntityListSearch
+                  searchQuery={searchQuery}
+                  onSearch={onSearch}
+                  placeholder={searchPlaceholder}
+                />
+              </EntityListSearchWrapper>
+            )}
+          </Box>
+          {!isMinSize(size, 'large') && hasPageSelect && (
+            <Box alignSelf="end">
               <SelectReset
                 value={pageSelectValue}
                 label={intl && intl.formatMessage(appMessages.labels.perPage)}
@@ -120,15 +150,6 @@ export function EntityListTableOptions({
                 onChange={onPageItemsSelect}
               />
             </Box>
-          )}
-          {hasSearch && (
-            <EntityListSearchWrapper>
-              <EntityListSearch
-                searchQuery={searchQuery}
-                onSearch={onSearch}
-                placeholder={searchPlaceholder}
-              />
-            </EntityListSearchWrapper>
           )}
         </Box>
       )}

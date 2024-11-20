@@ -2,10 +2,6 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
-import FieldFactory from 'components/fields/FieldFactory';
-// import styled from 'styled-components';
-import { Box } from 'grommet';
-
 import { ROUTES, API, API_FOR_ROUTE } from 'themes/config';
 
 import qe from 'utils/quasi-equals';
@@ -32,21 +28,28 @@ import {
   setListPreview,
   updatePath,
   loadEntitiesIfNeeded,
+  openNewEntityModal,
 } from 'containers/App/actions';
 
 import {
   selectReady,
   selectTaxonomiesWithCategories,
   selectActorConnections,
+  selectIsUserMember,
 } from 'containers/App/selectors';
+
+import EntityFields from './EntityFields';
 
 import PreviewHeader from './PreviewHeader';
 import PreviewFooter from './PreviewFooter';
-import { selectPreviewEntity } from './selectors';
+import { selectPreviewEntityWithConnections } from './selectors';
 
 export const DEPENDENCIES = [
+  API.ROLES,
   API.USERS,
   API.USER_ROLES,
+  API.USER_ACTIONS,
+  API.USER_ACTORS,
   API.CATEGORIES,
   API.ACTORS,
   API.ACTIONS,
@@ -68,88 +71,111 @@ export function PreviewEntity({
   onUpdatePath,
   onEntityClick,
   intl,
+  onCreateOption,
+  isMember,
 }) {
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
   }, [dataReady]);
+  if (!dataReady) return null;
 
   let headerContent;
-  let mainContent;
+  let fields = {};
   let footerContent;
   if (previewEntity && qe(content.get('path'), ROUTES.ACTION)) {
-    headerContent = getActionPreviewHeader(previewEntity, intl);
-    mainContent = dataReady && getActionPreviewFields({
-      action: previewEntity,
-      indicators: previewEntity.get('indicators'),
-      categories: previewEntity.get('categories'),
-      actorsByType: previewEntity.get('actorsByType'),
-      taxonomies,
-      actorConnections,
-      onEntityClick,
-      intl,
-    });
+    headerContent = getActionPreviewHeader(previewEntity, intl, onUpdatePath);
+    fields = {
+      fields: getActionPreviewFields({
+        action: previewEntity,
+        indicators: previewEntity.get('indicators'),
+        categories: previewEntity.get('categories'),
+        actorsByType: previewEntity.get('actorsByType'),
+        taxonomies,
+        actorConnections,
+        onEntityClick,
+        intl,
+      }),
+    };
     footerContent = getActionPreviewFooter(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.ACTOR)) {
-    headerContent = getActorPreviewHeader(previewEntity, intl);
-    mainContent = dataReady && getActorPreviewFields({
-      actor: previewEntity,
-      associationsByType: previewEntity.get('associationsByType'),
-      membersByType: previewEntity.get('membersByType'),
-      taxonomiesWithCategoriesByType: previewEntity.get('taxonomiesByType'),
-      onEntityClick,
+    headerContent = getActorPreviewHeader(
+      previewEntity,
       intl,
-    });
+      onUpdatePath,
+      onCreateOption,
+    );
+    fields = {
+      actorIndicators: {
+        withOptions: true,
+      },
+      fields: getActorPreviewFields({
+        actor: previewEntity,
+        associationsByType: previewEntity.get('associationsByType'),
+        membersByType: previewEntity.get('membersByType'),
+        taxonomiesWithCategoriesByType: previewEntity.get('taxonomiesByType'),
+        onEntityClick,
+        intl,
+      }),
+    };
     footerContent = previewEntity && getActorPreviewFooter(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.INDICATOR)) {
-    headerContent = previewEntity && getIndicatorPreviewHeader(previewEntity, intl);
-    mainContent = dataReady && getIndicatorPreviewFields({
-      indicator: previewEntity,
-      onEntityClick,
-      intl,
-    });
+    headerContent = previewEntity && getIndicatorPreviewHeader(previewEntity, intl, onUpdatePath);
+    fields = {
+      fields: getIndicatorPreviewFields({
+        indicator: previewEntity,
+        onEntityClick,
+        intl,
+      }),
+    };
     footerContent = previewEntity && getIndicatorPreviewFooter(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.RESOURCE)) {
-    headerContent = previewEntity && getResourcePreviewHeader(previewEntity, intl);
-    mainContent = dataReady && getResourcePreviewFields({
-      resource: previewEntity,
-      onEntityClick,
-      intl,
-    });
+    headerContent = previewEntity && getResourcePreviewHeader(previewEntity, intl, onUpdatePath);
+    fields = {
+      fields: getResourcePreviewFields({
+        resource: previewEntity,
+        onEntityClick,
+        intl,
+      }),
+    };
     footerContent = previewEntity && getResourcePreviewFooter(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.USERS)) {
-    headerContent = previewEntity && getUserPreviewHeader(previewEntity, intl);
-    mainContent = dataReady && getUserPreviewFields({
-      user: previewEntity,
-      onEntityClick,
+    headerContent = previewEntity && getUserPreviewHeader(
+      previewEntity,
       intl,
-    });
+      onUpdatePath,
+      onCreateOption,
+    );
+    fields = {
+      fields: getUserPreviewFields({
+        user: previewEntity,
+        actionsByType: previewEntity.get('actionsByType'),
+        onEntityClick,
+        intl,
+        isMember,
+      }),
+    };
     footerContent = previewEntity && getUserPreviewFooter(previewEntity, intl);
   }
+  // console.log(previewEntity && previewEntity.toJS())
   return (
     <>
       {headerContent && (
         <PreviewHeader
           content={headerContent}
           onSetPreviewItemId={onSetPreviewItemId}
+          onUpdatePath={onUpdatePath}
         />
       )}
-      {mainContent && (
-        <Box margin={{ vertical: 'medium' }}>
-          {mainContent.map(
-            (field, i) => field
-              ? (
-                <FieldFactory
-                  key={i}
-                  field={{ ...field }}
-                />
-              )
-              : null
-          )}
-        </Box>
+      {fields && (
+        <EntityFields
+          fields={fields}
+          item={previewEntity}
+          onUpdatePath={onUpdatePath}
+        />
       )}
       {footerContent && (
         <PreviewFooter
@@ -167,9 +193,11 @@ PreviewEntity.propTypes = {
   previewEntity: PropTypes.object, // immutable Map
   taxonomies: PropTypes.object, // immutable Map
   actorConnections: PropTypes.object, // immutable Map
+  isMember: PropTypes.bool,
   onSetPreviewItemId: PropTypes.func,
   onUpdatePath: PropTypes.func,
   onEntityClick: PropTypes.func,
+  onCreateOption: PropTypes.func,
   dataReady: PropTypes.bool,
   intl: intlShape.isRequired,
 };
@@ -178,7 +206,8 @@ const mapStateToProps = (state, { content }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   taxonomies: selectTaxonomiesWithCategories(state),
   actorConnections: selectActorConnections(state),
-  previewEntity: selectPreviewEntity(
+  isMember: selectIsUserMember(state),
+  previewEntity: selectPreviewEntityWithConnections(
     state,
     {
       id: content.get('id'),
@@ -200,6 +229,7 @@ export function mapDispatchToProps(dispatch) {
     onEntityClick: (id, path) => {
       dispatch(updatePath(`${path}/${id}`));
     },
+    onCreateOption: (args) => dispatch(openNewEntityModal(args)),
   };
 }
 

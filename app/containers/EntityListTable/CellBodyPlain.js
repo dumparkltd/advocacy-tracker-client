@@ -10,8 +10,8 @@ const LabelWrap = styled((p) => <Box direction="row" gap="xsmall" align="center"
 const Link = styled((p) => <Button as="a" {...p} />)`
   text-align: ${({ align }) => {
     if (align === 'end') return 'right';
-    if (align === 'start') return 'left';
-    return 'center';
+    if (align === 'center') return 'center';
+    return 'left';
   }};
   line-height: 12px;
 `;

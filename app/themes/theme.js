@@ -30,7 +30,7 @@ theme.gutter = 20;
 // 2: main colour, light
 // 3: main colour, background
 // 4: white
-const primary = coolorsToHex('https://coolors.co/08586c-00728f-00728f-f1f0f1-ffffff');
+const primary = coolorsToHex('https://coolors.co/08586c-00728f-00728f-f0f0f0-ffffff');
 // secondary color palette: dark to light
 // 0: dark header colour, darker
 // 1: dark header colour
@@ -51,7 +51,7 @@ const dark = coolorsToHex('https://coolors.co/1c2121-232b2b-323e3e-687271-8d9696
 // 2:  gray 1 (gray pattern)
 // 3:  gray 2 (icons light)
 // 4:  gray 3 (dark lines)
-const light = coolorsToHex('https://coolors.co/f1f0f1-f1f0f1-d5dddd-cdd6d6-c7d1d1');
+const light = coolorsToHex('https://coolors.co/f0f0f0-f0f0f0-d5dddd-cdd6d6-c7d1d1');
 
 // other palettes
 // 0: AA on light[0] and on error[3]
@@ -269,19 +269,6 @@ theme.fonts = {
 theme.sizes = {
   // also see global-styles.js for other sizes
   // px or em
-  text: {
-    aaLargeBold: '19px',
-    aaLarge: '24px',
-    mainListItem: '20px',
-    listItemTop: '13px',
-    listItemBottom: '12px',
-    markdown: '18px',
-    markdownMobile: '16px',
-    small: '13px', // used for labels
-    smaller: '12px', // used for labels
-    smallMobile: '11px', // used for labels
-    default: '16px', // used for labels
-  },
   print: {
     mainListItem: '10pt',
     listItemTop: '7pt',
@@ -291,6 +278,7 @@ theme.sizes = {
     smaller: '8pt', // used for labels
     small: '9pt', // used for labels
     default: '10pt', // used for labels
+    normal: '10pt', // used for labels
     large: '11pt', // used for labels
     larger: '12pt', // used for labels
     largest: '14pt', // used for labels
@@ -476,24 +464,25 @@ theme.global = {
     highlight: '#00728f',
     primary: '#00728f',
     highlightHover: '#08586c',
-    background: '#f1f0f1',
+    background: '#f0f0f0',
     backgroundLight: '#fcfcfc',
-    inactive: '#f1f0f1', // on light background (empowerment)
+    inactive: '#f0f0f0', // on light background (empowerment)
     a: '#00728f',
     aHover: '#08586c',
     textLight: '#1c2121', // on light background (empowerment)
-    textSecondary: '#6D7576', // on light background (empowerment)
-    hint: '#687271',
+    textSecondary: '#898989', // on light background (empowerment)
+    hint: '#898989',
+    'dark-5': '#898989',
     text: {
-      hint: '#687271',
+      hint: '#898989',
       brand: '#000000',
       dark: '#FFFFFF', //  on dark background
-      light: '#1c2121', // on light background (empowerment)
-      secondary: '#6D7576', // on light background (empowerment)
+      light: '#000000', // on light background (empowerment)
+      secondary: '#898989', // on light background (empowerment)
     },
     border: {
       light: '#CECED2',
-      lighter: '#f1f0f1',
+      lighter: '#f0f0f0',
       dark: '#FFFFFF',
     },
     danger: '#DB5D37',
@@ -546,6 +535,7 @@ theme.layer = {
 theme.text = {
   xxxlarge: { size: '48px', height: '60px', maxWidth: '800px' },
   xxlarge: { size: '30px', height: '36px', maxWidth: '800px' },
+  aaLarge: { size: '24px', height: '32px', maxWidth: '800px' },
   xlarge: { size: '20px', height: '28px', maxWidth: '800px' },
   large: { size: '18px', height: '24px', maxWidth: '800px' },
   largeTall: { size: '18px', height: '26px', maxWidth: '800px' },

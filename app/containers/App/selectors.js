@@ -1850,6 +1850,184 @@ const filterStatements = (
   return pass;
 };
 
+const getActorStatementsAndPositions = ({
+  actor,
+  actors,
+  indicators,
+  statements,
+  groupActors,
+  actorActions,
+  actionIndicators,
+  memberships,
+  authorityCategories,
+  actionCategoriesByAction,
+  includeMembers,
+  includeInofficial,
+  connectedCategoryQuery,
+}) => {
+  // 1. figure out any actor statements /////////////////////////////////////
+  // actorActions
+  let actorIndicators;
+  let actorStatementsAsMemberByGroup = List();
+  // direct
+  let actorStatements = actorActions.get(parseInt(actor.get('id'), 10));
+  if (actorStatements) {
+    actorStatements = actorStatements
+      .filter((statementId) => filterStatements(
+        statements,
+        statementId,
+        includeInofficial,
+        actionCategoriesByAction,
+        asList(connectedCategoryQuery),
+      ))
+      .toList();
+  }
+  // indirect via group
+  // if actor can belong to a "group"
+  const hasGroups = MEMBERSHIPS[actor.getIn(['attributes', 'actortype_id'])]
+    && MEMBERSHIPS[actor.getIn(['attributes', 'actortype_id'])].length > 0;
+  if (includeMembers && hasGroups) {
+    const actorMemberships = memberships.get(parseInt(actor.get('id'), 10));
+    if (actorMemberships) {
+      actorStatementsAsMemberByGroup = actorMemberships.reduce(
+        (memo, groupId) => {
+          if (groupActors.get(groupId.toString()) && actorActions && actorActions.get(groupId)) {
+            // for contacts we should only include statements/positions from "groups" and not countries or orgs they may belong to
+            if (
+              qe(actor.getIn(['attributes', 'actortype_id']), ACTORTYPES.CONTACT)
+              && !qe(groupActors.get(groupId.toString()).getIn(['attributes', 'actortype_id']), ACTORTYPES.GROUP)
+            ) {
+              return memo;
+            }
+            return memo.set(
+              groupId,
+              actorActions
+                .get(groupId)
+                .filter((statementId) => filterStatements(
+                  statements,
+                  statementId,
+                  includeInofficial,
+                  actionCategoriesByAction,
+                  asList(connectedCategoryQuery),
+                ))
+                .toList()
+            );
+          }
+          return memo;
+        },
+        Map(),
+      );
+    }
+  }
+
+  // 2. figure out actor positions on all indicators/topics
+  if (
+    (actorStatements && actorStatements.size > 0)
+    || (actorStatementsAsMemberByGroup && actorStatementsAsMemberByGroup.size > 0)
+  ) {
+    // now for each indicator
+    actorIndicators = indicators.map(
+      (indicator) => {
+        // get all statements for topic
+        let indicatorStatements = actionIndicators.get(parseInt(indicator.get('id'), 10));
+        if (indicatorStatements) {
+          // filter for current actor
+          indicatorStatements = indicatorStatements.reduce(
+            (memo, indicatorStatement, id) => {
+              const statementId = indicatorStatement.get('measure_id');
+              const hasDirectStatement = actorStatements && actorStatements.includes(parseInt(statementId, 10));
+              const groupsWithStatement = actorStatementsAsMemberByGroup
+                && actorStatementsAsMemberByGroup.filter(
+                  (ids) => ids.includes(parseInt(statementId, 10))
+                );
+              if (hasDirectStatement || (groupsWithStatement && groupsWithStatement.size > 0)) {
+                const statement = statements.get(statementId.toString());
+                let result = statement
+                  ? indicatorStatement.set(
+                    'measure',
+                    statement.get('attributes').set('id', statement.get('id')),
+                  )
+                  : indicatorStatement;
+                const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
+                const statementAuthority = statementCategories && authorityCategories.find(
+                  (cat, catId) => statementCategories.includes(parseInt(catId, 10))
+                );
+                if (statementAuthority) {
+                  result = result.set(
+                    'authority',
+                    statementAuthority.get('attributes').set('id', statementAuthority.get('id'))
+                  );
+                }
+                if (!hasDirectStatement && groupsWithStatement && groupsWithStatement.size > 0) {
+                  result = result.set(
+                    'viaGroupIds',
+                    groupsWithStatement.keySeq()
+                  ).set(
+                    'viaGroups',
+                    groupsWithStatement.keySeq().map(
+                      (groupId) => actors.get(groupId.toString())
+                    )
+                  );
+                }
+                return memo.set(id, result);
+              }
+              return memo;
+            },
+            Map(),
+          ).sort(
+            // sort: first check for dates, then use higher level of suuport
+            (a, b) => {
+              let aDate = a.getIn(['measure', 'date_start']);
+              let bDate = b.getIn(['measure', 'date_start']);
+              /* eslint-disable no-restricted-globals */
+              let aIsDate = aDate && isDate(aDate);
+              let bIsDate = bDate && isDate(bDate);
+              if (!aIsDate) {
+                aDate = a.getIn(['measure', 'created_at']);
+                aIsDate = new Date(aDate) instanceof Date && !isNaN(new Date(aDate));
+              }
+              if (!bIsDate) {
+                bDate = b.getIn(['measure', 'created_at']);
+                bIsDate = new Date(bDate) instanceof Date && !isNaN(new Date(bDate));
+              }
+              /* eslint-enable no-restricted-globals */
+              if (aIsDate && bIsDate) {
+                // check for support level if dates equals
+                if (aDate === bDate) {
+                  const aSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[a.get('supportlevel_id') || 0];
+                  const bSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[b.get('supportlevel_id') || 0];
+                  return aSupportLevel < bSupportLevel ? -1 : 1;
+                }
+                return new Date(aDate) < new Date(bDate) ? 1 : -1;
+              }
+              if (aIsDate) {
+                return -1;
+              }
+              if (bIsDate) {
+                return 1;
+              }
+              return 1;
+            }
+          ).toList();
+          return indicatorStatements || null;
+        }
+        return null;
+      },
+    );
+    // combine direct and indirect statements
+    if (actorStatementsAsMemberByGroup) {
+      actorStatements = actorStatements
+        ? actorStatements.concat(actorStatementsAsMemberByGroup.flatten(true).toList()).toSet()
+        : actorStatementsAsMemberByGroup.flatten(true).toList().toSet();
+      return actor
+        .set('statements', actorStatements)
+        .set('statementsAsGroup', actorStatementsAsMemberByGroup.flatten(true).toList().toSet())
+        .set('indicatorPositions', actorIndicators);
+    }
+  }
+  return actor;
+};
+
 export const selectActorsWithPositions = createSelector(
   // from param
   (state, params) => params && params.includeActorMembers,
@@ -1924,172 +2102,113 @@ export const selectActorsWithPositions = createSelector(
       ).indexOf(actor.getIn(['attributes', 'actortype_id']).toString()) > -1
     );
     return typeActors.map(
-      (actor) => {
-        // 1. figure out any actor statements /////////////////////////////////////
-        // actorActions
-        let actorIndicators;
-        let actorStatementsAsMemberByGroup = List();
-        // direct
-        let actorStatements = actorActions.get(parseInt(actor.get('id'), 10));
-        if (actorStatements) {
-          actorStatements = actorStatements
-            .filter((statementId) => filterStatements(
-              statements,
-              statementId,
-              includeInofficial,
-              actionCategoriesByAction,
-              asList(connectedCategoryQuery),
-            ))
-            .toList();
-        }
-        // indirect via group
-        // if actor can belong to a "group"
-        const hasGroups = MEMBERSHIPS[actor.getIn(['attributes', 'actortype_id'])]
-          && MEMBERSHIPS[actor.getIn(['attributes', 'actortype_id'])].length > 0;
-        if (includeMembers && hasGroups) {
-          const actorMemberships = memberships.get(parseInt(actor.get('id'), 10));
-          if (actorMemberships) {
-            actorStatementsAsMemberByGroup = actorMemberships.reduce(
-              (memo, groupId) => {
-                if (groupActors.get(groupId.toString()) && actorActions && actorActions.get(groupId)) {
-                  // for contacts we should only include statements/positions from "groups" and not countries or orgs they may belong to
-                  if (
-                    qe(actor.getIn(['attributes', 'actortype_id']), ACTORTYPES.CONTACT)
-                    && !qe(groupActors.get(groupId.toString()).getIn(['attributes', 'actortype_id']), ACTORTYPES.GROUP)
-                  ) {
-                    return memo;
-                  }
-                  return memo.set(
-                    groupId,
-                    actorActions
-                      .get(groupId)
-                      .filter((statementId) => filterStatements(
-                        statements,
-                        statementId,
-                        includeInofficial,
-                        actionCategoriesByAction,
-                        asList(connectedCategoryQuery),
-                      ))
-                      .toList()
-                  );
-                }
-                return memo;
-              },
-              Map(),
-            );
-          }
-        }
-
-        // 2. figure out actor positions on all indicators/topics
-        if (
-          (actorStatements && actorStatements.size > 0)
-          || (actorStatementsAsMemberByGroup && actorStatementsAsMemberByGroup.size > 0)
-        ) {
-          // now for each indicator
-          actorIndicators = indicators.map(
-            (indicator) => {
-              // get all statements for topic
-              let indicatorStatements = actionIndicators.get(parseInt(indicator.get('id'), 10));
-              if (indicatorStatements) {
-                // filter for current actor
-                indicatorStatements = indicatorStatements.reduce(
-                  (memo, indicatorStatement, id) => {
-                    const statementId = indicatorStatement.get('measure_id');
-                    const hasDirectStatement = actorStatements && actorStatements.includes(parseInt(statementId, 10));
-                    const groupsWithStatement = actorStatementsAsMemberByGroup
-                      && actorStatementsAsMemberByGroup.filter(
-                        (ids) => ids.includes(parseInt(statementId, 10))
-                      );
-                    if (hasDirectStatement || (groupsWithStatement && groupsWithStatement.size > 0)) {
-                      const statement = statements.get(statementId.toString());
-                      let result = statement
-                        ? indicatorStatement.set(
-                          'measure',
-                          statement.get('attributes').set('id', statement.get('id')),
-                        )
-                        : indicatorStatement;
-                      const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
-                      const statementAuthority = statementCategories && authorityCategories.find(
-                        (cat, catId) => statementCategories.includes(parseInt(catId, 10))
-                      );
-                      if (statementAuthority) {
-                        result = result.set(
-                          'authority',
-                          statementAuthority.get('attributes').set('id', statementAuthority.get('id'))
-                        );
-                      }
-                      if (!hasDirectStatement && groupsWithStatement && groupsWithStatement.size > 0) {
-                        result = result.set(
-                          'viaGroupIds',
-                          groupsWithStatement.keySeq()
-                        ).set(
-                          'viaGroups',
-                          groupsWithStatement.keySeq().map(
-                            (groupId) => actors.get(groupId.toString())
-                          )
-                        );
-                      }
-                      return memo.set(id, result);
-                    }
-                    return memo;
-                  },
-                  Map(),
-                ).sort(
-                  // sort: first check for dates, then use higher level of suuport
-                  (a, b) => {
-                    let aDate = a.getIn(['measure', 'date_start']);
-                    let bDate = b.getIn(['measure', 'date_start']);
-                    /* eslint-disable no-restricted-globals */
-                    let aIsDate = aDate && isDate(aDate);
-                    let bIsDate = bDate && isDate(bDate);
-                    if (!aIsDate) {
-                      aDate = a.getIn(['measure', 'created_at']);
-                      aIsDate = new Date(aDate) instanceof Date && !isNaN(new Date(aDate));
-                    }
-                    if (!bIsDate) {
-                      bDate = b.getIn(['measure', 'created_at']);
-                      bIsDate = new Date(bDate) instanceof Date && !isNaN(new Date(bDate));
-                    }
-                    /* eslint-enable no-restricted-globals */
-                    if (aIsDate && bIsDate) {
-                      // check for support level if dates equals
-                      if (aDate === bDate) {
-                        const aSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[a.get('supportlevel_id') || 0];
-                        const bSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[b.get('supportlevel_id') || 0];
-                        return aSupportLevel < bSupportLevel ? -1 : 1;
-                      }
-                      return new Date(aDate) < new Date(bDate) ? 1 : -1;
-                    }
-                    if (aIsDate) {
-                      return -1;
-                    }
-                    if (bIsDate) {
-                      return 1;
-                    }
-                    return 1;
-                  }
-                ).toList();
-                return indicatorStatements || null;
-              }
-              return null;
-            },
-          );
-          // combine direct and indirect statements
-          if (actorStatementsAsMemberByGroup) {
-            actorStatements = actorStatements
-              ? actorStatements.concat(actorStatementsAsMemberByGroup.flatten(true).toList()).toSet()
-              : actorStatementsAsMemberByGroup.flatten(true).toList().toSet();
-          }
-          return actor
-            .set('statements', actorStatements)
-            .set('statementsAsGroup', actorStatementsAsMemberByGroup.flatten(true).toList().toSet())
-            .set('indicatorPositions', actorIndicators);
-        }
-        return actor;
-      }
+      (actor) => getActorStatementsAndPositions({
+        actor,
+        actors,
+        indicators,
+        statements,
+        groupActors,
+        actorActions,
+        actionIndicators,
+        memberships,
+        authorityCategories,
+        actionCategoriesByAction,
+        includeMembers,
+        includeInofficial,
+        connectedCategoryQuery,
+      })
     );
   }
 );
+
+export const selectActorWithPositions = createSelector(
+  // from param
+  (state, params) => params && params.id,
+  (state, params) => params && params.includeActorMembers,
+  (state, params) => params && params.includeInofficial,
+  (state, params) => params && params.type,
+  // from query
+  selectIncludeInofficialStatements,
+  selectIncludeActorMembers,
+  selectConnectedCategoryQuery,
+  // from state
+  (state) => selectActors(state),
+  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
+  (state) => selectTaxonomyCategories(state, { taxonomy_id: AUTHORITY_TAXONOMY }),
+  selectActionCategoriesGroupedByAction,
+  selectMembershipsGroupedByMember,
+  selectActorActionsGroupedByActor,
+  selectIndicators,
+  selectActionIndicatorsGroupedByIndicatorAttributes,
+  (
+    actorId,
+    includeActorMembersParam,
+    includeInofficialParam,
+    actortypeId,
+    includeInofficialQuery,
+    includeActorMembersQuery,
+    connectedCategoryQuery,
+    actors,
+    statements,
+    authorityCategories,
+    actionCategoriesByAction,
+    memberships,
+    actorActions,
+    indicators,
+    actionIndicators,
+  ) => {
+    if (
+      !actors
+      || !statements
+      || !actionCategoriesByAction
+      || !memberships
+      || !actorActions
+      || !indicators
+      || !actionIndicators
+      || !authorityCategories
+    ) {
+      return null;
+    }
+    // limit to type if set
+    const actor = actors.get(actorId);
+    // use query unless param set
+    let includeInofficial = true;
+    if (typeof includeInofficialParam !== 'undefined') {
+      includeInofficial = includeInofficialParam;
+    } else if (typeof includeInofficialQuery !== 'undefined') {
+      includeInofficial = includeInofficialQuery;
+    }
+    let includeMembers = true;
+    if (typeof includeActorMembersParam !== 'undefined') {
+      includeMembers = includeActorMembersParam;
+    } else if (typeof includeActorMembersQuery !== 'undefined') {
+      includeMembers = includeActorMembersQuery;
+    }
+    // figure out actors that can have members aka "group actors"
+    const groupActors = actors.filter(
+      (groupActor) => Object.values(MEMBERSHIPS).reduce(
+        (memo, actorGroups) => [...memo, ...actorGroups],
+        [],
+      ).indexOf(groupActor.getIn(['attributes', 'actortype_id']).toString()) > -1
+    );
+    return actor && getActorStatementsAndPositions({
+      actor,
+      actors,
+      indicators,
+      statements,
+      groupActors,
+      actorActions,
+      actionIndicators,
+      memberships,
+      authorityCategories,
+      actionCategoriesByAction,
+      includeMembers,
+      includeInofficial,
+      connectedCategoryQuery,
+    });
+  }
+);
+
 
 export const selectActorsByType = createSelector(
   selectActors,

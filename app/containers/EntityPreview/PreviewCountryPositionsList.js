@@ -1,30 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-// import styled from 'styled-components';
-import { Box } from 'grommet';
+import styled from 'styled-components';
+import { Box, Text } from 'grommet';
 
 import EntityListTable from 'containers/EntityListTable';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
-import FieldGroup from 'components/fields/FieldGroup';
+import { ROUTES } from 'themes/config';
 
-import {
-  getActorConnectionField,
-} from 'utils/fields';
-
-import appMessages from 'containers/App/messages';
+const SectionTitle = styled((p) => <Text size="xsmall" {...p} />)`
+  text-transform: uppercase;
+  font-weight: bold;
+`;
 
 export function PreviewCountryPositionsList({ content, onUpdatePath }) {
   const indicators = content.get('indicators');
   const columns = content.get('countryPositionsTableColumns').toJS();
   const options = content.get('options').toJS();
   const entityTitle = content.get('entityTitle').toJS();
-  const countryAssociations = content.get('countryAssociations');
+
   return (
     <Box
       gap="medium"
       responsive={false}
       flex={{ shrink: 0 }}
     >
+      <SectionTitle>
+        Current Country Positions by Topic
+      </SectionTitle>
       <Box fill="horizontal" direction="row" justify="between" align="end">
         {options && (
           <Box direction="column" justify="end">
@@ -43,28 +45,9 @@ export function PreviewCountryPositionsList({ content, onUpdatePath }) {
             columns={columns}
             entities={indicators.toList()}
             entityTitle={entityTitle}
-            onEntityClick={onUpdatePath}
+            onEntityClick={(idOrPath, path) => onUpdatePath(path ? `${path}/${idOrPath}` : idOrPath)}
+            entityPath={ROUTES.INDICATOR}
             inSingleView
-          />
-        </Box>
-      )}
-      {countryAssociations && (
-        <Box>
-          <FieldGroup
-            seamless
-            group={{
-              label: appMessages.nav.associations,
-              fields: countryAssociations.reduce(
-                (memo, actors, typeid) => memo.concat([
-                  getActorConnectionField({
-                    actors,
-                    typeid,
-                    // onEntityClick
-                  }),
-                ]),
-                [],
-              ),
-            }}
           />
         </Box>
       )}

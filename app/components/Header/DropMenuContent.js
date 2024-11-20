@@ -44,6 +44,7 @@ const ExpandItems = styled((p) => <Button {...p} />)`
   color: ${palette('primary', 1)};
   font-family: ${({ theme }) => theme.fonts.title};
   font-weight: normal;
+  width: fit-content;
   &:hover {
     color: ${palette('primary', 0)};
   }

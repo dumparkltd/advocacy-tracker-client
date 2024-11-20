@@ -11,7 +11,7 @@ const Status = styled(Label)`
   padding-left: ${({ float }) => float === 'right' ? '1em' : 0};
   padding-right: ${({ float }) => float === 'left' ? '1em' : 0};
   font-weight: bold;
-  font-size: ${(props) => props.theme.sizes && props.theme.sizes.text.listItemTop};
+  font-size: ${(props) => props.theme.sizes && props.theme.text.xsmall.size};
   margin-top: ${({ top }) => top ? '-7px' : 0};
   color: ${palette('dark', 4)};
   @media print {

@@ -137,7 +137,7 @@ const ColumnHighlightTitle = styled.div`
   bottom: 100%;
   white-space: nowrap;
   box-shadow: 0px 2px 4px rgba(0,0,0,0.20);
-  background: #6d7576;
+  background: #898989;
   padding: 5px 8px;
 `;
 
@@ -207,6 +207,7 @@ export function EntitiesTable({
   onSetPreviewContent,
   sortedEntities,
   searchedEntities,
+  locationQuery,
 }) {
   const headerRef = useRef(null);
   const tableRef = useRef(null);
@@ -258,7 +259,7 @@ export function EntitiesTable({
         onSetPreviewContent();
       }
     }
-  }, [previewItemId]);
+  }, [previewItemId, locationQuery]);
   const size = React.useContext(ResponsiveContext);
   const isPrintView = usePrint();
 
@@ -460,7 +461,6 @@ export function EntitiesTable({
                         || col.type === 'amount'
                         || col.type === 'userrole'
                         || col.type === 'date'
-                        || col.type === 'supportlevel'
                         || col.type === 'topicPosition'
                       ) && (
                         <CellBodyPlain
@@ -477,7 +477,10 @@ export function EntitiesTable({
                           column={col}
                         />
                       )}
-                      {col.type === 'position' && (
+                      {(
+                        col.type === 'position'
+                        || col.type === 'supportlevel'
+                      ) && (
                         <CellBodyPosition
                           entity={entity[col.id]}
                           column={col}
@@ -605,6 +608,7 @@ EntitiesTable.propTypes = {
   availableHeaderColumns: PropTypes.array,
   visibleColumns: PropTypes.array,
   availableColumns: PropTypes.array,
+  locationQuery: PropTypes.object,
 };
 
 export default withTheme(EntitiesTable);

@@ -10,7 +10,7 @@ const LinkTooltip = styled(
   border-radius: 999px;
   width: 40px;
   height: 40px;
-  border: 1px solid #f1f0f1;
+  border: 1px solid #f0f0f0;
   box-shadow: 0px 0px 9px -3px rgba(0,0,0,0.1);
   ${({ theme, showContent }) => {
     if (showContent) {

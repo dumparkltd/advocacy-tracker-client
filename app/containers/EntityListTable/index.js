@@ -21,6 +21,7 @@ import {
   selectPrintConfig,
   selectPreviewQuery,
   selectHiddenColumns,
+  selectLocationQuery,
 } from 'containers/App/selectors';
 import {
   setPreviewContent,
@@ -117,9 +118,10 @@ export function EntityListTable({
   onUpdateHiddenColumns,
   onUpdateColumnFilters,
   onEntityClick,
+  locationQuery,
+  skipPreviews,
 }) {
   if (!columns) return null;
-
   const size = React.useContext(ResponsiveContext);
   // list options
   const {
@@ -321,7 +323,7 @@ export function EntityListTable({
     : availableHeaderColumns.filter((c) => !c.hidden);
   return (
     <div>
-      {options && (
+      {options && Object.keys(options).length > 0 && (
         <EntityListTableOptions
           options={{
             ...options,
@@ -343,12 +345,12 @@ export function EntityListTable({
         availableHeaderColumns={availableHeaderColumns || []}
         visibleColumns={visibleColumns || []}
         availableColumns={availableColumns || []}
-        onEntityClick={(id, path, componentId) => {
-          if (inSingleView && onEntityClick) {
-            onEntityClick(id, path);
+        onEntityClick={(idOrPath, path, componentId) => {
+          if ((skipPreviews || inSingleView) && onEntityClick) {
+            onEntityClick(idOrPath, path);
           }
-          if (!inSingleView && onSetPreviewItemId && componentId) {
-            onSetPreviewItemId(`${componentId}|${path}|${id}`);
+          if (!skipPreviews && !inSingleView && onSetPreviewItemId && componentId) {
+            onSetPreviewItemId(`${componentId}|${path}|${idOrPath}`);
           }
         }}
         onUpdateHiddenColumns={onUpdateHiddenColumns}
@@ -358,6 +360,7 @@ export function EntityListTable({
         previewItemId={previewItemId}
         reducePreviewItem={reducePreviewItem}
         onSetPreviewContent={onSetPreviewContent}
+        locationQuery={locationQuery}
       />
       <ListEntitiesMain>
         {entityTitle && listEmpty && (
@@ -466,6 +469,7 @@ EntityListTable.propTypes = {
   label: PropTypes.string,
   options: PropTypes.object,
   isByOption: PropTypes.bool,
+  skipPreviews: PropTypes.bool,
   isPrintView: PropTypes.bool,
   printConfig: PropTypes.object,
   pageItemSelectConfig: PropTypes.object,
@@ -477,6 +481,7 @@ EntityListTable.propTypes = {
   onUpdateHiddenColumns: PropTypes.func,
   onUpdateColumnFilters: PropTypes.func,
   hiddenColumns: PropTypes.object, // immutable List
+  locationQuery: PropTypes.object, // immutable Map
 };
 
 const mapStateToProps = (state) => ({
@@ -492,6 +497,7 @@ const mapStateToProps = (state) => ({
   printConfig: selectPrintConfig(state),
   previewItemId: selectPreviewQuery(state),
   hiddenColumns: selectHiddenColumns(state),
+  locationQuery: selectLocationQuery(state),
 });
 function mapDispatchToProps(dispatch) {
   return {

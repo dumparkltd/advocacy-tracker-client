@@ -19,6 +19,9 @@ import { lowerCase } from 'utils/string';
 import { MEMBERSHIPS, ACTORTYPES } from 'themes/config';
 
 import {
+  getIndicatorColumns,
+} from 'utils/entities';
+import {
   getIndicatorConnectionField,
 } from 'utils/fields';
 import { qe } from 'utils/quasi-equals';
@@ -48,41 +51,6 @@ const MapOptions = styled(
 const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
   && MEMBERSHIPS[typeId].length > 0
   && !qe(typeId, ACTORTYPES.CONTACT);
-
-const getIndicatorColumns = (viewEntity, typeId, intl, isAdmin) => {
-  let columns = [
-    {
-      id: 'main',
-      type: 'main',
-      sort: 'title',
-      attributes: isAdmin ? ['code', 'title'] : ['title'],
-    },
-    {
-      id: 'positionStatement',
-      type: 'positionStatement',
-    },
-    {
-      id: 'supportlevel_id',
-      type: 'supportlevel',
-      title: intl.formatMessage(appMessages.attributes.supportlevel_id),
-    },
-    {
-      id: 'authority',
-      type: 'positionStatementAuthority',
-    },
-  ];
-  if (hasMemberOption(typeId)) {
-    columns = [
-      ...columns,
-      {
-        id: 'viaGroups',
-        type: 'viaGroups',
-      },
-    ];
-  }
-  return columns;
-};
-
 
 export function TabStatements(props) {
   const {
@@ -164,7 +132,12 @@ export function TabStatements(props) {
                 indicators: indicatorsWithSupport,
                 onEntityClick,
                 skipLabel: true,
-                columns: getIndicatorColumns(viewEntity, typeId, intl, isAdmin),
+                columns: getIndicatorColumns({
+                  typeId,
+                  intl,
+                  isAdmin,
+                  hasMemberOption,
+                }),
               }),
             ],
           }}

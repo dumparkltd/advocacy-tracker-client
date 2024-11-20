@@ -19,6 +19,7 @@ import {
   ACTION_INDICATOR_SUPPORTLEVELS,
   ACTIONTYPES,
   ROUTES,
+  API,
 } from 'themes/config';
 import qe from 'utils/quasi-equals';
 import asList from 'utils/as-list';
@@ -37,6 +38,7 @@ import {
   setPreviewContent,
   updatePath,
   setListPreview,
+  openNewEntityModal,
 } from 'containers/App/actions';
 
 import {
@@ -47,6 +49,7 @@ import {
   selectIncludeInofficialStatements,
   selectSupportQuery,
   selectPreviewQuery,
+  selectLocationQuery,
 } from 'containers/App/selectors';
 
 import appMessages from 'containers/App/messages';
@@ -187,11 +190,20 @@ export function PositionsMap({
   onSetPreviewContent,
   onSetPreviewItemId,
   onUpdatePath,
+  locationQuery,
+  onCreateOption,
 }) {
   useEffect(() => {
     // kick off loading of data
     onLoadData();
   }, []);
+  useEffect(() => {
+    // also kick off loading of data again once dataReady changes and becomes negative again
+    // required due to possible in-view creation of activities
+    if (!dataReady) {
+      onLoadData();
+    }
+  }, [dataReady]);
   useEffect(() => {
     if (dataReady) {
       if (previewItemId) {
@@ -209,114 +221,82 @@ export function PositionsMap({
               && country.getIn(['indicatorPositions', currentIndicatorId.toString()]);
             const indicatorPosition = indicatorPositions && indicatorPositions.first();
             const content = {
+              item: country,
               header: {
                 aboveTitle: 'Country',
                 title: country.getIn(['attributes', 'title']),
+                titlePath: `${ROUTES.ACTOR}/${country.get('id')}`,
+                largeTitle: true,
                 code: country.getIn(['attributes', 'code']),
                 nextPreviewItem: `${ID}|${countryIds[nextIndex]}`,
                 prevPreviewItem: `${ID}|${countryIds[prevIndex]}`,
-              },
-              topicPosition: {
-                topicId: currentIndicatorId,
-                topic: currentIndicator && {
-                  title: getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title'])),
-                  viaGroup: indicatorPosition && indicatorPosition.get('viaGroups')
-                  && indicatorPosition.get('viaGroups').first()
-                  && indicatorPosition.get('viaGroups').first().getIn(['attributes', 'title']),
-                },
-                position: indicatorPosition ? {
-                  supportlevelId: indicatorPosition.get('supportlevel_id'),
-                  supportlevelTitle: intl.formatMessage(appMessages.supportlevels[indicatorPosition.get('supportlevel_id')]),
-                  levelOfAuthority: indicatorPosition.getIn(['authority', 'short_title']),
-                } : {
-                  supportlevelId: 0,
-                  supportlevelTitle: intl.formatMessage(appMessages.supportlevels[99]),
-                },
-              },
-              topicStatements: indicatorPositions && {
-                options: [
+                topActions: [
                   {
-                    id: `${ID}-preview-0`,
-                    active: includeActorMembers,
-                    label: intl.formatMessage(appMessages.ui.statementOptions.includeMemberships),
-                    onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-                  },
-                  {
-                    id: `${ID}-preview-1`,
-                    active: !includeInofficialStatements,
-                    label: intl.formatMessage(appMessages.ui.statementOptions.excludeInofficial),
-                    onClick: () => onUpdateQuery([{
-                      arg: 'inofficial',
-                      value: includeInofficialStatements ? 'false' : null,
-                      replace: true,
-                      multipleAttributeValues: false,
-                    }]),
-                  },
-                ],
-                indicatorPositionsTableColumns: [
-                  {
-                    id: 'position',
-                    type: 'position',
-                    label: 'Level of support',
-                  },
-                  {
-                    id: 'statement',
-                    type: 'plainWithDate',
-                    label: 'Statement',
-                  },
-                  {
-                    id: 'levelOfAuthority',
-                    type: 'plain',
-                    label: 'Level of authority',
-                  },
-                  {
-                    id: 'viaGroup',
-                    type: 'plain',
-                    label: 'As Member of',
-                  },
-                ],
-                indicatorPositions: indicatorPositions.reduce((memo, position) => {
-                  const statement = position.get('measure');
-                  let date = statement.get('date_start');
-                  if (date && isDate(date)) {
-                    date = intl.formatDate(date);
-                  } else if (statement.get('created_at') && isDate(statement.get('created_at'))) {
-                    date = intl.formatDate(statement.get('created_at'));
-                  }
-                  const supportLevel = position.get('supportlevel_id') || 0;
-                  return ([
-                    ...memo,
-                    {
-                      position: {
-                        color: ACTION_INDICATOR_SUPPORTLEVELS[supportLevel]
-                          && ACTION_INDICATOR_SUPPORTLEVELS[supportLevel].color,
-                        value: appMessages.supportlevels[supportLevel]
-                          && intl.formatMessage(appMessages.supportlevels[supportLevel]),
-                      },
-                      statement: statement && {
-                        // id: statement.get('id'),
-                        date,
-                        value: statement.get('title'),
-                        path: `${ROUTES.ACTION}/${statement.get('id')}`,
-                      },
-                      levelOfAuthority: position && {
-                        value: position.getIn(['authority', 'short_title']),
-                      },
-                      viaGroup: {
-                        value: position.get('viaGroups')
-                          && position.get('viaGroups').first()
-                          ? position.get('viaGroups').first().getIn(['attributes', 'title'])
-                          : '',
-                        path: position.get('viaGroups')
-                          && position.get('viaGroups').first()
-                          && `${ROUTES.ACTOR}/${position.get('viaGroups').first().get('id')}`,
-                      },
+                    label: `Add ${intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`].single)}`,
+                    path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}${ROUTES.NEW}`,
+                    type: 'create',
+                    onClick: (e) => {
+                      if (e && e.preventDefault) e.preventDefault();
+                      onCreateOption({
+                        path: API.ACTIONS,
+                        attributes: {
+                          measuretype_id: ACTIONTYPES.EXPRESS,
+                        },
+                        invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
+                        autoUser: true,
+                        connect: [
+                          {
+                            type: 'actorActions',
+                            create: [{
+                              actor_id: country.get('id'),
+                            }],
+                          },
+                          {
+                            type: 'actorIndicators',
+                            create: [{
+                              indicator_id: currentIndicator.get('id'),
+                            }],
+                          },
+                        ],
+                      });
                     },
-                  ]);
-                }, []),
+                  },
+                  {
+                    label: `Add ${intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.INTERACTION}`].single)}`,
+                    path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}${ROUTES.NEW}`,
+                    type: 'create',
+                    onClick: (e) => {
+                      if (e && e.preventDefault) e.preventDefault();
+                      onCreateOption({
+                        path: API.ACTIONS,
+                        attributes: {
+                          measuretype_id: ACTIONTYPES.INTERACTION,
+                        },
+                        invalidateEntitiesOnSuccess: [API.ACTORS, API.ACTIONS],
+                        autoUser: true,
+                        connect: [
+                          {
+                            type: 'actorActions',
+                            create: [{
+                              actor_id: country.get('id'),
+                            }],
+                          },
+                        ],
+                      });
+                    },
+                  },
+                  {
+                    label: 'Edit',
+                    path: `${ROUTES.ACTOR}${ROUTES.EDIT}/${country.get('id')}`,
+                    onClick: (e) => {
+                      if (e && e.preventDefault) e.preventDefault();
+                      onUpdatePath(`${ROUTES.ACTOR}${ROUTES.EDIT}/${country.get('id')}`);
+                    },
+                  },
+                ],
               },
               footer: {
-                primaryLink: country && {
+                primaryLink: {
                   path: `${ROUTES.ACTOR}/${country.get('id')}`,
                   title: 'Country details',
                 },
@@ -324,6 +304,130 @@ export function PositionsMap({
                   path: `${ROUTES.INDICATOR}/${currentIndicator.get('id')}`,
                   id: currentIndicator.get('id'),
                   title: getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title'])),
+                },
+              },
+              fields: {
+                topicPosition: {
+                  topicId: currentIndicatorId,
+                  topic: currentIndicator && {
+                    title: getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title'])),
+                    titlePath: `${ROUTES.INDICATOR}/${currentIndicator.get('id')}`,
+                  },
+                  position: indicatorPosition ? {
+                    supportlevelId: indicatorPosition.get('supportlevel_id'),
+                    supportlevelTitle: intl.formatMessage(appMessages.supportlevels[indicatorPosition.get('supportlevel_id')]),
+                    levelOfAuthority: indicatorPosition.getIn(['authority', 'short_title']),
+                  } : {
+                    supportlevelId: 0,
+                    supportlevelTitle: intl.formatMessage(appMessages.supportlevels[99]),
+                  },
+                  options: [
+                    {
+                      id: `${ID}-preview-0`,
+                      active: includeActorMembers,
+                      label: intl.formatMessage(appMessages.ui.statementOptions.includeMemberships),
+                      onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+                    },
+                    {
+                      id: `${ID}-preview-1`,
+                      active: !includeInofficialStatements,
+                      label: intl.formatMessage(appMessages.ui.statementOptions.excludeInofficial),
+                      onClick: () => onUpdateQuery([{
+                        arg: 'inofficial',
+                        value: includeInofficialStatements ? 'false' : null,
+                        replace: true,
+                        multipleAttributeValues: false,
+                      }]),
+                    },
+                  ],
+                },
+                topicStatements: indicatorPositions && {
+                  indicatorPositionsTableColumns: [
+                    {
+                      id: 'position',
+                      type: 'position',
+                      title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+                      width: '15%',
+                      align: 'center',
+                      info: {
+                        type: 'key-categorical',
+                        attribute: 'supportlevel_id',
+                        options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+                          .sort((a, b) => a.order < b.order ? -1 : 1)
+                          .map((level) => ({
+                            ...level,
+                            label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                          })),
+                      },
+                    },
+                    {
+                      id: 'statement',
+                      type: 'plainWithDate',
+                      label: 'Statement',
+                      width: '35%',
+                    },
+                    {
+                      id: 'levelOfAuthority',
+                      type: 'plain',
+                      label: 'Level of authority',
+                    },
+                    {
+                      id: 'viaGroup',
+                      type: 'plain',
+                      label: 'As Member of',
+                    },
+                  ],
+                  indicatorPositions: indicatorPositions.reduce((memo, position) => {
+                    const statement = position.get('measure');
+                    let date = statement.get('date_start');
+                    if (date && isDate(date)) {
+                      date = intl.formatDate(date);
+                    } else if (statement.get('created_at') && isDate(statement.get('created_at'))) {
+                      date = intl.formatDate(statement.get('created_at'));
+                    }
+                    const supportLevel = position.get('supportlevel_id') || 0;
+                    return ([
+                      ...memo,
+                      {
+                        position: {
+                          color: ACTION_INDICATOR_SUPPORTLEVELS[supportLevel]
+                            && ACTION_INDICATOR_SUPPORTLEVELS[supportLevel].color,
+                          value: appMessages.supportlevels[supportLevel]
+                            && intl.formatMessage(appMessages.supportlevels[supportLevel]),
+                        },
+                        statement: statement && {
+                          // id: statement.get('id'),
+                          date,
+                          value: statement.get('title'),
+                          path: `${ROUTES.ACTION}/${statement.get('id')}`,
+                        },
+                        levelOfAuthority: position && {
+                          value: position.getIn(['authority', 'short_title']),
+                        },
+                        viaGroup: {
+                          value: position.get('viaGroups')
+                            && position.get('viaGroups').first()
+                            ? position.get('viaGroups').first().getIn(['attributes', 'title'])
+                            : '',
+                          path: position.get('viaGroups')
+                            && position.get('viaGroups').first()
+                            && `${ROUTES.ACTOR}/${position.get('viaGroups').first().get('id')}`,
+                        },
+                      },
+                    ]);
+                  }, []),
+                },
+                actorUsers: {
+                  title: 'Assigned staff',
+                },
+                groups: {
+                  type: 'associations',
+                  actortype: ACTORTYPES.REG,
+                  title: 'Groups',
+                },
+                associations: {
+                  actortype: ACTORTYPES.REG,
+                  title: 'Regions',
                 },
               },
             };
@@ -336,7 +440,7 @@ export function PositionsMap({
         onSetPreviewContent();
       }
     }
-  }, [dataReady, previewItemId, countries]);
+  }, [dataReady, previewItemId, countries, locationQuery]);
 
   const size = React.useContext(ResponsiveContext);
 
@@ -592,10 +696,12 @@ PositionsMap.propTypes = {
   includeInofficialStatements: PropTypes.bool,
   currentIndicatorId: PropTypes.number,
   indicators: PropTypes.object,
+  locationQuery: PropTypes.object,
   previewItemId: PropTypes.string,
   onSetPreviewContent: PropTypes.func,
   onSetPreviewItemId: PropTypes.func,
   onUpdatePath: PropTypes.func,
+  onCreateOption: PropTypes.func,
   intl: intlShape.isRequired,
 };
 
@@ -608,6 +714,7 @@ const mapStateToProps = (state) => ({
   includeActorMembers: selectIncludeActorMembers(state),
   countries: selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
   previewItemId: selectPreviewQuery(state),
+  locationQuery: selectLocationQuery(state),
 });
 
 export function mapDispatchToProps(dispatch) {
@@ -621,6 +728,7 @@ export function mapDispatchToProps(dispatch) {
     onSetPreviewContent: (value) => dispatch(setPreviewContent(value)),
     onUpdatePath: (path) => dispatch(updatePath(path)),
     onSetPreviewItemId: (value) => dispatch(setListPreview(value)),
+    onCreateOption: (args) => dispatch(openNewEntityModal(args)),
   };
 }
 
