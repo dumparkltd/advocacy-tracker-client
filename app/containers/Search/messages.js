@@ -53,10 +53,6 @@ export default defineMessages({
       id: 'app.containers.Search.hints.noEntry',
       defaultMessage: 'Please enter a search text to start your search.',
     },
-    noTarget: {
-      id: 'app.containers.Search.hints.noTarget',
-      defaultMessage: 'Please enter a search text to start your search.',
-    },
     noQuery: {
       id: 'app.containers.Search.hints.noQuery',
       defaultMessage: 'Please enter a search text to start your search.',
@@ -77,5 +73,29 @@ export default defineMessages({
       id: 'app.containers.Search.hints.resultsMobile',
       defaultMessage: 'Search results',
     },
+  },
+  allContent: {
+    id: 'app.containers.Search.allContent',
+    defaultMessage: 'All content',
+  },
+  users_about: {
+    id: 'app.containers.Search.users_about',
+    defaultMessage: 'Overview users and user roles.',
+  },
+  resources_about: {
+    id: 'app.containers.Search.resources_about',
+    defaultMessage: 'References, websites and documents',
+  },
+  pages_about: {
+    id: 'app.containers.Search.pages_about',
+    defaultMessage: 'View and maintain pages',
+  },
+  categories_about: {
+    id: 'app.containers.Search.categories_about',
+    defaultMessage: 'View and maintain categories',
+  },
+  indicators_about: {
+    id: 'app.containers.Search.indicators_about',
+    defaultMessage: 'Explore topics',
   },
 });

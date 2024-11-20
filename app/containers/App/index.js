@@ -29,11 +29,13 @@ import {
   ACTIONTYPES,
   ACTORTYPES,
   RESOURCETYPES,
+  USER_ROLES,
 } from 'themes/config';
 
 import {
   selectIsSignedIn,
   selectIsUserMember,
+  selectHasUserRole,
   // selectIsUserVisitor,
   selectSessionUserAttributes,
   selectReady,
@@ -296,43 +298,71 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     return [{ title: 'User', items: navItems }];
   }
 
-  prepareOtherMenuItems = (currentPath, pages) => {
+  prepareOtherMenuItems = (currentPath, pages, hasUserRole) => {
     const { intl } = this.context;
-    return [
+    let groups = [];
+    groups = [
+      ...groups,
       {
         title: 'Pages',
         items: this.preparePageMenuPages(currentPath, pages),
       },
-      {
-        title: 'Admin',
-        items: [
-          {
-            path: `${ROUTES.RESOURCES}/${RESOURCETYPES.WEB}`,
-            title: intl.formatMessage(messages.nav.resources),
-            active: currentPath && currentPath.startsWith(ROUTES.RESOURCE),
-          },
-          {
-            path: ROUTES.USERS,
-            title: intl.formatMessage(messages.nav.users),
-            isAdmin: true,
-            active: currentPath === ROUTES.USERS,
-          },
-          {
-            path: ROUTES.PAGES,
-            title: intl.formatMessage(messages.nav.pages),
-            isAdmin: true,
-            active: currentPath === ROUTES.PAGES,
-          },
-          {
-            path: ROUTES.TAXONOMIES,
-            title: intl.formatMessage(messages.nav.taxonomies),
-            isAdmin: true,
-            active: currentPath.startsWith(ROUTES.CATEGORY)
-              || currentPath.startsWith(ROUTES.TAXONOMIES),
-          },
-        ],
-      },
     ];
+    let adminItems = [];
+    if (hasUserRole[USER_ROLES.VISITOR.value]) {
+      adminItems = [
+        ...adminItems,
+        {
+          path: `${ROUTES.RESOURCES}/${RESOURCETYPES.WEB}`,
+          title: intl.formatMessage(messages.nav.resources),
+          active: currentPath && currentPath.startsWith(ROUTES.RESOURCE),
+        },
+      ];
+    }
+    if (hasUserRole[USER_ROLES.MEMBER.value]) {
+      adminItems = [
+        ...adminItems,
+        {
+          path: ROUTES.USERS,
+          title: intl.formatMessage(messages.nav.users),
+          isAdmin: true,
+          active: currentPath === ROUTES.USERS,
+        },
+      ];
+    }
+    if (hasUserRole[USER_ROLES.VISITOR.value]) {
+      adminItems = [
+        ...adminItems,
+        {
+          path: ROUTES.PAGES,
+          title: intl.formatMessage(messages.nav.pages),
+          isAdmin: true,
+          active: currentPath === ROUTES.PAGES,
+        },
+      ];
+    }
+    if (hasUserRole[USER_ROLES.MEMBER.value]) {
+      adminItems = [
+        ...adminItems,
+        {
+          path: ROUTES.TAXONOMIES,
+          title: intl.formatMessage(messages.nav.taxonomies),
+          isAdmin: true,
+          active: currentPath.startsWith(ROUTES.CATEGORY)
+            || currentPath.startsWith(ROUTES.TAXONOMIES),
+        },
+      ];
+    }
+    if (adminItems && adminItems.length > 0) {
+      groups = [
+        ...groups,
+        {
+          title: 'Admin',
+          items: adminItems,
+        },
+      ];
+    }
+    return groups;
   }
 
   prepareCreateMenuItems = () => {
@@ -446,7 +476,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       onPageLink,
       isUserSignedIn,
       location,
-      isMember,
+      hasUserRole,
       // isVisitor,
       newEntityModal,
       user,
@@ -480,10 +510,10 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             isAuth={isAuth}
             isPrintView={isPrintView}
             navItems={{
-              main: isUserSignedIn && this.prepareMainMenuItems(location.pathname),
-              user: this.prepareUserMenuItems(location.pathname, user, isUserSignedIn),
-              other: isUserSignedIn && this.prepareOtherMenuItems(location.pathname, pages),
-              create: isMember && this.prepareCreateMenuItems(),
+              main: isUserSignedIn && this.prepareMainMenuItems(location.pathname, hasUserRole),
+              user: this.prepareUserMenuItems(location.pathname, user, isUserSignedIn, hasUserRole),
+              other: isUserSignedIn && this.prepareOtherMenuItems(location.pathname, pages, hasUserRole),
+              create: hasUserRole[USER_ROLES.MEMBER] && this.prepareCreateMenuItems(),
             }}
             onPageLink={onPageLink}
           />
@@ -588,7 +618,7 @@ App.propTypes = {
   children: PropTypes.node,
   isUserSignedIn: PropTypes.bool,
   isUserAuthenticating: PropTypes.bool,
-  isMember: PropTypes.bool,
+  hasUserRole: PropTypes.object,
   // isVisitor: PropTypes.bool,
   user: PropTypes.object,
   pages: PropTypes.object,
@@ -610,7 +640,7 @@ App.contextTypes = {
 
 const mapStateToProps = (state) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
-  isMember: selectIsUserMember(state),
+  hasUserRole: selectHasUserRole(state),
   // isVisitor: selectIsUserVisitor(state),
   isUserSignedIn: selectIsSignedIn(state),
   isUserAuthenticating: selectIsAuthenticating(state),
