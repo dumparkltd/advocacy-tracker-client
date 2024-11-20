@@ -40,7 +40,7 @@ const Note = styled(Text)`
   line-height: ${({ theme }) => theme.text.medium.size};
   border-bottom: 4px solid transparent;
   padding: 5px 0.5em 5px;
-  opacity: 0.4;
+  opacity: 0.3;
   @media print {
     font-size: ${({ theme }) => theme.sizes.header.print.title};
   }

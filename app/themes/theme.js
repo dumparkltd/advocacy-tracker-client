@@ -312,9 +312,9 @@ theme.sizes = {
     banner: {
       height: 72,
       heightPrint: 66,
-      heightMobile: 105,
-      heightMobileTop: 60,
-      heightMobileBottom: 45,
+      heightMobile: 95,
+      heightMobileTop: 55,
+      heightMobileBottom: 40,
     },
     nav: {
       height: 30,
@@ -390,12 +390,12 @@ export const BREAKPOINTS = {
   },
   ms: {
     min: 420, // exclusive
-    max: 720,
+    max: 760,
     name: 'mobile (landscape)',
     index: 1,
   },
   medium: {
-    min: 720, // exclusive
+    min: 760, // exclusive
     max: 992,
     name: 'tablet (portrait)',
     index: 2,

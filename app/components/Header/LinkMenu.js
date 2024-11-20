@@ -3,10 +3,10 @@ import styled from 'styled-components';
 import Button from 'components/buttons/ButtonSimple';
 
 const LinkMenu = styled((p) => <Button as="a" {...p} />)`
+  height: 30px;
   padding-right: 5px;
   padding-left: 5px;
-  padding-top: 5px;
-  padding-bottom: 5px;
+  padding-top: 7px;
 
   color: ${({ active }) => active ? 'black' : 'white'};
   background-color: ${({ active }) => active ? 'white' : 'transparent'};
@@ -23,17 +23,24 @@ const LinkMenu = styled((p) => <Button as="a" {...p} />)`
     background-color: ${({ active }) => active ? '#f0f0f0' : '#282a2c'};
   }
   @media (min-width: ${({ theme }) => theme.breakpointsMin.ms}) {
-    font-size: 17px;
+    font-size: 18px;
     line-height: 20px;
     padding-right: 10px;
     padding-left: 10px;
+    padding-top: 5px;
+  }
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    height: ${({ theme }) => theme.sizes.header.banner.height}px;
+    padding-top: 26px;
+    padding-right: 6px;
+    padding-left: 6px;
   }
   @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
-    height: ${({ theme }) => theme.sizes.header.banner.height}px;
+    padding-top: 23px;
     padding-right: 14px;
     padding-left: 14px;
-    font-size: 20px;
-    line-height: 24px;
+    font-size: 25px;
+    line-height: 28px;
   }
 `;
 

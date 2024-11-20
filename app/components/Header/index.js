@@ -19,14 +19,15 @@ import messages from './messages';
 
 const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
   margin: 0;
-  font-family: ${({ theme }) => theme.fonts.title};
-  font-size: ${({ theme, isDev }) => isDev ? theme.text.medium.size : theme.text.large.size};
-  line-height: ${({ theme, isDev }) => isDev ? theme.text.medium.size : theme.text.large.size};
-  font-weight: 500;
   padding: 0;
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    font-size: ${({ theme, isDev }) => isDev ? theme.text.large.size : theme.text.xlarge.size};
-    line-height: ${({ theme, isDev }) => isDev ? theme.text.large.size : theme.text.xlarge.size};
+  max-width: 110px;
+  font-family: ${({ theme }) => theme.fonts.title};
+  font-size: ${({ theme }) => theme.text.smallTight.size};
+  line-height: ${({ theme }) => theme.text.smallTight.height};
+  font-weight: 300;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
+    font-size: ${({ theme }) => theme.text.mediumTight.size};
+    line-height: ${({ theme }) => theme.text.mediumTight.height};
   }
   @media print {
     font-size: ${({ theme }) => theme.sizes.header.print.title};
@@ -47,7 +48,7 @@ const Styled = styled.div`
     height:${({ theme }) => theme.sizes.header.banner.height}px;
   }
   background-color: #000;
-  box-shadow: ${({ hasShadow }) => hasShadow ? '0px 0px 5px 0px rgba(0,0,0,0.5)' : 'none'};
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);
   z-index: 102;
   @media print {
     display: ${({ isPrint }) => isPrint ? 'none' : 'block'};
@@ -118,18 +119,26 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
     return (
       <ResponsiveContext.Consumer>
         {(size) => {
-          const isMainBelow = !isMinSize(size, 'medium');
+          const isMainBelow = !isMinSize(size, 'medium') && !isAuth;
+          const isAuthBelow = !isMinSize(size, 'medium') && isAuth;
+          // const areDropMenusLarge = !isMinSize(size, 'large');
           return (
             <Styled
               sticky={!isAuth}
               hasBackground={!isAuth}
-              hasShadow={!isAuth}
               hasNav={!isAuth}
               hasBrand
               isPrint={isPrintView}
             >
               <div>
-                <Box direction="row" justify="between" style={{ textAlign: 'center' }}>
+                <Box
+                  direction="row"
+                  justify="between"
+                  style={{
+                    textAlign: 'center',
+                    position: 'relative',
+                  }}
+                >
                   <Brand
                     as={isPrintView ? 'div' : 'a'}
                     href={isPrintView ? '' : '/'}
@@ -140,15 +149,17 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                     title={appTitle}
                     isPrint={isPrintView}
                   >
-                    <PrintHide>
-                      <LogoWrap>
-                        <Icon name="logo" size={isMinSize(size, 'large') ? '72px' : '60px'} />
-                      </LogoWrap>
-                    </PrintHide>
-                    <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
-                      <BrandTitle isDev={IS_DEV}>
-                        {`${intl.formatMessage(appMessages.app.title)}${IS_DEV ? ' [TEST-DB]' : ''}`}
-                      </BrandTitle>
+                    <Box direction="row" fill>
+                      <PrintHide>
+                        <LogoWrap>
+                          <Icon name="logo" size={isMinSize(size, 'medium') ? '72px' : '50px'} />
+                        </LogoWrap>
+                      </PrintHide>
+                      <Box pad={{ left: 'small' }} justify="center">
+                        <BrandTitle isDev={IS_DEV}>
+                          {`${intl.formatMessage(appMessages.app.title)}${IS_DEV ? ' [TEST-DB]' : ''}`}
+                        </BrandTitle>
+                      </Box>
                     </Box>
                   </Brand>
                   {!isMainBelow
@@ -157,10 +168,15 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                     && navItems.main
                     && navItems.main.length > 0
                     && (
-                      <MainMenu navItems={navItems.main} onClick={this.onClick()} />
+                      <MainMenu navItems={navItems.main} onClick={this.onClick} />
                     )}
                   {!isPrintView && (
-                    <Box direction="row" flex={{ grow: 0 }} style={{ position: 'relative' }}>
+                    <Box
+                      direction="row"
+                      flex={{ grow: 0 }}
+                      style={{ position: 'relative' }}
+                      margin={isMainBelow ? { right: 'small' } : null}
+                    >
                       {navItems && navItems.create && navItems.create.length > 0 && (
                         <DropMenu
                           title={intl.formatMessage(messages.addLabel)}
@@ -169,7 +185,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                           onClick={(path) => this.onClick(path)}
                         />
                       )}
-                      {navItems && navItems.user && navItems.user.length > 0 && (
+                      {!isAuthBelow && navItems && navItems.user && navItems.user.length > 0 && (
                         <DropMenu
                           title="User"
                           type="user"
@@ -190,12 +206,22 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                   )}
                 </Box>
                 {isMainBelow
+                  && !isAuth
                   && navItems
                   && navItems.main
                   && navItems.main.length > 0
                   && (
                     <Box>
                       <MainMenu navItems={navItems.main} onClick={this.onClick} />
+                    </Box>
+                  )}
+                {isAuthBelow
+                  && navItems
+                  && navItems.user
+                  && navItems.user.length > 0
+                  && (
+                    <Box>
+                      <MainMenu isAuth navItems={navItems.user[0].items} onClick={this.onClick} />
                     </Box>
                   )}
               </div>
