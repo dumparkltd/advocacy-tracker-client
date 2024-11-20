@@ -34,7 +34,6 @@ import {
 
 import {
   selectIsSignedIn,
-  selectIsUserMember,
   selectHasUserRole,
   // selectIsUserVisitor,
   selectSessionUserAttributes,
