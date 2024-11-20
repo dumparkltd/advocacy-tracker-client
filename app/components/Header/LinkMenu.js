@@ -3,32 +3,37 @@ import styled from 'styled-components';
 import Button from 'components/buttons/ButtonSimple';
 
 const LinkMenu = styled((p) => <Button as="a" {...p} />)`
+  padding-right: 5px;
+  padding-left: 5px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+
   color: ${({ active }) => active ? 'black' : 'white'};
   background-color: ${({ active }) => active ? 'white' : 'transparent'};
-  text-transform: uppercase;
-  font-family: ${({ theme }) => theme.fonts.title};
-  font-size: ${({ theme }) => theme.text.large.size};
-  line-height: ${({ theme }) => theme.text.large.size};
 
-  padding-right: 12px;
-  padding-left: 12px;
-  padding-top: 22px;
-  padding-bottom: 0px;
-  text-align: center;
-  font-size: ${({ theme }) => theme.text.small.size};
-  line-height: ${({ theme }) => theme.text.small.height};
+  font-family: ${({ theme }) => theme.fonts.title};
+  font-size: 15px;
+  line-height: 16px;
   font-weight: 300;
-  height:${({ theme }) => theme.sizes.header.banner.height}px;
+  text-transform: uppercase;
+  text-align: center;
+
   &:hover {
     color: ${({ active }) => active ? 'black' : 'white'};
     background-color: ${({ active }) => active ? '#f0f0f0' : '#282a2c'};
   }
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    font-size: ${({ theme }) => theme.text.xlarge.size};
-    line-height: ${({ theme }) => theme.text.xlarge.size};
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.ms}) {
+    font-size: 17px;
+    line-height: 20px;
+    padding-right: 10px;
+    padding-left: 10px;
   }
-  @media print {
-    font-size: ${({ theme }) => theme.sizes.header.print.title};
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
+    height: ${({ theme }) => theme.sizes.header.banner.height}px;
+    padding-right: 14px;
+    padding-left: 14px;
+    font-size: 20px;
+    line-height: 24px;
   }
 `;
 

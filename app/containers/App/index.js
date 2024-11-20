@@ -512,7 +512,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
               main: isUserSignedIn && this.prepareMainMenuItems(location.pathname, hasUserRole),
               user: this.prepareUserMenuItems(location.pathname, user, isUserSignedIn, hasUserRole),
               other: isUserSignedIn && this.prepareOtherMenuItems(location.pathname, pages, hasUserRole),
-              create: hasUserRole[USER_ROLES.MEMBER] && this.prepareCreateMenuItems(),
+              create: hasUserRole[USER_ROLES.MEMBER.value] && this.prepareCreateMenuItems(),
             }}
             onPageLink={onPageLink}
           />

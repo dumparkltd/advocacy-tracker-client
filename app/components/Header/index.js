@@ -13,15 +13,9 @@ import PrintHide from 'components/styled/PrintHide';
 
 import Brand from './Brand';
 import LogoWrap from './LogoWrap';
-import LinkMenu from './LinkMenu';
+import MainMenu from './MainMenu';
 import DropMenu from './DropMenu';
 import messages from './messages';
-
-const SearchLinkMenu = styled((p) => <LinkMenu {...p} />)`
-  font-size: ${({ theme }) => theme.text.xsmall.size};
-  line-height: ${({ theme }) => theme.text.xsmall.size};
-  padding-top: 23px;
-`;
 
 const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
   margin: 0;
@@ -86,9 +80,19 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
     window.removeEventListener('resize', this.resize);
   }
 
+  // onShowMenu = (evt) => {
+  //   if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+  //   this.setState({ showMenu: true });
+  // };
+  //
+  // onHideMenu = (evt) => {
+  //   if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+  //   this.setState({ showMenu: false });
+  // };
+
   onClick = (path, currentPath, evt) => {
     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.onHideMenu();
+    // this.onHideMenu();
     if (currentPath) {
       if (currentPath === ROUTES.LOGIN || currentPath === ROUTES.REGISTER) {
         this.props.onPageLink(path, { keepQuery: true });
@@ -114,7 +118,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
     return (
       <ResponsiveContext.Consumer>
         {(size) => {
-          const isLarge = isMinSize(size, 'large');
+          const isMainBelow = !isMinSize(size, 'medium');
           return (
             <Styled
               sticky={!isAuth}
@@ -124,109 +128,76 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
               hasBrand
               isPrint={isPrintView}
             >
-              <div style={{ position: 'relative', textAlign: 'center' }}>
-                <Brand
-                  as={isPrintView ? 'div' : 'a'}
-                  href={isPrintView ? '' : '/'}
-                  onClick={(evt) => {
-                    if (evt) evt.stopPropagation();
-                    if (!isPrintView) this.onClick('/');
-                  }}
-                  title={appTitle}
-                  isPrint={isPrintView}
-                  style={{ position: 'absolute', left: 0 }}
-                >
-                  <PrintHide>
-                    <LogoWrap>
-                      <Icon name="logo" size={isMinSize(size, 'medium') ? '72px' : '60px'} />
-                    </LogoWrap>
-                  </PrintHide>
-                  <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
-                    <BrandTitle isDev={IS_DEV}>
-                      {`${intl.formatMessage(appMessages.app.title)}${IS_DEV ? ' [TEST-DB]' : ''}`}
-                    </BrandTitle>
-                  </Box>
-                </Brand>
-                {isLarge
+              <div>
+                <Box direction="row" justify="between" style={{ textAlign: 'center' }}>
+                  <Brand
+                    as={isPrintView ? 'div' : 'a'}
+                    href={isPrintView ? '' : '/'}
+                    onClick={(evt) => {
+                      if (evt) evt.stopPropagation();
+                      if (!isPrintView) this.onClick('/');
+                    }}
+                    title={appTitle}
+                    isPrint={isPrintView}
+                  >
+                    <PrintHide>
+                      <LogoWrap>
+                        <Icon name="logo" size={isMinSize(size, 'large') ? '72px' : '60px'} />
+                      </LogoWrap>
+                    </PrintHide>
+                    <Box fill="vertical" pad={{ left: 'small' }} justify="center" gap="xxsmall">
+                      <BrandTitle isDev={IS_DEV}>
+                        {`${intl.formatMessage(appMessages.app.title)}${IS_DEV ? ' [TEST-DB]' : ''}`}
+                      </BrandTitle>
+                    </Box>
+                  </Brand>
+                  {!isMainBelow
+                    && !isPrintView
                     && navItems
                     && navItems.main
                     && navItems.main.length > 0
                     && (
-                      <div>
-                        {
-                          navItems.main.map((item, i) => {
-                            if (item.path === ROUTES.SEARCH) {
-                              return (
-                                <SearchLinkMenu
-                                  flex={{ shrink: 0 }}
-                                  key={i}
-                                  href={item.path}
-                                  active={item.active}
-                                  onClick={(evt) => {
-                                    if (evt) evt.stopPropagation();
-                                    this.onClick(item.path);
-                                  }}
-                                >
-                                  <Box as="span" align="center" direction="row" gap="4px">
-                                    {item.title}
-                                    <Icon name="search" size="20px" />
-                                  </Box>
-                                </SearchLinkMenu>
-                              );
-                            }
-                            return (
-                              <LinkMenu
-                                flex={{ shrink: 0 }}
-                                key={i}
-                                href={item.path}
-                                active={item.active}
-                                onClick={(evt) => {
-                                  if (evt) evt.stopPropagation();
-                                  this.onClick(item.path);
-                                }}
-                              >
-                                {item.title}
-                              </LinkMenu>
-                            );
-                          })
-                        }
-                      </div>
+                      <MainMenu navItems={navItems.main} onClick={this.onClick()} />
                     )}
-                {!isPrintView && (
-                  <Box direction="row" style={{ position: 'absolute', right: 0, top: 0 }}>
-                    {navItems && navItems.create && navItems.create.length > 0 && (
-                      <DropMenu
-                        title={intl.formatMessage(messages.addLabel)}
-                        type="add"
-                        navItemGroups={navItems && navItems.create}
-                        onClick={(path) => this.onClick(path)}
-                      />
-                    )}
-                    {navItems && navItems.user && navItems.user.length > 0 && (
-                      <DropMenu
-                        title="User"
-                        type="user"
-                        icon="profile"
-                        navItemGroups={navItems && navItems.user}
-                        onClick={(path) => this.onClick(path)}
-                      />
-                    )}
-                    {navItems && (navItems.other || (!isLarge && navItems.main)) && (
-                      <DropMenu
-                        title="More"
-                        type="other"
-                        navItemGroups={navItems && [
-                          !isLarge && {
-                            title: 'Main',
-                            items: navItems.main,
-                          },
-                          ...navItems.other,
-                        ]}
-                        onClick={(path) => this.onClick(path)}
-                      />
-                    )}
-                  </Box>
-                )}
+                  {!isPrintView && (
+                    <Box direction="row" flex={{ grow: 0 }} style={{ position: 'relative' }}>
+                      {navItems && navItems.create && navItems.create.length > 0 && (
+                        <DropMenu
+                          title={intl.formatMessage(messages.addLabel)}
+                          type="add"
+                          navItemGroups={navItems && navItems.create}
+                          onClick={(path) => this.onClick(path)}
+                        />
+                      )}
+                      {navItems && navItems.user && navItems.user.length > 0 && (
+                        <DropMenu
+                          title="User"
+                          type="user"
+                          icon="profile"
+                          navItemGroups={navItems && navItems.user}
+                          onClick={(path) => this.onClick(path)}
+                        />
+                      )}
+                      {navItems && navItems.other && (
+                        <DropMenu
+                          title="More"
+                          type="other"
+                          navItemGroups={navItems.other}
+                          onClick={(path) => this.onClick(path)}
+                        />
+                      )}
+                    </Box>
+                  )}
+                </Box>
+                {isMainBelow
+                  && navItems
+                  && navItems.main
+                  && navItems.main.length > 0
+                  && (
+                    <Box>
+                      <MainMenu navItems={navItems.main} onClick={this.onClick} />
+                    </Box>
+                  )}
               </div>
             </Styled>
           );
@@ -235,67 +206,6 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
     );
   }
 }
-
-// {!wide && (
-//   <Section
-//     fill="horizontal"
-//     direction="column"
-//     align="start"
-//     justify="start"
-//     wide={false}
-//   >
-//     {isSignedIn && isVisitor && (
-//       <LinkAccount
-//         href={ROUTES.BOOKMARKS}
-//         active={currentPath === ROUTES.BOOKMARKS}
-//         onClick={(evt) => this.onClick(evt, ROUTES.BOOKMARKS)}
-//         wide={wide}
-//       >
-//         <FormattedMessage {...appMessages.nav.bookmarks} />
-//       </LinkAccount>
-//     )}
-//     {isSignedIn && user && (
-//       <LinkAccount
-//         href={userPath}
-//         active={currentPath === userPath}
-//         onClick={(evt) => this.onClick(evt, userPath)}
-//         wide={wide}
-//       >
-//         Profile
-//       </LinkAccount>
-//     )}
-//     {isSignedIn && (
-//       <LinkAccount
-//         href={ROUTES.LOGOUT}
-//         active={currentPath === ROUTES.LOGOUT}
-//         onClick={(evt) => this.onClick(evt, ROUTES.LOGOUT)}
-//         wide={wide}
-//       >
-//         <FormattedMessage {...appMessages.nav.logout} />
-//       </LinkAccount>
-//     )}
-//     {!isSignedIn && (
-//       <LinkAccount
-//         href={ROUTES.REGISTER}
-//         active={currentPath === ROUTES.REGISTER}
-//         onClick={(evt) => this.onClick(evt, ROUTES.REGISTER, currentPath)}
-//         wide={wide}
-//       >
-//         <FormattedMessage {...appMessages.nav.register} />
-//       </LinkAccount>
-//     )}
-//     {!isSignedIn && (
-//       <LinkAccount
-//         href={ROUTES.LOGIN}
-//         active={currentPath === ROUTES.LOGIN}
-//         onClick={(evt) => this.onClick(evt, ROUTES.LOGIN, currentPath)}
-//         wide={wide}
-//       >
-//         <FormattedMessage {...appMessages.nav.login} />
-//       </LinkAccount>
-//     )}
-//   </Section>
-// )}
 
 Header.contextTypes = {
   intl: PropTypes.object.isRequired,

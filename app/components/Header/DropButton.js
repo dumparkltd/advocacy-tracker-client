@@ -41,7 +41,7 @@ const DropButton = styled((p) => <Button {...p} />)`
   }};
   }
 
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
     top: ${({ menuType }) => menuType === 'add' ? '33%' : '0'};
     right: ${({ offsetButtonRight }) => offsetButtonRight || '0'}px;
     padding: ${({ menuType }) => {

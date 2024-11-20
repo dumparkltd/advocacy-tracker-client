@@ -46,15 +46,15 @@ const DropMenu = ({
           </ScreenReaderOnly>
           {type === 'add' && (
             <div style={{ transform: 'rotate(45deg)' }}>
-              <Icon name="close" size={isMinSize(size, 'medium') ? '40px' : '30px'} />
+              <Icon name="close" size={isMinSize(size, 'large') ? '40px' : '30px'} />
             </div>
           )}
           {icon && type !== 'add' && (
-            <Icon name={icon} size={isMinSize(size, 'medium') ? '40px' : '30px'} />
+            <Icon name={icon} size={isMinSize(size, 'large') ? '40px' : '30px'} />
           )}
         </DropButton>
       </DropButtonWrap>
-      {open && !isMinSize(size, 'medium') && (
+      {open && !isMinSize(size, 'large') && (
         <Layer
           full
           responsive
@@ -72,7 +72,7 @@ const DropMenu = ({
           />
         </Layer>
       )}
-      {open && isMinSize(size, 'medium') && (
+      {open && isMinSize(size, 'large') && (
         <Drop
           target={ref.current}
           responsive

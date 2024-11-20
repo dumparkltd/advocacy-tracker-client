@@ -44,6 +44,13 @@ const Note = styled(Text)`
   @media print {
     font-size: ${({ theme }) => theme.sizes.header.print.title};
   }
+  position: absolute;
+  top: ${({ theme }) => theme.global.edgeSize.hair};
+  right: 0;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    position: static;
+  }
+
 `;
 
 const StyledContainer = styled(Container)`
@@ -92,10 +99,6 @@ NavSecondary.propTypes = {
   onPageLink: PropTypes.func.isRequired,
   navItems: PropTypes.array,
 };
-// const mapStateToProps = (state) => ({
-//   currentPath: selectCurrentPathname(state),
-// });
-
 
 export function mapDispatchToProps(dispatch) {
   return {

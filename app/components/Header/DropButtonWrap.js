@@ -7,9 +7,9 @@ const DropButtonWrap = styled.div`
   position: ${({ inDrop }) => inDrop ? 'fixed' : 'relative'};
   top:  ${({ inDrop }) => inDrop ? '5px' : 'auto'};
   right:  ${({ inDrop }) => inDrop ? '5px' : 'auto'};
-  height: ${({ theme }) => theme.sizes.header.banner.heightMobile}px;
-  width: ${({ theme }) => theme.sizes.header.banner.heightMobile - 10}px;
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+  height: ${({ theme }) => theme.sizes.header.banner.heightMobileTop}px;
+  width: ${({ theme }) => theme.sizes.header.banner.heightMobileTop - 10}px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
     padding: 0;
     position: ${({ inDrop }) => inDrop ? 'absolute' : 'relative'};
     top:  ${({ inDrop, menuType }) => {
@@ -23,10 +23,10 @@ const DropButtonWrap = styled.div`
     return 'auto';
   }};
     height: ${({ theme, inDrop, menuType }) => (menuType !== 'add' && inDrop)
-    ? theme.sizes.header.banner.heightMobile
+    ? theme.sizes.header.banner.heightMobileTop
     : theme.sizes.header.banner.height}px;
     width: ${({ theme, inDrop, menuType }) => (menuType !== 'add' && inDrop)
-    ? theme.sizes.header.banner.heightMobile
+    ? theme.sizes.header.banner.heightMobileTop
     : theme.sizes.header.banner.height}px;
   }
 `;

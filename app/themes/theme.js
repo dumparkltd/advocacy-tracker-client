@@ -310,9 +310,11 @@ theme.sizes = {
   },
   header: {
     banner: {
-      height: 60,
+      height: 72,
       heightPrint: 66,
-      heightMobile: 50,
+      heightMobile: 105,
+      heightMobileTop: 60,
+      heightMobileBottom: 45,
     },
     nav: {
       height: 30,
