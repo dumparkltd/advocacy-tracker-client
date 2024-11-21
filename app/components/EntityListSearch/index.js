@@ -21,7 +21,15 @@ import { selectIsPrintView } from 'containers/App/selectors';
 
 import messages from './messages';
 
-const Search = styled((p) => <Box direction="row" pad={{ vertical: 'xsmall', horizontal: 'medium' }} {...p} />)`
+const Search = styled(
+  (p) => (
+    <Box
+      direction="row"
+      pad={{ horizontal: 'medium' }}
+      {...p}
+    />
+  )
+)`
   width: 100%;
   background-color: ${palette('light', 1)};
   color: ${palette('dark', 1)};
@@ -38,11 +46,9 @@ const Search = styled((p) => <Box direction="row" pad={{ vertical: 'xsmall', hor
 `;
 const SearchInput = styled((p) => <DebounceInput {...p} />)`
   flex: 1;
-  background-color: ${palette('light', 1)};
   color: ${palette('dark', 2)};
   border: none;
-  padding: ${({ theme }) => theme.global.edgeSize.small};
-  padding-left: ${({ theme }) => theme.global.edgeSize.xsmall};
+  padding: ${({ theme }) => theme.global.edgeSize.xsmall};
   font-size: ${({ theme }) => theme.text.small.size};
   font-weight: 300;
   &:focus {

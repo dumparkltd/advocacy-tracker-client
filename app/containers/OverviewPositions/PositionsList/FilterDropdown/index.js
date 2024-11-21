@@ -55,7 +55,8 @@ const Label = styled(
   line-height: 24px
 `;
 const ButtonLabel = styled.span`
-  color: ${palette('dark', 2)};
+  color: ${palette('dark', 1)};
+  opacity: 0.5;
   font-size: ${({ theme }) => theme.text.small.size};
 `;
 const ButtonLabelActive = styled.span`
