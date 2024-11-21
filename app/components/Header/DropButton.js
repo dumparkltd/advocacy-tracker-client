@@ -42,7 +42,7 @@ const DropButton = styled((p) => <Button {...p} />)`
   }
 
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    top: ${({ menuType }) => menuType === 'add' ? '33%' : '0'};
+    top: ${({ menuType }) => menuType === 'add' ? '25%' : '0'};
     right: ${({ offsetButtonRight }) => offsetButtonRight || '0'}px;
     padding: ${({ menuType }) => {
     if (menuType === 'add') {
@@ -50,7 +50,13 @@ const DropButton = styled((p) => <Button {...p} />)`
     }
     return '5px';
   }};
-    height: ${({ theme }) => theme.sizes.header.banner.height}px;
+    height: ${({ theme, menuType }) => menuType === 'add'
+    ? theme.sizes.header.banner.height - 2
+    : theme.sizes.header.banner.height
+}px;
+    width: ${({ theme }) => theme.sizes.header.banner.height - 2}px;
+  }
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
     width: ${({ theme }) => theme.sizes.header.banner.height}px;
   }
 `;

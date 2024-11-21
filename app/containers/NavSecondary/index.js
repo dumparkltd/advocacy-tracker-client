@@ -54,7 +54,20 @@ const Note = styled(Text)`
 `;
 
 const StyledContainer = styled(Container)`
-  padding-bottom: 0;
+  padding: 0;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.ms}) {
+    padding: 0 12px;
+  }
+`;
+
+const Menu = styled(
+  (p) => <Box {...p} />
+)`
+  overflow-x: scroll;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.ms}) {
+    overflow-x: visible;
+    overflow-y: visible;
+  }
 `;
 class NavSecondary extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   render() {
@@ -66,7 +79,11 @@ class NavSecondary extends React.PureComponent { // eslint-disable-line react/pr
           <Content>
             <NavMain>
               <Box direction="row" justify="between" align="end" fill>
-                <Box direction="row" align="end" fill>
+                <Menu
+                  direction="row"
+                  align="end"
+                  fill
+                >
                   {navItems && navItems.map((item, i) => (
                     <LinkMain
                       key={i}
@@ -82,7 +99,7 @@ class NavSecondary extends React.PureComponent { // eslint-disable-line react/pr
                       </LinkTitle>
                     </LinkMain>
                   ))}
-                </Box>
+                </Menu>
                 <Note>
                   For authorised use only. Share with care.
                 </Note>

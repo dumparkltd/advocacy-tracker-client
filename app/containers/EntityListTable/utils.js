@@ -97,7 +97,7 @@ export const prepareHeader = ({
       case 'viaGroups':
         return ({
           ...col,
-          title: 'As Member of',
+          title: 'As member of',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,

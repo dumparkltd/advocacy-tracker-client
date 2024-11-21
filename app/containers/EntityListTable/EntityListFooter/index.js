@@ -44,7 +44,7 @@ const ListInlineItemLink = styled(A)`
   width: 2.3em;
   height: 2.3em;
   line-height: 2.3;
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 500;
   display: block;
   text-align: center;
@@ -52,14 +52,14 @@ const ListInlineItemLink = styled(A)`
     width: 2.5em;
     height: 2.5em;
     line-height: 2.5;
-    font-size: 12px;
+    font-size: 14px;
   }
 `;
 const ListInlineItemActive = styled.div`
   width: 2.3em;
   height: 2.3em;
   line-height: 2.3;
-  font-size: 10px;
+  font-size: 13px;
   border-radius: 9999px;
   font-weight: 500;
   background-color: ${palette('primary', 2)};
@@ -68,7 +68,7 @@ const ListInlineItemActive = styled.div`
     width: 2.5em;
     height: 2.5em;
     line-height: 2.5;
-    font-size: 12px;
+    font-size: 14px;
   }
 `;
 const ListInlineItemNav = styled(A)`

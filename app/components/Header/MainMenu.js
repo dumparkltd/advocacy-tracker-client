@@ -50,7 +50,13 @@ const MainMenu = ({ navItems, onClick, isAuth }) => {
   }
   return (
     <Styled justify={isAuth ? 'end' : 'start'}>
-      <div style={!isAuth ? { margin: '0 auto' } : null}>
+      <div
+        style={
+          (!isAuth && isMinSize(size, 'ms'))
+            ? { margin: '0 auto' }
+            : null
+        }
+      >
         {navItems && navItems.map((item, i) => {
           if (item.path === ROUTES.SEARCH) {
             return (
@@ -63,9 +69,10 @@ const MainMenu = ({ navItems, onClick, isAuth }) => {
                   if (evt) evt.stopPropagation();
                   onClick(item.path);
                 }}
+                title={item.title}
               >
                 <Box as="span" align="center" direction="row" gap="4px">
-                  {item.title}
+                  {isMinSize(size, 'large') && item.title}
                   <Icon name="search" size={iconSize} />
                 </Box>
               </SearchLinkMenu>

@@ -4,8 +4,8 @@ const TitleAboveCard = styled.span`
   color: black;
   text-transform: uppercase;
   font-weight: bold;
-  font-size: 16px;
-  line-height: 22px;
+  font-size: ${({ theme }) => theme.text.xxsmall.size};
+  line-height: ${({ theme }) => theme.text.xxsmall.height};
   margin-top: 20px;
   margin-bottom: 10px;
 `;

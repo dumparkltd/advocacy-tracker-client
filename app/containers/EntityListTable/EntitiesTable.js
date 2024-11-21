@@ -160,12 +160,14 @@ const getColorForColumn = (col, theme) => {
   return scaleColorCount(MAX_VALUE_COUNTRIES, MAP_OPTIONS.GRADIENT[col.subject], false)(100);
 };
 
-const getColWidth = ({ col, count, topicPositionLength }) => {
+const getColWidth = ({
+  col, count, topicPositionLength, isSmall,
+}) => {
   let result = 'auto';
   if (col.type === 'auxColumns') {
     result = '22px';
   } else if (col.type === 'topicPosition') {
-    result = '33px';
+    result = isSmall ? '26px' : '33px';
   } else if (topicPositionLength > 0) {
     if (col.type === 'main' && (count - topicPositionLength > 2)) {
       result = '25%';
@@ -316,17 +318,21 @@ export function EntitiesTable({
   const topicPositionLength = headerColumnsByType
     && headerColumnsByType.topicPosition
     && headerColumnsByType.topicPosition.length;
-
+  const isSmall = !isMinSize(size, 'medium');
   headerColumnsAux = headerColumnsAux && headerColumnsAux.map((col) => ({
     ...col,
     colWidth: getColWidth(
-      { col, count: headerColumnsAux.length, topicPositionLength }
+      {
+        col, count: headerColumnsAux.length, topicPositionLength, isSmall,
+      }
     ),
   }));
   columnsAux = columnsAux && headerColumnsAux && columnsAux.map((col) => ({
     ...col,
     colWidth: getColWidth(
-      { col, count: headerColumnsAux.length, topicPositionLength }
+      {
+        col, count: headerColumnsAux.length, topicPositionLength, isSmall,
+      }
     ),
   }));
   const mouseOverColumn = headerColumnsAux && headerColumnsAux.find((col) => col.id === columnMouseOver);

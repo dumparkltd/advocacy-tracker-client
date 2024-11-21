@@ -5,6 +5,7 @@ import { connect } from 'react-redux';
 import { compose } from 'redux';
 import { Map } from 'immutable';
 import styled from 'styled-components';
+import { palette } from 'styled-theme';
 
 import {
   Box, Text, ResponsiveContext,
@@ -21,6 +22,7 @@ import {
 import qe from 'utils/quasi-equals';
 import asArray from 'utils/as-array';
 import asList from 'utils/as-list';
+import isNumber from 'utils/is-number';
 import { isMinSize } from 'utils/responsive';
 
 import {
@@ -62,6 +64,7 @@ import EntityListTable from 'containers/EntityListTable';
 import Card from 'containers/OverviewPositions/Card';
 import TitleOnCard from 'containers/OverviewPositions/TitleOnCard';
 import TitleAboveCard from 'containers/OverviewPositions/TitleAboveCard';
+import Button from 'components/buttons/Button';
 
 import {
   selectCountries,
@@ -75,9 +78,53 @@ import FilterDropdown from './FilterDropdown';
 import messages from './messages';
 
 const Label = styled(
-  (p) => <Text {...p} color="textSecondary" size="xxsmall" />
+  (p) => <Text {...p} color="textSecondary" size="xxxsmall" />
 )`
-  line-height: 24px
+  line-height: 24px;
+`;
+
+const TitleWrapper = styled(
+  (p) => <Box {...p} />
+)`
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
+    margin-top: 27px;
+  }
+`;
+
+const SupportKeyTitle = styled((p) => <Text size="xsmall" {...p} />)`
+  font-weight: 600;
+`;
+
+
+const ShowFiltersButton = styled(Button)`
+  padding: 0.5em 0;
+  text-transform: uppercase;
+  font-family: ${({ theme }) => theme.fonts.title};
+  text-align: left;
+  color: ${palette('link', 0)};
+  &:hover {
+    color: ${palette('linkHover', 0)};
+  }
+  @media print {
+    display: none;
+  }
+`;
+const SupportKeyItem = styled(
+  (p) => (
+    <Box
+      direction="row"
+      align="center"
+      gap="4px"
+      margin={{ bottom: 'xsmall' }}
+      {...p}
+    />
+  )
+)`
+  margin-right: 14px;
+  &:last-child {
+    margin-right: 0;
+  }
+}}
 `;
 
 const prepareDropdownOptions = (entities, query, countries) => entities
@@ -159,6 +206,7 @@ export function PositionsList({
 }) {
   const size = React.useContext(ResponsiveContext);
   const [search, setSearch] = useState('');
+  const [showFiltersOnMobile, setShowFiltersOnMobile] = useState(false);
   useEffect(() => {
     // kick off loading of data
     onLoadData();
@@ -208,12 +256,17 @@ export function PositionsList({
       const title = getIndicatorAbbreviation(indicator.getIn(['attributes', 'title']));
       const id = `topic_${indicator.get('id')}`;
       const activeSupportLevels = getActiveSupportLevels(locationQuery, indicator.get('id'));
+      let minSize = 'medium';
+      const ref = indicator.getIn(['attributes', 'reference']);
+      if (isNumber(ref) && parseInt(ref, 10) < 5) {
+        minSize = 'small';
+      }
       return [
         ...memo,
         {
           id,
           type: 'topicPosition',
-          minSize: 'medium',
+          minSize,
           indicatorId: indicator.get('id'),
           indicatorCount: indicators.size,
           positions: 'indicatorPositions',
@@ -439,12 +492,12 @@ export function PositionsList({
   );
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
-      <Box pad={{ top: 'small', bottom: 'xsmall' }}>
+      <Box>
         <TitleAboveCard>
           <FormattedMessage {...messages.title} />
         </TitleAboveCard>
       </Box>
-      <Loading loading={!dataReady} />
+      {!dataReady && <Loading loading={!dataReady} />}
       {dataReady && (
         <Card>
           <Box
@@ -456,37 +509,42 @@ export function PositionsList({
             <Box gap="small">
               <Box
                 direction={isMinSize(size, 'large') ? 'row' : 'column'}
+                gap={isMinSize(size, 'medium') ? 'none' : 'small'}
                 justify="between"
-                margin={{ bottom: 'medium' }}
+                margin={{ bottom: isMinSize(size, 'medium') ? 'medium' : 'small' }}
               >
-                <Box margin={{ top: '30px' }}>
+                <TitleWrapper>
                   <TitleOnCard>
                     Countries
                   </TitleOnCard>
-                </Box>
-                <Box direction={isMinSize(size, 'large') ? 'row' : 'column'} gap="small">
-                  <FilterDropdown
-                    options={prepareDropdownOptions(
-                      actorsByType.get(parseInt(ACTORTYPES.REG, 10)),
-                      associationRegionQuery,
-                      countriesFilteredByColumn,
-                    )}
-                    onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.REG })}
-                    onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.REG })}
-                    label="Filter by region"
-                    buttonLabel="Select region"
-                  />
-                  <FilterDropdown
-                    options={prepareDropdownOptions(
-                      actorsByType.get(parseInt(ACTORTYPES.GROUP, 10)),
-                      associationGroupQuery,
-                      countriesFilteredByColumn,
-                    )}
-                    onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.GROUP })}
-                    onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.GROUP })}
-                    label="Filter by group"
-                    buttonLabel="Select group"
-                  />
+                </TitleWrapper>
+                <Box direction={isMinSize(size, 'medium') ? 'row' : 'column'} gap="small">
+                  {isMinSize(size, 'medium') && (
+                    <FilterDropdown
+                      options={prepareDropdownOptions(
+                        actorsByType.get(parseInt(ACTORTYPES.REG, 10)),
+                        associationRegionQuery,
+                        countriesFilteredByColumn,
+                      )}
+                      onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.REG })}
+                      onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.REG })}
+                      label="Filter by region"
+                      buttonLabel="Select region"
+                    />
+                  )}
+                  {isMinSize(size, 'medium') && (
+                    <FilterDropdown
+                      options={prepareDropdownOptions(
+                        actorsByType.get(parseInt(ACTORTYPES.GROUP, 10)),
+                        associationGroupQuery,
+                        countriesFilteredByColumn,
+                      )}
+                      onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.GROUP })}
+                      onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.GROUP })}
+                      label="Filter by group"
+                      buttonLabel="Select group"
+                    />
+                  )}
                   <Box>
                     <Label>Filter by name or code</Label>
                     <EntityListSearch
@@ -495,26 +553,67 @@ export function PositionsList({
                       placeholder="Enter name or code"
                     />
                   </Box>
+                  {!isMinSize(size, 'medium') && showFiltersOnMobile && (
+                    <FilterDropdown
+                      options={prepareDropdownOptions(
+                        actorsByType.get(parseInt(ACTORTYPES.REG, 10)),
+                        associationRegionQuery,
+                        countriesFilteredByColumn,
+                      )}
+                      onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.REG })}
+                      onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.REG })}
+                      label="Filter by region"
+                      buttonLabel="Select region"
+                    />
+                  )}
+                  {!isMinSize(size, 'medium') && showFiltersOnMobile && (
+                    <FilterDropdown
+                      options={prepareDropdownOptions(
+                        actorsByType.get(parseInt(ACTORTYPES.GROUP, 10)),
+                        associationGroupQuery,
+                        countriesFilteredByColumn,
+                      )}
+                      onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.GROUP })}
+                      onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.GROUP })}
+                      label="Filter by group"
+                      buttonLabel="Select group"
+                    />
+                  )}
+                  {!isMinSize(size, 'medium') && (
+                    <ShowFiltersButton
+                      onClick={() => setShowFiltersOnMobile(!showFiltersOnMobile)}
+                    >
+                      {showFiltersOnMobile && (
+                        <span>Hide filter options</span>
+                      )}
+                      {!showFiltersOnMobile && (
+                        <span>Show filter options</span>
+                      )}
+                    </ShowFiltersButton>
+                  )}
                 </Box>
               </Box>
               <Box
-                direction={isMinSize(size, 'ms') ? 'row' : 'column'}
-                justify={isMinSize(size, 'ms') ? 'between' : 'start'}
-                gap="small"
+                direction={isMinSize(size, 'medium') ? 'row' : 'column'}
+                justify={isMinSize(size, 'medium') ? 'between' : 'start'}
+                gap={isMinSize(size, 'medium') ? 'medium' : 'small'}
                 align="start"
               >
                 <Box gap="xsmall">
-                  <Text weight={600}>Levels of support</Text>
-                  <Box direction="row" wrap gap="xsmall">
+                  <SupportKeyTitle>Levels of support</SupportKeyTitle>
+                  <Box direction="row" wrap>
                     {supportLevels && supportLevels.map((level) => (
-                      <Box key={level.value} direction="row" align="center" gap="xsmall" margin={{ bottom: 'xsmall' }}>
-                        <Dot size="16px" color={level.color} />
+                      <SupportKeyItem
+                        key={level.value}
+                      >
+                        <Dot size="10px" color={level.color} />
                         <Text size="xxsmall" color="textSecondary">{level.label}</Text>
-                      </Box>
+                      </SupportKeyItem>
                     ))}
                   </Box>
                 </Box>
                 <ComponentOptions
+                  size={size}
                   options={options}
                   onUpdateQuery={onUpdateQuery}
                 />

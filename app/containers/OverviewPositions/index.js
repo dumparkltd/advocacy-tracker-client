@@ -27,7 +27,6 @@ const ViewContainer = styled(Container)`
 `;
 
 const Title = styled(TitleMedium)`
-  font-size: 48px;
   margin: 0;
 `;
 

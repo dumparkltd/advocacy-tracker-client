@@ -310,7 +310,7 @@ theme.sizes = {
   },
   header: {
     banner: {
-      height: 72,
+      height: 70,
       heightPrint: 66,
       heightMobile: 95,
       heightMobileTop: 55,

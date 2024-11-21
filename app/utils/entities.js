@@ -1351,12 +1351,12 @@ export const getIndicatorMainTitle = (title) => {
   } else if (short.indexOf(' - ') > -1) {
     short = short.split('-')[0].trim();
   }
-  return capitalize(short);
+  return short;
 };
 
 export const getIndicatorSecondaryTitle = (title) => {
   if (title && title.indexOf(':') > -1) {
-    return capitalize(title.split(':')[1].trim());
+    return title.split(':')[1].trim().split(' ').map((w, i) => i === 0 ? capitalize(w) : w).join(' ');
   }
   return null;
 };

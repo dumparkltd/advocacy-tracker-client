@@ -1,8 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Text } from 'grommet';
+import { Box, Text, ResponsiveContext } from 'grommet';
 import styled from 'styled-components';
 import Dot from 'components/styled/Dot';
+
+import { isMinSize } from 'utils/responsive';
 
 import Button from 'components/buttons/ButtonTableCell';
 
@@ -26,9 +28,15 @@ export function CellBodyPlain({
 }) {
   const { value, color, path } = entity;
   const { align = 'start', primary } = column;
+  const size = React.useContext(ResponsiveContext);
+  const isLink = !!path && !!onEntityClick;
+  let dotSize = isLink ? '33px' : '28px';
+  if (!isMinSize(size, 'medium')) {
+    dotSize = '22px';
+  }
   return (
     <Box align={align}>
-      {path && onEntityClick && (
+      {isLink && (
         <Link
           href={path}
           onClick={(evt) => {
@@ -40,7 +48,7 @@ export function CellBodyPlain({
           {color && (
             <LabelWrap textAlign={align}>
               <Box flex={{ shrink: 0 }} align={align}>
-                <Dot size={!value ? '33px' : null} color={color} />
+                <Dot size={!value ? dotSize : null} color={color} />
               </Box>
               {value && (
                 <Label weight={primary ? 500 : 300}>
@@ -56,12 +64,12 @@ export function CellBodyPlain({
           )}
         </Link>
       )}
-      {(!path || !onEntityClick) && (
+      {!isLink && (
         <>
           {color && (
             <LabelWrap textAlign={align}>
               <Box flex={{ shrink: 0 }} align={align}>
-                <Dot size={!value ? '28px' : null} color={color} />
+                <Dot size={!value ? dotSize : null} color={color} />
               </Box>
               {value && (
                 <Label weight={primary ? 500 : 300}>

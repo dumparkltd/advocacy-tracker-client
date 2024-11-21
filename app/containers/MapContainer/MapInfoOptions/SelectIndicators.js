@@ -35,7 +35,13 @@ const OptionButton = styled((p) => <Button {...p} />)`
   color: ${({ active }) => active ? palette('headerNavMainItem', 1) : 'inherit'};
 `;
 
-const SelectText = styled((p) => <Text {...p} />)``;
+const SelectText = styled((p) => <Text {...p} />)`
+  font-size: 16px;
+  line-height: 24px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    font-size: 18px;
+  }
+`;
 
 export function SelectIndicators({ config }) {
   const {
@@ -56,9 +62,7 @@ export function SelectIndicators({ config }) {
         onClick={() => setShowOptions(!showOptions)}
       >
         <Box direction="row" justify="between" align="center">
-          <SelectText
-            size="large"
-          >
+          <SelectText>
             {truncateText(
               activeOption.label,
               TEXT_TRUNCATE.INDICATOR_SELECT,

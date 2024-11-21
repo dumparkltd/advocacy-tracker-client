@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box, Drop, ResponsiveContext } from 'grommet';
+// import { Box, Drop, ResponsiveContext } from 'grommet';
+import { Box, Drop } from 'grommet';
 
-import { isMinSize } from 'utils/responsive';
+// import { isMinSize } from 'utils/responsive';
 import asArray from 'utils/as-array';
 
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
@@ -85,7 +86,7 @@ export function CellHeaderSmart({
   const hasFilters = filterOptions && activeFilterOptions.length > 0;
   const isActive = hasFilters || column.sortActive;
   // console.log('column', column, filterOptions, isActive, open)
-  const size = React.useContext(ResponsiveContext);
+  // const size = React.useContext(ResponsiveContext);
 
   return (
     <Box direction="column" align="center" justify={align} flex={false}>
@@ -116,10 +117,9 @@ export function CellHeaderSmart({
           </ColumnButton>
         </Box>
       )}
-      {column.filterOptions && ref && ref.current && open && isMinSize(size, 'medium') && (
+      {column.filterOptions && ref && ref.current && open && (
         <Drop
           target={ref.current}
-          responsive={false}
           align={{ top: 'top', right: 'right' }}
           onClickOutside={() => {
             setOpen(false);
@@ -136,7 +136,6 @@ export function CellHeaderSmart({
           }}
           animate={false}
           overflow="hidden"
-          inline
           stretch={false}
         >
           <DropContent>

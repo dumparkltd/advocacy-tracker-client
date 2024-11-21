@@ -44,9 +44,12 @@ export const TitleMedium = styled.h3`
   margin: 15px 0;
   display: inline-block;
   font-weight: normal;
-  font-size: 42px;
-  position: relaive;
-  top: -0.07em
+  position: relative;
+  top: -0.07em;
+  font-size: 33px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    font-size: 42px;
+  }
 `;
 const TitleMediumPrint = styled.h3`
   font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;

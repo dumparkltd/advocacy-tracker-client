@@ -22,7 +22,14 @@ const Link = styled((p) => <Button as="a" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 16px;
 `;
-const Label = styled((p) => <Text size="small" {...p} />)``;
+const Label = styled((p) => <Text {...p} />)`
+  font-size: ${({ theme }) => theme.text.xxsmall.size};
+  line-height: ${({ theme }) => theme.text.xxsmall.height};
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    font-size: ${({ theme }) => theme.text.small.size};
+    line-height: ${({ theme }) => theme.text.small.height};
+  }
+`;
 
 const Meta = styled((p) => <Box {...p} />)``;
 const Gap = styled((p) => <Box pad={{ horizontal: 'xxsmall' }} {...p} />)``;

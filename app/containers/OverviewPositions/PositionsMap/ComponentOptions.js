@@ -8,7 +8,6 @@ import { palette } from 'styled-theme';
 import {
   Box,
   Text,
-  Heading,
   ResponsiveContext,
 } from 'grommet';
 
@@ -21,12 +20,11 @@ import Dot from 'components/styled/Dot';
 
 import messages from './messages';
 
-const SupportTagsTitle = styled((p) => <Heading level="5" {...p} />)`
-  margin: 0;
+const SupportTagsTitle = styled((p) => <Text size="xsmall" {...p} />)`
   color: black;
   font-weight: 600;
 `;
-const Hint = styled((p) => <Text {...p} />)`
+const Hint = styled((p) => <Text size="xxsmall" {...p} />)`
   color: ${palette('dark', 4)};
   font-weight: 300;
   font-style: italic;
@@ -37,6 +35,11 @@ const TagButton = styled((p) => <Button {...p} />)`
   border: 1px solid ${({ selected }) => selected ? palette('primary', 1) : palette('light', 4)};
   border-radius: 9999px;
   padding: 3px 8px 3px 5px;
+  margin-bottom: 4px;
+  margin-right: 4px;
+  &:last-child {
+    margin-right: 0;
+  }
   &:hover {
     border: 1px solid ${({ selected }) => selected ? palette('primary', 0) : palette('dark', 3)};
   }
@@ -66,15 +69,16 @@ const ComponentOptions = ({
 }) => {
   const size = React.useContext(ResponsiveContext);
   return (
-    <Box gap="medium" margin={{ vertical: 'small' }}>
-      <Box gap="small">
+    <Box gap="small" margin={{ vertical: 'small' }} responsive={false}>
+      <Box gap="9px" responsive={false}>
         <Box
           direction={isMinSize(size, 'medium') ? 'row' : 'column'}
           align={isMinSize(size, 'medium') ? 'center' : 'start'}
           justify="start"
-          gap="small"
+          gap={isMinSize(size, 'medium') ? 'small' : 'xsmall'}
+          responsive={false}
         >
-          <SupportTagsTitle margin="none">
+          <SupportTagsTitle>
             <FormattedMessage {...messages.supportLevelTitle} />
           </SupportTagsTitle>
           <Hint>
@@ -84,7 +88,6 @@ const ComponentOptions = ({
         <Box
           wrap
           direction="row"
-          gap="xsmall"
           alignSelf="start"
           style={{ position: 'relative' }}
         >
@@ -103,7 +106,7 @@ const ComponentOptions = ({
             >
               <Box direction="row" align="center" gap="xsmall">
                 <Dot size="18px" color={tag.color} />
-                <Text size="small">{tag.label}</Text>
+                <Text size="xsmall">{tag.label}</Text>
               </Box>
             </TagButton>
           ))}
@@ -125,7 +128,7 @@ const ComponentOptions = ({
       {options && (
         <Box
           direction={isMinSize(size, 'medium') ? 'row' : 'column'}
-          gap={isMinSize(size, 'medium') ? 'medium' : 'xsmall'}
+          gap={isMinSize(size, 'medium') ? 'medium' : 'none'}
           flex={{ grow: 0 }}
           fill={false}
           alignSelf="start"

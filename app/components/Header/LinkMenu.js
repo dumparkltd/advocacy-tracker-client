@@ -4,8 +4,8 @@ import Button from 'components/buttons/ButtonSimple';
 
 const LinkMenu = styled((p) => <Button as="a" {...p} />)`
   height: 30px;
-  padding-right: 5px;
-  padding-left: 5px;
+  padding-right: 9px;
+  padding-left: 9px;
   padding-top: 7px;
 
   color: ${({ active }) => active ? 'black' : 'white'};

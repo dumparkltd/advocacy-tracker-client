@@ -24,7 +24,7 @@ import messages from './messages';
 const Search = styled((p) => <Box direction="row" pad={{ vertical: 'xsmall', horizontal: 'medium' }} {...p} />)`
   width: 100%;
   background-color: ${palette('light', 1)};
-  color: ${palette('dark', 2)};
+  color: ${palette('dark', 1)};
   border: 1px solid ${palette('light', 3)};
   min-height: ${({ small }) => small ? 35 : 45}px;
   border-radius: 999px;
@@ -37,19 +37,23 @@ const Search = styled((p) => <Box direction="row" pad={{ vertical: 'xsmall', hor
   }
 `;
 const SearchInput = styled((p) => <DebounceInput {...p} />)`
+  flex: 1;
   background-color: ${palette('light', 1)};
   color: ${palette('dark', 2)};
   border: none;
-  padding: 3px;
-  &::placeholder {
-    color: ${palette('dark', 2)};
-    opacity: 1;
-    font-size: ${({ theme }) => theme.text.small.size};
-  }
+  padding: ${({ theme }) => theme.global.edgeSize.small};
+  padding-left: ${({ theme }) => theme.global.edgeSize.xsmall};
+  font-size: ${({ theme }) => theme.text.small.size};
+  font-weight: 300;
   &:focus {
     outline: none;
+    box-shadow: none;
   }
-  flex: 1;
+  &::placeholder {
+    color: ${palette('dark', 1)};
+    opacity: 0.5;
+    font-weight: 300;
+  }
   @media print {
     display: none;
   }

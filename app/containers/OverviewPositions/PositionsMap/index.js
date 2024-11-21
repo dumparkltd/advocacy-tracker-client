@@ -86,11 +86,15 @@ const IndicatorSidePanel = styled((p) => <Box {...p} />)`
 const IndicatorList = styled((p) => <Box {...p} />)`
   border-top: 1px solid ${palette('light', 2)};
 `;
-const IndicatorPanelHeader = styled((p) => <Box {...p} pad="small" />)`
+const IndicatorPanelHeader = styled(
+  (p) => <Box justify="center" pad={{ horizontal: 'small' }} {...p} />
+)`
   position: relative;
+  min-height: 45px;
 `;
 const IndicatorSelectButton = styled((p) => <Button {...p} />)`
   border-bottom: 1px solid ${palette('light', 2)};
+  min-height: 45px;
   width: 100%;
   color: ${({ active }) => active ? 'white' : 'black'};
   cursor: ${({ active }) => active ? 'default' : 'pointer'};
@@ -141,9 +145,8 @@ const IndicatorSelectButton = styled((p) => <Button {...p} />)`
     border-color: transparent transparent transparent ${palette('primary', 1)};
   }
   `;
-const IndicatorListTitle = styled((p) => <Text size="small" {...p} />)`
-  color: ${palette('dark', 4)};
-  font-style: italic;
+const IndicatorListTitle = styled((p) => <Text size="xxxsmall" {...p} />)`
+  color: ${({ theme }) => theme.global.colors.textSecondary};
 `;
 const IndicatorLabel = styled((p) => <Text size="small" weight={500} {...p} />)`
   position: relative;
@@ -165,10 +168,14 @@ const SearchWrapper = styled((p) => <Box {...p} />)`
   }
 `;
 
-const MapSecondaryTitle = styled((p) => <Text size="large" {...p} />)`
+const MapSecondaryTitle = styled((p) => <Text {...p} />)`
   margin: 0;
   color: black;
   font-weight: 600;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    font-size: 16px;
+    line-height: 18px;
+  }
 `;
 
 const ID = 'positions-map';
@@ -374,7 +381,7 @@ export function PositionsMap({
                     {
                       id: 'viaGroup',
                       type: 'plain',
-                      label: 'As Member of',
+                      label: 'As member of',
                     },
                   ],
                   indicatorPositions: indicatorPositions.reduce((memo, position) => {
@@ -514,23 +521,18 @@ export function PositionsMap({
   ];
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
-      <Box pad={{ top: 'small', bottom: 'xsmall' }}>
+      <Box>
         <TitleAboveCard>
           <FormattedMessage {...messages.title} />
         </TitleAboveCard>
       </Box>
-      <Loading loading={!dataReady} />
+      {!dataReady && <Loading loading={!dataReady} />}
       {dataReady && (
         <Card>
           <Box direction={isMinSize(size, 'medium') ? 'row' : 'column'}>
             {isMinSize(size, 'medium') && (
               <IndicatorSidePanel>
-                <IndicatorPanelHeader
-                  pad={{
-                    vertical: 'small',
-                    horizontal: 'xsmall',
-                  }}
-                >
+                <IndicatorPanelHeader>
                   <IndicatorListTitle>
                     <FormattedMessage {...messages.indicatorListTitle} />
                   </IndicatorListTitle>
@@ -556,7 +558,7 @@ export function PositionsMap({
               </IndicatorSidePanel>
             )}
             {!isMinSize(size, 'medium') && indicators && (
-              <Box pad="small">
+              <Box pad="medium" margin={{ top: 'small' }}>
                 <SelectIndicators
                   config={{
                     onIndicatorSelect: (id) => onSetMapIndicator(id),
@@ -579,12 +581,17 @@ export function PositionsMap({
             <Box
               direction="column"
               fill="horizontal"
-              pad={{ top: isMinSize(size, 'medium') ? '42px' : 'small', horizontal: 'medium', bottom: 'none' }}
+              pad={{ top: isMinSize(size, 'medium') ? '42px' : 'xsmall', horizontal: 'medium', bottom: 'none' }}
               flex={{ grow: 1, shrink: 1 }}
             >
-              <Box direction="row" fill="horizontal" justify="between" margin={{ bottom: 'small' }}>
+              <Box
+                direction="row"
+                fill="horizontal"
+                justify="between"
+                margin={{ bottom: isMinSize(size, 'medium') ? 'small' : '15px' }}
+              >
                 {isMinSize(size, 'medium') && (
-                  <Box gap="small" pad={{ top: '5px' }}>
+                  <Box pad={{ top: '5px' }}>
                     <TitleOnCard>
                       {getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title']))}
                     </TitleOnCard>
@@ -667,9 +674,15 @@ export function PositionsMap({
                   }}
                 >
                   <Text size="large">
-                    {indicators
+                    {isMinSize(size, 'medium')
+                      && indicators
                       && currentIndicatorId
                       && getIndicatorMainTitle(currentIndicator.getIn(['attributes', 'title']))}
+                    {!isMinSize(size, 'medium')
+                      && indicators
+                      && currentIndicatorId
+                      && 'Go to topic'
+                    }
                   </Text>
                 </ButtonPrimary>
               </Box>

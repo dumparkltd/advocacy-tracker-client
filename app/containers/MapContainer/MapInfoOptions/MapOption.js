@@ -7,7 +7,7 @@ import InfoOverlay from 'components/InfoOverlay';
 
 import { usePrint } from 'containers/App/PrintContext';
 
-const Styled = styled((p) => <Box direction="row" align="center" gap="small" {...p} />)`
+const Styled = styled((p) => <Box direction="row" align="center" gap="7px" {...p} />)`
   padding: ${({ plain }) => plain ? '0' : '5px 0 5px 5px'};
   display: ${({ isPrint, active, printHide }) => (isPrint && (!active || printHide)) ? 'none' : 'flex'};
   pointer-events: ${({ isPrint }) => isPrint ? 'none' : 'all'};

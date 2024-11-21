@@ -21,8 +21,11 @@ const DropButtonWrap = styled.div`
     if (inDrop && menuType !== 'add') return '5px';
     return 'auto';
   }};
-    height: ${({ theme }) => theme.sizes.header.banner.height}px;
-    width: 68px;
+    height: ${({ theme, menuType }) => menuType === 'add'
+    ? theme.sizes.header.banner.height - 2
+    : theme.sizes.header.banner.height
+}px;
+    width: ${({ theme }) => theme.sizes.header.banner.height - 2}px;
   }
   @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
     width: ${({ theme }) => theme.sizes.header.banner.height}px;

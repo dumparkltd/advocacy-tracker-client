@@ -2434,11 +2434,11 @@ export default defineMessages({
     statementOptions: {
       includeMemberships: {
         id: 'app.containers.App.ui.statementOptions.includeMemberships',
-        defaultMessage: 'Include positions of groups (countries are member of)',
+        defaultMessage: 'Include positions of country groups',
       },
       excludeInofficial: {
         id: 'app.containers.App.ui.statementOptions.excludeInofficial',
-        defaultMessage: 'Only show "official" statements (Level of Authority)',
+        defaultMessage: 'Only show "official" statements',
       },
     },
   },
