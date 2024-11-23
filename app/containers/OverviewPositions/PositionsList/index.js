@@ -597,6 +597,7 @@ export function PositionsList({
                 direction={isMinSize(size, 'medium') ? 'row' : 'column'}
                 justify={isMinSize(size, 'medium') ? 'between' : 'start'}
                 gap={isMinSize(size, 'medium') ? 'medium' : 'small'}
+                responsive={false}
                 align="start"
               >
                 <Box gap="xsmall">

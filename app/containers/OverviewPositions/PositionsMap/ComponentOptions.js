@@ -1,10 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-
 import {
   Box,
   Text,
@@ -106,7 +104,9 @@ const ComponentOptions = ({
             >
               <Box direction="row" align="center" gap="xsmall">
                 <Dot size="18px" color={tag.color} />
-                <Text size="xsmall">{tag.label}</Text>
+                <Text size={isMinSize(size, 'medium') ? 'xsmall' : 'xxsmall'}>
+                  {tag.label}
+                </Text>
               </Box>
             </TagButton>
           ))}
@@ -126,19 +126,24 @@ const ComponentOptions = ({
         </Box>
       </Box>
       {options && (
-        <Box
-          direction={isMinSize(size, 'medium') ? 'row' : 'column'}
-          gap={isMinSize(size, 'medium') ? 'medium' : 'none'}
-          flex={{ grow: 0 }}
-          fill={false}
-          alignSelf="start"
-        >
-          {options.map((option) => (
-            <MapOption
-              key={option.id}
-              option={option}
-            />
-          ))}
+        <Box gap="xxsmall" responsive={false}>
+          <SupportTagsTitle>
+            Statement options
+          </SupportTagsTitle>
+          <Box
+            direction={isMinSize(size, 'medium') ? 'row' : 'column'}
+            gap={isMinSize(size, 'medium') ? 'medium' : 'none'}
+            flex={{ grow: 0 }}
+            fill={false}
+            alignSelf="start"
+          >
+            {options.map((option) => (
+              <MapOption
+                key={option.id}
+                option={option}
+              />
+            ))}
+          </Box>
         </Box>
       )}
     </Box>

@@ -2,7 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
-import { Box, Text } from 'grommet';
+import { Box, Text, ResponsiveContext } from 'grommet';
+
+import { isMinSize } from 'utils/responsive';
+
 import InfoOverlay from 'components/InfoOverlay';
 
 import { usePrint } from 'containers/App/PrintContext';
@@ -38,8 +41,9 @@ export function MapOption({
   } = option;
   const optionType = option.type || type;
   const isPrint = usePrint();
+  const size = React.useContext(ResponsiveContext);
   return (
-    <Styled plain={plain} isPrint={isPrint} printHide={printHide}>
+    <Styled plain={plain} isPrint={isPrint} printHide={printHide} flex={{ shrink: 0 }}>
       <StyledInput
         id={`map-${optionType}-${id}`}
         type="checkbox"
@@ -50,7 +54,7 @@ export function MapOption({
         as="label"
         color="textSecondary"
         htmlFor={`map-${optionType}-${id}`}
-        size="xsmall"
+        size={isMinSize(size, 'medium') ? 'xsmall' : 'xxsmall'}
       >
         {label}
         {info && (
