@@ -371,7 +371,7 @@ export function EntitiesTable({
                     {mouseOverColumn.mouseOverTitleSupTitle}
                   </Text>
                 )}
-                <Text size="xxsmall" color="white" style={{ textTransform: 'capitalize' }}>
+                <Text size="xxsmall" color="white">
                   {mouseOverColumn.mouseOverTitle || mouseOverColumn.mainTitle || mouseOverColumn.title}
                 </Text>
               </Box>
