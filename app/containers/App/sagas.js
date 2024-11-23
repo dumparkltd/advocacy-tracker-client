@@ -23,6 +23,7 @@ import {
   LOAD_ENTITIES_IF_NEEDED,
   REDIRECT_IF_NOT_PERMITTED,
   REDIRECT_IF_NOT_SIGNED_IN,
+  REDIRECT_IF_SIGNED_IN,
   SAVE_ENTITY,
   SAVE_MULTIPLE_ENTITIES,
   NEW_ENTITY,
@@ -238,6 +239,12 @@ export function* redirectIfNotSignedInSaga() {
     }
   }
 }
+export function* redirectIfSignedInSaga() {
+  const signedIn = yield select(selectIsSignedIn);
+  if (signedIn) {
+    yield put(forwardOnAuthenticationChange());
+  }
+}
 
 export function* authenticateSaga(payload) {
   // console.log('authenticateSaga');
@@ -282,7 +289,6 @@ export function* recoverSaga(payload) {
     yield put(recoverError(err));
   }
 }
-
 export function* authChangeSaga() {
   const redirectPathname = yield select(selectRedirectOnAuthSuccessPath);
   const redirectQuery = yield select(selectRedirectOnAuthSuccessSearch);
@@ -303,8 +309,9 @@ export function* logoutSaga() {
     yield put(logoutSuccess());
     yield put(updatePath('/', { replace: true }));
   } catch (err) {
-    console.log('ERROR in logoutSaga');
+    console.log('ERROR in logoutSaga - user likely already logged out');
     yield put(authenticateError(err));
+    yield put(updatePath('/', { replace: true }));
   }
 }
 
@@ -1350,6 +1357,7 @@ export default function* rootSaga() {
 
   yield takeLatest(REDIRECT_IF_NOT_PERMITTED, checkRoleSaga);
   yield takeLatest(REDIRECT_IF_NOT_SIGNED_IN, redirectIfNotSignedInSaga);
+  yield takeLatest(REDIRECT_IF_SIGNED_IN, redirectIfSignedInSaga);
   yield takeEvery(UPDATE_ROUTE_QUERY, updateRouteQuerySaga);
   yield takeEvery(UPDATE_PATH, updatePathSaga);
   yield takeEvery(SET_ACTORTYPE, setActortypeSaga);

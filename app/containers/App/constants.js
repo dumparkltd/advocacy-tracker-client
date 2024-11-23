@@ -12,6 +12,7 @@ import { API } from 'themes/config';
 
 export const REDIRECT_IF_NOT_PERMITTED = 'impactoss/App/REDIRECT_IF_NOT_PERMITTED';
 export const REDIRECT_IF_NOT_SIGNED_IN = 'impactoss/App/REDIRECT_IF_NOT_SIGNED_IN';
+export const REDIRECT_IF_SIGNED_IN = 'impactoss/App/REDIRECT_IF_SIGNED_IN';
 export const LOAD_ENTITIES_IF_NEEDED = 'impactoss/App/LOAD_ENTITIES_IF_NEEDED';
 export const LOADING_ENTITIES = 'impactoss/App/LOADING_ENTITIES';
 export const LOAD_ENTITIES_SUCCESS = 'impactoss/App/LOAD_ENTITIES_SUCCESS';

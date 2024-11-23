@@ -26,8 +26,17 @@ import ContentHeader from 'containers/ContentHeader';
 import AuthForm from 'components/forms/AuthForm';
 import A from 'components/styled/A';
 
-import { selectQueryMessages, selectIsAuthenticating, selectAuthError } from 'containers/App/selectors';
-import { updatePath, dismissQueryMessages } from 'containers/App/actions';
+import {
+  selectQueryMessages,
+  selectIsAuthenticating,
+  selectAuthError,
+} from 'containers/App/selectors';
+
+import {
+  updatePath,
+  dismissQueryMessages,
+  redirectIfSignedIn,
+} from 'containers/App/actions';
 
 import { ROUTES, IS_DEV } from 'themes/config';
 import messages from './messages';
@@ -41,6 +50,7 @@ const BottomLinks = styled.div`
 export class UserLogin extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
     this.props.initialiseForm();
+    this.props.redirectIfSignedIn();
   }
 
   render() {
@@ -140,6 +150,7 @@ UserLogin.propTypes = {
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
   handleLink: PropTypes.func.isRequired,
+  redirectIfSignedIn: PropTypes.func.isRequired,
   initialiseForm: PropTypes.func,
   onDismissQueryMessages: PropTypes.func,
   queryMessages: PropTypes.object,
@@ -164,6 +175,9 @@ export function mapDispatchToProps(dispatch) {
   return {
     initialiseForm: () => {
       dispatch(formActions.reset('userLogin.form.data'));
+    },
+    redirectIfSignedIn: () => {
+      dispatch(redirectIfSignedIn());
     },
     handleSubmit: (formData) => {
       dispatch(login(formData.toJS()));
