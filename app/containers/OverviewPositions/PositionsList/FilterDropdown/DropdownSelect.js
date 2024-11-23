@@ -8,20 +8,20 @@ import { cleanupSearchTarget, regExMultipleWords } from 'utils/string';
 import OptionList from './OptionList';
 
 const Styled = styled.div`
-  max-height: 450px;
-  min-height: 300px;
-  height: 450px;
+  padding-top: ${({ full }) => full ? 0 : 10}px;
+  position: relative;
+  max-height: ${({ full }) => full ? 'none' : '450px'};
+  min-height: ${({ full }) => full ? 0 : 300}px;
+  height: ${({ full }) => full ? '100%' : '450px'};
   display: block;
   z-index: 10;
   overflow: hidden;
   background-color: white;
-  border: 1px solid ${palette('light', 2)};
-  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.1);
+  border: 1px solid ${({ full }) => full ? 'transparent' : palette('light', 2)};
+  box-shadow: ${({ full }) => full ? 'none' : '0px 0px 5px 0px rgba(0,0,0,0.1)'};
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     min-width: 350px;
   }
-  margin-top: 10px;
-  position: relative;
 `;
 
 const Search = styled.div`
@@ -37,6 +37,7 @@ const Search = styled.div`
 export function DropdownSelect({
   options,
   onSelect,
+  full,
 }) {
   const [search, onSetSearch] = useState(null);
   const optionsSearched = search
@@ -46,8 +47,8 @@ export function DropdownSelect({
     })
     : options;
   return (
-    <Styled>
-      <Search>
+    <Styled full={full}>
+      <Search full={full}>
         <TagSearch
           onSearch={onSetSearch}
           onClear={() => onSetSearch(null)}
@@ -56,6 +57,7 @@ export function DropdownSelect({
         />
       </Search>
       <OptionList
+        full={full}
         options={optionsSearched}
         onSelect={onSelect}
       />
@@ -66,6 +68,7 @@ export function DropdownSelect({
 DropdownSelect.propTypes = {
   options: PropTypes.array,
   onSelect: PropTypes.func,
+  full: PropTypes.bool,
 };
 
 export default DropdownSelect;

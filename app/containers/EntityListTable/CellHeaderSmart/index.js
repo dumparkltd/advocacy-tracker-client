@@ -1,11 +1,12 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-// import { Box, Drop, ResponsiveContext } from 'grommet';
-import { Box, Drop } from 'grommet';
 
-// import { isMinSize } from 'utils/responsive';
-import asArray from 'utils/as-array';
+import {
+  Box, Drop, ResponsiveContext, Layer,
+} from 'grommet';
+
+import { isMinSize } from 'utils/responsive';
 
 import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import ButtonSort from 'components/buttons/ButtonSort';
@@ -13,9 +14,7 @@ import Icon from 'components/Icon';
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
 import TextPrint from 'components/styled/TextPrint';
 import PrintHide from 'components/styled/PrintHide';
-import DropHeader from './DropHeader';
-import DropFilter from './DropFilter';
-import DropSort from './DropSort';
+import DropContent from './DropContent';
 
 const ColumnButton = styled(ButtonFlatIconOnly)`
   color: ${({ isActive }) => isActive ? 'white' : 'inherit'};
@@ -50,23 +49,6 @@ const DropAnchor = styled.div`
   right: -${({ theme }) => theme.global.edgeSize.ms};
 `;
 
-const DropContent = styled.div`
-  max-width: none;
-  height: 300px;
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    height: 350px;
-    width: 300px;
-  }
-`;
-const BodyInDrop = styled.div`
-  position: absolute;
-  top: 50px;
-  right: 0;
-  left: 0;
-  bottom: 0;
-  overflow-y: auto;
-`;
-
 export function CellHeaderSmart({
   column,
   filterOptions,
@@ -86,7 +68,7 @@ export function CellHeaderSmart({
   const hasFilters = filterOptions && activeFilterOptions.length > 0;
   const isActive = hasFilters || column.sortActive;
   // console.log('column', column, filterOptions, isActive, open)
-  // const size = React.useContext(ResponsiveContext);
+  const size = React.useContext(ResponsiveContext);
 
   return (
     <Box direction="column" align="center" justify={align} flex={false}>
@@ -117,67 +99,63 @@ export function CellHeaderSmart({
           </ColumnButton>
         </Box>
       )}
-      {column.filterOptions && ref && ref.current && open && (
-        <Drop
-          target={ref.current}
-          align={{ top: 'top', right: 'right' }}
-          onClickOutside={() => {
-            setOpen(false);
-            if (onDropChange) onDropChange(false);
-          }}
-          onEsc={() => {
-            setOpen(false);
-            if (onDropChange) onDropChange(false);
-          }}
-          style={{
-            animation: 'none',
-            opacity: '1',
-            zIndex: '999999999',
-          }}
-          animate={false}
-          overflow="hidden"
-          stretch={false}
-        >
-          <DropContent>
-            <DropHeader
+      {column.filterOptions
+        && ref
+        && ref.current
+        && open && isMinSize(size, 'ms')
+        && (
+          <Drop
+            target={ref.current}
+            align={{ top: 'top', right: 'right' }}
+            onClickOutside={() => {
+              setOpen(false);
+              if (onDropChange) onDropChange(false);
+            }}
+            onEsc={() => {
+              setOpen(false);
+              if (onDropChange) onDropChange(false);
+            }}
+            style={{
+              animation: 'none',
+              opacity: '1',
+              zIndex: '999999999',
+            }}
+            animate={false}
+            overflow="hidden"
+            stretch={false}
+          >
+            <DropContent
+              column={column}
+              onUpdate={onUpdateFilterOptions}
               onClose={() => {
                 setOpen(false);
                 if (onDropChange) onDropChange(false);
               }}
-              title={column.filterOptionsTitle || column.mainTitle || 'Column options'}
             />
-            <BodyInDrop>
-              {column.onSort && (
-                <DropSort column={column} />
-              )}
-              <DropFilter
-                options={column.filterOptions}
-                onUpdate={(filterIds, checked) => {
-                  let changedToChecked = [];
-                  let changedToUnchecked = [];
-                  asArray(filterIds).forEach((filterId) => {
-                    if (checked) {
-                      changedToChecked = [...changedToChecked, filterId];
-                    }
-                    if (!checked) {
-                      changedToUnchecked = [...changedToUnchecked, filterId];
-                    }
-                  });
-                  const changedFilters = [...changedToChecked, ...changedToUnchecked];
-                  const updatedFilterOptions = column.filterOptions.map((option) => {
-                    const optionChanged = changedFilters.indexOf(option.value) > -1;
-                    return ({
-                      ...option,
-                      changed: optionChanged,
-                    });
-                  });
-                  onUpdateFilterOptions(updatedFilterOptions);
-                }}
-              />
-            </BodyInDrop>
-          </DropContent>
-        </Drop>
-      )}
+          </Drop>
+        )}
+      {column.filterOptions
+        && open
+        && !isMinSize(size, 'ms')
+        && (
+          <Layer
+            full
+            responsive
+            onClickOutside={() => setOpen(false)}
+            onEsc={() => setOpen(false)}
+            animation={false}
+            style={{ overflowY: 'auto', borderRadius: '0' }}
+          >
+            <DropContent
+              column={column}
+              onUpdate={onUpdateFilterOptions}
+              onClose={() => {
+                setOpen(false);
+                if (onDropChange) onDropChange(false);
+              }}
+            />
+          </Layer>
+        )}
       {!column.filterOptions && column.onSort && (
         <PrintHide>
           <Box pad={{ left: 'xxsmall' }} flex={false}>

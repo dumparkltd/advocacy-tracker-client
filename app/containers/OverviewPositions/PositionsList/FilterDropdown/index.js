@@ -11,8 +11,10 @@ import styled from 'styled-components';
 import PrintHide from 'components/styled/PrintHide';
 
 import {
-  Box, Drop, Text,
+  Box, Drop, Text, ResponsiveContext, Layer,
 } from 'grommet';
+
+import { isMinSize } from 'utils/responsive';
 
 import Icon from 'components/Icon';
 
@@ -87,6 +89,7 @@ export function FilterDropdown({
   const dropButtonRef = useRef(null);
 
   const activeOption = options.find((o) => o.active);
+  const size = React.useContext(ResponsiveContext);
   return (
     <Styled>
       <Label>{label}</Label>
@@ -159,7 +162,7 @@ export function FilterDropdown({
           </Box>
         </ActiveButton>
       )}
-      {!activeOption && dropdownOpen && dropButtonRef && (
+      {!activeOption && dropdownOpen && dropButtonRef && isMinSize(size, 'ms') && (
         <PrintHide>
           <Drop
             align={{ top: 'bottom', left: 'left' }}
@@ -175,6 +178,27 @@ export function FilterDropdown({
               }}
             />
           </Drop>
+        </PrintHide>
+      )}
+      {!activeOption && dropdownOpen && dropButtonRef && !isMinSize(size, 'ms') && (
+        <PrintHide>
+          <Layer
+            full
+            responsive
+            onClickOutside={() => setDropdownOpen(false)}
+            onEsc={() => setDropdownOpen(false)}
+            animation={false}
+            style={{ overflowY: 'auto', borderRadius: '0' }}
+          >
+            <DropdownSelect
+              full
+              options={options}
+              onSelect={(option) => {
+                setDropdownOpen(false);
+                onSelect(option.id);
+              }}
+            />
+          </Layer>
         </PrintHide>
       )}
     </Styled>
