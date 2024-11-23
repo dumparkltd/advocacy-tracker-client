@@ -40,6 +40,8 @@ import {
   openNewEntityModal,
   submitInvalid,
   saveErrorDismiss,
+  invalidateEntities,
+  redirectIfNotSignedIn,
 } from 'containers/App/actions';
 
 import {
@@ -82,10 +84,8 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
   }
 
   UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
-    if (this.props.dataReady && this.props.viewEntity) {
-      this.props.initialiseForm('actionEdit.form.data', this.getInitialFormData());
-    }
+    this.props.onInvalidateEntities();
+    this.props.redirectIfNotSignedIn();
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -265,7 +265,9 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
 
 ActionEdit.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func,
+  onInvalidateEntities: PropTypes.func,
   redirectIfNotPermitted: PropTypes.func,
+  redirectIfNotSignedIn: PropTypes.func,
   initialiseForm: PropTypes.func,
   handleSubmitRemote: PropTypes.func.isRequired,
   handleSubmitFail: PropTypes.func.isRequired,
@@ -323,10 +325,20 @@ const mapStateToProps = (state, { params }) => ({
 function mapDispatchToProps(dispatch, props) {
   return {
     loadEntitiesIfNeeded: () => {
-      DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
+      DEPENDENCIES.forEach((path) => {
+        dispatch(loadEntitiesIfNeeded(path));
+      });
+    },
+    onInvalidateEntities: () => {
+      DEPENDENCIES.forEach((path) => {
+        dispatch(invalidateEntities(path));
+      });
     },
     redirectIfNotPermitted: () => {
       dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
+    },
+    redirectIfNotSignedIn: () => {
+      dispatch(redirectIfNotSignedIn());
     },
     initialiseForm: (model, formData) => {
       dispatch(formActions.reset(model));

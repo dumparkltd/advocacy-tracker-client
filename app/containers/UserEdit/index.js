@@ -31,6 +31,8 @@ import {
   submitInvalid,
   saveErrorDismiss,
   openNewEntityModal,
+  invalidateEntities,
+  redirectIfNotSignedIn,
 } from 'containers/App/actions';
 
 import {
@@ -69,10 +71,8 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
   }
 
   UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
-    if (this.props.dataReady && this.props.viewEntity) {
-      this.props.initialiseForm('userEdit.form.data', this.getInitialFormData());
-    }
+    this.props.onInvalidateEntities();
+    this.props.redirectIfNotSignedIn();
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -218,6 +218,8 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
 
 UserEdit.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func,
+  onInvalidateEntities: PropTypes.func,
+  redirectIfNotSignedIn: PropTypes.func,
   initialiseForm: PropTypes.func,
   handleSubmitRemote: PropTypes.func.isRequired,
   handleSubmitFail: PropTypes.func.isRequired,
@@ -262,6 +264,14 @@ function mapDispatchToProps(dispatch) {
   return {
     loadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
+    },
+    onInvalidateEntities: () => {
+      DEPENDENCIES.forEach((path) => {
+        dispatch(invalidateEntities(path));
+      });
+    },
+    redirectIfNotSignedIn: () => {
+      dispatch(redirectIfNotSignedIn());
     },
     initialiseForm: (model, formData) => {
       dispatch(formActions.reset(model));
