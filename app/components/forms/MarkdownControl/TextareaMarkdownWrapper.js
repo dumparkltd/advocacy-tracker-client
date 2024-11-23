@@ -118,13 +118,19 @@ function TextareaMarkdownWrapper(props) {
       <Box direction="row" justify="between" align="center" margin={{ vertical: 'small' }} wrap>
         <Box direction="row" gap="small" align="center">
           <ViewButton
-            onClick={() => setView('write')}
+            onClick={(e) => {
+              if (e && e.preventDefault) e.preventDefault();
+              setView('write');
+            }}
             active={view === 'write'}
           >
             Write
           </ViewButton>
           <ViewButton
-            onClick={() => setView('preview')}
+            onClick={(e) => {
+              if (e && e.preventDefault) e.preventDefault();
+              setView('preview');
+            }}
             active={view === 'preview'}
           >
             Preview
@@ -294,7 +300,7 @@ function TextareaMarkdownWrapper(props) {
                     : scrollTop);
                 } else {
                   // do not go to top if coming from event
-                  setScrollTop(scrollTop + 0.0000001);
+                  setScrollTop(scrollTop + 1e20);
                 }
               }
               onChange(e);
