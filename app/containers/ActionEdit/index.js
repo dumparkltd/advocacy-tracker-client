@@ -34,6 +34,7 @@ import {
 import {
   loadEntitiesIfNeeded,
   redirectIfNotPermitted,
+  redirectIfNotSignedIn,
   updatePath,
   updateEntityForm,
   deleteEntity,
@@ -41,7 +42,6 @@ import {
   submitInvalid,
   saveErrorDismiss,
   invalidateEntities,
-  redirectIfNotSignedIn,
 } from 'containers/App/actions';
 
 import {

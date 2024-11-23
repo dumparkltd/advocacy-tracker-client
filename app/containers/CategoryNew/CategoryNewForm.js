@@ -29,6 +29,7 @@ import {
   saveErrorDismiss,
   openNewEntityModal,
   newEntity,
+  redirectIfNotSignedIn,
 } from 'containers/App/actions';
 
 import {
@@ -54,6 +55,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
   }
 
   UNSAFE_componentWillMount() {
+    this.props.redirectIfNotSignedIn();
     this.props.loadEntitiesIfNeeded();
     this.props.initialiseForm(FORM_INITIAL);
   }
@@ -146,6 +148,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
 CategoryNewForm.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func,
   redirectIfNotPermitted: PropTypes.func,
+  redirectIfNotSignedIn: PropTypes.func,
   handleSubmitRemote: PropTypes.func.isRequired,
   handleSubmitFail: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
@@ -197,6 +200,9 @@ function mapDispatchToProps(
     },
     redirectIfNotPermitted: () => {
       dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
+    },
+    redirectIfNotSignedIn: () => {
+      dispatch(redirectIfNotSignedIn());
     },
     onErrorDismiss: () => {
       dispatch(submitInvalid(true));

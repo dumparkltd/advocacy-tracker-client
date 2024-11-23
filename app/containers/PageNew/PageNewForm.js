@@ -14,7 +14,6 @@ import { getEntityFormFields } from 'utils/forms';
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
 
-import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
 import {
   API, ROUTES, USER_ROLES, PAGE_CONFIG,
 } from 'themes/config';
@@ -27,6 +26,7 @@ import {
   submitInvalid,
   saveErrorDismiss,
   newEntity,
+  redirectIfNotSignedIn,
 } from 'containers/App/actions';
 import {
   selectReady,
@@ -47,6 +47,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
   }
 
   UNSAFE_componentWillMount() {
+    this.props.redirectIfNotSignedIn();
     this.props.loadEntitiesIfNeeded();
     this.props.initialiseForm(FORM_INITIAL);
   }
@@ -118,6 +119,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
 PageNew.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func.isRequired,
   redirectIfNotPermitted: PropTypes.func,
+  redirectIfNotSignedIn: PropTypes.func,
   handleSubmitRemote: PropTypes.func.isRequired,
   handleSubmitFail: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
@@ -161,6 +163,9 @@ function mapDispatchToProps(
     },
     redirectIfNotPermitted: () => {
       dispatch(redirectIfNotPermitted(USER_ROLES.ADMIN.value));
+    },
+    redirectIfNotSignedIn: () => {
+      dispatch(redirectIfNotSignedIn());
     },
     onErrorDismiss: () => {
       dispatch(submitInvalid(true));

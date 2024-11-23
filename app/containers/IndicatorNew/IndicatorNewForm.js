@@ -32,6 +32,7 @@ import appMessages from 'containers/App/messages';
 import {
   loadEntitiesIfNeeded,
   redirectIfNotPermitted,
+  redirectIfNotSignedIn,
   updatePath,
   updateEntityForm,
   openNewEntityModal,
@@ -66,6 +67,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
   }
 
   UNSAFE_componentWillMount() {
+    this.props.redirectIfNotSignedIn();
     this.props.loadEntitiesIfNeeded();
     this.props.initialiseForm(FORM_INITIAL);
   }
@@ -159,6 +161,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
 IndicatorNewForm.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func,
   redirectIfNotPermitted: PropTypes.func,
+  redirectIfNotSignedIn: PropTypes.func,
   handleSubmitRemote: PropTypes.func.isRequired,
   handleSubmitFail: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
@@ -209,6 +212,9 @@ function mapDispatchToProps(
     },
     redirectIfNotPermitted: () => {
       dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
+    },
+    redirectIfNotSignedIn: () => {
+      dispatch(redirectIfNotSignedIn());
     },
     onErrorDismiss: () => {
       dispatch(submitInvalid(true));

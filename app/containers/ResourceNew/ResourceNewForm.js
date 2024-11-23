@@ -32,6 +32,7 @@ import {
   submitInvalid,
   saveErrorDismiss,
   newEntity,
+  redirectIfNotSignedIn,
 } from 'containers/App/actions';
 
 import {
@@ -61,6 +62,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
   }
 
   UNSAFE_componentWillMount() {
+    this.props.redirectIfNotSignedIn();
     this.props.loadEntitiesIfNeeded();
     this.props.initialiseForm(this.getInitialFormData());
   }
@@ -155,6 +157,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
 ResourceNew.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func,
   redirectIfNotPermitted: PropTypes.func,
+  redirectIfNotSignedIn: PropTypes.func,
   handleSubmitRemote: PropTypes.func.isRequired,
   handleSubmitFail: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
@@ -214,6 +217,9 @@ function mapDispatchToProps(
     },
     redirectIfNotPermitted: () => {
       dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
+    },
+    redirectIfNotSignedIn: () => {
+      dispatch(redirectIfNotSignedIn());
     },
     onErrorDismiss: () => {
       dispatch(submitInvalid(true));
