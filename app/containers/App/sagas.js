@@ -22,6 +22,7 @@ import {
 import {
   LOAD_ENTITIES_IF_NEEDED,
   REDIRECT_IF_NOT_PERMITTED,
+  REDIRECT_IF_NOT_SIGNED_IN,
   SAVE_ENTITY,
   SAVE_MULTIPLE_ENTITIES,
   NEW_ENTITY,
@@ -155,7 +156,7 @@ function* loadEntitiesErrorHandler(err, { path }) {
 /**
  * Check if entities already present
  */
-export function* loadEntitiesSaga({ path }) {
+export function* loadEntitiesIfNeededSaga({ path }) {
   if (Object.values(API).indexOf(path) > -1) {
     // requestedSelector returns the times that entities where fetched from the API
     const requestedAt = yield select(selectRequestedAt, { path });
@@ -180,12 +181,11 @@ export function* loadEntitiesSaga({ path }) {
             // Save response
             yield put(entitiesLoaded(keyBy(response.data, 'id'), path, Date.now()));
           } else {
-            // console.log('no response data', response)
             yield put(entitiesRequested(path, false));
-            throw new Error(response.statusText || 'error');
+            throw new Error((response && response.statusText) || 'error - possibly invalidated while loading');
           }
         } catch (err) {
-          console.log('ERROR in loadEntitiesSaga');
+          console.log('ERROR in loadEntitiesIfNeededSaga', path);
           // console.log('error', err)
           // Whoops Save error
           // Clear the request time on error, This will cause us to try again next time, which we probably want to do?
@@ -194,7 +194,6 @@ export function* loadEntitiesSaga({ path }) {
           throw new Error((err.response && err.response.status) || err);
         }
       } else {
-        // console.log('error: not signedin', )
         yield put(entitiesRequested(path, false));
         throw new Error('not signed in');
       }
@@ -209,13 +208,33 @@ export function* checkRoleSaga({ role }) {
   if (!signedIn) {
     const authenticating = yield select(selectIsAuthenticating);
     if (!authenticating) {
-      const redirectOnAuthSuccess = yield select(selectCurrentPathname);
-      yield put(replaceIfNotSignedIn(redirectOnAuthSuccess, replace));
+      const location = yield select(selectLocation);
+      const redirectPath = location.get('pathname');
+      const redirectSearch = location.get('search');
+      yield put(replaceIfNotSignedIn(
+        { pathname: redirectPath, search: redirectSearch },
+        replace,
+      ));
     }
   } else {
     const roleIds = yield select(selectSessionUserRoles);
     if (!hasRoleRequired(roleIds, role)) {
       yield put(replaceUnauthorised(replace));
+    }
+  }
+}
+export function* redirectIfNotSignedInSaga() {
+  const signedIn = yield select(selectIsSignedIn);
+  if (!signedIn) {
+    const authenticating = yield select(selectIsAuthenticating);
+    if (!authenticating) {
+      const location = yield select(selectLocation);
+      const redirectPath = location.get('pathname');
+      const redirectSearch = location.get('search');
+      yield put(replaceIfNotSignedIn(
+        { pathname: redirectPath, search: redirectSearch },
+        replace,
+      ));
     }
   }
 }
@@ -299,8 +318,6 @@ export function* validateTokenSaga() {
       [KEYS.CLIENT]: client,
       [KEYS.ACCESS_TOKEN]: accessToken,
     } = yield getAuthValues();
-    // console.log('validateTokenSaga', redirectOnAuthSuccess);
-    // console.log('uid && client && accessToken', uid, client, accessToken);
     if (uid && client && accessToken) {
       yield put(authenticateSending());
       const response = yield call(
@@ -1313,7 +1330,7 @@ export default function* rootSaga() {
 
   yield takeEvery(
     LOAD_ENTITIES_IF_NEEDED,
-    autoRestart(loadEntitiesSaga, loadEntitiesErrorHandler, MAX_LOAD_ATTEMPTS),
+    autoRestart(loadEntitiesIfNeededSaga, loadEntitiesErrorHandler, MAX_LOAD_ATTEMPTS),
   );
   yield takeLatest(VALIDATE_TOKEN, validateTokenSaga);
 
@@ -1332,6 +1349,7 @@ export default function* rootSaga() {
   yield takeEvery(SAVE_CONNECTIONS, saveConnectionsSaga);
 
   yield takeLatest(REDIRECT_IF_NOT_PERMITTED, checkRoleSaga);
+  yield takeLatest(REDIRECT_IF_NOT_SIGNED_IN, redirectIfNotSignedInSaga);
   yield takeEvery(UPDATE_ROUTE_QUERY, updateRouteQuerySaga);
   yield takeEvery(UPDATE_PATH, updatePathSaga);
   yield takeEvery(SET_ACTORTYPE, setActortypeSaga);

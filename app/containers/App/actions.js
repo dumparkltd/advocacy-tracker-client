@@ -24,6 +24,7 @@ import {
   SET_AUTHENTICATION_STATE,
   LOAD_ENTITIES_IF_NEEDED,
   REDIRECT_IF_NOT_PERMITTED,
+  REDIRECT_IF_NOT_SIGNED_IN,
   LOADING_ENTITIES,
   LOAD_ENTITIES_SUCCESS,
   LOAD_ENTITIES_ERROR,
@@ -186,6 +187,11 @@ export function redirectIfNotPermitted(role) {
   return {
     type: REDIRECT_IF_NOT_PERMITTED,
     role,
+  };
+}
+export function redirectIfNotSignedIn() {
+  return {
+    type: REDIRECT_IF_NOT_SIGNED_IN,
   };
 }
 /**
