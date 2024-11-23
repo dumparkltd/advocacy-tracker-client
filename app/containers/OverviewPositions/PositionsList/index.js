@@ -618,7 +618,7 @@ export function PositionsList({
                   onUpdateQuery={onUpdateQuery}
                 />
               </Box>
-              <Box height={{ min: '500px' }}>
+              <Box height={isMinSize(size, 'medium') ? { min: '500px' } : null}>
                 <EntityListTable
                   entityPath={ROUTES.ACTOR}
                   reducePreviewItem={reducePreviewItem}
