@@ -4,7 +4,7 @@ import React, {
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import { palette } from 'styled-theme';
-import styled, { withTheme } from 'styled-components';
+import styled from 'styled-components';
 import { Box, Text } from 'grommet';
 
 import {
@@ -23,6 +23,7 @@ import Button from 'components/buttons/ButtonSimple';
 import messages from './messages';
 
 const MIN_TEXTAREA_HEIGHT = 320;
+const MAX_TEXTAREA_HEIGHT = 640;
 
 const MarkdownHint = styled.div`
   text-align: right;
@@ -43,7 +44,7 @@ const StyledTextareaMarkdown = styled(
   border-radius: 0.5em;
   color: ${palette('text', 0)};
   min-height: ${MIN_TEXTAREA_HEIGHT}px;
-  resize: "none";
+  max-height: ${MAX_TEXTAREA_HEIGHT}px;
 `;
 const Preview = styled((p) => <Box {...p} />)`
   background-color: ${palette('background', 0)};
@@ -52,6 +53,7 @@ const Preview = styled((p) => <Box {...p} />)`
   padding: 0.7em;
   color: ${palette('text', 0)};
   min-height: ${MIN_TEXTAREA_HEIGHT}px;
+  max-height: ${MAX_TEXTAREA_HEIGHT}px;
 `;
 
 const MDButton = styled((p) => (
@@ -88,9 +90,10 @@ const MDButtonText = styled((p) => (
 `;
 
 function TextareaMarkdownWrapper(props) {
-  const { value, intl, theme } = props;
+  const { value, onChange, intl } = props;
   const textareaRef = useRef(null);
   const [view, setView] = useState('write');
+  const [scrollTop, setScrollTop] = useState(0);
   // const [hasFocus, setHasFocus] = useState(false);
   useEffect(() => {
     if (textareaRef.current) {
@@ -101,7 +104,14 @@ function TextareaMarkdownWrapper(props) {
     }
     // has textarea focus?
     // setHasFocus(document.activeElement === textareaRef.current);
-  });
+  }, [textareaRef]);
+
+  useEffect(() => {
+    if (textareaRef.current && textareaRef.current.scrollTop !== scrollTop) {
+      textareaRef.current.scrollTop = scrollTop;
+    }
+  }, [scrollTop]);
+
   const mdDisabled = view !== 'write';
   return (
     <Box>
@@ -271,6 +281,24 @@ function TextareaMarkdownWrapper(props) {
               linkUrlPlaceholder: 'https://link-url.ext',
             }}
             {...props}
+            onScroll={(e) => {
+              setScrollTop((e.target && e.target.scrollTop) || 0);
+            }}
+            onChange={(e) => {
+              const scroll = textareaRef && textareaRef.current && textareaRef.current.scrollTop;
+              if (scroll !== scrollTop) {
+                // do not remember when its rest to 0
+                if (scroll !== 0) {
+                  setScrollTop(scroll
+                    ? textareaRef && textareaRef.current && textareaRef.current.scrollTop
+                    : scrollTop);
+                } else {
+                  // do not go to top if coming from event
+                  setScrollTop(scrollTop + 0.0000001);
+                }
+              }
+              onChange(e);
+            }}
           />
           <MarkdownHint>
             <A
@@ -291,7 +319,6 @@ TextareaMarkdownWrapper.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   intl: intlShape,
-  theme: PropTypes.object,
 };
 
-export default injectIntl(withTheme(TextareaMarkdownWrapper));
+export default injectIntl(TextareaMarkdownWrapper);
