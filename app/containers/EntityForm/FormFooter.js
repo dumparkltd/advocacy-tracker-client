@@ -86,7 +86,10 @@ export function FormFooter({
             <Box>
               <ButtonCancel
                 type="button"
-                onClick={handleCancel}
+                onClick={(e) => {
+                  if (e && e.preventDefault) e.preventDefault();
+                  handleCancel(e);
+                }}
               >
                 <FormattedMessage {...appMessages.buttons.cancel} />
               </ButtonCancel>

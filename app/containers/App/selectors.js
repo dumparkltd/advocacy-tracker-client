@@ -565,6 +565,10 @@ export const selectPrintConfig = createSelector(
   getGlobal,
   (state) => state.get('printConfig') || null
 );
+export const selectBlockNavigation = createSelector(
+  getGlobal,
+  (state) => state.get('blockNavigation') || false
+);
 
 // database ////////////////////////////////////////////////////////////////////////
 

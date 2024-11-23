@@ -67,6 +67,7 @@ const MainMenu = ({ navItems, onClick, isAuth }) => {
                 active={item.active}
                 onClick={(evt) => {
                   if (evt) evt.stopPropagation();
+                  if (evt) evt.preventDefault();
                   onClick(item.path);
                 }}
                 title={item.title}
@@ -86,6 +87,7 @@ const MainMenu = ({ navItems, onClick, isAuth }) => {
               active={item.active}
               onClick={(evt) => {
                 if (evt) evt.stopPropagation();
+                if (evt) evt.preventDefault();
                 onClick(item.path);
               }}
             >

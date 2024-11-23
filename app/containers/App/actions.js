@@ -84,6 +84,7 @@ import {
   CLOSE_PRINT_VIEW,
   SET_LIST_PREVIEW,
   SET_LIST_PREVIEW_CONTENT,
+  BLOCK_NAVIGATION,
 } from './constants';
 
 export function submitInvalid(valid) {
@@ -629,5 +630,11 @@ export function setPreviewContent(args) {
   return {
     type: SET_LIST_PREVIEW_CONTENT,
     args,
+  };
+}
+export function blockNavigation(value) {
+  return {
+    type: BLOCK_NAVIGATION,
+    value,
   };
 }

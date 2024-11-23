@@ -19,7 +19,7 @@ export function CellHeaderPlain({ column }) {
       <TextPrint
         weight={500}
         size="xxsmall"
-        textAlign={align}
+        textAlign="end"
         wordBreak="keep-all"
         color="textSecondary"
       >

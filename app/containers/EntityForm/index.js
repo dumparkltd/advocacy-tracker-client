@@ -11,6 +11,7 @@ import { palette } from 'styled-theme';
 
 import { isMinSize } from 'utils/responsive';
 
+import { blockNavigation } from 'containers/App/actions';
 import { selectNewEntityModal } from 'containers/App/selectors';
 
 import ButtonForm from 'components/buttons/ButtonForm';
@@ -183,6 +184,28 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     return true;
   }
 
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    const { hasFormChanges } = nextProps;
+    if (hasFormChanges) this.props.onBlockNavigation(true);
+    if (hasFormChanges && !this.props.hasFormChanges) {
+      window.addEventListener('beforeunload', this.handleBeforeUnload);
+    } else if (!hasFormChanges && this.props.hasFormChanges) {
+      window.removeEventListener('beforeunload', this.handleBeforeUnload);
+    }
+  }
+
+  componentWillUnmount() {
+    this.props.onBlockNavigation(false);
+    window.removeEventListener('beforeunload', this.handleBeforeUnload);
+  }
+
+  handleBeforeUnload = (e) => {
+    if (this.props.hasFormChanges) {
+      e.preventDefault();
+      e.returnValue = ''; // Modern browsers require this to show the confirmation dialog
+    }
+  };
+
   setDeleteConfirmed = (confirm = true) => {
     this.setState({ deleteConfirmed: confirm });
   }
@@ -215,6 +238,8 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       saving,
       handleSubmitRemote,
       typeLabel,
+      hasFormChanges,
+      // onBlockNavigation,
     } = this.props;
     const { deleteConfirmed, stepActive, stepsSeen } = this.state;
     const closeMultiselectOnClickOutside = !newEntityModal || inModal;
@@ -243,6 +268,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
           hasEmptyRequired,
           hasAutofill,
           hasErrors,
+          hasChanges,
         ] = step.sections.reduce(
           (memo, section) => {
             if (!section.rows) return memo;
@@ -265,19 +291,20 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                     ) {
                       hasFieldAutofill = !!Object.values(fieldTracked).some((options) => !!options.autofill);
                     }
-                    let hasChanges = (fieldTracked.touched || !fieldTracked.pristine);
-                    let isValid = hasChanges && typeof fieldTracked.valid !== 'undefined' && fieldTracked.valid;
+                    let hasFieldChanges = (fieldTracked.touched || !fieldTracked.pristine);
+                    let isValid = hasFieldChanges && typeof fieldTracked.valid !== 'undefined' && fieldTracked.valid;
                     if (fieldTracked.$form && field.controlType === 'multiselect') {
-                      hasChanges = (fieldTracked.$form.touched || !fieldTracked.$form.pristine);
-                      isValid = hasChanges
+                      hasFieldChanges = (fieldTracked.$form.touched || !fieldTracked.$form.pristine);
+                      isValid = hasFieldChanges
                         && typeof fieldTracked.$form.valid !== 'undefined' && fieldTracked.$form.valid;
                     }
                     // WARNING: validity/errors are reset when field component unmount (on step change)
-                    const hasError = hasChanges && !isValid;
+                    const hasError = hasFieldChanges && !isValid;
                     const resultField = [
                       memo3[0] || isRequiredEmpty,
                       memo3[1] || hasFieldAutofill,
                       memo3[2] || hasError,
+                      memo3[3] || hasFieldChanges,
                     ];
                     return resultField;
                   },
@@ -289,7 +316,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
             );
             return resultSection;
           },
-          [false, false, false],
+          [false, false, false, false],
         );
         return ({
           ...step,
@@ -300,15 +327,21 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
           previouslySeen: currentStepPreviouslySeen,
           isActive: step.id === cleanStepActive,
           hasErrors,
+          hasChanges,
         });
       }
     );
-    const isBlocked = stepsWithStatus && stepsWithStatus.some(
+    const isBlocked = !hasFormChanges
+    || (stepsWithStatus && stepsWithStatus.some(
       (step) => (step.hasEmptyRequired || step.hasUnseenAutofill || step.hasErrors)
-    );
+    ));
+    // const isNavigationBlocked = stepsWithStatus && stepsWithStatus.some(
+    //   (step) => (step.hasChanges)
+    // );
     const activeStep = stepsWithStatus && stepsWithStatus.find((step) => step.isActive);
     // console.log('stepsWithStatus', stepsWithStatus, isBlocked)
-    // console.log('formDataTracked', formDataTracked, isBlocked)
+    // console.log('hasChanges', isNavigationBlocked)
+    // console.log('formDataTracked', formDataTracked)
     const activeStepHasErrors = activeStep.hasErrors;
     return (
       <ResponsiveContext.Consumer>
@@ -320,7 +353,10 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   <Box>
                     <ButtonCancel
                       type="button"
-                      onClick={handleCancel}
+                      onClick={(e) => {
+                        if (e && e.preventDefault) e.preventDefault();
+                        handleCancel(e);
+                      }}
                     >
                       <FormattedMessage {...appMessages.buttons.cancel} />
                     </ButtonCancel>
@@ -330,7 +366,10 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   <ButtonSubmitSubtle
                     type="button"
                     disabled={isBlocked}
-                    onClick={handleSubmitRemote}
+                    onClick={(e) => {
+                      if (e && e.preventDefault) e.preventDefault();
+                      handleSubmitRemote(e);
+                    }}
                   >
                     Save & Close
                   </ButtonSubmitSubtle>
@@ -517,9 +556,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
   }
 }
 
-const mapStateToProps = (state) => ({
-  newEntityModal: selectNewEntityModal(state),
-});
 
 EntityForm.propTypes = {
   handleSubmitFail: PropTypes.func.isRequired,
@@ -528,6 +564,7 @@ EntityForm.propTypes = {
   handleSubmitRemote: PropTypes.func,
   handleDelete: PropTypes.func,
   handleUpdate: PropTypes.func,
+  onBlockNavigation: PropTypes.func,
   model: PropTypes.string,
   fieldsByStep: PropTypes.array,
   formData: PropTypes.object,
@@ -539,10 +576,22 @@ EntityForm.propTypes = {
   newEntityModal: PropTypes.object,
   validators: PropTypes.object,
   scrollContainer: PropTypes.object,
+  hasFormChanges: PropTypes.bool,
   typeLabel: PropTypes.string,
 };
 EntityForm.defaultProps = {
   saving: false,
+  hasFormChanges: false,
 };
 
-export default connect(mapStateToProps)(EntityForm);
+const mapStateToProps = (state) => ({
+  newEntityModal: selectNewEntityModal(state),
+});
+
+export function mapDispatchToProps(dispatch) {
+  return {
+    onBlockNavigation: (value) => dispatch(blockNavigation(value)),
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(EntityForm);

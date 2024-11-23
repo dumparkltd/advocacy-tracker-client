@@ -94,6 +94,7 @@ import {
   forwardOnAuthenticationChange,
   updatePath,
   validateToken,
+  blockNavigation,
 } from 'containers/App/actions';
 
 import {
@@ -106,6 +107,7 @@ import {
   selectLocation,
   selectSessionUserRoles,
   selectIsAuthenticating,
+  selectBlockNavigation,
 } from 'containers/App/selectors';
 
 import {
@@ -570,6 +572,7 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
       }
     }
     yield put(saveSuccess(dataTS));
+    yield put(blockNavigation(false));
     if (!multiple && data.redirect) {
       yield put(updatePath(data.redirect, { replace: true }));
     }
@@ -781,6 +784,7 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
     if (data.onSuccess) {
       data.onSuccess();
     }
+    yield put(blockNavigation(false));
     if (!multiple && data.redirect) {
       if (data.createAsGuest) {
         yield put(updatePath(
@@ -1272,6 +1276,18 @@ export function* dismissQueryMessagesSaga() {
 export function* updatePathSaga({ path = '', args }) {
   const relativePath = (path && path.startsWith('/')) ? path : `/${path}`;
   const location = yield select(selectLocation);
+  const navBlocked = yield select(selectBlockNavigation);
+  if (navBlocked) {
+    /* eslint-disable no-alert */
+    const confirmLeave = window.confirm(
+      'You have unsaved changes. Are you sure you want to leave?'
+    );
+
+    if (!confirmLeave) {
+      return; // Do not navigate
+    }
+    yield put(blockNavigation(false));
+  }
   let queryNext = {};
   let queryNextString = '';
   if (args) {
