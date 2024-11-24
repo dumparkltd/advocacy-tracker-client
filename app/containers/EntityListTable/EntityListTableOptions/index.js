@@ -21,9 +21,6 @@ import appMessages from 'containers/App/messages';
 
 const EntityListSearchWrapper = styled((p) => <Box {...p} />)`
   width: 100%;
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    width: 500px;
-  }
 `;
 
 export function EntityListTableOptions({
@@ -124,6 +121,7 @@ export function EntityListTableOptions({
           <Box
             basis={isMinSize(size, 'large') ? '1/2' : 'auto'}
             alignSelf={isMinSize(size, 'large') ? 'start' : 'end'}
+            justify="end"
             fill={isMinSize(size, 'medium') ? false : 'horizontal'}
           >
             {hasSearch && (

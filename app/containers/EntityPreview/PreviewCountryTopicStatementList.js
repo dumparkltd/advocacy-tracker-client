@@ -22,7 +22,7 @@ export function PreviewCountryTopicStatementList({ content, onUpdatePath }) {
       flex={{ shrink: 0 }}
     >
       {indicatorPositions && indicatorPositions.length > 0 && (
-        <Box gap="medium">
+        <Box gap="small">
           <Box>
             <SectionTitle>
               <FormattedMessage {...messages.countryTopicStatementList.latestSectionTitle} />

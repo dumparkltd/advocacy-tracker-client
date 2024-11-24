@@ -3,7 +3,14 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import { FormattedMessage } from 'react-intl';
-import { Box, Text, Heading } from 'grommet';
+import {
+  Box,
+  Text,
+  Heading,
+  ResponsiveContext,
+} from 'grommet';
+
+import { isMinSize } from 'utils/responsive';
 
 import { ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
@@ -37,6 +44,8 @@ const TitleLink = styled(A)`
 
 export function PreviewCountryTopicPosition({ content, onUpdatePath }) {
   const { topic, position, options } = content.toJS();
+  const size = React.useContext(ResponsiveContext);
+
   return (
     <Box
       align="start"
@@ -69,13 +78,23 @@ export function PreviewCountryTopicPosition({ content, onUpdatePath }) {
           )}
         </Box>
       </Box>
-      <Box direction="row" align="start" fill="horizontal">
-        <Box basis="1/2">
+      <Box
+        direction={isMinSize(size, 'ms') ? 'row' : 'column'}
+        gap={isMinSize(size, 'ms') ? 'xsmall' : 'medium'}
+        align="start"
+        fill="horizontal"
+      >
+        <Box basis={isMinSize(size, 'ms') ? '1/2' : 'auto'}>
           {position && (
-            <Box direction="row" gap="small" align="center" pad={{ left: '20px' }}>
+            <Box
+              direction="row"
+              gap="small"
+              align="center"
+              pad={isMinSize(size, 'ms') ? { left: '20px' } : {}}
+            >
               <Box>
                 <Dot
-                  size="60px"
+                  size={isMinSize(size, 'ms') ? '60px' : '44px'}
                   color={
                     ACTION_INDICATOR_SUPPORTLEVELS[position.supportlevelId || 0]
                     && ACTION_INDICATOR_SUPPORTLEVELS[position.supportlevelId || 0].color

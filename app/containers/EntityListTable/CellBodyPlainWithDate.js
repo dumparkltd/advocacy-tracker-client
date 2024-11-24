@@ -4,6 +4,7 @@ import { Box, Text } from 'grommet';
 import styled from 'styled-components';
 import { truncateText } from 'utils/string';
 import Button from 'components/buttons/ButtonTableCell';
+import Label from './LabelCellBody';
 
 const LabelWrap = styled((p) => (
   <Box
@@ -16,13 +17,7 @@ const LabelWrap = styled((p) => (
 
 const Link = styled((p) => <Button as="a" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 12px;
 `;
-const Label = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
-  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 12px;
-`;
-
 
 export function CellBodyPlainWithDate({ entity, onEntityClick }) {
   const { value, date, path } = entity;

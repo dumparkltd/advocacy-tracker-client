@@ -8,7 +8,7 @@ import { cleanupSearchTarget, regExMultipleWords } from 'utils/string';
 import OptionList from './OptionList';
 
 const Styled = styled.div`
-  padding-top: ${({ full }) => full ? 0 : 10}px;
+  padding-top: 0px;
   position: relative;
   max-height: ${({ full }) => full ? 'none' : '450px'};
   min-height: ${({ full }) => full ? 0 : 300}px;

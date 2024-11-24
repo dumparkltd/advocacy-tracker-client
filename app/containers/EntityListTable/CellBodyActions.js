@@ -11,12 +11,9 @@ import { ROUTES } from 'themes/config';
 import DropEntityList from './DropEntityList';
 import LabelTooltip from './LabelTooltip';
 import LinkTooltip from './LinkTooltip';
+import Label from './LabelCellBody';
 
 const Link = styled((p) => <Button as="a" {...p} />)`
-  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 12px;
-`;
-const Label = styled((p) => <Text size="xxsmall" wordBreak="keep-all" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
 `;

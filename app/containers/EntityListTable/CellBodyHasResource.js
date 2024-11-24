@@ -10,6 +10,8 @@ import appMessages from 'containers/App/messages';
 import Button from 'components/buttons/ButtonTableCell';
 
 import { ROUTES } from 'themes/config';
+import Label from './LabelCellBody';
+
 const LinkTooltip = styled(
   React.forwardRef((p, ref) => <Button {...p} ref={ref} />)
 )`
@@ -19,7 +21,7 @@ const LinkTooltip = styled(
 const LinkInTT = styled((p) => <Button as="a" {...p} />)`
   line-height: 13px;
 `;
-const LabelInTT = styled((p) => <Text size="xxsmall" wordBreak="keep-all" {...p} />)`
+const LabelInTT = styled((p) => <Label size="xsmall" {...p} />)`
   line-height: 13px;
 `;
 

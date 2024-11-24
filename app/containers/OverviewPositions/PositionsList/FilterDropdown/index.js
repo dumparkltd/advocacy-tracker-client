@@ -169,6 +169,7 @@ export function FilterDropdown({
             target={dropButtonRef.current}
             onClickOutside={() => setDropdownOpen(false)}
             plain
+            margin={{ top: 'xsmall' }}
           >
             <DropdownSelect
               options={options}

@@ -75,12 +75,16 @@ const ListInlineItemNav = styled(A)`
   padding: 0;
   display: block;
   padding: 0 0.5em;
+  position: relative;
+  top: -2px;
 `;
 
 const ListInlineItemNavDisabled = styled.div`
   color: ${palette('light', 4)};
   padding: 0;
   padding: 0 0.5em;
+  position: relative;
+  top: -2px;
 `;
 
 export class EntityListFooter extends React.Component { // eslint-disable-line react/prefer-stateless-function

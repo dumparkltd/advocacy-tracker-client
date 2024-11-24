@@ -1,6 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box } from 'grommet';
+import { Box, ResponsiveContext } from 'grommet';
+
+import { isMinSize } from 'utils/responsive';
+
 import ButtonSort from 'components/buttons/ButtonSort';
 import Icon from 'components/Icon';
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
@@ -14,12 +17,19 @@ export function CellHeaderPlain({ column }) {
     (option) => column.sortOrder === option.value
   );
   const { align = 'start' } = column;
+  const size = React.useContext(ResponsiveContext);
+
   return (
-    <Box direction="row" align="center" justify={align} flex={false}>
+    <Box
+      direction="row"
+      align="center"
+      justify={align}
+      flex={false}
+    >
       <TextPrint
         weight={500}
-        size="xxsmall"
-        textAlign="end"
+        size={isMinSize(size, 'ms') ? 'xxsmall' : 'xxxsmall'}
+        textAlign={align}
         wordBreak="keep-all"
         color="textSecondary"
       >
