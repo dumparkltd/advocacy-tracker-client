@@ -63,7 +63,9 @@ export function CellBodyIndicators({
         >
           <LabelWrap>
             {entity.single.get('supportlevel') && (
-              <Dot color={entity.single.getIn(['supportlevel', 'color'])} />
+              <Box flex={{ shrink: 0 }}>
+                <Dot color={entity.single.getIn(['supportlevel', 'color'])} />
+              </Box>
             )}
             <Label textAlign={align}>
               {truncateText(entity.value, 25)}
@@ -118,7 +120,9 @@ export function CellBodyIndicators({
                     <Box key={level.value} flex={{ shrink: 0 }}>
                       <Box border="bottom" flex={{ shrink: 0 }} margin={{ bottom: 'small' }}>
                         <LabelWrap>
-                          <Dot color={level.color} />
+                          <Box flex={{ shrink: 0 }}>
+                            <Dot color={level.color} />
+                          </Box>
                           <Text size="small" weight={500}>
                             {intl.formatMessage(appMessages.supportlevels[level.value])}
                           </Text>

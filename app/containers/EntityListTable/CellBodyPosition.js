@@ -14,7 +14,9 @@ export function CellBodyPosition({
   return (
     <Box flex={{ shrink: 0 }} align={align}>
       {color && (
-        <Dot size="40px" color={color} title={value} />
+        <Box flex={{ shrink: 0 }}>
+          <Dot size="40px" color={color} title={value} />
+        </Box>
       )}
       {!color && (
         <Label weight={primary ? 500 : 300} textAlign={align}>
