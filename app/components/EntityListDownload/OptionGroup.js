@@ -80,9 +80,8 @@ export function OptionGroup({
         expanded={expandGroup}
         activeCount={activeOptionCount}
         optionCount={optionCount}
-      >
-        {label}
-      </OptionGroupToggle>
+        label={label}
+      />
       {expandGroup && (
         <Box gap="small" margin={{ vertical: 'medium' }}>
           {intro && (
