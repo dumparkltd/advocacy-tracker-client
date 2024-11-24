@@ -15,12 +15,9 @@ import Button from 'components/buttons/ButtonTableCell';
 
 import LabelTooltip from './LabelTooltip';
 import LinkTooltip from './LinkTooltip';
+import Label from './LabelCellBody';
 
 const Link = styled((p) => <Button as="a" plain {...p} />)`
-  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 12px;
-`;
-const Label = styled((p) => <Text size="xxsmall" wordBreak="keep-all" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
 `;
@@ -28,7 +25,7 @@ const Label = styled((p) => <Text size="xxsmall" wordBreak="keep-all" {...p} />)
 const LinkInTT = styled((p) => <Button as="a" {...p} />)`
   line-height: 13px;
 `;
-const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
+const LabelInTT = styled((p) => <Label size="xsmall" {...p} />)`
   line-height: 13px;
 `;
 

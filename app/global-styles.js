@@ -93,7 +93,7 @@ const GlobalStyle = createGlobalStyle`
   h6 {
     font-size: 0.9em;
   }
-  @media (min-width: 720px) {
+  @media (min-width: 761px) {
     h1 {
       font-size: 2.3em;
     }
@@ -113,7 +113,7 @@ const GlobalStyle = createGlobalStyle`
       font-size: 1em;
     }
   }
-  @media (min-width: 1200px) {
+  @media (min-width: 1153px) {
     h1 {
       font-size: 2.6em;
     }
@@ -174,7 +174,7 @@ const GlobalStyle = createGlobalStyle`
       }
     }
   }
-  @media (min-width: 720px) {
+  @media (min-width: 761px) {
     .content-page {
       .react-markdown {
         p {
@@ -229,7 +229,7 @@ const GlobalStyle = createGlobalStyle`
     margin-right: auto;
     margin-left: auto;
   }
-  @media (min-width: 720px) {
+  @media (min-width: 761px) {
     .delete-csv-modal,
     .download-csv-modal,
     .new-entity-modal {
@@ -244,7 +244,7 @@ const GlobalStyle = createGlobalStyle`
       left: auto;
     }
   }
-  @media (min-width: 992px) {
+  @media (min-width: 993px) {
     .preview-item-modal {
       max-width: 800px;
     }

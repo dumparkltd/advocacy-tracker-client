@@ -489,9 +489,13 @@ theme.global = {
     },
     danger: '#DB5D37',
     private: '#DA1D52',
+    privateBackground: '#fef7f9',
     archived: '#00728F',
-    draft: '#BCB9B8',
-    notifications: '#e6894b',
+    archivedBackground: '#f6f9fa',
+    draft: '#898989',
+    draftBackground: '#f7f7f7',
+    notifications: '#00728F',
+    notificationsBackground: '#f6f9fa',
     dark: '#1c2121',
   },
   edgeSize: {
@@ -555,6 +559,7 @@ theme.text = {
 theme.textPrint = {
   xxxlarge: { size: '24pt', height: '32pt' },
   xxlarge: { size: '14pt', height: '18pt' },
+  aalarge: { size: '12pt', height: '16pt' },
   xlarge: { size: '12pt', height: '16pt' },
   large: { size: '11pt', height: '14.5pt' },
   largeTall: { size: '11pt', height: '16pt' },
@@ -566,6 +571,7 @@ theme.textPrint = {
   xsmall: { size: '8pt', height: '10.5pt' },
   xsmallTight: { size: '8pt', height: '9pt' },
   xxsmall: { size: '7pt', height: '8.5pt' },
+  xxxsmall: { size: '7pt', height: '8.5pt' },
 };
 
 theme.icon = {

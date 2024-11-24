@@ -1,17 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Text } from 'grommet';
-// import styled from 'styled-components';
+import { Box } from 'grommet';
 import Dot from 'components/styled/Dot';
 
-// const LabelWrap = styled((p) => (
-//   <Box
-//     direction="column"
-//     gap="xsmall"
-//     align="start"
-//     {...p}
-//   />
-// ))``;
+import Label from './LabelCellBody';
 
 export function CellBodyPosition({
   entity,
@@ -25,9 +17,9 @@ export function CellBodyPosition({
         <Dot size="40px" color={color} title={value} />
       )}
       {!color && (
-        <Text size="xxsmall" weight={primary ? 500 : 300} wordBreak="keep-all" textAlign={align}>
+        <Label weight={primary ? 500 : 300} textAlign={align}>
           {value}
-        </Text>
+        </Label>
       )}
     </Box>
   );

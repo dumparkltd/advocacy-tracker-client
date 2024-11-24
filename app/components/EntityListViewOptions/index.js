@@ -8,7 +8,7 @@ import {
 
 import { isMinSize } from 'utils/responsive';
 
-import ButtonSimple from 'components/buttons/ButtonSimple';
+import ButtonFlat from 'components/buttons/ButtonFlat';
 import Icon from 'components/Icon';
 
 const Styled = styled((p) => <Box {...p} />)`
@@ -16,23 +16,39 @@ const Styled = styled((p) => <Box {...p} />)`
   z-index: 20;
   display: ${({ isPrint }) => isPrint ? 'none' : 'inline-block'};
 `;
-const ButtonGroup = styled((p) => <Box direction="row" margin="none" gap="medium" {...p} />)`
-  border-radius: 999px;
-  padding: 8px 18px 6px ${({ isOnMap }) => isOnMap ? '18' : '0'}px;
-  box-shadow: ${({ isOnMap }) => isOnMap ? '0px 0px 5px 0px rgba(0,0,0,0.2)' : 'none'};
+const ButtonGroup = styled(
+  (p) => (
+    <Box
+      direction="row"
+      align="center"
+      responsive={false}
+      plain
+      {...p}
+    />
+  )
+)`
   background: white;
+  box-shadow: ${({ isOnMap }) => isOnMap ? '0px 0px 5px 0px rgba(0,0,0,0.2)' : 'none'};
+  border-radius: 999px;
+  padding: 4px 13px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.ms}) {
+    padding: 4px 16px;
+  }
 `;
 const ButtonLabel = styled((p) => <Text size="small" {...p} />)`
   font-weight: normal;
 `;
-const ButtonOptions = styled((p) => <ButtonSimple {...p} />)`
+const ButtonOptions = styled((p) => <ButtonFlat {...p} />)`
   color: ${({ isActive }) => isActive ? palette('dark', 2) : palette('dark', 4)};
-  border-radius: 5px;
-  border: none;
-  padding: 5px;
   cursor: ${({ isActive }) => isActive ? 'default' : 'pointer'};
+  padding: 0;
+  min-height: 33px;
+  min-width: 33px;
+  text-transform: none;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    padding: 0 3px 0 0;
+  }
   &:hover {
-    box-shadow: none;
     color: ${({ isActive, theme }) => isActive ? palette('dark', 2) : theme.global.colors.highlight};
   }
 `;
@@ -45,22 +61,27 @@ class EntityListViewOptions extends React.PureComponent { // eslint-disable-line
         {(size) => (
           <Styled isPrint={isPrintView}>
             {options && (
-              <ButtonGroup pad="none" isOnMap={isOnMap}>
+              <ButtonGroup
+                isOnMap={isOnMap}
+                gap={isMinSize(size, 'ms') ? 'xsmall' : 'xxsmall'}
+              >
                 {options.map((option, i) => option && (
-                  <ButtonOptions
-                    key={i}
-                    onClick={() => option.onClick()}
-                    isActive={option.active}
-                  >
-                    <Box as="span" direction="row" gap="none" align="center">
-                      <Icon name={option.icon} size="33px" />
-                      {isMinSize(size, 'medium') && (
-                        <ButtonLabel size="small" isActive={option.active}>
-                          {option.title}
-                        </ButtonLabel>
-                      )}
-                    </Box>
-                  </ButtonOptions>
+                  <Box key={i}>
+                    <ButtonOptions
+                      onClick={() => option.onClick()}
+                      isActive={option.active}
+                      title={option.title}
+                    >
+                      <Box direction="row" align="center" responsive={false}>
+                        <Icon name={option.icon} size="33px" />
+                        {isMinSize(size, 'medium') && (
+                          <ButtonLabel size="small" isActive={option.active}>
+                            {option.title}
+                          </ButtonLabel>
+                        )}
+                      </Box>
+                    </ButtonOptions>
+                  </Box>
                 ))}
               </ButtonGroup>
             )}

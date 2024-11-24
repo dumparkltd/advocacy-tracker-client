@@ -10,13 +10,9 @@ import { truncateText } from 'utils/string';
 import appMessages from 'containers/App/messages';
 import LabelTooltip from './LabelTooltip';
 import LinkTooltip from './LinkTooltip';
+import Label from './LabelCellBody';
 
-const Label = styled((p) => <Text size="xxsmall" wordBreak="keep-all" {...p} />)`
-  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 12px;
-`;
-
-const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
+const LabelInTT = styled((p) => <Label size="xsmall" {...p} />)`
   line-height: 13px;
 `;
 

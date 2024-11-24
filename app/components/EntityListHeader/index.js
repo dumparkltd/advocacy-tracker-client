@@ -19,8 +19,7 @@ import { isMinSize } from 'utils/responsive';
 
 import { FILTER_FORM_MODEL, EDIT_FORM_MODEL } from 'containers/EntityListForm/constants';
 
-import Button from 'components/buttons/ButtonSimple';
-import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
+import ButtonFlat from 'components/buttons/ButtonFlat';
 import Bookmarker from 'containers/Bookmarker';
 
 import EntityListViewOptions from 'components/EntityListViewOptions';
@@ -52,29 +51,59 @@ const TheHeader = styled((p) => <Box direction="row" {...p} />)`
 `;
 const HeaderSection = styled((p) => <Box direction="row" {...p} />)`
   position: relative;
-  flex: ${({ grow }) => grow ? '1' : '0'} ${({ shrink = '1' }) => shrink ? '1' : '0'} auto;
 `;
-const FilterButton = styled((p) => <Button {...p} />)`
-  color: ${palette('buttonFlat', 1)};
-  background: ${palette('primary', 1)};
-  color: white;
+
+const HeaderActionsWrapper = styled(
+  (p) => (
+    <Box
+      direction="row"
+      align="center"
+      plain
+      responsive={false}
+      {...p}
+    />
+  )
+)`
+  background: white;
+  box-shadow: ${({ isOnMap }) => isOnMap ? '0px 0px 5px 0px rgba(0,0,0,0.2)' : 'none'};
   border-radius: 999px;
-  box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
-  border: none;
-  font-family: ${({ theme }) => theme.fonts.title};
-  text-transform: uppercase;
-  padding: 8px 16px 6px 16px;
-  &:hover {
-    box-shadow: 0px 2px 4px 0px rgba(0,0,0,0.2);
-    background: ${palette('primary', 0)};
+  padding: 4px 13px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.ms}) {
+    padding: 4px 16px;
   }
 `;
-const HeaderActionsWrapper = styled((p) => <Box {...p} />)`
-  background: white;
-  border-radius: 999px;
-  padding: 4px 16px;
-  box-shadow: ${({ isOnMap }) => isOnMap ? '0px 0px 5px 0px rgba(0,0,0,0.2)' : 'none'};
+
+const ButtonActions = styled((p) => <ButtonFlat {...p} />)`
+  padding: 0;
+  min-height: 33px;
+  min-width: 33px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    padding: 0;
+  }
 `;
+
+const FilterButton = styled((p) => <ButtonFlat {...p} />)`
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+  padding: 4px 13px;
+  border: none;
+  border-radius: 999px;
+  background: ${palette('primary', 1)};
+  color: white;
+  font-family: ${({ theme }) => theme.fonts.title};
+  text-transform: uppercase;
+  font-weight: 300;
+  min-height: 33px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.ms}) {
+    min-width: 33px;
+    padding: 4px 16px;
+  }
+  &:hover {
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+    background: ${palette('primary', 0)};
+    color: white;
+  }
+`;
+
 const STATE_INITIAL = {
   activeOption: null,
   showTypes: false,
@@ -404,7 +433,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
           <Styled isPrint={isPrintView}>
             <TheHeader
               margin={{ bottom: 'xsmall' }}
-              pad={{ top: 'medium' }}
+              pad={{ top: 'ms' }}
               align="center"
               justify="between"
             >
@@ -424,11 +453,8 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                 {(normalActions || managerActions) && (
                   <HeaderSection>
                     <HeaderActionsWrapper
-                      fill="vertical"
-                      direction="row"
-                      align="center"
-                      pad="none"
                       isOnMap={isOnMap}
+                      gap={isMinSize(size, 'ms') ? 'xsmall' : 'xxsmall'}
                     >
                       {normalActions && normalActions.map(
                         (action, i) => {
@@ -445,14 +471,14 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                           if (action.type === 'icon') {
                             return (
                               <Box key={i}>
-                                <ButtonFlatIconOnly
+                                <ButtonActions
                                   onClick={action.onClick && (() => action.onClick())}
                                   title={action.title}
                                   alt={action.title}
                                   subtle
                                 >
                                   <Icon name={action.icon} title={action.title} />
-                                </ButtonFlatIconOnly>
+                                </ButtonActions>
                               </Box>
                             );
                           }
@@ -464,14 +490,14 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                           if (action.icon === 'import') {
                             return (
                               <Box key={i}>
-                                <ButtonFlatIconOnly
+                                <ButtonActions
                                   onClick={action.onClick && (() => action.onClick())}
                                   title={action.title}
                                   alt={action.title}
                                   subtle
                                 >
                                   <Multiple size="small" style={{ stroke: 'currentColor' }} />
-                                </ButtonFlatIconOnly>
+                                </ButtonActions>
                               </Box>
                             );
                           }
@@ -486,14 +512,14 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     <FilterButton
                       onClick={onShowFilters}
                     >
-                      <Box direction="row" gap="small" align="center">
+                      <Box direction="row" gap="xsmall" align="center" responsive={false}>
                         {isMinSize(size, 'medium') && (
                           <Text style={{ marginTop: '-3px' }}>
                             {intl.formatMessage(messages.listOptions.showFilter)}
                           </Text>
                         )}
-                        <Box>
-                          <Icon name="filter" size="33px" text />
+                        <Box style={{ marginTop: '2px' }}>
+                          <Icon name="filter" size="30px" text />
                         </Box>
                       </Box>
                     </FilterButton>

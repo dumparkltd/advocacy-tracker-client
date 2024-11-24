@@ -14,6 +14,9 @@ const ButtonFlat = styled(Button)`
     }
     return props.primary ? palette('buttonFlat', 0) : palette('buttonFlat', 1);
   }};
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    padding: ${(props) => props.inForm ? '1em 1.2em' : '10px 12px'};
+  }
   &:hover {
     color: ${(props) => {
     if (props.disabled) {
@@ -21,9 +24,6 @@ const ButtonFlat = styled(Button)`
     }
     return props.primary ? palette('buttonFlatHover', 0) : palette('buttonFlatHover', 1);
   }};
-  }
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    padding: ${(props) => props.inForm ? '1em 1.2em' : '10px 12px'};
   }
 `;
 

@@ -5,9 +5,10 @@ import styled from 'styled-components';
 import { palette } from 'styled-theme';
 
 import {
-  Box, Heading,
+  Box, Heading, ResponsiveContext, Text,
 } from 'grommet';
-import Icon from 'components/Icon';
+
+import { isMinSize } from 'utils/responsive';
 
 import appMessages from 'containers/App/messages';
 
@@ -15,6 +16,7 @@ import Reference from 'components/fields/Reference';
 import ScreenReaderOnly from 'components/styled/ScreenReaderOnly';
 import Button from 'components/buttons/ButtonSimple';
 import A from 'components/styled/A';
+import Icon from 'components/Icon';
 
 const Title = styled((p) => <Heading level={3} {...p} />)`
   font-family: ${({ theme }) => theme.fonts.title};
@@ -83,6 +85,7 @@ export function PreviewHeader({
     largeTitle,
     topActions,
   } = contentClean;
+  const size = React.useContext(ResponsiveContext);
   return (
     <Box
       responsive={false}
@@ -92,22 +95,32 @@ export function PreviewHeader({
     >
       <Box direction="row" fill="horizontal" align="center" justify="end" gap="medium">
         {topActions && topActions.length > 0 && (
-          <Box direction="row" align="center" gap="medium">
+          <Box
+            responsive={false}
+            direction="row"
+            align="center"
+            gap={isMinSize(size, 'ms') ? 'xsmall' : 'xxsmall'}
+          >
             {topActions.map((action, i) => (
               <HeaderLink
                 key={i}
                 onClick={action.onClick}
                 href={action.path}
               >
-                {(!action.type || action.type !== 'create') && action.label}
-                {action.type === 'create' && (
-                  <Box direction="row" align="center" gap="xsmall">
-                    <span>
-                      {action.label}
-                    </span>
+                <Box
+                  responsive={false}
+                  direction="row"
+                  align="center"
+                  gap="xsmall"
+                  pad={{ horizontal: 'xsmall' }}
+                >
+                  <Text size={isMinSize(size, 'ms') ? 'medium' : 'small'}>
+                    {action.label}
+                  </Text>
+                  {action.type === 'create' && isMinSize(size, 'ms') && (
                     <Icon name="add" size="14px" />
-                  </Box>
-                )}
+                  )}
+                </Box>
               </HeaderLink>
             ))}
           </Box>
@@ -123,7 +136,6 @@ export function PreviewHeader({
       </Box>
       <Box
         direction="column"
-        gap="xsmall"
         pad={{ top: 'medium' }}
       >
         {aboveTitle && (

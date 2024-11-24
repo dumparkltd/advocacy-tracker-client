@@ -2,9 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
-import { Box } from 'grommet';
+import { Box, ResponsiveContext } from 'grommet';
 
 import { setListPreview, updatePath } from 'containers/App/actions';
+
+import { isMinSize } from 'utils/responsive';
 
 import PreviewHeader from './PreviewHeader';
 import PreviewEntity from './PreviewEntity';
@@ -13,7 +15,9 @@ import PreviewFooter from './PreviewFooter';
 import EntityFields from './EntityFields';
 
 const Styled = styled((p) => <Box {...p} />)`
-  margin-left: 5px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    margin-left: 5px;
+  }
 `;
 export function EntityPreview({
   content,
@@ -23,6 +27,7 @@ export function EntityPreview({
   // PreviewEntity: using item path and id, includes header and footer
   // PreviewItem: using the main list item and its columns
   // console.log('content', content && content.toJS())
+  const size = React.useContext(ResponsiveContext);
   return (
     <Styled
       background="white"
@@ -30,7 +35,10 @@ export function EntityPreview({
       responsive={false}
       flex={{ shrink: 0 }}
       elevation="medium"
-      pad={{ horizontal: 'large', vertical: 'small' }}
+      pad={isMinSize(size, 'medium')
+        ? { horizontal: 'large', vertical: 'small' }
+        : { horizontal: 'small', vertical: 'small' }
+      }
       gap="small"
       overflow="auto"
       style={{ position: 'relative', display: 'block' }}

@@ -144,6 +144,7 @@ class Header extends React.PureComponent { // eslint-disable-line react/prefer-s
                     href={isPrintView ? '' : '/'}
                     onClick={(evt) => {
                       if (evt) evt.stopPropagation();
+                      if (evt) evt.preventDefault();
                       if (!isPrintView) this.onClick('/');
                     }}
                     title={appTitle}
