@@ -65,7 +65,6 @@ export function EntityPreview({
             item={content.get('item')}
             itemContent={content.get('itemContent')}
             columns={content.get('columns')}
-            onUpdatePath={onUpdatePath}
           />
         )}
       {content

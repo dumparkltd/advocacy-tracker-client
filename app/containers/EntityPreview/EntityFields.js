@@ -87,10 +87,6 @@ export function EntityFields({
   onEntityClick,
   isAdmin,
 }) {
-  // console.log('fields', fields && fields)
-  // console.log('item', item && item.toJS())
-  // console.log('columns', columns && columns.toJS())
-  // console.log('categories', categories && categories.toJS())
   return (
     <Styled gap="large">
       {fields && Object.keys(fields).map((fieldId) => {
@@ -376,7 +372,6 @@ EntityFields.propTypes = {
   taxonomies: PropTypes.object, // immutable Map
   actionConnections: PropTypes.object, // immutable Map
   actorConnections: PropTypes.object, // immutable Map
-  // onUpdatePath: PropTypes.func,
   isAdmin: PropTypes.bool,
 };
 
@@ -390,7 +385,7 @@ const mapStateToProps = (state) => ({
 });
 
 export function mapDispatchToProps(dispatch) {
-  return {
+  const props = {
     loadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
@@ -404,6 +399,7 @@ export function mapDispatchToProps(dispatch) {
       dispatch(updatePath(`${path}/${id}`));
     },
   };
+  return props;
 }
 
-export default connect(mapStateToProps, null)(injectIntl(EntityFields));
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(EntityFields));
