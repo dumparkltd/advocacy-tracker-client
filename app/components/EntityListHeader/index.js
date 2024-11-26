@@ -485,25 +485,23 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                           return null;
                         }
                       )}
-                      {managerActions && managerActions.map(
-                        (action, i) => {
-                          if (action.icon === 'import') {
-                            return (
-                              <Box key={i}>
-                                <ButtonActions
-                                  onClick={action.onClick && (() => action.onClick())}
-                                  title={action.title}
-                                  alt={action.title}
-                                  subtle
-                                >
-                                  <Multiple size="small" style={{ stroke: 'currentColor' }} />
-                                </ButtonActions>
-                              </Box>
-                            );
-                          }
-                          return null;
-                        }
-                      )}
+                      {managerActions && managerActions
+                        .filter(
+                          (action) => action.icon === 'import'
+                        ).map(
+                          (action, i) => (
+                            <Box key={i + 1000}>
+                              <ButtonActions
+                                onClick={action.onClick && (() => action.onClick())}
+                                title={action.title}
+                                alt={action.title}
+                                subtle
+                              >
+                                <Multiple size="small" style={{ stroke: 'currentColor' }} />
+                              </ButtonActions>
+                            </Box>
+                          )
+                        )}
                     </HeaderActionsWrapper>
                   </HeaderSection>
                 )}
