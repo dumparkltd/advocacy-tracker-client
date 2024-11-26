@@ -2218,3 +2218,19 @@ export const selectActorsByType = createSelector(
   selectActors,
   (actors) => actors && actors.groupBy((actor) => actor.getIn(['attributes', 'actortype_id']))
 );
+
+export const selectIsCurrentActionStatement = createSelector(
+  (state, id) => id,
+  selectLocation,
+  selectAction,
+  (id, location, action) => {
+    if (
+      action // we have an action for the id
+      && location.get('pathname').startsWith(`${ROUTES.ACTION}/`) // we are lookking at a single action
+      && qe(action.getIn(['attributes', 'measuretype_id']), ACTIONTYPES.EXPRESS) // actiontype is statement
+    ) {
+      return true;
+    }
+    return false;
+  }
+);

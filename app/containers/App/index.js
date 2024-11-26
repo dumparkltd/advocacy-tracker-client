@@ -45,6 +45,7 @@ import {
   selectIsPrintView,
   selectPrintConfig,
   selectPreviewQuery,
+  selectIsCurrentActionStatement,
 } from './selectors';
 
 import {
@@ -206,7 +207,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     }))
     .toArray();
 
-  prepareMainMenuItems = (currentPath) => {
+  prepareMainMenuItems = (currentPath, isActionStatement) => {
     const { intl } = this.context;
     return [
       {
@@ -214,21 +215,27 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
         title: intl.formatMessage(messages.nav.positions),
         active: currentPath && (
           currentPath.startsWith(ROUTES.POSITIONS)
-          || currentPath.startsWith(ROUTES.INDICATORS)
-          || currentPath.startsWith(`${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`)
+          || currentPath.startsWith(ROUTES.INDICATOR)
+          || currentPath.startsWith(`${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`) //  statement list
+          || isActionStatement // single statement
         ),
       },
       {
         path: ROUTES.ACTORS,
         title: intl.formatMessage(messages.nav.actors),
-        active: currentPath && currentPath.startsWith(ROUTES.ACTORS),
+        active: currentPath && currentPath.startsWith(ROUTES.ACTOR),
       },
       {
         path: ROUTES.ACTIONS,
         title: intl.formatMessage(messages.nav.outreach),
         active: currentPath && (
-          currentPath.startsWith(ROUTES.ACTIONS)
-          && !currentPath.startsWith(`${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`)
+          (
+            currentPath.startsWith(ROUTES.ACTIONS) // action list except statements
+            && !currentPath.startsWith(`${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`)
+          )
+          || (
+            currentPath.startsWith(`${ROUTES.ACTION}/`) && !isActionStatement // single action except statement
+          )
         ),
       },
       {
@@ -486,6 +493,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
       listPreviewContent,
       onClosePreviewModal,
       previewItemId,
+      isActionStatement,
     } = this.props;
     const { intl } = this.context;
     const title = intl.formatMessage(messages.app.title);
@@ -509,7 +517,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             isAuth={isAuth}
             isPrintView={isPrintView}
             navItems={{
-              main: isUserSignedIn && this.prepareMainMenuItems(location.pathname, hasUserRole),
+              main: isUserSignedIn && this.prepareMainMenuItems(location.pathname, isActionStatement),
               user: this.prepareUserMenuItems(location.pathname, user, isUserSignedIn, hasUserRole),
               other: isUserSignedIn && this.prepareOtherMenuItems(location.pathname, pages, hasUserRole),
               create: hasUserRole[USER_ROLES.MEMBER.value] && this.prepareCreateMenuItems(),
@@ -630,6 +638,7 @@ App.propTypes = {
   onCloseModal: PropTypes.func,
   onClosePreviewModal: PropTypes.func,
   isPrintView: PropTypes.bool,
+  isActionStatement: PropTypes.bool,
   printArgs: PropTypes.object,
   previewItemId: PropTypes.string,
 };
@@ -637,7 +646,7 @@ App.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state, params) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   hasUserRole: selectHasUserRole(state),
   // isVisitor: selectIsUserVisitor(state),
@@ -653,6 +662,7 @@ const mapStateToProps = (state) => ({
   newEntityModal: selectNewEntityModal(state),
   listPreviewContent: selectListPreviewContent(state),
   previewItemId: selectPreviewQuery(state),
+  isActionStatement: selectIsCurrentActionStatement(state, params && params.params && params.params.id),
 });
 
 export function mapDispatchToProps(dispatch) {
