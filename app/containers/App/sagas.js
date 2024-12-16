@@ -22,6 +22,8 @@ import {
 import {
   LOAD_ENTITIES_IF_NEEDED,
   REDIRECT_IF_NOT_PERMITTED,
+  REDIRECT_IF_NOT_SIGNED_IN,
+  REDIRECT_IF_SIGNED_IN,
   SAVE_ENTITY,
   SAVE_MULTIPLE_ENTITIES,
   NEW_ENTITY,
@@ -48,14 +50,14 @@ import {
   SET_MAPINDICATOR,
   OPEN_BOOKMARK,
   SET_INCLUDE_ACTOR_MEMBERS,
-  SET_INCLUDE_TARGET_MEMBERS,
   SET_INCLUDE_ACTOR_CHILDREN,
-  SET_INCLUDE_TARGET_CHILDREN,
   SET_INCLUDE_MEMBERS_FORFILTERS,
   SET_INCLUDE_INOFFICAL_STATEMENTS,
-  SET_INCLUDE_TARGET_CHILDREN_ON_MAP,
-  SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP,
+  SET_INCLUDE_SUPPORT_LEVEL,
+  SET_INCLUDE_ACTOR_CHILDREN_ON_MAP,
+  SET_INCLUDE_ACTOR_CHILDREN_MEMBERS_ON_MAP,
   PARAMS,
+  SET_LIST_PREVIEW,
 } from 'containers/App/constants';
 
 import {
@@ -92,6 +94,7 @@ import {
   forwardOnAuthenticationChange,
   updatePath,
   validateToken,
+  blockNavigation,
 } from 'containers/App/actions';
 
 import {
@@ -104,6 +107,7 @@ import {
   selectLocation,
   selectSessionUserRoles,
   selectIsAuthenticating,
+  selectBlockNavigation,
 } from 'containers/App/selectors';
 
 import {
@@ -155,7 +159,7 @@ function* loadEntitiesErrorHandler(err, { path }) {
 /**
  * Check if entities already present
  */
-export function* loadEntitiesSaga({ path }) {
+export function* loadEntitiesIfNeededSaga({ path }) {
   if (Object.values(API).indexOf(path) > -1) {
     // requestedSelector returns the times that entities where fetched from the API
     const requestedAt = yield select(selectRequestedAt, { path });
@@ -180,11 +184,11 @@ export function* loadEntitiesSaga({ path }) {
             // Save response
             yield put(entitiesLoaded(keyBy(response.data, 'id'), path, Date.now()));
           } else {
-            // console.log('no response data', response)
             yield put(entitiesRequested(path, false));
-            throw new Error(response.statusText || 'error');
+            throw new Error((response && response.statusText) || 'error - possibly invalidated while loading');
           }
         } catch (err) {
+          console.log('ERROR in loadEntitiesIfNeededSaga', path);
           // console.log('error', err)
           // Whoops Save error
           // Clear the request time on error, This will cause us to try again next time, which we probably want to do?
@@ -193,7 +197,6 @@ export function* loadEntitiesSaga({ path }) {
           throw new Error((err.response && err.response.status) || err);
         }
       } else {
-        // console.log('error: not signedin', )
         yield put(entitiesRequested(path, false));
         throw new Error('not signed in');
       }
@@ -208,14 +211,40 @@ export function* checkRoleSaga({ role }) {
   if (!signedIn) {
     const authenticating = yield select(selectIsAuthenticating);
     if (!authenticating) {
-      const redirectOnAuthSuccess = yield select(selectCurrentPathname);
-      yield put(replaceIfNotSignedIn(redirectOnAuthSuccess, replace));
+      const location = yield select(selectLocation);
+      const redirectPath = location.get('pathname');
+      const redirectSearch = location.get('search');
+      yield put(replaceIfNotSignedIn(
+        { pathname: redirectPath, search: redirectSearch },
+        replace,
+      ));
     }
   } else {
     const roleIds = yield select(selectSessionUserRoles);
     if (!hasRoleRequired(roleIds, role)) {
       yield put(replaceUnauthorised(replace));
     }
+  }
+}
+export function* redirectIfNotSignedInSaga() {
+  const signedIn = yield select(selectIsSignedIn);
+  if (!signedIn) {
+    const authenticating = yield select(selectIsAuthenticating);
+    if (!authenticating) {
+      const location = yield select(selectLocation);
+      const redirectPath = location.get('pathname');
+      const redirectSearch = location.get('search');
+      yield put(replaceIfNotSignedIn(
+        { pathname: redirectPath, search: redirectSearch },
+        replace,
+      ));
+    }
+  }
+}
+export function* redirectIfSignedInSaga() {
+  const signedIn = yield select(selectIsSignedIn);
+  if (signedIn) {
+    yield put(forwardOnAuthenticationChange());
   }
 }
 
@@ -229,6 +258,7 @@ export function* authenticateSaga(payload) {
     yield put(invalidateEntities()); // important invalidate before forward to allow for reloading of entities
     yield put(forwardOnAuthenticationChange());
   } catch (err) {
+    console.log('ERROR in authenticateSaga');
     if (err.response) {
       err.response.json = yield err.response.json();
     }
@@ -254,13 +284,13 @@ export function* recoverSaga(payload) {
       }
     ));
   } catch (err) {
+    console.log('ERROR in authenticateSaga');
     if (err.response) {
       err.response.json = yield err.response.json();
     }
     yield put(recoverError(err));
   }
 }
-
 export function* authChangeSaga() {
   const redirectPathname = yield select(selectRedirectOnAuthSuccessPath);
   const redirectQuery = yield select(selectRedirectOnAuthSuccessSearch);
@@ -281,7 +311,9 @@ export function* logoutSaga() {
     yield put(logoutSuccess());
     yield put(updatePath('/', { replace: true }));
   } catch (err) {
+    console.log('ERROR in logoutSaga - user likely already logged out');
     yield put(authenticateError(err));
+    yield put(updatePath('/', { replace: true }));
   }
 }
 
@@ -295,8 +327,6 @@ export function* validateTokenSaga() {
       [KEYS.CLIENT]: client,
       [KEYS.ACCESS_TOKEN]: accessToken,
     } = yield getAuthValues();
-    // console.log('validateTokenSaga', redirectOnAuthSuccess);
-    // console.log('uid && client && accessToken', uid, client, accessToken);
     if (uid && client && accessToken) {
       yield put(authenticateSending());
       const response = yield call(
@@ -311,10 +341,7 @@ export function* validateTokenSaga() {
       yield put(authenticateSuccess(response.data)); // need to store currentUserData
     }
   } catch (err) {
-    // if (err.response) {
-    //   err.response.json = yield err.response.json();
-    // }
-    // console.log('err', err);
+    console.log('ERROR in validateTokenSaga');
     yield put(authenticateReset());
     yield call(clearAuthValues);
     yield put(invalidateEntities());
@@ -456,15 +483,6 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
           },
         });
       }
-      // update action-actors connections (targets)
-      if (data.entity.actionActors) {
-        yield call(saveConnectionsSaga, {
-          data: {
-            path: API.ACTION_ACTORS,
-            updates: data.entity.actionActors,
-          },
-        });
-      }
       // update action-actions connections (relationships)
       if (data.entity.topActions) {
         yield call(saveConnectionsSaga, {
@@ -482,7 +500,6 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
           },
         });
       }
-      // update action-actors connections (targets)
       if (data.entity.actionResources) {
         yield call(saveConnectionsSaga, {
           data: {
@@ -555,6 +572,7 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
       }
     }
     yield put(saveSuccess(dataTS));
+    yield put(blockNavigation(false));
     if (!multiple && data.redirect) {
       yield put(updatePath(data.redirect, { replace: true }));
     }
@@ -566,13 +584,15 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
       );
     }
   } catch (err) {
+    console.log('ERROR in saveEntitySaga');
     if (err.response) {
       err.response.json = yield err.response.json();
       yield put(saveError(err, dataTS));
     }
-    if (updateClient) {
-      yield put(invalidateEntities(data.path));
-    }
+    // lets not invalidate on error so we dont lose any data entered
+    // if (updateClient) {
+    //   // yield put(invalidateEntities(data.path));
+    // }
   }
 }
 
@@ -614,6 +634,7 @@ export function* deleteEntitySaga({ data }, updateClient = true, multiple = fals
     }
     yield put(deleteSuccess(dataTS));
   } catch (err) {
+    console.log('ERROR in deleteEntitySaga');
     if (err.response) {
       err.response.json = yield err.response.json();
       yield put(deleteError(err, dataTS));
@@ -667,15 +688,6 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
             entityId: entityCreated.data.id,
             path: API.ACTOR_ACTIONS,
             updates: data.entity.actorActions,
-            keyPair: ['actor_id', 'measure_id'],
-          });
-        }
-        // update action-actors connections (targets)
-        if (data.entity.actionActors) {
-          yield call(createConnectionsSaga, {
-            entityId: entityCreated.data.id,
-            path: API.ACTION_ACTORS,
-            updates: data.entity.actionActors,
             keyPair: ['actor_id', 'measure_id'],
           });
         }
@@ -772,6 +784,7 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
     if (data.onSuccess) {
       data.onSuccess();
     }
+    yield put(blockNavigation(false));
     if (!multiple && data.redirect) {
       if (data.createAsGuest) {
         yield put(updatePath(
@@ -796,13 +809,15 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
       );
     }
   } catch (err) {
+    console.log('ERROR in newEntitySaga');
     if (err.response) {
       err.response.json = yield err.response.json && err.response.json();
       yield put(saveError(err, dataTS));
     }
-    if (updateClient) {
-      yield put(invalidateEntities(data.path));
-    }
+    // lets not invalidate on error so we dont lose any data entered
+    // if (updateClient) {
+    //   yield put(invalidateEntities(data.path));
+    // }
   }
 }
 
@@ -846,11 +861,13 @@ export function* saveConnectionsSaga({ data }) {
       yield put(updateConnections(data.path, connectionsUpdated));
       yield put(saveSuccess(dataTS));
     } catch (err) {
+      console.log('ERROR in saveConnectionsSaga');
       if (err.response) {
         err.response.json = yield err.response && err.response.json && err.response.json();
         yield put(saveError(err, dataTS));
       }
-      yield put(invalidateEntities(data.path));
+      // lets not invalidate on error so we dont lose any data entered
+      // yield put(invalidateEntities(data.path));
     }
   }
 }
@@ -870,7 +887,9 @@ const getNextQuery = (query, extend, location) => {
     const isReplacing = !!param.replace;
     const isRemoving = !!param.remove;
     const isAdding = !!param.add;
-    const hasValue = typeof param.value !== 'undefined';
+    const hasValue = typeof param.value !== 'undefined'
+      && param.value !== null
+      && param.value !== '';
     // console.log('hasQueryArg', hasQueryArg);
     // console.log('isReplacing', isReplacing);
     // console.log('isRemoving', isRemoving);
@@ -1080,19 +1099,6 @@ export function* setIncludeActorMembersSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
-export function* setIncludeTargetMembersSaga({ value }) {
-  const location = yield select(selectLocation);
-  const queryNext = getNextQuery(
-    {
-      arg: 'tm',
-      value,
-      replace: true,
-    },
-    true, // extend
-    location,
-  );
-  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
-}
 export function* setIncludeActorChildrenSaga({ value }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
@@ -1106,11 +1112,11 @@ export function* setIncludeActorChildrenSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
-export function* setIncludeTargetChildrenSaga({ value }) {
+export function* setIncludeActorChildrenOnMapSaga({ value }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
     {
-      arg: 'tch',
+      arg: 'achmap',
       value,
       replace: true,
     },
@@ -1119,24 +1125,11 @@ export function* setIncludeTargetChildrenSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
-export function* setIncludeTargetChildrenOnMapSaga({ value }) {
+export function* setIncludeActorChildrenMembersOnMapSaga({ value }) {
   const location = yield select(selectLocation);
   const queryNext = getNextQuery(
     {
-      arg: 'mtch',
-      value,
-      replace: true,
-    },
-    true, // extend
-    location,
-  );
-  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
-}
-export function* setIncludeTargetChildrenMembersOnMapSaga({ value }) {
-  const location = yield select(selectLocation);
-  const queryNext = getNextQuery(
-    {
-      arg: 'mtchm',
+      arg: 'achmmap',
       value,
       replace: true,
     },
@@ -1163,6 +1156,33 @@ export function* setIncludeInofficialStatementsSaga({ value }) {
   const queryNext = getNextQuery(
     {
       arg: 'inofficial',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
+
+export function* setIncludeSupportLevelSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'support',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
+export function* setListPreviewSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'preview',
       value,
       replace: true,
     },
@@ -1253,9 +1273,21 @@ export function* dismissQueryMessagesSaga() {
   ));
 }
 
-export function* updatePathSaga({ path, args }) {
-  const relativePath = path.startsWith('/') ? path : `/${path}`;
+export function* updatePathSaga({ path = '', args }) {
+  const relativePath = (path && path.startsWith('/')) ? path : `/${path}`;
   const location = yield select(selectLocation);
+  const navBlocked = yield select(selectBlockNavigation);
+  if (navBlocked) {
+    /* eslint-disable no-alert */
+    const confirmLeave = window.confirm(
+      'You have unsaved changes. Are you sure you want to leave?'
+    );
+
+    if (!confirmLeave) {
+      return; // Do not navigate
+    }
+    yield put(blockNavigation(false));
+  }
   let queryNext = {};
   let queryNextString = '';
   if (args) {
@@ -1321,7 +1353,7 @@ export default function* rootSaga() {
 
   yield takeEvery(
     LOAD_ENTITIES_IF_NEEDED,
-    autoRestart(loadEntitiesSaga, loadEntitiesErrorHandler, MAX_LOAD_ATTEMPTS),
+    autoRestart(loadEntitiesIfNeededSaga, loadEntitiesErrorHandler, MAX_LOAD_ATTEMPTS),
   );
   yield takeLatest(VALIDATE_TOKEN, validateTokenSaga);
 
@@ -1340,6 +1372,8 @@ export default function* rootSaga() {
   yield takeEvery(SAVE_CONNECTIONS, saveConnectionsSaga);
 
   yield takeLatest(REDIRECT_IF_NOT_PERMITTED, checkRoleSaga);
+  yield takeLatest(REDIRECT_IF_NOT_SIGNED_IN, redirectIfNotSignedInSaga);
+  yield takeLatest(REDIRECT_IF_SIGNED_IN, redirectIfSignedInSaga);
   yield takeEvery(UPDATE_ROUTE_QUERY, updateRouteQuerySaga);
   yield takeEvery(UPDATE_PATH, updatePathSaga);
   yield takeEvery(SET_ACTORTYPE, setActortypeSaga);
@@ -1349,13 +1383,13 @@ export default function* rootSaga() {
   yield takeEvery(SET_MAPSUBJECT, setMapSubjectSaga);
   yield takeEvery(SET_MAPINDICATOR, setMapIndicatorSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_MEMBERS, setIncludeActorMembersSaga);
-  yield takeEvery(SET_INCLUDE_TARGET_MEMBERS, setIncludeTargetMembersSaga);
   yield takeEvery(SET_INCLUDE_ACTOR_CHILDREN, setIncludeActorChildrenSaga);
-  yield takeEvery(SET_INCLUDE_TARGET_CHILDREN, setIncludeTargetChildrenSaga);
-  yield takeEvery(SET_INCLUDE_TARGET_CHILDREN_ON_MAP, setIncludeTargetChildrenOnMapSaga);
-  yield takeEvery(SET_INCLUDE_TARGET_CHILDREN_MEMBERS_ON_MAP, setIncludeTargetChildrenMembersOnMapSaga);
+  yield takeEvery(SET_INCLUDE_ACTOR_CHILDREN_ON_MAP, setIncludeActorChildrenOnMapSaga);
+  yield takeEvery(SET_INCLUDE_ACTOR_CHILDREN_MEMBERS_ON_MAP, setIncludeActorChildrenMembersOnMapSaga);
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
   yield takeEvery(SET_INCLUDE_INOFFICAL_STATEMENTS, setIncludeInofficialStatementsSaga);
+  yield takeEvery(SET_INCLUDE_SUPPORT_LEVEL, setIncludeSupportLevelSaga);
+  yield takeEvery(SET_LIST_PREVIEW, setListPreviewSaga);
   // yield takeEvery(PRINT_VIEW, printViewSaga);
   yield takeEvery(OPEN_BOOKMARK, openBookmarkSaga);
 

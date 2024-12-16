@@ -13,8 +13,8 @@ import messages from './messages';
 
 const Brand = styled.div`
   color: ${({ theme }) => theme.global.colors.text.brand} !important;
-  height: ${({ theme }) => theme.sizes.header.banner.heightMobile}px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  height: ${({ theme }) => theme.sizes.header.banner.heightMobileTop}px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     height: ${({ theme }) => theme.sizes.header.banner.height}px;
   }
 `;
@@ -34,7 +34,7 @@ const Styled = styled.div`
   font-family: ${({ theme }) => theme.fonts.title};
   font-size: ${({ theme }) => theme.text.xxsmall.size};
   line-height: ${({ theme }) => theme.text.xxsmall.size};
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     font-size: ${({ theme }) => theme.text.xsmall.size};
     line-height: ${({ theme }) => theme.text.xsmall.size};
   }
@@ -48,7 +48,7 @@ const BrandTitle = styled((p) => <Heading level={1} {...p} />)`
   max-width: 90px;
   word-break: break-word;
   padding: 0;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     font-size: ${({ theme }) => theme.text.large.size};
     line-height: ${({ theme }) => theme.text.large.size};
   }

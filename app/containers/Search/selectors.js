@@ -10,6 +10,16 @@ import {
   selectTaxonomies,
   selectReady,
   selectLocationQuery,
+  selectActions,
+  selectActiontypes,
+  selectActors,
+  selectActortypes,
+  selectIndicators,
+  selectUsers,
+  selectResources,
+  selectResourcetypes,
+  selectPages,
+  selectCategories,
 } from 'containers/App/selectors';
 
 import { filterEntitiesByKeywords } from 'utils/entities';
@@ -18,7 +28,6 @@ import { qe } from 'utils/quasi-equals';
 import { sortEntities, getSortOption } from 'utils/sort';
 
 import { CONFIG, DEPENDENCIES } from './constants';
-
 
 export const selectPathQuery = createSelector(
   selectLocationQuery,
@@ -155,4 +164,83 @@ export const selectEntitiesByQuery = createSelector(
       );
     });
   }
+);
+const selectCategoriesCount = createSelector(
+  selectCategories,
+  (categories) => categories && categories.size
+);
+const selectPagesCount = createSelector(
+  selectPages,
+  (pages) => pages && pages.size
+);
+const selectUsersCount = createSelector(
+  selectUsers,
+  (users) => users && users.size
+);
+const selectIndicatorsCount = createSelector(
+  selectIndicators,
+  (indicators) => indicators && indicators.size
+);
+
+const countTypes = ({
+  types, // Map
+  entities,
+  typeAttribute,
+}) => types && entities && typeAttribute && types.reduce(
+  (memo, type) => {
+    const typeEntities = entities.filter(
+      (entity) => qe(
+        entity.getIn(['attributes', typeAttribute]),
+        type.get('id'),
+      )
+    );
+    return {
+      ...memo,
+      [type.get('id')]: typeEntities.size,
+    };
+  },
+  {},
+);
+
+const selectActortypesCount = createSelector(
+  selectActors,
+  selectActortypes,
+  (entities, types) => countTypes({ entities, types, typeAttribute: 'actortype_id' })
+);
+const selectActiontypesCount = createSelector(
+  selectActions,
+  selectActiontypes,
+  (entities, types) => countTypes({ entities, types, typeAttribute: 'measuretype_id' })
+);
+const selectResourcetypesCount = createSelector(
+  selectResources,
+  selectResourcetypes,
+  (entities, types) => countTypes({ entities, types, typeAttribute: 'resourcetype_id' })
+);
+
+export const selectAllTypeCounts = createSelector(
+  selectIndicatorsCount,
+  selectActortypesCount,
+  selectActiontypesCount,
+  selectResourcetypesCount,
+  selectUsersCount,
+  selectPagesCount,
+  selectCategoriesCount,
+  (
+    indicatorsCount,
+    actortypesCount,
+    actiontypesCount,
+    resourcetypesCount,
+    usersCount,
+    pagesCount,
+    categoriesCount,
+  ) => ({
+    indicatorsCount,
+    actortypesCount,
+    actiontypesCount,
+    resourcetypesCount,
+    usersCount,
+    pagesCount,
+    categoriesCount,
+  })
 );

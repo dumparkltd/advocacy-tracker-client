@@ -10,6 +10,8 @@ import { connect } from 'react-redux';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 
+import { Box } from 'grommet';
+
 import Icon from 'components/Icon';
 import Button from 'components/buttons/Button';
 import DebounceInput from 'react-debounce-input';
@@ -19,17 +21,21 @@ import { selectIsPrintView } from 'containers/App/selectors';
 
 import messages from './messages';
 
-const Search = styled.div`
-  display: flex;
-  flex-direction: row;
+const Search = styled(
+  (p) => (
+    <Box
+      direction="row"
+      pad={{ horizontal: 'medium' }}
+      {...p}
+    />
+  )
+)`
   width: 100%;
-  background-color: ${palette('background', 0)};
-  color: ${palette('dark', 2)};
-  padding: 2px 7px;
-  border: 1px solid ${({ active }) => active ? palette('light', 4) : palette('light', 2)};
-  box-shadow: 0 0 3px 0 ${({ active }) => active ? palette('dark', 2) : 'transparent'};
-  min-height: ${({ small }) => small ? 30 : 36}px;
-  border-radius: 5px;
+  background-color: ${palette('light', 1)};
+  color: ${palette('dark', 1)};
+  border: 1px solid ${palette('light', 3)};
+  min-height: ${({ small }) => small ? 35 : 45}px;
+  border-radius: 999px;
   position: relative;
   @media print {
     border: none;
@@ -38,27 +44,30 @@ const Search = styled.div`
     display: ${({ hidePrint }) => hidePrint ? 'none' : 'block'};
   }
 `;
-const SearchInput = styled(DebounceInput)`
-  background-color: ${palette('background', 0)};
+const SearchInput = styled((p) => <DebounceInput {...p} />)`
+  flex: 1;
+  color: ${palette('dark', 2)};
   border: none;
-  padding: 3px;
+  padding: ${({ theme }) => theme.global.edgeSize.xsmall};
+  font-size: ${({ theme }) => theme.text.small.size};
+  font-weight: 300;
   &:focus {
     outline: none;
+    box-shadow: none;
   }
-  flex: 1;
-  font-size: 0.85em;
+  &::placeholder {
+    color: ${palette('dark', 1)};
+    opacity: 0.5;
+    font-weight: 300;
+  }
   @media print {
     display: none;
   }
 `;
-const Clear = styled(Button)`
-  padding: ${(props) => props.small ? '4px 6px' : '8px 6px'};
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: ${palette('background', 4)};
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    padding: ${({ small }) => small ? '4px 6px' : '8px 6px'};
+const Clear = styled((p) => <Button {...p} />)`
+  color: ${palette('dark', 4)};
+  &:hover {
+    color: ${palette('primary', 0)};
   }
   @media print {
     display: none;
@@ -106,13 +115,16 @@ export class EntityListSearch extends React.Component { // eslint-disable-line r
               onBlur={() => this.setState({ active: false })}
               placeholder={placeholder || (intl.formatMessage(messages.searchPlaceholderEntities))}
             />
-            {searchQuery && (
-              <Clear
-                onClick={() => onSearch()}
-              >
-                <Icon name="removeSmall" />
-              </Clear>
-            )}
+            <Box direction="row" gap="none" align="center">
+              {searchQuery && (
+                <Clear onClick={() => onSearch()}>
+                  <Icon name="removeSmall" />
+                </Clear>
+              )}
+              <Box>
+                <Icon name="search" palette="dark" paletteIndex={4} />
+              </Box>
+            </Box>
           </Search>
         </PrintHide>
       </>

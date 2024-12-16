@@ -9,6 +9,7 @@ import { lowerCase } from 'utils/string';
 import appMessage from 'utils/app-message';
 import IndeterminateCheckbox from 'components/forms/IndeterminateCheckbox';
 import InfoOverlay from 'components/InfoOverlay';
+import Checkbox from 'components/styled/Checkbox';
 
 import messages from './messages';
 
@@ -18,7 +19,7 @@ const Styled = styled((p) => (
   width: 100%;
   line-height: 1.3;
   font-size: ${({ theme }) => theme.text.xsmall.size};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     border-bottom: 1px solid ${palette('light', 1)};
     font-size: ${({ theme }) => theme.text.small.size};
   }
@@ -27,15 +28,10 @@ const Styled = styled((p) => (
   }
 `;
 
-const CheckboxWrapper = styled((p) => (
-  <Box
-    fill="vertical"
-    flex={{ shrink: 0 }}
-    align="center"
-    {...p}
-  />
-))`
-  width: 40px;
+const CheckboxWrapper = styled.div`
+  padding-left: 18px;
+  padding-right: 9px;
+  margin-top: -1px;
 `;
 
 const OptionLabel = styled((p) => <Box pad={{ vertical: 'small', right: 'xsmall' }} fill as="label" {...p} />)`
@@ -74,6 +70,7 @@ const IdSpacer = styled.span`
   padding-right: 0.25em;
   color: ${palette('text', 1)};
 `;
+
 // <Label bold={props.bold} italic={props.isNew}>
 function Option({
   option,
@@ -121,10 +118,9 @@ function Option({
           />
         )}
         {!isIndeterminate && (
-          <input
+          <Checkbox
             id={optionId}
             disabled={disabled}
-            type="checkbox"
             checked={checked}
             onChange={(evt) => {
               evt.stopPropagation();

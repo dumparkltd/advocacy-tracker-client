@@ -8,26 +8,17 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import Helmet from 'react-helmet';
-import { FormattedMessage } from 'react-intl';
 import { actions as formActions } from 'react-redux-form/immutable';
 import { Map, List, fromJS } from 'immutable';
 
 import {
   entityOptions,
   taxonomyOptions,
-  getTitleFormField,
-  getEmailField,
   getHighestUserRoleId,
-  getRoleFormField,
-  renderActorsByActortypeControl,
-  renderActionsByActiontypeControl,
   getConnectionUpdatesFromFormData,
+  getEntityFormFields,
 } from 'utils/forms';
 
-import {
-  getMetaField,
-  getRoleField,
-} from 'utils/fields';
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
@@ -40,6 +31,8 @@ import {
   submitInvalid,
   saveErrorDismiss,
   openNewEntityModal,
+  invalidateEntities,
+  redirectIfNotSignedIn,
 } from 'containers/App/actions';
 
 import {
@@ -50,16 +43,14 @@ import {
   selectTaxonomiesWithCategories,
 } from 'containers/App/selectors';
 
-import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES, USER_ROLES, ACTORTYPES } from 'themes/config';
+import {
+  ROUTES, USER_ROLES, ACTORTYPES, USER_CONFIG,
+} from 'themes/config';
 
-import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
-import EntityForm from 'containers/EntityForm';
-
-import appMessages from 'containers/App/messages';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import {
   selectDomain,
@@ -80,10 +71,8 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
   }
 
   UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
-    if (this.props.dataReady && this.props.viewEntity) {
-      this.props.initialiseForm('userEdit.form.data', this.getInitialFormData());
-    }
+    this.props.onInvalidateEntities();
+    this.props.redirectIfNotSignedIn();
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -137,109 +126,10 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
     });
   };
 
-  getHeaderMainFields = () => {
-    const { intl } = this.context;
-    return ([{ // fieldGroup
-      fields: [getTitleFormField(intl.formatMessage, 'title', 'name')],
-    }, {
-      fields: [getEmailField(intl.formatMessage)],
-    }]);
-  };
-
-  getHeaderAsideFields = (entity, roles) => {
-    const { intl } = this.context;
-    return ([
-      {
-        fields: (roles && roles.size > 0) ? [
-          getRoleFormField(intl.formatMessage, roles),
-          getMetaField(entity, true),
-        ]
-          : [
-            getRoleField(entity),
-            getMetaField(entity, true),
-          ],
-      },
-    ]);
-  };
-
-  getBodyMainFields = (
-    actorsByActortype,
-    actionsByActiontype,
-    connectedTaxonomies,
-    onCreateOption,
-    isAdmin,
-  ) => {
-    const { intl } = this.context;
-    const groups = [];
-    if (actorsByActortype) {
-      const actorConnections = renderActorsByActortypeControl({
-        entitiesByActortype: actorsByActortype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (actorConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.actorUsers),
-            fields: actorConnections,
-          },
-        );
-      }
-    }
-    if (actionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl({
-        entitiesByActiontype: actionsByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.actionUsers),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
-
   // only admins can assign any roles to any other user TODO check
   getEditableUserRoles = (roles, sessionUserHighestRoleId) => roles && (sessionUserHighestRoleId === USER_ROLES.ADMIN.value)
     ? roles
     : Map();
-  //   if (roles) {
-  //     // const userHighestRoleId = getHighestUserRoleId(roles);
-  //     // const userHighestRole = Object.values(USER_ROLES).find((r) => qe(r.value, userHighestRoleId));
-  //     // const sessionUserHighestRole = Object.values(USER_ROLES).find((r) => qe(r.value, sessionUserHighestRoleId));
-  //
-  //     // TODO check!!
-  //     // roles are editable by the session user (logged on user) if
-  //     // the session user is an ADMIN
-  //     // the session user can only assign roles "lower" (that is higher id) than his/her own role
-  //     // and when the session user has a "higher" (lower id) role than the user profile being edited
-  //     // only admins can assign any roles to any other user
-  //     // if (sessionUserHighestRoleId === USER_ROLES.ADMIN.value) {
-  //     // }
-  //     return sessionUserHighestRoleId === USER_ROLES.ADMIN.value ? roles : Map();
-  //     // // other users can only assign roles to users that have a lower role / higher order
-  //     // if (sessionUserHighestRole.order < userHighestRole.order) {
-  //     //   return roles.filter(
-  //     //     (role) => {
-  //     //       // also can only assign roles than their own role
-  //     //       const theRole = Object.values(USER_ROLES).find((r) => qe(r.value, parseInt(role.get('id'), 10)));
-  //     //       return sessionUserHighestRole.order < theRole.order;
-  //     //     }
-  //     //   );
-  //     // }
-  //     // return Map();
-  //   }
-  //   return Map();
-  // }
 
   render() {
     const { intl } = this.context;
@@ -253,14 +143,22 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       actionsByActiontype,
       onCreateOption,
       connectedTaxonomies,
+      handleCancel,
+      handleSubmitRemote,
+      handleSubmit,
+      handleSubmitFail,
+      handleUpdate,
+      onErrorDismiss,
+      onServerErrorDismiss,
       isMember,
       isAdmin,
+      myId,
     } = this.props;
     const reference = this.props.params.id;
-    const { saveSending, saveError, submitValid } = viewDomain.get('page').toJS();
-
+    const { saveSending } = viewDomain.get('page').toJS();
+    const isMine = qe(myId, reference);
     const editableRoles = this.getEditableUserRoles(roles, sessionUserHighestRoleId);
-
+    const formDataPath = 'userEdit.form.data';
     return (
       <div>
         <Helmet
@@ -272,79 +170,41 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
         <Content ref={this.scrollContainer}>
           <ContentHeader
             title={intl.formatMessage(messages.pageTitle)}
-            type={CONTENT_SINGLE}
-            icon="users"
-            buttons={
-              viewEntity && [{
-                type: 'cancel',
-                onClick: () => this.props.handleCancel(this.props.params.id),
-              },
-              {
-                type: 'save',
-                disabled: saveSending,
-                onClick: () => this.props.handleSubmitRemote('userEdit.form.data'),
-              }]
-            }
           />
-          {!submitValid
-            && (
-              <Messages
-                type="error"
-                messageKey="submitInvalid"
-                onDismiss={this.props.onErrorDismiss}
-              />
-            )
-          }
-          {saveError
-            && (
-              <Messages
-                type="error"
-                messages={saveError.messages}
-                onDismiss={this.props.onServerErrorDismiss}
-              />
-            )
-          }
-          {(saveSending || !dataReady)
-            && <Loading />
-          }
-          {!viewEntity && dataReady && !saveError
-            && (
-              <div>
-                <FormattedMessage {...messages.notFound} />
-              </div>
-            )
-          }
           {viewEntity && dataReady && (
-            <EntityForm
-              model="userEdit.form.data"
-              formData={viewDomain.getIn(['form', 'data'])}
-              saving={saveSending}
-              handleSubmit={(formData) => this.props.handleSubmit(
+            <EntityFormWrapper
+              typeLabel="User"
+              model={formDataPath}
+              viewDomain={viewDomain}
+              handleSubmit={(formData) => handleSubmit(
                 formData,
                 roles,
                 actorsByActortype,
                 actionsByActiontype,
               )}
-              handleSubmitFail={this.props.handleSubmitFail}
-              handleCancel={() => this.props.handleCancel(reference)}
-              handleUpdate={this.props.handleUpdate}
-              fields={{
-                header: {
-                  main: this.getHeaderMainFields(),
-                  aside: this.getHeaderAsideFields(viewEntity, editableRoles),
-                },
-                body: {
-                  main: isMember && this.getBodyMainFields(
-                    actorsByActortype,
-                    actionsByActiontype,
-                    connectedTaxonomies,
-                    onCreateOption,
-                    isAdmin,
-                  ),
-                  // aside: this.getBodyAsideFields(),
-                },
-              }}
+              handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
+              saving={saveSending}
+              handleSubmitFail={handleSubmitFail}
+              handleCancel={() => handleCancel(reference)}
+              handleUpdate={handleUpdate}
+              onErrorDismiss={onErrorDismiss}
+              onServerErrorDismiss={onServerErrorDismiss}
               scrollContainer={this.scrollContainer.current}
+              fieldsByStep={dataReady && getEntityFormFields(
+                {
+                  isAdmin,
+                  isMember,
+                  isMine,
+                  roleOptions: editableRoles,
+                  actorsByActortype,
+                  actionsByActiontype,
+                  connectedTaxonomies,
+                  onCreateOption,
+                  intl,
+                },
+                USER_CONFIG.form, // shape
+                USER_CONFIG.attributes, // attributes
+              )}
             />
           )}
           {saveSending
@@ -358,6 +218,8 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
 
 UserEdit.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func,
+  onInvalidateEntities: PropTypes.func,
+  redirectIfNotSignedIn: PropTypes.func,
   initialiseForm: PropTypes.func,
   handleSubmitRemote: PropTypes.func.isRequired,
   handleSubmitFail: PropTypes.func.isRequired,
@@ -369,6 +231,7 @@ UserEdit.propTypes = {
   roles: PropTypes.object,
   isAdmin: PropTypes.bool,
   isMember: PropTypes.bool,
+  myId: PropTypes.string,
   dataReady: PropTypes.bool,
   sessionUserHighestRoleId: PropTypes.number,
   params: PropTypes.object,
@@ -401,6 +264,14 @@ function mapDispatchToProps(dispatch) {
   return {
     loadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
+    },
+    onInvalidateEntities: () => {
+      DEPENDENCIES.forEach((path) => {
+        dispatch(invalidateEntities(path));
+      });
+    },
+    redirectIfNotSignedIn: () => {
+      dispatch(redirectIfNotSignedIn());
     },
     initialiseForm: (model, formData) => {
       dispatch(formActions.reset(model));

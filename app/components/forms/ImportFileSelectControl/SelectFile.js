@@ -6,7 +6,7 @@ import { palette } from 'styled-theme';
 import FileReaderInput from 'react-file-reader-input';
 import Baby from 'babyparse';
 
-import { Text } from 'grommet';
+import { Text, Box } from 'grommet';
 
 import { countRelationshipsFromRows } from 'utils/import';
 
@@ -55,7 +55,7 @@ const Remove = styled(ButtonFlatIconOnly)`
   &:hover {
     color: ${palette('buttonFlatHover', 1)};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0 0.75em;
   }
 `;
@@ -144,7 +144,7 @@ class SelectFile extends React.PureComponent { // eslint-disable-line react/pref
               </Remove>
             </DocumentWrapEdit>
             <ImportButton type="submit" primary>
-              <div style={{ position: 'relative' }}>
+              <Box direction="row" align="center" gap="small">
                 {rows.length === 1 && (
                   <FormattedMessage
                     {...messages.import.single}
@@ -162,20 +162,16 @@ class SelectFile extends React.PureComponent { // eslint-disable-line react/pref
                   />
                 )}
                 {!!relCount && relCount > 0 && (
-                  <div style={{ position: 'relative' }}>
-                    <div style={{ position: 'absolute', top: '-7px' }}>
-                      <Text size="xxsmall" weight={400} style={{ textTransform: 'none', letterSpacing: 0, opacity: 0.85 }}>
-                        <FormattedMessage
-                          {...messages.import.relationships}
-                          values={{
-                            total: relCount,
-                          }}
-                        />
-                      </Text>
-                    </div>
-                  </div>
+                  <Text size="medium" weight={400} style={{ textTransform: 'none' }}>
+                    <FormattedMessage
+                      {...messages.import.relationships}
+                      values={{
+                        total: relCount,
+                      }}
+                    />
+                  </Text>
                 )}
-              </div>
+              </Box>
             </ImportButton>
           </div>
         )}

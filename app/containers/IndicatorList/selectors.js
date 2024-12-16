@@ -112,7 +112,7 @@ export const selectIndicatorsWithConnections = createSelector(
   selectIndicatorsWhereQuery,
   (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
   selectConnections,
-  selectActionIndicatorsGroupedByIndicator, // as targets
+  selectActionIndicatorsGroupedByIndicator,
   (
     ready,
     indicators,
@@ -199,12 +199,12 @@ const selectIndicatorsWithout = createSelector(
     ? filterEntitiesWithoutAssociation(entities, categories, query)
     : entities
 );
-const selectIndicatorsByConnections = createSelector(
+export const selectListIndicators = createSelector(
   selectIndicatorsWithout,
   selectActionQuery,
   (entities, query) => query
-    ? filterEntitiesByConnection(entities, query, 'actions')
-    : entities
+    ? filterEntitiesByConnection(entities, query, 'actions').toList()
+    : entities.toList()
 );
 // kicks off series of cascading selectors
 // 1. selectEntitiesWhere filters by attribute
@@ -214,17 +214,3 @@ const selectIndicatorsByConnections = createSelector(
 // 5. selectIndicatorsByConnections will filter by specific connection
 // 6. selectIndicatorsByCategories will filter by specific categories
 // 7. selectIndicatorsByCOnnectedCategories will filter by specific categories connected via connection
-export const selectListIndicators = createSelector(
-  selectIndicatorsByConnections,
-  selectSortByQuery,
-  selectSortOrderQuery,
-  (entities, sort, order) => {
-    const sortOption = getSortOption(CONFIG.views.list.sorting, sort);
-    return entities && sortEntities(
-      entities,
-      order || (sortOption ? sortOption.order : 'desc'),
-      sort || (sortOption ? sortOption.attribute : 'title'),
-      sortOption ? sortOption.type : 'string',
-    );
-  }
-);

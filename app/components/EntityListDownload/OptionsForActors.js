@@ -23,9 +23,6 @@ export function OptionsForActors({
   setActionsAsRows,
   actiontypes,
   setActiontypes,
-  hasActionsAsTarget,
-  actiontypesAsTarget,
-  setActiontypesAsTarget,
   hasMembers,
   membertypes,
   setMembertypes,
@@ -57,10 +54,6 @@ export function OptionsForActors({
   }, 0);
   const activeActiontypeCount = hasActions && Object.keys(actiontypes).reduce((counter, actiontypeId) => {
     if (actiontypes[actiontypeId].active) return counter + 1;
-    return counter;
-  }, 0);
-  const activeActiontypeAsTargetCount = hasActionsAsTarget && Object.keys(actiontypesAsTarget).reduce((counter, actiontypeId) => {
-    if (actiontypesAsTarget[actiontypeId].active) return counter + 1;
     return counter;
   }, 0);
   const activeAssociationtypeCount = hasAssociations && Object.keys(associationtypes).reduce((counter, typeId) => {
@@ -162,48 +155,6 @@ export function OptionsForActors({
           }}
         />
       )}
-      {hasActionsAsTarget && (
-        <OptionGroup
-          groupId="actions-as-target"
-          label={intl.formatMessage(messages.optionGroups.actionAsTargetLabel)}
-          expandedId={expandGroup}
-          onExpandGroup={(val) => setExpandGroup(val)}
-          activeOptionCount={activeActiontypeAsTargetCount}
-          optionCount={Object.keys(actiontypesAsTarget).length}
-          introNode={(
-            <Box gap="small">
-              <Text size="small">
-                <FormattedMessage
-                  {...messages.optionGroups.introNodeDefault}
-                  values={{ type: intl.formatMessage(messages.optionGroups.activityLabel) }}
-                />
-              </Text>
-              {hasAssociations && (
-                <Text size="small">
-                  <FormattedMessage
-                    {...messages.optionGroups.introNodeHasAssociations}
-                    values={{ type: lowerCase(typeTitle) }}
-                  />
-                </Text>
-              )}
-              {!hasAssociations && hasMembers && (
-                <Text size="small">
-                  <FormattedMessage
-                    {...messages.optionGroups.introNodeHasMembersNoAssociation}
-                    values={{ type: lowerCase(typeTitle) }}
-                  />
-                </Text>
-              )}
-            </Box>
-          )}
-          options={actiontypesAsTarget}
-          optionListLabels={{
-            attributes: intl.formatMessage(messages.optionGroups.listLabelTypes,
-              { type: intl.formatMessage(messages.optionGroups.activityLabel) }),
-          }}
-          onSetOptions={(options) => setActiontypesAsTarget(options)}
-        />
-      )}
       {hasAssociations && (
         <OptionGroup
           groupId="associations"
@@ -276,10 +227,6 @@ OptionsForActors.propTypes = {
   setActiontypes: PropTypes.func,
   actionsAsRows: PropTypes.bool,
   setActionsAsRows: PropTypes.func,
-  // actions as targeted actor
-  hasActionsAsTarget: PropTypes.bool,
-  actiontypesAsTarget: PropTypes.object,
-  setActiontypesAsTarget: PropTypes.func,
   // members (similar to child actors)
   hasMembers: PropTypes.bool,
   membertypes: PropTypes.object,

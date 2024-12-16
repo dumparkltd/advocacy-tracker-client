@@ -9,19 +9,14 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { actions as formActions } from 'react-redux-form/immutable';
 
-import {
-  getTitleFormField,
-  getMenuTitleFormField,
-  getMarkdownFormField,
-  getStatusField,
-  getMenuOrderFormField,
-} from 'utils/forms';
+import { getEntityFormFields } from 'utils/forms';
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
 
-import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
-import { API, ROUTES, USER_ROLES } from 'themes/config';
+import {
+  API, ROUTES, USER_ROLES, PAGE_CONFIG,
+} from 'themes/config';
 
 import {
   loadEntitiesIfNeeded,
@@ -31,6 +26,7 @@ import {
   submitInvalid,
   saveErrorDismiss,
   newEntity,
+  redirectIfNotSignedIn,
 } from 'containers/App/actions';
 import {
   selectReady,
@@ -39,7 +35,8 @@ import {
 
 import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
-import FormWrapper from './FormWrapper';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
+
 import messages from './messages';
 import { DEPENDENCIES, FORM_INITIAL } from './constants';
 
@@ -50,6 +47,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
   }
 
   UNSAFE_componentWillMount() {
+    this.props.redirectIfNotSignedIn();
     this.props.loadEntitiesIfNeeded();
     this.props.initialiseForm(FORM_INITIAL);
   }
@@ -67,36 +65,6 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
     }
   }
 
-  getHeaderMainFields = () => {
-    const { intl } = this.context;
-    return ([ // fieldGroups
-      { // fieldGroup
-        fields: [
-          getTitleFormField(intl.formatMessage),
-          getMenuTitleFormField(intl.formatMessage),
-          getMenuOrderFormField(intl.formatMessage),
-        ],
-      },
-    ]);
-  };
-
-  getHeaderAsideFields = () => {
-    const { intl } = this.context;
-    return ([{
-      fields: [
-        getStatusField(intl.formatMessage),
-        getStatusField(intl.formatMessage, 'private'),
-      ],
-    }]);
-  };
-
-  getBodyMainFields = () => {
-    const { intl } = this.context;
-    return ([{
-      fields: [getMarkdownFormField(intl.formatMessage, true, 'content')],
-    }]);
-  };
-
   render() {
     const { intl } = this.context;
     const {
@@ -113,44 +81,35 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
       inModal,
     } = this.props;
     const { saveSending } = viewDomain.get('page').toJS();
-
+    const pageTitle = intl.formatMessage(messages.pageTitle);
+    const typeLabel = 'Page';
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
-        <ContentHeader
-          title={intl.formatMessage(messages.pageTitle)}
-          type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
-          buttons={
-            dataReady ? [{
-              type: 'cancel',
-              onClick: this.props.handleCancel,
-            },
-            {
-              type: 'save',
-              disabled: saveSending,
-              onClick: () => handleSubmitRemote(formDataPath),
-            }] : null
-          }
-        />
-        <FormWrapper
+        <ContentHeader title={pageTitle} />
+        <EntityFormWrapper
+          isNewEntityView
+          typeLabel={typeLabel}
           model={formDataPath}
           inModal={inModal}
           viewDomain={viewDomain}
           handleSubmit={(formData) => handleSubmit(formData)}
+          handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
+          saving={saveSending}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
           handleUpdate={handleUpdate}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={dataReady && {
-            header: {
-              main: this.getHeaderMainFields(),
-              aside: this.getHeaderAsideFields(),
+          fieldsByStep={dataReady && getEntityFormFields(
+            {
+              isAdmin: true,
+              isMine: true,
+              intl,
             },
-            body: {
-              main: this.getBodyMainFields(),
-            },
-          }}
+            PAGE_CONFIG.form, // shape
+            PAGE_CONFIG.attributes, // attributes
+          )}
         />
       </Content>
     );
@@ -160,6 +119,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
 PageNew.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func.isRequired,
   redirectIfNotPermitted: PropTypes.func,
+  redirectIfNotSignedIn: PropTypes.func,
   handleSubmitRemote: PropTypes.func.isRequired,
   handleSubmitFail: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
@@ -203,6 +163,9 @@ function mapDispatchToProps(
     },
     redirectIfNotPermitted: () => {
       dispatch(redirectIfNotPermitted(USER_ROLES.ADMIN.value));
+    },
+    redirectIfNotSignedIn: () => {
+      dispatch(redirectIfNotSignedIn());
     },
     onErrorDismiss: () => {
       dispatch(submitInvalid(true));

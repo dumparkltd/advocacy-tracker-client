@@ -11,11 +11,11 @@ import ReactMarkdown from 'react-markdown';
 import styled from 'styled-components';
 import {
   Box,
-  Button,
   Layer,
   Text,
 } from 'grommet';
 import { FormClose } from 'grommet-icons';
+import Button from 'components/buttons/ButtonSimple';
 
 import Loading from 'components/Loading';
 
@@ -24,9 +24,9 @@ import LayerWrap from './LayerWrap';
 import LayerContent from './LayerContent';
 
 const Markdown = styled(ReactMarkdown)`
-  font-size: ${(props) => props.theme.sizes.text.markdownMobile};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${(props) => props.theme.sizes.text.markdown};
+  font-size: ${(props) => props.theme.text.medium.size};
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    font-size: ${(props) => props.theme.text.medium.size};
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.markdown};
@@ -57,7 +57,9 @@ function Overlay({
           </Box>
           {onClose && (
             <Box flex={{ grow: 0 }}>
-              <Button plain icon={<FormClose size="medium" />} onClick={onClose} />
+              <Button onClick={onClose}>
+                <FormClose size="medium" />
+              </Button>
             </Box>
           )}
         </LayerHeader>

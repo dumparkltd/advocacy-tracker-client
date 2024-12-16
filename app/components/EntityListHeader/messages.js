@@ -18,7 +18,7 @@ export default defineMessages({
   listOptions: {
     showFilter: {
       id: 'app.components.EntityListHeader.listOptions.showFilter',
-      defaultMessage: 'Show filter options',
+      defaultMessage: 'Filter',
     },
     showEditOptions: {
       id: 'app.components.EntityListHeader.listOptions.showEditOptions',
@@ -70,16 +70,8 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-actors',
       defaultMessage: 'By connection',
     },
-    'connections-action-targets': {
-      id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-targets',
-      defaultMessage: 'By connection',
-    },
     'connections-actor-actions': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-actor-actions',
-      defaultMessage: 'By connection',
-    },
-    'connections-target-actions': {
-      id: 'app.components.EntityListHeader.filterGroupLabel.connections-target-actions',
       defaultMessage: 'By connection',
     },
     'connections-association-members': {
@@ -116,11 +108,11 @@ export default defineMessages({
     },
     'connections-action-users': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-action-users',
-      defaultMessage: 'By assigned user',
+      defaultMessage: 'By assigned WWF staff',
     },
     'connections-actor-users': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-actor-users',
-      defaultMessage: 'By assigned user',
+      defaultMessage: 'By assigned WWF staff',
     },
     'connections-user-actions': {
       id: 'app.components.EntityListHeader.filterGroupLabel.connections-user-actions',
@@ -156,10 +148,6 @@ export default defineMessages({
       id: 'app.components.EntityListHeader.editGroupLabel.connections-action-actors',
       defaultMessage: 'Update actors',
     },
-    'connections-action-targets': {
-      id: 'app.components.EntityListHeader.editGroupLabel.connections-action-targets',
-      defaultMessage: 'Update targets',
-    },
     'connections-actor-actions': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-actor-actions',
       defaultMessage: 'Update activities',
@@ -171,10 +159,6 @@ export default defineMessages({
     'connections-member-associations': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-member-associations',
       defaultMessage: 'Update memberships',
-    },
-    'connections-target-actions': {
-      id: 'app.components.EntityListHeader.editGroupLabel.connections-target-actions',
-      defaultMessage: 'Update activities',
     },
     'connections-action-resources': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-action-resources',
@@ -194,7 +178,7 @@ export default defineMessages({
     },
     'connections-actor-users': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-actor-users',
-      defaultMessage: 'Update users assignments',
+      defaultMessage: 'Update WWF staff',
     },
     'connections-user-actions': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-user-actions',
@@ -210,11 +194,11 @@ export default defineMessages({
     },
     'connections-action-parents': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-action-parents',
-      defaultMessage: 'Update parent activities',
+      defaultMessage: 'Update activities',
     },
     'connections-action-children': {
       id: 'app.components.EntityListHeader.editGroupLabel.connections-action-children',
-      defaultMessage: 'Update child activities',
+      defaultMessage: 'Update sub-activities',
     },
   },
   filterFormTitlePrefix: {

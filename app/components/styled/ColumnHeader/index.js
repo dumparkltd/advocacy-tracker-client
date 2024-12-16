@@ -13,13 +13,13 @@ const ColumnHeader = styled.div`
   &:last-child {
     border-right: none;
   }
-  @media (min-width: ${({ theme }) => theme.breakpoints ? theme.breakpoints.medium : '769px'}) {
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.medium : '769px'}) {
     padding-top: 8px;
     padding-bottom: 8px;
     padding-left: ${({ hasSelectAll, isPrint }) => (isPrint || hasSelectAll) ? 1 : 8}px;
     padding-right: 4px;
   }
-  @media (min-width: ${({ theme }) => theme.breakpoints ? theme.breakpoints.large : '993px'}) {
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.large : '993px'}) {
     font-size: 0.85em;
   }
   @media print {

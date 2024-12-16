@@ -2,30 +2,17 @@ import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import {
-  Box, Text, Button, Drop,
+  Box, Text, Drop,
 } from 'grommet';
 import styled from 'styled-components';
 import { truncateText } from 'utils/string';
 
 import appMessages from 'containers/App/messages';
+import LabelTooltip from './LabelTooltip';
+import LinkTooltip from './LinkTooltip';
+import Label from './LabelCellBody';
 
-const Label = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
-  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 12px;
-`;
-
-const LinkTT = styled(
-  React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
-)`
-  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 12px;
-`;
-const LabelTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
-  text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  font-style: italic;
-  line-height: 12px;
-`;
-const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
+const LabelInTT = styled((p) => <Label size="xsmall" {...p} />)`
   line-height: 13px;
 `;
 
@@ -44,16 +31,18 @@ export function CellBodyCategories({
         </Label>
       )}
       {entity.tooltip && (
-        <LinkTT
+        <LinkTooltip
           ref={buttonRef}
+          showContent={showContent}
           alignSelf={align}
           onClick={() => setShowContent(!showContent)}
-          active={showContent}
         >
-          <LabelTT textAlign={align}>
-            {entity.value}
-          </LabelTT>
-        </LinkTT>
+          <Box align="center" justify="center">
+            <LabelTooltip textAlign={align}>
+              {entity.value}
+            </LabelTooltip>
+          </Box>
+        </LinkTooltip>
       )}
       {entity.tooltip && showContent && buttonRef.current && (
         <Drop

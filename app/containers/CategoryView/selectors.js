@@ -19,8 +19,6 @@ import {
   selectActionCategoriesGroupedByAction,
   selectActorActionsGroupedByActor,
   selectActorActionsGroupedByAction,
-  selectActionActorsGroupedByAction,
-  selectActionActorsGroupedByActor,
   selectActionResourcesGroupedByAction,
 } from 'containers/App/selectors';
 
@@ -241,7 +239,6 @@ export const selectActionsByType = createSelector(
   selectActionsAssociated,
   selectActionConnections,
   selectActorActionsGroupedByAction,
-  selectActionActorsGroupedByAction,
   selectActionResourcesGroupedByAction,
   selectActionCategoriesGroupedByAction,
   selectCategories,
@@ -250,7 +247,6 @@ export const selectActionsByType = createSelector(
     actions,
     actionConnections,
     actorActions,
-    actionActors,
     actionResources,
     actionCategories,
     categories,
@@ -262,7 +258,6 @@ export const selectActionsByType = createSelector(
         action,
         actionConnections,
         actorActions,
-        actionActors,
         actionResources,
         categories,
         actionCategories,
@@ -279,7 +274,6 @@ export const selectActorsByType = createSelector(
   selectActorsAssociated,
   selectActorConnections,
   selectActorActionsGroupedByActor,
-  selectActionActorsGroupedByActor,
   selectActorCategoriesGroupedByActor,
   selectCategories,
   (
@@ -287,7 +281,6 @@ export const selectActorsByType = createSelector(
     actors,
     actorConnections,
     actorActions,
-    actionActors,
     actorCategories,
     categories,
   ) => {
@@ -298,7 +291,6 @@ export const selectActorsByType = createSelector(
         actor,
         actorConnections,
         actorActions,
-        actionActors,
         categories,
         actorCategories,
       }))
@@ -344,7 +336,7 @@ export const selectChildActionsByType = createSelector(
   (
     ready,
     actions,
-    actionActors,
+    actorActionsByAction,
     actionCategories,
     categories,
   ) => actions && actions.map(
@@ -357,7 +349,7 @@ export const selectChildActionsByType = createSelector(
       )
     ).set(
       'actors',
-      actionActors.get(parseInt(action.get('id'), 10))
+      actorActionsByAction.get(parseInt(action.get('id'), 10))
     )
   ).groupBy(
     (r) => r.getIn(['attributes', 'actiontype_id'])

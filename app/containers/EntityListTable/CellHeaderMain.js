@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import ButtonSort from 'components/buttons/ButtonSort';
+
 import { Box } from 'grommet';
 
 import IndeterminateCheckbox from 'components/forms/IndeterminateCheckbox';
 import PrintHide from 'components/styled/PrintHide';
 import BoxPrint from 'components/styled/BoxPrint';
 import TextPrint from 'components/styled/TextPrint';
-import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import Icon from 'components/Icon';
 
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
@@ -22,15 +23,10 @@ const Select = styled(PrintHide)`
   position: relative;
 `;
 
-const SortButton = styled(ButtonFlatIconOnly)`
-  color: inherit;
-  padding: 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: 0;
-  }
+const Label = styled.label`
+  position: relative;
+  top: -1px;
 `;
-
-const Label = styled.label``;
 
 
 export function CellHeaderMain({ column, canEdit }) {
@@ -53,20 +49,26 @@ export function CellHeaderMain({ column, canEdit }) {
       )}
       {canEdit && (
         <Label htmlFor="select-all">
-          <TextPrint weight={500} size="small" wordBreak="keep-all">
+          <TextPrint
+            weight={500}
+            size="xxsmall"
+            wordBreak="keep-all"
+            color="textSecondary"
+          >
             {column.title}
           </TextPrint>
         </Label>
       )}
       {!canEdit && (
-        <TextPrint weight={500} size="small">
+        <TextPrint weight={500} size="xxsmall" color="textSecondary">
           {column.title}
         </TextPrint>
       )}
       {column.onSort && (
         <PrintHide>
           <Box pad={{ left: 'xxsmall' }} flex={false}>
-            <SortButton
+            <ButtonSort
+              sortActive={column.sortActive}
               onClick={() => {
                 if (column.sortActive) {
                   const nextSortOrderOption = SORT_ORDER_OPTIONS.find((option) => sortOrderOption.nextValue === option.value);
@@ -81,12 +83,10 @@ export function CellHeaderMain({ column, canEdit }) {
                   ? sortOrderOption.icon
                   : 'sorting'
                 }
-                palette="dark"
-                paletteIndex={column.sortActive ? 1 : 4}
                 hidePrint={!column.sortActive}
                 size="20px"
               />
-            </SortButton>
+            </ButtonSort>
           </Box>
         </PrintHide>
       )}

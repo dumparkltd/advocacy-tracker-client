@@ -9,13 +9,14 @@ import { injectIntl, intlShape } from 'react-intl';
 
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { Box, Text, Drop } from 'grommet';
+import { Box, Drop } from 'grommet';
 import { FormClose, FormDown, FormUp } from 'grommet-icons';
 
 import Button from 'components/buttons/Button';
-import ButtonTagFilterWrap from 'components/buttons//ButtonTagFilterWrap';
+import ButtonTagFilterWrap from 'components/buttons/ButtonTagFilterWrap';
 import ButtonTagFilter from 'components/buttons/ButtonTagFilter';
 import PrintHide from 'components/styled/PrintHide';
+import TextPrint from 'components/styled/TextPrint';
 
 import { usePrint } from 'containers/App/PrintContext';
 
@@ -24,7 +25,7 @@ import { getFilterLabel } from './utils';
 const Clear = styled(Button)`
   background-color: ${palette('background', 4)};
   padding: 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0;
   }
   @media print {
@@ -83,9 +84,9 @@ function GroupFilters({
             title={`${groupFilters.length} filters`}
           >
             <Box direction="row" gap="xsmall" align="center">
-              <Text size="small" style={{ fontStyle: 'italic' }}>
+              <TextPrint size="small" style={{ fontStyle: 'italic' }}>
                 {`${groupFilters.length} filters`}
-              </Text>
+              </TextPrint>
               <PrintHide>
                 {showMultiple && <FormUp size="xsmall" color="inherit" />}
                 {!showMultiple && <FormDown size="xsmall" color="inherit" />}

@@ -10,7 +10,7 @@ const ToggleAllItems = styled(Button)`
   &:hover {
     color: ${palette('linkHover', 0)};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0.5em 0;
     font-size: 0.85em;
   }

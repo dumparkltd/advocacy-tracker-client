@@ -11,14 +11,12 @@ import Helmet from 'react-helmet';
 import { Map, List, fromJS } from 'immutable';
 import { injectIntl, intlShape } from 'react-intl';
 
-import { loadEntitiesIfNeeded, updatePath, printView } from 'containers/App/actions';
+import { loadEntitiesIfNeeded, printView } from 'containers/App/actions';
 import {
   selectReady,
-  selectIsUserMember,
   selectPages,
 } from 'containers/App/selectors';
 import appMessages from 'containers/App/messages';
-import { ROUTES } from 'themes/config';
 
 import EntityList from 'containers/EntityList';
 
@@ -32,8 +30,6 @@ export function PageList({
   onLoadEntitiesIfNeeded,
   onSetPrintView,
   dataReady,
-  handleNew,
-  isMember,
   location,
   entities,
   allEntities,
@@ -71,14 +67,6 @@ export function PageList({
       icon: 'print',
     });
   }
-  if (isMember) {
-    headerOptions.actions.push({
-      title: 'Create new',
-      onClick: () => handleNew(),
-      icon: 'add',
-      isMember,
-    });
-  }
   return (
     <div>
       <Helmet
@@ -89,7 +77,7 @@ export function PageList({
       />
       <EntityList
         entities={entities}
-        allEntities={allEntities}
+        allEntities={allEntities ? allEntities.toList() : null}
         config={CONFIG}
         headerOptions={headerOptions}
         dataReady={dataReady}
@@ -98,6 +86,7 @@ export function PageList({
           plural: intl.formatMessage(appMessages.entities.pages.plural),
         }}
         locationQuery={fromJS(location.query)}
+        skipPreviews
       />
     </div>
   );
@@ -107,19 +96,16 @@ export function PageList({
 PageList.propTypes = {
   onLoadEntitiesIfNeeded: PropTypes.func,
   onSetPrintView: PropTypes.func,
-  handleNew: PropTypes.func,
   dataReady: PropTypes.bool,
   entities: PropTypes.instanceOf(List).isRequired,
   allEntities: PropTypes.instanceOf(Map),
   location: PropTypes.object,
-  isMember: PropTypes.bool,
   intl: intlShape.isRequired,
 };
 
 const mapStateToProps = (state, props) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   entities: selectListPages(state, fromJS(props.location.query)),
-  isMember: selectIsUserMember(state),
   allEntities: selectPages(state),
 });
 
@@ -127,9 +113,6 @@ function mapDispatchToProps(dispatch) {
   return {
     onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
-    },
-    handleNew: () => {
-      dispatch(updatePath(`${ROUTES.PAGES}${ROUTES.NEW}`, { replace: true }));
     },
     onSetPrintView: (config) => {
       dispatch(printView(config));

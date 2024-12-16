@@ -9,7 +9,7 @@ import { find } from 'lodash/collection';
 import { USER_ROLES } from 'themes/config';
 
 const Role = styled(Label)`
-  font-size: ${(props) => props.theme.sizes.text.smaller};
+  font-size: ${(props) => props.theme.text.xsmall.sizeer};
   @media print {
     font-size: ${(props) => props.theme.sizes.print.smaller};
   }

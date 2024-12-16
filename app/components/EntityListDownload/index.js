@@ -28,7 +28,6 @@ import {
   INDICATOR_ACTIONTYPES,
   ACTIONTYPE_ACTIONTYPES,
   ACTIONTYPE_RESOURCETYPES,
-  ACTIONTYPE_TARGETTYPES,
   MEMBERSHIPS,
   USER_ACTIONTYPES,
   USER_ACTORTYPES,
@@ -38,6 +37,9 @@ import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonSubmit from 'components/buttons/ButtonSubmit';
+
+import Checkbox from 'components/styled/Checkbox';
+
 import { filterEntitiesByKeywords } from 'utils/entities';
 import { isMinSize } from 'utils/responsive';
 
@@ -71,7 +73,7 @@ const StyledButtonCancel = styled(ButtonForm)`
 const Main = styled.div`
   padding: 0 0 10px;
   margin: 0 0 30px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 20px 24px;
     margin: 0 0 50px;
   }
@@ -130,14 +132,12 @@ export function EntityListDownload({
   const [actorsAsRows, setActorsAsRows] = useState(false);
   const [indicatorsAsRows, setIndicatorsAsRows] = useState(false);
   const [indicatorsActive, setIndicatorsActive] = useState(false);
-  const [targettypes, setTargettypes] = useState({});
   const [parenttypes, setParenttypes] = useState({});
   const [childtypes, setChildtypes] = useState({});
   const [resourcetypes, setResourcetypes] = useState({});
   // for actors
   const [actiontypes, setActiontypes] = useState({});
   const [actionsAsRows, setActionsAsRows] = useState(false);
-  const [actiontypesAsTarget, setActiontypesAsTarget] = useState({});
   const [membertypes, setMembertypes] = useState({});
   const [associationtypes, setAssociationtypes] = useState({});
   // for indicators
@@ -148,7 +148,6 @@ export function EntityListDownload({
   let hasUsers;
   // check action relationships
   let hasActors;
-  let hasTargets;
   let hasIndicators;
   let hasParentActions;
   let hasChildActions;
@@ -159,11 +158,6 @@ export function EntityListDownload({
       && config.connections.actors
       && ACTIONTYPE_ACTORTYPES[typeId]
       && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
-
-    hasTargets = config.connections
-      && config.connections.targets
-      && ACTIONTYPE_TARGETTYPES[typeId]
-      && ACTIONTYPE_TARGETTYPES[typeId].length > 0;
 
     hasIndicators = config.connections
       && config.connections.indicators
@@ -194,7 +188,6 @@ export function EntityListDownload({
   }
   // check actor relationships
   let hasActions;
-  let hasActionsAsTarget;
   let hasMembers;
   let hasAssociations;
 
@@ -203,13 +196,6 @@ export function EntityListDownload({
       && config.connections.actions
       && !!Object.keys(ACTIONTYPE_ACTORTYPES).find((actiontypeId) => {
         const actiontypeIds = ACTIONTYPE_ACTORTYPES[actiontypeId];
-        return actiontypeIds.indexOf(typeId) > -1;
-      });
-
-    hasActionsAsTarget = config.connections
-      && config.connections.targets
-      && !!Object.keys(ACTIONTYPE_TARGETTYPES).find((actiontypeId) => {
-        const actiontypeIds = ACTIONTYPE_TARGETTYPES[actiontypeId];
         return actiontypeIds.indexOf(typeId) > -1;
       });
 
@@ -270,23 +256,6 @@ export function EntityListDownload({
                 label,
                 active: false,
                 column: `actors_${snakeCase(label)}`,
-              },
-            };
-          }, {})
-        );
-      }
-      // targets
-      if (hasTargets && typeNames.actortypes) {
-        setTargettypes(
-          ACTIONTYPE_TARGETTYPES[typeId].reduce((memo, actortypeId) => {
-            const label = intl.formatMessage(appMessages.entities[`actors_${actortypeId}`].pluralLong);
-            return {
-              ...memo,
-              [actortypeId]: {
-                id: actortypeId,
-                label,
-                active: false,
-                column: `targets_${snakeCase(label)}`,
               },
             };
           }, {})
@@ -368,26 +337,6 @@ export function EntityListDownload({
           }, {})
         );
       }
-      // actions as target
-      if (hasActionsAsTarget && typeNames.actiontypes) {
-        const actiontypeIds = Object.keys(ACTIONTYPE_TARGETTYPES).filter(
-          (actiontypeId) => ACTIONTYPE_TARGETTYPES[actiontypeId].indexOf(typeId) > -1
-        );
-        setActiontypesAsTarget(
-          actiontypeIds.reduce((memo, actiontypeId) => {
-            const label = intl.formatMessage(appMessages.entities[`actions_${actiontypeId}`].pluralLong);
-            return {
-              ...memo,
-              [actiontypeId]: {
-                id: actiontypeId,
-                label,
-                active: false,
-                column: `actions-as-target_${snakeCase(label)}`,
-              },
-            };
-          }, {})
-        );
-      }
       // associations/parents
       if (hasAssociations && typeNames.actortypes) {
         setAssociationtypes(
@@ -431,13 +380,11 @@ export function EntityListDownload({
     hasAttributes,
     hasTaxonomies,
     hasActors,
-    hasTargets,
     hasIndicators,
     hasParentActions,
     hasChildActions,
     hasResources,
     hasActions,
-    hasActionsAsTarget,
     hasMembers,
     hasAssociations,
   ]);
@@ -557,21 +504,6 @@ export function EntityListDownload({
           }
         }
       }
-      if (hasTargets) {
-        csvColumns = Object.keys(targettypes).reduce((memo, actortypeId) => {
-          if (targettypes[actortypeId].active) {
-            let displayName = targettypes[actortypeId].column;
-            if (!displayName || targettypes[actortypeId].column === '') {
-              displayName = actortypeId;
-            }
-            return [
-              ...memo,
-              { id: `targets_${actortypeId}`, displayName },
-            ];
-          }
-          return memo;
-        }, csvColumns);
-      }
       if (hasParentActions) {
         relationships = relationships.set('parents', relationships.get('measures'));
 
@@ -682,8 +614,6 @@ export function EntityListDownload({
         hasActors,
         actorsAsRows,
         actortypes,
-        hasTargets,
-        targettypes,
         hasParentActions,
         parenttypes,
         hasChildActions,
@@ -728,21 +658,6 @@ export function EntityListDownload({
             ];
           }
         }
-      }
-      if (hasActionsAsTarget) {
-        csvColumns = Object.keys(actiontypesAsTarget).reduce((memo, actiontypeId) => {
-          if (actiontypesAsTarget[actiontypeId].active) {
-            let displayName = actiontypesAsTarget[actiontypeId].column;
-            if (!displayName || actiontypesAsTarget[actiontypeId].column === '') {
-              displayName = actiontypeId;
-            }
-            return [
-              ...memo,
-              { id: `targeted-by-actions_${actiontypeId}`, displayName },
-            ];
-          }
-          return memo;
-        }, csvColumns);
       }
       if (hasAssociations) {
         relationships = relationships.set('associations', relationships.get('actors'));
@@ -792,8 +707,6 @@ export function EntityListDownload({
         hasActions,
         actionsAsRows,
         actiontypes,
-        hasActionsAsTarget,
-        actiontypesAsTarget,
         hasAssociations,
         associationtypes,
         hasMembers,
@@ -858,9 +771,8 @@ export function EntityListDownload({
               <Box direction="row" align="center" fill={false}>
                 <Box direction="row" align="center">
                   <Select>
-                    <StyledInput
+                    <Checkbox
                       id="check-filter-keyword"
-                      type="checkbox"
                       checked={ignoreSearch}
                       onChange={(evt) => setIgnoreSearch(evt.target.checked)}
                     />
@@ -875,9 +787,8 @@ export function EntityListDownload({
               <Box direction="row" align="center" fill={false}>
                 <Box direction="row" align="center">
                   <Select>
-                    <StyledInput
+                    <Checkbox
                       id="check-filter-selection"
-                      type="checkbox"
                       checked={ignoreSelection}
                       onChange={(evt) => setIgnoreSelection(evt.target.checked)}
                     />
@@ -901,7 +812,6 @@ export function EntityListDownload({
               <OptionsForActions
                 typeTitle={typeTitle}
                 hasActors={hasActors}
-                hasTargets={hasTargets}
                 hasParentActions={hasParentActions}
                 hasChildActions={hasChildActions}
                 hasResources={hasResources}
@@ -923,8 +833,6 @@ export function EntityListDownload({
                 setTaxonomies={setTaxonomies}
                 actortypes={actortypes}
                 setActortypes={setActortypes}
-                targettypes={targettypes}
-                setTargettypes={setTargettypes}
                 parenttypes={parenttypes}
                 setParenttypes={setParenttypes}
                 childtypes={childtypes}
@@ -941,9 +849,6 @@ export function EntityListDownload({
                 setActionsAsRows={setActionsAsRows}
                 actiontypes={actiontypes}
                 setActiontypes={setActiontypes}
-                hasActionsAsTarget={hasActionsAsTarget}
-                actiontypesAsTarget={actiontypesAsTarget}
-                setActiontypesAsTarget={setActiontypesAsTarget}
                 hasMembers={hasMembers}
                 membertypes={membertypes}
                 setMembertypes={setMembertypes}
@@ -1003,9 +908,8 @@ export function EntityListDownload({
               <Box direction="row" align="center" fill={false}>
                 <Box direction="row" align="center">
                   <Select>
-                    <StyledInput
+                    <Checkbox
                       id="check-timestamp"
-                      type="checkbox"
                       checked={csvSuffix}
                       onChange={(evt) => setCSVSuffix(evt.target.checked)}
                     />

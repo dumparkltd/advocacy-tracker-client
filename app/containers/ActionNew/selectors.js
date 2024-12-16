@@ -1,7 +1,6 @@
 import { createSelector } from 'reselect';
 import {
   ACTIONTYPE_ACTORTYPES,
-  ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_RESOURCETYPES,
   INDICATOR_ACTIONTYPES,
   ACTIONTYPE_ACTIONTYPES,
@@ -54,33 +53,7 @@ export const selectActorsByActortype = createSelector(
     if (!validActortypeIds || validActortypeIds.length === 0) {
       return null;
     }
-    return actortypes.filter(
-      (type) => validActortypeIds
-        && validActortypeIds.indexOf(type.get('id')) > -1
-        && type.getIn(['attributes', 'is_active'])
-    ).map((type) => actors.filter(
-      (actor) => qe(
-        type.get('id'),
-        actor.getIn(['attributes', 'actortype_id']),
-      )
-    ));
-  }
-);
-export const selectTargetsByActortype = createSelector(
-  (state, id) => id,
-  selectActorsCategorised,
-  selectActortypes,
-  (actiontypeId, actors, actortypes) => {
-    // compare App/selectors/selectActortypesForActiontype
-    const validActortypeIds = ACTIONTYPE_TARGETTYPES[actiontypeId];
-    if (!validActortypeIds || validActortypeIds.length === 0) {
-      return null;
-    }
-    return actortypes.filter(
-      (type) => validActortypeIds
-        && validActortypeIds.indexOf(type.get('id')) > -1
-        && type.getIn(['attributes', 'is_target'])
-    ).map((type) => actors.filter(
+    return actortypes.map((type) => actors.filter(
       (actor) => qe(
         type.get('id'),
         actor.getIn(['attributes', 'actortype_id']),

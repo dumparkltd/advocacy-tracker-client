@@ -6,6 +6,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { compose } from 'redux';
 import styled, { css } from 'styled-components';
 import { Box, Text } from 'grommet';
 
@@ -19,12 +20,15 @@ import countryPointsJSON from 'data/country-points.json';
 import {
   selectPrintConfig,
 } from 'containers/App/selectors';
+import {
+  setListPreview,
+} from 'containers/App/actions';
 
 import { usePrint } from 'containers/App/PrintContext';
 
 // import appMessages from 'containers/App/messages';
 // import { hasGroupActors } from 'utils/entities';
-import MapWrapper from './MapWrapper';
+import LeafletWrapper from './LeafletWrapper';
 import MapOption from './MapInfoOptions/MapOption';
 import MapKey from './MapInfoOptions/MapKey';
 import MapInfoOptions from './MapInfoOptions';
@@ -49,14 +53,24 @@ ${({ isPrint }) => isPrint && css`margin-left: 0`};
   margin-left: 0;
 }
 `;
-const getMapOuterWrapper = (fullMap) => fullMap
-  ? styled.div``
-  : styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)`
+const MapOuterWrapper = styled(
+  ({ fullMap, isOverviewMap, ...rest }) => fullMap
+    ? <div {...rest} />
+    : (
+      <Box
+        margin={isOverviewMap ? null : { horizontal: 'medium' }}
+        {...rest}
+      />
+    )
+)`
     ${({ isPrint }) => isPrint && css`margin-left: 0;`}
     ${({ isPrint }) => isPrint && css`margin-right: 0;`}
-    position: relative;
+    position: ${({ fullMap }) => fullMap ? 'static' : 'relative'};
     overflow: hidden;
-    padding-top: ${({ isPrint, orient }) => (isPrint && orient) === 'landscape' ? '50%' : '56.25%'};
+    padding-top: ${({ isPrint, orient, fullMap }) => {
+    if (fullMap) return 0;
+    return (isPrint && orient) === 'landscape' ? '50%' : '56.25%';
+  }};
     @media print {
       margin-left: 0;
       margin-right: 0;
@@ -75,7 +89,10 @@ export function MapContainer({
   reducePoints,
   reduceCountryAreas,
   fullMap,
+  isOverviewMap,
   printArgs,
+  onClearFilters,
+  onSetPreviewItemId,
   // intl,
 }) {
   const {
@@ -92,6 +109,7 @@ export function MapContainer({
     includeSecondaryMembers,
     scrollWheelZoom,
     valueToStyle,
+    filters,
   } = mapData;
   const {
     keyTitle,
@@ -99,7 +117,6 @@ export function MapContainer({
     unit,
     maxBinValue,
   } = mapKey;
-
   const [showAsPoint, setShowAsPoint] = useState(false);
 
   // convert TopoJSON to JSON
@@ -186,12 +203,18 @@ export function MapContainer({
     ];
   }
   const isPrintView = usePrint();
-  const MapOuterWrapper = getMapOuterWrapper(fullMap);
 
   return (
-    <Styled>
-      <MapOuterWrapper isPrint={isPrintView} orient={printArgs && printArgs.printOrientation}>
-        <MapWrapper
+    <Styled
+      className={`advocacy-tracker-map${fullMap ? ' advocacy-tracker-map-full' : ''}`}
+    >
+      <MapOuterWrapper
+        isPrint={isPrintView}
+        orient={printArgs && printArgs.printOrientation}
+        isOverviewMap={isOverviewMap}
+        fullMap={fullMap}
+      >
+        <LeafletWrapper
           fullMap={fullMap}
           isPrintView={isPrintView}
           printArgs={printArgs}
@@ -214,20 +237,24 @@ export function MapContainer({
           fitBounds={fitBounds}
           projection={projection}
           mapId={mapId}
-          hasInfo={mapInfo && mapInfo.length > 0}
+          hasInfo={!!mapInfo}
           circleLayerConfig={{
             ...circleLayerConfig,
             rangeMax: minMaxValues && minMaxValues.points && minMaxValues.points.max,
           }}
+
+          onSetPreviewItemId={onSetPreviewItemId}
         />
       </MapOuterWrapper>
-      {mapInfo && mapInfo.length > 0 && (
+      {mapInfo && (
         <MapInfoOptions
           isPrintView={isPrintView}
-          options={mapInfo}
+          option={mapInfo}
           minMaxValues={minMaxValues}
           countryMapSubject={mapSubject}
           circleLayerConfig={circleLayerConfig}
+          filters={filters}
+          onClearFilters={onClearFilters}
         />
       )}
       {mapKey && Object.keys(mapKey).length > 0 && (
@@ -269,18 +296,34 @@ export function MapContainer({
 
 MapContainer.propTypes = {
   onActorClick: PropTypes.func,
+  onClearFilters: PropTypes.func,
   reducePoints: PropTypes.func,
   reduceCountryAreas: PropTypes.func,
   mapData: PropTypes.object,
   mapKey: PropTypes.object,
   printArgs: PropTypes.object,
-  mapInfo: PropTypes.array,
+  mapInfo: PropTypes.object,
   mapOptions: PropTypes.array,
   fullMap: PropTypes.bool,
+  isOverviewMap: PropTypes.bool,
+
+  onSetPreviewItemId: PropTypes.func,
 };
 
 const mapStateToProps = (state) => ({
   printArgs: selectPrintConfig(state),
 });
 
-export default connect(mapStateToProps)(MapContainer);
+
+export function mapDispatchToProps(dispatch) {
+  return {
+    onSetPreviewItemId: (value) => dispatch(setListPreview(value)),
+  };
+}
+
+const withConnect = connect(
+  mapStateToProps,
+  mapDispatchToProps,
+);
+
+export default compose(withConnect)(MapContainer);

@@ -3,12 +3,10 @@ import React from 'react';
 import { usePrint } from 'containers/App/PrintContext';
 const Styled = styled.div`
   position: ${({ isStatic, isPrint }) => (isPrint || isStatic) ? 'static' : 'absolute'};
-  top: ${({ headerStyle, theme }) => {
-    if (headerStyle === 'types') {
-      return theme.sizes.headerList.banner.height;
-    }
-    if (headerStyle === 'simple') {
-      return 40;
+  top: ${({ isOnMap, theme }) => {
+    if (isOnMap) {
+      // to fix: add dynamic navSecondary height
+      return theme.sizes.navSecondary.heightMobile + 2;
     }
     return 0;
   }}px;
@@ -18,7 +16,16 @@ const Styled = styled.div`
   overflow-x: hidden;
   overflow-y: ${({ noOverflow }) => noOverflow ? 'hidden' : 'auto'};
   z-index: 90;
-  background-color: ${({ bg, isPrint }) => (bg && !isPrint) ? '#f1f0f1' : 'transparent'};
+  background-color: ${({ bg, isPrint }) => (bg && !isPrint) ? '#f0f0f0' : 'transparent'};
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    top: ${({ isOnMap, theme }) => {
+    if (isOnMap) {
+      // to fix: add dynamic navSecondary height
+      return theme.sizes.navSecondary.height + 2;
+    }
+    return 0;
+  }}px;
+  }
   @media print {
     box-shadow: none;
     position: ${({ printAbsolute }) => printAbsolute ? 'absolute' : 'static'};

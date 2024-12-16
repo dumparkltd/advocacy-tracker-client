@@ -79,7 +79,7 @@ const FormTitle = styled.h3`
 
 const Intro = styled.div`
   margin-bottom: 10px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     margin-bottom: 16px;
     font-size: 1.2em;
   }
@@ -88,7 +88,7 @@ const Intro = styled.div`
   }
 `;
 const Hint = styled.div`
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     margin-bottom: 16px;
     font-size: 1.2em;
   }

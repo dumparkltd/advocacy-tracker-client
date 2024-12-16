@@ -30,7 +30,7 @@ theme.gutter = 20;
 // 2: main colour, light
 // 3: main colour, background
 // 4: white
-const primary = coolorsToHex('https://coolors.co/08586c-00728f-00728f-f1f0f1-ffffff');
+const primary = coolorsToHex('https://coolors.co/08586c-00728f-00728f-f0f0f0-ffffff');
 // secondary color palette: dark to light
 // 0: dark header colour, darker
 // 1: dark header colour
@@ -51,13 +51,14 @@ const dark = coolorsToHex('https://coolors.co/1c2121-232b2b-323e3e-687271-8d9696
 // 2:  gray 1 (gray pattern)
 // 3:  gray 2 (icons light)
 // 4:  gray 3 (dark lines)
-const light = coolorsToHex('https://coolors.co/f1f0f1-f1f0f1-d5dddd-cdd6d6-c7d1d1');
+const light = coolorsToHex('https://coolors.co/f0f0f0-f0f0f0-d5dddd-cdd6d6-c7d1d1');
 
 // other palettes
 // 0: AA on light[0] and on error[3]
 // 1: AA on white
 const error = coolorsToHex('https://coolors.co/b20e0e-c10f0f-d31717-f2e3e3-ffffff');
 const success = coolorsToHex('https://coolors.co/00632e-007034-007c3a-e1f2ed-ffffff');
+const alert = coolorsToHex('https://coolors.co/ff8800-ffa200-ffb700-ffd000-ffea00');
 // colour palettes, usage:
 //   import { palette } from 'styled-theme';
 //   color: ${palette('primary', 0)}
@@ -72,7 +73,7 @@ theme.palette = {
   // other palettes
   error,
   success,
-  // alert,
+  alert,
   // info,
 
   // taxonomy/category colours
@@ -268,19 +269,6 @@ theme.fonts = {
 theme.sizes = {
   // also see global-styles.js for other sizes
   // px or em
-  text: {
-    aaLargeBold: '19px',
-    aaLarge: '24px',
-    mainListItem: '20px',
-    listItemTop: '13px',
-    listItemBottom: '12px',
-    markdown: '18px',
-    markdownMobile: '16px',
-    small: '13px', // used for labels
-    smaller: '12px', // used for labels
-    smallMobile: '11px', // used for labels
-    default: '16px', // used for labels
-  },
   print: {
     mainListItem: '10pt',
     listItemTop: '7pt',
@@ -290,6 +278,7 @@ theme.sizes = {
     smaller: '8pt', // used for labels
     small: '9pt', // used for labels
     default: '10pt', // used for labels
+    normal: '10pt', // used for labels
     large: '11pt', // used for labels
     larger: '12pt', // used for labels
     largest: '14pt', // used for labels
@@ -315,21 +304,17 @@ theme.sizes = {
       heightMobile: 30,
     },
   },
-  headerExplore: {
-    banner: {
-      height: 120,
-      heightMobile: 60,
-    },
-    nav: {
-      height: 40,
-      heightMobile: 35,
-    },
+  navSecondary: {
+    height: 60,
+    heightMobile: 60,
   },
   header: {
     banner: {
-      height: 60,
+      height: 70,
       heightPrint: 66,
-      heightMobile: 50,
+      heightMobile: 95,
+      heightMobileTop: 55,
+      heightMobileBottom: 40,
     },
     nav: {
       height: 30,
@@ -351,6 +336,14 @@ theme.sizes = {
       small: 8,
       large: 10,
     },
+  },
+  mapSearchBar: {
+    height: 45,
+    width: 250,
+    searchIconSize: 24,
+  },
+  footer: {
+    height: 150,
   },
   home: {
     // px or em
@@ -397,12 +390,12 @@ export const BREAKPOINTS = {
   },
   ms: {
     min: 420, // exclusive
-    max: 720,
+    max: 760,
     name: 'mobile (landscape)',
     index: 1,
   },
   medium: {
-    min: 720, // exclusive
+    min: 760, // exclusive
     max: 992,
     name: 'tablet (portrait)',
     index: 2,
@@ -415,12 +408,12 @@ export const BREAKPOINTS = {
   },
   xlarge: {
     min: 1152, // exclusive
-    max: 1728,
+    max: 1444,
     name: 'desktop',
     index: 4,
   },
   xxlarge: {
-    min: 1728, // exclusive
+    min: 1444, // exclusive
     max: 99999999,
     name: 'large desktop',
     index: 5,
@@ -446,7 +439,7 @@ theme.breakpointsMin = {
 // grommet
 theme.global = {
   drop: {
-    zIndex: 200,
+    zIndex: 999999999,
   },
   breakpoints: {
     small: {
@@ -469,35 +462,40 @@ theme.global = {
   colors: {
     icon: '#000000',
     actors: '#006076',
-    targets: '#a52752',
     brand: '#000000',
     highlight: '#00728f',
+    primary: '#00728f',
     highlightHover: '#08586c',
-    background: '#f1f0f1',
+    background: '#f0f0f0',
     backgroundLight: '#fcfcfc',
-    inactive: '#f1f0f1', // on light background (empowerment)
+    inactive: '#f0f0f0', // on light background (empowerment)
     a: '#00728f',
     aHover: '#08586c',
     textLight: '#1c2121', // on light background (empowerment)
-    textSecondary: '#777b7e', // on light background (empowerment)
-    hint: '#687271',
+    textSecondary: '#898989', // on light background (empowerment)
+    hint: '#898989',
+    'dark-5': '#898989',
     text: {
-      hint: '#687271',
+      hint: '#898989',
       brand: '#000000',
       dark: '#FFFFFF', //  on dark background
-      light: '#1c2121', // on light background (empowerment)
-      secondary: '#777b7e', // on light background (empowerment)
+      light: '#000000', // on light background (empowerment)
+      secondary: '#898989', // on light background (empowerment)
     },
     border: {
       light: '#CECED2',
-      lighter: '#f1f0f1',
+      lighter: '#f0f0f0',
       dark: '#FFFFFF',
     },
     danger: '#DB5D37',
     private: '#DA1D52',
+    privateBackground: '#fef7f9',
     archived: '#00728F',
-    draft: '#BCB9B8',
-    notifications: '#e6894b',
+    archivedBackground: '#f6f9fa',
+    draft: '#898989',
+    draftBackground: '#f7f7f7',
+    notifications: '#00728F',
+    notificationsBackground: '#f6f9fa',
     dark: '#1c2121',
   },
   edgeSize: {
@@ -512,6 +510,19 @@ theme.global = {
     xlarge: '64px',
     xxlarge: '100px',
   },
+
+  focus: {
+    border: {
+      color: 'highlight',
+    },
+    outline: {
+      color: 'highlight',
+      size: '1px',
+    },
+    shadow: {
+      size: '0px',
+    },
+  },
 };
 // also grommet but not global somehow
 theme.accordion = {
@@ -521,7 +532,7 @@ theme.accordion = {
   },
 };
 theme.layer = {
-  zIndex: 201,
+  zIndex: 999999999,
   overlay: {
     background: 'rgba(0, 0, 0, 0.80)',
   },
@@ -530,22 +541,25 @@ theme.layer = {
 theme.text = {
   xxxlarge: { size: '48px', height: '60px', maxWidth: '800px' },
   xxlarge: { size: '30px', height: '36px', maxWidth: '800px' },
+  aaLarge: { size: '24px', height: '32px', maxWidth: '800px' },
   xlarge: { size: '20px', height: '28px', maxWidth: '800px' },
   large: { size: '18px', height: '24px', maxWidth: '800px' },
   largeTall: { size: '18px', height: '26px', maxWidth: '800px' },
   medium: { size: '16px', height: '21px', maxWidth: '800px' },
   mediumTall: { size: '16px', height: '23px', maxWidth: '800px' },
   mediumTight: { size: '16px', height: '18px', maxWidth: '800px' },
-  small: { size: '14px', height: '18px', maxWidth: '700px' },
+  small: { size: '14px', height: '20px', maxWidth: '700px' },
   smallTight: { size: '14px', height: '16px', maxWidth: '700px' },
   xsmall: { size: '13px', height: '16px', maxWidth: '600px' },
   xsmallTight: { size: '13px', height: '14px', maxWidth: '600px' },
   xxsmall: { size: '12px', height: '14px', maxWidth: '500px' },
+  xxxsmall: { size: '11px', height: '13px', maxWidth: '500px' },
 };
 
 theme.textPrint = {
   xxxlarge: { size: '24pt', height: '32pt' },
   xxlarge: { size: '14pt', height: '18pt' },
+  aalarge: { size: '12pt', height: '16pt' },
   xlarge: { size: '12pt', height: '16pt' },
   large: { size: '11pt', height: '14.5pt' },
   largeTall: { size: '11pt', height: '16pt' },
@@ -557,6 +571,7 @@ theme.textPrint = {
   xsmall: { size: '8pt', height: '10.5pt' },
   xsmallTight: { size: '8pt', height: '9pt' },
   xxsmall: { size: '7pt', height: '8.5pt' },
+  xxxsmall: { size: '7pt', height: '8.5pt' },
 };
 
 theme.icon = {

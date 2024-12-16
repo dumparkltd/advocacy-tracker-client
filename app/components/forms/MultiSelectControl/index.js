@@ -29,9 +29,9 @@ const MultiSelectControl = (props) => {
     tagFilterGroups,
     closeOnClickOutside,
     groups,
+    inSingleForm,
     ...otherProps
   } = props;
-
   return (
     <Control
       type="multiselect"
@@ -56,6 +56,7 @@ const MultiSelectControl = (props) => {
         tagFilterGroups,
         closeOnClickOutside,
         groups,
+        inSingleForm,
       }}
       {...otherProps}
     />
@@ -71,6 +72,7 @@ MultiSelectControl.propTypes = {
   selectAll: PropTypes.bool,
   advanced: PropTypes.bool,
   closeOnClickOutside: PropTypes.bool,
+  inSingleForm: PropTypes.bool,
   options: PropTypes.instanceOf(List),
   groups: PropTypes.instanceOf(Map),
   title: PropTypes.string,

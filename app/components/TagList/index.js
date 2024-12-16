@@ -32,11 +32,11 @@ flex-wrap:${({ isPrint }) => isPrint ? 'wrap' : 'none'};
 
 const ConnectionGroupLabel = styled.span`
   color: ${palette('text', 1)};
-  font-size: ${({ theme }) => theme.sizes && theme.sizes.text.smaller};
+  font-size: ${({ theme }) => theme.sizes && theme.text.xxxsmall.size};
   padding-top: 2px;
   white-space: nowrap;
   @media print {
-    font-size: ${({ theme }) => theme.sizes.print.smaller};
+    font-size: ${({ theme }) => theme.sizes.print.xsmall};
   }
 `;
 
@@ -52,7 +52,7 @@ function TagList({
   const groupedFilters = groupBy(filters, 'groupId');
   return (
     <Styled>
-      {(hasFilters || !!searchQuery) && (
+      {(hasFilters || (!!searchQuery && isPrintView)) && (
         <Tags gap="xsmall" align="end" isPrint={isPrintView}>
           {hasFilters && Object.keys(groupedFilters).map(
             (groupId, i) => {

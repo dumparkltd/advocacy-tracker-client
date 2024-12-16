@@ -5,9 +5,9 @@ import { palette } from 'styled-theme';
 import {
   Text,
   Box,
-  Button,
   Drop,
 } from 'grommet';
+import Button from 'components/buttons/ButtonSimple';
 
 import { TEXT_TRUNCATE } from 'themes/config';
 import Icon from 'components/Icon';
@@ -15,21 +15,15 @@ import Icon from 'components/Icon';
 import { truncateText } from 'utils/string';
 
 const SelectButton = styled(
-  React.forwardRef((p, ref) => (
-    <Button
-      plain
-      ref={ref}
-      fill="horizontal"
-      {...p}
-    />
-  ))
+  React.forwardRef((p, ref) => (<Button ref={ref} {...p} />))
 )`
   padding: 0px 2px;
   border-bottom: 1px solid;
   height: 30px;
+  width: 100%
 `;
 
-const OptionButton = styled((p) => <Button plain {...p} />)`
+const OptionButton = styled((p) => <Button {...p} />)`
   display: block;
   width: 100%;
   padding: 4px 8px;
@@ -38,25 +32,22 @@ const OptionButton = styled((p) => <Button plain {...p} />)`
   &:hover {
     color:${palette('headerNavMainItemHover', 0)};
   }
-  opacity: ${({ isDefaultOption }) => isDefaultOption ? 0.6 : 1};
   color: ${({ active }) => active ? palette('headerNavMainItem', 1) : 'inherit'};
 `;
 
 const SelectText = styled((p) => <Text {...p} />)`
-  opacity: ${({ isDefaultOption }) => isDefaultOption ? 0.5 : 1}
-`;
-const Reset = styled((p) => <Button plain {...p} />)`
-  text-align: center;
-  width: 25px;
-`;
-const ResetPlaceholder = styled((p) => <Box {...p} />)`
-  width: 25px;
+  font-size: 16px;
+  line-height: 24px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    font-size: 18px;
+  }
 `;
 
 export function SelectIndicators({ config }) {
   const {
     onIndicatorSelect,
     indicatorOptions,
+    dropAlign,
   } = config;
   const [showOptions, setShowOptions] = useState(false);
   const buttonRef = useRef();
@@ -64,53 +55,35 @@ export function SelectIndicators({ config }) {
     (o) => o.active
   );
   if (!activeOption) return null;
-  const isDefaultOption = activeOption.id === 'all';
   return (
     <Box fill="horizontal" direction="row" align="center">
-      <Box flex={{ grow: 1 }}>
-        <SelectButton
-          ref={buttonRef}
-          plain
-          fill="horizontal"
-          onClick={() => setShowOptions(!showOptions)}
-        >
-          <Box direction="row" justify="between" align="center">
-            <SelectText
-              size="large"
-              isDefaultOption={isDefaultOption}
-            >
-              {truncateText(
-                activeOption.label,
-                TEXT_TRUNCATE.INDICATOR_SELECT,
-                false
-              )}
-            </SelectText>
-            <Box>
-              {!showOptions && (
-                <Icon name="dropdownOpen" text textRight size="1em" />
-              )}
-              {showOptions && (
-                <Icon name="dropdownClose" text textRight size="1em" />
-              )}
-            </Box>
+      <SelectButton
+        ref={buttonRef}
+        onClick={() => setShowOptions(!showOptions)}
+      >
+        <Box direction="row" justify="between" align="center">
+          <SelectText>
+            {truncateText(
+              activeOption.label,
+              TEXT_TRUNCATE.INDICATOR_SELECT,
+              false
+            )}
+          </SelectText>
+          <Box>
+            {!showOptions && (
+              <Icon name="dropdownOpen" text textRight size="1em" />
+            )}
+            {showOptions && (
+              <Icon name="dropdownClose" text textRight size="1em" />
+            )}
           </Box>
-        </SelectButton>
-      </Box>
-      <Box flex={{ shrink: 0 }} pad={{ left: 'ms' }}>
-        {!isDefaultOption && (
-          <Reset onClick={() => onIndicatorSelect()}>
-            <Icon name="removeSmall" text printHide />
-          </Reset>
-        )}
-        {isDefaultOption && (
-          <ResetPlaceholder />
-        )}
-      </Box>
+        </Box>
+      </SelectButton>
       {showOptions && (
         <Drop
           target={buttonRef.current}
           stretch
-          align={{ bottom: 'top', left: 'left' }}
+          align={dropAlign || { bottom: 'top', left: 'left' }}
           onClickOutside={() => setShowOptions(false)}
         >
           <Box pad={{ vertical: 'xsmall' }}>

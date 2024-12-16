@@ -2,83 +2,45 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { FormattedMessage } from 'react-intl';
-import { Control, Form, Errors } from 'react-redux-form/immutable';
+
+import { Form } from 'react-redux-form/immutable';
 import styled from 'styled-components';
+import { get } from 'lodash/object';
+import { Box, ResponsiveContext } from 'grommet';
 import { palette } from 'styled-theme';
 
-import { omit } from 'lodash/object';
+import { isMinSize } from 'utils/responsive';
 
-import asArray from 'utils/as-array';
-import appMessage from 'utils/app-message';
-
+import { blockNavigation } from 'containers/App/actions';
 import { selectNewEntityModal } from 'containers/App/selectors';
+
+import ButtonForm from 'components/buttons/ButtonForm';
+import ButtonCancel from 'components/buttons/ButtonCancel';
+import Button from 'components/buttons/ButtonSimple';
+
+import Icon from 'components/Icon';
+
+import FormWrapper from 'components/forms/FormWrapper';
 
 import appMessages from 'containers/App/messages';
 
-import Icon from 'components/Icon';
-import FieldFactory from 'components/fields/FieldFactory';
-
-import Button from 'components/buttons/Button';
-import ButtonCancel from 'components/buttons/ButtonCancel';
-import ButtonSubmit from 'components/buttons/ButtonSubmit';
-import ButtonForm from 'components/buttons/ButtonForm';
-import FieldGroupWrapper from 'components/fields/FieldGroupWrapper';
-import FieldGroupLabel from 'components/fields/FieldGroupLabel';
-import FieldWrap from 'components/fields/FieldWrap';
-import Field from 'components/fields/Field';
-import GroupIcon from 'components/fields/GroupIcon';
-import GroupLabel from 'components/fields/GroupLabel';
-import Clear from 'components/styled/Clear';
-import ViewPanel from 'components/EntityView/ViewPanel';
-
-import FieldLabel from 'components/forms/Label';
-import ErrorWrapper from 'components/forms/ErrorWrapper';
-import FormFooter from 'components/forms/FormFooter';
-import FormFooterButtons from 'components/forms/FormFooterButtons';
-import FormBody from 'components/forms/FormBody';
-import FormWrapper from 'components/forms/FormWrapper';
-import Aside from 'components/EntityView/Aside';
-import Main from 'components/EntityView/Main';
-import FormFieldWrap from 'components/forms/FormFieldWrap';
-import ControlTitle from 'components/forms/ControlTitle';
-import ControlTitleText from 'components/forms/ControlTitleText';
-import ControlShort from 'components/forms/ControlShort';
-import ControlInput from 'components/forms/ControlInput';
-import ControlCheckbox from 'components/forms/ControlCheckbox';
-import ControlTextArea from 'components/forms/ControlTextArea';
-import ControlSelect from 'components/forms/ControlSelect';
-import MarkdownControl from 'components/forms/MarkdownControl';
-import DateControl from 'components/forms/DateControl';
-import RadioControl from 'components/forms/RadioControl';
-import Required from 'components/forms/Required';
-import MultiSelectField from 'components/forms/MultiSelectField';
+import FormContentWrapper from './FormContentWrapper';
+import FormFooter from './FormFooter';
+import SkipIconNext from './SkipIconNext';
+import WarningDot from './WarningDot';
 
 import messages from './messages';
-
-const StyledForm = styled(Form)`
-  display: table;
-  width: 100%;
-`;
-
-const Hint = styled.div`
-  color: ${palette('text', 1)};
-  font-size: ${(props) => props.theme.sizes.text.small};
-  margin-top: -6px;
-  @media print {
-    font-size: ${(props) => props.theme.sizes.print.small};
-  }
-`;
 
 const DeleteConfirmText = styled.span`
   padding-left: 1em;
   padding-right: 1em;
 `;
-const DeleteWrapper = styled.div`
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
+const Styled = styled.div`
+  margin-bottom: ${({ inModal }) => inModal ? 0 : 300}px;
 `;
+const DeleteWrapper = styled(
+  (p) => <Box direction="row" align="center" pad={{ vertical: 'medium' }} {...p} />
+)``;
 
 const ButtonDelete = styled(ButtonForm)`
   color: ${palette('buttonFlat', 0)};
@@ -87,42 +49,130 @@ const ButtonDelete = styled(ButtonForm)`
   }
 `;
 
-const ButtonPreDelete = styled(Button)`
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
+const ButtonPreDelete = styled(ButtonForm)`
   color: ${palette('text', 1)};
   &:hover {
     color: ${palette('linkHover', 2)};
   }
 `;
+const StyledForm = styled(Form)`
+  width: 100%;
+`;
 
-const controls = {
-  input: ControlInput,
-  url: ControlInput,
-  email: ControlInput,
-  title: ControlTitle,
-  titleText: ControlTitleText,
-  short: ControlShort,
-  textarea: ControlTextArea,
-  markdown: MarkdownControl,
-  date: DateControl,
-  select: ControlSelect,
-  radio: RadioControl,
-  checkbox: ControlCheckbox,
-  button: Control.button,
-};
+const FormSteps = styled(
+  (p) => <Box direction="row" fill="horizontal" responsive={false} {...p} />
+)`
+  background: #DADDE0;
+  overflow: hidden;
+`;
+const FormStepWrapper = styled(
+  (p) => <Box {...p} />
+)`
+  position: relative;
+`;
+const SkipButton = styled(
+  (p) => <Button {...p} />
+)`
+  opacity: 1;
+  color: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlight};
+  stroke: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlight};
+  fill: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlight};
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
+  &:hover {
+    color: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlightHover};
+    stroke: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlightHover};
+    fill: ${({ theme, disabled }) => disabled ? '#B7BCBF' : theme.global.colors.highlightHover};
+  }
+`;
+const HighlightBackground = styled.div`
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: ${({ lastItem }) => lastItem ? 0 : 13}px;
+  left: 0;
+  background-color: ${({ theme }) => theme.global.colors.highlight};
+`;
 
-// These props will be omitted before being passed to the Control component
-const NON_CONTROL_PROPS = ['hint', 'label', 'component', 'controlType', 'children', 'errorMessages'];
+const ButtonStep = styled(
+  (p) => <Button {...p} />
+)`
+  position: relative;
+  height: 52px;
+  text-align: left;
+  color: ${({ highlight }) => highlight ? 'white' : '#777E7E'};
+  padding: 4px 8px;
+  opacity: 1;
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
+  &:hover {
+    color: ${({ theme, highlight, disabled }) => {
+    if (disabled) return highlight ? 'white' : '#777E7E';
+    return highlight ? 'white' : theme.global.colors.highlightHover;
+  }};
+  }
+  &:focus {
+    outline: 0;
+    color: ${({ theme, highlight, disabled }) => {
+    if (disabled) return highlight ? 'white' : '#777E7E';
+    return highlight ? 'white' : theme.global.colors.highlightHover;
+  }};
+  }
+`;
+const ButtonStepArrow = styled.div`
+  display: ${({ lastItem }) => lastItem ? 'none' : 'block'};
+  content: '';
+  width: 0;
+  height: 0;
+  position: absolute;
+  right: 0;
+  top: -4px;
+  z-index: 1;
+  border-top: 30px solid ${({ theme, prevHighlighted }) => prevHighlighted ? theme.global.colors.highlight : 'transparent'};
+  border-bottom: 30px solid ${({ theme, prevHighlighted }) => prevHighlighted ? theme.global.colors.highlight : 'transparent'};
+  border-left: 15px solid white;
+  &:before {
+    content: '';
+    width: 0;
+    height: 0;
+    border-top: 30px solid transparent;
+    border-bottom: 30px solid transparent;
+    border-left: 15px solid ${({ theme, highlight }) => highlight ? theme.global.colors.highlight : '#DADDE0'};
+    position: absolute;
+    top: -30px;
+    right: 1.5px;
+}
+`;
+const ButtonStepLabel = styled.span`
+  font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 20px;
+  position: relative;
+  top: -1px;
+`;
 
+const ButtonStepLabelUpper = styled(ButtonStepLabel)`
+  text-transform: uppercase;
+  font-size: ${({ theme }) => theme.text.medium.size};
+  color: ${({ theme, disabled }) => disabled ? '' : theme.global.colors.highlight};
+`;
+
+const SkipButtonInner = styled(
+  (p) => <Box direction="row" gap="small" align="center" {...p} />
+)``;
+
+const ButtonSubmitSubtle = styled(ButtonForm)`
+  color: ${({ theme, disabled }) => disabled ? '#DADDE0' : theme.global.colors.highlight};
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
+  &:hover {
+    color: ${({ theme, disabled }) => disabled ? '#DADDE0' : theme.global.colors.highlightHover};
+  }
+`;
 
 class EntityForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor() {
     super();
     this.state = {
       deleteConfirmed: false,
+      stepActive: null,
+      stepsSeen: [],
     };
   }
 
@@ -134,239 +184,45 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     return true;
   }
 
-  getControlProps = (field) => {
-    switch (field.controlType) {
-      case 'select': // we will render select options as children, so don't pass options prop directly to the control
-        return omit(field, NON_CONTROL_PROPS.concat(['options']));
-      default:
-        return omit(field, NON_CONTROL_PROPS);
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    const { hasFormChanges } = nextProps;
+    if (hasFormChanges) this.props.onBlockNavigation(true);
+    if (hasFormChanges && !this.props.hasFormChanges) {
+      window.addEventListener('beforeunload', this.handleBeforeUnload);
+    } else if (!hasFormChanges && this.props.hasFormChanges) {
+      window.removeEventListener('beforeunload', this.handleBeforeUnload);
     }
   }
 
-  // REGULAR COMPONENT
-  getFieldComponent = (field) => {
-    if (field.component) {
-      return field.component; // Don't use this unless you really have to
-    } if (field.controlType in controls) {
-      return controls[field.controlType];
-    }
-    return controls.input; // Default to input type if not specified
+  componentWillUnmount() {
+    this.props.onBlockNavigation(false);
+    window.removeEventListener('beforeunload', this.handleBeforeUnload);
   }
 
-  preDelete = (confirm = true) => {
+  handleBeforeUnload = (e) => {
+    if (this.props.hasFormChanges) {
+      e.preventDefault();
+      e.returnValue = ''; // Modern browsers require this to show the confirmation dialog
+    }
+  };
+
+  setDeleteConfirmed = (confirm = true) => {
     this.setState({ deleteConfirmed: confirm });
+  }
+
+  setStepActive = (stepActive) => {
+    this.setState({ stepActive });
+  }
+
+  addStepSeen = (stepSeen) => {
+    this.setState((prevState) => ({ stepsSeen: [...prevState.stepsSeen, stepSeen] }));
   }
 
   handleSubmit = (formData) => !this.props.saving && this.props.handleSubmit(formData);
 
-  renderMultiSelect = (field, formData, closeMultiselectOnClickOutside, scrollContainer) => (
-    <MultiSelectField
-      field={field}
-      scrollContainer={scrollContainer}
-      fieldData={formData.getIn(field.dataPath)}
-      closeOnClickOutside={closeMultiselectOnClickOutside}
-      handleUpdate={(fieldData) => this.props.handleUpdate(formData.setIn(field.dataPath, fieldData))}
-    />
-  )
-
-  renderFieldChildren = (field) => {
-    const { intl } = this.context;
-    // handle known cases here
-    switch (field.controlType) {
-      case 'select':
-        return field.options && field.options.map((option, i) => (
-          <option key={i} value={option.value} {...option.props}>
-            { option.message
-              ? appMessage(intl, option.message)
-              : (option.label || option.value)
-            }
-          </option>
-        ));
-      case 'info':
-        return field.displayValue;
-      default:
-        return field.children || null; // enables passing children component, or null
-    }
-  }
-
-  renderComponent = (field) => {
-    const { id, model, ...props } = this.getControlProps(field);
-    const FieldComponent = this.getFieldComponent(field);
-    return (
-      <FieldComponent
-        id={id}
-        model={model || `.${id}`}
-        debounce={500}
-        {...props}
-      >
-        {this.renderFieldChildren(field)}
-      </FieldComponent>
-    );
-  }
-
-  renderCombo = (field) => (
-    <FieldWrap>
-      {
-        field.fields.map((comboField, i) => (
-          <span key={i}>
-            { this.renderFormField(comboField, true) }
-          </span>
-        ))
-      }
-    </FieldWrap>
-  );
-
-  renderFormField = (field, nested, closeMultiselectOnClickOutside, scrollContainer) => {
-    let formField;
-    if (!field.controlType) {
-      formField = this.renderComponent(field);
-    } else {
-      switch (field.controlType) {
-        case 'info':
-          formField = (<FieldFactory field={field} nested={nested} />);
-          break;
-        case 'combo':
-          formField = this.renderCombo(field);
-          break;
-        case 'multiselect':
-          formField = this.renderMultiSelect(
-            field,
-            this.props.formData,
-            closeMultiselectOnClickOutside,
-            scrollContainer,
-          );
-          break;
-        default:
-          formField = this.renderComponent(field);
-      }
-    }
-    return (
-      <FormFieldWrap nested={nested}>
-        { field.label && field.controlType !== 'multiselect' && field.controlType !== 'info'
-          && (
-            <FieldLabel htmlFor={field.id} inline={field.controlType === 'checkbox' || field.controlType === 'markdown'}>
-              { field.controlType === 'checkbox' && formField }
-              { field.label }
-              { field.validators && field.validators.required
-              && <Required>*</Required>
-              }
-            </FieldLabel>
-          )
-        }
-        { field.hint
-          && <Hint>{field.hint}</Hint>
-        }
-        { field.controlType !== 'checkbox' && formField }
-      </FormFieldWrap>
-    );
-  }
-
-  renderGroup = (group, closeMultiselectOnClickOutside, scrollContainer) => (
-    <FieldGroupWrapper>
-      { group.label
-        && (
-          <FieldGroupLabel>
-            <GroupLabel>
-              {group.label}
-            </GroupLabel>
-            { group.icon
-            && (
-              <GroupIcon>
-                <Icon name={group.icon} />
-              </GroupIcon>
-            )
-            }
-          </FieldGroupLabel>
-        )
-      }
-      {
-        group.fields.map((field, i) => field
-          ? (
-            <Field labelledGroup={!!group.label} key={i} printHide={field.printHide}>
-              {this.renderFormField(
-                field,
-                false,
-                closeMultiselectOnClickOutside,
-                scrollContainer,
-              )}
-              {
-                field.errorMessages
-                && (
-                  <ErrorWrapper>
-                    <Errors
-                      className="errors"
-                      model={field.model}
-                      show={(fieldValue) => fieldValue.touched || !fieldValue.pristine}
-                      messages={field.errorMessages}
-                    />
-                  </ErrorWrapper>
-                )
-              }
-            </Field>
-          )
-          : null)
-      }
-    </FieldGroupWrapper>
-  )
-
-  renderMain = (
-    fieldGroups,
-    hasAside = true,
-    bottom = false,
-    closeMultiselectOnClickOutside = false,
-    scrollContainer,
-  ) => (
-    <Main hasAside={hasAside} bottom={bottom}>
-      {
-        asArray(fieldGroups).map(
-          (fieldGroup, i) => {
-            // skip group if no group or fields are present
-            if (!fieldGroup.fields
-              || !fieldGroup.fields.reduce((memo, field) => memo || field, false)
-            ) {
-              return null;
-            }
-            return (
-              <div key={i}>
-                {this.renderGroup(fieldGroup, closeMultiselectOnClickOutside, scrollContainer)}
-              </div>
-            );
-          }
-        )
-      }
-    </Main>
-  );
-
-  renderAside = (
-    fieldGroups,
-    bottom = false,
-    closeMultiselectOnClickOutside = false,
-    scrollContainer,
-  ) => (
-    <Aside bottom={bottom}>
-      {
-        asArray(fieldGroups).map(
-          (fieldGroup, i) => {
-            // skip group if no group or fields are present
-            if (!fieldGroup.fields
-              || !fieldGroup.fields.reduce((memo, field) => memo || field, false)
-            ) {
-              return null;
-            }
-            return (
-              <div key={i}>
-                {this.renderGroup(fieldGroup, closeMultiselectOnClickOutside, scrollContainer)}
-              </div>
-            );
-          }
-        )
-      }
-    </Aside>
-  );
-
   render() {
     const {
-      fields,
+      fieldsByStep,
       model,
       handleCancel,
       handleSubmitFail,
@@ -374,122 +230,368 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       validators,
       newEntityModal, // is any new entity modal active
       scrollContainer,
+      formData,
+      formDataTracked,
+      handleUpdate,
+      handleDelete,
+      isNewEntityView,
+      saving,
+      handleSubmitRemote,
+      typeLabel,
+      hasFormChanges,
+      // onBlockNavigation,
     } = this.props;
+    const { deleteConfirmed, stepActive, stepsSeen } = this.state;
     const closeMultiselectOnClickOutside = !newEntityModal || inModal;
+    let byStep = fieldsByStep;
+    const footerStep = byStep.find((step) => step.id === 'footer');
+    const footerFields = footerStep && footerStep.fields && footerStep.fields.filter((f) => !!f);
+    byStep = byStep.filter((step) => step.id !== 'footer');
+    // the active step id
+    const cleanStepActive = stepActive || (byStep && byStep[0] && byStep[0].id);
+    // the active step
+    // the order of the active step
+    const activeStepIndex = byStep.map((step) => step.id).indexOf(cleanStepActive);
+    const nextStepIndex = activeStepIndex + 1 < byStep.length ? activeStepIndex + 1 : null;
+    const prevStepIndex = activeStepIndex > 0 ? activeStepIndex - 1 : null;
+    // console.log('activeStepIndex, byStep[activeStepIndex]', activeStepIndex, byStep[activeStepIndex])
+    // console.log('prevStepIndex, byStep[prevStepIndex]', prevStepIndex, byStep[prevStepIndex])
+    // console.log('nextStepIndex, byStep[nextStepIndex]', nextStepIndex, byStep[nextStepIndex], activeStepIndex + 1 <= byStep.length)
+    // console.log('formDataTracked', formDataTracked)
+    const stepsWithStatus = byStep && byStep.map(
+      (step, idx) => {
+        if (!step.sections) return step;
+        const currentStepBeforeActive = idx <= activeStepIndex;
+        const currentStepPreviouslySeen = stepsSeen.indexOf(step.id) > -1;
+        const stepSeen = currentStepPreviouslySeen || currentStepBeforeActive;
+        const [
+          hasEmptyRequired,
+          hasAutofill,
+          hasErrors,
+          hasChanges,
+        ] = step.sections.reduce(
+          (memo, section) => {
+            if (!section.rows) return memo;
+            const resultSection = section.rows.reduce(
+              (memo2, row) => {
+                if (!row.fields) return memo2;
+                const resultRow = row.fields.reduce(
+                  (memo3, field) => {
+                    if (!field) return memo3;
+                    const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
+                    const fieldTracked = get(formDataTracked, modelPath);
+                    if (!fieldTracked) return memo3;
+                    const isRequiredEmpty = fieldTracked
+                      && field.hasrequired
+                      && fieldTracked.value === '';
+                    let hasFieldAutofill = isNewEntityView && field.autofill;
+                    if (
+                      isNewEntityView
+                      && (field.controlType === 'select' || field.controlType === 'multiselect' || !!field.options)
+                    ) {
+                      hasFieldAutofill = !!Object.values(fieldTracked).some((options) => !!options.autofill);
+                    }
+                    let hasFieldChanges = (fieldTracked.touched || !fieldTracked.pristine);
+                    let isValid = hasFieldChanges && typeof fieldTracked.valid !== 'undefined' && fieldTracked.valid;
+                    if (fieldTracked.$form && field.controlType === 'multiselect') {
+                      hasFieldChanges = (fieldTracked.$form.touched || !fieldTracked.$form.pristine);
+                      isValid = hasFieldChanges
+                        && typeof fieldTracked.$form.valid !== 'undefined' && fieldTracked.$form.valid;
+                    }
+                    // WARNING: validity/errors are reset when field component unmount (on step change)
+                    const hasError = hasFieldChanges && !isValid;
+                    const resultField = [
+                      memo3[0] || isRequiredEmpty,
+                      memo3[1] || hasFieldAutofill,
+                      memo3[2] || hasError,
+                      memo3[3] || hasFieldChanges,
+                    ];
+                    return resultField;
+                  },
+                  memo2,
+                );
+                return resultRow;
+              },
+              memo,
+            );
+            return resultSection;
+          },
+          [false, false, false, false],
+        );
+        return ({
+          ...step,
+          hasEmptyRequired,
+          hasUnseenAutofill: isNewEntityView && !stepSeen && hasAutofill,
+          seen: stepSeen,
+          highlighted: currentStepBeforeActive,
+          previouslySeen: currentStepPreviouslySeen,
+          isActive: step.id === cleanStepActive,
+          hasErrors,
+          hasChanges,
+        });
+      }
+    );
+    const isBlocked = !hasFormChanges
+    || (stepsWithStatus && stepsWithStatus.some(
+      (step) => (step.hasEmptyRequired || step.hasUnseenAutofill || step.hasErrors)
+    ));
+    // const isNavigationBlocked = stepsWithStatus && stepsWithStatus.some(
+    //   (step) => (step.hasChanges)
+    // );
+    const activeStep = stepsWithStatus && stepsWithStatus.find((step) => step.isActive);
+    // console.log('stepsWithStatus', stepsWithStatus, isBlocked)
+    // console.log('hasChanges', isNavigationBlocked)
+    // console.log('formDataTracked', formDataTracked)
+    const activeStepHasErrors = activeStep.hasErrors;
     return (
-      <FormWrapper withoutShadow={inModal} hasMarginBottom={!inModal}>
-        <StyledForm
-          model={model}
-          onSubmit={this.handleSubmit}
-          onSubmitFailed={handleSubmitFail}
-          validators={validators}
-        >
-          <FormBody>
-            {fields.header && (
-              <ViewPanel>
-                {fields.header.main && this.renderMain(
-                  fields.header.main,
-                  !!fields.header.aside,
-                  false,
-                  closeMultiselectOnClickOutside,
-                  scrollContainer,
+      <ResponsiveContext.Consumer>
+        {(size) => (
+          <Styled inModal={inModal}>
+            {!inModal && (
+              <Box direction="row" justify="end">
+                {handleCancel && (
+                  <Box>
+                    <ButtonCancel
+                      type="button"
+                      onClick={(e) => {
+                        if (e && e.preventDefault) e.preventDefault();
+                        handleCancel(e);
+                      }}
+                    >
+                      <FormattedMessage {...appMessages.buttons.cancel} />
+                    </ButtonCancel>
+                  </Box>
                 )}
-                {fields.header.aside && this.renderAside(
-                  fields.header.aside,
-                  false,
-                  closeMultiselectOnClickOutside,
-                  scrollContainer,
-                )}
-              </ViewPanel>
+                <Box>
+                  <ButtonSubmitSubtle
+                    type="button"
+                    disabled={isBlocked}
+                    onClick={(e) => {
+                      if (e && e.preventDefault) e.preventDefault();
+                      handleSubmitRemote(e);
+                    }}
+                  >
+                    Save & Close
+                  </ButtonSubmitSubtle>
+                </Box>
+              </Box>
             )}
-            {fields.body && (
-              <ViewPanel>
-                {fields.body.main && this.renderMain(
-                  fields.body.main,
-                  true,
-                  true,
-                  closeMultiselectOnClickOutside,
-                  scrollContainer,
+            <FormWrapper hasMarginBottom={false}>
+              <StyledForm
+                model={model}
+                onSubmit={this.handleSubmit}
+                onSubmitFailed={handleSubmitFail}
+                validators={validators}
+              >
+                {stepsWithStatus && (
+                  <FormSteps>
+                    {stepsWithStatus.map((step, idx) => {
+                      const {
+                        hasEmptyRequired,
+                        hasUnseenAutofill,
+                        highlighted,
+                        isActive,
+                        hasErrors,
+                      } = step;
+                      let title = step.title || step.id;
+                      if (!isMinSize(size, 'medium')) {
+                        if (!isActive) {
+                          title = '';
+                        } else if (isActive && step.titleSmall) {
+                          title = step.titleSmall;
+                        }
+                      }
+                      if (byStep.length > 1) {
+                        title = `${idx + 1}.${title ? ' ' : ''}${title}`;
+                      }
+                      return (
+                        <FormStepWrapper
+                          key={step.id}
+                          basis={(isMinSize(size, 'medium') && byStep.length > 1)
+                            ? `1/${byStep.length}`
+                            : 'auto'}
+                          flex={((!isMinSize(size, 'medium') && isActive) || byStep.length === 1) ? { grow: 1 } : false}
+                          direction="row"
+                        >
+                          <ButtonStepArrow highlight={highlighted} lastItem={idx + 1 === byStep.length} prevHighlighted={activeStepIndex > idx} />
+                          {highlighted && (
+                            <HighlightBackground lastItem={idx + 1 === byStep.length} />
+                          )}
+                          <Box basis="full" style={{ position: 'relative', zIndex: 1 }}>
+                            <ButtonStep
+                              highlight={highlighted}
+                              disabled={activeStepHasErrors}
+                              onClick={(evt) => {
+                                if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+                                if (!isActive) {
+                                  this.setStepActive(step.id);
+                                  this.addStepSeen(cleanStepActive);
+                                }
+                              }}
+                              lastItem={idx + 1 === byStep.length}
+                            >
+                              <Box direction="row" align="center" gap="small">
+                                <ButtonStepLabel>
+                                  {title}
+                                </ButtonStepLabel>
+                                <Box direction="row" align="center" gap="xxsmall">
+                                  {hasErrors && (
+                                    <WarningDot type="error" />
+                                  )}
+                                  {!hasErrors && hasEmptyRequired && (
+                                    <WarningDot type="required" />
+                                  )}
+                                  {hasUnseenAutofill && (
+                                    <WarningDot type="autofill" />
+                                  )}
+                                </Box>
+                              </Box>
+                            </ButtonStep>
+                          </Box>
+                        </FormStepWrapper>
+                      );
+                    })}
+                  </FormSteps>
                 )}
-                {fields.body.aside && this.renderAside(
-                  fields.body.aside,
-                  true,
-                  closeMultiselectOnClickOutside,
-                  scrollContainer,
+                <FormContentWrapper
+                  step={activeStep}
+                  fields={activeStep && activeStep.fields}
+                  sections={activeStep && activeStep.sections}
+                  formData={formData}
+                  formDataTracked={formDataTracked}
+                  closeMultiselectOnClickOutside={closeMultiselectOnClickOutside}
+                  scrollContainer={scrollContainer}
+                  handleUpdate={handleUpdate}
+                  isNewEntityView={isNewEntityView}
+                />
+                {stepsWithStatus && stepsWithStatus.length > 1 && (
+                  <Box
+                    direction="row"
+                    justify="between"
+                    pad={{ vertical: 'medium', horizontal: 'medium' }}
+                    style={{
+                      borderTop: '1px solid #B7BCBF',
+                    }}
+                  >
+                    <SkipButton
+                      disabled={activeStepHasErrors || prevStepIndex === null}
+                      onClick={(evt) => {
+                        if (evt && evt.preventDefault) evt.preventDefault();
+                        if (byStep[prevStepIndex]) {
+                          this.setStepActive(byStep[prevStepIndex].id);
+                          this.addStepSeen(activeStep.id);
+                        }
+                      }}
+                    >
+                      <SkipButtonInner>
+                        <SkipIconNext reverse />
+                        <ButtonStepLabelUpper
+                          disabled={activeStepHasErrors || prevStepIndex === null}
+                        >
+                          Previous
+                        </ButtonStepLabelUpper>
+                      </SkipButtonInner>
+                    </SkipButton>
+                    <SkipButton
+                      disabled={activeStepHasErrors || nextStepIndex === null}
+                      plain
+                      onClick={(evt) => {
+                        if (evt && evt.preventDefault) evt.preventDefault();
+                        if (byStep[nextStepIndex]) {
+                          this.setStepActive(byStep[nextStepIndex].id);
+                          this.addStepSeen(byStep[nextStepIndex].id);
+                        }
+                      }}
+                    >
+                      <SkipButtonInner>
+                        <ButtonStepLabelUpper
+                          disabled={activeStepHasErrors || nextStepIndex === null}
+                        >
+                          Next
+                        </ButtonStepLabelUpper>
+                        <SkipIconNext disabled={activeStepHasErrors || nextStepIndex === null} />
+                      </SkipButtonInner>
+                    </SkipButton>
+                  </Box>
                 )}
-              </ViewPanel>
-            )}
-          </FormBody>
-          <FormFooter>
-            {this.props.handleDelete && !this.state.deleteConfirmed && (
+                <FormFooter
+                  fields={footerFields}
+                  formData={formData}
+                  formDataTracked={formDataTracked}
+                  handleCancel={handleCancel}
+                  isBlocked={isBlocked || saving}
+                />
+              </StyledForm>
+            </FormWrapper>
+            {handleDelete && !deleteConfirmed && (
               <DeleteWrapper>
-                <ButtonPreDelete type="button" onClick={this.preDelete}>
-                  <Icon name="trash" sizes={{ mobile: '1.8em' }} />
+                <ButtonPreDelete type="button" onClick={this.setDeleteConfirmed}>
+                  <Box direction="row" gap="small" align="center">
+                    <Icon name="trash" sizes={{ mobile: '1.8em' }} />
+                    <span>{`Delete ${typeLabel}`}</span>
+                  </Box>
                 </ButtonPreDelete>
               </DeleteWrapper>
             )}
-            {this.props.handleDelete && this.state.deleteConfirmed && (
-              <FormFooterButtons left>
+            {handleDelete && deleteConfirmed && (
+              <DeleteWrapper>
                 <DeleteConfirmText>
                   <FormattedMessage {...messages.confirmDeleteQuestion} />
                 </DeleteConfirmText>
                 <ButtonCancel
                   type="button"
-                  onClick={() => this.preDelete(false)}
+                  onClick={() => this.setDeleteConfirmed(false)}
                 >
                   <FormattedMessage {...messages.buttons.cancelDelete} />
                 </ButtonCancel>
-                <ButtonDelete type="button" onClick={this.props.handleDelete}>
+                <ButtonDelete type="button" onClick={handleDelete}>
                   <FormattedMessage {...messages.buttons.confirmDelete} />
                 </ButtonDelete>
-              </FormFooterButtons>
+              </DeleteWrapper>
             )}
-            {!this.state.deleteConfirmed && (
-              <FormFooterButtons>
-                <ButtonCancel
-                  type="button"
-                  onClick={handleCancel}
-                >
-                  <FormattedMessage {...appMessages.buttons.cancel} />
-                </ButtonCancel>
-                <ButtonSubmit type="submit" disabled={this.props.saving}>
-                  <FormattedMessage {...appMessages.buttons.save} />
-                </ButtonSubmit>
-              </FormFooterButtons>
-            )}
-            <Clear />
-          </FormFooter>
-        </StyledForm>
-      </FormWrapper>
+          </Styled>
+        )}
+      </ResponsiveContext.Consumer>
     );
   }
 }
 
-const mapStateToProps = (state) => ({
-  newEntityModal: selectNewEntityModal(state),
-});
 
 EntityForm.propTypes = {
   handleSubmitFail: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
   handleCancel: PropTypes.func.isRequired,
+  handleSubmitRemote: PropTypes.func,
   handleDelete: PropTypes.func,
   handleUpdate: PropTypes.func,
+  onBlockNavigation: PropTypes.func,
   model: PropTypes.string,
-  fields: PropTypes.object,
+  fieldsByStep: PropTypes.array,
   formData: PropTypes.object,
+  formDataTracked: PropTypes.object,
   inModal: PropTypes.bool,
   saving: PropTypes.bool,
+  isNewEntityView: PropTypes.bool,
+  isMine: PropTypes.bool,
   newEntityModal: PropTypes.object,
   validators: PropTypes.object,
   scrollContainer: PropTypes.object,
+  hasFormChanges: PropTypes.bool,
+  typeLabel: PropTypes.string,
 };
 EntityForm.defaultProps = {
   saving: false,
+  hasFormChanges: false,
 };
 
-EntityForm.contextTypes = {
-  intl: PropTypes.object.isRequired,
-};
+const mapStateToProps = (state) => ({
+  newEntityModal: selectNewEntityModal(state),
+});
 
-export default connect(mapStateToProps)(EntityForm);
+export function mapDispatchToProps(dispatch) {
+  return {
+    onBlockNavigation: (value) => dispatch(blockNavigation(value)),
+  };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(EntityForm);

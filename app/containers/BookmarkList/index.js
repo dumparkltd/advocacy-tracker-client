@@ -94,11 +94,11 @@ const Target = styled(Button)`
   &:last-child {
     border-bottom: 0;
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     font-size: 0.85em;
     padding: 0.3em 8px 0.3em 12px;
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.xlarge}) {
     padding: 0.4em 20px 0.4em 24px
   }
   @media print {
@@ -213,11 +213,11 @@ export class BookmarkList extends React.PureComponent { // eslint-disable-line r
 
   updateViewport() {
     let viewport = VIEWPORTS.MOBILE;
-    if (window.innerWidth >= parseInt(this.props.theme.breakpoints.xlarge, 10)) {
+    if (window.innerWidth > parseInt(this.props.theme.breakpoints.xlarge, 10)) {
       viewport = VIEWPORTS.LARGE;
-    } else if (window.innerWidth >= parseInt(this.props.theme.breakpoints.large, 10)) {
+    } else if (window.innerWidth > parseInt(this.props.theme.breakpoints.large, 10)) {
       viewport = VIEWPORTS.MEDIUM;
-    } else if (window.innerWidth >= parseInt(this.props.theme.breakpoints.medium, 10)) {
+    } else if (window.innerWidth > parseInt(this.props.theme.breakpoints.medium, 10)) {
       viewport = VIEWPORTS.SMALL;
     }
     this.setState({ viewport });

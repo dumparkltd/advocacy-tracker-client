@@ -1,10 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Text } from 'grommet';
+import { Box } from 'grommet';
 import { FormClose } from 'grommet-icons';
 
 import Dot from 'components/styled/Dot';
 import PrintHide from 'components/styled/PrintHide';
+import TextPrint from 'components/styled/TextPrint';
 import { usePrint } from 'containers/App/PrintContext';
 import ButtonTagFilter from '../ButtonTagFilter';
 import ButtonTagFilterInverse from '../ButtonTagFilterInverse';
@@ -46,9 +47,9 @@ function ButtonTagFilterWrap({
         {filter && filter.dot && (
           <Dot color={filter.dot} />
         )}
-        <Text size="small">
+        <TextPrint size="xsmall">
           {label}
-        </Text>
+        </TextPrint>
         {showConnectedAttributes && filter && filter.connectedAttributes && (
           <Box direction="row" gap="hair" align="center">
             {filter.connectedAttributes.map(

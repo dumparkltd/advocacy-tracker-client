@@ -7,7 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import { isMinSize } from 'utils/responsive';
 
 import {
-  CONTENT_SINGLE, CONTENT_PAGE, CONTENT_MODAL,
+  CONTENT_PAGE, CONTENT_MODAL,
 } from 'containers/App/constants';
 
 import SupTitle from 'components/SupTitle';
@@ -21,13 +21,13 @@ import { usePrint } from 'containers/App/PrintContext';
 const Styled = styled.div`
   padding: ${({ isModal, hasViewOptions }) => {
     if (isModal) return '0 0 10px 10px';
-    if (hasViewOptions) return '0.5em 0 0.5em';
+    if (hasViewOptions) return '0';
     return '1em 0 0.5em';
   }};
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: ${({ isModal, hasViewOptions }) => {
     if (isModal) return '20px 0 20px 24px';
-    if (hasViewOptions) return '0 0 1em';
+    if (hasViewOptions) return '0';
     return '3em 0 1em';
   }};
   }
@@ -37,15 +37,27 @@ const Styled = styled.div`
 //   line-height: 1;
 //   margin-top: 10px;
 // `;
-const TitleMedium = styled.h3`
+export const TitleMedium = styled.h3`
+  font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  text-transform: uppercase;
   line-height: 1;
   margin: 15px 0;
   display: inline-block;
+  font-weight: normal;
+  position: relative;
+  top: -0.07em;
+  font-size: 33px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    font-size: 42px;
+  }
 `;
 const TitleMediumPrint = styled.h3`
+  font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  text-transform: uppercase;
   margin-bottom: 0px;
   margin-top: 22px;
-  font-size: 18pt;
+  font-size: 12pt;
+  font-weight: normal;
   @media print {
     margin-bottom: 5px;
   }
@@ -60,7 +72,7 @@ const ButtonWrap = styled.span`
   }
 `;
 const TitleButtonWrap = styled((p) => <Box align="center" direction="row" {...p} />)`
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     min-height: 62px;
     width: 100%;
   }
@@ -69,7 +81,7 @@ const TitleButtonWrap = styled((p) => <Box align="center" direction="row" {...p}
 const ButtonGroup = styled((p) => <Box align="center" direction="row" {...p} />)`
   text-align: left;
   margin-bottom: 10px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     margin-bottom: -4px;
   }
 `;
@@ -95,8 +107,6 @@ const InfoTitlePrintOnly = styled(Text)`
 const renderTitle = (type, title) => {
   switch (type) {
     case CONTENT_PAGE:
-    case CONTENT_MODAL:
-    case CONTENT_SINGLE:
       return (
         <SupTitle title={title} />
       );
@@ -117,6 +127,7 @@ export function ContentHeader({
 }) {
   const isPrintView = usePrint();
   const size = React.useContext(ResponsiveContext);
+
   return (
     <Styled
       hasBottomBorder={type === CONTENT_PAGE || type === CONTENT_MODAL}

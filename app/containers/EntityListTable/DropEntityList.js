@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box, Text, Button,
-} from 'grommet';
+import { Box, Text } from 'grommet';
 import styled from 'styled-components';
 
 import { injectIntl, intlShape } from 'react-intl';
@@ -10,8 +8,9 @@ import { injectIntl, intlShape } from 'react-intl';
 import { truncateText } from 'utils/string';
 import { ACTORTYPES_CONFIG, ACTIONTYPES_CONFIG, ROUTES } from 'themes/config';
 import appMessages from 'containers/App/messages';
+import Button from 'components/buttons/ButtonTableCell';
 
-const LinkInTT = styled((p) => <Button as="a" plain {...p} />)`
+const LinkInTT = styled((p) => <Button as="a" {...p} />)`
   line-height: 13px;
 `;
 const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`

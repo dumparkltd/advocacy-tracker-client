@@ -15,25 +15,37 @@ import { Box, Text } from 'grommet';
 
 import Header from 'components/Header';
 import Overlay from 'components/InfoOverlay/Overlay';
-import EntityNew from 'containers/EntityNew';
+import EntityNewModal from 'containers/EntityNewModal';
+import EntityPreview from 'containers/EntityPreview';
 import PrintUI from 'containers/PrintUI';
 
 import { getAuthValues } from 'utils/api-request';
 
 import { sortEntities } from 'utils/sort';
-import { ROUTES, API, PRINT } from 'themes/config';
+import {
+  ROUTES,
+  API,
+  PRINT,
+  ACTIONTYPES,
+  ACTORTYPES,
+  RESOURCETYPES,
+  USER_ROLES,
+} from 'themes/config';
 
 import {
   selectIsSignedIn,
-  selectIsUserMember,
-  selectIsUserVisitor,
+  selectHasUserRole,
+  // selectIsUserVisitor,
   selectSessionUserAttributes,
   selectReady,
   selectEntitiesWhere,
   selectNewEntityModal,
+  selectListPreviewContent,
   selectIsAuthenticating,
   selectIsPrintView,
   selectPrintConfig,
+  selectPreviewQuery,
+  selectIsCurrentActionStatement,
 } from './selectors';
 
 import {
@@ -43,6 +55,7 @@ import {
   openNewEntityModal,
   submitInvalid,
   saveErrorDismiss,
+  setListPreview,
 } from './actions';
 
 import { PrintContext } from './PrintContext';
@@ -62,7 +75,7 @@ const Main = styled.div`
   bottom:0;
   overflow: ${({ isPrint }) => isPrint ? 'auto' : 'hidden'};
   width: auto;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     top: ${({ isHome, theme }) => isHome
     ? 0
     : theme.sizes.header.banner.height
@@ -181,7 +194,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     }
   }
 
-  preparePageMenuPages = (pages, currentPath) => sortEntities(
+  preparePageMenuPages = (currentPath, pages) => sortEntities(
     pages,
     'asc',
     'order',
@@ -194,41 +207,149 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
     }))
     .toArray();
 
-  prepareMainMenuItems = (
-    isMember,
-    isVisitor,
-    currentPath,
-  ) => {
+  prepareMainMenuItems = (currentPath, isActionStatement) => {
+    const { intl } = this.context;
+    return [
+      {
+        path: ROUTES.POSITIONS,
+        title: intl.formatMessage(messages.nav.positions),
+        active: currentPath && (
+          currentPath.startsWith(ROUTES.POSITIONS)
+          || currentPath.startsWith(ROUTES.INDICATOR)
+          || currentPath.startsWith(`${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`) //  statement list
+          || isActionStatement // single statement
+        ),
+      },
+      {
+        path: ROUTES.ACTORS,
+        title: intl.formatMessage(messages.nav.actors),
+        active: currentPath && currentPath.startsWith(ROUTES.ACTOR),
+      },
+      {
+        path: ROUTES.ACTIONS,
+        title: intl.formatMessage(messages.nav.outreach),
+        active: currentPath && (
+          (
+            currentPath.startsWith(ROUTES.ACTIONS) // action list except statements
+            && !currentPath.startsWith(`${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`)
+          )
+          || (
+            currentPath.startsWith(`${ROUTES.ACTION}/`) && !isActionStatement // single action except statement
+          )
+        ),
+      },
+      {
+        path: ROUTES.BOOKMARKS,
+        title: intl.formatMessage(messages.nav.mystuff),
+        active: currentPath && currentPath.startsWith(ROUTES.BOOKMARKS),
+      },
+      {
+        path: ROUTES.SEARCH,
+        title: intl.formatMessage(messages.nav.search),
+        active: currentPath.startsWith(ROUTES.SEARCH),
+        icon: 'search',
+      },
+      // {
+      //   path: ROUTES.RESOURCES,
+      //   title: intl.formatMessage(messages.nav.resources),
+      //   active: currentPath && currentPath.startsWith(ROUTES.RESOURCE),
+      // },
+    ];
+  }
+
+  prepareUserMenuItems = (currentPath, user, isSignedIn) => {
     const { intl } = this.context;
     let navItems = [];
-    if (isVisitor) {
-      navItems = navItems.concat([
+    if (user) {
+      const userPath = `${ROUTES.USERS}/${user.id}`;
+      const userPWPath = `${ROUTES.USERS}${ROUTES.PASSWORD}/${user.id}`;
+      navItems = [
+        ...navItems,
         {
-          path: ROUTES.INDICATORS,
-          title: intl.formatMessage(messages.nav.indicators),
-          active: currentPath && currentPath.startsWith(ROUTES.INDICATOR),
+          path: userPath,
+          active: currentPath === userPath,
+          title: 'Profile',
         },
         {
-          path: ROUTES.RESOURCES,
+          path: userPWPath,
+          active: currentPath === userPWPath,
+          title: 'Change password',
+        },
+      ];
+    }
+    if (isSignedIn) {
+      navItems = [
+        ...navItems,
+        {
+          path: ROUTES.LOGOUT,
+          active: currentPath === ROUTES.LOGOUT,
+          title: intl.formatMessage(messages.nav.logout),
+        },
+      ];
+    } else {
+      navItems = [
+        ...navItems,
+        {
+          path: ROUTES.LOGIN,
+          active: currentPath === ROUTES.LOGIN,
+          title: intl.formatMessage(messages.nav.login),
+        },
+        {
+          path: ROUTES.REGISTER,
+          active: currentPath === ROUTES.REGISTER,
+          title: intl.formatMessage(messages.nav.register),
+        },
+      ];
+    }
+    return [{ title: 'User', items: navItems }];
+  }
+
+  prepareOtherMenuItems = (currentPath, pages, hasUserRole) => {
+    const { intl } = this.context;
+    let groups = [];
+    groups = [
+      ...groups,
+      {
+        title: 'Pages',
+        items: this.preparePageMenuPages(currentPath, pages),
+      },
+    ];
+    let adminItems = [];
+    if (hasUserRole[USER_ROLES.VISITOR.value]) {
+      adminItems = [
+        ...adminItems,
+        {
+          path: `${ROUTES.RESOURCES}/${RESOURCETYPES.WEB}`,
           title: intl.formatMessage(messages.nav.resources),
           active: currentPath && currentPath.startsWith(ROUTES.RESOURCE),
         },
-      ]);
+      ];
     }
-    if (isMember) {
-      navItems = navItems.concat([
+    if (hasUserRole[USER_ROLES.MEMBER.value]) {
+      adminItems = [
+        ...adminItems,
         {
           path: ROUTES.USERS,
           title: intl.formatMessage(messages.nav.users),
           isAdmin: true,
           active: currentPath === ROUTES.USERS,
         },
+      ];
+    }
+    if (hasUserRole[USER_ROLES.VISITOR.value]) {
+      adminItems = [
+        ...adminItems,
         {
           path: ROUTES.PAGES,
           title: intl.formatMessage(messages.nav.pages),
           isAdmin: true,
           active: currentPath === ROUTES.PAGES,
         },
+      ];
+    }
+    if (hasUserRole[USER_ROLES.MEMBER.value]) {
+      adminItems = [
+        ...adminItems,
         {
           path: ROUTES.TAXONOMIES,
           title: intl.formatMessage(messages.nav.taxonomies),
@@ -236,27 +357,144 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
           active: currentPath.startsWith(ROUTES.CATEGORY)
             || currentPath.startsWith(ROUTES.TAXONOMIES),
         },
-      ]);
+      ];
     }
-    return navItems;
-  };
+    if (adminItems && adminItems.length > 0) {
+      groups = [
+        ...groups,
+        {
+          title: 'Admin',
+          items: adminItems,
+        },
+      ];
+    }
+    return groups;
+  }
+
+  prepareCreateMenuItems = () => {
+    const { intl } = this.context;
+    return [
+      {
+        title: 'Common',
+        items: [
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.EXPRESS}`].single),
+          },
+          {
+            path: `${ROUTES.ACTORS}/${ACTORTYPES.CONTACT}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.CONTACT}`].single),
+          },
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.INTERACTION}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.INTERACTION}`].single),
+          },
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EVENT}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.EVENT}`].single),
+          },
+        ],
+      },
+      {
+        title: 'Positions',
+        hidden: true,
+        items: [
+          {
+            path: `${ROUTES.INDICATORS}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities.indicators.single),
+          },
+        ],
+      },
+      {
+        title: 'Stakeholders',
+        hidden: true,
+        items: [
+          {
+            path: `${ROUTES.ACTORS}/${ACTORTYPES.ORG}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.ORG}`].single),
+          },
+          {
+            path: `${ROUTES.ACTORS}/${ACTORTYPES.GROUP}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.GROUP}`].single),
+          },
+          {
+            path: `${ROUTES.ACTORS}/${ACTORTYPES.REG}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.REG}`].single),
+          },
+          {
+            path: `${ROUTES.ACTORS}/${ACTORTYPES.COUNTRY}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actors_${ACTORTYPES.COUNTRY}`].single),
+          },
+        ],
+      },
+      {
+        title: 'Outreach',
+        hidden: true,
+        items: [
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.TASK}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.TASK}`].single),
+          },
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.OP}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.OP}`].single),
+          },
+          {
+            path: `${ROUTES.ACTIONS}/${ACTIONTYPES.AP}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`actions_${ACTIONTYPES.AP}`].single),
+          },
+        ],
+      },
+      {
+        title: 'Resources',
+        hidden: true,
+        items: [
+          {
+            path: `${ROUTES.RESOURCES}/${RESOURCETYPES.WEB}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`resources_${RESOURCETYPES.WEB}`].single),
+          },
+          {
+            path: `${ROUTES.RESOURCES}/${RESOURCETYPES.REF}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`resources_${RESOURCETYPES.REF}`].single),
+          },
+          {
+            path: `${ROUTES.RESOURCES}/${RESOURCETYPES.DOC}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities[`resources_${RESOURCETYPES.DOC}`].single),
+          },
+        ],
+      },
+      {
+        title: 'Other',
+        hidden: true,
+        items: [
+          {
+            path: `${ROUTES.PAGES}${ROUTES.NEW}`,
+            title: intl.formatMessage(messages.entities.pages.single),
+          },
+        ],
+      },
+    ];
+  }
 
   render() {
     const {
       pages,
       onPageLink,
       isUserSignedIn,
-      isMember,
-      isVisitor,
       location,
+      hasUserRole,
+      // isVisitor,
       newEntityModal,
       user,
       children,
       isUserAuthenticating,
       isPrintView,
       printArgs,
+      listPreviewContent,
+      onClosePreviewModal,
+      previewItemId,
+      isActionStatement,
     } = this.props;
-
     const { intl } = this.context;
     const title = intl.formatMessage(messages.app.title);
     const isHome = location.pathname === '/';
@@ -275,28 +513,16 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
         <Helmet titleTemplate={`%s - ${title}`} defaultTitle={title} />
         {!isHome && (
           <Header
-            isSignedIn={isUserSignedIn}
-            isVisitor={isVisitor}
-            isPrintView={isPrintView}
-            user={user}
-            pages={pages && this.preparePageMenuPages(pages, location.pathname)}
-            navItems={this.prepareMainMenuItems(
-              isUserSignedIn && isMember,
-              isUserSignedIn && isVisitor,
-              location.pathname,
-            )}
-            search={!isUserSignedIn
-              ? null
-              : {
-                path: ROUTES.SEARCH,
-                title: intl.formatMessage(messages.nav.search),
-                active: location.pathname.startsWith(ROUTES.SEARCH),
-                icon: 'search',
-              }
-            }
-            onPageLink={onPageLink}
-            isAuth={isAuth}
             currentPath={location.pathname}
+            isAuth={isAuth}
+            isPrintView={isPrintView}
+            navItems={{
+              main: isUserSignedIn && this.prepareMainMenuItems(location.pathname, isActionStatement),
+              user: this.prepareUserMenuItems(location.pathname, user, isUserSignedIn, hasUserRole),
+              other: isUserSignedIn && this.prepareOtherMenuItems(location.pathname, pages, hasUserRole),
+              create: hasUserRole[USER_ROLES.MEMBER.value] && this.prepareCreateMenuItems(),
+            }}
+            onPageLink={onPageLink}
           />
         )}
         <Main isHome={isHome} isPrint={isPrintView}>
@@ -331,7 +557,7 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
             }}
             appElement={document.getElementById('app')}
           >
-            <EntityNew
+            <EntityNewModal
               path={newEntityModal.get('path')}
               attributes={newEntityModal.get('attributes')}
               connect={newEntityModal.get('connect')}
@@ -346,6 +572,23 @@ class App extends React.PureComponent { // eslint-disable-line react/prefer-stat
               onSaveSuccess={this.props.onCloseModal}
               onCancel={this.props.onCloseModal}
               inModal
+            />
+          </ReactModal>
+        )}
+        {listPreviewContent && previewItemId && (
+          <ReactModal
+            isOpen
+            contentLabel="List item preview"
+            onRequestClose={() => onClosePreviewModal(null)}
+            className="preview-item-modal"
+            overlayClassName="preview-item-modal-overlay"
+            style={{
+              overlay: { zIndex: 99999999 },
+            }}
+            appElement={document.getElementById('app')}
+          >
+            <EntityPreview
+              content={listPreviewContent}
             />
           </ReactModal>
         )}
@@ -382,8 +625,8 @@ App.propTypes = {
   children: PropTypes.node,
   isUserSignedIn: PropTypes.bool,
   isUserAuthenticating: PropTypes.bool,
-  isMember: PropTypes.bool,
-  isVisitor: PropTypes.bool,
+  hasUserRole: PropTypes.object,
+  // isVisitor: PropTypes.bool,
   user: PropTypes.object,
   pages: PropTypes.object,
   validateToken: PropTypes.func,
@@ -391,18 +634,22 @@ App.propTypes = {
   onPageLink: PropTypes.func.isRequired,
   location: PropTypes.object.isRequired,
   newEntityModal: PropTypes.object,
+  listPreviewContent: PropTypes.object,
   onCloseModal: PropTypes.func,
+  onClosePreviewModal: PropTypes.func,
   isPrintView: PropTypes.bool,
+  isActionStatement: PropTypes.bool,
   printArgs: PropTypes.object,
+  previewItemId: PropTypes.string,
 };
 App.contextTypes = {
   intl: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state, params) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
-  isMember: selectIsUserMember(state),
-  isVisitor: selectIsUserVisitor(state),
+  hasUserRole: selectHasUserRole(state),
+  // isVisitor: selectIsUserVisitor(state),
   isUserSignedIn: selectIsSignedIn(state),
   isUserAuthenticating: selectIsAuthenticating(state),
   user: selectSessionUserAttributes(state),
@@ -413,6 +660,9 @@ const mapStateToProps = (state) => ({
     where: { draft: false },
   }),
   newEntityModal: selectNewEntityModal(state),
+  listPreviewContent: selectListPreviewContent(state),
+  previewItemId: selectPreviewQuery(state),
+  isActionStatement: selectIsCurrentActionStatement(state, params && params.params && params.params.id),
 });
 
 export function mapDispatchToProps(dispatch) {
@@ -431,6 +681,9 @@ export function mapDispatchToProps(dispatch) {
       dispatch(submitInvalid(true));
       dispatch(saveErrorDismiss());
       dispatch(openNewEntityModal(null));
+    },
+    onClosePreviewModal: (val) => {
+      dispatch(setListPreview(val));
     },
   };
 }

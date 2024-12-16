@@ -2,7 +2,15 @@ import { toLower, deburr } from 'lodash/string';
 import { reduce } from 'lodash/collection';
 import { TEXT_TRUNCATE } from 'themes/config';
 
-export const lowerCase = (str) => toLower(str);
+export const lowerCase = (str) => toLower(str).replace('wwf', 'WWF');
+export const capitalize = (str) => str
+  && str.split(' ').reduce(
+    (m, word) => ([
+      ...m,
+      String(word[0]).toUpperCase() + String(lowerCase(word)).slice(1),
+    ]),
+    [],
+  ).join(' ');
 
 export const getPathFromUrl = (url) => url.split(/[?#]/)[0];
 
@@ -59,10 +67,19 @@ export const regExMultipleWords = (str) => {
 // match multiple words
 export const regExMultipleWordsMatchStart = (str) => reduce(str.split(' '), (words, s) => `${words}(?=.*\\b${s})`, '');
 
-export const truncateText = (text, limit, keepWords = true) => {
-  if (text.length > (limit + TEXT_TRUNCATE.GRACE)) {
+export const truncateText = (
+  text,
+  limit,
+  keepWords = true,
+  appendEllipsis = true,
+  grace = true,
+) => {
+  const limitClean = grace ? limit + TEXT_TRUNCATE.GRACE : limit;
+  if (text.length > (limitClean)) {
     if (!keepWords) {
-      return `${text.substring(0, limit).trim()}\u2026`;
+      return appendEllipsis
+        ? `${text.substring(0, limit).trim()}\u2026`
+        : text.substring(0, limit).trim();
     }
     const words = text.split(' ');
     let truncated = '';
@@ -71,7 +88,10 @@ export const truncateText = (text, limit, keepWords = true) => {
       truncated = truncated.length > 0 ? `${truncated} ${word}` : word;
     }
     // check if really truncated (not a given as we accept full words)
-    return text.length > truncated.length ? `${truncated}\u2026` : text;
+    if (appendEllipsis) {
+      return text.length > truncated.length ? `${truncated}\u2026` : text;
+    }
+    return truncated;
   }
   return text;
 };

@@ -4,7 +4,7 @@ import Main from './Main';
 
 const Aside = styled(Main)`
   border-right-style: none;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     width: 30%;
   }
   @media print {

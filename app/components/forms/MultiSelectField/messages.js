@@ -15,6 +15,6 @@ export default defineMessages({
   },
   update: {
     id: 'app.components.MultiSelectField.update',
-    defaultMessage: 'Update {type}',
+    defaultMessage: 'Select or change {type}',
   },
 });

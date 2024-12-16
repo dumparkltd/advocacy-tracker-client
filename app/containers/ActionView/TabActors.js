@@ -32,7 +32,6 @@ import TabActorsAccordion from './TabActorsAccordion';
 
 import {
   selectActorsByType,
-  selectTargetsByType,
 } from './selectors';
 
 export function TabActors({
@@ -42,7 +41,6 @@ export function TabActors({
   viewSubject,
   hasChildren,
   onEntityClick,
-  targetsByActortype,
   actorsByActortype,
   actorConnections,
   childActionsByActiontype,
@@ -50,18 +48,9 @@ export function TabActors({
 }) {
   const hasMemberOption = !!typeId && !qe(typeId, ACTIONTYPES.NATL);
 
-  const hasMap = viewSubject === 'actors' || viewSubject === 'targets';
+  const hasMap = viewSubject === 'actors';
 
-  const actortypesForSubject = viewSubject === 'actors'
-    ? actorsByActortype
-    : targetsByActortype;
-  const hasChildTargets = viewSubject === 'targets'
-    && hasChildren
-    && childActionsByActiontype
-    && childActionsByActiontype
-      .flatten(true)
-      .filter((action) => action.get('targetsByType'))
-      .size > 0;
+  const actortypesForSubject = actorsByActortype;
   const hasChildActors = viewSubject === 'actors'
     && hasChildren
     && childActionsByActiontype
@@ -71,7 +60,6 @@ export function TabActors({
       .size > 0;
 
   const hasActivities = (actortypesForSubject && actortypesForSubject.size > 0)
-    || hasChildTargets
     || hasChildActors;
 
   return (
@@ -83,11 +71,6 @@ export function TabActors({
               No actors for activity in database
             </Text>
           )}
-          {viewSubject === 'targets' && (
-            <Text>
-              No activity targets in database
-            </Text>
-          )}
         </Box>
       )}
       {hasActivities && hasMap && (
@@ -96,27 +79,25 @@ export function TabActors({
           mapSubject={viewSubject}
           onActorClick={(id) => onEntityClick(id, ROUTES.ACTOR)}
           hasMemberOption={hasMemberOption}
-          hasChildTargetOption={hasChildTargets}
+          hasChildActorOption={hasChildActors}
           typeId={typeId}
           childActionsByActiontype={childActionsByActiontype}
         />
       )}
       <Box margin={{ vertical: 'medium' }}>
-        {viewSubject === 'targets' && (
-          <FieldGroup
-            seamless
-            group={{
-              fields: [
-                checkActionAttribute(typeId, 'target_comment')
-                  && getMarkdownField(viewEntity, 'target_comment', true),
-              ],
-            }}
-          />
-        )}
+        <FieldGroup
+          seamless
+          group={{
+            fields: [
+              checkActionAttribute(typeId, 'target_comment')
+                && getMarkdownField(viewEntity, 'target_comment', true),
+            ],
+          }}
+        />
         {hasActivities && (
           <TabActorsAccordion
             viewSubject={viewSubject}
-            hasChildTargets={hasChildTargets}
+            hasChildActors={hasChildActors}
             taxonomies={taxonomies}
             onEntityClick={onEntityClick}
             actorConnections={actorConnections}
@@ -136,7 +117,6 @@ TabActors.propTypes = {
   onEntityClick: PropTypes.func,
   taxonomies: PropTypes.object,
   actorsByActortype: PropTypes.object,
-  targetsByActortype: PropTypes.object,
   actorConnections: PropTypes.object,
   childActionsByActiontype: PropTypes.object,
   viewSubject: PropTypes.string,
@@ -146,7 +126,6 @@ TabActors.propTypes = {
 
 const mapStateToProps = (state, { viewEntity }) => ({
   actorsByActortype: selectActorsByType(state, viewEntity.get('id')),
-  targetsByActortype: selectTargetsByType(state, viewEntity.get('id')),
   actorConnections: selectActorConnections(state),
 });
 

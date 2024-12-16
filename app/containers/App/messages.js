@@ -23,23 +23,23 @@ export default defineMessages({
     },
     1: {
       id: 'app.containers.App.supportlevels.1',
-      defaultMessage: '1 - Strong support',
+      defaultMessage: 'Strong support',
     },
     2: {
       id: 'app.containers.App.supportlevels.2',
-      defaultMessage: '2 - Quite positive',
+      defaultMessage: 'Quite positive',
     },
     3: {
       id: 'app.containers.App.supportlevels.3',
-      defaultMessage: '3 - On the fence',
+      defaultMessage: 'On the fence',
     },
     4: {
       id: 'app.containers.App.supportlevels.4',
-      defaultMessage: '4 - Rather sceptical',
+      defaultMessage: 'Rather sceptical',
     },
     5: {
       id: 'app.containers.App.supportlevels.5',
-      defaultMessage: '5 - Opponent',
+      defaultMessage: 'Opponent',
     },
     99: {
       id: 'app.containers.App.supportlevels.99',
@@ -911,6 +911,10 @@ export default defineMessages({
       id: 'app.containers.App.attributes.status_comment',
       defaultMessage: 'Status comment',
     },
+    reference: {
+      id: 'app.containers.App.attributes.reference',
+      defaultMessage: 'reference',
+    },
     reference_ml: {
       id: 'app.containers.App.attributes.reference_ml',
       defaultMessage: 'reference_ml',
@@ -969,7 +973,7 @@ export default defineMessages({
     },
     order: {
       id: 'app.containers.App.attributes.order',
-      defaultMessage: 'Menu order',
+      defaultMessage: 'Order',
     },
     user_only: {
       id: 'app.containers.App.attributes.user_only',
@@ -1065,17 +1069,13 @@ export default defineMessages({
       id: 'app.containers.App.nav.actionsMembers',
       defaultMessage: 'Activities as member',
     },
-    targetingActions: {
-      id: 'app.containers.App.nav.targetingActions',
-      defaultMessage: 'Targeted by',
-    },
     topActions: {
       id: 'app.containers.App.nav.topActions',
-      defaultMessage: 'Parent activities',
+      defaultMessage: 'Activities',
     },
     subActions: {
       id: 'app.containers.App.nav.subActions',
-      defaultMessage: 'Child activities',
+      defaultMessage: 'Sub-activities',
     },
     actors: {
       id: 'app.containers.App.nav.actors',
@@ -1089,14 +1089,6 @@ export default defineMessages({
       id: 'app.containers.App.nav.indicators',
       defaultMessage: 'Position indicators',
     },
-    targets: {
-      id: 'app.containers.App.nav.targets',
-      defaultMessage: 'Targets',
-    },
-    targetingActionsAsMember: {
-      id: 'app.containers.App.nav.targetingActionsAsMember',
-      defaultMessage: 'Targeted by (as member)',
-    },
     members: {
       id: 'app.containers.App.nav.members',
       defaultMessage: 'Members',
@@ -1107,11 +1099,11 @@ export default defineMessages({
     },
     parents: {
       id: 'app.containers.App.nav.parents',
-      defaultMessage: 'Parent activities',
+      defaultMessage: 'Activities',
     },
     children: {
       id: 'app.containers.App.nav.children',
-      defaultMessage: 'Child activities',
+      defaultMessage: 'Sub-activities',
     },
     attributes: {
       id: 'app.containers.App.nav.attributes',
@@ -1168,6 +1160,18 @@ export default defineMessages({
     register: {
       id: 'app.containers.App.nav.register',
       defaultMessage: 'Register',
+    },
+    positions: {
+      id: 'app.containers.App.nav.positions',
+      defaultMessage: 'Positions',
+    },
+    outreach: {
+      id: 'app.containers.App.nav.outreach',
+      defaultMessage: 'Outreach',
+    },
+    mystuff: {
+      id: 'app.containers.App.nav.mystuff',
+      defaultMessage: 'My stuff',
     },
   },
   entities: {
@@ -1370,15 +1374,15 @@ export default defineMessages({
       },
       children: {
         id: 'app.containers.App.entities.actions.children',
-        defaultMessage: 'Child activities',
+        defaultMessage: 'Sub-activities',
       },
       topActions: {
         id: 'app.containers.App.entities.actions.topActions',
-        defaultMessage: 'Parent activities',
+        defaultMessage: 'Activities',
       },
       subActions: {
         id: 'app.containers.App.entities.actions.subActions',
-        defaultMessage: 'Child activities',
+        defaultMessage: 'Sub-activities',
       },
       single: {
         id: 'app.containers.App.entities.actions.single',
@@ -1850,7 +1854,7 @@ export default defineMessages({
       },
       empty: {
         id: 'app.containers.App.entities.users.empty',
-        defaultMessage: 'No users assigned yet',
+        defaultMessage: 'No WWF staff assigned yet',
       },
     },
     bookmarks: {
@@ -2425,6 +2429,16 @@ export default defineMessages({
       all: {
         id: 'app.containers.App.ui.pageItemOptions.all',
         defaultMessage: 'All',
+      },
+    },
+    statementOptions: {
+      includeMemberships: {
+        id: 'app.containers.App.ui.statementOptions.includeMemberships',
+        defaultMessage: 'Include positions of country groups',
+      },
+      excludeInofficial: {
+        id: 'app.containers.App.ui.statementOptions.excludeInofficial',
+        defaultMessage: 'Only show "official" statements',
       },
     },
   },

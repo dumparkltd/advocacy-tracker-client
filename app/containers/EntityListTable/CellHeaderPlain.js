@@ -1,8 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
-import { Box } from 'grommet';
-import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
+import { Box, ResponsiveContext } from 'grommet';
+
+import { isMinSize } from 'utils/responsive';
+
+import ButtonSort from 'components/buttons/ButtonSort';
 import Icon from 'components/Icon';
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
 import InfoOverlay from 'components/InfoOverlay';
@@ -10,22 +12,27 @@ import TextPrint from 'components/styled/TextPrint';
 import PrintHide from 'components/styled/PrintHide';
 import CellHeaderInfoOverlay from './CellHeaderInfoOverlay';
 
-const SortButton = styled(ButtonFlatIconOnly)`
-  color: inherit;
-  padding: 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: 0;
-  }
-`;
-
 export function CellHeaderPlain({ column }) {
   const sortOrderOption = column.onSort && SORT_ORDER_OPTIONS.find(
     (option) => column.sortOrder === option.value
   );
   const { align = 'start' } = column;
+  const size = React.useContext(ResponsiveContext);
+
   return (
-    <Box direction="row" align="center" justify={align} flex={false}>
-      <TextPrint weight={500} size="small" textAlign={align} wordBreak="keep-all">
+    <Box
+      direction="row"
+      align="center"
+      justify={align}
+      flex={false}
+    >
+      <TextPrint
+        weight={500}
+        size={isMinSize(size, 'ms') ? 'xxsmall' : 'xxxsmall'}
+        textAlign={align}
+        wordBreak="keep-all"
+        color="textSecondary"
+      >
         {column.label || column.title}
       </TextPrint>
       {column.info && (
@@ -39,13 +46,11 @@ export function CellHeaderPlain({ column }) {
       {column.onSort && (
         <PrintHide>
           <Box pad={{ left: 'xxsmall' }} flex={false}>
-            <SortButton
+            <ButtonSort
+              sortActive={column.sortActive}
               onClick={() => {
                 if (column.sortActive) {
-                  const nextSortOrderOption = SORT_ORDER_OPTIONS.find(
-                    (option) => sortOrderOption.nextValue === option.value
-                  );
-                  column.onSort(column.id || column.type, nextSortOrderOption.value);
+                  column.onSort(column.id || column.type, sortOrderOption.nextValue);
                 } else {
                   column.onSort(column.id || column.type, sortOrderOption.value);
                 }
@@ -56,12 +61,10 @@ export function CellHeaderPlain({ column }) {
                   ? sortOrderOption.icon
                   : 'sorting'
                 }
-                palette="dark"
-                paletteIndex={column.sortActive ? 1 : 4}
                 hidePrint={!column.sortActive}
                 size="20px"
               />
-            </SortButton>
+            </ButtonSort>
           </Box>
         </PrintHide>
       )}

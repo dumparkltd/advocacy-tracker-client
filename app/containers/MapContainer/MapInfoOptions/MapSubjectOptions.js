@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
+import { palette } from 'styled-theme';
 import { Box, Button } from 'grommet';
 
 // import ButtonFactory from 'components/buttons/ButtonFactory';
@@ -15,7 +16,7 @@ const Styled = styled.div`
     if (isPrint) return 0;
     return inList ? 2 : 10;
   }}px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding-bottom: ${({ inList, isPrint }) => {
     if (isPrint) return 0;
     return inList ? 5 : 15;
@@ -27,6 +28,13 @@ const TypeButton = styled((p) => <Button plain {...p} />)`
   border-bottom: 2px solid;
   border-bottom-color: ${({ active }) => active ? 'auto' : 'transparent'};
   background: none;
+  cursor: ${({ active }) => active ? 'default' : 'pointer'};
+`;
+
+const StyledTextPrint = styled((p) => <TextPrint {...p} />)`
+  text-transform: uppercase;
+  font-weight: 600;
+  color: ${({ active }) => active ? palette('text', 0) : palette('text', 1)}
 `;
 
 function MapSubjectOptions({ options, inList, align = 'start' }) {
@@ -46,13 +54,17 @@ function MapSubjectOptions({ options, inList, align = 'start' }) {
               options.map((option, i) => option && (
                 <Box key={i}>
                   <TypeButton
+                    as={(!!option.onClick && !option.active) ? 'button' : 'div'}
                     active={option.active}
-                    onClick={option.onClick}
+                    onClick={!option.active ? option.onClick : null}
                     inList={inList}
                   >
-                    <TextPrint size={inList ? 'medium' : 'large'}>
+                    <StyledTextPrint
+                      size={inList ? 'medium' : 'large'}
+                      active={option.active}
+                    >
                       {option.title}
-                    </TextPrint>
+                    </StyledTextPrint>
                   </TypeButton>
                 </Box>
               ))
@@ -63,9 +75,9 @@ function MapSubjectOptions({ options, inList, align = 'start' }) {
       <PrintOnly>
         {optionActiveForPrint && (
           <Box direction="row" gap="small" justify={align}>
-            <TextPrint size={inList ? 'medium' : 'large'}>
+            <StyledTextPrint size={inList ? 'medium' : 'large'}>
               {optionActiveForPrint.title}
-            </TextPrint>
+            </StyledTextPrint>
           </Box>
         )}
       </PrintOnly>

@@ -1,17 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 // import { FormattedMessage, intlShape, injectIntl } from 'react-intl';
-import { Box, Text, Button } from 'grommet';
-import InfoOverlay from 'components/InfoOverlay';
+import { Box, Text } from 'grommet';
+import TagList from 'components/TagList';
 import PrintHide from 'components/styled/PrintHide';
 
-import qe from 'utils/quasi-equals';
-
 import MapKey from './MapKey';
-import MapSubjectOptions from './MapSubjectOptions';
 import MapOption from './MapOption';
-import SelectFFIndicators from './SelectFFIndicators';
 import SelectIndicators from './SelectIndicators';
 
 const Title = styled((p) => <Text weight={500} {...p} />)`
@@ -38,12 +34,6 @@ const Styled = styled.div`
     left: ${({ isPrint }) => isPrint ? 0 : 10}px;
     bottom: ${({ isPrint }) => isPrint ? 0 : 30}px;
   }
-`;
-const IndicatorButton = styled((p) => <Button plain {...p} />)`
-    color: #0077d8;
-    &:hover {
-      color: #0063b5;
-    }
 `;
 const Pane = styled((p) => <Box {...p} />)`
   position: absolute;
@@ -80,79 +70,21 @@ const Pane = styled((p) => <Box {...p} />)`
 // `;
 
 export function MapInfoOptions({
-  options,
+  option,
   countryMapSubject,
   minMaxValues,
-  circleLayerConfig,
   isPrintView,
+  filters,
+  onClearFilters,
 }) {
-  if (!options) return null;
-  const [tab, setTab] = useState(options[0].id);
-  const activeOption = options.find((o) => qe(tab, o.id));
-  const renderTabs = (shadow) => options
-    && options.map(
-      (option) => {
-        const active = qe(tab, option.id);
-        return (
-          <Box
-            key={option.id}
-            elevation={shadow ? 'medium' : ''}
-            style={{ zIndex: active ? 2 : 0 }}
-            background={(shadow || active) ? 'white' : ''}
-          >
-            <Button
-              plain
-              onClick={() => setTab(option.id)}
-            >
-              <Box pad={{ vertical: 'xsmall', horizontal: 'small' }}>
-                <Text
-                  size="small"
-                  weight={active ? 500 : 300}
-                  style={{
-                    opacity: shadow ? 0 : 1,
-                  }}
-                >
-                  {option.tabTitle}
-                </Text>
-              </Box>
-            </Button>
-          </Box>
-        );
-      }
-    );
+  if (!option) return null;
   let activeIndicatorOption;
-  let showIndicatorInfo;
-  if (activeOption.id === 'indicators') {
-    activeIndicatorOption = activeOption.ffOptions.find(
-      (o) => qe(o.value, activeOption.ffActiveOptionId || '0')
-    );
-    showIndicatorInfo = activeIndicatorOption
-      && activeIndicatorOption.value !== '0'
-      && circleLayerConfig
-      && minMaxValues
-      && minMaxValues.points;
-  }
-  if (activeOption.id === 'countries' && activeOption.indicatorOptions) {
-    activeIndicatorOption = activeOption.indicatorOptions.find(
-      (o) => o.active
-    );
+  if (option.indicatorOptions) {
+    activeIndicatorOption = option.indicatorOptions.find((o) => o.active);
   }
   return (
-    <Styled hasTabs={options.length > 1 || activeOption.indicatorOptions} isPrint={isPrintView}>
-      <Pane>
-        {options.length > 1 && (
-          <Box fill="horizontal" direction="row" style={{ zIndex: 1 }}>
-            {renderTabs(true)}
-          </Box>
-        )}
-        <Box flex={{ grow: 1 }} direction="row" elevation={isPrintView ? 'none' : 'medium'} background="white" style={{ zIndex: 2 }} />
-      </Pane>
-      <Pane>
-        {options.length > 1 && (
-          <Box fill="horizontal" direction="row">
-            {renderTabs(false)}
-          </Box>
-        )}
+    <Styled isPrint={isPrintView}>
+      <Pane elevation="medium">
         <Box
           flex={{ grow: 1 }}
           direction="row"
@@ -163,171 +95,53 @@ export function MapInfoOptions({
             top: 'ms',
           }}
         >
-          {activeOption.id === 'indicators' && (
-            <Box fill="horizontal">
-              <SelectFFIndicators config={activeOption} />
-              {showIndicatorInfo && (
-                <Box pad={{ top: 'medium' }} gap="medium">
-                  <MapKey
-                    maxValue={minMaxValues.points.max}
-                    minValue={minMaxValues.points.min}
-                    isIndicator
-                    type="circles"
-                    circleLayerConfig={circleLayerConfig}
-                  />
-                  {activeIndicatorOption.title && (
-                    <div>
-                      {activeIndicatorOption.onClick && (
-                        <IndicatorButton
-                          as={activeIndicatorOption.href ? 'a' : 'button'}
-                          href={activeIndicatorOption.href}
-                          onClick={(evt) => {
-                            if (evt) evt.preventDefault();
-                            activeIndicatorOption.onClick();
-                          }}
-                        >
-                          <Title hasInfo={!!activeIndicatorOption.info}>
-                            {activeIndicatorOption.title}
-                          </Title>
-                        </IndicatorButton>
-                      )}
-                      {!activeIndicatorOption.onClick && (
-                        <Title hasInfo={!!activeIndicatorOption.info}>
-                          {activeIndicatorOption.title}
-                        </Title>
-                      )}
-                      {activeIndicatorOption.info && (
-                        <InfoOverlay
-                          title={activeIndicatorOption.title}
-                          content={activeIndicatorOption.info}
-                          markdown
-                          tooltip
-                          inline
-                        />
-                      )}
-                    </div>
-                  )}
-                </Box>
-              )}
-              {!showIndicatorInfo && (
-                <Box pad={{ top: 'medium' }}>
-                  <SubTitle>Select an indicator to add it to the map</SubTitle>
-                </Box>
-              )}
-            </Box>
-          )}
-          {activeOption.id === 'countries' && !activeOption.indicatorOptions && (
-            <Box fill="horizontal">
-              {activeOption.subjectOptions && (
-                <MapSubjectOptions options={activeOption.subjectOptions} />
-              )}
-              {minMaxValues.countries && minMaxValues.countries.max > 0 && (
-                <MapKey maxValue={minMaxValues.countries.max} mapSubject={countryMapSubject} />
-              )}
-              <Box gap="xsmall" margin={{ vertical: 'small' }}>
-                {activeOption.title && (
-                  <Title>{activeOption.title}</Title>
-                )}
-                {activeOption.subTitle && (
-                  <SubTitle>{activeOption.subTitle}</SubTitle>
-                )}
-              </Box>
-              {activeOption.memberOption && (
-                <MapOption option={activeOption.memberOption} type="info" />
-              )}
-              {activeOption.infoOptions
-                && activeOption.infoOptions.length > 0
-                && activeOption.infoOptions.map(
-                  (infoOption, i) => (
-                    <MapOption
-                      key={i}
-                      option={{ ...infoOption, id: infoOption.id || i }}
-                      type="info"
-                    />
-                  )
-                )
-              }
-            </Box>
-          )}
-          {activeOption.id === 'countries' && activeOption.indicatorOptions && (
-            <Box fill="horizontal">
+          <Box fill="horizontal">
+            {option.indicatorOptions && (
               <PrintHide>
                 <Box pad={{ bottom: 'ms' }} gap="xxsmall">
-                  <SubTitle>Select a topic to view country positions</SubTitle>
-                  <SelectIndicators config={activeOption} />
+                  {activeIndicatorOption && activeIndicatorOption.supTitle && (
+                    <SubTitle>{activeIndicatorOption.supTitle}</SubTitle>
+                  )}
+                  <SelectIndicators config={option} />
                 </Box>
               </PrintHide>
-              {activeIndicatorOption.id === 'all'
-                && minMaxValues.countries
-                && minMaxValues.countries.max > 0 && (
-                <MapKey maxValue={minMaxValues.countries.max} mapSubject={countryMapSubject} />
-              )}
-              {activeIndicatorOption.id !== 'all' && activeOption.categoryConfig && (
-                <MapKey type="categories" config={activeOption.categoryConfig} />
-              )}
-              {activeIndicatorOption.id === 'all' && (
-                <Box gap="xsmall" margin={{ vertical: 'small' }}>
-                  {activeOption.title && (
-                    <Title>{activeOption.title}</Title>
-                  )}
-                  {activeOption.subTitle && (
-                    <SubTitle>{activeOption.subTitle}</SubTitle>
-                  )}
-                </Box>
-              )}
-              {activeIndicatorOption.id !== 'all' && (
-                <Box pad={{ vertical: 'small' }} gap="medium">
-                  {activeIndicatorOption.label && (
-                    <div>
-                      {activeIndicatorOption.onClick && (
-                        <IndicatorButton
-                          as={activeIndicatorOption.href ? 'a' : 'button'}
-                          href={activeIndicatorOption.href}
-                          onClick={(evt) => {
-                            if (evt) evt.preventDefault();
-                            activeIndicatorOption.onClick();
-                          }}
-                        >
-                          <Title hasInfo={!!activeIndicatorOption.info}>
-                            {activeIndicatorOption.label}
-                          </Title>
-                        </IndicatorButton>
-                      )}
-                      {!activeIndicatorOption.onClick && (
-                        <Title hasInfo={!!activeIndicatorOption.info}>
-                          {activeIndicatorOption.label}
-                        </Title>
-                      )}
-                      {activeIndicatorOption.info && (
-                        <InfoOverlay
-                          title={activeIndicatorOption.label}
-                          content={activeIndicatorOption.info}
-                          markdown
-                          tooltip
-                          inline
-                        />
-                      )}
-                    </div>
-                  )}
-                </Box>
-              )}
-              {activeOption.memberOption && (
-                <MapOption option={activeOption.memberOption} type="member" />
-              )}
-              {activeOption.infoOptions
-                && activeOption.infoOptions.length > 0
-                && activeOption.infoOptions.map(
-                  (infoOption, i) => (
-                    <MapOption
-                      key={i}
-                      option={{ ...infoOption, id: infoOption.id || i }}
-                      type="info"
-                    />
-                  )
+            )}
+            {!option.indicatorOptions && (
+              <Box gap="xsmall" margin={{ vertical: 'small' }}>
+                {option.title && (
+                  <Title>{option.title}</Title>
+                )}
+                {option.subTitle && (
+                  <SubTitle>{option.subTitle}</SubTitle>
+                )}
+              </Box>
+            )}
+            {(!activeIndicatorOption || activeIndicatorOption.id === 'all')
+            && minMaxValues.countries && minMaxValues.countries.max > 0 && (
+              <MapKey maxValue={minMaxValues.countries.max} mapSubject={countryMapSubject} />
+            )}
+            {activeIndicatorOption && activeIndicatorOption.id !== 'all' && option.categoryConfig && (
+              <MapKey type="categories" config={option.categoryConfig} />
+            )}
+            {filters && (
+              <TagList filters={filters} onClear={onClearFilters} />
+            )}
+            {option.memberOption && (
+              <MapOption option={option.memberOption} type="info" />
+            )}
+            {option.infoOptions
+              && option.infoOptions.length > 0
+              && option.infoOptions.map(
+                (infoOption, i) => (
+                  <MapOption
+                    key={i}
+                    option={{ ...infoOption, id: infoOption.id || i }}
+                    type="info"
+                  />
                 )
-              }
-            </Box>
-          )}
+              )
+            }
+          </Box>
         </Box>
       </Pane>
     </Styled>
@@ -335,11 +149,12 @@ export function MapInfoOptions({
 }
 
 MapInfoOptions.propTypes = {
-  options: PropTypes.array,
+  option: PropTypes.object,
+  filters: PropTypes.array,
   minMaxValues: PropTypes.object,
-  circleLayerConfig: PropTypes.object,
   countryMapSubject: PropTypes.string,
   isPrintView: PropTypes.bool,
+  onClearFilters: PropTypes.func,
 };
 
 export default MapInfoOptions;

@@ -21,7 +21,7 @@ const Styled = styled.div`
     }
     return 15;
   }}px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding-bottom: ${({
     nested,
     noPadding,

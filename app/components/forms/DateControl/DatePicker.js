@@ -81,6 +81,7 @@ class DatePicker extends React.PureComponent { // eslint-disable-line react/pref
             fixedWeeks: true,
             // todayButton: 'Go to Today',
           }}
+          style={{ width: '100%' }}
         />
         <DatePickerStyle />
       </React.Fragment>

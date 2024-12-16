@@ -20,7 +20,7 @@ const ButtonTagFilterInverse = styled(ButtonTagFilter)`
     fill: ${({ theme }) => theme.global.colors.highlight};
     background-color: ${({ isPrint, theme }) => isPrint ? 'white' : theme.global.colors.white};
   }
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding:${({ isPrint }) => isPrint ? ' 1px 4px' : '3px 6px'};
     font-size:${({ isPrint }) => isPrint ? '9pt' : '0.85em'};
   }

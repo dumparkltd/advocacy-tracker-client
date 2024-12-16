@@ -12,13 +12,24 @@ import { palette } from 'styled-theme';
 import { Edit } from 'grommet-icons';
 import { Map, List, fromJS } from 'immutable';
 import ReactModal from 'react-modal';
+
 import { qe } from 'utils/quasi-equals';
+import { jumpToComponent } from 'utils/scroll-to-component';
+import {
+  getActiontypePreviewFields,
+  getActortypePreviewFields,
+} from 'utils/fields';
+
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import Icon from 'components/Icon';
 import EntityListHeader from 'components/EntityListHeader';
 import EntityListDownload from 'components/EntityListDownload';
 import EntityListDelete from 'components/EntityListDelete';
+import NavSecondary from 'containers/NavSecondary';
+import ContainerWrapper from 'components/styled/Container/ContainerWrapper';
+import Container from 'components/styled/Container';
+import Content from 'components/styled/ContentSimple';
 
 import {
   selectHasUserRole,
@@ -27,9 +38,7 @@ import {
   selectViewQuery,
   selectMapSubjectQuery,
   selectIncludeActorMembers,
-  selectIncludeTargetMembers,
   selectIncludeActorChildren,
-  selectIncludeTargetChildren,
   selectIncludeInofficialStatements,
   selectTaxonomiesWithCategories,
   selectIsPrintView,
@@ -38,19 +47,18 @@ import {
 } from 'containers/App/selectors';
 
 import {
-  updatePath,
+  setListPreview,
   openNewEntityModal,
   setView,
   updateRouteQuery,
   setMapSubject,
   setIncludeActorMembers,
-  setIncludeTargetMembers,
   setIncludeActorChildren,
-  setIncludeTargetChildren,
   setIncludeInofficialStatements,
   saveMultipleEntities,
   newMultipleEntities,
   deleteMultipleEntities,
+  updatePath,
 } from 'containers/App/actions';
 import appMessages from 'containers/App/messages';
 
@@ -60,6 +68,8 @@ import {
   ACTION_FIELDS,
   ACTOR_FIELDS,
   INDICATOR_FIELDS,
+  ROUTES,
+  API,
 } from 'themes/config';
 
 import EntitiesMap from './EntitiesMap';
@@ -93,11 +103,13 @@ import {
 import { currentFilters, currentFilterArgs } from './current-filters';
 
 const Progress = styled.div`
-  position: absolute;
+  position: fixed;
   width: 100%;
   display: block;
   background: white;
   bottom: 0;
+  left: 0;
+  right: 0;
   box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
   background-color: ${palette('primary', 4)};
   padding: ${({ error }) => error ? 0 : 40}px;
@@ -122,16 +134,178 @@ const STATE_INITIAL = {
   deleteConfirm: null,
   downloadActive: false,
 };
+const reducePreviewItem = ({
+  item, id, path, intl, onUpdatePath,
+}) => {
+  if (id && path) {
+    return { entity: { path, id } };
+  }
+  if (item && qe(item.get('type'), API.ACTORS)) {
+    const label = intl.formatMessage(
+      appMessages.entities[`actors_${item.getIn(['attributes', 'actortype_id'])}`].single
+    );
+    let title = item ? item.getIn(['attributes', 'title']) : 'undefined';
+    if (item.getIn(['attributes', 'prefix']) && item.getIn(['attributes', 'prefix']).trim().length > 0) {
+      title = `${title} (${item.getIn(['attributes', 'prefix'])})`;
+    }
+    const content = {
+      header: {
+        aboveTitle: label,
+        title,
+        titlePath: `${ROUTES.ACTOR}/${item.get('id')}`,
+        topActions: [{
+          label: 'Edit',
+          path: `${ROUTES.ACTOR}${ROUTES.EDIT}/${item.get('id')}`,
+          onClick: (e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            onUpdatePath(`${ROUTES.ACTOR}${ROUTES.EDIT}/${item.get('id')}`);
+          },
+        }],
+      },
+      fields: getActortypePreviewFields(item.getIn(['attributes', 'actortype_id'])),
+      item,
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.ACTOR}/${item.get('id')}`,
+          title: `${label} details`,
+        },
+      },
+    };
+    return content;
+  }
+  if (item && qe(item.get('type'), API.ACTIONS)) {
+    const label = intl.formatMessage(
+      appMessages.entities[`actions_${item.getIn(['attributes', 'measuretype_id'])}`].single
+    );
+    const content = {
+      header: {
+        aboveTitle: label,
+        title: item && item.getIn(['attributes', 'title']),
+        titlePath: `${ROUTES.ACTION}/${item.get('id')}`,
+        topActions: [{
+          label: 'Edit',
+          path: `${ROUTES.ACTION}${ROUTES.EDIT}/${item.get('id')}`,
+          onClick: (e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            onUpdatePath(`${ROUTES.ACTION}${ROUTES.EDIT}/${item.get('id')}`);
+          },
+        }],
+      },
+      fields: getActiontypePreviewFields(item.getIn(['attributes', 'measuretype_id'])),
+      item,
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.ACTION}/${item.get('id')}`,
+          title: `${label} details`,
+        },
+      },
+    };
+    return content;
+  }
+  if (item && qe(item.get('type'), API.INDICATORS)) {
+    // return { entity: { path: ROUTES.INDICATOR, id: item.get('id') } };
+    const label = intl.formatMessage(
+      appMessages.entities.indicators.single
+    );
+    const content = {
+      header: {
+        aboveTitle: label,
+        title: item && item.getIn(['attributes', 'title']),
+      },
+      item,
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.INDICATOR}/${item.get('id')}`,
+          title: `${label} details`,
+        },
+      },
+    };
+    return content;
+  }
+  if (item && qe(item.get('type'), API.USERS)) {
+    // return { entity: { path: ROUTES.USERS, id: item.get('id') } };
+    const label = intl.formatMessage(
+      appMessages.entities.users.single
+    );
+    const content = {
+      header: {
+        aboveTitle: label,
+        title: item && item.getIn(['attributes', 'name']),
+      },
+      item,
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.USERS}/${item.get('id')}`,
+          title: `${label} details`,
+        },
+      },
+    };
+    return content;
+  }
+  if (item && qe(item.get('type'), API.CATEGORIES)) {
+    // return { entity: { path: ROUTES.CATEGORY, id: item.get('id') } };
+    const label = appMessages.entities.taxonomies[item.getIn(['attributes', 'taxonomy_id'])]
+      ? intl.formatMessage(
+        appMessages.entities.taxonomies[item.getIn(['attributes', 'taxonomy_id'])].single
+      )
+      : 'Category';
+    const content = {
+      header: {
+        aboveTitle: label,
+        title: item && item.getIn(['attributes', 'title']),
+      },
+      item,
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.CATEGORY}/${item.get('id')}`,
+          title: `${label} details`,
+        },
+      },
+    };
+    return content;
+  }
+  if (item && qe(item.get('type'), API.RESOURCES)) {
+    const label = intl.formatMessage(
+      appMessages.entities[`resources_${item.getIn(['attributes', 'resourcetype_id'])}`].single
+    );
+    const content = {
+      header: {
+        aboveTitle: label,
+        title: item && item.getIn(['attributes', 'title']),
+      },
+      item,
+      footer: {
+        primaryLink: item && {
+          path: `${ROUTES.RESOURCE}/${item.get('id')}`,
+          title: `${label} details`,
+        },
+      },
+    };
+    return content;
+  }
+  return {};
+};
 
 export class EntityList extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   constructor() {
     super();
+    this.ScrollContainer = React.createRef();
+    this.ScrollTarget = React.createRef();
+    this.ScrollReference = React.createRef();
     this.state = STATE_INITIAL;
   }
 
   UNSAFE_componentWillMount() {
     this.props.updateClientPath();
   }
+
+  scrollToTop = () => {
+    jumpToComponent(
+      this.ScrollTarget.current,
+      this.ScrollReference.current,
+      this.ScrollContainer.current
+    );
+  };
 
   onShowFilters = (evt) => {
     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
@@ -258,10 +432,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       actortypes,
       filterActortypes,
       actiontypes,
-      targettypes,
-      filterTargettypes,
       resourcetypes,
-      typeOptions,
       onSelectType,
       onSetView,
       typeId,
@@ -275,14 +446,10 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       mapSubject,
       onSetMapSubject,
       onSetIncludeActorMembers,
-      onSetIncludeTargetMembers,
       onSetIncludeActorChildren,
-      onSetIncludeTargetChildren,
       onSetIncludeInofficial,
       includeActorMembers,
-      includeTargetMembers,
       includeActorChildren,
-      includeTargetChildren,
       includeInofficial,
       headerOptions,
       taxonomies,
@@ -295,7 +462,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onDismissError,
       onEntityClick,
       onResetProgress,
-      actiontypesForTarget,
       membertypes,
       filterAssociationtypes,
       associationtypes,
@@ -307,6 +473,9 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       isPrintView,
       searchQuery,
       currentUserId,
+      secondaryNavItems,
+      onUpdatePath,
+      skipPreviews,
     } = this.props;
     // detect print to avoid expensive rendering
     const printing = isPrintView || !!(
@@ -358,6 +527,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         {
           type: 'primaryGroup',
           title: 'List',
+          icon: 'list',
           onClick: () => onSetView('list'),
           active: showList,
           disabled: showList,
@@ -366,6 +536,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         {
           type: 'primaryGroup',
           title: 'Map',
+          icon: 'map',
           onClick: () => onSetView('map'),
           active: showMap,
           disabled: showMap,
@@ -425,7 +596,8 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     const isSearchQueryActiveForDownload = !!locationQuery.get('search') && showList;
     const isSelectionActiveForDownload = showList && entityIdsSelectedFiltered && entityIdsSelectedFiltered.size > 0;
     return (
-      <div>
+      <ContainerWrapper ref={this.ScrollContainer} isPrintView={isPrintView}>
+        {secondaryNavItems && (<NavSecondary navItems={secondaryNavItems} />)}
         {config.batchDelete && this.state.deleteConfirm && entityIdsSelectedFiltered && (
           <ReactModal
             isOpen
@@ -482,177 +654,175 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             />
           </ReactModal>
         )}
-        {headerStyle === 'types' && !printing && (
-          <EntityListHeader
-            typeId={typeId}
-            dataReady={dataReady}
-            currentFilters={filters}
-            listUpdating={progress !== null && progress >= 0 && progress < 100}
-            entities={entities}
-            allEntities={allEntities}
-            entityIdsSelected={entityIdsSelectedFiltered}
-            taxonomies={taxonomies}
-            actortypes={actortypes}
-            filterActortypes={filterActortypes}
-            resourcetypes={resourcetypes}
-            actiontypes={actiontypes}
-            targettypes={targettypes}
-            filterTargettypes={filterTargettypes}
-            actiontypesForTarget={actiontypesForTarget}
-            membertypes={membertypes}
-            filterAssociationtypes={filterAssociationtypes}
-            connections={connections}
-            associationtypes={associationtypes}
-            connectedTaxonomies={connectedTaxonomies}
-            config={config}
-            locationQuery={locationQuery}
-            canEdit={isMember && showList}
-            isMember={isMember}
-            isAdmin={isAdmin}
-            hasUserRole={hasUserRole}
-            onCreateOption={onCreateOption}
-            onUpdate={
-              (associations, activeEditOption) => handleEditSubmit(
-                associations,
-                activeEditOption,
-                entityIdsSelectedFiltered,
-                viewDomain.get('errors'),
-                connections,
-              )}
-            onUpdateFilters={onUpdateFilters}
-            showFilters={this.state.visibleFilters}
-            showEditOptions={isMember && showList && this.state.visibleEditOptions}
-            onShowFilters={this.onShowFilters}
-            onHideFilters={this.onHideFilters}
-            onHideEditOptions={this.onHideEditOptions}
-            onSelectType={(type) => {
-              // reset selection
-              onEntitySelectAll([]);
-              onSelectType(type);
-            }}
-            typeOptions={typeOptions}
-            hasFilters={filters && filters.length > 0}
-            onUpdateQuery={onUpdateQuery}
-            filteringOptions={filteringOptions}
-            includeMembersWhenFiltering={includeMembersWhenFiltering}
-            includeActorMembers={includeActorMembers}
-            includeTargetMembers={includeTargetMembers}
-            includeActorChildren={includeActorChildren}
-            includeTargetChildren={includeTargetChildren}
-            headerActions={headerActions}
-            onClearFilters={this.onClearFilters}
-            isPrintView={isPrintView}
-          />
-        )}
-        {headerStyle === 'simple' && (
-          <EntityListHeader
-            headerStyle={headerStyle}
-            dataReady={dataReady}
-            config={config}
-            canEdit={isMember && showList}
-            isMember={isMember}
-            hasUserRole={hasUserRole}
-            headerActions={headerOptions && headerOptions.actions}
-            isPrintView={isPrintView}
-          />
-        )}
-        {!isPrintView && (
+        {!dataReady && !isPrintView && (
           <Loading loading={!dataReady} />
         )}
-        {showList && dataReady && (
-          <EntitiesListView
-            searchQuery={searchQuery}
-            isPrintView={isPrintView}
-            headerInfo={headerOptions.info}
-            listActions={allListActions}
-            showEntitiesDelete={onEntitiesDelete}
-            allEntityCount={allEntities && allEntities.size}
-            viewOptions={viewOptions}
-            hasHeader={includeHeader}
-            headerStyle={headerStyle}
-            listUpdating={progress !== null && progress >= 0 && progress < 100}
-            entities={entities}
-            errors={errors}
-            taxonomies={taxonomies}
-            actortypes={actortypes}
-            actiontypes={actiontypes}
-            targettypes={targettypes}
-            resourcetypes={resourcetypes}
-            connections={connections}
-            connectedTaxonomies={connectedTaxonomies}
-            entityIdsSelected={entityIdsSelectedFiltered}
+        {dataReady && (
+          <Container ref={this.ScrollReference} isPrint={isPrintView}>
+            <Content isPrint={isPrintView}>
+              {headerStyle === 'types' && !printing && (
+                <EntityListHeader
+                  typeId={typeId}
+                  dataReady={dataReady}
+                  currentFilters={filters}
+                  listUpdating={progress !== null && progress >= 0 && progress < 100}
+                  entities={entities}
+                  allEntities={allEntities}
+                  entityIdsSelected={entityIdsSelectedFiltered}
+                  taxonomies={taxonomies}
+                  actortypes={actortypes}
+                  filterActortypes={filterActortypes}
+                  resourcetypes={resourcetypes}
+                  actiontypes={actiontypes}
+                  membertypes={membertypes}
+                  filterAssociationtypes={filterAssociationtypes}
+                  connections={connections}
+                  associationtypes={associationtypes}
+                  connectedTaxonomies={connectedTaxonomies}
+                  config={config}
+                  locationQuery={locationQuery}
+                  canEdit={isMember && showList}
+                  isMember={isMember}
+                  isAdmin={isAdmin}
+                  hasUserRole={hasUserRole}
+                  onCreateOption={onCreateOption}
+                  onUpdate={
+                    (associations, activeEditOption) => handleEditSubmit(
+                      associations,
+                      activeEditOption,
+                      entityIdsSelectedFiltered,
+                      viewDomain.get('errors'),
+                      connections,
+                    )}
+                  onUpdateFilters={onUpdateFilters}
+                  showFilters={this.state.visibleFilters}
+                  showEditOptions={isMember && showList && this.state.visibleEditOptions}
+                  onShowFilters={this.onShowFilters}
+                  onHideFilters={this.onHideFilters}
+                  onHideEditOptions={this.onHideEditOptions}
+                  onSelectType={(type) => {
+                    // reset selection
+                    onEntitySelectAll([]);
+                    onSelectType(type);
+                  }}
+                  hasFilters={filters && filters.length > 0}
+                  onUpdateQuery={onUpdateQuery}
+                  filteringOptions={filteringOptions}
+                  includeMembersWhenFiltering={includeMembersWhenFiltering}
+                  includeActorMembers={includeActorMembers}
+                  includeActorChildren={includeActorChildren}
+                  headerActions={headerActions}
+                  viewOptions={viewOptions}
+                  isOnMap={showMap}
+                  isPrintView={isPrintView}
+                />
+              )}
+              {headerStyle === 'simple' && (
+                <EntityListHeader
+                  headerStyle={headerStyle}
+                  dataReady={dataReady}
+                  config={config}
+                  canEdit={isMember && showList}
+                  isMember={isMember}
+                  hasUserRole={hasUserRole}
+                  headerActions={headerOptions && headerOptions.actions}
+                  isPrintView={isPrintView}
+                />
+              )}
+              {showList && dataReady && (
+                <EntitiesListView
+                  reducePreviewItem={({ item, id, path }) => reducePreviewItem({
+                    item, id, path, intl, onUpdatePath,
+                  })}
+                  onScrollToTop={this.scrollToTop}
+                  searchQuery={searchQuery}
+                  isPrintView={isPrintView}
+                  headerInfo={headerOptions.info}
+                  listActions={allListActions}
+                  showEntitiesDelete={onEntitiesDelete}
+                  allEntityCount={allEntities && allEntities.size}
+                  hasHeader={includeHeader}
+                  headerStyle={headerStyle}
+                  listUpdating={progress !== null && progress >= 0 && progress < 100}
+                  entities={entities}
+                  errors={errors}
+                  taxonomies={taxonomies}
+                  connections={connections}
+                  connectedTaxonomies={connectedTaxonomies}
+                  entityIdsSelected={entityIdsSelectedFiltered}
+                  skipPreviews={skipPreviews}
+                  config={config}
+                  entityTitle={entityTitle}
 
-            config={config}
-            entityTitle={entityTitle}
+                  isMember={isMember}
+                  isAdmin={isAdmin}
+                  isVisitor={hasUserRole[USER_ROLES.VISITOR.value]}
 
-            isMember={isMember}
-            isAdmin={isAdmin}
-            isVisitor={hasUserRole[USER_ROLES.VISITOR.value]}
-
-            onEntitySelect={(id, checked) => {
-              // reset when unchecking last selected item
-              if (!checked && !this.state.visibleEditOptions && entityIdsSelectedFiltered.size === 1) {
-                this.onResetEditOptions();
-              }
-              this.onHideDeleteConfirm();
-              onEntitySelect(id, checked);
-            }}
-            onEntitySelectAll={(ids) => {
-              // reset when unchecking last selected item
-              if (!this.state.visibleEditOptions && (!ids || ids.length === 0)) {
-                this.onResetEditOptions();
-              }
-              this.onHideDeleteConfirm();
-              onEntitySelectAll(ids);
-            }}
-            onEntityClick={(id, path) => onEntityClick(
-              id, path, viewDomain.get('errors')
+                  onEntitySelect={(id, checked) => {
+                    // reset when unchecking last selected item
+                    if (!checked && !this.state.visibleEditOptions && entityIdsSelectedFiltered.size === 1) {
+                      this.onResetEditOptions();
+                    }
+                    this.onHideDeleteConfirm();
+                    onEntitySelect(id, checked);
+                  }}
+                  onEntitySelectAll={(ids) => {
+                    // reset when unchecking last selected item
+                    if (!this.state.visibleEditOptions && (!ids || ids.length === 0)) {
+                      this.onResetEditOptions();
+                    }
+                    this.onHideDeleteConfirm();
+                    onEntitySelectAll(ids);
+                  }}
+                  onEntityClick={(id, path, componentId) => onEntityClick(
+                    {
+                      id, path, componentId, errors: viewDomain.get('errors'),
+                    }
+                  )}
+                  onDismissError={onDismissError}
+                  typeId={typeId}
+                  hasFilters={filters && filters.length > 0}
+                  filters={filters}
+                  showCode={showCode}
+                  mapSubject={mapSubject}
+                  onSetMapSubject={onSetMapSubject}
+                  onSetIncludeActorMembers={onSetIncludeActorMembers}
+                  onSetIncludeActorChildren={onSetIncludeActorChildren}
+                  onSetIncludeInofficial={onSetIncludeInofficial}
+                  includeActorMembers={includeActorMembers}
+                  includeActorChildren={includeActorChildren}
+                  includeInofficial={includeInofficial}
+                  onClearFilters={this.onClearFilters}
+                />
+              )}
+            </Content>
+            {showMap && (
+              <EntitiesMap
+                viewOptions={viewOptions}
+                entities={entities}
+                actortypes={actortypes}
+                actiontypes={actiontypes}
+                config={config}
+                dataReady={dataReady}
+                onEntityClick={(id, path, componentId) => onEntityClick(
+                  {
+                    id, path, componentId, errors: viewDomain.get('errors'),
+                  }
+                )}
+                typeId={typeId}
+                hasFilters={filters && filters.length > 0}
+                mapSubject={mapSubject}
+                onSetMapSubject={onSetMapSubject}
+                onSetIncludeActorMembers={onSetIncludeActorMembers}
+                onSetIncludeActorChildren={onSetIncludeActorChildren}
+                includeActorMembers={includeActorMembers}
+                includeActorChildren={includeActorChildren}
+                isPrintView={isPrintView}
+                filters={filters}
+                onClearFilters={this.onClearFilters}
+              />
             )}
-            onDismissError={onDismissError}
-            typeId={typeId}
-            hasFilters={filters && filters.length > 0}
-            filters={filters}
-            showCode={showCode}
-            mapSubject={mapSubject}
-            onSetMapSubject={onSetMapSubject}
-            onSetIncludeActorMembers={onSetIncludeActorMembers}
-            onSetIncludeTargetMembers={onSetIncludeTargetMembers}
-            onSetIncludeActorChildren={onSetIncludeActorChildren}
-            onSetIncludeTargetChildren={onSetIncludeTargetChildren}
-            onSetIncludeInofficial={onSetIncludeInofficial}
-            includeActorMembers={includeActorMembers}
-            includeTargetMembers={includeTargetMembers}
-            includeActorChildren={includeActorChildren}
-            includeTargetChildren={includeTargetChildren}
-            includeInofficial={includeInofficial}
-          />
-        )}
-        {showMap && dataReady && (
-          <EntitiesMap
-            viewOptions={viewOptions}
-            entities={entities}
-            actortypes={actortypes}
-            actiontypes={actiontypes}
-            targettypes={targettypes}
-            config={config}
-            dataReady={dataReady}
-            onEntityClick={(id, path) => onEntityClick(
-              id, path, viewDomain.get('errors')
-            )}
-            typeId={typeId}
-            hasFilters={filters && filters.length > 0}
-            mapSubject={mapSubject}
-            onSetMapSubject={onSetMapSubject}
-            onSetIncludeActorMembers={onSetIncludeActorMembers}
-            onSetIncludeTargetMembers={onSetIncludeTargetMembers}
-            onSetIncludeActorChildren={onSetIncludeActorChildren}
-            onSetIncludeTargetChildren={onSetIncludeTargetChildren}
-            includeActorMembers={includeActorMembers}
-            includeTargetMembers={includeTargetMembers}
-            includeActorChildren={includeActorChildren}
-            includeTargetChildren={includeTargetChildren}
-            isPrintView={isPrintView}
-          />
+          </Container>
         )}
         {isMember && (progress !== null && progress < 100) && (
           <Progress>
@@ -715,7 +885,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             />
           </Progress>
         )}
-      </div>
+      </ContainerWrapper>
     );
   }
 }
@@ -736,9 +906,6 @@ EntityList.propTypes = {
   filterActortypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
-  targettypes: PropTypes.instanceOf(Map),
-  filterTargettypes: PropTypes.instanceOf(Map),
-  actiontypesForTarget: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
   filterAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
@@ -771,12 +938,12 @@ EntityList.propTypes = {
   onDismissError: PropTypes.func.isRequired,
   onDismissAllErrors: PropTypes.func.isRequired,
   onUpdateQuery: PropTypes.func.isRequired,
+  // reducePreviewItem: PropTypes.func,
   canEdit: PropTypes.bool,
   includeHeader: PropTypes.bool,
   headerStyle: PropTypes.string,
   showCode: PropTypes.bool,
   includeMembersWhenFiltering: PropTypes.bool,
-  typeOptions: PropTypes.array,
   listActions: PropTypes.array,
   onSelectType: PropTypes.func,
   onSetView: PropTypes.func,
@@ -786,20 +953,19 @@ EntityList.propTypes = {
   searchQuery: PropTypes.string,
   onSetMapSubject: PropTypes.func,
   onSetIncludeActorMembers: PropTypes.func,
-  onSetIncludeTargetMembers: PropTypes.func,
   onSetIncludeActorChildren: PropTypes.func,
-  onSetIncludeTargetChildren: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
   includeActorMembers: PropTypes.bool,
-  includeTargetMembers: PropTypes.bool,
   includeActorChildren: PropTypes.bool,
-  includeTargetChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
   onEntitiesDelete: PropTypes.func,
   onUpdateFilters: PropTypes.func,
+  onUpdatePath: PropTypes.func,
   isPrintView: PropTypes.bool,
   currentUserId: PropTypes.string,
   filteringOptions: PropTypes.array,
+  secondaryNavItems: PropTypes.array,
+  skipPreviews: PropTypes.bool,
 };
 
 EntityList.contextTypes = {
@@ -819,8 +985,6 @@ const mapStateToProps = (state) => ({
   mapSubject: selectMapSubjectQuery(state),
   includeActorMembers: selectIncludeActorMembers(state),
   includeActorChildren: selectIncludeActorChildren(state),
-  includeTargetMembers: selectIncludeTargetMembers(state),
-  includeTargetChildren: selectIncludeTargetChildren(state),
   includeInofficial: selectIncludeInofficialStatements(state),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   isPrintView: selectIsPrintView(state),
@@ -847,7 +1011,9 @@ function mapDispatchToProps(dispatch, props) {
     onEntitySelect: (id, checked) => {
       dispatch(selectEntity({ id, checked }));
     },
-    onEntityClick: (id, path, errors) => {
+    onEntityClick: ({
+      id, path, componentId, errors,
+    }) => {
       if (errors && errors.size) {
         dispatch(resetProgress());
         errors.forEach((error, key) => {
@@ -856,7 +1022,11 @@ function mapDispatchToProps(dispatch, props) {
           }
         });
       }
-      dispatch(updatePath(`${path || props.config.clientPath}/${id}`));
+      if (props.skipPreviews || !componentId) {
+        dispatch(updatePath(`${path || props.config.clientPath}/${id}`));
+      } else {
+        dispatch(setListPreview(`${componentId}|${path}|${id}`));
+      }
     },
     onEntitySelectAll: (ids) => {
       dispatch(selectMultipleEntities(ids));
@@ -873,6 +1043,7 @@ function mapDispatchToProps(dispatch, props) {
     onUpdateQuery: (args) => {
       dispatch(updateRouteQuery(args));
     },
+    onUpdatePath: (path) => dispatch(updatePath(path)),
     onUpdateFilters: (values) => {
       dispatch(setFilters(values));
     },
@@ -882,14 +1053,8 @@ function mapDispatchToProps(dispatch, props) {
     onSetMapSubject: (subject) => {
       dispatch(setMapSubject(subject));
     },
-    onSetIncludeTargetMembers: (active) => {
-      dispatch(setIncludeTargetMembers(active));
-    },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));
-    },
-    onSetIncludeTargetChildren: (active) => {
-      dispatch(setIncludeTargetChildren(active));
     },
     onSetIncludeActorChildren: (active) => {
       dispatch(setIncludeActorChildren(active));
@@ -978,7 +1143,6 @@ function mapDispatchToProps(dispatch, props) {
                 break;
               case ('actions'):
               case ('actors'):
-              case ('targets'):
               case ('members'):
               case ('associations'):
               case ('resources'):

@@ -8,41 +8,30 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { actions as formActions } from 'react-redux-form/immutable';
-
+import { format } from 'date-fns';
 import { Map, List, fromJS } from 'immutable';
 
 import {
   getConnectionUpdatesFromFormData,
-  getTitleFormField,
-  getStatusField,
-  getMarkdownFormField,
-  getCodeFormField,
-  renderActorsByActortypeControl,
-  renderTargetsByActortypeControl,
-  renderResourcesByResourcetypeControl,
-  getDateField,
-  getTextareaField,
-  renderTaxonomyControl,
-  getLinkFormField,
-  renderActionsByActiontypeControl,
-  renderIndicatorControl,
-  renderUserMultiControl,
+  getActiontypeFormFields,
 } from 'utils/forms';
 
 import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewErrorNEW } from 'utils/entity-form';
-import { checkActionAttribute, checkActionRequired, getEntityTitle } from 'utils/entities';
+import { getEntityTitle } from 'utils/entities';
 import { lowerCase } from 'utils/string';
+import asList from 'utils/as-list';
 
-import { CONTENT_SINGLE, CONTENT_MODAL } from 'containers/App/constants';
 import {
   API,
   USER_ROLES,
   ROUTES,
-  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
+  API_DATE_FORMAT,
+  ACTIONTYPES_CONFIG,
 } from 'themes/config';
+import { CONTENT_MODAL, CONTENT_SINGLE } from 'containers/App/constants';
 
 import {
   loadEntitiesIfNeeded,
@@ -53,6 +42,7 @@ import {
   submitInvalid,
   saveErrorDismiss,
   newEntity,
+  redirectIfNotSignedIn,
 } from 'containers/App/actions';
 
 import {
@@ -69,13 +59,12 @@ import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
 
 import appMessages from 'containers/App/messages';
-import FormWrapper from './FormWrapper';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import {
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
   selectActorsByActortype,
-  selectTargetsByActortype,
   selectResourcesByResourcetype,
   selectIndicatorOptions,
   selectUserOptions,
@@ -91,6 +80,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
   }
 
   UNSAFE_componentWillMount() {
+    this.props.redirectIfNotSignedIn();
     this.props.loadEntitiesIfNeeded();
     this.props.initialiseForm(this.getInitialFormData());
   }
@@ -114,290 +104,149 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
-    const { typeId, sessionUser } = props;
+    const {
+      typeId,
+      sessionUser,
+      inModal,
+      modalConnect,
+      actorsByActortype,
+      topActionsByActiontype,
+      userOptions,
+      indicatorOptions,
+    } = props;
+    const shape = ACTIONTYPES_CONFIG[parseInt(typeId, 10)]
+      && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].form;
     const dataWithType = FORM_INITIAL.setIn(['attributes', 'measuretype_id'], typeId);
-    return sessionUser
+    const nowFormatted = format(new Date(), API_DATE_FORMAT);
+    let result = dataWithType;
+    if (
+      sessionUser
       && sessionUser.getIn(['attributes', 'id'])
-      ? dataWithType.set(
-        'associatedUsers',
-        fromJS([{
-          value: sessionUser.getIn(['attributes', 'id']).toString(),
-          checked: true,
-          label: sessionUser.getIn(['attributes', 'name']),
-          reference: sessionUser.getIn(['attributes', 'id']).toString(),
-        }])
+      && (!modalConnect || modalConnect.get('type') !== 'userActions')
+    ) {
+      result = result
+        .set(
+          'associatedUsers',
+          fromJS([{
+            value: sessionUser.getIn(['attributes', 'id']).toString(),
+            checked: true,
+            label: sessionUser.getIn(['attributes', 'name']),
+            autofill: true,
+          }])
+        );
+    }
+    const hasAutoFillDate = shape.find(
+      (step) => step.sections && step.sections.find(
+        (section) => section.rows && section.rows.find(
+          (row) => row.length > 0 && row.find(
+            (att) => att.attribute === 'date_start' && att.prepopulate
+          )
+        )
       )
-      : dataWithType;
-  };
-
-  getHeaderMainFields = (typeId, isAdmin) => {
-    const { intl } = this.context;
-    return ([ // fieldGroups
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'code', isAdmin) && getCodeFormField(
-            intl.formatMessage,
-            'code',
-            checkActionRequired(typeId, 'code'),
-          ),
-          checkActionAttribute(typeId, 'title') && getTitleFormField(
-            intl.formatMessage,
-            'title',
-            'title',
-            checkActionRequired(typeId, 'title'),
-          ),
-        ],
-      },
-    ]);
-  };
-
-  getHeaderAsideFields = () => {
-    const { intl } = this.context;
-    const groups = [];
-    groups.push({
-      fields: [
-        getStatusField(intl.formatMessage),
-        getStatusField(intl.formatMessage, 'private'),
-        getStatusField(intl.formatMessage, 'notifications'),
-      ],
-    });
-    return groups;
-  };
-
-  getBodyMainFields = (
-    typeId,
-    connectedTaxonomies,
-    actorsByActortype,
-    targetsByActortype,
-    resourcesByResourcetype,
-    subActionsByActiontype,
-    indicatorOptions,
-    onCreateOption,
-    isAdmin,
-  ) => {
-    const { intl } = this.context;
-    // if (!type) return [];
-    // const typeId = type.get('id');
-    const groups = [];
-    groups.push(
-      {
-        fields: [
-          // description
-          checkActionAttribute(typeId, 'description') && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'description'),
-            'description',
-          ),
-          checkActionAttribute(typeId, 'comment') && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'comment'),
-            'comment',
-          ),
-        ],
-      },
-      {
-        fields: [
-          checkActionAttribute(typeId, 'target_comment') && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'target_comment'),
-            'target_comment',
-          ),
-          checkActionAttribute(typeId, 'status_comment') && getMarkdownFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'status_comment'),
-            'status_comment',
-          ),
-        ],
-      },
     );
-    if (indicatorOptions) {
-      const indicatorConnections = renderIndicatorControl({
-        entities: indicatorOptions,
-        intl,
-        connectionAttributes: [{
-          attribute: 'supportlevel_id',
-          type: 'select',
-          showCode: isAdmin,
-          options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId].map(
-            (level) => ({
-              label: intl.formatMessage(appMessages.supportlevels[level.value]),
-              ...level,
-            }),
-          ),
-        }],
-      });
-      if (indicatorConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.indicators),
-            fields: [indicatorConnections],
-          },
-        );
-      }
-    }
 
-    if (actorsByActortype) {
-      const actorConnections = renderActorsByActortypeControl({
-        entitiesByActortype: actorsByActortype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (actorConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.actors),
-            fields: actorConnections,
-          },
-        );
-      }
-    }
-    if (targetsByActortype) {
-      const targetConnections = renderTargetsByActortypeControl({
-        entitiesByActortype: targetsByActortype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (targetConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.targets),
-            fields: targetConnections,
-          },
-        );
-      }
-    }
-    if (subActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl({
-        entitiesByActiontype: subActionsByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        model: 'associatedSubActionsByActiontype',
-        isAdmin,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.subActions),
-            fields: actionConnections,
-          },
-        );
-      }
-    }
-    if (resourcesByResourcetype) {
-      const resourceConnections = renderResourcesByResourcetypeControl({
-        entitiesByResourcetype: resourcesByResourcetype,
-        onCreateOption,
-        intl,
-        isAdmin,
-      });
-      if (resourceConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.resources),
-            fields: resourceConnections,
-          },
-        );
-      }
-    }
-    return groups;
-  };
-
-  getBodyAsideFields = (
-    typeId,
-    taxonomies,
-    connectedTaxonomies,
-    topActionsByActiontype,
-    userOptions,
-    onCreateOption,
-    isAdmin,
-  ) => {
-    const { intl } = this.context;
-    // const typeId = type.get('id');
-    const groups = [];
-    if (userOptions) {
-      groups.push(
-        {
-          label: intl.formatMessage(appMessages.nav.userActions),
-          fields: [
-            renderUserMultiControl(userOptions, null, intl),
-          ],
-        },
+    if (hasAutoFillDate) {
+      result = result.setIn(
+        ['attributes', 'date_start'],
+        nowFormatted,
       );
     }
-    groups.push( // fieldGroups
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'url') && getLinkFormField(
-            intl.formatMessage,
-            checkActionRequired(typeId, 'url'),
-            'url',
-          ),
-        ],
-      },
-    );
-    groups.push(
-      { // fieldGroup
-        fields: [
-          checkActionAttribute(typeId, 'date_start') && getDateField(
-            intl.formatMessage,
-            'date_start',
-            checkActionRequired(typeId, 'date_start'),
-          ),
-          checkActionAttribute(typeId, 'date_end') && getDateField(
-            intl.formatMessage,
-            'date_end',
-            checkActionRequired(typeId, 'date_end'),
-          ),
-          checkActionAttribute(typeId, 'date_comment') && getTextareaField(
-            intl.formatMessage,
-            'date_comment',
-            checkActionRequired(typeId, 'date_comment'),
-          ),
-        ],
-      },
-    );
-    groups.push(
-      { // fieldGroup
-        label: intl.formatMessage(appMessages.entities.taxonomies.plural),
-        icon: 'categories',
-        fields: renderTaxonomyControl({
-          taxonomies, onCreateOption, intl,
-        }),
-      },
-    );
-    if (topActionsByActiontype) {
-      const actionConnections = renderActionsByActiontypeControl({
-        entitiesByActiontype: topActionsByActiontype,
-        taxonomies: connectedTaxonomies,
-        onCreateOption,
-        intl,
-        model: 'associatedTopActionsByActiontype',
-        isAdmin,
-      });
-      if (actionConnections) {
-        groups.push(
-          {
-            label: intl.formatMessage(appMessages.nav.topActions),
-            fields: actionConnections,
-          },
-        );
-      }
+    if (inModal && modalConnect) {
+      result = asList(modalConnect).reduce(
+        (memo, modalConnectItem) => {
+          if (modalConnectItem.get('create')) {
+            // connect action to actor
+            if (modalConnectItem.get('type') === 'actorActions') {
+              const actorId = modalConnectItem
+                .get('create')
+                .find((item) => item.keySeq().includes('actor_id'))
+                .get('actor_id');
+              // console.log(actorId)
+              const actor = actorId && actorsByActortype.flatten(true).get(actorId);
+              return memo
+                .set(
+                  'associatedActorsByActortype',
+                  fromJS({
+                    [actor.getIn(['attributes', 'actortype_id'])]: [{
+                      value: actor.get('id').toString(),
+                      checked: true,
+                      label: actor.getIn(['attributes', 'title']),
+                      autofill: true,
+                    }],
+                  })
+                );
+            }
+            // connect action with top action
+            if (modalConnectItem.get('type') === 'subActions') {
+              const actionId = modalConnectItem
+                .get('create')
+                .find((item) => item.keySeq().includes('other_measure_id'))
+                .get('other_measure_id');
+              // console.log(actorId)
+              const action = actionId && topActionsByActiontype.flatten(true).get(actionId);
+              return memo
+                .set(
+                  'associatedTopActionsByActiontype',
+                  fromJS({
+                    [action.getIn(['attributes', 'measuretype_id'])]: [{
+                      value: action.get('id').toString(),
+                      checked: true,
+                      label: action.getIn(['attributes', 'title']),
+                      autofill: true,
+                    }],
+                  })
+                );
+            }
+            // connect action with user
+            if (modalConnectItem.get('type') === 'userActions') {
+              const userId = modalConnectItem
+                .get('create')
+                .find((item) => item.keySeq().includes('user_id'))
+                .get('user_id');
+              const user = userId && userOptions && userOptions.get(userId);
+              return memo
+                .set(
+                  'associatedUsers',
+                  fromJS([{
+                    value: user.get('id').toString(),
+                    checked: true,
+                    label: user.getIn(['attributes', 'name']),
+                    autofill: true,
+                  }])
+                );
+            }
+            // connect action with topic
+            if (modalConnectItem.get('type') === 'actorIndicators') {
+              const indicatorId = modalConnectItem
+                .get('create')
+                .find((item) => item.keySeq().includes('indicator_id'))
+                .get('indicator_id');
+              const indicator = indicatorId && indicatorOptions && indicatorOptions.get(indicatorId);
+              return memo
+                .set(
+                  'associatedIndicators',
+                  fromJS([{
+                    value: indicator.get('id').toString(),
+                    checked: true,
+                    label: indicator.getIn(['attributes', 'title']),
+                    autofill: true,
+                  }])
+                );
+            }
+          }
+          return memo;
+        },
+        result,
+      );
     }
-    return groups;
+    return result;
   };
 
   render() {
     const { intl } = this.context;
     const {
-      dataReady,
       viewDomain,
       actorsByActortype,
-      targetsByActortype,
       resourcesByResourcetype,
       connectedTaxonomies,
       taxonomies,
@@ -420,28 +269,19 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       modalConnect,
       invalidateEntitiesOnSuccess,
       isAdmin,
+      dataReady,
     } = this.props;
-    const { saveSending, isAnySending } = viewDomain.get('page').toJS();
-    const saving = isAnySending || saveSending;
-    const type = intl.formatMessage(appMessages.entities[`actions_${typeId}`].single);
+    const typeLabel = intl.formatMessage(appMessages.entities[`actions_${typeId}`].single);
     let subTitle;
     if (inModal && modalConnect && modalConnect.get('create')) {
       // connect action to actor
-      if (
-        modalConnect.get('type') === 'actorActions'
-        || modalConnect.get('type') === 'actionActors'
-      ) {
+      if (modalConnect.get('type') === 'actorActions') {
         const actorId = modalConnect
           .get('create')
           .find((item) => item.keySeq().includes('actor_id'))
           .get('actor_id');
         // console.log(actorId)
-        let actor;
-        if (modalConnect.get('type') === 'actorActions') {
-          actor = actorId && actorsByActortype.flatten(true).get(actorId);
-        } else if (modalConnect.get('type') === 'actionActors') {
-          actor = actorId && targetsByActortype.flatten(true).get(actorId);
-        }
+        const actor = actorId && actorsByActortype.flatten(true).get(actorId);
         const actorType = actor && intl.formatMessage(appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].single);
         subTitle = actor && `For ${lowerCase(actorType)}: ${getEntityTitle(actor)}`;
       }
@@ -469,22 +309,17 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     return (
       <Content ref={this.scrollContainer} inModal={inModal}>
         <ContentHeader
-          title={intl.formatMessage(messages.pageTitle, { type })}
+          title={intl.formatMessage(messages.pageTitle, { type: typeLabel })}
           subTitle={subTitle}
           type={inModal ? CONTENT_MODAL : CONTENT_SINGLE}
-          buttons={
-            dataReady ? [{
-              type: 'cancel',
-              onClick: () => handleCancel(typeId),
-            },
-            {
-              type: 'save',
-              disabled: saving,
-              onClick: () => handleSubmitRemote(formDataPath),
-            }] : null
-          }
+          buttons={inModal && [{
+            type: 'cancel',
+            onClick: () => handleCancel(typeId),
+          }]}
         />
-        <FormWrapper
+        <EntityFormWrapper
+          isNewEntityView
+          typeLabel={typeLabel}
           model={formDataPath}
           inModal={inModal}
           viewDomain={viewDomain}
@@ -492,7 +327,6 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             formData,
             actiontype,
             actorsByActortype,
-            targetsByActortype,
             resourcesByResourcetype,
             topActionsByActiontype,
             subActionsByActiontype,
@@ -500,40 +334,28 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             userOptions,
             invalidateEntitiesOnSuccess,
           )}
+          handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleSubmitFail={handleSubmitFail}
           handleCancel={() => handleCancel(typeId)}
           handleUpdate={handleUpdate}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
-          fields={{
-            header: {
-              main: this.getHeaderMainFields(typeId, isAdmin),
-              aside: this.getHeaderAsideFields(),
-            },
-            body: {
-              main: this.getBodyMainFields(
-                typeId,
-                connectedTaxonomies,
-                actorsByActortype,
-                targetsByActortype,
-                resourcesByResourcetype,
-                subActionsByActiontype,
-                indicatorOptions,
-                inModal ? null : onCreateOption,
-                isAdmin
-              ),
-              aside: this.getBodyAsideFields(
-                typeId,
-                taxonomies,
-                connectedTaxonomies,
-                topActionsByActiontype,
-                userOptions,
-                inModal ? null : onCreateOption,
-                isAdmin,
-              ),
-            },
-          }}
+          fieldsByStep={dataReady && getActiontypeFormFields({
+            isAdmin,
+            isMine: true,
+            typeId,
+            taxonomies,
+            connectedTaxonomies,
+            userOptions,
+            indicatorOptions,
+            actorsByActortype,
+            topActionsByActiontype,
+            subActionsByActiontype,
+            resourcesByResourcetype,
+            onCreateOption: inModal ? null : onCreateOption,
+            intl,
+          })}
         />
       </Content>
     );
@@ -543,6 +365,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
 ActionNewForm.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func,
   redirectIfNotPermitted: PropTypes.func,
+  redirectIfNotSignedIn: PropTypes.func,
   handleSubmitRemote: PropTypes.func.isRequired,
   handleSubmitFail: PropTypes.func.isRequired,
   handleSubmit: PropTypes.func.isRequired,
@@ -551,7 +374,6 @@ ActionNewForm.propTypes = {
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   actorsByActortype: PropTypes.instanceOf(Map),
-  targetsByActortype: PropTypes.instanceOf(Map),
   resourcesByResourcetype: PropTypes.instanceOf(Map),
   initialiseForm: PropTypes.func,
   onErrorDismiss: PropTypes.func.isRequired,
@@ -565,7 +387,10 @@ ActionNewForm.propTypes = {
   onCreateOption: PropTypes.func,
   connectedTaxonomies: PropTypes.instanceOf(Map),
   actiontype: PropTypes.instanceOf(Map),
-  modalConnect: PropTypes.instanceOf(Map),
+  modalConnect: PropTypes.oneOfType([
+    PropTypes.instanceOf(Map),
+    PropTypes.instanceOf(List),
+  ]),
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
   invalidateEntitiesOnSuccess: PropTypes.oneOfType([
@@ -595,7 +420,6 @@ const mapStateToProps = (state, { typeId, autoUser }) => ({
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   actiontype: selectActiontype(state, typeId),
   actorsByActortype: selectActorsByActortype(state, typeId),
-  targetsByActortype: selectTargetsByActortype(state, typeId),
   resourcesByResourcetype: selectResourcesByResourcetype(state, typeId),
   topActionsByActiontype: selectTopActionsByActiontype(state, typeId),
   subActionsByActiontype: selectSubActionsByActiontype(state, typeId),
@@ -609,7 +433,6 @@ function mapDispatchToProps(
   {
     formDataPath,
     modalAttributes,
-    modalConnect,
     inModal,
     onSaveSuccess,
     onCancel,
@@ -625,6 +448,9 @@ function mapDispatchToProps(
     },
     redirectIfNotPermitted: () => {
       dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
+    },
+    redirectIfNotSignedIn: () => {
+      dispatch(redirectIfNotSignedIn());
     },
     onErrorDismiss: () => {
       dispatch(submitInvalid(true));
@@ -642,7 +468,6 @@ function mapDispatchToProps(
       formData,
       actiontype,
       actorsByActortype,
-      targetsByActortype,
       resourcesByResourcetype,
       topActionsByActiontype,
       subActionsByActiontype,
@@ -712,7 +537,7 @@ function mapDispatchToProps(
       // indicators
       if (formData.get('associatedIndicators') && indicatorOptions) {
         saveData = saveData.set(
-          'actionIndicators', // targets
+          'actionIndicators', // indicators
           getConnectionUpdatesFromFormData({
             formData,
             connections: indicatorOptions,
@@ -731,29 +556,6 @@ function mapDispatchToProps(
               formData,
               connections: actors,
               connectionAttribute: ['associatedActorsByActortype', actortypeid.toString()],
-              createConnectionKey: 'actor_id',
-              createKey: 'measure_id',
-            }))
-            .reduce(
-              (memo, deleteCreateLists) => {
-                const creates = memo.get('create').concat(deleteCreateLists.get('create'));
-                return memo.set('create', creates);
-              },
-              fromJS({
-                create: [],
-              }),
-            )
-        );
-      }
-      // targets
-      if (formData.get('associatedTargetsByActortype') && targetsByActortype) {
-        saveData = saveData.set(
-          'actionActors',
-          targetsByActortype
-            .map((targets, actortypeid) => getConnectionUpdatesFromFormData({
-              formData,
-              connections: targets,
-              connectionAttribute: ['associatedTargetsByActortype', actortypeid.toString()],
               createConnectionKey: 'actor_id',
               createKey: 'measure_id',
             }))
@@ -806,26 +608,6 @@ function mapDispatchToProps(
       if (inModal) {
         if (modalAttributes) {
           saveData = saveData.mergeIn(['attributes'], modalAttributes);
-        }
-        if (modalConnect
-          && (
-            modalConnect.get('type') === 'actorActions'
-            || modalConnect.get('type') === 'actionActors'
-            || modalConnect.get('type') === 'userActions'
-            || modalConnect.get('type') === 'subActions'
-          )
-        ) {
-          if (saveData.get('type')) {
-            saveData = saveData.mergeIn(
-              [modalConnect.get('type'), 'create'],
-              modalConnect.get('create'),
-            );
-          } else {
-            saveData = saveData.setIn(
-              [modalConnect.get('type'), 'create'],
-              modalConnect.get('create'),
-            );
-          }
         }
       }
       dispatch(

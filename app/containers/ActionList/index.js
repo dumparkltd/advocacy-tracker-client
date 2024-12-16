@@ -26,8 +26,6 @@ import {
   selectActiontypes,
   selectActortypesForActiontype,
   selectParentActortypesForActiontype,
-  selectParentTargettypesForActiontype,
-  selectTargettypesForActiontype,
   selectResourcetypesForActiontype,
   selectViewQuery,
   selectIncludeMembersForFiltering,
@@ -39,7 +37,7 @@ import { PRINT_TYPES } from 'containers/App/constants';
 import { checkActionAttribute } from 'utils/entities';
 import { keydownHandlerPrint } from 'utils/print';
 
-import { ROUTES } from 'themes/config';
+import { ROUTES, ACTIONTYPES, OUTREACH_ACTIONTYPES } from 'themes/config';
 
 import EntityList from 'containers/EntityList';
 import { CONFIG, DEPENDENCIES } from './constants';
@@ -50,13 +48,6 @@ import {
 } from './selectors';
 
 import messages from './messages';
-
-
-const prepareTypeOptions = (types, activeId, intl) => types.toList().toJS().map((type) => ({
-  value: type.id,
-  label: intl.formatMessage(appMessages.actiontypes[type.id]),
-  active: activeId === type.id,
-}));
 
 export function ActionList({
   onLoadEntitiesIfNeeded,
@@ -73,12 +64,8 @@ export function ActionList({
   actiontypes,
   actortypes,
   parentActortypes,
-  parentTargettypes,
-  targettypes,
   resourcetypes,
-  onSelectType,
   onSetPrintView,
-  handleNew,
   handleImport,
   view,
   intl,
@@ -148,12 +135,6 @@ export function ActionList({
   }
   if (isMember) {
     headerOptions.actions.push({
-      title: 'Create new',
-      onClick: () => handleNew(typeId),
-      icon: 'add',
-      isMember,
-    });
-    headerOptions.actions.push({
       title: intl.formatMessage(appMessages.buttons.import),
       onClick: () => handleImport(typeId),
       icon: 'import',
@@ -164,13 +145,9 @@ export function ActionList({
   const filterActortypes = hasMemberFilterOption && parentActortypes
     ? actortypes.merge(parentActortypes)
     : actortypes;
-  const filterTargettypes = hasMemberFilterOption && parentTargettypes
-    ? targettypes.merge(parentTargettypes)
-    : targettypes;
   // console.log('filterActortypes', filterActortypes && filterActortypes.toJS())
   // console.log('parentActortypes', parentActortypes && parentActortypes.toJS())
   // console.log('actortypes', actortypes && actortypes.toJS())
-  // console.log('targettypes', targettypes && targettypes.toJS())
   let filteringOptions;
   if (hasMemberFilterOption && onSetFilterMemberOption) {
     filteringOptions = [{
@@ -183,6 +160,38 @@ export function ActionList({
       },
     }];
   }
+
+  let navItems;
+  if (OUTREACH_ACTIONTYPES.indexOf(typeId) > -1) {
+    navItems = [];
+    navItems = OUTREACH_ACTIONTYPES.reduce(
+      (memo, actionTypeId) => [
+        ...memo,
+        {
+          path: `${ROUTES.ACTIONS}/${actionTypeId}`,
+          title: intl.formatMessage(appMessages.actiontypes_short[actionTypeId]),
+          active: location.pathname && location.pathname.startsWith(`${ROUTES.ACTIONS}/${actionTypeId}`),
+        },
+      ],
+      navItems,
+    );
+  } else {
+    navItems = [
+      {
+        path: ROUTES.POSITIONS,
+        title: 'Overview',
+      },
+      {
+        path: `${ROUTES.ACTIONS}/${ACTIONTYPES.EXPRESS}`,
+        title: intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`].plural),
+        active: true,
+      },
+      {
+        path: ROUTES.INDICATORS,
+        title: intl.formatMessage(appMessages.entities.indicators.plural),
+      },
+    ];
+  }
   return (
     <div>
       <Helmet
@@ -192,6 +201,7 @@ export function ActionList({
         ]}
       />
       <EntityList
+        secondaryNavItems={navItems}
         entities={entities}
         allEntities={allEntities.toList()}
         taxonomies={taxonomies}
@@ -206,12 +216,8 @@ export function ActionList({
         locationQuery={fromJS(location.query)}
         actortypes={actortypes}
         filterActortypes={filterActortypes}
-        targettypes={targettypes}
-        filterTargettypes={filterTargettypes}
         actiontypes={actiontypes}
         resourcetypes={resourcetypes}
-        typeOptions={prepareTypeOptions(actiontypes, typeId, intl)}
-        onSelectType={onSelectType}
         typeId={typeId}
         showCode={checkActionAttribute(typeId, 'code', isAdmin)}
         includeMembersWhenFiltering={includeMembersWhenFiltering}
@@ -229,16 +235,12 @@ ActionList.propTypes = {
   connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
   parentActortypes: PropTypes.instanceOf(Map),
-  parentTargettypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
-  targettypes: PropTypes.instanceOf(Map),
   resourcetypes: PropTypes.instanceOf(Map),
   allEntities: PropTypes.instanceOf(Map),
   onLoadEntitiesIfNeeded: PropTypes.func,
   onSetFilterMemberOption: PropTypes.func,
-  handleNew: PropTypes.func,
   handleImport: PropTypes.func,
-  onSelectType: PropTypes.func,
   onSetPrintView: PropTypes.func,
   location: PropTypes.object,
   isVisitor: PropTypes.bool,
@@ -260,8 +262,6 @@ const mapStateToProps = (state, props) => ({
   actiontypes: selectActiontypes(state),
   actortypes: selectActortypesForActiontype(state, { type: props.params.id }),
   parentActortypes: selectParentActortypesForActiontype(state, { type: props.params.id }),
-  parentTargettypes: selectParentTargettypesForActiontype(state, { type: props.params.id }),
-  targettypes: selectTargettypesForActiontype(state, { type: props.params.id }),
   resourcetypes: selectResourcetypesForActiontype(state, { type: props.params.id }),
   allEntities: selectActionsWithConnections(state, { type: props.params.id }),
   view: selectViewQuery(state),
@@ -272,18 +272,8 @@ function mapDispatchToProps(dispatch) {
     onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
-    handleNew: (typeId) => {
-      dispatch(updatePath(`${ROUTES.ACTIONS}/${typeId}${ROUTES.NEW}`, { replace: true }));
-    },
     handleImport: (typeId) => {
       dispatch(updatePath(`${ROUTES.ACTIONS}/${typeId}${ROUTES.IMPORT}`));
-    },
-    onSelectType: (typeId) => {
-      dispatch(updatePath(
-        typeId && typeId !== ''
-          ? `${ROUTES.ACTIONS}/${typeId}`
-          : ROUTES.ACTIONS
-      ));
     },
     onSetPrintView: (config) => {
       dispatch(printView(config));

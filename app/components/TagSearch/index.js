@@ -62,7 +62,7 @@ const Clear = styled(Button)`
   top: 0;
   right: 0;
   background-color: ${palette('background', 4)};
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: ${({ small }) => small ? '4px 6px' : '8px 6px'};
   }
   @media print {
@@ -102,21 +102,21 @@ export class TagSearch extends React.Component { // eslint-disable-line react/pr
     // onClick={() => {
     //   this.inputNode.focus()
     // }}
-    const hasFilters = (searchQuery || filters.length > 0);
+    const hasFilters = (searchQuery || (filters && filters.length > 0));
     return (
       <Search
         active={this.state.active}
         small={this.props.multiselect}
         printHide={!hasFilters}
       >
-        {filters.length > 0 && (
+        {filters && filters.length > 0 && (
           <LabelPrint>
             <FormattedMessage {...messages.labelPrintFilters} />
           </LabelPrint>
         )}
-        {filters.length > 0 && (
+        {filters && filters.length > 0 && (
           <Tags>
-            {filters.map((filter, i) => (
+            {filters && filters.map((filter, i) => (
               <ButtonTagFilterWrap
                 key={i}
                 filter={filter}

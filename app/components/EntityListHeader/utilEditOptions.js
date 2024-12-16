@@ -31,7 +31,6 @@ export const makeActiveEditOptions = ({
       return makeTaxonomyEditOptions(entities, taxonomies, activeEditOption, messages);
     case 'actions':
     case 'actors':
-    case 'targets':
     case 'members':
     case 'associations':
     case 'resources':
@@ -114,6 +113,7 @@ const makeTaxonomyEditOptions = (entities, taxonomies, activeEditOption, message
     required: false,
     selectAll: true,
     groups: null,
+    path: activeEditOption.path,
   };
 
   const taxonomy = taxonomies.get(activeEditOption.optionId);
@@ -170,13 +170,18 @@ const makeGroupedConnectionEditOptions = (
     selectAll: true,
     tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, intl),
   };
-  const areActors = type === 'action-targets' // targets
-    || type === 'action-actors' // active actors
+  const connectingToActors = type === 'action-actors' // active actors
     || type === 'member-associations' // associations
     || type === 'association-members' // members
     || type === 'indicator-actions';
+  const connectingToActions = type === 'actor-actions'
+    || type === 'resource-actions'
+    || type === 'action-parents'
+    || type === 'action-children';
+  const connectingToResources = type === 'action-resources';
 
-  const hasCode = isAdmin || (areActors && qe(typeId, ACTORTYPES.COUNTRY));
+  const hasCode = isAdmin || (connectingToActors && qe(typeId, ACTORTYPES.COUNTRY));
+
   if (option) {
     editOptions.title = messages.title;
     editOptions.path = option.connectPath;
@@ -187,19 +192,13 @@ const makeGroupedConnectionEditOptions = (
     connections
       .get(connectionPath)
       .filter((c) => {
-        if (
-          type === 'target-actions'
-          || type === 'actor-actions'
-          || type === 'resource-actions'
-          || type === 'action-parents'
-          || type === 'action-children'
-        ) {
+        if (connectingToActions) {
           return qe(typeId, c.getIn(['attributes', 'measuretype_id']));
         }
-        if (type === 'action-resources') {
+        if (connectingToResources) {
           return qe(typeId, c.getIn(['attributes', 'resourcetype_id']));
         }
-        if (areActors) {
+        if (connectingToActors) {
           return qe(typeId, c.getIn(['attributes', 'actortype_id']));
         }
         return true;
@@ -254,16 +253,20 @@ const makeConnectionEditOptions = (
     selectAll: true,
     tagFilterGroups: option && makeTagFilterGroups(connectedTaxonomies, intl),
   };
-  const areActors = type === 'action-targets' // targets
-    || type === 'action-actors' // active actors
+  const connectingToActors = type === 'action-actors' // active actors
     || type === 'member-associations' // associations
     || type === 'association-members' // members
     || type === 'indicator-actions';
+  // const connectingToActions = type === 'actor-actions'
+  //   || type === 'resource-actions'
+  //   || type === 'action-parents'
+  //   || type === 'action-children';
+  // const connectingToResources = type === 'action-resources';
 
-  const hasCode = isAdmin || (areActors && qe(typeId, ACTORTYPES.COUNTRY));
+  const hasCode = isAdmin || (connectingToActors && qe(typeId, ACTORTYPES.COUNTRY));
   if (option) {
-    editOptions.title = messages.title;
     editOptions.path = option.connectPath;
+    editOptions.title = messages.title;
     editOptions.invalidateEntitiesPaths = option.invalidateEntitiesPaths;
     editOptions.search = option.search;
     editOptions.multiple = !option.single;

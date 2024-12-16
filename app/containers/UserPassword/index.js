@@ -11,9 +11,9 @@ import Helmet from 'react-helmet';
 import { actions as formActions } from 'react-redux-form/immutable';
 
 import {
-  getPasswordCurrentField,
-  getPasswordNewField,
-  getPasswordConfirmationField,
+  getPasswordCurrentFormField,
+  getPasswordNewFormField,
+  getPasswordConfirmationFormField,
 } from 'utils/forms';
 
 import Messages from 'components/Messages';
@@ -70,9 +70,9 @@ export class UserPassword extends React.PureComponent { // eslint-disable-line r
                 handleCancel={() => this.props.handleCancel(reference)}
                 labels={{ submit: intl.formatMessage(messages.submit) }}
                 fields={[
-                  getPasswordCurrentField(intl.formatMessage),
-                  getPasswordNewField(intl.formatMessage),
-                  getPasswordConfirmationField(intl.formatMessage),
+                  getPasswordCurrentFormField({ formatMessage: intl.formatMessage }),
+                  getPasswordNewFormField({ formatMessage: intl.formatMessage }),
+                  getPasswordConfirmationFormField({ formatMessage: intl.formatMessage }),
                 ]}
               />
             )

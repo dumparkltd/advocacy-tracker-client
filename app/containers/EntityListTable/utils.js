@@ -5,6 +5,7 @@ import { formatNumber, checkEmpty } from 'utils/fields';
 import qe from 'utils/quasi-equals';
 import appMessage from 'utils/app-message';
 import { lowerCase } from 'utils/string';
+import { getEntityTitle, getEntityPath } from 'utils/entities';
 import appMessages from 'containers/App/messages';
 import {
   API,
@@ -71,32 +72,24 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
-      case 'targets':
+      case 'actorsViaChildren':
         return ({
           ...col,
-          title: 'Targets',
-          sortActive,
-          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
-          onSort,
-        });
-      case 'targetsViaChildren':
-        return ({
-          ...col,
-          title: 'Indirect targets',
+          title: 'Indirect stakeholders',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
           info: {
             type: 'text',
-            title: 'Indirect targets',
-            text: 'From child activities, e.g tasks',
+            title: 'Indirect stakeholders',
+            text: 'From sub-activities, e.g tasks',
           },
         });
       case 'actors':
       case 'userActors':
         return ({
           ...col,
-          title: 'Actors',
+          title: 'Stakeholders',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -104,7 +97,7 @@ export const prepareHeader = ({
       case 'viaGroups':
         return ({
           ...col,
-          title: 'As Member of',
+          title: 'As member of',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -128,7 +121,7 @@ export const prepareHeader = ({
       case 'users':
         return ({
           ...col,
-          title: 'Users (staff)',
+          title: 'WWF staff',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -170,7 +163,7 @@ export const prepareHeader = ({
       case 'childActions':
         return ({
           ...col,
-          title: col.title || 'Child activities',
+          title: col.title || 'Sub-activities',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -178,7 +171,7 @@ export const prepareHeader = ({
       case 'parentActions':
         return ({
           ...col,
-          title: col.title || 'Parent activities',
+          title: col.title || 'Activities',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -188,7 +181,7 @@ export const prepareHeader = ({
           ...col,
           title: appMessages.entities[`actions_${col.actiontype_id}`]
             ? intl.formatMessage(appMessages.entities[`actions_${col.actiontype_id}`].pluralShort)
-            : 'Actions',
+            : 'Activities',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -217,20 +210,11 @@ export const prepareHeader = ({
       case 'indicatorActions':
       case 'actorActions':
         if (!label) {
-          if (col.subject === 'targets') {
-            label = 'Targeted by';
-            if (col.members) {
-              label = 'Targeted as member';
-            } else if (col.children) {
-              label = 'Targeted as parent';
-            }
-          } else {
-            label = 'Activities';
-            if (col.members) {
-              label = 'Activities as member';
-            } else if (col.children) {
-              label = 'Activities as parent';
-            }
+          label = 'Activities';
+          if (col.members) {
+            label = 'Activities as member';
+          } else if (col.children) {
+            label = 'Activities as parent';
           }
         }
         return ({
@@ -251,7 +235,7 @@ export const prepareHeader = ({
         });
       case 'actionsSimple':
         if (!label) {
-          label = col.subject === 'actors' ? 'Actions' : 'Targets';
+          label = 'Activities';
         }
         return ({
           ...col,
@@ -272,6 +256,13 @@ export const prepareHeader = ({
           ...col,
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
+          onSort,
+        });
+      case 'topicPosition':
+        return ({
+          ...col,
+          sortActive,
+          sortOrder: sortActive && sortOrder ? sortOrder : 'desc',
           onSort,
         });
       default:
@@ -314,16 +305,29 @@ const getRelatedEntities = (
   }
   return null;
 };
-const getRelatedSortValue = (relatedEntities) => getRelatedValue(relatedEntities);
-
-const getRelatedValue = (relatedEntities, typeLabel) => {
+const getRelatedSortValue = (relatedEntities) => {
   if (relatedEntities && relatedEntities.size > 0) {
     if (relatedEntities.size > 1) {
-      return typeLabel
+      return getRelatedValue(relatedEntities);
+    }
+    const entity = relatedEntities.first();
+    return typeof entity.getIn(['attributes', 'reference']) !== 'undefined'
+      && entity.getIn(['attributes', 'reference']) !== null
+      && entity.getIn(['attributes', 'reference']).trim().length > 0
+      ? entity.getIn(['attributes', 'reference'])
+      : getEntityTitle(entity);
+  }
+  return null;
+};
+
+const getRelatedValue = (relatedEntities, typeLabel, includeLabel = false) => {
+  if (relatedEntities && relatedEntities.size > 0) {
+    if (relatedEntities.size > 1) {
+      return (typeLabel && includeLabel)
         ? `${relatedEntities.size} ${lowerCase(typeLabel)}`
         : relatedEntities.size;
     }
-    return relatedEntities.first().getIn(['attributes', 'name']) || relatedEntities.first().getIn(['attributes', 'title']);
+    return getEntityTitle(relatedEntities.first());
   }
   return null;
 };
@@ -331,15 +335,25 @@ const getSingleRelatedValueFromAttributes = (relatedEntity) => relatedEntity
   ? relatedEntity.get('name') || relatedEntity.get('title')
   : null;
 
+// TODO move to utils/entities
+export const getValueFromPositions = (positions) => {
+  const latest = positions && positions.first();
+  return latest && latest.get('supportlevel_id') && parseInt(latest.get('supportlevel_id'), 10);
+};
+const getColorFromPositions = (positions) => {
+  const value = getValueFromPositions(positions);
+  const level = value && ACTION_INDICATOR_SUPPORTLEVELS[parseInt(value, 10)];
+  if (level) {
+    return level.color;
+  }
+  return ACTION_INDICATOR_SUPPORTLEVELS[99].color;
+};
 
 export const prepareEntityRows = ({
   entities,
   columns,
   entityIdsSelected,
-  config,
   url,
-  entityPath,
-  onEntityClick,
   onEntitySelect,
   connections,
   taxonomies,
@@ -353,12 +367,14 @@ export const prepareEntityRows = ({
     // console.log(connections && connections.toJS())
     const entityValues = columns.reduce(
       (memoEntity, col) => {
-        const path = (config && config.clientPath) || entityPath;
+        const path = getEntityPath(entity);
         let relatedEntities;
         let relatedEntityIds;
         let temp;
         let attribute;
         let value;
+        let sortValue = null;
+        // console.log(col)
         // let formattedDate;
         if (col.attribute) {
           value = entity.getIn(['attributes', col.attribute]);
@@ -366,7 +382,6 @@ export const prepareEntityRows = ({
             value = entity.getIn(['attributes', col.fallbackAttribute]);
           }
         }
-        // console.log(col)
         switch (col.type) {
           case 'main':
             return {
@@ -374,10 +389,12 @@ export const prepareEntityRows = ({
               [col.id]: {
                 ...col,
                 values: col.attributes.reduce(
-                  (memo, att) => ({
-                    ...memo,
-                    [att]: entity.getIn(['attributes', att]),
-                  }),
+                  (memo, att) => {
+                    let attVal = att === 'title'
+                      ? attVal = getEntityTitle(entity)
+                      : entity.getIn(['attributes', att]);
+                    return ({ ...memo, [att]: attVal });
+                  },
                   {}
                 ),
                 draft: entity.getIn(['attributes', 'draft']),
@@ -386,11 +403,9 @@ export const prepareEntityRows = ({
                 private: entity.getIn(['attributes', 'private']),
                 sortValue: entity.getIn(['attributes', col.sort || 'title']),
                 selected: entityIdsSelected && entityIdsSelected.includes(id),
+                id,
+                path,
                 href: url || `${path}/${id}`,
-                onClick: (evt) => {
-                  if (evt) evt.preventDefault();
-                  onEntityClick(id, path);
-                },
                 onSelect: (checked) => onEntitySelect(id, checked),
               },
             };
@@ -436,29 +451,14 @@ export const prepareEntityRows = ({
                 sortValue: getRelatedSortValue(relatedEntities),
               },
             };
-          case 'targets':
-            temp = entity.get('targets') || (entity.get('targetsByType') && entity.get('targetsByType').flatten(true));
+          case 'actorsViaChildren':
+            temp = entity.get('actorsViaChildren');
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: getRelatedValue(relatedEntities, col.label || 'targets'),
-                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
-                tooltip: relatedEntities && relatedEntities.size > 1
-                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
-                multiple: relatedEntities && relatedEntities.size > 1,
-                sortValue: getRelatedSortValue(relatedEntities),
-              },
-            };
-          case 'targetsViaChildren':
-            temp = entity.get('targetsViaChildren');
-            relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
-            return {
-              ...memoEntity,
-              [col.id]: {
-                ...col,
-                value: getRelatedValue(relatedEntities, col.label || 'targets'),
+                value: getRelatedValue(relatedEntities, col.label || 'actors'),
                 single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
                 tooltip: relatedEntities && relatedEntities.size > 1
                   && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
@@ -764,31 +764,54 @@ export const prepareEntityRows = ({
             };
           case 'stackedBarActions':
             temp = entity.get(col.values);
+            if (temp) {
+              if (col.values === 'supportlevels') {
+                sortValue = temp.reduce(
+                  (sum, val) => {
+                    if (val.count && [1, 2].indexOf(parseInt(val.value, 10)) > -1) {
+                      return val.count + sum;
+                    }
+                    return sum;
+                  },
+                  0,
+                );
+              } else {
+                sortValue = temp.reduce(
+                  (sum, val) => (val.count || 0) + sum,
+                  0,
+                );
+              }
+            }
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
                 values: temp && temp.map(
-                  (value) => {
-                    if (value.actors) {
-                      relatedEntities = getRelatedEntities(value.actors, connections.get('actors'), col);
+                  (val) => {
+                    if (val.actors) {
+                      relatedEntities = getRelatedEntities(val.actors, connections.get('actors'), col);
                       if (relatedEntities && relatedEntities.size > 0) {
                         return {
-                          ...value,
+                          ...val,
                           tooltip: relatedEntities && relatedEntities.size > 0
                             && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
                         };
                       }
                     }
-                    return value;
+                    return val;
                   }
                 ).toJS(),
-                sortValue: temp
-                  ? temp.reduce(
-                    (sum, val) => (val.count || 0) + sum,
-                    0,
-                  )
-                  : null,
+                sortValue,
+              },
+            };
+          case 'topicPosition':
+            temp = entity.getIn([col.positions, col.indicatorId]);
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                color: getColorFromPositions(temp),
+                sortValue: getValueFromPositions(temp) || 99,
               },
             };
           default:
@@ -805,6 +828,36 @@ export const prepareEntityRows = ({
   [],
 );
 
+export const checkColumnFilterOptions = (column, entities) => {
+  const {
+    filterOptions,
+    type,
+    positions,
+    indicatorId,
+  } = column;
+  return type === 'topicPosition' && filterOptions && filterOptions.reduce(
+    (memo, option) => {
+      const existEntities = !!entities.find(
+        (entity) => {
+          const entityPositions = entity.getIn([positions, indicatorId]);
+          if (qe(option.value, 99) && !getValueFromPositions(entityPositions)) {
+            return true;
+          }
+          return qe(option.value, getValueFromPositions(entityPositions));
+        }
+      );
+      return [
+        ...memo,
+        {
+          ...option,
+          exists: existEntities,
+        },
+      ];
+    },
+    [],
+  );
+};
+
 export const getListHeaderLabel = ({
   intl,
   entityTitle,
@@ -817,6 +870,7 @@ export const getListHeaderLabel = ({
 }) => {
   let result = 'error';
   if (!intl) return result;
+  if (!entityTitle) return '';
   if (selectedTotal > 0) {
     if (allSelectedOnPage) {
       // return `All ${selectedTotal} ${selectedTotal === 1 ? entityTitle.single : entityTitle.plural} on this page are selected. `;

@@ -56,7 +56,7 @@ const SectionWrapper = styled.div`
   display: ${(props) => props.hasBrand ? 'block' : 'table-cell'};
   vertical-align: ${(props) => props.hasBrand ? 'baseline' : 'middle'};
   padding-bottom: 1em;
-  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.xlarge}) {
     padding-bottom: 3em;
   }
 `;
@@ -64,7 +64,7 @@ const SectionWrapper = styled.div`
 const HomeActions = styled.div`
   margin-top: 30px;
   margin-bottom: 50px;
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
     margin-top: 50px;
   }
 `;
@@ -75,7 +75,7 @@ const Title = styled.h1`
   font-weight: 400;
   font-size: ${({ theme }) => theme.text.xxlarge.size};
   line-height: ${({ theme }) => theme.text.xxlarge.size.height};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     font-size: ${({ theme }) => theme.text.xxxlarge.size};
     line-height: ${({ theme }) => theme.text.xxxlarge.size.height};
   }
@@ -90,7 +90,7 @@ const Intro = styled(ReactMarkdown)`
   color: ${({ hint, theme }) => theme.global.colors.text[hint ? 'secondary' : 'brand']};
   margin-left: auto;
   margin-right: auto;
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
     font-size: ${({ hint, theme }) => theme.text[hint ? 'medium' : 'large'].size};
     line-height: ${({ hint, theme }) => theme.text[hint ? 'medium' : 'large'].height};
   }
@@ -100,7 +100,7 @@ const Intro = styled(ReactMarkdown)`
 `;
 const GridSpace = styled(Grid)`
   display: none !important;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     display: inline-block;
   }
 `;
@@ -111,7 +111,7 @@ const MainButton = styled(ButtonHero)`
   display: block;
   margin: 10px auto;
   min-width: auto;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     display: inline-block;
     margin: 10px 5px 0;
     min-width: auto;

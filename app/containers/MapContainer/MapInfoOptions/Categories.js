@@ -34,7 +34,7 @@ const KeyLabelWrap = styled.div`
 `;
 const KeyLabel = styled.div`
   white-space: nowrap;
-  font-size: ${(props) => props.theme.sizes.text.small};
+  font-size: ${(props) => props.theme.text.xsmall.size};
 `;
 export function Bins({
   config, // intl, dark,

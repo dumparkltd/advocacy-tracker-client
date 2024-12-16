@@ -21,7 +21,7 @@ const Root = styled.div`
   right: 0;
   z-index: 2501;
   pointer-events: none;
-  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
     right: auto;
     bottom: 0;
     top: ${({ position }) => position ? position.y : 0}px;
@@ -55,7 +55,7 @@ const Main = styled.div`
   overflow-x: hidden;
   overflow-y: auto;
   max-height: ${({ h }) => h}px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
     height: auto;
     min-width: ${({ isPrint }) => isPrint ? 'auto' : '290px'};
     max-width: ${({ isPrint }) => isPrint ? 'auto' : '310px'};
@@ -69,7 +69,7 @@ const Main = styled.div`
 
 const TTTitle = styled.h4`
 margin: 0;
-font-size: ${({ theme }) => theme.sizes.text.default};
+font-size: ${({ theme }) => theme.text.medium.size};
 `;
 
 const CountryButton = styled((p) => <Button {...p} />)`

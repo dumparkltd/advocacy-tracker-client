@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Field } from 'react-redux-form/immutable';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
+import Checkbox from 'components/styled/Checkbox';
 
 const Option = styled.div`
   padding: 0.25em 0;
@@ -31,7 +32,7 @@ export class RadioControl extends React.PureComponent { // eslint-disable-line r
           options && options.map((option, i) => (
             <Option key={i}>
               <Label highlight={option.highlight}>
-                <input
+                <Checkbox
                   type="radio"
                   name={model}
                   value={option.value}

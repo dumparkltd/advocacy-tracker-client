@@ -41,7 +41,7 @@ export function ConnectionsField({ field, intl }) {
           onEntityClick={field.onEntityClick}
           showValueForAction={field.showValueForAction}
           columns={field.columns}
-          moreLess={!isPrint}
+          moreLess={(field.moreLess || typeof field.moreLess === 'undefined') && !isPrint}
           inSingleView
           sortBy={field.sortBy}
           sortOrder={field.sortOrder}

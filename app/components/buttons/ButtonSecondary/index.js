@@ -13,7 +13,6 @@ const getActiveHoverBackground = (disabled) => disabled
 
 // eslint-disable no-nested-ternary
 const ButtonDefault = styled(Button)`
-  letter-spacing: 1px;
   color: ${(props) => props.inactive
     ? palette('buttonToggleInactive', 0)
     : palette('buttonDefault', 0)
@@ -53,7 +52,7 @@ const ButtonDefault = styled(Button)`
     return 'none';
   }};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0.2em 1em;
   }
 `;

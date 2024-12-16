@@ -9,13 +9,10 @@ import PropTypes from 'prop-types';
 import ReactMarkdown from 'react-markdown';
 
 import styled from 'styled-components';
-import {
-  Box,
-  Button,
-  Drop,
-} from 'grommet';
+import { Box, Drop } from 'grommet';
 import { CircleInformation, CircleQuestion } from 'grommet-icons';
 
+import Button from 'components/buttons/ButtonSimple';
 import PrintHide from 'components/styled/PrintHide';
 import Overlay from './Overlay';
 
@@ -31,17 +28,26 @@ const DropContent = styled(({ dropBackground, ...p }) => (
 `;
 
 const Markdown = styled(ReactMarkdown)`
-  font-size: ${(props) => props.theme.sizes.text.markdownMobile};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${(props) => props.theme.sizes.text.markdown};
+  font-size: ${(props) => props.theme.text.medium.size};
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    font-size: ${(props) => props.theme.text.medium.size};
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.markdown};
   }
 `;
 
+const StyledButton = styled(Button)`
+  color: ${({ theme, colorButton = 'hint' }) => theme.global.colors[colorButton]};
+  stroke: ${({ theme, colorButton = 'hint' }) => theme.global.colors[colorButton]};
+  &:hover {
+    color: ${({ theme }) => theme.global.colors.highlight};
+    stroke: ${({ theme }) => theme.global.colors.highlight};
+  }
+`;
+
 function InfoOverlay({
-  dark,
+  // dark,
   content,
   tooltip,
   title,
@@ -66,30 +72,33 @@ function InfoOverlay({
         align="center"
         justify="center"
       >
-        <Button
-          plain
-          icon={
-            (tooltip || icon === 'question')
-              ? (
-                <CircleQuestion
-                  color={colorButton || (dark ? 'light-5' : 'dark-5')}
-                  size="21px"
-                />
-              )
-              : (
-                <CircleInformation
-                  color={colorButton || (dark ? 'light-5' : 'dark-5')}
-                  size="21px"
-                />
-              )
-          }
-          fill={false}
+        <StyledButton
+          colorButton={colorButton}
           onMouseOver={() => tooltip && showInfo(true)}
           onMouseLeave={() => tooltip && showInfo(false)}
           onFocus={() => tooltip && showInfo(true)}
           onBlur={() => null}
-          onClick={() => !tooltip && showInfo(!info)}
-        />
+          onClick={(evt) => {
+            if (evt) evt.preventDefault();
+            if (!tooltip) showInfo(!info);
+          }}
+        >
+          {
+            (tooltip || icon === 'question')
+              ? (
+                <CircleQuestion
+                  color="currentColor"
+                  size="19px"
+                />
+              )
+              : (
+                <CircleInformation
+                  color="currentColor"
+                  size="19px"
+                />
+              )
+          }
+        </StyledButton>
       </Box>
       {info && infoRef && tooltip && (
         <Drop
@@ -120,7 +129,7 @@ function InfoOverlay({
 }
 
 InfoOverlay.propTypes = {
-  dark: PropTypes.bool,
+  // dark: PropTypes.bool,
   markdown: PropTypes.bool,
   inline: PropTypes.bool,
   tooltip: PropTypes.bool,

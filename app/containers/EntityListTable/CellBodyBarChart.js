@@ -3,10 +3,11 @@ import PropTypes from 'prop-types';
 import {
   Box,
   Text,
-  Button,
   Drop,
 } from 'grommet';
 import styled from 'styled-components';
+
+import Button from 'components/buttons/ButtonSimple';
 
 import { ROUTES } from 'themes/config';
 
@@ -28,7 +29,7 @@ const Bar = styled.div`
   width: ${({ value, maxvalue }) => value / maxvalue * 100}%;
   min-width: 1px;
   height: 20px;
-  background-color: ${({ theme, subject }) => theme.global.colors[subject] || theme.global.colors.primary};
+  background-color: ${({ theme, color }) => color || theme.global.colors.primary};
   opacity: ${({ issecondary }) => issecondary ? 0.6 : 1};
   display: block;
   position: absolute;
@@ -36,7 +37,7 @@ const Bar = styled.div`
   top: 0;
 `;
 
-const BarButton = styled((p) => <Button plain {...p} />)`
+const BarButton = styled((p) => <Button {...p} />)`
   width: ${({ value, maxvalue }) => value / maxvalue * 100}%;
   min-width: 1px;
   height: 20px;
@@ -48,8 +49,8 @@ const BarButton = styled((p) => <Button plain {...p} />)`
   opacity: ${({ isHover }) => isHover ? 0.85 : 1};
 `;
 
-const LinkTT = styled(
-  React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
+const LinkTooltip = styled(
+  React.forwardRef((p, ref) => <Button {...p} ref={ref} />)
 )`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   line-height: 12px;
@@ -60,7 +61,6 @@ export function CellBodyBarChart({
   value,
   maxvalue,
   issecondary,
-  subject,
   rowConfig,
   entityType,
   onEntityClick,
@@ -75,12 +75,12 @@ export function CellBodyBarChart({
         <Box direction="row" gap="none" flex={{ shrink: 0 }} align="center">
           <Value>
             {!rowConfig.tooltip && (
-              <Text size="small" weight={500} textAlign="end">
+              <Text size="xsmall" weight={500} textAlign="end">
                 {value}
               </Text>
             )}
             {rowConfig.tooltip && (
-              <LinkTT
+              <LinkTooltip
                 onClick={() => showInfo(!info)}
                 onMouseOver={() => isHover(true)}
                 onMouseLeave={() => isHover(false)}
@@ -91,12 +91,12 @@ export function CellBodyBarChart({
                 <Text size="small" weight={500} textAlign="end" wordBreak="keep-all">
                   {value}
                 </Text>
-              </LinkTT>
+              </LinkTooltip>
             )}
           </Value>
           <BarWrapper>
             {!rowConfig.tooltip && (
-              <Bar value={value} maxvalue={maxvalue} issecondary={issecondary} subject={subject} />
+              <Bar value={value} maxvalue={maxvalue} issecondary={issecondary} color={color} />
             )}
             {rowConfig.tooltip && (
               <BarButton
@@ -104,8 +104,6 @@ export function CellBodyBarChart({
                 maxvalue={maxvalue}
                 issecondary={issecondary}
                 color={color}
-                subject={subject}
-                fill={false}
                 isHover={hover}
                 onClick={() => showInfo(true)}
                 onMouseOver={() => isHover(true)}
@@ -148,7 +146,6 @@ CellBodyBarChart.propTypes = {
   value: PropTypes.number,
   maxvalue: PropTypes.number,
   issecondary: PropTypes.bool,
-  subject: PropTypes.string,
   entityType: PropTypes.string,
   color: PropTypes.string,
   rowConfig: PropTypes.object,

@@ -3,27 +3,20 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 
 import SelectReset from 'components/SelectReset';
-import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
+import ButtonSort from 'components/buttons/ButtonSort';
 import Icon from 'components/Icon';
 
 import ColumnHeader from 'components/styled/ColumnHeader';
 
 import messages from './messages';
 
-const SortButton = styled(ButtonFlatIconOnly)`
-  padding: 0;
-  color: inherit;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: 0;
-  }
-`;
 const Styled = styled(ColumnHeader)`
   padding-right: 0;
 `;
 const LabelWrap = styled.div`
   display: table-cell;
   padding-right: 4px;
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.medium : '769px'}) {
     padding-left: ${(props) => props.isSelect ? 0 : 7}px;
   }
 `;
@@ -72,14 +65,15 @@ class ColumnSelect extends React.PureComponent { // eslint-disable-line react/pr
               />
               {nextSortOrderOption
               && (
-                <SortButton
+                <ButtonSort
+                  sortActive
                   onClick={(e) => {
                     e.preventDefault();
                     this.props.onSortOrder(nextSortOrderOption.value);
                   }}
                 >
                   <Icon name={sortOrderOption.icon} />
-                </SortButton>
+                </ButtonSort>
               )
               }
             </SelectWrapper>

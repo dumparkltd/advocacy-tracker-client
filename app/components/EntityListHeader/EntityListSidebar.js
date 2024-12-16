@@ -9,11 +9,12 @@ import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import { fromJS } from 'immutable';
-import { Box, Button } from 'grommet';
+import { Box } from 'grommet';
 
 import Scrollable from 'components/styled/Scrollable';
 import Icon from 'components/Icon';
 import SupTitle from 'components/SupTitle';
+import Button from 'components/buttons/ButtonSimple';
 
 import Sidebar from 'components/styled/Sidebar';
 import SidebarHeader from 'components/styled/SidebarHeader';
@@ -38,13 +39,14 @@ const ListEntitiesEmpty = styled.div`
 `;
 
 const SidebarWrapper = styled.div`
-  position: absolute;
+  position: fixed;
   top: 0;
   bottom: 0;
   right: 0;
   z-index: 100;
   width: 100%;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    top: ${({ theme }) => theme.sizes.header.banner.height}px;
     width: auto;
   }
 `;
@@ -67,7 +69,6 @@ const STATE_INITIAL = {
     taxonomies_13: false,
     actors: false,
     actions: false,
-    targets: false,
     members: false,
     associations: false,
     indicators: false,
@@ -128,7 +129,7 @@ export class EntityListSidebar extends React.Component { // eslint-disable-line 
               <Box direction="row" justify="between" align="center">
                 {isEditPanel && <SupTitle title={intl.formatMessage(messages.header.edit)} />}
                 {!isEditPanel && <SupTitle title={intl.formatMessage(messages.header.filter)} />}
-                <Button plain onClick={onHideSidebar}>
+                <Button onClick={onHideSidebar}>
                   <Icon name="close" />
                 </Button>
               </Box>

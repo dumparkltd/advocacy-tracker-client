@@ -16,7 +16,7 @@ const ButtonDefaultGrouped = styled(ButtonDefault)`
   padding-bottom: 0.4em;
   padding-left: ${({ isFirst }) => isFirst ? 0.4 : 0.3}em;
   padding-right: ${({ isLast }) => isLast ? 0.4 : 0.3}em;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding-top: 0.5em;
     padding-bottom: 0.4em;
     padding-left: ${({ isFirst }) => isFirst ? 1.5 : 1.1}em;
