@@ -343,8 +343,8 @@ export function EntityListTable({
         canEdit={canEdit}
         visibleHeaderColumns={visibleHeaderColumns || []}
         availableHeaderColumns={availableHeaderColumns || []}
+        previewColumns={columns}
         visibleColumns={visibleColumns || []}
-        availableColumns={availableColumns || []}
         onEntityClick={(idOrPath, path, componentId) => {
           if ((skipPreviews || inSingleView) && onEntityClick) {
             onEntityClick(idOrPath, path);
