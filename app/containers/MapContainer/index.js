@@ -54,7 +54,9 @@ ${({ isPrint }) => isPrint && css`margin-left: 0`};
 }
 `;
 const MapOuterWrapper = styled(
-  ({ fullMap, isOverviewMap, ...rest }) => fullMap
+  ({
+    fullMap, isOverviewMap, isPrint, ...rest
+  }) => fullMap
     ? <div {...rest} />
     : (
       <Box

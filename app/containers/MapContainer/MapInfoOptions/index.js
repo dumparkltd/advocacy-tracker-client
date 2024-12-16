@@ -27,10 +27,8 @@ const Styled = styled.div`
     return '220px;';
   }}
   left: 0;
-  max-width: 320px;
-  @media (min-width: 370px) {
-    max-width: 420px;
-    width: 100%;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.ms}) {
+    width: 420px;
     left: ${({ isPrint }) => isPrint ? 0 : 10}px;
     bottom: ${({ isPrint }) => isPrint ? 0 : 30}px;
   }
