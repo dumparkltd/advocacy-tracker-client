@@ -27,6 +27,7 @@ import {
   selectIncludeMembersForFiltering,
   selectIncludeActorMembers,
   selectIncludeActorChildren,
+  selectIndicators,
 } from 'containers/App/selectors';
 
 import {
@@ -56,6 +57,7 @@ export const selectConnections = createSelector(
   selectActorCategoriesGroupedByActor,
   selectUsers,
   selectCategories,
+  selectIndicators,
   (
     ready,
     actions,
@@ -64,6 +66,7 @@ export const selectConnections = createSelector(
     actorAssociationsGrouped,
     users,
     categories,
+    indicators,
   ) => {
     if (ready) {
       return new Map().set(
@@ -83,6 +86,9 @@ export const selectConnections = createSelector(
       ).set(
         API.USERS,
         users,
+      ).set(
+        API.INDICATORS,
+        indicators,
       );
     }
     return new Map();

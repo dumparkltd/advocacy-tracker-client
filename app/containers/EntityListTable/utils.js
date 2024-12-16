@@ -821,15 +821,35 @@ export const prepareEntityRows = ({
             };
           case 'positionsCompact':
             temp = entity.getIn([col.positions]) || null;
+            // console.log('country', entity && entity.toJS())
+            // console.log('connections', connections && connections.toJS())
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
                 // colors:,
-                levels: temp && temp.reduce((memo, indicatorPositions) => ([
-                  ...memo,
-                  getLevelFromPositions(indicatorPositions),
-                ]), []),
+                // levels: temp && temp.reduce((memo, indicatorPositions) => ([
+                //   ...memo,
+                //   getLevelFromPositions(indicatorPositions),
+                // ]), []),
+                positions: temp && temp.reduce((memo, indicatorPositions, indicatorId) => {
+                  const latest = indicatorPositions && indicatorPositions.first();
+                  return ([
+                    ...memo,
+                    {
+                      indicatorId: parseInt(indicatorId, 10),
+                      supportlevelId: latest && latest.get('supportlevel_id') && parseInt(latest.get('supportlevel_id'), 10),
+                      color: getColorFromPositions(indicatorPositions),
+                      authority: latest && getSingleRelatedValueFromAttributes(latest.get('authority')),
+                      group: latest && getRelatedValue(latest.get('viaGroups')),
+                    },
+                  ]);
+                }, []),
+                getTooltipForPosition: (indicatorId, position) => ({
+                  actor: entity.getIn(['attributes', 'title']) || entity.getIn(['attributes', 'name']),
+                  topic: connections && connections.getIn([API.INDICATORS, indicatorId]),
+                  position,
+                }),
               },
             };
           default:

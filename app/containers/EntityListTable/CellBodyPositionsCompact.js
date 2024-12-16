@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box } from 'grommet';
-import Dot from 'components/styled/Dot';
-
+import CellBodyPositionsCompactSingle from './CellBodyPositionsCompactSingle';
 // import Label from './LabelCellBody';
 
 const GAP = 2.5;
@@ -11,7 +10,7 @@ export function CellBodyPositionsCompact({
   entity,
   column = {},
 }) {
-  const { levels } = entity;
+  const { positions } = entity;
   const { align = 'start', colWidth } = column;
   const refOuter = React.useRef(null);
 
@@ -27,7 +26,7 @@ export function CellBodyPositionsCompact({
       flex={{ shrink: 0 }}
       align={align}
     >
-      {levels && (
+      {positions && (
         <Box
           flex={{ shrink: 0 }}
           direction="row"
@@ -35,13 +34,11 @@ export function CellBodyPositionsCompact({
           align="middle"
           width={colWidth}
         >
-          {levels.map((level, key) => (
-            <Dot
-              key={key}
-              size="32px"
-              width={`${Math.floor((outerWidth - ((levels.length - 1) * GAP)) / levels.length)}px`}
-              color={level.color}
-              title={level.value}
+          {positions.map((position) => (
+            <CellBodyPositionsCompactSingle
+              key={position.indicatorId}
+              position={position}
+              width={`${Math.floor((outerWidth - ((positions.length - 1) * GAP)) / positions.length)}px`}
             />
           ))}
         </Box>
