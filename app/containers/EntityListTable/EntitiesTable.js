@@ -197,7 +197,7 @@ export function EntitiesTable({
   visibleHeaderColumns,
   availableHeaderColumns,
   visibleColumns,
-  availableColumns,
+  previewColumns,
   onEntityClick,
   onUpdateHiddenColumns,
   onUpdateColumnFilters,
@@ -248,7 +248,7 @@ export function EntitiesTable({
                 prevPreviewItem: prevIndex !== entityIndex && `${ID}|${path}|${entityIds[prevIndex]}`,
               },
               item: mainItem,
-              columns: availableColumns,
+              columns: previewColumns,
             };
             onSetPreviewContent(content);
           } else if (itemId && path) {
@@ -613,7 +613,7 @@ EntitiesTable.propTypes = {
   visibleHeaderColumns: PropTypes.array,
   availableHeaderColumns: PropTypes.array,
   visibleColumns: PropTypes.array,
-  availableColumns: PropTypes.array,
+  previewColumns: PropTypes.array,
   locationQuery: PropTypes.object,
 };
 
