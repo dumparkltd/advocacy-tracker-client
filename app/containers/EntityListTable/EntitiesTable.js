@@ -28,6 +28,7 @@ import CellHeaderMain from './CellHeaderMain';
 import CellHeaderPlain from './CellHeaderPlain';
 import CellHeaderSmart from './CellHeaderSmart';
 import CellHeaderAuxColumns from './CellHeaderAuxColumns';
+import CellBodyPositionsCompact from './CellBodyPositionsCompact';
 
 const Table = styled.table`
   border-spacing: 0;
@@ -64,7 +65,7 @@ const TableCellHeader = styled.th`
   text-align: inherit;
   height: 100%;
   text-align: start;
-  vertical-align: bottom;
+  vertical-align: middle;
   border-bottom: 1px solid;
   border-bottom-color: ${({ utility, col, isActive }) => {
     if (utility && col.type === 'options') return 'rgba(0,0,0,0.05)';
@@ -166,6 +167,8 @@ const getColWidth = ({
   let result = 'auto';
   if (col.type === 'auxColumns') {
     result = '22px';
+  } else if (col.type === 'positionsCompact') {
+    result = '200px';
   } else if (col.type === 'topicPosition') {
     result = isSmall ? '26px' : '33px';
   } else if (topicPositionLength > 0) {
@@ -582,6 +585,12 @@ export function EntitiesTable({
                           column={col}
                           entityType="actors"
                           onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                        />
+                      )}
+                      {col.type === 'positionsCompact' && (
+                        <CellBodyPositionsCompact
+                          column={col}
+                          entity={entity[col.id]}
                         />
                       )}
                     </TableCellBodyInner>

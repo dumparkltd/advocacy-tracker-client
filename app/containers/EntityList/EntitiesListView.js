@@ -253,7 +253,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       const canHaveMembers = Object.keys(MEMBERSHIPS).some(
         (id) => MEMBERSHIPS[id].indexOf(typeId) > -1
       );
-      const actionColumns = getOwnActivityColumns(
+      let actionColumns = getOwnActivityColumns(
         mapSubjectClean,
         typeId,
       );
@@ -264,7 +264,28 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         isSingle: false,
         isAdmin,
       });
-
+      if (qe(typeId, ACTORTYPES.COUNTRY)) {
+        actionColumns = [
+          ...actionColumns,
+          {
+            id: 'positionsCompact',
+            type: 'positionsCompact',
+            positions: 'indicatorPositions',
+            title: 'Positions by topic',
+            info: {
+              title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+              type: 'key-categorical',
+              attribute: 'supportlevel_id',
+              options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+                .sort((a, b) => a.order < b.order ? -1 : 1)
+                .map((level) => ({
+                  ...level,
+                  label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                })),
+            },
+          },
+        ];
+      }
       columns = [
         {
           id: 'main',

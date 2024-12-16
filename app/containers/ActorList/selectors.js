@@ -3,7 +3,7 @@ import { Map } from 'immutable';
 import asList from 'utils/as-list';
 
 import {
-  selectActortypeActors,
+  selectActorsWithPositions,
   selectAttributeQuery,
   selectWithoutQuery,
   selectAnyQuery,
@@ -91,7 +91,7 @@ export const selectConnections = createSelector(
 
 const selectActorsWithCategories = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectActortypeActors,
+  selectActorsWithPositions,
   selectActorCategoriesGroupedByActor,
   selectCategories,
   (ready, entities, associationsGrouped, categories) => {

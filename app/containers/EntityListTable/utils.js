@@ -348,6 +348,11 @@ const getColorFromPositions = (positions) => {
   }
   return ACTION_INDICATOR_SUPPORTLEVELS[99].color;
 };
+const getLevelFromPositions = (positions) => {
+  const value = getValueFromPositions(positions);
+  const level = value && ACTION_INDICATOR_SUPPORTLEVELS[parseInt(value, 10)];
+  return level || ACTION_INDICATOR_SUPPORTLEVELS[99];
+};
 
 export const prepareEntityRows = ({
   entities,
@@ -812,6 +817,19 @@ export const prepareEntityRows = ({
                 ...col,
                 color: getColorFromPositions(temp),
                 sortValue: getValueFromPositions(temp) || 99,
+              },
+            };
+          case 'positionsCompact':
+            temp = entity.getIn([col.positions]) || null;
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                // colors:,
+                levels: temp && temp.reduce((memo, indicatorPositions) => ([
+                  ...memo,
+                  getLevelFromPositions(indicatorPositions),
+                ]), []),
               },
             };
           default:
