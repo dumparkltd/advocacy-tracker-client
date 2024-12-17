@@ -11,7 +11,9 @@ const DropLayerTitle = styled((p) => <Text size="small" {...p} />)`
   text-transform: uppercase;
   font-weight: bold;
 `;
-const CloseButton = styled((p) => <Button {...p} />)`
+const CloseButton = styled(
+  React.forwardRef((p, ref) => <Button ref={ref} {...p} />)
+)`
   border-radius: 999px;
   color: white;
   height: 25px;
@@ -22,6 +24,13 @@ const CloseButton = styled((p) => <Button {...p} />)`
   };
 `;
 export function DropHeader({ onClose }) {
+  const buttonRef = React.useRef(null);
+
+  React.useEffect(() => {
+    if (buttonRef.current) {
+      buttonRef.current.focus();
+    }
+  }, []);
   return (
     <Box
       pad={{ horizontal: 'ms', top: 'ms' }}
@@ -32,7 +41,7 @@ export function DropHeader({ onClose }) {
       flex={{ shrink: 0 }}
     >
       <DropLayerTitle>Configure columns</DropLayerTitle>
-      <CloseButton onClick={() => onClose()}>
+      <CloseButton onClick={() => onClose()} ref={buttonRef}>
         <Icon name="close" size="25px" />
       </CloseButton>
     </Box>

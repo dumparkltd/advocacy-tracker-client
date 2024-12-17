@@ -1,15 +1,19 @@
 import { STATES as CHECKBOX_STATES } from 'components/forms/IndeterminateCheckbox';
 import { Map } from 'immutable';
-import isNumber from 'utils/is-number';
-import { formatNumber, checkEmpty } from 'utils/fields';
-import qe from 'utils/quasi-equals';
+
 import appMessage from 'utils/app-message';
+import isNumber from 'utils/is-number';
+import qe from 'utils/quasi-equals';
+import asList from 'utils/as-list';
+import { formatNumber, checkEmpty } from 'utils/fields';
 import { lowerCase } from 'utils/string';
+
 import {
   getEntityTitle,
   getEntityPath,
   getIndicatorMainTitle,
 } from 'utils/entities';
+
 import appMessages from 'containers/App/messages';
 import {
   API,
@@ -324,9 +328,9 @@ const getRelatedSortValue = (relatedEntities) => {
   return null;
 };
 
-const getRelatedValue = (relatedEntities, typeLabel, includeLabel = false) => {
+const getRelatedValue = (relatedEntities, typeLabel, includeLabel = false, first = false) => {
   if (relatedEntities && relatedEntities.size > 0) {
-    if (relatedEntities.size > 1) {
+    if (relatedEntities.size > 1 && !first) {
       return (typeLabel && includeLabel)
         ? `${relatedEntities.size} ${lowerCase(typeLabel)}`
         : relatedEntities.size;
@@ -851,7 +855,7 @@ export const prepareEntityRows = ({
                       color: getColorFromPositions(indicatorPositions),
                       authority: latest && getSingleRelatedValueFromAttributes(latest.get('authority')),
                       actorTitle: getEntityTitle(entity),
-                      groupTitle: latest && getRelatedValue(latest.get('viaGroups')),
+                      groupTitle: latest && latest.get('viaGroups') && getEntityTitle(latest.get('viaGroups').first()),
                       indicatorTitle: connections
                         && connections.getIn([API.INDICATORS, indicatorId, 'attributes', 'title'])
                         && getIndicatorMainTitle(connections.getIn([API.INDICATORS, indicatorId, 'attributes', 'title'])),

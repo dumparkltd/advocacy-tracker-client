@@ -46,12 +46,19 @@ export function CellHeaderAuxColumns({
 }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
-  const size = React.useContext(ResponsiveContext);
+  const buttonRef = React.useRef(null);
 
+  const size = React.useContext(ResponsiveContext);
+  const showDrop = isMinSize(size, 'medium');
+  React.useEffect(() => {
+    if (!open && buttonRef.current) {
+      buttonRef.current.focus();
+    }
+  }, [open]);
   return (
     <Styled ref={ref}>
       <BoxPrint margin={{ right: 'ms', top: 'ms' }} printHide>
-        <AuxButton onClick={() => setOpen(true)}>
+        <AuxButton onClick={() => setOpen(true)} ref={buttonRef}>
           <Box gap="2px" direction="column" justify="center" align="center" fill>
             <Dot />
             <Dot />
@@ -59,7 +66,7 @@ export function CellHeaderAuxColumns({
           </Box>
         </AuxButton>
       </BoxPrint>
-      {ref && ref.current && open && isMinSize(size, 'medium') && (
+      {ref && ref.current && open && showDrop && (
         <Drop
           target={ref.current}
           responsive={false}
@@ -71,9 +78,9 @@ export function CellHeaderAuxColumns({
             opacity: '1',
             zIndex: '999999999',
           }}
-          animate={false}
           overflow="hidden"
           stretch={false}
+          trapFocus
         >
           <DropContent
             onClose={() => setOpen(false)}
@@ -82,7 +89,7 @@ export function CellHeaderAuxColumns({
           />
         </Drop>
       )}
-      {open && !isMinSize(size, 'medium') && (
+      {open && !showDrop && (
         <Layer
           full
           responsive
