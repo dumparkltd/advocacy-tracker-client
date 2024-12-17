@@ -4,7 +4,6 @@ import { Box } from 'grommet';
 import CellBodyPositionsCompactSingle from './CellBodyPositionsCompactSingle';
 // import Label from './LabelCellBody';
 
-const GAP = 2.5;
 
 export function CellBodyPositionsCompact({
   entity,
@@ -30,7 +29,6 @@ export function CellBodyPositionsCompact({
         <Box
           flex={{ shrink: 0 }}
           direction="row"
-          gap={`${GAP}px`}
           align="middle"
           width={colWidth}
         >
@@ -38,7 +36,7 @@ export function CellBodyPositionsCompact({
             <CellBodyPositionsCompactSingle
               key={position.indicatorId}
               position={position}
-              width={`${Math.floor((outerWidth - ((positions.length - 1) * GAP)) / positions.length)}px`}
+              width={`${Math.floor((outerWidth - ((positions.length - 1))) / positions.length) - 2}px`}
             />
           ))}
         </Box>

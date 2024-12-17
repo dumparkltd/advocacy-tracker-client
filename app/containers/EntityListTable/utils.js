@@ -5,7 +5,11 @@ import { formatNumber, checkEmpty } from 'utils/fields';
 import qe from 'utils/quasi-equals';
 import appMessage from 'utils/app-message';
 import { lowerCase } from 'utils/string';
-import { getEntityTitle, getEntityPath } from 'utils/entities';
+import {
+  getEntityTitle,
+  getEntityPath,
+  getIndicatorMainTitle,
+} from 'utils/entities';
 import appMessages from 'containers/App/messages';
 import {
   API,
@@ -348,11 +352,11 @@ const getColorFromPositions = (positions) => {
   }
   return ACTION_INDICATOR_SUPPORTLEVELS[99].color;
 };
-const getLevelFromPositions = (positions) => {
-  const value = getValueFromPositions(positions);
-  const level = value && ACTION_INDICATOR_SUPPORTLEVELS[parseInt(value, 10)];
-  return level || ACTION_INDICATOR_SUPPORTLEVELS[99];
-};
+// const getLevelFromPositions = (positions) => {
+//   const value = getValueFromPositions(positions);
+//   const level = value && ACTION_INDICATOR_SUPPORTLEVELS[parseInt(value, 10)];
+//   return level || ACTION_INDICATOR_SUPPORTLEVELS[99];
+// };
 
 export const prepareEntityRows = ({
   entities,
@@ -838,18 +842,17 @@ export const prepareEntityRows = ({
                     ...memo,
                     {
                       indicatorId: parseInt(indicatorId, 10),
-                      supportlevelId: latest && latest.get('supportlevel_id') && parseInt(latest.get('supportlevel_id'), 10),
+                      supportlevelId: (latest && latest.get('supportlevel_id') && parseInt(latest.get('supportlevel_id'), 10)) || 99,
                       color: getColorFromPositions(indicatorPositions),
                       authority: latest && getSingleRelatedValueFromAttributes(latest.get('authority')),
-                      group: latest && getRelatedValue(latest.get('viaGroups')),
+                      actorTitle: getEntityTitle(entity),
+                      groupTitle: latest && getRelatedValue(latest.get('viaGroups')),
+                      indicatorTitle: connections
+                        && connections.getIn([API.INDICATORS, indicatorId, 'attributes', 'title'])
+                        && getIndicatorMainTitle(connections.getIn([API.INDICATORS, indicatorId, 'attributes', 'title'])),
                     },
                   ]);
                 }, []),
-                getTooltipForPosition: (indicatorId, position) => ({
-                  actor: entity.getIn(['attributes', 'title']) || entity.getIn(['attributes', 'name']),
-                  topic: connections && connections.getIn([API.INDICATORS, indicatorId]),
-                  position,
-                }),
               },
             };
           default:

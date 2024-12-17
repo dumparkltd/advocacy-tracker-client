@@ -1,11 +1,7 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  Text,
-  Drop,
-} from 'grommet';
 import styled from 'styled-components';
+import { Box, Text, Drop } from 'grommet';
 
 import Button from 'components/buttons/ButtonSimple';
 
@@ -67,7 +63,7 @@ export function CellBodyBarChart({
   color,
 }) {
   const infoRef = useRef(null);
-  const [info, showInfo] = useState(false);
+  const [info, setInfo] = useState(false);
   const [hover, isHover] = useState(false);
   return (
     <Box>
@@ -81,7 +77,7 @@ export function CellBodyBarChart({
             )}
             {rowConfig.tooltip && (
               <LinkTooltip
-                onClick={() => showInfo(!info)}
+                onClick={() => setInfo(!info)}
                 onMouseOver={() => isHover(true)}
                 onMouseLeave={() => isHover(false)}
                 onFocus={() => isHover(true)}
@@ -105,7 +101,7 @@ export function CellBodyBarChart({
                 issecondary={issecondary}
                 color={color}
                 isHover={hover}
-                onClick={() => showInfo(true)}
+                onClick={() => setInfo(true)}
                 onMouseOver={() => isHover(true)}
                 onMouseLeave={() => isHover(false)}
                 onFocus={() => isHover(true)}
@@ -118,7 +114,7 @@ export function CellBodyBarChart({
       {info && infoRef && rowConfig.tooltip && (
         <Drop
           target={infoRef.current}
-          onClickOutside={() => showInfo(false)}
+          onClickOutside={() => setInfo(false)}
           align={{
             bottom: 'top',
             left: 'left',
@@ -132,7 +128,7 @@ export function CellBodyBarChart({
             entityType={entityType}
             tooltipConfig={rowConfig.tooltip}
             onEntityClick={(id) => {
-              showInfo(false);
+              setInfo(false);
               onEntityClick(id, entityType === 'actors' ? ROUTES.ACTOR : ROUTES.ACTION);
             }}
           />
