@@ -168,7 +168,7 @@ const getColWidth = ({
   if (col.type === 'auxColumns') {
     result = '22px';
   } else if (col.type === 'positionsCompact') {
-    result = '200px';
+    result = isSmall ? '160px' : '200px';
   } else if (col.type === 'topicPosition') {
     result = isSmall ? '26px' : '33px';
   } else if (topicPositionLength > 0) {
@@ -591,6 +591,7 @@ export function EntitiesTable({
                         <CellBodyPositionsCompact
                           column={col}
                           entity={entity[col.id]}
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         />
                       )}
                     </TableCellBodyInner>

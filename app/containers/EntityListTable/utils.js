@@ -836,6 +836,11 @@ export const prepareEntityRows = ({
                 //   ...memo,
                 //   getLevelFromPositions(indicatorPositions),
                 // ]), []),
+                mainEntity: {
+                  id: entity.get('id'),
+                  path,
+                  href: url || `${path}/${id}`,
+                },
                 positions: temp && temp.reduce((memo, indicatorPositions, indicatorId) => {
                   const latest = indicatorPositions && indicatorPositions.first();
                   return ([

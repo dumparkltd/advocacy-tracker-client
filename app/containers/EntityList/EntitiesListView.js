@@ -272,6 +272,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
             type: 'positionsCompact',
             positions: 'indicatorPositions',
             title: 'Positions by topic',
+            minSize: 'small',
             info: {
               title: intl.formatMessage(appMessages.attributes.supportlevel_id),
               type: 'key-categorical',

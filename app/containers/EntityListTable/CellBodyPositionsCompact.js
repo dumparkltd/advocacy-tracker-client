@@ -8,14 +8,17 @@ import CellBodyPositionsCompactSingle from './CellBodyPositionsCompactSingle';
 export function CellBodyPositionsCompact({
   entity,
   column = {},
+  onEntityClick,
 }) {
-  const { positions } = entity;
+  const { positions, mainEntity } = entity;
   const { align = 'start', colWidth } = column;
   const refOuter = React.useRef(null);
 
-  // estimate from specified col width (outer cell width incl padding of ~12)
+  // figure out width
+  // first estimate from specified col width (outer cell width incl padding of ~12)
   let outerWidth = parseInt(colWidth, 10) - 12;
-  // calculate based on actual inner cell width
+
+  // then calculate based on actual inner cell width
   if (refOuter && refOuter.current) {
     outerWidth = refOuter.current.getBoundingClientRect().width;
   }
@@ -37,6 +40,8 @@ export function CellBodyPositionsCompact({
               key={position.indicatorId}
               position={position}
               width={`${Math.floor((outerWidth - ((positions.length - 1))) / positions.length) - 2}px`}
+              mainEntity={mainEntity}
+              onEntityClick={onEntityClick}
             />
           ))}
         </Box>
@@ -48,6 +53,7 @@ export function CellBodyPositionsCompact({
 CellBodyPositionsCompact.propTypes = {
   entity: PropTypes.object,
   column: PropTypes.object,
+  onEntityClick: PropTypes.func,
 };
 
 export default CellBodyPositionsCompact;
