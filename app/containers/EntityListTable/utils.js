@@ -4,7 +4,6 @@ import { Map } from 'immutable';
 import appMessage from 'utils/app-message';
 import isNumber from 'utils/is-number';
 import qe from 'utils/quasi-equals';
-import asList from 'utils/as-list';
 import { formatNumber, checkEmpty } from 'utils/fields';
 import { lowerCase } from 'utils/string';
 

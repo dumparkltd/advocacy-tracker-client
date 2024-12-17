@@ -45,20 +45,27 @@ export function CellHeaderAuxColumns({
   // theme,
 }) {
   const [open, setOpen] = useState(false);
+  const [opened, setOpened] = useState(false);
   const ref = useRef(null);
   const buttonRef = React.useRef(null);
 
   const size = React.useContext(ResponsiveContext);
   const showDrop = isMinSize(size, 'medium');
   React.useEffect(() => {
-    if (!open && buttonRef.current) {
+    if (opened && !open && buttonRef.current) {
       buttonRef.current.focus();
     }
   }, [open]);
   return (
     <Styled ref={ref}>
       <BoxPrint margin={{ right: 'ms', top: 'ms' }} printHide>
-        <AuxButton onClick={() => setOpen(true)} ref={buttonRef}>
+        <AuxButton
+          ref={buttonRef}
+          onClick={() => {
+            setOpen(true);
+            setOpened(true);
+          }}
+        >
           <Box gap="2px" direction="column" justify="center" align="center" fill>
             <Dot />
             <Dot />

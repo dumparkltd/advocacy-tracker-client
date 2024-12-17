@@ -176,7 +176,7 @@ const getColWidth = ({
       result = '250px';
     }
   } else if (count > 6 && col.type === 'main') {
-    result = '250px';
+    result = isSmall ? 'auto' : '180px';
   } else if (count > 4) {
     if (col.type === 'main') {
       result = isSmall ? 'auto' : '300px';
