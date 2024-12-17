@@ -123,6 +123,64 @@ export function EntityListTable({
 }) {
   if (!columns) return null;
   const size = React.useContext(ResponsiveContext);
+
+  const updateHiddenColumns = () => {
+    // console.log('EntityListTable columns effect', size, columns);
+    const initiallyHiddenColumns = columns.reduce((memo, col) => {
+      if (col.type === 'main') {
+        return memo;
+      }
+      if (!size) {
+        return [...memo, col.id];
+      }
+      if (col.minSize) {
+        if (isMinSize(size, col.minSize)) {
+          return memo;
+        }
+        return [...memo, col.id];
+      }
+      // only show main when smaller than medium
+      if ((!isMinSize(size, 'medium') || isPrintView)) {
+        return [...memo, col.id];
+      }
+      return memo;
+    }, []);
+    const initiallyVisibleColumns = columns.filter(
+      (col) => initiallyHiddenColumns.indexOf(col.id) < 0
+    ).map(
+      (col) => col.id
+    );
+    // console.log('initiallyHiddenColumns', initiallyHiddenColumns);
+    // console.log('initiallyVisibleColumns', initiallyVisibleColumns);
+    // console.log('onUpdateHiddenColumns', size, initiallyHiddenColumns, initiallyVisibleColumns)
+    onUpdateHiddenColumns({
+      addToHidden: initiallyHiddenColumns,
+      removeFromHidden: initiallyVisibleColumns,
+    });
+  };
+
+  React.useEffect(() => {
+    updateHiddenColumns();
+  }, []);
+  React.useEffect(() => {
+    updateHiddenColumns();
+  }, [size]);
+  //
+  // React.useEffect(() => {
+  //   // Define a function to handle window resize
+  //   const handleResize = () => {
+  //     updateHiddenColumns();
+  //   };
+  //
+  //   // Attach the event listener
+  //   window.addEventListener('resize', handleResize);
+  //
+  //   // Cleanup the event listener on component unmount
+  //   return () => {
+  //     window.removeEventListener('resize', handleResize);
+  //   };
+  // }, []);
+
   // list options
   const {
     hasSearch,
@@ -163,13 +221,6 @@ export function EntityListTable({
   }
   const availableColumns = columns
     .filter((col) => {
-      if (col.minSize && col.type !== 'main') {
-        return isMinSize(size, col.minSize);
-      }
-      // only show main when smaller than medium
-      if ((!isMinSize(size, 'medium') || isPrintView) && col.type !== 'main') {
-        return false;
-      }
       if (col.printHideOnSingle && isPrintView) {
         return false;
       }

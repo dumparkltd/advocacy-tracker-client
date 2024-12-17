@@ -59,7 +59,7 @@ export function CellHeaderAuxColumns({
           </Box>
         </AuxButton>
       </BoxPrint>
-      {ref && ref.current && open && isMinSize(size, 'ms') && (
+      {ref && ref.current && open && isMinSize(size, 'medium') && (
         <Drop
           target={ref.current}
           responsive={false}
@@ -82,7 +82,7 @@ export function CellHeaderAuxColumns({
           />
         </Drop>
       )}
-      {open && !isMinSize(size, 'ms') && (
+      {open && !isMinSize(size, 'medium') && (
         <Layer
           full
           responsive

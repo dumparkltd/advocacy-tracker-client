@@ -173,13 +173,13 @@ const getColWidth = ({
     result = isSmall ? '26px' : '33px';
   } else if (topicPositionLength > 0) {
     if (col.type === 'main' && (count - topicPositionLength > 2)) {
-      result = '25%';
+      result = '250px';
     }
   } else if (count > 6 && col.type === 'main') {
-    result = '25%';
-  } else if (count > 2) {
+    result = '250px';
+  } else if (count > 4) {
     if (col.type === 'main') {
-      result = '30%';
+      result = isSmall ? 'auto' : '300px';
     } else if (col.isSingleActionColumn) {
       result = '25%';
     }
@@ -296,7 +296,7 @@ export function EntitiesTable({
     setMouseOverColumnWidth(null);
   };
 
-  const hasColumnOptions = !inSingleView && isMinSize(size, 'medium');
+  const hasColumnOptions = !inSingleView; // z && isMinSize(size, 'medium');
   let headerColumnsAux = hasColumnOptions
     ? [
       ...visibleHeaderColumns,
