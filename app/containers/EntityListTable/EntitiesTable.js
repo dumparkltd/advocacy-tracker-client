@@ -164,33 +164,33 @@ const getColorForColumn = (col, theme) => {
 const getColWidth = ({
   col, count, topicPositionLength, isSmall,
 }) => {
-  let result = 'auto';
+  if (isSmall && col.type === 'main') {
+    return '135px';
+  }
   if (col.type === 'auxColumns') {
-    result = '22px';
-  } else if (col.type === 'positionsCompact') {
-    result = isSmall ? '135px' : '200px';
-  } else if (col.type === 'topicPosition') {
-    result = isSmall ? '26px' : '33px';
-  } else if (topicPositionLength > 0) {
-    if (col.type === 'main' && (count - topicPositionLength > 2)) {
-      result = isSmall ? '150px' : '180px';
-    }
-  } else if (count > 6 && col.type === 'main') {
-    result = isSmall ? 'auto' : '180px';
-  } else if (count > 4) {
+    return '22px';
+  }
+  if (col.type === 'positionsCompact') {
+    return isSmall ? '135px' : '200px';
+  }
+  if (col.type === 'topicPosition') {
+    return isSmall ? '26px' : '33px';
+  }
+  if (topicPositionLength > 0 && col.type === 'main' && (count - topicPositionLength > 2)) {
+    return isSmall ? '150px' : '180px';
+  }
+  if (count > 6 && col.type === 'main') {
+    return isSmall ? 'auto' : '180px';
+  }
+  if (count > 4) {
     if (col.type === 'main') {
-      result = isSmall ? 'auto' : '300px';
-    } else if (col.isSingleActionColumn) {
-      result = '25%';
+      return isSmall ? 'auto' : '300px';
+    }
+    if (col.isSingleActionColumn) {
+      return '25%';
     }
   }
-  // if (count === 4) {
-  //   return col.type === 'main' ? 30 : (70 / (count - 1)) * colSpan;
-  // }
-  // if (count > 4) {
-  //   return col.type === 'main' ? 25 : (75 / (count - 1)) * colSpan;
-  // }
-  return result;
+  return 'auto';
 };
 
 const ID = 'entities-table';

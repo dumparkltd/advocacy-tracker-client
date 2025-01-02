@@ -21,7 +21,6 @@ export function CellBodyPositionsCompact({
     // first estimate from specified col width (outer cell width incl padding of ~12)
     : parseInt(colWidth, 10) - 12;
 
-  console.log('outerWidth, colWidth', outerWidth, colWidth)
   return (
     <Box
       ref={refOuter}
