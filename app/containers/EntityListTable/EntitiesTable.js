@@ -168,12 +168,12 @@ const getColWidth = ({
   if (col.type === 'auxColumns') {
     result = '22px';
   } else if (col.type === 'positionsCompact') {
-    result = isSmall ? '160px' : '200px';
+    result = isSmall ? '135px' : '200px';
   } else if (col.type === 'topicPosition') {
     result = isSmall ? '26px' : '33px';
   } else if (topicPositionLength > 0) {
     if (col.type === 'main' && (count - topicPositionLength > 2)) {
-      result = '250px';
+      result = isSmall ? '150px' : '180px';
     }
   } else if (count > 6 && col.type === 'main') {
     result = isSmall ? 'auto' : '180px';

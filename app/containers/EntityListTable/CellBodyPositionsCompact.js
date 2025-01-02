@@ -15,13 +15,13 @@ export function CellBodyPositionsCompact({
   const refOuter = React.useRef(null);
 
   // figure out width
-  // first estimate from specified col width (outer cell width incl padding of ~12)
-  let outerWidth = parseInt(colWidth, 10) - 12;
+  let outerWidth = (refOuter && refOuter.current)
+    // then calculate based on actual inner cell width
+    ? outerWidth = refOuter.current.getBoundingClientRect().width
+    // first estimate from specified col width (outer cell width incl padding of ~12)
+    : parseInt(colWidth, 10) - 12;
 
-  // then calculate based on actual inner cell width
-  if (refOuter && refOuter.current) {
-    outerWidth = refOuter.current.getBoundingClientRect().width;
-  }
+  console.log('outerWidth, colWidth', outerWidth, colWidth)
   return (
     <Box
       ref={refOuter}
@@ -39,7 +39,7 @@ export function CellBodyPositionsCompact({
             <CellBodyPositionsCompactSingle
               key={position.indicatorId}
               position={position}
-              width={`${Math.floor((outerWidth - ((positions.length - 1))) / positions.length) - 2}px`}
+              width={`${Math.floor(outerWidth / positions.length)}px`}
               mainEntity={mainEntity}
               onEntityClick={onEntityClick}
             />
