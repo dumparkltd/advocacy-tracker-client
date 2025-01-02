@@ -38,7 +38,7 @@ export function CellBodyPositionsCompact({
             <CellBodyPositionsCompactSingle
               key={position.indicatorId}
               position={position}
-              width={`${Math.floor(outerWidth / positions.length)}px`}
+              singleWidth={Math.floor(outerWidth / positions.length)}
               mainEntity={mainEntity}
               onEntityClick={onEntityClick}
             />

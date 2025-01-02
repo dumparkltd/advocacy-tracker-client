@@ -20,6 +20,7 @@ const LinkTooltip = styled(
   React.forwardRef((p, ref) => <Button as="a" {...p} ref={ref} />)
 )`
   border: 1px solid transparent;
+  width: ${({ width }) => width};
   &:hover {
     border: 1px solid black;
   }
@@ -34,7 +35,7 @@ const LabelValueWrap = styled((p) => <Box gap="xsmall" {...p} />)``;
 export function CellBodyPositionsCompactSingle({
   position,
   mainEntity,
-  width,
+  singleWidth,
   onEntityClick,
 }) {
   // const [showContent, setShowContent] = React.useState(false);
@@ -45,6 +46,7 @@ export function CellBodyPositionsCompactSingle({
   const { id, path, href } = mainEntity;
   const size = React.useContext(ResponsiveContext);
   const isSmall = !isMinSize(size, 'medium');
+
   return (
     <>
       <LinkTooltip
@@ -63,10 +65,11 @@ export function CellBodyPositionsCompactSingle({
         ref={infoRef}
         title="Click for position details"
         href={href}
+        width={singleWidth ? `${singleWidth}px` : 'auto'}
       >
         <Dot
           size="32px"
-          width={width}
+          width="100%"
           color={position.color}
         />
       </LinkTooltip>
@@ -145,7 +148,7 @@ export function CellBodyPositionsCompactSingle({
 
 CellBodyPositionsCompactSingle.propTypes = {
   position: PropTypes.object,
-  width: PropTypes.string, // eg 12px
+  singleWidth: PropTypes.number, // eg 12
   mainEntity: PropTypes.object,
   onEntityClick: PropTypes.func,
   intl: intlShape,
