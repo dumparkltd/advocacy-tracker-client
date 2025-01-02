@@ -3,13 +3,15 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import ButtonSort from 'components/buttons/ButtonSort';
 
-import { Box } from 'grommet';
+import { Box, Text } from 'grommet';
 
+import InfoOverlay from 'components/InfoOverlay';
 import IndeterminateCheckbox from 'components/forms/IndeterminateCheckbox';
 import PrintHide from 'components/styled/PrintHide';
 import BoxPrint from 'components/styled/BoxPrint';
 import TextPrint from 'components/styled/TextPrint';
 import Icon from 'components/Icon';
+import asArray from 'utils/as-array';
 
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
 
@@ -34,6 +36,7 @@ export function CellHeaderMain({ column, canEdit }) {
   const sortOrderOption = column.onSort && SORT_ORDER_OPTIONS.find(
     (option) => column.sortOrder === option.value
   );
+  const [title, info] = asArray(column.title);
 
   return (
     <Box direction="row" align="center" justify="start" flex={false}>
@@ -56,14 +59,37 @@ export function CellHeaderMain({ column, canEdit }) {
             wordBreak="keep-all"
             color="textSecondary"
           >
-            {column.title}
+            {title}
           </TextPrint>
         </Label>
       )}
       {!canEdit && (
         <TextPrint weight={500} size="xxsmall" color="textSecondary">
-          {column.title}
+          {title}
         </TextPrint>
+      )}
+      {info && (
+        <InfoOverlay
+          tooltip
+          icon="question"
+          padButton={{ horizontal: 'xsmall' }}
+          content={(
+            <Box
+              pad="small"
+              margin={{ horizontal: 'xsmall', vertical: 'xsmall' }}
+              background="white"
+              elevation="small"
+              overflow={{
+                vertical: 'auto',
+                horizontal: 'hidden',
+              }}
+            >
+              <Text size="small">
+                {info}
+              </Text>
+            </Box>
+          )}
+        />
       )}
       {column.onSort && (
         <PrintHide>

@@ -907,7 +907,7 @@ export const checkColumnFilterOptions = (column, entities) => {
   );
 };
 
-export const getListHeaderLabel = ({
+export const getListHeaderLabels = ({
   intl,
   entityTitle,
   selectedTotal,
@@ -917,38 +917,53 @@ export const getListHeaderLabel = ({
   messages,
   hasFilters,
 }) => {
-  let result = 'error';
+  let result = ['error'];
   if (!intl) return result;
   if (!entityTitle) return '';
+  // some items selected
   if (selectedTotal > 0) {
     if (allSelectedOnPage) {
       // return `All ${selectedTotal} ${selectedTotal === 1 ? entityTitle.single : entityTitle.plural} on this page are selected. `;
-      result = intl.formatMessage(messages.entityListHeader.allSelectedOnPage, {
-        total: selectedTotal,
-        type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
-      });
-    } else {
-    // return `${selectedTotal} ${selectedTotal === 1 ? entityTitle.single : entityTitle.plural} selected. `;
-      result = intl.formatMessage(messages.entityListHeader.selected, {
-        total: selectedTotal,
-        type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
-      });
+      return [
+        intl.formatMessage(messages.entityListHeader.allSelectedOnPage, {
+          total: selectedTotal,
+          type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
+        }),
+      ];
     }
-  } else if (typeof pageTotal !== 'undefined' && (pageTotal < entitiesTotal)) {
-    result = intl.formatMessage(messages.entityListHeader.noneSelected, {
-      pageTotal,
-      entitiesTotal,
-      type: entityTitle.plural,
-      filtered: hasFilters ? ' (filtered)' : ' total',
-    });
-  } else {
-    result = intl.formatMessage(messages.entityListHeader.notPaged, {
+    return [
+      intl.formatMessage(messages.entityListHeader.selected, {
+        total: selectedTotal,
+        type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
+      }),
+    ];
+  }
+  // no items selected
+  // paged
+  if (typeof pageTotal !== 'undefined' && (pageTotal < entitiesTotal)) {
+    result = [entityTitle.plural];
+    if (hasFilters) {
+      return [...result, 'filtered'];
+    }
+    return [
+      ...result,
+      intl.formatMessage(messages.entityListHeader.noneSelected, {
+        pageTotal,
+        entitiesTotal,
+        type: (entitiesTotal === 1) ? entityTitle.single : entityTitle.plural,
+      }),
+    ];
+  }
+  // not paged
+  result = [
+    intl.formatMessage(messages.entityListHeader.notPaged, {
       entitiesTotal,
       type: (entitiesTotal === 1) ? entityTitle.single : entityTitle.plural,
-      filtered: hasFilters ? ' (filtered)' : '',
-    });
-  }
-  return result;
+    }),
+  ];
+  return hasFilters
+    ? [...result, 'filtered']
+    : result;
 };
 
 export const getSelectedState = (

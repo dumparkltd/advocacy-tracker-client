@@ -49,7 +49,7 @@ import { getPager } from './pagination';
 import {
   prepareEntityRows,
   prepareHeader,
-  getListHeaderLabel,
+  getListHeaderLabels,
   getSelectedState,
   getColumnMaxValues,
 } from './utils';
@@ -351,7 +351,7 @@ export function EntityListTable({
       entityIdsSelected.size,
       entityIdsOnPage.length === entityIdsSelected.size,
     ),
-    title: label || getListHeaderLabel({
+    title: label || getListHeaderLabels({
       intl,
       entityTitle,
       pageTotal: entityIdsOnPage.length,
