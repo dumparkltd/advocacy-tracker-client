@@ -938,7 +938,14 @@ const getNextQuery = (query, extend, location) => {
           if (isAdding) {
             queryUpdated[param.arg].push(val);
           } else if (isRemoving) {
-            delete queryUpdated[param.arg];
+            // console.log(queryUpdated.xcol, param)
+            if (queryUpdated[param.arg] === param.value) {
+              delete queryUpdated[param.arg];
+            } else if (asArray(queryUpdated[param.arg]).indexOf(param.value) > -1) {
+              queryUpdated[param.arg] = queryUpdated[param.arg].filter(
+                (qv) => !qe(qv.toString().split('>')[0], val.split('>')[0])
+              );
+            }
           }
         // remove if present
         } else if (isAlreadyIncluded && extend && isRemoving) {

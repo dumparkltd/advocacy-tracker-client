@@ -1,11 +1,18 @@
 import { STATES as CHECKBOX_STATES } from 'components/forms/IndeterminateCheckbox';
 import { Map } from 'immutable';
-import isNumber from 'utils/is-number';
-import { formatNumber, checkEmpty } from 'utils/fields';
-import qe from 'utils/quasi-equals';
+
 import appMessage from 'utils/app-message';
+import isNumber from 'utils/is-number';
+import qe from 'utils/quasi-equals';
+import { formatNumber, checkEmpty } from 'utils/fields';
 import { lowerCase } from 'utils/string';
-import { getEntityTitle, getEntityPath } from 'utils/entities';
+
+import {
+  getEntityTitle,
+  getEntityPath,
+  getIndicatorMainTitle,
+} from 'utils/entities';
+
 import appMessages from 'containers/App/messages';
 import {
   API,
@@ -320,9 +327,9 @@ const getRelatedSortValue = (relatedEntities) => {
   return null;
 };
 
-const getRelatedValue = (relatedEntities, typeLabel, includeLabel = false) => {
+const getRelatedValue = (relatedEntities, typeLabel, includeLabel = false, first = false) => {
   if (relatedEntities && relatedEntities.size > 0) {
-    if (relatedEntities.size > 1) {
+    if (relatedEntities.size > 1 && !first) {
       return (typeLabel && includeLabel)
         ? `${relatedEntities.size} ${lowerCase(typeLabel)}`
         : relatedEntities.size;
@@ -348,6 +355,11 @@ const getColorFromPositions = (positions) => {
   }
   return ACTION_INDICATOR_SUPPORTLEVELS[99].color;
 };
+// const getLevelFromPositions = (positions) => {
+//   const value = getValueFromPositions(positions);
+//   const level = value && ACTION_INDICATOR_SUPPORTLEVELS[parseInt(value, 10)];
+//   return level || ACTION_INDICATOR_SUPPORTLEVELS[99];
+// };
 
 export const prepareEntityRows = ({
   entities,
@@ -814,6 +826,43 @@ export const prepareEntityRows = ({
                 sortValue: getValueFromPositions(temp) || 99,
               },
             };
+          case 'positionsCompact':
+            temp = entity.getIn([col.positions]) || null;
+            // console.log('country', entity && entity.toJS())
+            // console.log('connections', connections && connections.toJS())
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                // colors:,
+                // levels: temp && temp.reduce((memo, indicatorPositions) => ([
+                //   ...memo,
+                //   getLevelFromPositions(indicatorPositions),
+                // ]), []),
+                mainEntity: {
+                  id: entity.get('id'),
+                  path,
+                  href: url || `${path}/${id}`,
+                },
+                positions: temp && temp.reduce((memo, indicatorPositions, indicatorId) => {
+                  const latest = indicatorPositions && indicatorPositions.first();
+                  return ([
+                    ...memo,
+                    {
+                      indicatorId: parseInt(indicatorId, 10),
+                      supportlevelId: (latest && latest.get('supportlevel_id') && parseInt(latest.get('supportlevel_id'), 10)) || 99,
+                      color: getColorFromPositions(indicatorPositions),
+                      authority: latest && getSingleRelatedValueFromAttributes(latest.get('authority')),
+                      actorTitle: getEntityTitle(entity),
+                      groupTitle: latest && latest.get('viaGroups') && getEntityTitle(latest.get('viaGroups').first()),
+                      indicatorTitle: connections
+                        && connections.getIn([API.INDICATORS, indicatorId, 'attributes', 'title'])
+                        && getIndicatorMainTitle(connections.getIn([API.INDICATORS, indicatorId, 'attributes', 'title'])),
+                    },
+                  ]);
+                }, []),
+              },
+            };
           default:
             return memoEntity;
         }
@@ -858,7 +907,7 @@ export const checkColumnFilterOptions = (column, entities) => {
   );
 };
 
-export const getListHeaderLabel = ({
+export const getListHeaderLabels = ({
   intl,
   entityTitle,
   selectedTotal,
@@ -868,38 +917,53 @@ export const getListHeaderLabel = ({
   messages,
   hasFilters,
 }) => {
-  let result = 'error';
+  let result = ['error'];
   if (!intl) return result;
   if (!entityTitle) return '';
+  // some items selected
   if (selectedTotal > 0) {
     if (allSelectedOnPage) {
       // return `All ${selectedTotal} ${selectedTotal === 1 ? entityTitle.single : entityTitle.plural} on this page are selected. `;
-      result = intl.formatMessage(messages.entityListHeader.allSelectedOnPage, {
-        total: selectedTotal,
-        type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
-      });
-    } else {
-    // return `${selectedTotal} ${selectedTotal === 1 ? entityTitle.single : entityTitle.plural} selected. `;
-      result = intl.formatMessage(messages.entityListHeader.selected, {
-        total: selectedTotal,
-        type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
-      });
+      return [
+        intl.formatMessage(messages.entityListHeader.allSelectedOnPage, {
+          total: selectedTotal,
+          type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
+        }),
+      ];
     }
-  } else if (typeof pageTotal !== 'undefined' && (pageTotal < entitiesTotal)) {
-    result = intl.formatMessage(messages.entityListHeader.noneSelected, {
-      pageTotal,
-      entitiesTotal,
-      type: entityTitle.plural,
-      filtered: hasFilters ? ' (filtered)' : ' total',
-    });
-  } else {
-    result = intl.formatMessage(messages.entityListHeader.notPaged, {
+    return [
+      intl.formatMessage(messages.entityListHeader.selected, {
+        total: selectedTotal,
+        type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
+      }),
+    ];
+  }
+  // no items selected
+  // paged
+  if (typeof pageTotal !== 'undefined' && (pageTotal < entitiesTotal)) {
+    result = [entityTitle.plural];
+    if (hasFilters) {
+      return [...result, 'filtered'];
+    }
+    return [
+      ...result,
+      intl.formatMessage(messages.entityListHeader.noneSelected, {
+        pageTotal,
+        entitiesTotal,
+        type: (entitiesTotal === 1) ? entityTitle.single : entityTitle.plural,
+      }),
+    ];
+  }
+  // not paged
+  result = [
+    intl.formatMessage(messages.entityListHeader.notPaged, {
       entitiesTotal,
       type: (entitiesTotal === 1) ? entityTitle.single : entityTitle.plural,
-      filtered: hasFilters ? ' (filtered)' : '',
-    });
-  }
-  return result;
+    }),
+  ];
+  return hasFilters
+    ? [...result, 'filtered']
+    : result;
 };
 
 export const getSelectedState = (

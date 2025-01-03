@@ -28,6 +28,7 @@ import CellHeaderMain from './CellHeaderMain';
 import CellHeaderPlain from './CellHeaderPlain';
 import CellHeaderSmart from './CellHeaderSmart';
 import CellHeaderAuxColumns from './CellHeaderAuxColumns';
+import CellBodyPositionsCompact from './CellBodyPositionsCompact';
 
 const Table = styled.table`
   border-spacing: 0;
@@ -64,7 +65,7 @@ const TableCellHeader = styled.th`
   text-align: inherit;
   height: 100%;
   text-align: start;
-  vertical-align: bottom;
+  vertical-align: middle;
   border-bottom: 1px solid;
   border-bottom-color: ${({ utility, col, isActive }) => {
     if (utility && col.type === 'options') return 'rgba(0,0,0,0.05)';
@@ -163,31 +164,33 @@ const getColorForColumn = (col, theme) => {
 const getColWidth = ({
   col, count, topicPositionLength, isSmall,
 }) => {
-  let result = 'auto';
+  if (isSmall && col.type === 'main') {
+    return '135px';
+  }
   if (col.type === 'auxColumns') {
-    result = '22px';
-  } else if (col.type === 'topicPosition') {
-    result = isSmall ? '26px' : '33px';
-  } else if (topicPositionLength > 0) {
-    if (col.type === 'main' && (count - topicPositionLength > 2)) {
-      result = '25%';
-    }
-  } else if (count > 6 && col.type === 'main') {
-    result = '25%';
-  } else if (count > 2) {
+    return '22px';
+  }
+  if (col.type === 'positionsCompact') {
+    return isSmall ? '135px' : '200px';
+  }
+  if (col.type === 'topicPosition') {
+    return isSmall ? '26px' : '33px';
+  }
+  if (topicPositionLength > 0 && col.type === 'main' && (count - topicPositionLength > 2)) {
+    return isSmall ? '150px' : '180px';
+  }
+  if (count > 6 && col.type === 'main') {
+    return isSmall ? 'auto' : '180px';
+  }
+  if (count > 4) {
     if (col.type === 'main') {
-      result = '30%';
-    } else if (col.isSingleActionColumn) {
-      result = '25%';
+      return isSmall ? 'auto' : '300px';
+    }
+    if (col.isSingleActionColumn) {
+      return '25%';
     }
   }
-  // if (count === 4) {
-  //   return col.type === 'main' ? 30 : (70 / (count - 1)) * colSpan;
-  // }
-  // if (count > 4) {
-  //   return col.type === 'main' ? 25 : (75 / (count - 1)) * colSpan;
-  // }
-  return result;
+  return 'auto';
 };
 
 const ID = 'entities-table';
@@ -293,7 +296,7 @@ export function EntitiesTable({
     setMouseOverColumnWidth(null);
   };
 
-  const hasColumnOptions = !inSingleView && isMinSize(size, 'medium');
+  const hasColumnOptions = !inSingleView; // z && isMinSize(size, 'medium');
   let headerColumnsAux = hasColumnOptions
     ? [
       ...visibleHeaderColumns,
@@ -581,6 +584,13 @@ export function EntitiesTable({
                           maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
                           column={col}
                           entityType="actors"
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                        />
+                      )}
+                      {col.type === 'positionsCompact' && (
+                        <CellBodyPositionsCompact
+                          column={col}
+                          entity={entity[col.id]}
                           onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         />
                       )}

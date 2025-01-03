@@ -43,7 +43,7 @@ export function CellHeaderPlain({ column }) {
           content={<CellHeaderInfoOverlay info={column.info} />}
         />
       )}
-      {column.onSort && (
+      {isMinSize(size, 'medium') && column.onSort && (
         <PrintHide>
           <Box pad={{ left: 'xxsmall' }} flex={false}>
             <ButtonSort

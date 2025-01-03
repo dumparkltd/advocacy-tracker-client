@@ -105,6 +105,7 @@ function InfoOverlay({
           align={{ bottom: 'top' }}
           target={infoRef.current}
           plain
+          trapFocus={false}
         >
           <DropContent dropBackground={dropBackground}>
             {markdown && (
