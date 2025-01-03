@@ -15,7 +15,6 @@ import {
   ACTORTYPES,
   ACTIONTYPES,
   ACTIONTYPE_ACTORTYPES,
-  ACTIONTYPES_CONFIG,
   USER_ACTIONTYPES,
   MEMBERSHIPS,
   ACTION_INDICATOR_SUPPORTLEVELS,
@@ -39,35 +38,7 @@ import messages from './messages';
 const LabelPrint = styled.span`
   font-size: ${({ theme }) => theme.sizes.print.smaller};
 `;
-const getOwnActivityColumns = (mapSubject, typeId) => {
-  const actionTypeIds = Object.keys(ACTIONTYPE_ACTORTYPES).filter(
-    (actionTypeId) => {
-      if (qe(actionTypeId, ACTIONTYPES.OP)) return false;
-      if (qe(actionTypeId, ACTIONTYPES.AP)) return false;
-      if (qe(actionTypeId, ACTIONTYPES.EVENT)) return false;
-      const actiontypeActortypeId = ACTIONTYPE_ACTORTYPES[actionTypeId];
-      return actiontypeActortypeId.indexOf(typeId.toString()) > -1;
-    }
-  ).sort(
-    (a, b) => {
-      const orderA = ACTIONTYPES_CONFIG[parseInt(a, 10)].order;
-      const orderB = ACTIONTYPES_CONFIG[parseInt(b, 10)].order;
-      return orderA > orderB ? 1 : -1;
-    }
-  );
-  return actionTypeIds.map(
-    (id) => ({
-      id: `action_${id}`,
-      type: 'actiontype',
-      subject: mapSubject,
-      actiontype_id: id,
-      actions: 'actionsByType',
-      actionsMembers: 'actionsAsMemberByType',
-      actionsChildren: 'actionsAsParentByType',
-      minSize: (id === ACTIONTYPES.EXPRESS) ? 'medium' : 'large',
-    })
-  );
-};
+
 class EntitiesListView extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
     super(props);
@@ -253,20 +224,25 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       const canHaveMembers = Object.keys(MEMBERSHIPS).some(
         (id) => MEMBERSHIPS[id].indexOf(typeId) > -1
       );
-      let actionColumns = getOwnActivityColumns(
-        mapSubjectClean,
-        typeId,
-      );
-      const typeColumns = getActortypeColumns({
-        typeId,
-        showCode,
-        includeMain: false,
-        isSingle: false,
-        isAdmin,
-      });
+      columns = [
+        {
+          id: 'main',
+          type: 'main',
+          sort: 'title',
+          attributes: showCode ? ['code', 'title', 'prefix'] : ['title', 'prefix'],
+        },
+        ...getActortypeColumns({
+          typeId,
+          showCode,
+          includeMain: false,
+          isSingle: false,
+          isAdmin,
+          mapSubjectClean,
+        }),
+      ];
       if (qe(typeId, ACTORTYPES.COUNTRY)) {
-        actionColumns = [
-          ...actionColumns,
+        columns = [
+          ...columns,
           {
             id: 'positionsCompact',
             type: 'positionsCompact',
@@ -287,22 +263,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           },
         ];
       }
-      columns = [
-        {
-          id: 'main',
-          type: 'main',
-          sort: 'title',
-          attributes: showCode ? ['code', 'title', 'prefix'] : ['title', 'prefix'],
-        },
-        ...typeColumns.map((tc) => ({
-          ...tc,
-          hasSingleActionColumn: actionColumns.length === 1,
-        })),
-        ...actionColumns.map((ac) => ({
-          ...ac,
-          isSingleActionColumn: actionColumns.length === 1,
-        })),
-      ];
       subjectOptions = [
         {
           type: 'secondary',
@@ -389,7 +349,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {
           id: 'statements', // one row per type,
           type: 'indicatorActions', // one row per type,
+          type_id: ACTIONTYPES.EXPRESS,
           title: intl.formatMessage(appMessages.actiontypes[1]),
+          minSize: 'ms',
         },
         {
           id: 'support', // one row per type,
@@ -397,6 +359,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
           values: 'supportlevels',
           title: 'Support',
           options: ACTION_INDICATOR_SUPPORTLEVELS,
+          minSize: 'small',
           info: {
             type: 'key-categorical',
             title: 'Support by number of countries',
@@ -503,6 +466,8 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         )}
         {showRelatedActorsForActions && (
           <EntityListTable
+            typeId={typeId}
+            mapSubject={mapSubjectClean}
             skipPreviews={skipPreviews}
             isByOption
             reducePreviewItem={reducePreviewItem}
@@ -579,6 +544,8 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {showRelatedUsersForActions && (
           <Box>
             <EntityListTable
+              typeId={typeId}
+              mapSubject={mapSubjectClean}
               skipPreviews={skipPreviews}
               reducePreviewItem={reducePreviewItem}
               isByOption
@@ -626,6 +593,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         )}
         {showMainEntities && (
           <EntityListTable
+            mapSubject={mapSubjectClean}
             skipPreviews={skipPreviews}
             hasFilters={hasFilters}
             columns={columns}

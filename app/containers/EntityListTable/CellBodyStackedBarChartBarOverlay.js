@@ -56,9 +56,6 @@ export function CellBodyStackedBarChartBarOverlay({
           background="white"
           elevation="small"
           stretch={false}
-          style={{
-            animation: 'none',
-          }}
         >
           <DropEntityList
             entityType={entityType}

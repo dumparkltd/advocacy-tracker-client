@@ -30,22 +30,23 @@ export function CellHeaderPlain({ column }) {
         weight={500}
         size={isMinSize(size, 'ms') ? 'xxsmall' : 'xxxsmall'}
         textAlign={align}
-        wordBreak="keep-all"
         color="textSecondary"
+        style={{
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}
+        title={column.label || column.title}
       >
         {column.label || column.title}
       </TextPrint>
-      {column.info && (
-        <InfoOverlay
-          tooltip
-          icon="question"
-          padButton={{ horizontal: 'xsmall' }}
-          content={<CellHeaderInfoOverlay info={column.info} />}
-        />
-      )}
       {isMinSize(size, 'medium') && column.onSort && (
         <PrintHide>
-          <Box pad={{ left: 'xxsmall' }} flex={false}>
+          <Box
+            style={{ position: 'relative', top: '-1px' }}
+            pad={{ left: '2px' }}
+            flex={false}
+          >
             <ButtonSort
               sortActive={column.sortActive}
               onClick={() => {
@@ -67,6 +68,16 @@ export function CellHeaderPlain({ column }) {
             </ButtonSort>
           </Box>
         </PrintHide>
+      )}
+      {column.info && (
+        <Box style={{ position: 'relative', top: '-1px' }}>
+          <InfoOverlay
+            tooltip
+            icon="question"
+            padButton={{ horizontal: 'xsmall' }}
+            content={<CellHeaderInfoOverlay info={column.info} />}
+          />
+        </Box>
       )}
     </Box>
   );

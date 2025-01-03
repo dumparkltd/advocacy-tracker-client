@@ -256,7 +256,7 @@ export function PositionsList({
       const title = getIndicatorAbbreviation(indicator.getIn(['attributes', 'title']));
       const id = `topic_${indicator.get('id')}`;
       const activeSupportLevels = getActiveSupportLevels(locationQuery, indicator.get('id'));
-      let minSize = 'medium';
+      let minSize = 'ms';
       const ref = indicator.getIn(['attributes', 'reference']);
       if (isNumber(ref) && parseInt(ref, 10) < 5) {
         minSize = 'small';
@@ -635,6 +635,7 @@ export function PositionsList({
                       id: 'users',
                       type: 'users',
                       isSingleActionColumn: false,
+                      minSize: 'large',
                     },
                     {
                       id: 'associations',
@@ -642,7 +643,7 @@ export function PositionsList({
                       actors: 'associationsByType',
                       isSingleActionColumn: false,
                       minSize: 'large',
-                      title: 'Regions & Groups',
+                      title: 'Part of',
                     },
                     {
                       id: `action_${ACTIONTYPES.EXPRESS}`,
@@ -652,7 +653,7 @@ export function PositionsList({
                       actionsMembers: 'actionsAsMemberByType',
                       actionsChildren: 'actionsAsParentByType',
                       isSingleActionColumn: false,
-                      minSize: 'large',
+                      minSize: 'medium',
                       simple: true,
                     },
                     {

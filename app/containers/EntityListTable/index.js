@@ -120,12 +120,23 @@ export function EntityListTable({
   onEntityClick,
   locationQuery,
   skipPreviews,
+  typeId,
+  mapSubject,
 }) {
   if (!columns) return null;
   const size = React.useContext(ResponsiveContext);
 
+  // list sorting
+  const sortColumn = columns.find((c) => !!c.sortDefault);
+  const sortDefault = {
+    sort: sortColumn ? sortColumn.sort : 'main',
+    order: sortColumn ? sortColumn.sortOrder : 'asc',
+  };
+  const [showAllConnections, setShowAllConnections] = useState(false);
+  const [localSort, setLocalSort] = useState(sortDefault);
+
   const updateHiddenColumns = () => {
-    // console.log('EntityListTable columns effect', size, columns);
+    // console.log('updateHiddenColumns')
     const initiallyHiddenColumns = columns.reduce((memo, col) => {
       if (col.type === 'main') {
         return memo;
@@ -157,29 +168,39 @@ export function EntityListTable({
       addToHidden: initiallyHiddenColumns,
       removeFromHidden: initiallyVisibleColumns,
     });
+    // if (initiallyHiddenColumns.length === 0) {
+    // }
   };
+  // initialise columns
+  React.useLayoutEffect(() => {
+    updateHiddenColumns();
+  }, [typeId, mapSubject]);
 
-  React.useEffect(() => {
-    updateHiddenColumns();
-  }, []);
-  React.useEffect(() => {
-    updateHiddenColumns();
-  }, [size]);
-  //
+  // // initialise columns: reset
   // React.useEffect(() => {
-  //   // Define a function to handle window resize
-  //   const handleResize = () => {
-  //     updateHiddenColumns();
-  //   };
-  //
-  //   // Attach the event listener
-  //   window.addEventListener('resize', handleResize);
-  //
-  //   // Cleanup the event listener on component unmount
-  //   return () => {
-  //     window.removeEventListener('resize', handleResize);
-  //   };
-  // }, []);
+  //   if (columnsReady && !hiddenColumns) {
+  //     setColumnsReady(false);
+  //   }
+  // }, [hiddenColumns]);
+
+  // React.useEffect(() => {
+  //   updateHiddenColumns();
+  // }, [size]);
+
+  React.useLayoutEffect(() => {
+    // Define a function to handle window resize
+    const handleResize = () => {
+      updateHiddenColumns();
+    };
+
+    // Attach the event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup the event listener on component unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
 
   // list options
   const {
@@ -192,15 +213,6 @@ export function EntityListTable({
     includeChildren,
     searchPlaceholder,
   } = options;
-
-  // list sorting
-  const sortColumn = columns.find((c) => !!c.sortDefault);
-  const sortDefault = {
-    sort: sortColumn ? sortColumn.sort : 'main',
-    order: sortColumn ? sortColumn.sortOrder : 'asc',
-  };
-  const [showAllConnections, setShowAllConnections] = useState(false);
-  const [localSort, setLocalSort] = useState(sortDefault);
 
   // filter entitities by keyword
   const searchAttributes = (
@@ -219,6 +231,12 @@ export function EntityListTable({
       searchAttributes,
     );
   }
+  // hide initially if hidden columns have not been set
+  // console.log('hiddenColumns', hiddenColumns && hiddenColumns.toJS())
+  // console.log('columnsReady', columnsReady)
+  // if (!columnsReady) return null;
+  // const hideInitially = !columnsReady;
+  // console.log('hideInitially', hideInitially)
   const availableColumns = columns
     .filter((col) => {
       if (col.printHideOnSingle && isPrintView) {
@@ -351,6 +369,7 @@ export function EntityListTable({
       entityIdsSelected.size,
       entityIdsOnPage.length === entityIdsSelected.size,
     ),
+    // main column title
     title: label || getListHeaderLabels({
       intl,
       entityTitle,
@@ -492,6 +511,8 @@ EntityListTable.propTypes = {
   entityIdsSelected: PropTypes.instanceOf(List),
   errors: PropTypes.instanceOf(Map),
   // showValueForAction: PropTypes.instanceOf(Map),
+  typeId: PropTypes.string,
+  mapSubject: PropTypes.string,
   entityTitle: PropTypes.object,
   config: PropTypes.object,
   columns: PropTypes.array,
