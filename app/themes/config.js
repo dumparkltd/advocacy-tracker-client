@@ -2144,7 +2144,6 @@ export const ACTIONTYPES_CONFIG = {
         sortDefault: true,
         attribute: 'date_start',
         fallbackAttribute: 'created_at',
-        primary: true,
         minSize: 'medium', // default
       },
       {
@@ -2401,7 +2400,6 @@ export const ACTIONTYPES_CONFIG = {
         sortOrder: 'desc',
         sortDefault: true,
         attribute: 'date_start',
-        primary: true,
         minSize: 'medium',
         title: 'Date (start)',
       },
@@ -2681,7 +2679,6 @@ export const ACTIONTYPES_CONFIG = {
         sortOrder: 'desc',
         sortDefault: true,
         attribute: 'date_start',
-        primary: true,
         minSize: 'large',
       },
       {
@@ -2948,7 +2945,6 @@ export const ACTIONTYPES_CONFIG = {
         sortOrder: 'desc',
         sortDefault: true,
         attribute: 'date_start',
-        primary: true,
         minSize: 'large',
       },
       {
@@ -3215,7 +3211,6 @@ export const ACTIONTYPES_CONFIG = {
         sortOrder: 'desc',
         sortDefault: true,
         attribute: 'date_start',
-        primary: true,
         minSize: 'large',
       },
       {
@@ -3484,7 +3479,6 @@ export const ACTIONTYPES_CONFIG = {
         sortOrder: 'desc',
         sortDefault: true,
         attribute: 'date_start',
-        primary: true,
         minSize: 'small',
       },
       {
