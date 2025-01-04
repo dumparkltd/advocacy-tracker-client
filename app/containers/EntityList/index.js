@@ -560,7 +560,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
           {
             title: 'Delete selected',
             onClick: (evt) => this.onShowDeleteConfirm(evt),
-            icon: <Icon name="trash" size="22px" />,
+            icon: <Icon name="trash" size="20px" />,
             type: 'listOption',
           },
           ...allListActions,
@@ -572,7 +572,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
         {
           title: 'Edit selected',
           onClick: (evt) => this.onShowEditOptions(evt),
-          icon: <Edit color="white" size="xxsmall" />,
+          icon: <Edit color="white" size="14px" />,
           type: 'listOption',
           active: true,
           isMember,
