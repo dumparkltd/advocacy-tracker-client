@@ -384,12 +384,12 @@ theme.backgroundImages = {};
 export const BREAKPOINTS = {
   small: {
     min: 0,
-    max: 420, // inclusive
+    max: 500, // inclusive
     name: 'mobile',
     index: 0,
   },
   ms: {
-    min: 420, // exclusive
+    min: 500, // exclusive
     max: 760,
     name: 'mobile (landscape)',
     index: 1,

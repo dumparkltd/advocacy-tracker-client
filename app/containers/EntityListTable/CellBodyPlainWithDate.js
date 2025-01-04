@@ -25,7 +25,7 @@ export function CellBodyPlainWithDate({ entity, onEntityClick }) {
     <LabelWrap>
       {date && (
         <Box flex={{ shrink: 0 }}>
-          <Text size="xsmall" weight={500} wordBreak="keep-all">
+          <Text size="xsmall" wordBreak="keep-all">
             {date}
           </Text>
         </Box>

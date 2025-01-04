@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { Box, Button } from 'grommet';
+import { Box, Button, ResponsiveContext } from 'grommet';
 
 // import ButtonFactory from 'components/buttons/ButtonFactory';
-
+import { isMinSize } from 'utils/responsive';
 import PrintHide from 'components/styled/PrintHide';
 import PrintOnly from 'components/styled/PrintOnly';
 import TextPrint from 'components/styled/TextPrint';
@@ -44,7 +44,11 @@ function MapSubjectOptions({ options, inList, align = 'start' }) {
       (option) => option && option.active && !option.printHide
     )
     : null;
-
+  const size = React.useContext(ResponsiveContext);
+  let textSize = inList ? 'medium' : 'large';
+  if (!isMinSize(size, 'ms')) {
+    textSize = 'small';
+  }
   return (
     <Styled inList={inList} isPrint={isPrint}>
       <PrintHide>
@@ -60,7 +64,7 @@ function MapSubjectOptions({ options, inList, align = 'start' }) {
                     inList={inList}
                   >
                     <StyledTextPrint
-                      size={inList ? 'medium' : 'large'}
+                      size={textSize}
                       active={option.active}
                     >
                       {option.title}
@@ -75,7 +79,7 @@ function MapSubjectOptions({ options, inList, align = 'start' }) {
       <PrintOnly>
         {optionActiveForPrint && (
           <Box direction="row" gap="small" justify={align}>
-            <StyledTextPrint size={inList ? 'medium' : 'large'}>
+            <StyledTextPrint size={textSize}>
               {optionActiveForPrint.title}
             </StyledTextPrint>
           </Box>

@@ -316,7 +316,7 @@ export const selectLocationQuery = createSelector(
 );
 export const selectHiddenColumns = createSelector(
   selectLocationQuery,
-  (locationQuery) => locationQuery && asList(locationQuery.get('xcol'))
+  (locationQuery) => locationQuery && locationQuery.get('xcol') && asList(locationQuery.get('xcol'))
 );
 
 // filter queries //////////////////////////////////////////////////////////////

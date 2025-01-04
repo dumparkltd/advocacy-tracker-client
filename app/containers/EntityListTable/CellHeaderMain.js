@@ -3,13 +3,15 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import ButtonSort from 'components/buttons/ButtonSort';
 
-import { Box } from 'grommet';
+import { Box, Text } from 'grommet';
 
+import InfoOverlay from 'components/InfoOverlay';
 import IndeterminateCheckbox from 'components/forms/IndeterminateCheckbox';
 import PrintHide from 'components/styled/PrintHide';
 import BoxPrint from 'components/styled/BoxPrint';
 import TextPrint from 'components/styled/TextPrint';
 import Icon from 'components/Icon';
+import asArray from 'utils/as-array';
 
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
 
@@ -21,23 +23,28 @@ const Select = styled(PrintHide)`
   text-align: center;
   padding-right: 6px;
   position: relative;
+  top: -2px;
 `;
 
 const Label = styled.label`
-  position: relative;
-  top: -1px;
+  max-width: 100%;
 `;
-
 
 export function CellHeaderMain({ column, canEdit }) {
   const sortOrderOption = column.onSort && SORT_ORDER_OPTIONS.find(
     (option) => column.sortOrder === option.value
   );
+  const [title, info] = asArray(column.title);
 
   return (
-    <Box direction="row" align="center" justify="start" flex={false}>
+    <Box
+      direction="row"
+      align="center"
+      justify="start"
+      style={{ width: '100%' }}
+    >
       {canEdit && (
-        <BoxPrint printHide>
+        <BoxPrint printHide flex={{ shrink: 0 }}>
           <Select>
             <Checkbox
               id="select-all"
@@ -47,26 +54,54 @@ export function CellHeaderMain({ column, canEdit }) {
           </Select>
         </BoxPrint>
       )}
-      {canEdit && (
-        <Label htmlFor="select-all">
+      <Box
+        direction="row"
+        flex={{ shrink: 1 }}
+      >
+        {canEdit && (
+          <Label
+            htmlFor="select-all"
+            title={title}
+          >
+            <TextPrint
+              weight={500}
+              size="xxsmall"
+              color="textSecondary"
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                width: '100%',
+                display: 'inline-block',
+              }}
+            >
+              {title}
+            </TextPrint>
+          </Label>
+        )}
+        {!canEdit && (
           <TextPrint
             weight={500}
             size="xxsmall"
-            wordBreak="keep-all"
             color="textSecondary"
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+            title={title}
           >
-            {column.title}
+            {title}
           </TextPrint>
-        </Label>
-      )}
-      {!canEdit && (
-        <TextPrint weight={500} size="xxsmall" color="textSecondary">
-          {column.title}
-        </TextPrint>
-      )}
+        )}
+      </Box>
       {column.onSort && (
         <PrintHide>
-          <Box pad={{ left: 'xxsmall' }} flex={false}>
+          <Box
+            style={{ position: 'relative', top: '-1px' }}
+            pad={{ left: '2px' }}
+            flex={{ shrink: 0 }}
+          >
             <ButtonSort
               sortActive={column.sortActive}
               onClick={() => {
@@ -89,6 +124,31 @@ export function CellHeaderMain({ column, canEdit }) {
             </ButtonSort>
           </Box>
         </PrintHide>
+      )}
+      {info && (
+        <Box style={{ position: 'relative', top: '-1px' }}>
+          <InfoOverlay
+            tooltip
+            icon="question"
+            padButton={{ horizontal: 'xsmall' }}
+            content={(
+              <Box
+                pad="small"
+                margin={{ horizontal: 'xsmall', vertical: 'xsmall' }}
+                background="white"
+                elevation="small"
+                overflow={{
+                  vertical: 'auto',
+                  horizontal: 'hidden',
+                }}
+              >
+                <Text size="small">
+                  {info}
+                </Text>
+              </Box>
+            )}
+          />
+        </Box>
       )}
     </Box>
   );

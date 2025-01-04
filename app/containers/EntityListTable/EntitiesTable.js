@@ -28,6 +28,7 @@ import CellHeaderMain from './CellHeaderMain';
 import CellHeaderPlain from './CellHeaderPlain';
 import CellHeaderSmart from './CellHeaderSmart';
 import CellHeaderAuxColumns from './CellHeaderAuxColumns';
+import CellBodyPositionsCompact from './CellBodyPositionsCompact';
 
 const Table = styled.table`
   border-spacing: 0;
@@ -64,7 +65,7 @@ const TableCellHeader = styled.th`
   text-align: inherit;
   height: 100%;
   text-align: start;
-  vertical-align: bottom;
+  vertical-align: middle;
   border-bottom: 1px solid;
   border-bottom-color: ${({ utility, col, isActive }) => {
     if (utility && col.type === 'options') return 'rgba(0,0,0,0.05)';
@@ -161,33 +162,51 @@ const getColorForColumn = (col, theme) => {
 };
 
 const getColWidth = ({
-  col, count, topicPositionLength, isSmall,
+  col, count, topicPositionLength, size,
 }) => {
-  let result = 'auto';
-  if (col.type === 'auxColumns') {
-    result = '22px';
-  } else if (col.type === 'topicPosition') {
-    result = isSmall ? '26px' : '33px';
-  } else if (topicPositionLength > 0) {
-    if (col.type === 'main' && (count - topicPositionLength > 2)) {
-      result = '25%';
+  const isSmall = !isMinSize(size, 'ms');
+  const isMS = !isMinSize(size, 'medium');
+  if (isSmall && col.type === 'main') {
+    if (count === 1) {
+      return 'auto';
     }
-  } else if (count > 6 && col.type === 'main') {
-    result = '25%';
-  } else if (count > 2) {
-    if (col.type === 'main') {
-      result = '30%';
-    } else if (col.isSingleActionColumn) {
-      result = '25%';
+    if (count === 2) {
+      return '50%';
+    }
+    if (count > 4) {
+      return 'auto';
+    }
+    return '150px';
+  }
+  if (isMS && col.type === 'main') {
+    if (count > 4) {
+      return 'auto';
     }
   }
-  // if (count === 4) {
-  //   return col.type === 'main' ? 30 : (70 / (count - 1)) * colSpan;
-  // }
-  // if (count > 4) {
-  //   return col.type === 'main' ? 25 : (75 / (count - 1)) * colSpan;
-  // }
-  return result;
+  if (col.type === 'auxColumns') {
+    return '22px';
+  }
+  if (col.type === 'positionsCompact') {
+    return isSmall ? '135px' : '200px';
+  }
+  if (col.type === 'topicPosition') {
+    return (isSmall || isMS) ? '26px' : '33px';
+  }
+  if (topicPositionLength > 0 && col.type === 'main' && (count - topicPositionLength > 2)) {
+    return isSmall ? '150px' : '180px';
+  }
+  if (count > 6 && col.type === 'main') {
+    return isSmall ? 'auto' : '180px';
+  }
+  if (count > 4) {
+    if (col.type === 'main') {
+      return isSmall ? 'auto' : '200px';
+    }
+    if (col.isSingleActionColumn) {
+      return '25%';
+    }
+  }
+  return 'auto';
 };
 
 const ID = 'entities-table';
@@ -293,7 +312,7 @@ export function EntitiesTable({
     setMouseOverColumnWidth(null);
   };
 
-  const hasColumnOptions = !inSingleView && isMinSize(size, 'medium');
+  const hasColumnOptions = !inSingleView; // z && isMinSize(size, 'medium');
   let headerColumnsAux = hasColumnOptions
     ? [
       ...visibleHeaderColumns,
@@ -318,12 +337,11 @@ export function EntitiesTable({
   const topicPositionLength = headerColumnsByType
     && headerColumnsByType.topicPosition
     && headerColumnsByType.topicPosition.length;
-  const isSmall = !isMinSize(size, 'medium');
   headerColumnsAux = headerColumnsAux && headerColumnsAux.map((col) => ({
     ...col,
     colWidth: getColWidth(
       {
-        col, count: headerColumnsAux.length, topicPositionLength, isSmall,
+        col, count: visibleHeaderColumns.length, topicPositionLength, size,
       }
     ),
   }));
@@ -331,7 +349,7 @@ export function EntitiesTable({
     ...col,
     colWidth: getColWidth(
       {
-        col, count: headerColumnsAux.length, topicPositionLength, isSmall,
+        col, count: visibleHeaderColumns.length, topicPositionLength, size,
       }
     ),
   }));
@@ -400,7 +418,12 @@ export function EntitiesTable({
                   onMouseOver={col.type === 'topicPosition' ? (evt) => handleColumnMouseOver(evt, col, true) : null}
                   onFocus={col.type === 'topicPosition' ? (evt) => handleColumnMouseOver(evt, col, true) : null}
                 >
-                  <Box fill={false} flex={{ grow: 0 }} justify="start">
+                  <Box
+                    fill={false}
+                    flex={{ grow: 0 }}
+                    justify="start"
+                    style={{ width: '100%' }}
+                  >
                     {col.type === 'main' && (
                       <CellHeaderMain
                         column={col}
@@ -540,7 +563,6 @@ export function EntitiesTable({
                       {(
                         col.type === 'actionsSimple'
                         || col.type === 'resourceActions'
-                        || col.type === 'indicatorActions'
                         || col.type === 'userActions'
                         || col.type === 'positionStatement'
                         || col.type === 'childActions'
@@ -559,6 +581,7 @@ export function EntitiesTable({
                       {(
                         col.type === 'actorActions'
                         || col.type === 'actiontype'
+                        || col.type === 'indicatorActions'
                       ) && !col.simple && (
                         <CellBodyBarChart
                           value={entity[col.id].value}
@@ -581,6 +604,13 @@ export function EntitiesTable({
                           maxvalue={Object.values(columnMaxValues).reduce((memo, val) => Math.max(memo, val), 0)}
                           column={col}
                           entityType="actors"
+                          onEntityClick={(id, path) => onEntityClick(id, path, ID)}
+                        />
+                      )}
+                      {col.type === 'positionsCompact' && (
+                        <CellBodyPositionsCompact
+                          column={col}
+                          entity={entity[col.id]}
                           onEntityClick={(id, path) => onEntityClick(id, path, ID)}
                         />
                       )}

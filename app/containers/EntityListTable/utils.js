@@ -1,11 +1,18 @@
 import { STATES as CHECKBOX_STATES } from 'components/forms/IndeterminateCheckbox';
 import { Map } from 'immutable';
-import isNumber from 'utils/is-number';
-import { formatNumber, checkEmpty } from 'utils/fields';
-import qe from 'utils/quasi-equals';
+
 import appMessage from 'utils/app-message';
+import isNumber from 'utils/is-number';
+import qe from 'utils/quasi-equals';
+import { formatNumber, checkEmpty } from 'utils/fields';
 import { lowerCase } from 'utils/string';
-import { getEntityTitle, getEntityPath } from 'utils/entities';
+
+import {
+  getEntityTitle,
+  getEntityPath,
+  getIndicatorMainTitle,
+} from 'utils/entities';
+
 import appMessages from 'containers/App/messages';
 import {
   API,
@@ -21,7 +28,7 @@ export const prepareHeader = ({
   onSort,
   onSelectAll,
   selectedState,
-  title,
+  title, // main column title
   intl,
 }) => columns.map(
   (col) => {
@@ -51,7 +58,7 @@ export const prepareHeader = ({
       case 'date':
         return ({
           ...col,
-          title: 'Date',
+          title: label || 'Date',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'desc',
           onSort,
@@ -59,7 +66,7 @@ export const prepareHeader = ({
       case 'attribute':
         return ({
           ...col,
-          title: intl.formatMessage(appMessages.attributes[col.attribute]),
+          title: label || intl.formatMessage(appMessages.attributes[col.attribute]),
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -67,7 +74,7 @@ export const prepareHeader = ({
       case 'userrole':
         return ({
           ...col,
-          title: 'User role',
+          title: label || 'User role',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -75,7 +82,7 @@ export const prepareHeader = ({
       case 'actorsViaChildren':
         return ({
           ...col,
-          title: 'Indirect stakeholders',
+          title: label || 'Indirect stakeholders',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -87,9 +94,12 @@ export const prepareHeader = ({
         });
       case 'actors':
       case 'userActors':
+        if (col.type_id) {
+          label = intl.formatMessage(appMessages.entities[`actors_${col.type_id}`].plural);
+        }
         return ({
           ...col,
-          title: 'Stakeholders',
+          title: label || 'Stakeholders',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -97,7 +107,7 @@ export const prepareHeader = ({
       case 'viaGroups':
         return ({
           ...col,
-          title: 'As member of',
+          title: label || 'As member of',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -105,7 +115,7 @@ export const prepareHeader = ({
       case 'positionStatement':
         return ({
           ...col,
-          title: 'Statement',
+          title: label || 'Statement',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -113,7 +123,7 @@ export const prepareHeader = ({
       case 'positionStatementAuthority':
         return ({
           ...col,
-          title: 'Level of authority',
+          title: label || 'Level of authority',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -121,7 +131,7 @@ export const prepareHeader = ({
       case 'users':
         return ({
           ...col,
-          title: 'WWF staff',
+          title: label || 'WWF staff',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -129,7 +139,7 @@ export const prepareHeader = ({
       case 'indicators':
         return ({
           ...col,
-          title: 'Topics',
+          title: label || 'Topics',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -147,41 +157,51 @@ export const prepareHeader = ({
       case 'associations':
         return ({
           ...col,
-          title: col.title || 'Member of',
+          title: label || 'Member of',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'members':
+        if (col.type_id) {
+          label = intl.formatMessage(appMessages.entities[`actors_${col.type_id}`].plural);
+        }
         return ({
           ...col,
-          title: col.title || 'Members',
+          title: label || 'Members',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'childActions':
+        if (col.type_id) {
+          label = intl.formatMessage(appMessages.entities[`actions_${col.type_id}`].plural);
+        }
         return ({
           ...col,
-          title: col.title || 'Sub-activities',
+          title: label || 'Sub-activities',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'parentActions':
+        if (col.type_id) {
+          label = intl.formatMessage(appMessages.entities[`actions_${col.type_id}`].plural);
+        }
         return ({
           ...col,
-          title: col.title || 'Activities',
+          title: label || 'Activities',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'actiontype':
+        if (col.type_id) {
+          label = intl.formatMessage(appMessages.entities[`actions_${col.type_id}`].plural);
+        }
         return ({
           ...col,
-          title: appMessages.entities[`actions_${col.actiontype_id}`]
-            ? intl.formatMessage(appMessages.entities[`actions_${col.actiontype_id}`].pluralShort)
-            : 'Activities',
+          title: label || 'Activities',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -225,21 +245,17 @@ export const prepareHeader = ({
           onSort,
         });
       case 'userActions':
-        label = label || 'Assigned to';
         return ({
           ...col,
-          title: label,
+          title: label || 'Assigned to',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
       case 'actionsSimple':
-        if (!label) {
-          label = 'Activities';
-        }
         return ({
           ...col,
-          title: label,
+          title: label || 'Activities',
           sortActive,
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
@@ -320,9 +336,9 @@ const getRelatedSortValue = (relatedEntities) => {
   return null;
 };
 
-const getRelatedValue = (relatedEntities, typeLabel, includeLabel = false) => {
+const getRelatedValue = (relatedEntities, typeLabel, includeLabel = false, first = false) => {
   if (relatedEntities && relatedEntities.size > 0) {
-    if (relatedEntities.size > 1) {
+    if (relatedEntities.size > 1 && !first) {
       return (typeLabel && includeLabel)
         ? `${relatedEntities.size} ${lowerCase(typeLabel)}`
         : relatedEntities.size;
@@ -348,6 +364,11 @@ const getColorFromPositions = (positions) => {
   }
   return ACTION_INDICATOR_SUPPORTLEVELS[99].color;
 };
+// const getLevelFromPositions = (positions) => {
+//   const value = getValueFromPositions(positions);
+//   const level = value && ACTION_INDICATOR_SUPPORTLEVELS[parseInt(value, 10)];
+//   return level || ACTION_INDICATOR_SUPPORTLEVELS[99];
+// };
 
 export const prepareEntityRows = ({
   entities,
@@ -437,7 +458,11 @@ export const prepareEntityRows = ({
             };
           case 'actionsSimple':
             attribute = col.actions || 'actions';
-            temp = entity.get(attribute) || (entity.get(`${attribute}ByType`) && entity.get(`${attribute}ByType`).flatten(true));
+            if (col.type_id) {
+              temp = entity.getIn([`${attribute}ByType`, parseInt(col.type_id, 10)]);
+            } else {
+              temp = entity.get(attribute) || (entity.get(`${attribute}ByType`) && entity.get(`${attribute}ByType`).flatten(true));
+            }
             relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
             return {
               ...memoEntity,
@@ -508,7 +533,11 @@ export const prepareEntityRows = ({
             };
           case 'actors':
           case 'userActors':
-            temp = entity.get('actors') || (entity.get('actorsByType') && entity.get('actorsByType').flatten(true));
+            if (col.type_id) {
+              temp = entity.getIn(['actorsByType', parseInt(col.type_id, 10)]);
+            } else {
+              temp = entity.get('actors') || (entity.get('actorsByType') && entity.get('actorsByType').flatten(true));
+            }
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -537,7 +566,11 @@ export const prepareEntityRows = ({
               },
             };
           case 'members':
-            temp = entity.get('members') || (entity.get('membersByType') && entity.get('membersByType').flatten(true));
+            if (col.type_id) {
+              temp = entity.getIn(['membersByType', parseInt(col.type_id, 10)]);
+            } else {
+              temp = entity.get('members') || (entity.get('membersByType') && entity.get('membersByType').flatten(true));
+            }
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -552,8 +585,11 @@ export const prepareEntityRows = ({
               },
             };
           case 'associations':
-            temp = entity.get('associations') || (entity.get('associationsByType') && entity.get('associationsByType').flatten(true));
-
+            if (col.type_id) {
+              temp = entity.getIn(['associationsByType', parseInt(col.type_id, 10)]);
+            } else {
+              temp = entity.get('associations') || (entity.get('associationsByType') && entity.get('associationsByType').flatten(true));
+            }
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
             return {
               ...memoEntity,
@@ -568,7 +604,11 @@ export const prepareEntityRows = ({
               },
             };
           case 'childActions':
-            temp = entity.get('children') || (entity.get('childrenByType') && entity.get('childrenByType').flatten(true));
+            if (col.type_id) {
+              temp = entity.getIn(['childrenByType', parseInt(col.type_id, 10)]);
+            } else {
+              temp = entity.get('children') || (entity.get('childrenByType') && entity.get('childrenByType').flatten(true));
+            }
             relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
             return {
               ...memoEntity,
@@ -583,7 +623,11 @@ export const prepareEntityRows = ({
               },
             };
           case 'parentActions':
-            temp = entity.get('parents') || (entity.get('parentsByType') && entity.get('parentsByType').flatten(true));
+            if (col.type_id) {
+              temp = entity.getIn(['parentsByType', parseInt(col.type_id, 10)]);
+            } else {
+              temp = entity.get('parents') || (entity.get('parentsByType') && entity.get('parentsByType').flatten(true));
+            }
             relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
             return {
               ...memoEntity,
@@ -598,7 +642,6 @@ export const prepareEntityRows = ({
               },
             };
           case 'taxonomy':
-            // console.log(entity && entity.toJS())
             relatedEntities = taxonomies.get(col.taxonomy_id.toString())
               && getRelatedEntities(
                 entity.get('categories'),
@@ -617,9 +660,11 @@ export const prepareEntityRows = ({
               },
             };
           case 'hasResources':
-            // resources
-            temp = entity.getIn(['resourcesByType', parseInt(col.resourcetype_id, 10)])
-              || entity.getIn(['resourcesByType', col.resourcetype_id]);
+            if (col.resourcetype_id) {
+              temp = entity.getIn(['resourcesByType', parseInt(col.resourcetype_id, 10)]);
+            } else {
+              temp = entity.get('resources') || (entity.get('resourcesByType') && entity.get('resourcesByType').flatten(true));
+            }
             relatedEntities = temp && getRelatedEntities(temp, resources, col);
             return {
               ...memoEntity,
@@ -629,9 +674,15 @@ export const prepareEntityRows = ({
                 sortValue: relatedEntities ? 1 : -1,
               },
             };
+          case 'indicatorActions':
           case 'actorActions':
-            temp = entity.get(col.actions)
-              || (entity.get(`${col.actions}ByType`) && entity.get(`${col.actions}ByType`).flatten(true));
+            attribute = col.actions || 'actions';
+            if (col.type_id) {
+              temp = entity.getIn([`${attribute}ByType`, parseInt(col.type_id, 10)]);
+            } else {
+              temp = entity.get(attribute)
+                || (entity.get(`${attribute}ByType`) && entity.get(`${attribute}ByType`).flatten(true));
+            }
             relatedEntities = getRelatedEntities(temp, connections.get('measures'), col);
             return {
               ...memoEntity,
@@ -668,10 +719,13 @@ export const prepareEntityRows = ({
               },
             };
           case 'resourceActions':
-          case 'indicatorActions':
           case 'userActions':
-            temp = entity.get('actions')
-              || (entity.get('actionsByType') && entity.get('actionsByType').flatten(true));
+            if (col.type_id) {
+              temp = entity.getIn(['actionsByType', parseInt(col.type_id, 10)]);
+            } else {
+              temp = entity.get('actions')
+                || (entity.get('actionsByType') && entity.get('actionsByType').flatten(true));
+            }
             relatedEntities = temp && getRelatedEntities(
               temp,
               connections.get(API.ACTIONS),
@@ -690,16 +744,16 @@ export const prepareEntityRows = ({
               },
             };
           case 'actiontype':
-            relatedEntityIds = entity.getIn([col.actions, parseInt(col.actiontype_id, 10)]) || Map();
-            if (includeMembers && entity.getIn([col.actionsMembers, parseInt(col.actiontype_id, 10)])) {
+            relatedEntityIds = entity.getIn([col.actions, parseInt(col.type_id, 10)]) || Map();
+            if (includeMembers && entity.getIn([col.actionsMembers, parseInt(col.type_id, 10)])) {
               relatedEntityIds = relatedEntityIds
-                .merge(entity.getIn([col.actionsMembers, parseInt(col.actiontype_id, 10)]))
+                .merge(entity.getIn([col.actionsMembers, parseInt(col.type_id, 10)]))
                 .toList()
                 .toSet();
             }
-            if (includeChildren && entity.getIn([col.actionsChildren, parseInt(col.actiontype_id, 10)])) {
+            if (includeChildren && entity.getIn([col.actionsChildren, parseInt(col.type_id, 10)])) {
               relatedEntityIds = relatedEntityIds
-                .merge(entity.getIn([col.actionsChildren, parseInt(col.actiontype_id, 10)]))
+                .merge(entity.getIn([col.actionsChildren, parseInt(col.type_id, 10)]))
                 .toList()
                 .toSet();
             }
@@ -814,6 +868,43 @@ export const prepareEntityRows = ({
                 sortValue: getValueFromPositions(temp) || 99,
               },
             };
+          case 'positionsCompact':
+            temp = entity.getIn([col.positions]) || null;
+            // console.log('country', entity && entity.toJS())
+            // console.log('connections', connections && connections.toJS())
+            return {
+              ...memoEntity,
+              [col.id]: {
+                ...col,
+                // colors:,
+                // levels: temp && temp.reduce((memo, indicatorPositions) => ([
+                //   ...memo,
+                //   getLevelFromPositions(indicatorPositions),
+                // ]), []),
+                mainEntity: {
+                  id: entity.get('id'),
+                  path,
+                  href: url || `${path}/${id}`,
+                },
+                positions: temp && temp.reduce((memo, indicatorPositions, indicatorId) => {
+                  const latest = indicatorPositions && indicatorPositions.first();
+                  return ([
+                    ...memo,
+                    {
+                      indicatorId: parseInt(indicatorId, 10),
+                      supportlevelId: (latest && latest.get('supportlevel_id') && parseInt(latest.get('supportlevel_id'), 10)) || 99,
+                      color: getColorFromPositions(indicatorPositions),
+                      authority: latest && getSingleRelatedValueFromAttributes(latest.get('authority')),
+                      actorTitle: getEntityTitle(entity),
+                      groupTitle: latest && latest.get('viaGroups') && getEntityTitle(latest.get('viaGroups').first()),
+                      indicatorTitle: connections
+                        && connections.getIn([API.INDICATORS, indicatorId, 'attributes', 'title'])
+                        && getIndicatorMainTitle(connections.getIn([API.INDICATORS, indicatorId, 'attributes', 'title'])),
+                    },
+                  ]);
+                }, []),
+              },
+            };
           default:
             return memoEntity;
         }
@@ -858,7 +949,7 @@ export const checkColumnFilterOptions = (column, entities) => {
   );
 };
 
-export const getListHeaderLabel = ({
+export const getListHeaderLabels = ({
   intl,
   entityTitle,
   selectedTotal,
@@ -868,38 +959,53 @@ export const getListHeaderLabel = ({
   messages,
   hasFilters,
 }) => {
-  let result = 'error';
+  let result = ['error'];
   if (!intl) return result;
   if (!entityTitle) return '';
+  // some items selected
   if (selectedTotal > 0) {
     if (allSelectedOnPage) {
       // return `All ${selectedTotal} ${selectedTotal === 1 ? entityTitle.single : entityTitle.plural} on this page are selected. `;
-      result = intl.formatMessage(messages.entityListHeader.allSelectedOnPage, {
-        total: selectedTotal,
-        type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
-      });
-    } else {
-    // return `${selectedTotal} ${selectedTotal === 1 ? entityTitle.single : entityTitle.plural} selected. `;
-      result = intl.formatMessage(messages.entityListHeader.selected, {
-        total: selectedTotal,
-        type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
-      });
+      return [
+        intl.formatMessage(messages.entityListHeader.allSelectedOnPage, {
+          total: selectedTotal,
+          type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
+        }),
+      ];
     }
-  } else if (typeof pageTotal !== 'undefined' && (pageTotal < entitiesTotal)) {
-    result = intl.formatMessage(messages.entityListHeader.noneSelected, {
-      pageTotal,
-      entitiesTotal,
-      type: entityTitle.plural,
-      filtered: hasFilters ? ' (filtered)' : ' total',
-    });
-  } else {
-    result = intl.formatMessage(messages.entityListHeader.notPaged, {
+    return [
+      intl.formatMessage(messages.entityListHeader.selected, {
+        total: selectedTotal,
+        type: selectedTotal === 1 ? entityTitle.single : entityTitle.plural,
+      }),
+    ];
+  }
+  // no items selected
+  // paged
+  if (typeof pageTotal !== 'undefined' && (pageTotal < entitiesTotal)) {
+    result = [entityTitle.plural];
+    if (hasFilters) {
+      return [...result, 'filtered'];
+    }
+    return [
+      ...result,
+      intl.formatMessage(messages.entityListHeader.noneSelected, {
+        pageTotal,
+        entitiesTotal,
+        type: (entitiesTotal === 1) ? entityTitle.single : entityTitle.plural,
+      }),
+    ];
+  }
+  // not paged
+  result = [
+    intl.formatMessage(messages.entityListHeader.notPaged, {
       entitiesTotal,
       type: (entitiesTotal === 1) ? entityTitle.single : entityTitle.plural,
-      filtered: hasFilters ? ' (filtered)' : '',
-    });
-  }
-  return result;
+    }),
+  ];
+  return hasFilters
+    ? [...result, 'filtered']
+    : result;
 };
 
 export const getSelectedState = (
