@@ -422,7 +422,7 @@ export function EntitiesTable({
                     fill={false}
                     flex={{ grow: 0 }}
                     justify="start"
-                    style={{ width: '100%' }}
+                    style={{ maxWidth: '100%' }}
                   >
                     {col.type === 'main' && (
                       <CellHeaderMain

@@ -161,46 +161,14 @@ export function EntityListTable({
     ).map(
       (col) => col.id
     );
-    // console.log('initiallyHiddenColumns', initiallyHiddenColumns);
-    // console.log('initiallyVisibleColumns', initiallyVisibleColumns);
-    // console.log('onUpdateHiddenColumns', size, initiallyHiddenColumns, initiallyVisibleColumns)
     onUpdateHiddenColumns({
       addToHidden: initiallyHiddenColumns,
       removeFromHidden: initiallyVisibleColumns,
     });
-    // if (initiallyHiddenColumns.length === 0) {
-    // }
   };
-  // initialise columns
   React.useLayoutEffect(() => {
     updateHiddenColumns();
-  }, [typeId, mapSubject]);
-
-  // // initialise columns: reset
-  // React.useEffect(() => {
-  //   if (columnsReady && !hiddenColumns) {
-  //     setColumnsReady(false);
-  //   }
-  // }, [hiddenColumns]);
-
-  // React.useEffect(() => {
-  //   updateHiddenColumns();
-  // }, [size]);
-
-  React.useLayoutEffect(() => {
-    // Define a function to handle window resize
-    const handleResize = () => {
-      updateHiddenColumns();
-    };
-
-    // Attach the event listener
-    window.addEventListener('resize', handleResize);
-
-    // Cleanup the event listener on component unmount
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
+  }, [typeId, mapSubject, size]);
 
   // list options
   const {
