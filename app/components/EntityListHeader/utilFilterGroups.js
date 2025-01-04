@@ -14,9 +14,13 @@ import {
 
 import appMessage from 'utils/app-message';
 
-import { makeAttributeFilterOptions } from './utilFilterOptions';
+import {
+  makeAttributeFilterOptions,
+  makeAnyWithoutFilterOptions,
+} from './utilFilterOptions';
+
 // figure out filter groups for filter panel
-export const makeFilterGroups = ({
+const makeFilterGroups = ({
   config,
   taxonomies,
   hasUserRole,
@@ -348,4 +352,72 @@ export const makeFilterGroups = ({
     };
   }
   return filterGroups;
+};
+
+export const makePanelFilterGroups = ({
+  config,
+  taxonomies,
+  connectedTaxonomies,
+  hasUserRole,
+  actortypes,
+  resourcetypes,
+  actiontypes,
+  membertypes,
+  associationtypes,
+  activeOption,
+  currentFilters,
+  typeId,
+  intl,
+  locationQuery,
+  includeMembersWhenFiltering,
+  messages,
+}) => {
+  let panelGroups = null;
+  panelGroups = makeFilterGroups({
+    config,
+    taxonomies,
+    connectedTaxonomies,
+    hasUserRole,
+    actortypes,
+    resourcetypes,
+    actiontypes,
+    membertypes,
+    associationtypes,
+    activeFilterOption: activeOption,
+    currentFilters,
+    typeId,
+    intl,
+    locationQuery,
+    messages,
+    includeMembers: includeMembersWhenFiltering,
+  });
+  panelGroups = Object.keys(panelGroups).reduce(
+    (memo, groupId) => {
+      const group = panelGroups[groupId];
+      if (group.includeAnyWithout && group.options && group.options.length > 0) {
+        const allAnyOptions = makeAnyWithoutFilterOptions({
+          config,
+          locationQuery,
+          activeFilterOption: {
+            group: groupId,
+          },
+          intl,
+          messages,
+        });
+        return {
+          ...memo,
+          [groupId]: {
+            ...group,
+            optionsGeneral: allAnyOptions,
+          },
+        };
+      }
+      return {
+        ...memo,
+        [groupId]: group,
+      };
+    },
+    {},
+  );
+  return panelGroups;
 };

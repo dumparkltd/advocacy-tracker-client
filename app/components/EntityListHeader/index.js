@@ -30,12 +30,9 @@ import Icon from 'components/Icon';
 
 import EntityListSidebar from './EntityListSidebar';
 
-import { makeFilterGroups } from './utilFilterGroups';
+import { makePanelFilterGroups } from './utilFilterGroups';
 import { makeEditGroups } from './utilEditGroups';
-import {
-  makeActiveFilterOptions,
-  makeAnyWithoutFilterOptions,
-} from './utilFilterOptions';
+import { makeActiveFilterOptions } from './utilFilterOptions';
 import { makeActiveEditOptions } from './utilEditOptions';
 
 import messages from './messages';
@@ -109,16 +106,75 @@ const STATE_INITIAL = {
   showTypes: false,
 };
 
-const getFilterConnectionsMsg = (intl, type) => type
-  && messages.filterGroupLabel[`connections-${type}`]
-  ? intl.formatMessage(messages.filterGroupLabel[`connections-${type}`])
-  : intl.formatMessage(messages.filterGroupLabel.connections);
-
 const getEditConnectionsMsg = (intl, type) => type
   && messages.editGroupLabel[`connections-${type}`]
   ? intl.formatMessage(messages.editGroupLabel[`connections-${type}`])
   : intl.formatMessage(messages.editGroupLabel.connections);
 
+const getFilterConnectionsMsg = (intl, type) => type
+  && messages.filterGroupLabel[`connections-${type}`]
+  ? intl.formatMessage(messages.filterGroupLabel[`connections-${type}`])
+  : intl.formatMessage(messages.filterGroupLabel.connections);
+
+const makeFormOptions = ({
+  showFilters,
+  showEditOptions,
+  allEntities,
+  entitiesSelected,
+  config,
+  locationQuery,
+  taxonomies,
+  connections,
+  connectedTaxonomies,
+  activeOption,
+  intl,
+  typeId,
+  isAdmin,
+  includeMembersWhenFiltering,
+  includeActorMembers,
+  includeActorChildren,
+}) => {
+  if (showFilters) {
+    return makeActiveFilterOptions({
+      entities: allEntities,
+      config,
+      locationQuery,
+      taxonomies,
+      connections,
+      // actortypes,
+      // actiontypes,
+      connectedTaxonomies,
+      activeFilterOption: activeOption,
+      intl,
+      typeId,
+      isAdmin,
+      messages: {
+        titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
+        without: intl.formatMessage(messages.filterFormWithoutPrefix),
+        any: intl.formatMessage(messages.filterFormAnyPrefix),
+      },
+      includeMembers: includeMembersWhenFiltering,
+      includeActorMembers,
+      includeActorChildren,
+    });
+  }
+  if (showEditOptions) {
+    return makeActiveEditOptions({
+      isAdmin,
+      entities: entitiesSelected,
+      config,
+      taxonomies,
+      connections,
+      connectedTaxonomies,
+      activeEditOption: activeOption,
+      intl,
+      messages: {
+        title: `${intl.formatMessage(messages.editFormTitlePrefix)} ${entitiesSelected.size} ${intl.formatMessage(messages.editFormTitlePostfix)}`,
+      },
+    });
+  }
+  return null;
+};
 
 export class EntityListHeader extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor() {
@@ -297,136 +353,30 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       && entities.filter((entity) => entityIdsSelected.includes(entity.get('id')));
     const formModel = showFilters ? FILTER_FORM_MODEL : EDIT_FORM_MODEL;
 
-    let panelGroups = null;
-    let formOptions = null;
-    if (dataReady && showFilters) {
-      panelGroups = makeFilterGroups({
-        config,
-        taxonomies,
-        connectedTaxonomies,
-        hasUserRole,
-        actortypes: filterActortypes || actortypes,
-        resourcetypes,
-        actiontypes,
-        membertypes,
-        associationtypes: filterAssociationtypes || associationtypes,
-        activeFilterOption: activeOption,
-        currentFilters,
-        typeId,
-        intl,
-        locationQuery,
-        messages: {
-          attributes: intl.formatMessage(messages.filterGroupLabel.attributes),
-          taxonomyGroup: intl.formatMessage(messages.filterGroupLabel.taxonomies),
-          connections: (type) => getFilterConnectionsMsg(intl, type),
-          connectedTaxonomies: intl.formatMessage(messages.filterGroupLabel.connectedTaxonomies),
-          taxonomies: (taxId) => this.context.intl.formatMessage(appMessages.entities.taxonomies[taxId].plural),
-        },
-        includeMembers: includeMembersWhenFiltering,
-      });
-      panelGroups = Object.keys(panelGroups).reduce(
-        (memo, groupId) => {
-          const group = panelGroups[groupId];
-          if (group.includeAnyWithout && group.options && group.options.length > 0) {
-            const allAnyOptions = makeAnyWithoutFilterOptions({
-              config,
-              locationQuery,
-              activeFilterOption: {
-                group: groupId,
-              },
-              intl,
-              messages: {
-                titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
-                without: intl.formatMessage(messages.filterFormWithoutPrefix),
-                any: intl.formatMessage(messages.filterFormAnyPrefix),
-                connections: (type) => getFilterConnectionsMsg(intl, type),
-              },
-            });
-            return {
-              ...memo,
-              [groupId]: {
-                ...group,
-                optionsGeneral: allAnyOptions,
-              },
-            };
-          }
-          return {
-            ...memo,
-            [groupId]: group,
-          };
-        },
-        {},
-      );
-      if (activeOption) {
-        formOptions = makeActiveFilterOptions({
-          entities: allEntities,
-          config,
-          locationQuery,
-          taxonomies,
-          connections,
-          // actortypes,
-          // actiontypes,
-          connectedTaxonomies,
-          activeFilterOption: activeOption,
-          intl,
-          typeId,
-          isAdmin,
-          messages: {
-            titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
-            without: intl.formatMessage(messages.filterFormWithoutPrefix),
-            any: intl.formatMessage(messages.filterFormAnyPrefix),
-          },
-          includeMembers: includeMembersWhenFiltering,
-          includeActorMembers,
-          includeActorChildren,
-        });
-      }
-    } else if (dataReady && showEditOptions && hasSelected) {
-      panelGroups = makeEditGroups({
-        config,
-        taxonomies,
-        connectedTaxonomies,
-        activeEditOption: activeOption,
-        hasUserRole,
-        actortypes,
-        actiontypes,
-        resourcetypes,
-        membertypes,
-        associationtypes,
-        typeId,
-        isAdmin,
-        messages: {
-          attributes: intl.formatMessage(messages.editGroupLabel.attributes),
-          taxonomyGroup: intl.formatMessage(messages.editGroupLabel.taxonomies),
-          connections: (type) => getEditConnectionsMsg(intl, type),
-          taxonomies: (taxId) => this.context.intl.formatMessage(appMessages.entities.taxonomies[taxId].plural),
-        },
-        // selectedActortypeIds: entitiesSelected.groupBy((e) => e.getIn(['attributes', 'actortype_id'])).keySeq(),
-        // selectedActiontypeIds: entitiesSelected.groupBy((e) => e.getIn(['attributes', 'measuretype_id'])).keySeq(),
-      });
-      if (activeOption && connections) {
-        formOptions = makeActiveEditOptions({
-          isAdmin,
-          entities: entitiesSelected,
-          config,
-          taxonomies,
-          connections,
-          connectedTaxonomies,
-          activeEditOption: activeOption,
-          intl,
-          messages: {
-            title: `${intl.formatMessage(messages.editFormTitlePrefix)} ${entitiesSelected.size} ${intl.formatMessage(messages.editFormTitlePostfix)}`,
-          },
-        });
-      }
-    }
     const managerActions = canEdit && headerActions && headerActions.filter(
       (action) => action.isMember
     );
     const normalActions = headerActions && headerActions.filter(
       (action) => !action.isMember
     );
-
+    const formOptions = dataReady && activeOption && makeFormOptions({
+      showFilters,
+      showEditOptions,
+      allEntities,
+      entitiesSelected,
+      config,
+      locationQuery,
+      taxonomies,
+      connections,
+      connectedTaxonomies,
+      activeOption,
+      intl,
+      typeId,
+      isAdmin,
+      includeMembersWhenFiltering,
+      includeActorMembers,
+      includeActorChildren,
+    });
     return (
       <ResponsiveContext.Consumer>
         {(size) => (
@@ -525,10 +475,37 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                 )}
               </Box>
             </TheHeader>
-            {showFilters && (
+            {dataReady && showFilters && (
               <EntityListSidebar
                 hasEntities={allEntities && allEntities.size > 0}
-                panelGroups={panelGroups}
+                makePanelGroups={() => makePanelFilterGroups({
+                  config,
+                  taxonomies,
+                  connectedTaxonomies,
+                  hasUserRole,
+                  actortypes: filterActortypes || actortypes,
+                  resourcetypes,
+                  actiontypes,
+                  membertypes,
+                  filterAssociationtypes,
+                  associationtypes: filterAssociationtypes || associationtypes,
+                  activeOption,
+                  currentFilters,
+                  typeId,
+                  intl,
+                  locationQuery,
+                  includeMembersWhenFiltering,
+                  messages: {
+                    attributes: intl.formatMessage(messages.filterGroupLabel.attributes),
+                    taxonomyGroup: intl.formatMessage(messages.filterGroupLabel.taxonomies),
+                    connections: (type) => getFilterConnectionsMsg(intl, type),
+                    connectedTaxonomies: intl.formatMessage(messages.filterGroupLabel.connectedTaxonomies),
+                    taxonomies: (taxId) => intl.formatMessage(appMessages.entities.taxonomies[taxId].plural),
+                    titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
+                    without: intl.formatMessage(messages.filterFormWithoutPrefix),
+                    any: intl.formatMessage(messages.filterFormAnyPrefix),
+                  },
+                })}
                 onHideSidebar={onHideFilters}
                 onHideOptions={this.onHideForm}
                 setActiveOption={this.onSetActiveOption}
@@ -539,12 +516,31 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                 filteringOptions={filteringOptions}
               />
             )}
-            {showEditOptions && (
+            {dataReady && showEditOptions && (
               <EntityListSidebar
                 isEditPanel
                 hasEntities={entities && entities.size > 0}
                 hasSelected={hasSelected}
-                panelGroups={panelGroups}
+                makePanelGroups={() => makeEditGroups({
+                  config,
+                  taxonomies,
+                  connectedTaxonomies,
+                  activeEditOption: activeOption,
+                  hasUserRole,
+                  actortypes,
+                  actiontypes,
+                  resourcetypes,
+                  membertypes,
+                  associationtypes,
+                  typeId,
+                  isAdmin,
+                  messages: {
+                    attributes: intl.formatMessage(messages.editGroupLabel.attributes),
+                    taxonomyGroup: intl.formatMessage(messages.editGroupLabel.taxonomies),
+                    connections: (type) => getEditConnectionsMsg(intl, type),
+                    taxonomies: (taxId) => this.context.intl.formatMessage(appMessages.entities.taxonomies[taxId].plural),
+                  },
+                })}
                 onHideSidebar={onHideEditOptions}
                 setActiveOption={this.onSetActiveOption}
               />

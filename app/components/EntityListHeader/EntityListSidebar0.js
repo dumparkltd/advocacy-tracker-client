@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
+import { fromJS } from 'immutable';
 import { Box } from 'grommet';
 
 import Scrollable from 'components/styled/Scrollable';
@@ -113,7 +114,7 @@ export class EntityListSidebar extends React.Component { // eslint-disable-line 
       isEditPanel,
       hasEntities,
       hasSelected,
-      makePanelGroups,
+      panelGroups,
       onHideSidebar,
       onHideOptions,
       onUpdateQuery,
@@ -150,7 +151,7 @@ export class EntityListSidebar extends React.Component { // eslint-disable-line 
             <div>
               { (!isEditPanel || (isEditPanel && hasSelected && hasEntities)) && (
                 <EntityListSidebarGroups
-                  groups={makePanelGroups && makePanelGroups()}
+                  groups={fromJS(panelGroups)}
                   onShowForm={this.onShowForm}
                   onHideOptions={onHideOptions}
                   onToggleGroup={this.onToggleGroup}
@@ -175,7 +176,7 @@ EntityListSidebar.propTypes = {
   isEditPanel: PropTypes.bool,
   hasEntities: PropTypes.bool,
   hasSelected: PropTypes.bool,
-  makePanelGroups: PropTypes.func,
+  panelGroups: PropTypes.object,
   onHideSidebar: PropTypes.func,
   onHideOptions: PropTypes.func,
   setActiveOption: PropTypes.func,

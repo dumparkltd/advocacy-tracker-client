@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import { Box } from 'grommet';
+import { fromJS } from 'immutable';
 
 import qe from 'utils/quasi-equals';
 
@@ -39,7 +40,7 @@ class EntityListSidebarGroups extends React.PureComponent { // eslint-disable-li
     } = this.props;
     return (
       <div>
-        {groups && groups.entrySeq().map(([groupId, group]) => {
+        {groups && fromJS(groups).entrySeq().map(([groupId, group]) => {
           const groupOptions = group.get('options') && group.get('options').filter(
             (option) => option.get('id')
           ).sort(
@@ -120,7 +121,7 @@ class EntityListSidebarGroups extends React.PureComponent { // eslint-disable-li
   }
 }
 EntityListSidebarGroups.propTypes = {
-  groups: PropTypes.object,
+  groups: PropTypes.object, // JS
   expanded: PropTypes.object,
   onShowForm: PropTypes.func.isRequired,
   onToggleGroup: PropTypes.func.isRequired,
