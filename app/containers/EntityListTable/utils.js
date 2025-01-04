@@ -981,31 +981,43 @@ export const getListHeaderLabels = ({
     ];
   }
   // no items selected
-  // paged
+  result = [entityTitle.plural];
+  // items on multiple pages
   if (typeof pageTotal !== 'undefined' && (pageTotal < entitiesTotal)) {
-    result = [entityTitle.plural];
+    // some filtered items on first page only
     if (hasFilters) {
-      return [...result, 'filtered'];
+      return [
+        ...result,
+        intl.formatMessage(messages.entityListHeader.noneSelectedFiltered, {
+          pageTotal,
+          filteredTotal: entitiesTotal,
+          type: (entitiesTotal === 1) ? entityTitle.single : entityTitle.plural,
+        }),
+      ];
     }
+    // some items on first page only
     return [
       ...result,
       intl.formatMessage(messages.entityListHeader.noneSelected, {
         pageTotal,
         entitiesTotal,
         type: (entitiesTotal === 1) ? entityTitle.single : entityTitle.plural,
+        hasFilters,
       }),
     ];
   }
-  // not paged
-  result = [
-    intl.formatMessage(messages.entityListHeader.notPaged, {
-      entitiesTotal,
-      type: (entitiesTotal === 1) ? entityTitle.single : entityTitle.plural,
-    }),
-  ];
-  return hasFilters
-    ? [...result, 'filtered']
-    : result;
+  // all filtered items on single page
+  if (hasFilters) {
+    return [
+      ...result,
+      intl.formatMessage(messages.entityListHeader.notPagedFiltered, {
+        entitiesTotal,
+        type: (entitiesTotal === 1) ? entityTitle.single : entityTitle.plural,
+      }),
+    ];
+  }
+  // all items on single page
+  return result;
 };
 
 export const getSelectedState = (

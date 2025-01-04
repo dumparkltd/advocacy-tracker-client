@@ -7,6 +7,7 @@ import {
   EMAIL_STATUSES,
   ROUTES,
   ACTORTYPES,
+  ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
 export const DEPENDENCIES = [
@@ -89,6 +90,24 @@ export const CONFIG = {
       key: 'measure_id',
       ownKey: 'actor_id',
       groupByType: true,
+    },
+    indicators: {
+      edit: false,
+      query: 'indicators',
+      type: 'actor-action-indicators',
+      search: true,
+      message: 'entities.indicators.plural',
+      path: API.INDICATORS,
+      entityType: 'indicators',
+      connectionAttributeFilter: {
+        addonOnly: true,
+        path: 'indicatorConnections',
+        // query: 'indicatorConnections',
+        attribute: 'supportlevel_id',
+        message: 'attributes.supportlevel_id',
+        options: ACTION_INDICATOR_SUPPORTLEVELS,
+        optionMessages: 'supportlevels',
+      },
     },
     members: { // filter by associated entity
       query: 'by-member',

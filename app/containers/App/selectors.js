@@ -2026,7 +2026,16 @@ const getActorStatementsAndPositions = ({
       return actor
         .set('statements', actorStatements)
         .set('statementsAsGroup', actorStatementsAsMemberByGroup.flatten(true).toList().toSet())
-        .set('indicatorPositions', actorIndicators);
+        .set('indicatorPositions', actorIndicators)
+        .set('indicators', actorIndicators && actorIndicators.reduce(
+          (memo, indicatorPosition, key) => {
+            if (indicatorPosition && indicatorPosition.size > 0) {
+              return memo.set(key, key);
+            }
+            return memo;
+          },
+          Map(),
+        ));
     }
   }
   return actor;

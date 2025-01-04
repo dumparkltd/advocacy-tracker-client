@@ -28,6 +28,7 @@ import {
   selectIncludeActorMembers,
   selectIncludeActorChildren,
   selectIndicators,
+  selectLocationQuery,
 } from 'containers/App/selectors';
 
 import {
@@ -43,9 +44,9 @@ import {
   actorsByType,
 } from 'utils/entities';
 // import { qe } from 'utils/quasi-equals';
+import { getValueFromPositions } from 'containers/EntityListTable/utils';
 
-
-import { API } from 'themes/config';
+import { API, INDICATOR_ACTION_ACTORTYPES } from 'themes/config';
 
 import { DEPENDENCIES } from './constants';
 
@@ -277,8 +278,47 @@ const selectActorsByActions = createSelector(
     : entities
 );
 
-const selectActorsByMembers = createSelector(
+const selectActorsByTopicPosition = createSelector(
+  (state, params) => params && params.type,
   selectActorsByActions,
+  selectLocationQuery,
+  (type, actors, locationQuery) => {
+    if (INDICATOR_ACTION_ACTORTYPES.indexOf(type) > -1 && locationQuery.get('indicators')) {
+      const locationQueryValue = locationQuery.get('indicators');
+      // console.log('locationQueryValue', type, locationQueryValue)
+      return actors.filter((country) => {
+        const countryPositions = country.get('indicatorPositions');
+        // countries pass when they pass all queried indicators
+        const pass = asList(locationQueryValue).reduce(
+          (memo, queryValue) => {
+            if (!memo) return memo;
+            const indicatorId = queryValue.split('>')[0];
+            const countryIndicatorPositions = countryPositions && countryPositions.get(indicatorId);
+            // console.log('countryIndicatorPosition', countryIndicatorPositions && countryIndicatorPositions.toJS())
+            if (!countryIndicatorPositions || countryIndicatorPositions.size === 0) {
+              return false;
+            }
+            let countrySupportLevel;
+            if (countryPositions) {
+              countrySupportLevel = getValueFromPositions(countryPositions.get(indicatorId));
+            }
+            countrySupportLevel = countrySupportLevel || 99;
+            const levels = queryValue.indexOf('=') > -1
+              && queryValue.split('=')[1].split('|');
+            if (!levels) return memo;
+            return levels.indexOf(`${countrySupportLevel}`) > -1;
+          },
+          true,
+        );
+        return pass;
+      });
+    }
+    return actors;
+  }
+);
+
+const selectActorsByMembers = createSelector(
+  selectActorsByTopicPosition,
   selectMemberQuery,
   (entities, query) => query
     ? filterEntitiesByConnection(entities, query, 'members')
