@@ -192,6 +192,7 @@ export function EntityListTable({
 
   let searchedEntities = entities;
   const searchQueryClean = search || searchQuery;
+  console.log('searchQueryClean', searchQueryClean)
   if (!inSingleView && searchQueryClean && searchQueryClean.length > 2) {
     searchedEntities = filterEntitiesByKeywords(
       searchedEntities,
@@ -325,6 +326,7 @@ export function EntityListTable({
       : (sortedEntities.slice(0, CONNECTIONMAX));
   }
   const entityIdsOnPage = entitiesOnPage.map((entity) => entity.id);
+  console.log(searchQueryClean, hasFilters)
   const availableHeaderColumns = prepareHeader({
     columns: availableColumns,
     // config,

@@ -219,3 +219,12 @@ export const selectCountries = createSelector(
     return result || null;
   },
 );
+
+export const selectHasFilters = createSelector(
+  selectLocationQuery,
+  (state) => selectAssociationTypeQuery(state, { typeId: ACTORTYPES.REG }),
+  (state) => selectAssociationTypeQuery(state, { typeId: ACTORTYPES.GROUP }),
+  (locationQuery, regionQuery, groupQuery) => locationQuery.get('indicators')
+    || regionQuery
+    || groupQuery
+);
