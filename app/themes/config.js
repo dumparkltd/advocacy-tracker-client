@@ -1100,6 +1100,7 @@ export const ACTORTYPES_CONFIG = {
         type: 'members', // one row per type,
         type_id: ACTORTYPES.CONTACT,
         minSize: 'ms',
+        showOnSingle: false,
       },
       {
         id: 'users', // one row per type,
@@ -1114,6 +1115,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'large',
+        showOnSingle: false,
       },
       {
         id: `action_${ACTIONTYPES.EXPRESS}`,
@@ -1123,6 +1125,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'medium',
+        showOnSingle: false,
       },
       {
         id: `action_${ACTIONTYPES.TASK}`,
@@ -1132,6 +1135,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'large',
+        showOnSingle: false,
       },
       {
         id: 'taxonomy',
@@ -1336,6 +1340,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'medium',
+        showOnSingle: false,
       },
       {
         id: `action_${ACTIONTYPES.EXPRESS}`,
@@ -1345,6 +1350,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `action_${ACTIONTYPES.TASK}`,
@@ -1354,6 +1360,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'hidden',
+        showOnSingle: false,
       },
     ],
     form: [
@@ -1517,7 +1524,7 @@ export const ACTORTYPES_CONFIG = {
       }, // step
     ], // steps
   },
-  3: {
+  3: { // CONTACT
     id: ACTORTYPES.CONTACT,
     order: 5,
     columns: [
@@ -1546,6 +1553,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'medium',
+        showOnSingle: false,
       },
       {
         id: `action_${ACTIONTYPES.EXPRESS}`,
@@ -1555,6 +1563,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'large',
+        showOnSingle: false,
       },
       {
         id: `action_${ACTIONTYPES.TASK}`,
@@ -1564,6 +1573,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'large',
+        showOnSingle: false,
       },
     ],
     form: [
@@ -1774,6 +1784,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'medium',
+        showOnSingle: false,
       },
     ],
     form: [
@@ -1924,6 +1935,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'medium',
+        showOnSingle: false,
       },
       {
         id: `action_${ACTIONTYPES.EXPRESS}`,
@@ -1933,6 +1945,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'small',
+        showOnSingle: false,
       },
       {
         id: `action_${ACTIONTYPES.TASK}`,
@@ -1942,6 +1955,7 @@ export const ACTORTYPES_CONFIG = {
         actionsMembers: 'actionsAsMemberByType',
         actionsChildren: 'actionsAsParentByType',
         minSize: 'large',
+        showOnSingle: false,
       },
     ],
     form: [
@@ -2150,6 +2164,7 @@ export const ACTIONTYPES_CONFIG = {
         type: 'taxonomy',
         taxonomy_id: EXPRESSFORM_TAXONOMY, // level of authority
         minSize: 'medium',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.GROUP}`,
@@ -2157,6 +2172,7 @@ export const ACTIONTYPES_CONFIG = {
         sort: 'title',
         type_id: ACTORTYPES.GROUP,
         minSize: 'small',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.COUNTRY}`,
@@ -2164,6 +2180,7 @@ export const ACTIONTYPES_CONFIG = {
         sort: 'title',
         type_id: ACTORTYPES.COUNTRY,
         minSize: 'small',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.CONTACT}`,
@@ -2171,6 +2188,7 @@ export const ACTIONTYPES_CONFIG = {
         sort: 'title',
         type_id: ACTORTYPES.CONTACT,
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.ORG}`,
@@ -2178,6 +2196,7 @@ export const ACTIONTYPES_CONFIG = {
         sort: 'title',
         type_id: ACTORTYPES.ORG,
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `parents_${ACTIONTYPES.EVENT}`,
@@ -2185,6 +2204,7 @@ export const ACTIONTYPES_CONFIG = {
         type_id: ACTIONTYPES.EVENT,
         sort: 'title',
         minSize: 'large',
+        showOnSingle: false,
       },
       {
         id: `parents_${ACTIONTYPES.INTERACTION}`,
@@ -2192,6 +2212,7 @@ export const ACTIONTYPES_CONFIG = {
         type_id: ACTIONTYPES.INTERACTION,
         sort: 'title',
         minSize: 'hidden',
+        showOnSingle: false,
       },
     ],
     form: [
@@ -2392,6 +2413,7 @@ export const ACTIONTYPES_CONFIG = {
         attribute: 'date_end',
         minSize: 'medium',
         title: 'Date (end)',
+        showOnSingle: false,
       },
       {
         id: 'taxonomy',
@@ -2673,48 +2695,56 @@ export const ACTIONTYPES_CONFIG = {
         type: 'childActions',
         type_id: ACTIONTYPES.TASK,
         minSize: 'large',
+        showOnSingle: false,
       },
       {
         id: `actions_${ACTIONTYPES.EVENT}`,
         type: 'parentActions',
         type_id: ACTIONTYPES.EVENT,
         minSize: 'large',
+        showOnSingle: false,
       },
       {
         id: `actions_${ACTIONTYPES.INTERACTION}`,
         type: 'parentActions',
         type_id: ACTIONTYPES.INTERACTION,
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `actions_${ACTIONTYPES.AP}`,
         type: 'parentActions',
         type_id: ACTIONTYPES.AP,
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.CONTACT}`,
         type_id: ACTORTYPES.CONTACT,
         type: 'actors',
         minSize: 'small',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.COUNTRY}`,
         type_id: ACTORTYPES.COUNTRY,
         type: 'actors',
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.GROUP}`,
         type_id: ACTORTYPES.GROUP,
         type: 'actors',
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.ORG}`,
         type_id: ACTORTYPES.ORG,
         type: 'actors',
         minSize: 'hidden',
+        showOnSingle: false,
       },
     ],
     form: [
@@ -2932,48 +2962,56 @@ export const ACTIONTYPES_CONFIG = {
         type: 'childActions',
         type_id: ACTIONTYPES.TASK,
         minSize: 'large',
+        showOnSingle: false,
       },
       {
         id: `actions_${ACTIONTYPES.EVENT}`,
         type: 'parentActions',
         type_id: ACTIONTYPES.EVENT,
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `actions_${ACTIONTYPES.INTERACTION}`,
         type: 'parentActions',
         type_id: ACTIONTYPES.INTERACTION,
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `actions_${ACTIONTYPES.AP}`,
         type: 'parentActions',
         type_id: ACTIONTYPES.AP,
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.CONTACT}`,
         type_id: ACTORTYPES.CONTACT,
         type: 'actors',
         minSize: 'small',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.COUNTRY}`,
         type_id: ACTORTYPES.COUNTRY,
         type: 'actors',
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.GROUP}`,
         type_id: ACTORTYPES.GROUP,
         type: 'actors',
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.ORG}`,
         type_id: ACTORTYPES.ORG,
         type: 'actors',
         minSize: 'hidden',
+        showOnSingle: false,
       },
     ],
     form: [
@@ -3197,24 +3235,28 @@ export const ACTIONTYPES_CONFIG = {
         type_id: ACTORTYPES.CONTACT,
         type: 'actors',
         minSize: 'small',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.COUNTRY}`,
         type_id: ACTORTYPES.COUNTRY,
         type: 'actors',
         minSize: 'ms',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.GROUP}`,
         type_id: ACTORTYPES.GROUP,
         type: 'actors',
         minSize: 'medium',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.ORG}`,
         type_id: ACTORTYPES.ORG,
         type: 'actors',
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `parentActions_${ACTIONTYPES.EVENT}`, // one row per type,
@@ -3243,6 +3285,7 @@ export const ACTIONTYPES_CONFIG = {
         type: 'childActions',
         type_id: ACTIONTYPES.INTERACTION,
         minSize: 'hidden',
+        showOnSingle: false,
       },
     ],
     form: [
@@ -3455,24 +3498,28 @@ export const ACTIONTYPES_CONFIG = {
         type_id: ACTORTYPES.CONTACT,
         type: 'actors',
         minSize: 'ms',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.COUNTRY}`,
         type_id: ACTORTYPES.COUNTRY,
         type: 'actors',
         minSize: 'medium',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.GROUP}`,
         type_id: ACTORTYPES.GROUP,
         type: 'actors',
         minSize: 'medium',
+        showOnSingle: false,
       },
       {
         id: `actors_${ACTORTYPES.ORG}`,
         type_id: ACTORTYPES.ORG,
         type: 'actors',
         minSize: 'hidden',
+        showOnSingle: false,
       },
       {
         id: `parentActions_${ACTIONTYPES.EVENT}`, // one row per type,
