@@ -109,18 +109,15 @@ export const CONFIG = {
   connections: { // filter by associated entity
     // filter by associated actor
     indicators: {
+      edit: false,
       query: 'indicators',
       type: 'action-indicators',
       search: true,
       message: 'entities.indicators.plural',
       path: API.INDICATORS,
-      invalidateEntitiesPaths: [API.INDICATORS, API.ACTIONS],
       entityType: 'indicators',
-      clientPath: ROUTES.INDICATOR,
-      connectPath: API.ACTION_INDICATORS, // filter by actor connection
-      key: 'indicator_id',
-      ownKey: 'measure_id',
       connectionAttributeFilter: {
+        addonOnly: true,
         path: 'indicatorConnections',
         // query: 'indicatorConnections',
         attribute: 'supportlevel_id',

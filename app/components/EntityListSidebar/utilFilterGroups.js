@@ -7,6 +7,7 @@ import { fromJS } from 'immutable';
 import {
   // ACTIONTYPES,
   INDICATOR_ACTIONTYPES,
+  INDICATOR_ACTION_ACTORTYPES,
   USER_ACTIONTYPES,
   USER_ACTORTYPES,
   ACTIONTYPE_ACTIONTYPES,
@@ -134,6 +135,9 @@ const makeFilterGroups = ({
         if (option.type === 'action-indicators') {
           validType = INDICATOR_ACTIONTYPES.indexOf(typeId) > -1;
         }
+        if (option.type === 'actor-action-indicators') {
+          validType = INDICATOR_ACTION_ACTORTYPES.indexOf(typeId) > -1;
+        }
         if (option.type === 'action-users') {
           validType = USER_ACTIONTYPES.indexOf(typeId) > -1;
         }
@@ -160,7 +164,10 @@ const makeFilterGroups = ({
               ...option,
             }],
           };
-          if (option.connectionAttributeFilter) {
+          if (
+            option.connectionAttributeFilter
+            && !option.connectionAttributeFilter.addonOnly
+          ) {
             const connectionFilterOption = {
               id: option.connectionAttributeFilter.path, // filterOptionId
               active: !!activeFilterOption
@@ -486,6 +493,7 @@ export const makeQuickFilterGroups = ({
                   includeMembers,
                   includeActorMembers,
                   includeActorChildren,
+                  without: false,
                 });
                 let filters = [];
                 const hasChecked = filterOptions && filterOptions.options && Object.values(filterOptions.options).find((o) => o.checked);
@@ -499,12 +507,13 @@ export const makeQuickFilterGroups = ({
                             id: `${connectionOption.type}-${o.value}`, // filterOptionId
                             filterType: 'dropdownSelect',
                             dropdownLabel: group.dropdownLabel,
+                            search: group.search,
                             options: [o],
-                            onClear: (value) => {
+                            onClear: (value, query) => {
                               onUpdateFilters(fromJS([
                                 {
                                   hasChanged: true,
-                                  query: connectionOption.query,
+                                  query: query || connectionOption.query,
                                   checked: false,
                                   value,
                                 },
@@ -525,6 +534,7 @@ export const makeQuickFilterGroups = ({
                       id: connectionOption.type, // filterOptionId
                       filterType: 'dropdownSelect',
                       dropdownLabel: group.dropdownLabel,
+                      search: group.search,
                       label: hasChecked ? 'Add another filter' : null,
                       options: filterOptions && filterOptions.options && Object.keys(filterOptions.options).reduce(
                         (memo2, key) => {
@@ -538,11 +548,11 @@ export const makeQuickFilterGroups = ({
                         },
                         {},
                       ),
-                      onSelect: (value) => {
+                      onSelect: (value, query) => {
                         onUpdateFilters(fromJS([
                           {
                             hasChanged: true,
-                            query: connectionOption.query,
+                            query: query || connectionOption.query,
                             value,
                             replace: false,
                             checked: true,
@@ -625,6 +635,7 @@ export const makeQuickFilterGroups = ({
                         if (type.get('viaMember')) {
                           label = `${label} (via member countries only)`;
                         }
+
                         const filterOptions = makeActiveFilterOptions({
                           entities,
                           config,
@@ -642,26 +653,28 @@ export const makeQuickFilterGroups = ({
                           includeMembers,
                           includeActorMembers,
                           includeActorChildren,
+                          without: false,
                         });
                         let filters = [];
                         const hasChecked = filterOptions && filterOptions.options && Object.values(filterOptions.options).find((o) => o.checked);
                         if (hasChecked) {
                           filters = Object.values(filterOptions.options).reduce(
-                            (memo3, o) => {
-                              if (o.checked) {
+                            (memo3, option) => {
+                              if (option.checked) {
                                 return [
                                   ...memo3,
                                   {
-                                    id: `${connectionOption.type}-${type.get('id')}-${o.value}`, // filterOptionId
+                                    id: `${connectionOption.type}-${type.get('id')}-${option.value}`, // filterOptionId
                                     filterType: 'dropdownSelect',
                                     dropdownLabel: group.dropdownLabel,
-                                    options: [o],
+                                    search: group.search,
+                                    options: [option],
                                     label: memo3.length === 0 ? label : null,
-                                    onClear: (value) => {
+                                    onClear: (value, query) => {
                                       onUpdateFilters(fromJS([
                                         {
                                           hasChanged: true,
-                                          query: connectionOption.query,
+                                          query: query || connectionOption.query,
                                           checked: false,
                                           value,
                                         },
@@ -682,6 +695,7 @@ export const makeQuickFilterGroups = ({
                               id: `${connectionOption.type}-${type.get('id')}`, // filterOptionId
                               filterType: 'dropdownSelect',
                               dropdownLabel: group.dropdownLabel,
+                              search: group.search,
                               label: !hasChecked ? label : null,
                               options: filterOptions && filterOptions.options && Object.keys(filterOptions.options).reduce(
                                 (memo3, key) => {

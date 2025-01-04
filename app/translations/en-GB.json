@@ -81,7 +81,7 @@
   "app.components.EntityListSidebar.editGroupLabel.taxonomies": "Update categories",
   "app.components.EntityListSidebar.editGroupLabel.connections": "Update links",
   "app.components.EntityListSidebar.editGroupLabel.connections-action-actors": "Update stakeholders",
-  "app.components.EntityListSidebar.editGroupLabel.connections-actor-actions": "Update activities connections",
+  "app.components.EntityListSidebar.editGroupLabel.connections-actor-actions": "Update activities",
   "app.components.EntityListSidebar.filterFormTitlePrefix": "Filter by",
   "app.components.EntityListSidebar.filterFormWithoutPrefix": "Without any",
   "app.components.EntityListSidebar.editFormTitlePrefix": "Update",
