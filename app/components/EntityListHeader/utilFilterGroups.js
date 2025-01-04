@@ -7,6 +7,7 @@ import appMessages from 'containers/App/messages';
 import {
   // ACTIONTYPES,
   INDICATOR_ACTIONTYPES,
+  INDICATOR_ACTION_ACTORTYPES,
   USER_ACTIONTYPES,
   USER_ACTORTYPES,
   ACTIONTYPE_ACTIONTYPES,
@@ -129,6 +130,9 @@ export const makeFilterGroups = ({
         if (option.type === 'action-indicators') {
           validType = INDICATOR_ACTIONTYPES.indexOf(typeId) > -1;
         }
+        if (option.type === 'actor-action-indicators') {
+          validType = INDICATOR_ACTION_ACTORTYPES.indexOf(typeId) > -1;
+        }
         if (option.type === 'action-users') {
           validType = USER_ACTIONTYPES.indexOf(typeId) > -1;
         }
@@ -155,7 +159,10 @@ export const makeFilterGroups = ({
               ...option,
             }],
           };
-          if (option.connectionAttributeFilter) {
+          if (
+            option.connectionAttributeFilter
+            && !option.connectionAttributeFilter.addonOnly
+          ) {
             const connectionFilterOption = {
               id: option.connectionAttributeFilter.path, // filterOptionId
               active: !!activeFilterOption

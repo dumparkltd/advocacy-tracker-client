@@ -108,6 +108,7 @@ export const makeEditGroups = ({
       const option = config.connections[connectionKey];
       if (
         option
+        && (typeof option.edit === 'undefined' || option.edit)
         && (
           isAdmin
           || typeof option.adminOnly === 'undefined'
