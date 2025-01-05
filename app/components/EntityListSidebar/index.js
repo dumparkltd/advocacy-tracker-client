@@ -61,11 +61,11 @@ const ButtonFilterType = styled(Button)`
   color: ${({ active, theme }) => active ? 'black' : theme.global.colors.textSecondary};
   padding: 4px 8px;
   text-transform: uppercase;
-  font-size: ${({ theme }) => theme.text.xxsmall.size};
+  font-size: ${({ theme }) => theme.text.xsmall.size};
   font-weight: 600;
-  line-height: ${({ theme }) => theme.text.xsmall.size};
+  line-height: ${({ theme }) => theme.text.small.size};
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    font-size: ${({ theme }) => theme.text.xsmall.size};
+    font-size: ${({ theme }) => theme.text.small.size};
     padding: 6px 12px;
   }
   &:hover {

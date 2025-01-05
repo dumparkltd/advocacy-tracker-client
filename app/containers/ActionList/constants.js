@@ -7,6 +7,7 @@ import {
   ARCHIVE_STATUSES,
   NOTIFICATION_STATUSES,
   ACTIONTYPES,
+  ACTORTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
   AUTHORITY_TAXONOMY,
 } from 'themes/config';
@@ -65,17 +66,37 @@ export const CONFIG = {
       ],
     },
   },
-  quickFilterGroups: {
-    indicators: {
+  quickFilterGroups: [
+    {
+      id: 'indicators',
       title: 'Topics',
+      option: 'connections',
+      connection: 'indicators',
+      dropdownLabel: 'Select topic',
     },
-    taxonomies: {
+    {
+      id: 'taxonomies',
       title: 'Level of authority',
+      option: 'taxonomies',
+      types: [{
+        id: AUTHORITY_TAXONOMY,
+        type: 'buttons',
+      }],
     },
-    actors: {
+    {
+      id: 'actors',
       title: 'Stakeholders',
+      option: 'connections',
+      connection: 'actors',
+      groupByType: true,
+      filteringOptions: [],
+      types: [
+        ACTORTYPES.COUNTRY,
+        ACTORTYPES.REG,
+        ACTORTYPES.GROUP,
+      ],
     },
-  },
+  ],
   taxonomies: { // filter by each category
     query: 'cat',
     search: true,
@@ -83,21 +104,10 @@ export const CONFIG = {
     key: 'category_id',
     ownKey: 'measure_id',
     invalidateEntitiesPaths: [API.CATEGORIES, API.ACTIONS],
-    quickFilter: {
-      group: 'taxonomies',
-      types: [{
-        id: AUTHORITY_TAXONOMY,
-        type: 'buttons',
-      }],
-    },
-    // defaultGroupAttribute: 'groups_actions_default',
   },
   connections: { // filter by associated entity
     // filter by associated actor
     indicators: {
-      quickFilter: {
-        group: 'indicators',
-      },
       query: 'indicators',
       type: 'action-indicators',
       search: true,
@@ -119,9 +129,6 @@ export const CONFIG = {
       },
     },
     actors: {
-      quickFilter: {
-        group: 'actors',
-      },
       query: 'actor',
       type: 'action-actors',
       search: true,

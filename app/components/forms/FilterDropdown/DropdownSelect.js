@@ -43,7 +43,7 @@ export function DropdownSelect({
   const optionsSearched = search
     ? options.filter((o) => {
       const regex = new RegExp(regExMultipleWords(search), 'i');
-      return regex.test(cleanupSearchTarget(o.title));
+      return regex.test(cleanupSearchTarget(o.label));
     })
     : options;
   return (

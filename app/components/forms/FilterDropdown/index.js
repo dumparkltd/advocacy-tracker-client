@@ -31,11 +31,21 @@ const Styled = styled((p) => <Box {...p} />)`
 const DropButton = styled(forwardRef(
   (p, ref) => <Button {...p} ref={ref} />
 ))`
-  background-color: ${palette('light', 1)};
+  background-color:  ${({ type }) => {
+    if (type === 'quickFilters') {
+      return 'white';
+    }
+    return palette('light', 1);
+  }};
   color: ${palette('dark', 2)};
   border: 1px solid ${palette('light', 3)};
   height: ${({ small }) => small ? 35 : 45}px;
-  border-radius: 999px;
+  border-radius: ${({ type }) => {
+    if (type === 'quickFilters') {
+      return '10px';
+    }
+    return '999px';
+  }};
   position: relative;
 `;
 const ActiveButton = styled((p) => <Button {...p} />)`
@@ -44,7 +54,12 @@ const ActiveButton = styled((p) => <Button {...p} />)`
   border: 1px solid ${palette('light', 3)};
   min-height: 45px;
   min-width: 200px;
-  border-radius: 999px;
+  border-radius: ${({ type }) => {
+    if (type === 'quickFilters') {
+      return '10px';
+    }
+    return '999px';
+  }};
   position: relative;
   &:hover {
     background-color: ${({ theme }) => theme.global.colors.highlightHover};
@@ -84,11 +99,13 @@ export function FilterDropdown({
   onSelect,
   label,
   buttonLabel,
+  onClear,
+  type,
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropButtonRef = useRef(null);
 
-  const activeOption = options.find((o) => o.active);
+  const activeOption = options.find((o) => o.checked);
   const size = React.useContext(ResponsiveContext);
   return (
     <Styled>
@@ -97,6 +114,7 @@ export function FilterDropdown({
         <DropButton
           onClick={() => setDropdownOpen(!dropdownOpen)}
           ref={dropButtonRef}
+          type={type}
         >
           <Box
             direction="row"
@@ -111,12 +129,14 @@ export function FilterDropdown({
               align="center"
               justify="between"
             >
-              <Icon
-                size="24px"
-                name="filter"
-                palette="dark"
-                paletteIndex={3}
-              />
+              {type !== 'quickFilters' && (
+                <Icon
+                  size="24px"
+                  name="filter"
+                  palette="dark"
+                  paletteIndex={3}
+                />
+              )}
               <ButtonLabel>{buttonLabel}</ButtonLabel>
             </Box>
             {!dropdownOpen && (
@@ -142,7 +162,14 @@ export function FilterDropdown({
       )}
       {activeOption && (
         <ActiveButton
-          onClick={() => onSelect(null)}
+          type={type}
+          onClick={() => {
+            if (onClear) {
+              onClear(activeOption.value);
+            } else {
+              onSelect(null);
+            }
+          }}
         >
           <Box
             direction="row"
@@ -152,7 +179,7 @@ export function FilterDropdown({
             pad={{ left: 'small', right: 'xsmall' }}
           >
             <ButtonLabelActive>
-              {truncateText(activeOption.title, 20)}
+              {truncateText(activeOption.label, 20)}
             </ButtonLabelActive>
             <Icon
               size="24px"
@@ -173,9 +200,9 @@ export function FilterDropdown({
           >
             <DropdownSelect
               options={options}
-              onSelect={(option) => {
+              onSelect={({ value }) => {
                 setDropdownOpen(false);
-                onSelect(option.id);
+                onSelect(value);
               }}
             />
           </Drop>
@@ -194,9 +221,9 @@ export function FilterDropdown({
             <DropdownSelect
               full
               options={options}
-              onSelect={(option) => {
+              onSelect={({ value }) => {
                 setDropdownOpen(false);
-                onSelect(option.id);
+                onSelect(value);
               }}
             />
           </Layer>
@@ -209,8 +236,10 @@ export function FilterDropdown({
 FilterDropdown.propTypes = {
   label: PropTypes.string,
   buttonLabel: PropTypes.string,
+  type: PropTypes.string,
   options: PropTypes.array,
   onSelect: PropTypes.func,
+  onClear: PropTypes.func,
 };
 
 export default FilterDropdown;

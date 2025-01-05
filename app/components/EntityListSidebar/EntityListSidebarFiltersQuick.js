@@ -7,19 +7,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { palette } from 'styled-theme';
-import { Box } from 'grommet';
-import { fromJS, Map, List } from 'immutable';
+import { Box, Text } from 'grommet';
+import { Map, List } from 'immutable';
 
 import { injectIntl, intlShape } from 'react-intl';
 
 // import qe from 'utils/quasi-equals';
 
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+// import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 // import appMessages from 'containers/App/messages';
+import FilterDropdown from 'components/forms/FilterDropdown';
 
 import { makeQuickFilterGroups } from './utilFilterGroups';
-// import { makeActiveFilterOptions } from './utilFilterOptions';
 import messages from './messages';
 
 const Styled = styled((p) => (
@@ -34,6 +33,54 @@ const Styled = styled((p) => (
   })
 `;
 
+const PanelTitleWrap = styled((p) => (
+  <Box
+    flex={{ shrink: 0 }}
+    margin={{ top: 'medium', bottom: 'small' }}
+    {...p}
+  />
+))``;
+
+const PanelTitle = styled((p) => <Text size="xsmall" weight={600} {...p} />)`
+  text-transform: uppercase;
+`;
+
+const Groups = styled((p) => (
+  <Box
+    flex={{ shrink: 0 }}
+    {...p}
+  />
+))``;
+
+const Group = styled((p) => (
+  <Box
+    flex={{ shrink: 0 }}
+    margin={{ bottom: 'large' }}
+    {...p}
+  />
+))``;
+
+const GroupTitle = styled((p) => <Text size="medium" weight={600} {...p} />)`
+  text-transform: uppercase;
+`;
+const Filters = styled((p) => (
+  <Box
+    flex={{ shrink: 0 }}
+    margin={{ vertical: 'small' }}
+    {...p}
+  />
+))``;
+
+const Filter = styled((p) => (
+  <Box
+    flex={{ shrink: 0 }}
+    margin={{ bottom: 'ms' }}
+    gap="xxsmall"
+    {...p}
+  />
+))``;
+
+const FilterTitle = styled((p) => <Text size="small" weight={600} {...p} />)``;
 
 // const makeFormOptions = ({
 //   allEntities,
@@ -79,8 +126,8 @@ const Styled = styled((p) => (
 
 export const EntityListSidebarFiltersQuick = ({
   intl,
-  onUpdateQuery,
-  filteringOptions,
+  // onUpdateQuery,
+  // filteringOptions,
   onUpdateFilters,
   allEntities,
   config,
@@ -93,7 +140,7 @@ export const EntityListSidebarFiltersQuick = ({
   includeMembersWhenFiltering,
   includeActorMembers,
   includeActorChildren,
-  hasUserRole,
+  // hasUserRole,
   filterActortypes,
   actortypes,
   resourcetypes,
@@ -103,42 +150,74 @@ export const EntityListSidebarFiltersQuick = ({
   associationtypes,
   currentFilters,
 }) => {
-  // const formOptions = activeOption && makeFormOptions({
-  //   allEntities,
-  //   config,
-  //   locationQuery,
-  //   taxonomies,
-  //   connections,
-  //   connectedTaxonomies,
-  //   activeOption,
-  //   intl,
-  //   typeId,
-  //   isAdmin,
-  //   includeMembersWhenFiltering,
-  //   includeActorMembers,
-  //   includeActorChildren,
-  // });
-  // const groups = makeQuickFilterGroups({
-  //   config,
-  //   taxonomies,
-  //   connectedTaxonomies,
-  //   hasUserRole,
-  //   actortypes: filterActortypes || actortypes,
-  //   resourcetypes,
-  //   actiontypes,
-  //   membertypes,
-  //   filterAssociationtypes,
-  //   associationtypes: filterAssociationtypes || associationtypes,
-  //   activeOption,
-  //   currentFilters,
-  //   typeId,
-  //   intl,
-  //   locationQuery,
-  //   includeMembersWhenFiltering,
-  // });
+  const groups = makeQuickFilterGroups({
+    config,
+    taxonomies,
+    connectedTaxonomies,
+    // hasUserRole,
+    actortypes: filterActortypes || actortypes,
+    resourcetypes,
+    actiontypes,
+    membertypes,
+    associationtypes: filterAssociationtypes || associationtypes,
+    currentFilters,
+    typeId,
+    intl,
+    locationQuery,
+    includeMembers: includeMembersWhenFiltering,
+    entities: allEntities,
+    connections,
+    messages: {
+      titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
+      without: intl.formatMessage(messages.filterFormWithoutPrefix),
+      any: intl.formatMessage(messages.filterFormAnyPrefix),
+    },
+    isAdmin,
+    includeActorMembers,
+    includeActorChildren,
+    onUpdateFilters,
+  });
+  // console.log('config', config)
+  // console.log('groups', groups)
+
   return (
     <Styled>
-      Hello quick
+      <PanelTitleWrap>
+        <PanelTitle>
+          Filter items by
+        </PanelTitle>
+      </PanelTitleWrap>
+      <Groups>
+        {groups && groups.map((group) => (
+          <Group
+            key={group.id}
+          >
+            <GroupTitle>
+              {group.label}
+            </GroupTitle>
+            <Filters>
+              {group.filters && group.filters.map((filter) => (
+                <Filter key={filter.id}>
+                  {filter.label && (
+                    <FilterTitle>
+                      {filter.label}
+                    </FilterTitle>
+                  )}
+                  {filter.filterType === 'dropdownSelect' && (
+                    <FilterDropdown
+                      options={filter.options && Object.values(filter.options)}
+                      onClear={(value) => filter.onClear(value)}
+                      onSelect={(value) => filter.onSelect(value)}
+                      buttonLabel={filter.dropdownLabel}
+                      type="quickFilters"
+                    />
+                  )}
+                </Filter>
+              ))}
+            </Filters>
+          </Group>
+        ))}
+      </Groups>
     </Styled>
   );
 };
@@ -155,11 +234,11 @@ EntityListSidebarFiltersQuick.propTypes = {
   connections: PropTypes.instanceOf(Map),
   connectedTaxonomies: PropTypes.instanceOf(Map),
   locationQuery: PropTypes.instanceOf(Map),
-  onUpdateQuery: PropTypes.func,
+  // onUpdateQuery: PropTypes.func,
   onUpdateFilters: PropTypes.func,
   config: PropTypes.object,
-  hasUserRole: PropTypes.object,
-  filteringOptions: PropTypes.array,
+  // hasUserRole: PropTypes.object,
+  // filteringOptions: PropTypes.array,
   currentFilters: PropTypes.array,
   typeId: PropTypes.string,
   isAdmin: PropTypes.bool,

@@ -26,7 +26,7 @@ function Option({ option, onSelect }) {
   return (
     <StyledButton onClick={() => onSelect(option)}>
       <Label>
-        {option.title}
+        {option.label}
       </Label>
     </StyledButton>
   );

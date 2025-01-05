@@ -65,6 +65,7 @@ import Card from 'containers/OverviewPositions/Card';
 import TitleOnCard from 'containers/OverviewPositions/TitleOnCard';
 import TitleAboveCard from 'containers/OverviewPositions/TitleAboveCard';
 import Button from 'components/buttons/Button';
+import FilterDropdown from 'components/forms/FilterDropdown';
 
 import {
   selectCountries,
@@ -73,7 +74,6 @@ import {
 import { DEPENDENCIES } from './constants';
 
 import ComponentOptions from './ComponentOptions';
-import FilterDropdown from './FilterDropdown';
 
 import messages from './messages';
 
@@ -143,9 +143,9 @@ const prepareDropdownOptions = (entities, query, countries) => entities
   ).reduce(
     (memo, entity) => ([
       ...memo, {
-        title: getEntityTitle(entity),
-        id: entity.get('id'),
-        active: asArray(query).indexOf(entity.get('id')) > -1,
+        label: getEntityTitle(entity),
+        value: entity.get('id'),
+        checked: asArray(query).indexOf(entity.get('id')) > -1,
       },
     ]),
     [],
@@ -527,7 +527,7 @@ export function PositionsList({
                         countriesFilteredByColumn,
                       )}
                       onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.REG })}
-                      onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.REG })}
+                      onSelect={(value) => onUpdateAssociationQuery({ value, type: ACTORTYPES.REG })}
                       label="Filter by region"
                       buttonLabel="Select region"
                     />
@@ -540,7 +540,7 @@ export function PositionsList({
                         countriesFilteredByColumn,
                       )}
                       onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.GROUP })}
-                      onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.GROUP })}
+                      onSelect={(value) => onUpdateAssociationQuery({ value, type: ACTORTYPES.GROUP })}
                       label="Filter by group"
                       buttonLabel="Select group"
                     />

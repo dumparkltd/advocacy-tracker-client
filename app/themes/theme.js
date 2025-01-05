@@ -51,7 +51,7 @@ const dark = coolorsToHex('https://coolors.co/1c2121-232b2b-323e3e-687271-8d9696
 // 2:  gray 1 (gray pattern)
 // 3:  gray 2 (icons light)
 // 4:  gray 3 (dark lines)
-const light = coolorsToHex('https://coolors.co/f0f0f0-f0f0f0-d5dddd-cdd6d6-c7d1d1');
+const light = coolorsToHex('https://coolors.co/f7f7f7-f0f0f0-d5dddd-cdd6d6-c7d1d1');
 
 // other palettes
 // 0: AA on light[0] and on error[3]

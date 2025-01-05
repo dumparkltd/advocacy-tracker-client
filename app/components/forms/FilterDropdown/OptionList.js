@@ -34,11 +34,11 @@ function OptionList({ options, onSelect }) {
     <Styled>
       <ListWrapper>
         <OptionsWrapper>
-          {options && options.map((option) => {
-            const { id } = option;
+          {options && options.map((option, key) => {
+            const { value, query } = option;
             return (
               <Option
-                key={id}
+                key={`${query}-${value}`}
                 option={option}
                 onSelect={onSelect}
               />
