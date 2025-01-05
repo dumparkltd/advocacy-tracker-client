@@ -326,7 +326,7 @@ class EntityListSidebarFiltersClassic extends React.PureComponent { // eslint-di
     return (
       <>
         <div>
-          {showFilters && filteringOptions && (
+          {filteringOptions && (
             <Options>
               {filteringOptions.map((option) => {
                 const o = {

@@ -5,7 +5,7 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { injectIntl, intlShape } from 'react-intl';
 import { Map, List } from 'immutable';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
@@ -20,21 +20,14 @@ import Sidebar from 'components/styled/Sidebar';
 import SidebarHeader from 'components/styled/SidebarHeader';
 
 import EntityListSidebarFiltersClassic from './EntityListSidebarFiltersClassic';
+import EntityListSidebarFiltersQuick from './EntityListSidebarFiltersQuick';
 
 import messages from './messages';
 
-// const Main = styled.div``;
 const ScrollableWrapper = styled(Scrollable)`
-  background-color: ${palette('aside', 0)};
-`;
-
-const ListEntitiesEmpty = styled.div`
-  font-size: 1.2em;
-  padding: 1.5em;
-  color: ${palette('text', 1)};
-  @media print {
-    font-size: ${(props) => props.theme.sizes.print.large};
-  }
+  background-color: ${(
+    { hasBackground }
+  ) => hasBackground ? palette('asideHeader', 0) : palette('aside', 0)};
 `;
 
 const SidebarWrapper = styled.div`
@@ -51,59 +44,119 @@ const SidebarWrapper = styled.div`
   }
 `;
 
-export class EntityListSidebar extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  render() {
-    const {
-      showFilters,
-      showEditOptions,
-      allEntities,
-      entitiesSelected,
-      onUpdateQuery,
-      filteringOptions,
-      onUpdate,
-      onUpdateFilters,
-      connections,
-      includeActorMembers,
-      includeActorChildren,
-      includeMembersWhenFiltering,
-      typeId,
-      config,
-      isAdmin,
-      hasUserRole,
-      locationQuery,
-      taxonomies,
-      connectedTaxonomies,
-      actortypes,
-      filterActortypes,
-      actiontypes,
-      resourcetypes,
-      membertypes,
-      filterAssociationtypes,
-      associationtypes,
-      currentFilters,
-      onHideFilters,
-      onHideEditOptions,
-      onCreateOption,
-      intl,
-    } = this.props;
-    const onHideSidebar = showFilters ? onHideFilters : onHideEditOptions;
-    const isEditPanel = !showFilters;
-    const hasEntities = allEntities && allEntities.size > 0;
-    return (
-      <SidebarWrapper onClick={onHideSidebar}>
-        <Sidebar onClick={(evt) => evt.stopPropagation()}>
-          <ScrollableWrapper>
-            <SidebarHeader>
-              <Box direction="row" justify="between" align="center">
-                {showFilters && <SupTitle title={intl.formatMessage(messages.header.filter)} />}
-                {!showFilters && <SupTitle title={intl.formatMessage(messages.header.edit)} />}
-                <Button onClick={onHideSidebar}>
-                  <Icon name="close" />
-                </Button>
+const ButtonClose = styled(Button)`
+  border-radius: 9999px;
+  background-color: white;
+  padding: 4px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    padding: 6px;
+  }
+  &:hover {
+    color: ${({ theme }) => theme.global.colors.highlight};
+  }
+`;
+const ButtonFilterType = styled(Button)`
+  border-bottom: 3px solid ${({ active }) => active ? 'black' : 'transparent'};
+  border-top: 3px solid transparent;
+  color: ${({ active, theme }) => active ? 'black' : theme.global.colors.textSecondary};
+  padding: 4px 8px;
+  text-transform: uppercase;
+  font-size: ${({ theme }) => theme.text.xxsmall.size};
+  font-weight: 600;
+  line-height: ${({ theme }) => theme.text.xsmall.size};
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    font-size: ${({ theme }) => theme.text.xsmall.size};
+    padding: 6px 12px;
+  }
+  &:hover {
+    color: ${({ active, theme }) => active ? 'black' : theme.global.colors.highlight};
+    cursor: ${({ active }) => active ? 'default' : 'pointer'};
+  }
+`;
+
+
+export const EntityListSidebar = ({
+  showFilters,
+  showEditOptions,
+  allEntities,
+  entitiesSelected,
+  onUpdateQuery,
+  filteringOptions,
+  onUpdate,
+  onUpdateFilters,
+  connections,
+  includeActorMembers,
+  includeActorChildren,
+  includeMembersWhenFiltering,
+  typeId,
+  config,
+  isAdmin,
+  hasUserRole,
+  locationQuery,
+  taxonomies,
+  connectedTaxonomies,
+  actortypes,
+  filterActortypes,
+  actiontypes,
+  resourcetypes,
+  membertypes,
+  filterAssociationtypes,
+  associationtypes,
+  currentFilters,
+  onHideFilters,
+  onHideEditOptions,
+  onCreateOption,
+  intl,
+}) => {
+  const [filterType, setFilterType] = React.useState(null);
+  const onHideSidebar = showFilters ? onHideFilters : onHideEditOptions;
+  const hasEntities = allEntities && allEntities.size > 0;
+
+  const hasFilterOptions = showFilters && !!config.quickFilterGroups;
+  let filterTypeClean = filterType || 'classic';
+  if (hasFilterOptions && !filterType) {
+    filterTypeClean = 'quick';
+  }
+
+  const showEditPanel = !showFilters && hasEntities && !!entitiesSelected;
+
+  return (
+    <SidebarWrapper onClick={onHideSidebar}>
+      <Sidebar onClick={(evt) => evt.stopPropagation()}>
+        <ScrollableWrapper hasBackground={filterTypeClean === 'quick'}>
+          <SidebarHeader
+            hasFilterOptions={hasFilterOptions}
+          >
+            <Box direction="row" justify="between" align="center">
+              {showFilters && hasFilterOptions && (
+                <Icon name="filter" alt={intl.formatMessage(messages.header.filter)} />
+              )}
+              {showFilters && !hasFilterOptions && <SupTitle title={intl.formatMessage(messages.header.filter)} />}
+              {!showFilters && <SupTitle title={intl.formatMessage(messages.header.edit)} />}
+              <ButtonClose onClick={onHideSidebar}>
+                <Icon name="close" size="30px" />
+              </ButtonClose>
+            </Box>
+            {hasFilterOptions && (
+              <Box direction="row" margin={{ top: 'ms' }}>
+                <ButtonFilterType
+                  onClick={() => setFilterType('quick')}
+                  active={filterTypeClean === 'quick'}
+                >
+                  Quick filters
+                </ButtonFilterType>
+                <ButtonFilterType
+                  onClick={() => setFilterType('classic')}
+                  active={filterTypeClean === 'classic'}
+                >
+                  All filters
+                </ButtonFilterType>
               </Box>
-            </SidebarHeader>
+            )}
+          </SidebarHeader>
+          {(showFilters || showEditPanel) && (
             <div>
-              {(!isEditPanel || (isEditPanel && !!entitiesSelected && hasEntities)) && (
+              {(showEditPanel || filterTypeClean === 'classic') && (
                 <EntityListSidebarFiltersClassic
                   entitiesSelected={entitiesSelected}
                   allEntities={allEntities}
@@ -135,18 +188,41 @@ export class EntityListSidebar extends React.Component { // eslint-disable-line 
                   onCreateOption={onCreateOption}
                 />
               )}
-              {isEditPanel && hasEntities && !entitiesSelected && (
-                <ListEntitiesEmpty>
-                  <FormattedMessage {...messages.entitiesNotSelected} />
-                </ListEntitiesEmpty>
+              {showFilters && filterTypeClean === 'quick' && (
+                <EntityListSidebarFiltersQuick
+                  allEntities={allEntities}
+                  taxonomies={taxonomies}
+                  actortypes={actortypes}
+                  filterActortypes={filterActortypes}
+                  actiontypes={actiontypes}
+                  resourcetypes={resourcetypes}
+                  membertypes={membertypes}
+                  filterAssociationtypes={filterAssociationtypes}
+                  associationtypes={associationtypes}
+                  connectedTaxonomies={connectedTaxonomies}
+                  onUpdateQuery={onUpdateQuery}
+                  filteringOptions={filteringOptions}
+                  onUpdateFilters={onUpdateFilters}
+                  connections={connections}
+                  includeActorMembers={includeActorMembers}
+                  includeActorChildren={includeActorChildren}
+                  includeMembersWhenFiltering={includeMembersWhenFiltering}
+                  typeId={typeId}
+                  config={config}
+                  isAdmin={isAdmin}
+                  hasUserRole={hasUserRole}
+                  locationQuery={locationQuery}
+                  currentFilters={currentFilters}
+                />
               )}
             </div>
-          </ScrollableWrapper>
-        </Sidebar>
-      </SidebarWrapper>
-    );
-  }
-}
+          )}
+        </ScrollableWrapper>
+      </Sidebar>
+    </SidebarWrapper>
+  );
+};
+
 EntityListSidebar.propTypes = {
   entitiesSelected: PropTypes.instanceOf(List),
   allEntities: PropTypes.instanceOf(List),
