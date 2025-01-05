@@ -17,23 +17,15 @@ import { Multiple } from 'grommet-icons';
 import { isEqual } from 'lodash/lang';
 import { isMinSize } from 'utils/responsive';
 
-import { FILTER_FORM_MODEL, EDIT_FORM_MODEL } from 'containers/EntityListForm/constants';
-
 import ButtonFlat from 'components/buttons/ButtonFlat';
 import Bookmarker from 'containers/Bookmarker';
 
 import EntityListViewOptions from 'components/EntityListViewOptions';
-import EntityListForm from 'containers/EntityListForm';
-import appMessages from 'containers/App/messages';
+
 import PrintHide from 'components/styled/PrintHide';
 import Icon from 'components/Icon';
 
 import EntityListSidebar from './EntityListSidebar';
-
-import { makePanelFilterGroups } from './utilFilterGroups';
-import { makeEditGroups } from './utilEditGroups';
-import { makeActiveFilterOptions } from './utilFilterOptions';
-import { makeActiveEditOptions } from './utilEditOptions';
 
 import messages from './messages';
 
@@ -101,108 +93,38 @@ const FilterButton = styled((p) => <ButtonFlat {...p} />)`
   }
 `;
 
-const STATE_INITIAL = {
-  activeOption: null,
-  showTypes: false,
-};
-
-const getEditConnectionsMsg = (intl, type) => type
-  && messages.editGroupLabel[`connections-${type}`]
-  ? intl.formatMessage(messages.editGroupLabel[`connections-${type}`])
-  : intl.formatMessage(messages.editGroupLabel.connections);
-
-const getFilterConnectionsMsg = (intl, type) => type
-  && messages.filterGroupLabel[`connections-${type}`]
-  ? intl.formatMessage(messages.filterGroupLabel[`connections-${type}`])
-  : intl.formatMessage(messages.filterGroupLabel.connections);
-
-const makeFormOptions = ({
-  showFilters,
-  showEditOptions,
-  allEntities,
-  entitiesSelected,
-  config,
-  locationQuery,
-  taxonomies,
-  connections,
-  connectedTaxonomies,
-  activeOption,
-  intl,
-  typeId,
-  isAdmin,
-  includeMembersWhenFiltering,
-  includeActorMembers,
-  includeActorChildren,
-}) => {
-  if (showFilters) {
-    return makeActiveFilterOptions({
-      entities: allEntities,
-      config,
-      locationQuery,
-      taxonomies,
-      connections,
-      // actortypes,
-      // actiontypes,
-      connectedTaxonomies,
-      activeFilterOption: activeOption,
-      intl,
-      typeId,
-      isAdmin,
-      messages: {
-        titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
-        without: intl.formatMessage(messages.filterFormWithoutPrefix),
-        any: intl.formatMessage(messages.filterFormAnyPrefix),
-      },
-      includeMembers: includeMembersWhenFiltering,
-      includeActorMembers,
-      includeActorChildren,
-    });
-  }
-  if (showEditOptions) {
-    return makeActiveEditOptions({
-      isAdmin,
-      entities: entitiesSelected,
-      config,
-      taxonomies,
-      connections,
-      connectedTaxonomies,
-      activeEditOption: activeOption,
-      intl,
-      messages: {
-        title: `${intl.formatMessage(messages.editFormTitlePrefix)} ${entitiesSelected.size} ${intl.formatMessage(messages.editFormTitlePostfix)}`,
-      },
-    });
-  }
-  return null;
-};
+// const STATE_INITIAL = {
+//   activeOption: null,
+//   showTypes: false,
+// };
 
 export class EntityListHeader extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  constructor() {
-    super();
-    this.state = STATE_INITIAL;
-    this.typeWrapperRef = React.createRef();
-    this.typeButtonRef = React.createRef();
-    this.handleClickOutside = this.handleClickOutside.bind(this);
-  }
+  // constructor() {
+  //   super();
+  //   this.state = STATE_INITIAL;
+  //   // this.typeWrapperRef = React.createRef();
+  //   // this.typeButtonRef = React.createRef();
+  //   // this.handleClickOutside = this.handleClickOutside.bind(this);
+  // }
+  //
+  // UNSAFE_componentWillMount() {
+  //   this.setState(STATE_INITIAL);
+  // }
 
-  UNSAFE_componentWillMount() {
-    this.setState(STATE_INITIAL);
-  }
-
-  componentDidMount() {
-    window.addEventListener('resize', this.resize);
-    window.addEventListener('mousedown', this.handleClickOutside);
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (
-      this.props.showFilters !== nextProps.showFilters
-      || this.props.showEditOptions !== nextProps.showEditOptions
-    ) {
-      // close and reset option panel
-      this.setState({ activeOption: null });
-    }
-  }
+  // componentDidMount() {
+  //   window.addEventListener('resize', this.resize);
+  //   window.addEventListener('mousedown', this.handleClickOutside);
+  // }
+  //
+  // UNSAFE_componentWillReceiveProps(nextProps) {
+  //   if (
+  //     this.props.showFilters !== nextProps.showFilters
+  //     || this.props.showEditOptions !== nextProps.showEditOptions
+  //   ) {
+  //     // close and reset option panel
+  //     this.setState({ activeOption: null });
+  //   }
+  // }
 
   shouldComponentUpdate(nextProps, nextState) {
     // TODO consider targeting specific query params, eg where, without, cat, catx but also actors, etc
@@ -226,99 +148,76 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     window.removeEventListener('mousedown', this.handleClickOutside);
   }
 
-  handleClickOutside = (evt) => {
-    const wrapperContains = this.typeWrapperRef
-      && this.typeWrapperRef.current
-      && this.typeWrapperRef.current.contains(evt.target);
-    const buttonContains = this.typeButtonRef
-      && this.typeButtonRef.current
-      && this.typeButtonRef.current.contains(evt.target);
-    if (!wrapperContains && !buttonContains) {
-      this.setState({ showTypes: false });
-    }
-  };
-
-  onSetActiveOption = (option) => {
-    this.setState({ activeOption: option });
-  };
-
-  // onShowForm = (option) => {
-  //   this.setState({ activeOption: option.active ? null : option });
+  // handleClickOutside = (evt) => {
+  //   const wrapperContains = this.typeWrapperRef
+  //     && this.typeWrapperRef.current
+  //     && this.typeWrapperRef.current.contains(evt.target);
+  //   const buttonContains = this.typeButtonRef
+  //     && this.typeButtonRef.current
+  //     && this.typeButtonRef.current.contains(evt.target);
+  //   if (!wrapperContains && !buttonContains) {
+  //     this.setState({ showTypes: false });
+  //   }
   // };
 
-  onHideForm = (evt) => {
-    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ activeOption: null });
-  };
+  // getFormButtons = (activeOption, intl) => {
+  //   const { onCreateOption } = this.props;
+  //   return [
+  //     activeOption.create
+  //       ? {
+  //         type: 'addFlat',
+  //         position: 'left',
+  //         onClick: () => onCreateOption(activeOption.create),
+  //       }
+  //       : null,
+  //     {
+  //       type: 'simple',
+  //       title: intl.formatMessage(appMessages.buttons.cancel),
+  //       onClick: this.onHideForm,
+  //     },
+  //     {
+  //       type: 'primary',
+  //       title: intl.formatMessage(appMessages.buttons.assign),
+  //       submit: true,
+  //     },
+  //   ];
+  // };
+  //
+  // getFilterFormButtons = () => {
+  //   const { intl } = this.context;
+  //   return [
+  //     {
+  //       type: 'simple',
+  //       title: intl.formatMessage(appMessages.buttons.cancel),
+  //       onClick: this.onHideForm,
+  //     },
+  //     {
+  //       type: 'primary',
+  //       title: intl.formatMessage(appMessages.buttons.updateFilter),
+  //       submit: true,
+  //     },
+  //   ];
+  // };
 
-  onShowTypes = (evt) => {
-    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ showTypes: true });
-  };
-
-  onHideTypes = (evt) => {
-    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ showTypes: false });
-  };
-
-  getFormButtons = (activeOption, intl) => {
-    const { onCreateOption } = this.props;
-    return [
-      activeOption.create
-        ? {
-          type: 'addFlat',
-          position: 'left',
-          onClick: () => onCreateOption(activeOption.create),
-        }
-        : null,
-      {
-        type: 'simple',
-        title: intl.formatMessage(appMessages.buttons.cancel),
-        onClick: this.onHideForm,
-      },
-      {
-        type: 'primary',
-        title: intl.formatMessage(appMessages.buttons.assign),
-        submit: true,
-      },
-    ];
-  };
-
-  getFilterFormButtons = () => {
-    const { intl } = this.context;
-    return [
-      {
-        type: 'simple',
-        title: intl.formatMessage(appMessages.buttons.cancel),
-        onClick: this.onHideForm,
-      },
-      {
-        type: 'primary',
-        title: intl.formatMessage(appMessages.buttons.updateFilter),
-        submit: true,
-      },
-    ];
-  };
-
-  resize = () => {
-    // reset
-    this.setState(STATE_INITIAL);
-    this.forceUpdate();
-  };
+  // resize = () => {
+  //   // reset
+  //   this.setState(STATE_INITIAL);
+  //   this.forceUpdate();
+  // };
 
   render() {
     const {
-      config,
-      onUpdate,
-      onUpdateFilters,
-      hasUserRole,
       entities,
       allEntities,
+      entityIdsSelected,
+      onShowFilters,
+      typeId,
+      config,
+      isAdmin,
+      hasUserRole,
       locationQuery,
       taxonomies,
       connectedTaxonomies,
-      connections,
-      entityIdsSelected,
       actortypes,
       filterActortypes,
       actiontypes,
@@ -327,31 +226,31 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
       filterAssociationtypes,
       associationtypes,
       currentFilters,
-      onShowFilters,
       onHideFilters,
+      onHideEditOptions,
       showFilters,
       showEditOptions,
-      onHideEditOptions,
       canEdit,
       dataReady,
-      typeId,
       onUpdateQuery,
-      includeMembersWhenFiltering,
+      onUpdate,
+      onUpdateFilters,
+      connections,
       includeActorMembers,
       includeActorChildren,
+      includeMembersWhenFiltering,
       filteringOptions,
       headerActions,
       viewOptions,
-      isAdmin,
       isPrintView,
       isOnMap,
       intl,
+      onCreateOption,
     } = this.props;
-    const { activeOption } = this.state;
     const hasSelected = dataReady && canEdit && entityIdsSelected && entityIdsSelected.size > 0;
     const entitiesSelected = hasSelected
-      && entities.filter((entity) => entityIdsSelected.includes(entity.get('id')));
-    const formModel = showFilters ? FILTER_FORM_MODEL : EDIT_FORM_MODEL;
+      ? entities.filter((entity) => entityIdsSelected.includes(entity.get('id')))
+      : null;
 
     const managerActions = canEdit && headerActions && headerActions.filter(
       (action) => action.isMember
@@ -359,24 +258,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
     const normalActions = headerActions && headerActions.filter(
       (action) => !action.isMember
     );
-    const formOptions = dataReady && activeOption && makeFormOptions({
-      showFilters,
-      showEditOptions,
-      allEntities,
-      entitiesSelected,
-      config,
-      locationQuery,
-      taxonomies,
-      connections,
-      connectedTaxonomies,
-      activeOption,
-      intl,
-      typeId,
-      isAdmin,
-      includeMembersWhenFiltering,
-      includeActorMembers,
-      includeActorChildren,
-    });
+
     return (
       <ResponsiveContext.Consumer>
         {(size) => (
@@ -475,101 +357,38 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                 )}
               </Box>
             </TheHeader>
-            {dataReady && showFilters && (
+            {dataReady && (showFilters || showEditOptions) && (
               <EntityListSidebar
-                hasEntities={allEntities && allEntities.size > 0}
-                makePanelGroups={() => makePanelFilterGroups({
-                  config,
-                  taxonomies,
-                  connectedTaxonomies,
-                  hasUserRole,
-                  actortypes: filterActortypes || actortypes,
-                  resourcetypes,
-                  actiontypes,
-                  membertypes,
-                  filterAssociationtypes,
-                  associationtypes: filterAssociationtypes || associationtypes,
-                  activeOption,
-                  currentFilters,
-                  typeId,
-                  intl,
-                  locationQuery,
-                  includeMembersWhenFiltering,
-                  messages: {
-                    attributes: intl.formatMessage(messages.filterGroupLabel.attributes),
-                    taxonomyGroup: intl.formatMessage(messages.filterGroupLabel.taxonomies),
-                    connections: (type) => getFilterConnectionsMsg(intl, type),
-                    connectedTaxonomies: intl.formatMessage(messages.filterGroupLabel.connectedTaxonomies),
-                    taxonomies: (taxId) => intl.formatMessage(appMessages.entities.taxonomies[taxId].plural),
-                    titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
-                    without: intl.formatMessage(messages.filterFormWithoutPrefix),
-                    any: intl.formatMessage(messages.filterFormAnyPrefix),
-                  },
-                })}
-                onHideSidebar={onHideFilters}
-                onHideOptions={this.onHideForm}
-                setActiveOption={this.onSetActiveOption}
-                onUpdateQuery={(args) => {
-                  this.onHideForm();
-                  onUpdateQuery(args);
-                }}
+                showFilters={showFilters}
+                showEditOptions={showEditOptions}
+                allEntities={allEntities}
+                entitiesSelected={entitiesSelected}
+                onUpdateQuery={onUpdateQuery}
                 filteringOptions={filteringOptions}
-              />
-            )}
-            {dataReady && showEditOptions && (
-              <EntityListSidebar
-                isEditPanel
-                hasEntities={entities && entities.size > 0}
-                hasSelected={hasSelected}
-                makePanelGroups={() => makeEditGroups({
-                  config,
-                  taxonomies,
-                  connectedTaxonomies,
-                  activeEditOption: activeOption,
-                  hasUserRole,
-                  actortypes,
-                  actiontypes,
-                  resourcetypes,
-                  membertypes,
-                  associationtypes,
-                  typeId,
-                  isAdmin,
-                  messages: {
-                    attributes: intl.formatMessage(messages.editGroupLabel.attributes),
-                    taxonomyGroup: intl.formatMessage(messages.editGroupLabel.taxonomies),
-                    connections: (type) => getEditConnectionsMsg(intl, type),
-                    taxonomies: (taxId) => this.context.intl.formatMessage(appMessages.entities.taxonomies[taxId].plural),
-                  },
-                })}
-                onHideSidebar={onHideEditOptions}
-                setActiveOption={this.onSetActiveOption}
-              />
-            )}
-            {activeOption && formOptions && (
-              <EntityListForm
-                model={formModel}
-                activeOptionId={`${activeOption.group}-${activeOption.optionId}`}
-                formOptions={formOptions}
-                buttons={showEditOptions
-                  ? this.getFormButtons(activeOption, intl)
-                  : this.getFilterFormButtons()
-                }
-                onCancel={this.onHideForm}
-                showNew={showEditOptions}
-                showCancelButton={showFilters}
-                onSubmit={showEditOptions
-                  ? (associations) => {
-                    // close and reset option panel
-                    const connectPath = formOptions.path;
-                    this.setState({ activeOption: null });
-                    onUpdate(associations, { ...activeOption, path: connectPath });
-                  }
-                  : (filterOptions) => {
-                    // close and reset option panel
-                    this.setState({ activeOption: null });
-                    onUpdateFilters(filterOptions && filterOptions.get('values'), activeOption);
-                  }
-                }
+                onUpdate={onUpdate}
+                onUpdateFilters={onUpdateFilters}
+                connections={connections}
+                includeActorMembers={includeActorMembers}
+                includeActorChildren={includeActorChildren}
+                includeMembersWhenFiltering={includeMembersWhenFiltering}
+                typeId={typeId}
+                config={config}
+                isAdmin={isAdmin}
+                hasUserRole={hasUserRole}
+                locationQuery={locationQuery}
+                taxonomies={taxonomies}
+                connectedTaxonomies={connectedTaxonomies}
+                actortypes={actortypes}
+                filterActortypes={filterActortypes}
+                actiontypes={actiontypes}
+                resourcetypes={resourcetypes}
+                membertypes={membertypes}
+                filterAssociationtypes={filterAssociationtypes}
+                associationtypes={associationtypes}
+                currentFilters={currentFilters}
+                onHideFilters={onHideFilters}
+                onHideEditOptions={onHideEditOptions}
+                onCreateOption={onCreateOption}
               />
             )}
           </Styled>

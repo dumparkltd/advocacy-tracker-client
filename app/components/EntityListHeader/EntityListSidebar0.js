@@ -20,7 +20,7 @@ import Sidebar from 'components/styled/Sidebar';
 import SidebarHeader from 'components/styled/SidebarHeader';
 import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
-import EntityListSidebarGroups from './EntityListSidebarGroups';
+import EntityListSidebarFiltersClassic from './EntityListSidebarFiltersClassic';
 
 import messages from './messages';
 
@@ -150,7 +150,7 @@ export class EntityListSidebar extends React.Component { // eslint-disable-line 
             </SidebarHeader>
             <div>
               { (!isEditPanel || (isEditPanel && hasSelected && hasEntities)) && (
-                <EntityListSidebarGroups
+                <EntityListSidebarFiltersClassic
                   groups={fromJS(panelGroups)}
                   onShowForm={this.onShowForm}
                   onHideOptions={onHideOptions}

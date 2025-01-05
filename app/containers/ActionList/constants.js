@@ -8,6 +8,7 @@ import {
   NOTIFICATION_STATUSES,
   ACTIONTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
+  AUTHORITY_TAXONOMY,
 } from 'themes/config';
 
 export const DEPENDENCIES = [
@@ -64,6 +65,17 @@ export const CONFIG = {
       ],
     },
   },
+  quickFilterGroups: {
+    indicators: {
+      title: 'Topics',
+    },
+    taxonomies: {
+      title: 'Level of authority',
+    },
+    actors: {
+      title: 'Stakeholders',
+    },
+  },
   taxonomies: { // filter by each category
     query: 'cat',
     search: true,
@@ -71,11 +83,45 @@ export const CONFIG = {
     key: 'category_id',
     ownKey: 'measure_id',
     invalidateEntitiesPaths: [API.CATEGORIES, API.ACTIONS],
+    quickFilter: {
+      group: 'taxonomies',
+      types: [{
+        id: AUTHORITY_TAXONOMY,
+        type: 'buttons',
+      }],
+    },
     // defaultGroupAttribute: 'groups_actions_default',
   },
   connections: { // filter by associated entity
     // filter by associated actor
+    indicators: {
+      quickFilter: {
+        group: 'indicators',
+      },
+      query: 'indicators',
+      type: 'action-indicators',
+      search: true,
+      message: 'entities.indicators.plural',
+      path: API.INDICATORS,
+      invalidateEntitiesPaths: [API.INDICATORS, API.ACTIONS],
+      entityType: 'indicators',
+      clientPath: ROUTES.INDICATOR,
+      connectPath: API.ACTION_INDICATORS, // filter by actor connection
+      key: 'indicator_id',
+      ownKey: 'measure_id',
+      connectionAttributeFilter: {
+        path: 'indicatorConnections',
+        // query: 'indicatorConnections',
+        attribute: 'supportlevel_id',
+        message: 'attributes.supportlevel_id',
+        options: ACTION_INDICATOR_SUPPORTLEVELS,
+        optionMessages: 'supportlevels',
+      },
+    },
     actors: {
+      quickFilter: {
+        group: 'actors',
+      },
       query: 'actor',
       type: 'action-actors',
       search: true,
@@ -121,27 +167,6 @@ export const CONFIG = {
       ownKey: 'other_measure_id', //  parent
       key: 'measure_id', // child
       groupByType: true,
-    },
-    indicators: {
-      query: 'indicators',
-      type: 'action-indicators',
-      search: true,
-      message: 'entities.indicators.plural',
-      path: API.INDICATORS,
-      invalidateEntitiesPaths: [API.INDICATORS, API.ACTIONS],
-      entityType: 'indicators',
-      clientPath: ROUTES.INDICATOR,
-      connectPath: API.ACTION_INDICATORS, // filter by actor connection
-      key: 'indicator_id',
-      ownKey: 'measure_id',
-      connectionAttributeFilter: {
-        path: 'indicatorConnections',
-        // query: 'indicatorConnections',
-        attribute: 'supportlevel_id',
-        message: 'attributes.supportlevel_id',
-        options: ACTION_INDICATOR_SUPPORTLEVELS,
-        optionMessages: 'supportlevels',
-      },
     },
     // filter by associated entity
     resources: {

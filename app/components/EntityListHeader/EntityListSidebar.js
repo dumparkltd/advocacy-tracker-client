@@ -5,7 +5,8 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
+import { Map, List } from 'immutable';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import { Box } from 'grommet';
@@ -17,9 +18,8 @@ import Button from 'components/buttons/ButtonSimple';
 
 import Sidebar from 'components/styled/Sidebar';
 import SidebarHeader from 'components/styled/SidebarHeader';
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 
-import EntityListSidebarGroups from './EntityListSidebarGroups';
+import EntityListSidebarFiltersClassic from './EntityListSidebarFiltersClassic';
 
 import messages from './messages';
 
@@ -50,115 +50,91 @@ const SidebarWrapper = styled.div`
   }
 `;
 
-const STATE_INITIAL = {
-  expandedGroups: {
-    taxonomies: false,
-    taxonomies_1: false,
-    taxonomies_2: false,
-    taxonomies_3: false,
-    taxonomies_4: false,
-    taxonomies_5: false,
-    taxonomies_6: false,
-    taxonomies_7: false,
-    taxonomies_8: false,
-    taxonomies_9: false,
-    taxonomies_10: false,
-    taxonomies_11: false,
-    taxonomies_12: false,
-    taxonomies_13: false,
-    actors: false,
-    actions: false,
-    members: false,
-    associations: false,
-    indicators: false,
-    users: false,
-    resources: false,
-    parents: false,
-    attributes: false,
-  },
-};
-
 export class EntityListSidebar extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  constructor() {
-    super();
-    this.state = STATE_INITIAL;
-  }
-
-  UNSAFE_componentWillMount() {
-    this.setState(STATE_INITIAL);
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.activePanel !== this.props.activePanel) {
-      // close and reset option panel
-      this.props.setActiveOption(null);
-    }
-  }
-
-  onShowForm = (option) => this.props.setActiveOption(option.active ? null : option);
-
-  onToggleGroup = (groupId, expanded) => {
-    this.setState((prevState) => {
-      const expandedGroups = { ...prevState.expandedGroups };
-      expandedGroups[groupId] = expanded;
-      return ({
-        expandedGroups,
-        activeOption: null,
-      });
-    });
-  }
-
   render() {
     const {
-      isEditPanel,
-      hasEntities,
-      hasSelected,
-      makePanelGroups,
-      onHideSidebar,
-      onHideOptions,
+      showFilters,
+      showEditOptions,
+      allEntities,
+      entitiesSelected,
       onUpdateQuery,
       filteringOptions,
+      onUpdate,
+      onUpdateFilters,
+      connections,
+      includeActorMembers,
+      includeActorChildren,
+      includeMembersWhenFiltering,
+      typeId,
+      config,
+      isAdmin,
+      hasUserRole,
+      locationQuery,
+      taxonomies,
+      connectedTaxonomies,
+      actortypes,
+      filterActortypes,
+      actiontypes,
+      resourcetypes,
+      membertypes,
+      filterAssociationtypes,
+      associationtypes,
+      currentFilters,
+      onHideFilters,
+      onHideEditOptions,
+      onCreateOption,
+      intl,
     } = this.props;
-    const { intl } = this.context;
+    const onHideSidebar = showFilters ? onHideFilters : onHideEditOptions;
+    const isEditPanel = !showFilters;
+    const hasEntities = allEntities && allEntities.size > 0;
     return (
       <SidebarWrapper onClick={onHideSidebar}>
         <Sidebar onClick={(evt) => evt.stopPropagation()}>
           <ScrollableWrapper>
             <SidebarHeader>
               <Box direction="row" justify="between" align="center">
-                {isEditPanel && <SupTitle title={intl.formatMessage(messages.header.edit)} />}
-                {!isEditPanel && <SupTitle title={intl.formatMessage(messages.header.filter)} />}
+                {showFilters && <SupTitle title={intl.formatMessage(messages.header.filter)} />}
+                {!showFilters && <SupTitle title={intl.formatMessage(messages.header.edit)} />}
                 <Button onClick={onHideSidebar}>
                   <Icon name="close" />
                 </Button>
               </Box>
-              {filteringOptions && filteringOptions.map((option) => {
-                const o = {
-                  ...option,
-                  onClick: () => {
-                    onHideOptions();
-                    option.onClick();
-                  },
-                };
-                return (
-                  <Box margin={{ top: 'small' }} key={option.key}>
-                    <MapOption option={o} type="members" />
-                  </Box>
-                );
-              })}
             </SidebarHeader>
             <div>
-              { (!isEditPanel || (isEditPanel && hasSelected && hasEntities)) && (
-                <EntityListSidebarGroups
-                  groups={makePanelGroups && makePanelGroups()}
-                  onShowForm={this.onShowForm}
-                  onHideOptions={onHideOptions}
-                  onToggleGroup={this.onToggleGroup}
-                  expanded={this.state.expandedGroups}
+              {(!isEditPanel || (isEditPanel && !!entitiesSelected && hasEntities)) && (
+                <EntityListSidebarFiltersClassic
+                  entitiesSelected={entitiesSelected}
+                  allEntities={allEntities}
+                  taxonomies={taxonomies}
+                  actortypes={actortypes}
+                  filterActortypes={filterActortypes}
+                  actiontypes={actiontypes}
+                  resourcetypes={resourcetypes}
+                  membertypes={membertypes}
+                  filterAssociationtypes={filterAssociationtypes}
+                  associationtypes={associationtypes}
+                  connectedTaxonomies={connectedTaxonomies}
+                  showFilters={showFilters}
+                  showEditOptions={showEditOptions}
                   onUpdateQuery={onUpdateQuery}
+                  filteringOptions={filteringOptions}
+                  onUpdate={onUpdate}
+                  onUpdateFilters={onUpdateFilters}
+                  connections={connections}
+                  includeActorMembers={includeActorMembers}
+                  includeActorChildren={includeActorChildren}
+                  includeMembersWhenFiltering={includeMembersWhenFiltering}
+                  typeId={typeId}
+                  config={config}
+                  isAdmin={isAdmin}
+                  hasUserRole={hasUserRole}
+                  locationQuery={locationQuery}
+                  currentFilters={currentFilters}
+                  onCreateOption={onCreateOption}
                 />
               )}
-              { isEditPanel && hasEntities && !hasSelected && (
+              {isEditPanel && hasEntities && !entitiesSelected && (
                 <ListEntitiesEmpty>
                   <FormattedMessage {...messages.entitiesNotSelected} />
                 </ListEntitiesEmpty>
@@ -171,20 +147,37 @@ export class EntityListSidebar extends React.Component { // eslint-disable-line 
   }
 }
 EntityListSidebar.propTypes = {
-  activePanel: PropTypes.string,
-  isEditPanel: PropTypes.bool,
-  hasEntities: PropTypes.bool,
-  hasSelected: PropTypes.bool,
-  makePanelGroups: PropTypes.func,
-  onHideSidebar: PropTypes.func,
-  onHideOptions: PropTypes.func,
-  setActiveOption: PropTypes.func,
-  onUpdateQuery: PropTypes.func,
+  entitiesSelected: PropTypes.instanceOf(List),
+  allEntities: PropTypes.instanceOf(List),
+  taxonomies: PropTypes.instanceOf(Map),
+  actortypes: PropTypes.instanceOf(Map),
+  filterActortypes: PropTypes.instanceOf(Map),
+  resourcetypes: PropTypes.instanceOf(Map),
+  actiontypes: PropTypes.instanceOf(Map),
+  membertypes: PropTypes.instanceOf(Map),
+  filterAssociationtypes: PropTypes.instanceOf(Map),
+  associationtypes: PropTypes.instanceOf(Map),
+  connections: PropTypes.instanceOf(Map),
+  connectedTaxonomies: PropTypes.instanceOf(Map),
+  locationQuery: PropTypes.instanceOf(Map),
+  onUpdate: PropTypes.func.isRequired,
+  onUpdateFilters: PropTypes.func.isRequired,
+  onCreateOption: PropTypes.func.isRequired,
+  onUpdateQuery: PropTypes.func.isRequired,
+  onHideFilters: PropTypes.func,
+  onHideEditOptions: PropTypes.func,
+  hasUserRole: PropTypes.object,
+  config: PropTypes.object,
+  currentFilters: PropTypes.array,
   filteringOptions: PropTypes.array,
+  typeId: PropTypes.string,
+  showFilters: PropTypes.bool,
+  showEditOptions: PropTypes.bool,
+  isAdmin: PropTypes.bool,
+  includeMembersWhenFiltering: PropTypes.bool,
+  includeActorMembers: PropTypes.bool,
+  includeActorChildren: PropTypes.bool,
+  intl: intlShape.isRequired,
 };
 
-EntityListSidebar.contextTypes = {
-  intl: PropTypes.object.isRequired,
-};
-
-export default EntityListSidebar;
+export default injectIntl(EntityListSidebar);

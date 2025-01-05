@@ -318,7 +318,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
 
   onHideFilters = (evt) => {
     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ visibleFilters: false });
+    this.setState({ visibleFilters: null });
   };
 
   onShowEditOptions = (evt) => {
