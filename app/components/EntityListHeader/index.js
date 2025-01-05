@@ -7,14 +7,12 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import styled from 'styled-components';
-import { Map, List } from 'immutable';
 import { palette } from 'styled-theme';
 import {
   Box, Text, ResponsiveContext,
 } from 'grommet';
 import { Multiple } from 'grommet-icons';
 
-import { isEqual } from 'lodash/lang';
 import { isMinSize } from 'utils/responsive';
 
 import ButtonFlat from 'components/buttons/ButtonFlat';
@@ -24,8 +22,6 @@ import EntityListViewOptions from 'components/EntityListViewOptions';
 
 import PrintHide from 'components/styled/PrintHide';
 import Icon from 'components/Icon';
-
-import EntityListSidebar from './EntityListSidebar';
 
 import messages from './messages';
 
@@ -93,164 +89,17 @@ const FilterButton = styled((p) => <ButtonFlat {...p} />)`
   }
 `;
 
-// const STATE_INITIAL = {
-//   activeOption: null,
-//   showTypes: false,
-// };
-
 export class EntityListHeader extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  // constructor() {
-  //   super();
-  //   this.state = STATE_INITIAL;
-  //   // this.typeWrapperRef = React.createRef();
-  //   // this.typeButtonRef = React.createRef();
-  //   // this.handleClickOutside = this.handleClickOutside.bind(this);
-  // }
-  //
-  // UNSAFE_componentWillMount() {
-  //   this.setState(STATE_INITIAL);
-  // }
-
-  // componentDidMount() {
-  //   window.addEventListener('resize', this.resize);
-  //   window.addEventListener('mousedown', this.handleClickOutside);
-  // }
-  //
-  // UNSAFE_componentWillReceiveProps(nextProps) {
-  //   if (
-  //     this.props.showFilters !== nextProps.showFilters
-  //     || this.props.showEditOptions !== nextProps.showEditOptions
-  //   ) {
-  //     // close and reset option panel
-  //     this.setState({ activeOption: null });
-  //   }
-  // }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    // TODO consider targeting specific query params, eg where, without, cat, catx but also actors, etc
-    if (nextProps.listUpdating && isEqual(this.state, nextState)) {
-      return false;
-    }
-    if (this.props.listUpdating && !nextProps.listUpdating) {
-      return true;
-    }
-    return this.props.locationQuery !== nextProps.locationQuery
-      || this.props.entityIdsSelected !== nextProps.entityIdsSelected
-      || this.props.showFilters !== nextProps.showFilters
-      || this.props.showEditOptions !== nextProps.showEditOptions
-      || this.props.taxonomies !== nextProps.taxonomies
-      || this.props.connections !== nextProps.connections
-      || !isEqual(this.state, nextState);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.resize);
-    window.removeEventListener('mousedown', this.handleClickOutside);
-  }
-
-  // handleClickOutside = (evt) => {
-  //   const wrapperContains = this.typeWrapperRef
-  //     && this.typeWrapperRef.current
-  //     && this.typeWrapperRef.current.contains(evt.target);
-  //   const buttonContains = this.typeButtonRef
-  //     && this.typeButtonRef.current
-  //     && this.typeButtonRef.current.contains(evt.target);
-  //   if (!wrapperContains && !buttonContains) {
-  //     this.setState({ showTypes: false });
-  //   }
-  // };
-
-  // getFormButtons = (activeOption, intl) => {
-  //   const { onCreateOption } = this.props;
-  //   return [
-  //     activeOption.create
-  //       ? {
-  //         type: 'addFlat',
-  //         position: 'left',
-  //         onClick: () => onCreateOption(activeOption.create),
-  //       }
-  //       : null,
-  //     {
-  //       type: 'simple',
-  //       title: intl.formatMessage(appMessages.buttons.cancel),
-  //       onClick: this.onHideForm,
-  //     },
-  //     {
-  //       type: 'primary',
-  //       title: intl.formatMessage(appMessages.buttons.assign),
-  //       submit: true,
-  //     },
-  //   ];
-  // };
-  //
-  // getFilterFormButtons = () => {
-  //   const { intl } = this.context;
-  //   return [
-  //     {
-  //       type: 'simple',
-  //       title: intl.formatMessage(appMessages.buttons.cancel),
-  //       onClick: this.onHideForm,
-  //     },
-  //     {
-  //       type: 'primary',
-  //       title: intl.formatMessage(appMessages.buttons.updateFilter),
-  //       submit: true,
-  //     },
-  //   ];
-  // };
-
-  // resize = () => {
-  //   // reset
-  //   this.setState(STATE_INITIAL);
-  //   this.forceUpdate();
-  // };
-
   render() {
     const {
-      entities,
-      allEntities,
-      entityIdsSelected,
       onShowFilters,
-      typeId,
-      config,
-      isAdmin,
-      hasUserRole,
-      locationQuery,
-      taxonomies,
-      connectedTaxonomies,
-      actortypes,
-      filterActortypes,
-      actiontypes,
-      resourcetypes,
-      membertypes,
-      filterAssociationtypes,
-      associationtypes,
-      currentFilters,
-      onHideFilters,
-      onHideEditOptions,
-      showFilters,
-      showEditOptions,
       canEdit,
-      dataReady,
-      onUpdateQuery,
-      onUpdate,
-      onUpdateFilters,
-      connections,
-      includeActorMembers,
-      includeActorChildren,
-      includeMembersWhenFiltering,
-      filteringOptions,
       headerActions,
       viewOptions,
       isPrintView,
       isOnMap,
       intl,
-      onCreateOption,
     } = this.props;
-    const hasSelected = dataReady && canEdit && entityIdsSelected && entityIdsSelected.size > 0;
-    const entitiesSelected = hasSelected
-      ? entities.filter((entity) => entityIdsSelected.includes(entity.get('id')))
-      : null;
 
     const managerActions = canEdit && headerActions && headerActions.filter(
       (action) => action.isMember
@@ -337,7 +186,7 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                     </HeaderActionsWrapper>
                   </HeaderSection>
                 )}
-                {dataReady && isMinSize(size, 'small') && (
+                {isMinSize(size, 'small') && (
                   <HeaderSection align="center">
                     <FilterButton
                       onClick={onShowFilters}
@@ -357,40 +206,6 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
                 )}
               </Box>
             </TheHeader>
-            {dataReady && (showFilters || showEditOptions) && (
-              <EntityListSidebar
-                showFilters={showFilters}
-                showEditOptions={showEditOptions}
-                allEntities={allEntities}
-                entitiesSelected={entitiesSelected}
-                onUpdateQuery={onUpdateQuery}
-                filteringOptions={filteringOptions}
-                onUpdate={onUpdate}
-                onUpdateFilters={onUpdateFilters}
-                connections={connections}
-                includeActorMembers={includeActorMembers}
-                includeActorChildren={includeActorChildren}
-                includeMembersWhenFiltering={includeMembersWhenFiltering}
-                typeId={typeId}
-                config={config}
-                isAdmin={isAdmin}
-                hasUserRole={hasUserRole}
-                locationQuery={locationQuery}
-                taxonomies={taxonomies}
-                connectedTaxonomies={connectedTaxonomies}
-                actortypes={actortypes}
-                filterActortypes={filterActortypes}
-                actiontypes={actiontypes}
-                resourcetypes={resourcetypes}
-                membertypes={membertypes}
-                filterAssociationtypes={filterAssociationtypes}
-                associationtypes={associationtypes}
-                currentFilters={currentFilters}
-                onHideFilters={onHideFilters}
-                onHideEditOptions={onHideEditOptions}
-                onCreateOption={onCreateOption}
-              />
-            )}
           </Styled>
         )}
       </ResponsiveContext.Consumer>
@@ -398,50 +213,13 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
   }
 }
 EntityListHeader.propTypes = {
-  entities: PropTypes.instanceOf(List),
-  allEntities: PropTypes.instanceOf(List),
-  entityIdsSelected: PropTypes.instanceOf(List),
-  taxonomies: PropTypes.instanceOf(Map),
-  actortypes: PropTypes.instanceOf(Map),
-  filterActortypes: PropTypes.instanceOf(Map),
-  resourcetypes: PropTypes.instanceOf(Map),
-  actiontypes: PropTypes.instanceOf(Map),
-  membertypes: PropTypes.instanceOf(Map),
-  filterAssociationtypes: PropTypes.instanceOf(Map),
-  associationtypes: PropTypes.instanceOf(Map),
-  connections: PropTypes.instanceOf(Map),
-  connectedTaxonomies: PropTypes.instanceOf(Map),
-  locationQuery: PropTypes.instanceOf(Map),
-  hasUserRole: PropTypes.object,
-  config: PropTypes.object,
-  onUpdate: PropTypes.func.isRequired,
-  onUpdateFilters: PropTypes.func.isRequired,
-  onCreateOption: PropTypes.func.isRequired,
-  listUpdating: PropTypes.bool,
-  currentFilters: PropTypes.array,
-  onUpdateQuery: PropTypes.func.isRequired,
   onShowFilters: PropTypes.func,
-  onHideFilters: PropTypes.func,
-  showFilters: PropTypes.bool,
-  showEditOptions: PropTypes.bool,
-  onHideEditOptions: PropTypes.func,
   canEdit: PropTypes.bool,
-  dataReady: PropTypes.bool,
-  isAdmin: PropTypes.bool,
-  includeMembersWhenFiltering: PropTypes.bool,
-  includeActorMembers: PropTypes.bool,
-  includeActorChildren: PropTypes.bool,
-  filteringOptions: PropTypes.array,
   isPrintView: PropTypes.bool,
   isOnMap: PropTypes.bool,
-  typeId: PropTypes.string,
   headerActions: PropTypes.array,
   viewOptions: PropTypes.array,
   intl: intlShape.isRequired,
-};
-
-EntityListHeader.contextTypes = {
-  intl: PropTypes.object.isRequired,
 };
 
 export default injectIntl(EntityListHeader);

@@ -42,9 +42,10 @@ const SidebarWrapper = styled.div`
   top: 0;
   bottom: 0;
   right: 0;
-  z-index: 100;
+  z-index: 110;
   width: 100%;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    z-index: 100;
     top: ${({ theme }) => theme.sizes.header.banner.height}px;
     width: auto;
   }

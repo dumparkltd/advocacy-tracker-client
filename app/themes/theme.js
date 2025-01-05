@@ -290,7 +290,7 @@ theme.sizes = {
     },
     width: {
       small: 300,
-      large: 340,
+      large: 400,
     },
   },
   mainListItem: {
