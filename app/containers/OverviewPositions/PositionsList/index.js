@@ -648,7 +648,7 @@ export function PositionsList({
                     {
                       id: `action_${ACTIONTYPES.EXPRESS}`,
                       type: 'actiontype',
-                      actiontype_id: ACTIONTYPES.EXPRESS,
+                      type_id: ACTIONTYPES.EXPRESS,
                       actions: 'actionsByType',
                       actionsMembers: 'actionsAsMemberByType',
                       actionsChildren: 'actionsAsParentByType',
@@ -659,7 +659,7 @@ export function PositionsList({
                     {
                       id: `action_${ACTIONTYPES.INTERACTION}`,
                       type: 'actiontype',
-                      actiontype_id: ACTIONTYPES.INTERACTION,
+                      type_id: ACTIONTYPES.INTERACTION,
                       actions: 'actionsByType',
                       actionsMembers: 'actionsAsMemberByType',
                       actionsChildren: 'actionsAsParentByType',
