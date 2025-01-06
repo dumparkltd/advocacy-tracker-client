@@ -560,7 +560,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                 {
                   id: 'userActions',
                   type: 'userActions',
-                  actiontype_id: viewTypeClean,
+                  type_id: viewTypeClean,
                   title: userEntityColumnTitle,
                 },
               ]}
