@@ -47,14 +47,14 @@ export function CellBodyPlain({
                 <Dot size={!value ? dotSize : null} color={color} />
               </Box>
               {value && (
-                <Label weight={primary ? 500 : 300}>
+                <Label weight={primary ? 500 : 300} title={value}>
                   {value}
                 </Label>
               )}
             </LabelWrap>
           )}
           {!color && (
-            <Label weight={primary ? 500 : 300}>
+            <Label weight={primary ? 500 : 300} title={value}>
               {value}
             </Label>
           )}

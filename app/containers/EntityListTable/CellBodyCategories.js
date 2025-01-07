@@ -26,7 +26,7 @@ export function CellBodyCategories({
   return (
     <Box alignContent={align}>
       {entity.single && (
-        <Label textAlign={align}>
+        <Label textAlign={align} title={entity.value}>
           {truncateText(entity.value, 25)}
         </Label>
       )}

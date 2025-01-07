@@ -39,13 +39,13 @@ export function CellBodyPlainWithDate({ entity, onEntityClick }) {
           }}
           title={value}
         >
-          <Label>
+          <Label title={value}>
             {truncateText(value, 25)}
           </Label>
         </Link>
       )}
       {(!path || !onEntityClick) && (
-        <Label>
+        <Label title={value}>
           {value}
         </Label>
       )}

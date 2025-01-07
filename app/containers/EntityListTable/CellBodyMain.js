@@ -110,7 +110,7 @@ export function CellBodyMain({
               }
               if (key === 'title' || key === 'name') {
                 return (
-                  <Label key={key}>
+                  <Label key={key} title={entity.values[key]}>
                     {truncateText(entity.values[key], 45)}
                   </Label>
                 );
@@ -121,6 +121,7 @@ export function CellBodyMain({
                     key={key}
                     color="dark-5"
                     size="small"
+                    title={entity.values[key]}
                   >
                     {`[${entity.values[key]}]`}
                   </Label>

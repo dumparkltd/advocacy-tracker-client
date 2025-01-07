@@ -19,7 +19,7 @@ export function CellBodyPosition({
         </Box>
       )}
       {!color && (
-        <Label weight={primary ? 500 : 300} textAlign={align}>
+        <Label weight={primary ? 500 : 300} textAlign={align} title={value}>
           {value}
         </Label>
       )}
