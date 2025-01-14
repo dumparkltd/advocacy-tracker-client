@@ -23,7 +23,7 @@ import Button from 'components/buttons/ButtonSimple';
 
 import { truncateText } from 'utils/string';
 import DropdownSelect from './DropdownSelect';
-import { getOptionLabel } from './Option';
+import { getOptionLabel } from './utils';
 
 const Styled = styled((p) => <Box {...p} />)`
   position: relative;
@@ -171,7 +171,6 @@ export function FilterDropdown({
           type={type}
           onClick={() => {
             if (onClear) {
-              console.log(activeOption)
               onClear(activeOption.value, activeOption.query);
             } else {
               onSelect(null);

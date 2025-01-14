@@ -283,13 +283,20 @@ const makeConnectionEditOptions = (
           ) ? counter + 1 : counter,
           0, // initial value
         );
+        const label = getEntityTitle(connection, option.labels, intl);
+
+        let sortValue = label;
+        if (option.sort === 'referenceThenTitle') {
+          sortValue = connection.getIn(['attributes', 'reference']) || sortValue;
+        }
         editOptions.options[connection.get('id')] = {
           reference: hasCode && getEntityReference(connection),
-          label: getEntityTitle(connection, option.labels, intl),
+          label,
           value: connection.get('id'),
           checked: checkedState(count, entities.size),
           tags: connection.get('categories'),
           draft: connection.getIn(['attributes', 'draft']),
+          order: sortValue,
         };
       });
   }

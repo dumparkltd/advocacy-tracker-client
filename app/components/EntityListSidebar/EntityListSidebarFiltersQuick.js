@@ -18,6 +18,8 @@ import { injectIntl, intlShape } from 'react-intl';
 // import appMessages from 'containers/App/messages';
 import FilterDropdown from 'components/forms/FilterDropdown';
 
+import FilterPills from './FilterPills';
+
 import { makeQuickFilterGroups } from './utilFilterGroups';
 import messages from './messages';
 
@@ -82,51 +84,10 @@ const Filter = styled((p) => (
 
 const FilterTitle = styled((p) => <Text size="small" weight={600} {...p} />)``;
 
-// const makeFormOptions = ({
-//   allEntities,
-//   config,
-//   locationQuery,
-//   taxonomies,
-//   connections,
-//   connectedTaxonomies,
-//   activeOption,
-//   intl,
-//   typeId,
-//   isAdmin,
-//   includeMembersWhenFiltering,
-//   includeActorMembers,
-//   includeActorChildren,
-// }) => makeActiveFilterOptions({
-//   entities: allEntities,
-//   config,
-//   locationQuery,
-//   taxonomies,
-//   connections,
-//   // actortypes,
-//   // actiontypes,
-//   connectedTaxonomies,
-//   activeFilterOption: activeOption,
-//   intl,
-//   typeId,
-//   isAdmin,
-//   messages: {
-//     titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
-//     without: intl.formatMessage(messages.filterFormWithoutPrefix),
-//     any: intl.formatMessage(messages.filterFormAnyPrefix),
-//   },
-//   includeMembers: includeMembersWhenFiltering,
-//   includeActorMembers,
-//   includeActorChildren,
-// });
-//
-// const getFilterConnectionsMsg = (intl, type) => type
-//   && messages.filterGroupLabel[`connections-${type}`]
-//   ? intl.formatMessage(messages.filterGroupLabel[`connections-${type}`])
-//   : intl.formatMessage(messages.filterGroupLabel.connections);
 
 export const EntityListSidebarFiltersQuick = ({
   intl,
-  // onUpdateQuery,
+  onUpdateQuery,
   // filteringOptions,
   onUpdateFilters,
   allEntities,
@@ -176,6 +137,7 @@ export const EntityListSidebarFiltersQuick = ({
     includeActorMembers,
     includeActorChildren,
     onUpdateFilters,
+    onUpdateQuery,
   });
   // console.log('config', config)
   // console.log('groups', groups)
@@ -213,6 +175,20 @@ export const EntityListSidebarFiltersQuick = ({
                       hasSearch={typeof filter.search === 'undefined' || filter.search}
                     />
                   )}
+                  {filter.connectionAttributeFilterOptions && (
+                    <Box margin={{ top: 'small', bottom: 'medium' }} gap="xxsmall">
+                      {filter.connectionAttributeFilterOptions.label && (
+                        <Text color="hint" size="xxsmall">
+                          {filter.connectionAttributeFilterOptions.label}
+                        </Text>
+                      )}
+                      {filter.connectionAttributeFilterOptions.filterType === 'pills' && (
+                        <FilterPills
+                          options={filter.connectionAttributeFilterOptions.options}
+                        />
+                      )}
+                    </Box>
+                  )}
                 </Filter>
               ))}
             </Filters>
@@ -235,7 +211,7 @@ EntityListSidebarFiltersQuick.propTypes = {
   connections: PropTypes.instanceOf(Map),
   connectedTaxonomies: PropTypes.instanceOf(Map),
   locationQuery: PropTypes.instanceOf(Map),
-  // onUpdateQuery: PropTypes.func,
+  onUpdateQuery: PropTypes.func,
   onUpdateFilters: PropTypes.func,
   config: PropTypes.object,
   // hasUserRole: PropTypes.object,

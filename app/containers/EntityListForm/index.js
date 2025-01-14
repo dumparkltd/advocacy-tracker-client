@@ -37,9 +37,10 @@ const FormWrapper = styled.div`
   width: 100%;
   @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     width: ${(props) => props.wide ? '100%' : '350px'};
+    border-right: 2px solid #f0f0f0;
   }
   @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
-    width: ${(props) => props.wide ? 692 : 350}px;
+    width: ${(props) => props.wide ? 590 : 350}px;
     z-index: 99;
   }
 `;

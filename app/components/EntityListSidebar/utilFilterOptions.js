@@ -797,11 +797,14 @@ const getConnectionFilterOptions = ({
     messagePrefix: messages.titlePrefix,
     message: option.message,
     search: option.search,
+    sort: option.sort,
   };
   const { query, path } = option;
   const showEntityReference = getShowEntityReference(option.entityType, null, isAdmin);
   const entityType = option.entityTypeAs || option.entityType;
   let locationQueryValue = locationQuery.get(query);
+
+  // console.log('option', option);
   // if no entities found show any active options
   if (entities.size === 0) {
     if (locationQueryValue) {
@@ -838,6 +841,7 @@ const getConnectionFilterOptions = ({
             count: 0,
             query: 'without',
             checked: true,
+            sortValue: '-1',
           };
         }
       });
@@ -892,6 +896,7 @@ const getConnectionFilterOptions = ({
               count: 1,
               query: 'without',
               checked: optionChecked(locationQuery.get('without'), `att:${option.attribute}`),
+              order: '-1',
             };
           }
         }
@@ -900,15 +905,21 @@ const getConnectionFilterOptions = ({
         let optionConnections = false;
         const entityConnections = entity.get(entityType);
         // if entity has connected entities
+        // console.log('entityConnections', entityConnections && entityConnections.toJS())
         if (entityConnections) {
           // add connected entities if not present otherwise increase count
           entityConnections.forEach((connectedId) => {
+            // console.log('connectedId', connectedId)
             const connection = connections.getIn([entityType, connectedId.toString()]);
             if (connection && !resultOptions.options[connectedId]) {
               optionConnections = true;
               const value = connectedId;
               const reference = showEntityReference && getEntityReference(connection);
               const label = getEntityTitle(connection, option.labels, intl);
+              let sortValue = label;
+              if (option.sort === 'referenceThenTitle') {
+                sortValue = connection.getIn(['attributes', 'reference']) || sortValue;
+              }
               resultOptions.options[connectedId] = {
                 reference,
                 label,
@@ -919,6 +930,7 @@ const getConnectionFilterOptions = ({
                 checked: optionChecked(locationQueryValue, value),
                 tags: connection.get('categories'),
                 draft: connection.getIn(['attributes', 'draft']),
+                order: sortValue,
               };
               // }
             }
@@ -941,6 +953,7 @@ const getConnectionFilterOptions = ({
               count: 1,
               query: 'without',
               checked: optionChecked(locationQuery.get('without'), entityType),
+              order: '-1',
             };
           }
         }

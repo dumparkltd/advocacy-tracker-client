@@ -484,7 +484,4 @@ EntityListSidebarFiltersClassic.propTypes = {
   intl: intlShape.isRequired,
 };
 
-EntityListSidebarFiltersClassic.contextTypes = {
-};
-
 export default injectIntl(EntityListSidebarFiltersClassic);

@@ -5,8 +5,8 @@ import { palette } from 'styled-theme';
 import { injectIntl, intlShape } from 'react-intl';
 
 import Button from 'components/buttons/ButtonSimple';
-import appMessage from 'utils/app-message';
-import { lowerCase } from 'utils/string';
+
+import { getOptionLabel } from './utils';
 
 const StyledButton = styled((p) => <Button {...p} />)`
   width: 100%;
@@ -22,26 +22,15 @@ const StyledButton = styled((p) => <Button {...p} />)`
   }
 `;
 
-const Label = styled.div``;
-
-export const getOptionLabel = (option, intl) => {
-  const { message, messagePrefix, label } = option;
-  let optionLabel;
-  if (message) {
-    optionLabel = messagePrefix
-      ? `${messagePrefix} ${lowerCase(appMessage(intl, message))}`
-      : appMessage(intl, message);
-  } else {
-    optionLabel = label;
-  }
-  return optionLabel;
-};
+const Label = styled.div`
+  font-style: ${({ without }) => without ? 'italic' : 'normal'};
+`;
 
 // <Label bold={props.bold} italic={props.isNew}>
 function Option({ option, onSelect, intl }) {
   return (
     <StyledButton onClick={() => onSelect(option)}>
-      <Label>
+      <Label without={option.query === 'without'}>
         {getOptionLabel(option, intl)}
       </Label>
     </StyledButton>

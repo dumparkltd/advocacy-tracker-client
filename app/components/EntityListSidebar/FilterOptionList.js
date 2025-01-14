@@ -26,6 +26,7 @@ export function FilterOptionList({
   onUpdateQuery,
 }) {
   const optionCAF = option.get('connectionAttributeFilter');
+
   return (
     <Box>
       <EntityListSidebarOption

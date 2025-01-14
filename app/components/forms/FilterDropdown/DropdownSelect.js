@@ -2,10 +2,15 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
+import { injectIntl, intlShape } from 'react-intl';
+
 import TagSearch from 'components/TagSearch';
 
 import { cleanupSearchTarget, regExMultipleWords } from 'utils/string';
+import isNumber from 'utils/is-number';
+
 import OptionList from './OptionList';
+import { getOptionLabel } from './utils';
 
 const Styled = styled.div`
   padding-top: 0px;
@@ -39,6 +44,7 @@ export function DropdownSelect({
   onSelect,
   full,
   hasSearch,
+  intl,
 }) {
   const [search, onSetSearch] = useState(null);
   const optionsSearched = (hasSearch && search)
@@ -47,6 +53,17 @@ export function DropdownSelect({
       return regex.test(cleanupSearchTarget(o.label));
     })
     : options;
+  const optionsSorted = optionsSearched.sort(
+    (a, b) => {
+      const valueA = a.order || getOptionLabel(a, intl);
+      const valueB = b.order || getOptionLabel(b, intl);
+      if (isNumber(valueA) && isNumber(valueB)) {
+        return parseInt(valueA, 10) < parseInt(valueB, 10) ? -1 : 1;
+      }
+      return valueA < valueB ? -1 : 1;
+    }
+  );
+  console.log('optionsSorted', optionsSorted)
   return (
     <Styled full={full}>
       {hasSearch && (
@@ -61,7 +78,7 @@ export function DropdownSelect({
       )}
       <OptionList
         full={full}
-        options={optionsSearched}
+        options={optionsSorted}
         onSelect={onSelect}
         hasSearch={hasSearch}
       />
@@ -74,6 +91,7 @@ DropdownSelect.propTypes = {
   onSelect: PropTypes.func,
   full: PropTypes.bool,
   hasSearch: PropTypes.bool,
+  intl: intlShape,
 };
 
-export default DropdownSelect;
+export default injectIntl(DropdownSelect);

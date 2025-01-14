@@ -2,6 +2,8 @@ import { reduce } from 'lodash/collection';
 import { sortEntities } from 'utils/sort';
 import { startsWith } from 'utils/string';
 import qe from 'utils/quasi-equals';
+import isNumber from 'utils/is-number';
+
 import appMessages from 'containers/App/messages';
 import { fromJS } from 'immutable';
 import {
@@ -164,25 +166,6 @@ const makeFilterGroups = ({
               ...option,
             }],
           };
-          if (
-            option.connectionAttributeFilter
-            && !option.connectionAttributeFilter.addonOnly
-          ) {
-            const connectionFilterOption = {
-              id: option.connectionAttributeFilter.path, // filterOptionId
-              active: !!activeFilterOption
-                && activeFilterOption.group === connectionKey
-                && activeFilterOption.optionId === option.connectionAttributeFilter.path,
-              currentFilters: currentFilters.filter(
-                (f) => qe(f.groupId, option.connectionAttributeFilter.path)
-              ),
-              ...option.connectionAttributeFilter,
-            };
-            filterGroups[connectionKey].options = [
-              ...filterGroups[connectionKey].options,
-              connectionFilterOption,
-            ];
-          }
         }
       } else {
         let types;
@@ -443,7 +426,7 @@ export const makeQuickFilterGroups = ({
   taxonomies,
   connectedTaxonomies,
   // hasUserRole,
-  // currentFilters,
+  currentFilters,
   locationQuery,
   intl,
   entities,
@@ -453,6 +436,7 @@ export const makeQuickFilterGroups = ({
   includeActorMembers,
   includeActorChildren,
   onUpdateFilters,
+  onUpdateQuery,
 }) => {
   const groups = config.quickFilterGroups.reduce(
     (memo, group) => {
@@ -472,10 +456,6 @@ export const makeQuickFilterGroups = ({
                 validType = USER_ACTORTYPES.indexOf(typeId) > -1;
               }
               if (validType) {
-                // const optionCurrentFilters = currentFilters && currentFilters.filter(
-                //   (f) => qe(f.query, group.connection)
-                // );
-                // console.log(optionCurrentFilters)
                 const filterOptions = makeActiveFilterOptions({
                   entities,
                   config,
@@ -495,31 +475,104 @@ export const makeQuickFilterGroups = ({
                   includeActorChildren,
                   without: false,
                 });
+
                 let filters = [];
-                const hasChecked = filterOptions && filterOptions.options && Object.values(filterOptions.options).find((o) => o.checked);
-                if (hasChecked) {
+                const activeOption = filterOptions && filterOptions.options && Object.values(filterOptions.options).find((o) => o.checked);
+                const activeWithoutOption = filterOptions && filterOptions.options && Object.values(filterOptions.options).find((o) => o.checked && o.query === 'without');
+                if (activeOption) {
                   filters = Object.values(filterOptions.options).reduce(
                     (memo2, o) => {
                       if (o.checked) {
+                        let filter = {
+                          id: `${connectionOption.type}-${o.value}`, // filterOptionId
+                          filterType: 'dropdownSelect',
+                          dropdownLabel: group.dropdownLabel,
+                          search: group.search,
+                          options: [o],
+                          onClear: (value, query) => {
+                            onUpdateFilters(fromJS([
+                              {
+                                hasChanged: true,
+                                query: query || connectionOption.query,
+                                checked: false,
+                                value,
+                              },
+                            ]));
+                          },
+                        };
+                        if (
+                          connectionOption
+                          && connectionOption.connectionAttributeFilter
+                          && connectionOption.connectionAttributeFilter.options
+                          && !activeWithoutOption
+                        ) {
+                          const optionCAF = connectionOption.connectionAttributeFilter;
+                          const optionCurrentFilter = currentFilters && currentFilters.find(
+                            (f) => qe(f.query, o.query) && qe(f.queryValue.split('>')[0], o.value)
+                          );
+                          const cafOptions = Object.values(optionCAF.options)
+                            .map((cafo) => {
+                              const label = intl.formatMessage(appMessages[optionCAF.optionMessages][cafo.value]);
+                              let checked = false;
+                              if (
+                                optionCurrentFilter
+                                && optionCurrentFilter.connectedAttributes
+                                && optionCurrentFilter.connectedAttributes.find(
+                                  (att) => qe(att.value, cafo.value)
+                                )
+                              ) {
+                                checked = true;
+                              }
+                              return {
+                                ...cafo,
+                                label,
+                                checked,
+                                onClick: () => {
+                                  const [value] = optionCurrentFilter.queryValue.split('>');
+
+                                  let newValues = [];
+                                  if (optionCurrentFilter.connectedAttributes) {
+                                    newValues = optionCurrentFilter.connectedAttributes.map((cafo2) => cafo2.value);
+                                  }
+                                  if (checked) {
+                                    newValues = newValues.filter((val) => val !== cafo.value);
+                                  } else {
+                                    newValues = [...newValues, cafo.value];
+                                  }
+                                  onUpdateQuery({
+                                    arg: optionCurrentFilter.query,
+                                    value: newValues.length > 0
+                                      ? `${value}>${optionCAF.attribute}=${newValues.join('|')}`
+                                      : value,
+                                    prevValue: optionCurrentFilter.queryValue,
+                                    replace: true,
+                                  });
+                                },
+                              };
+                            })
+                            .sort((a, b) => {
+                              const valueA = a.order || a.label;
+                              const valueB = b.order || b.label;
+                              if (isNumber(valueA) && isNumber(valueB)) {
+                                return parseInt(valueA, 10) < parseInt(valueB, 10) ? -1 : 1;
+                              }
+                              return valueA < valueB ? -1 : 1;
+                            });
+                          if (cafOptions) {
+                            filter = {
+                              ...filter,
+                              connectionAttributeFilterOptions: {
+                                id: `${connectionOption.type}-${o.value}-caf`, // filterOptionId
+                                filterType: 'pills',
+                                label: `Specify ${intl.formatMessage(appMessages.attributes[optionCAF.attribute])}`,
+                                options: cafOptions,
+                              },
+                            };
+                          }
+                        }
                         return [
                           ...memo2,
-                          {
-                            id: `${connectionOption.type}-${o.value}`, // filterOptionId
-                            filterType: 'dropdownSelect',
-                            dropdownLabel: group.dropdownLabel,
-                            search: group.search,
-                            options: [o],
-                            onClear: (value, query) => {
-                              onUpdateFilters(fromJS([
-                                {
-                                  hasChanged: true,
-                                  query: query || connectionOption.query,
-                                  checked: false,
-                                  value,
-                                },
-                              ]));
-                            },
-                          },
+                          filter,
                         ];
                       }
                       return memo2;
@@ -527,7 +580,7 @@ export const makeQuickFilterGroups = ({
                     filters,
                   );
                 }
-                if (filters.length < 3) {
+                if (filters.length < 5 && !activeWithoutOption) {
                   filters = [
                     ...filters,
                     {
@@ -535,15 +588,18 @@ export const makeQuickFilterGroups = ({
                       filterType: 'dropdownSelect',
                       dropdownLabel: group.dropdownLabel,
                       search: group.search,
-                      label: hasChecked ? 'Add another filter' : null,
+                      label: activeOption ? 'Add another filter' : null,
                       options: filterOptions && filterOptions.options && Object.keys(filterOptions.options).reduce(
                         (memo2, key) => {
-                          const val = filterOptions.options[key];
-                          return val.checked
+                          const o = filterOptions.options[key];
+                          if (activeOption && o.query === 'without') {
+                            return memo2;
+                          }
+                          return o.checked
                             ? memo2
                             : {
                               ...memo2,
-                              [key]: val,
+                              [key]: o,
                             };
                         },
                         {},

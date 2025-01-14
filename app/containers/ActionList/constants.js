@@ -116,6 +116,7 @@ export const CONFIG = {
       message: 'entities.indicators.plural',
       path: API.INDICATORS,
       entityType: 'indicators',
+      sort: 'referenceThenTitle',
       connectionAttributeFilter: {
         addonOnly: true,
         path: 'indicatorConnections',
