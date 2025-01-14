@@ -532,7 +532,6 @@ export function EntitiesTable({
                       {(
                         col.type === 'actorsSimple'
                         || col.type === 'actors'
-                        || col.type === 'actorsViaChildren'
                         || col.type === 'members'
                         || col.type === 'associations'
                         || col.type === 'userActors'

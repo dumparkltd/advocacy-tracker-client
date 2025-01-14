@@ -6,7 +6,6 @@ const LinkTooltip = styled(
   React.forwardRef((p, ref) => <Button {...p} ref={ref} />)
 )`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 12px;
   border-radius: 999px;
   width: 40px;
   height: 40px;

@@ -49,8 +49,9 @@ const LinkTooltip = styled(
   React.forwardRef((p, ref) => <Button {...p} ref={ref} />)
 )`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 12px;
   padding: 0 4px;
+  position: relative;
+  top: -2px;
 `;
 
 export function CellBodyBarChart({

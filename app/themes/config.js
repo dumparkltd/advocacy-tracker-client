@@ -2180,6 +2180,7 @@ export const ACTIONTYPES_CONFIG = {
         type_id: ACTORTYPES.COUNTRY,
         minSize: 'small',
         showOnSingle: false,
+        includeViaParent: true,
       },
       {
         id: `actors_${ACTORTYPES.CONTACT}`,

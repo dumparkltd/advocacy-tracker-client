@@ -75,6 +75,7 @@ export function CellBodyActors({
           }}
         >
           <DropEntityList
+            hasIndirect={!!entity.tooltipIndirect}
             entityType="actors"
             tooltipConfig={entity.tooltip}
             onEntityClick={(id) => {
@@ -82,6 +83,17 @@ export function CellBodyActors({
               onEntityClick(id, ROUTES.ACTOR);
             }}
           />
+          {entity.tooltipIndirect && (
+            <DropEntityList
+              indirect
+              entityType="actors"
+              tooltipConfig={entity.tooltipIndirect}
+              onEntityClick={(id) => {
+                setShowContent(false);
+                onEntityClick(id, ROUTES.ACTOR);
+              }}
+            />
+          )}
         </Drop>
       )}
     </Box>
