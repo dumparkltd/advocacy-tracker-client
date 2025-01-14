@@ -73,6 +73,7 @@ export const CONFIG = {
       option: 'connections',
       connection: 'indicators',
       dropdownLabel: 'Select topic',
+      search: false,
     },
     {
       id: 'taxonomies',

@@ -428,7 +428,6 @@ export function PositionsList({
                 id: 'supportlevel_id',
                 type: 'supportlevel',
                 title: intl.formatMessage(appMessages.attributes.supportlevel_id),
-                align: 'center',
                 info: {
                   type: 'key-categorical',
                   attribute: 'supportlevel_id',

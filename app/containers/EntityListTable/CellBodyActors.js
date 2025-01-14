@@ -38,7 +38,7 @@ export function CellBodyActors({
           title={entity.value}
           alignSelf={align}
         >
-          <Box direction="row" gap="xsmall" align="center">
+          <Box>
             <Label textAlign={align} title={entity.value}>
               {truncateText(entity.value, 25)}
             </Label>

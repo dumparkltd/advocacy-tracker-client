@@ -15,6 +15,7 @@ const Link = styled((p) => <Button as="a" {...p} />)`
     if (align === 'center') return 'center';
     return 'left';
   }};
+  max-width: 100%;
 `;
 
 export function CellBodyPlain({
@@ -54,9 +55,11 @@ export function CellBodyPlain({
             </LabelWrap>
           )}
           {!color && (
-            <Label weight={primary ? 500 : 300} title={value}>
-              {value}
-            </Label>
+            <Box>
+              <Label weight={primary ? 500 : 300} title={value}>
+                {value}
+              </Label>
+            </Box>
           )}
         </Link>
       )}
