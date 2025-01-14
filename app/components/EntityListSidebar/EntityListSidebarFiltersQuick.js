@@ -206,10 +206,11 @@ export const EntityListSidebarFiltersQuick = ({
                   {filter.filterType === 'dropdownSelect' && (
                     <FilterDropdown
                       options={filter.options && Object.values(filter.options)}
-                      onClear={(value) => filter.onClear(value)}
-                      onSelect={(value) => filter.onSelect(value)}
+                      onClear={(value, query) => filter.onClear(value, query)}
+                      onSelect={(value, query) => filter.onSelect(value, query)}
                       buttonLabel={filter.dropdownLabel}
                       type="quickFilters"
+                      hasSearch={typeof filter.search === 'undefined' || filter.search}
                     />
                   )}
                 </Filter>

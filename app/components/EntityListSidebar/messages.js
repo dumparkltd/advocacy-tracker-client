@@ -92,6 +92,10 @@ export default defineMessages({
       id: 'app.components.EntityListSidebar.filterGroupLabel.connections-action-indicators',
       defaultMessage: 'By country position',
     },
+    'connections-actor-action-indicators': {
+      id: 'app.components.EntityListHeader.filterGroupLabel.connections-actor-action-indicators',
+      defaultMessage: 'By country position',
+    },
     'connections-indicator-actions': {
       id: 'app.components.EntityListSidebar.filterGroupLabel.connections-indicator-actions',
       defaultMessage: 'By activity',

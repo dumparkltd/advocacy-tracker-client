@@ -9,6 +9,7 @@ import PropTypes from 'prop-types';
 import { palette } from 'styled-theme';
 import styled from 'styled-components';
 import PrintHide from 'components/styled/PrintHide';
+import { injectIntl, intlShape } from 'react-intl';
 
 import {
   Box, Drop, Text, ResponsiveContext, Layer,
@@ -22,6 +23,7 @@ import Button from 'components/buttons/ButtonSimple';
 
 import { truncateText } from 'utils/string';
 import DropdownSelect from './DropdownSelect';
+import { getOptionLabel } from './Option';
 
 const Styled = styled((p) => <Box {...p} />)`
   position: relative;
@@ -101,12 +103,16 @@ export function FilterDropdown({
   buttonLabel,
   onClear,
   type,
+  hasSearch = true,
+  intl,
 }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropButtonRef = useRef(null);
 
   const activeOption = options.find((o) => o.checked);
   const size = React.useContext(ResponsiveContext);
+
+  const activeOptionLabel = activeOption && getOptionLabel(activeOption, intl);
   return (
     <Styled>
       <Label>{label}</Label>
@@ -165,7 +171,8 @@ export function FilterDropdown({
           type={type}
           onClick={() => {
             if (onClear) {
-              onClear(activeOption.value);
+              console.log(activeOption)
+              onClear(activeOption.value, activeOption.query);
             } else {
               onSelect(null);
             }
@@ -179,7 +186,7 @@ export function FilterDropdown({
             pad={{ left: 'small', right: 'xsmall' }}
           >
             <ButtonLabelActive>
-              {truncateText(activeOption.label, 20)}
+              {activeOptionLabel ? truncateText(activeOptionLabel, 20) : 'undefined'}
             </ButtonLabelActive>
             <Icon
               size="24px"
@@ -196,13 +203,14 @@ export function FilterDropdown({
             target={dropButtonRef.current}
             onClickOutside={() => setDropdownOpen(false)}
             plain
-            margin={{ top: 'xsmall' }}
+            margin={{ top: 'xxsmall' }}
           >
             <DropdownSelect
               options={options}
-              onSelect={({ value }) => {
+              hasSearch={hasSearch}
+              onSelect={({ value, query }) => {
                 setDropdownOpen(false);
-                onSelect(value);
+                onSelect(value, query);
               }}
             />
           </Drop>
@@ -220,10 +228,11 @@ export function FilterDropdown({
           >
             <DropdownSelect
               full
+              hasSearch={hasSearch}
               options={options}
-              onSelect={({ value }) => {
+              onSelect={({ value, query }) => {
                 setDropdownOpen(false);
-                onSelect(value);
+                onSelect(value, query);
               }}
             />
           </Layer>
@@ -240,6 +249,8 @@ FilterDropdown.propTypes = {
   options: PropTypes.array,
   onSelect: PropTypes.func,
   onClear: PropTypes.func,
+  hasSearch: PropTypes.bool,
+  intl: intlShape,
 };
 
-export default FilterDropdown;
+export default injectIntl(FilterDropdown);

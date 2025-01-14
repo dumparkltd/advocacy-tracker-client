@@ -38,9 +38,10 @@ export function DropdownSelect({
   options,
   onSelect,
   full,
+  hasSearch,
 }) {
   const [search, onSetSearch] = useState(null);
-  const optionsSearched = search
+  const optionsSearched = (hasSearch && search)
     ? options.filter((o) => {
       const regex = new RegExp(regExMultipleWords(search), 'i');
       return regex.test(cleanupSearchTarget(o.label));
@@ -48,18 +49,21 @@ export function DropdownSelect({
     : options;
   return (
     <Styled full={full}>
-      <Search full={full}>
-        <TagSearch
-          onSearch={onSetSearch}
-          onClear={() => onSetSearch(null)}
-          searchQuery={search || ''}
-          multiselect
-        />
-      </Search>
+      {hasSearch && (
+        <Search full={full}>
+          <TagSearch
+            onSearch={onSetSearch}
+            onClear={() => onSetSearch(null)}
+            searchQuery={search || ''}
+            multiselect
+          />
+        </Search>
+      )}
       <OptionList
         full={full}
         options={optionsSearched}
         onSelect={onSelect}
+        hasSearch={hasSearch}
       />
     </Styled>
   );
@@ -69,6 +73,7 @@ DropdownSelect.propTypes = {
   options: PropTypes.array,
   onSelect: PropTypes.func,
   full: PropTypes.bool,
+  hasSearch: PropTypes.bool,
 };
 
 export default DropdownSelect;
