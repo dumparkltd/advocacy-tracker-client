@@ -1643,7 +1643,6 @@ export const ACTORTYPES_CONFIG = {
                 },
                 {
                   attribute: 'url',
-                  hideByDefault: true,
                 },
               ],
             ], // rows
@@ -2291,7 +2290,6 @@ export const ACTIONTYPES_CONFIG = {
               ],
               [{
                 attribute: 'url',
-                hideByDefault: true,
                 basis: '2/3',
               }],
               [{
@@ -2557,7 +2555,6 @@ export const ACTIONTYPES_CONFIG = {
               ],
               [{
                 attribute: 'url',
-                hideByDefault: true,
                 basis: '2/3',
               }],
               [{
@@ -2819,7 +2816,6 @@ export const ACTIONTYPES_CONFIG = {
               ],
               [{
                 attribute: 'url',
-                hideByDefault: true,
                 basis: '2/3',
               }],
               [{
@@ -3085,7 +3081,6 @@ export const ACTIONTYPES_CONFIG = {
               ],
               [{
                 attribute: 'url',
-                hideByDefault: true,
                 basis: '2/3',
               }],
               [{
@@ -3359,7 +3354,6 @@ export const ACTIONTYPES_CONFIG = {
               ],
               [{
                 attribute: 'url',
-                hideByDefault: true,
                 basis: '2/3',
               }],
               [{
@@ -3615,7 +3609,6 @@ export const ACTIONTYPES_CONFIG = {
               ],
               [{
                 attribute: 'url',
-                hideByDefault: true,
               }],
               [{
                 attribute: 'description',
