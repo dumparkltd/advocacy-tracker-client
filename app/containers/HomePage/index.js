@@ -10,21 +10,14 @@ import Helmet from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import ReactMarkdown from 'react-markdown';
 import styled, { withTheme } from 'styled-components';
-import Grid from 'grid-styled';
-import Row from 'components/styled/Row';
+import { Box } from 'grommet';
 import Container from 'components/styled/Container';
 
 import { loadEntitiesIfNeeded, updatePath } from 'containers/App/actions';
-import {
-  selectIsSigningIn,
-  selectIsUserVisitor,
-  selectIsSignedIn,
-} from 'containers/App/selectors';
+import { selectIsSignedIn } from 'containers/App/selectors';
 
 import ButtonHero from 'components/buttons/ButtonHero';
-// import ButtonFlat from 'components/buttons/ButtonFlat';
-// import NormalImg from 'components/Img';
-import Loading from 'components/Loading';
+
 import Footer from 'containers/Footer';
 
 import appMessages from 'containers/App/messages';
@@ -98,12 +91,6 @@ const Intro = styled(ReactMarkdown)`
     font-size: ${(props) => props.theme.sizes.print.large};
   }
 `;
-const GridSpace = styled(Grid)`
-  display: none !important;
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    display: inline-block;
-  }
-`;
 
 const MainButton = styled(ButtonHero)`
   max-width: ${({ single }) => single ? 'auto' : '250px'};
@@ -122,14 +109,6 @@ const MainButton = styled(ButtonHero)`
   }
 `;
 
-// const StyledButtonFlat = styled(ButtonFlat)`
-//   color: ${palette('homeIntro', 0)};
-//   @media print {
-//     color: ${palette('text', 1)};
-//     text-decoration: underline;
-//   }
-// `;
-
 export class HomePage extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   UNSAFE_componentWillMount() {
     this.props.loadEntitiesIfNeeded();
@@ -138,7 +117,7 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
   render() {
     const { intl } = this.context;
     const {
-      onPageLink, isUserSigningIn, isUserSignedIn, isUserVisitor,
+      onPageLink, isUserSignedIn,
     } = this.props;
     return (
       <Styled>
@@ -151,68 +130,15 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
         <SectionTop>
           <SectionWrapper>
             <Container noPaddingBottom>
-              <Row>
-                <GridSpace lg={1 / 8} />
-                <Grid lg={3 / 4} sm={1}>
-                  <Title>
-                    <FormattedMessage {...appMessages.app.title} />
-                  </Title>
-                </Grid>
-              </Row>
-              <Row>
-                <GridSpace lg={1 / 6} sm={1 / 8} />
-                <Grid lg={2 / 3} sm={3 / 4} xs={1}>
-                  <Intro source={intl.formatMessage(messages.intro, { isDev: IS_DEV })} />
-                </Grid>
-              </Row>
+              <Title>
+                <FormattedMessage {...appMessages.app.title} />
+              </Title>
+              <Intro source={intl.formatMessage(messages.intro, { isDev: IS_DEV })} />
               <HomeActions>
-                {isUserSigningIn && (
-                  <Row>
-                    <GridSpace lg={1 / 6} sm={1 / 8} />
-                    <Grid lg={2 / 3} sm={3 / 4} xs={1}>
-                      {isUserSigningIn && (
-                        <FormattedMessage {...messages.signingIn} />
-                      )}
-                    </Grid>
-                    <Grid lg={2 / 3} sm={3 / 4} xs={1}>
-                      <Loading />
-                    </Grid>
-                  </Row>
-                )}
-                {!isUserSigningIn && isUserSignedIn && isUserVisitor && (
-                  <Row>
-                    <GridSpace lg={1 / 6} sm={1 / 8} />
-                    <Grid lg={1} sm={1} xs={1}>
-                      <MainButton
-                        space
-                        onClick={() => onPageLink(ROUTES.ACTIONS)}
-                        count={2}
-                      >
-                        <FormattedMessage {...appMessages.nav.actions} />
-                      </MainButton>
-                      <MainButton
-                        space
-                        onClick={() => onPageLink(ROUTES.ACTORS)}
-                        count={2}
-                      >
-                        <FormattedMessage {...appMessages.nav.actors} />
-                      </MainButton>
-                    </Grid>
-                  </Row>
-                )}
-                {!isUserSigningIn && isUserSignedIn && !isUserVisitor && (
-                  <Row>
-                    <GridSpace lg={1 / 6} sm={1 / 8} />
-                    <Intro hint source={intl.formatMessage(messages.noRoleAssigned)} />
-                  </Row>
-                )}
-                {!isUserSigningIn && !isUserSignedIn && (
-                  <Row>
-                    <GridSpace lg={1 / 6} sm={1 / 8} />
-                    <Grid lg={2 / 3} sm={3 / 4} xs={1}>
-                      <Intro hint source={intl.formatMessage(messages.notSignedIn)} />
-                    </Grid>
-                    <Grid lg={1} sm={1} xs={1}>
+                {!isUserSignedIn && (
+                  <Box>
+                    <Intro hint source={intl.formatMessage(messages.notSignedIn)} />
+                    <Box direction="row" gap="xsmall" justify="center">
                       <MainButton
                         space
                         onClick={() => onPageLink(ROUTES.LOGIN)}
@@ -227,8 +153,8 @@ export class HomePage extends React.PureComponent { // eslint-disable-line react
                       >
                         <FormattedMessage {...appMessages.nav.register} />
                       </MainButton>
-                    </Grid>
-                  </Row>
+                    </Box>
+                  </Box>
                 )}
               </HomeActions>
             </Container>
@@ -244,9 +170,7 @@ HomePage.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func.isRequired,
   onPageLink: PropTypes.func.isRequired,
   theme: PropTypes.object.isRequired,
-  isUserSigningIn: PropTypes.bool,
   isUserSignedIn: PropTypes.bool,
-  isUserVisitor: PropTypes.bool,
   dataReady: PropTypes.bool,
 };
 
@@ -255,9 +179,7 @@ HomePage.contextTypes = {
 };
 
 const mapStateToProps = (state) => ({
-  isUserSigningIn: selectIsSigningIn(state),
   isUserSignedIn: selectIsSignedIn(state),
-  isUserVisitor: selectIsUserVisitor(state),
 });
 
 function mapDispatchToProps(dispatch) {

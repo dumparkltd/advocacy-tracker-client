@@ -20,9 +20,6 @@ theme.media = {
   // impactossLogo: [impactossLogo, impactossLogo2x],
 };
 
-// grid-styles settings https://github.com/jxnblk/grid-styled
-theme.gutter = 20;
-
 // global color palettes
 // primary color palette: dark to light
 // 0: main colour, darker, used for links and navigation elements, hover
