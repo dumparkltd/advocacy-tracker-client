@@ -72,7 +72,6 @@ export const CONFIG = {
       title: 'Topics',
       option: 'connections',
       connection: 'indicators',
-      dropdownLabel: 'Select topic',
       search: false,
     },
     {
