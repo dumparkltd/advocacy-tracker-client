@@ -23,14 +23,16 @@ const StyledButton = styled((p) => <Button {...p} />)`
 `;
 
 const Label = styled.div`
-  font-style: ${({ without }) => without ? 'italic' : 'normal'};
+  font-style: ${({ withoutOrAny }) => withoutOrAny ? 'italic' : 'normal'};
 `;
 
 // <Label bold={props.bold} italic={props.isNew}>
 function Option({ option, onSelect, intl }) {
   return (
     <StyledButton onClick={() => onSelect(option)}>
-      <Label without={option.query === 'without'}>
+      <Label
+        withoutOrAny={option.query === 'without' || option.query === 'any'}
+      >
         {getOptionLabel(option, intl)}
       </Label>
     </StyledButton>

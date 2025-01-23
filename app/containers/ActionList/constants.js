@@ -89,7 +89,9 @@ export const CONFIG = {
       option: 'connections',
       connection: 'actors',
       groupByType: true,
-      filteringOptions: [],
+      filteringOptions: [
+        'filter-member-option',
+      ],
       types: [
         ACTORTYPES.COUNTRY,
         ACTORTYPES.REG,

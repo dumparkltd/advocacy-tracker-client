@@ -14,7 +14,7 @@ import { injectIntl, intlShape } from 'react-intl';
 
 // import qe from 'utils/quasi-equals';
 
-// import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
 // import appMessages from 'containers/App/messages';
 import FilterDropdown from 'components/forms/FilterDropdown';
 
@@ -84,11 +84,10 @@ const Filter = styled((p) => (
 
 const FilterTitle = styled((p) => <Text size="small" weight={600} {...p} />)``;
 
-
 export const EntityListSidebarFiltersQuick = ({
   intl,
   onUpdateQuery,
-  // filteringOptions,
+  filteringOptions,
   onUpdateFilters,
   allEntities,
   config,
@@ -150,50 +149,78 @@ export const EntityListSidebarFiltersQuick = ({
         </PanelTitle>
       </PanelTitleWrap>
       <Groups>
-        {groups && groups.map((group) => (
-          <Group
-            key={group.id}
-          >
-            <GroupTitle>
-              {group.label}
-            </GroupTitle>
-            <Filters>
-              {group.filters && group.filters.map((filter) => (
-                <Filter key={filter.id}>
-                  {filter.label && (
-                    <FilterTitle>
-                      {filter.label}
-                    </FilterTitle>
-                  )}
-                  {filter.filterType === 'dropdownSelect' && (
-                    <FilterDropdown
-                      options={filter.options && Object.values(filter.options)}
-                      onClear={(value, query) => filter.onClear(value, query)}
-                      onSelect={(value, query) => filter.onSelect(value, query)}
-                      buttonLabel={filter.dropdownLabel}
-                      type="quickFilters"
-                      hasSearch={typeof filter.search === 'undefined' || filter.search}
-                    />
-                  )}
-                  {filter.connectionAttributeFilterOptions && (
-                    <Box margin={{ top: 'small', bottom: 'medium' }} gap="xxsmall">
-                      {filter.connectionAttributeFilterOptions.label && (
-                        <Text color="hint" size="xxsmall">
-                          {filter.connectionAttributeFilterOptions.label}
-                        </Text>
-                      )}
-                      {filter.connectionAttributeFilterOptions.filterType === 'pills' && (
-                        <FilterPills
-                          options={filter.connectionAttributeFilterOptions.options}
-                        />
-                      )}
-                    </Box>
-                  )}
-                </Filter>
-              ))}
-            </Filters>
-          </Group>
-        ))}
+        {groups && groups.map((group) => {
+          const groupFilteringOptions = group.filteringOptions
+            ? group.filteringOptions.reduce((memo, option) => {
+              const availableOption = filteringOptions.find((o) => o.key === option);
+              return availableOption
+                ? [...memo, availableOption]
+                : memo;
+            }, [])
+            : null;
+
+          return (
+            <Group
+              key={group.id}
+            >
+              <GroupTitle>
+                {group.label}
+              </GroupTitle>
+              {groupFilteringOptions && groupFilteringOptions.length > 0 && (
+                <Box flex={{ shrink: 0 }}>
+                  {groupFilteringOptions.map((option) => {
+                    const o = {
+                      ...option,
+                      onClick: () => {
+                        option.onClick();
+                      },
+                    };
+                    return (
+                      <Box key={option.key}>
+                        <MapOption option={o} type="members" />
+                      </Box>
+                    );
+                  })}
+                </Box>
+              )}
+              <Filters>
+                {group.filters && group.filters.map((filter) => (
+                  <Filter key={filter.id}>
+                    {filter.label && (
+                      <FilterTitle>
+                        {filter.label}
+                      </FilterTitle>
+                    )}
+                    {filter.filterType === 'dropdownSelect' && (
+                      <FilterDropdown
+                        options={filter.options && Object.values(filter.options)}
+                        onClear={(value, query) => filter.onClear(value, query)}
+                        onSelect={(value, query) => filter.onSelect(value, query)}
+                        buttonLabel={filter.dropdownLabel}
+                        type="quickFilters"
+                        hasSearch={typeof filter.search === 'undefined' || filter.search}
+                      />
+                    )}
+                    {filter.connectionAttributeFilterOptions && (
+                      <Box margin={{ top: 'small', bottom: 'medium' }} gap="xxsmall">
+                        {filter.connectionAttributeFilterOptions.label && (
+                          <Text color="hint" size="xxsmall">
+                            {filter.connectionAttributeFilterOptions.label}
+                          </Text>
+                        )}
+                        {filter.connectionAttributeFilterOptions.filterType === 'pills' && (
+                          <FilterPills
+                            options={filter.connectionAttributeFilterOptions.options}
+                          />
+                        )}
+                      </Box>
+                    )}
+                  </Filter>
+                ))}
+              </Filters>
+            </Group>
+          );
+        })}
       </Groups>
     </Styled>
   );

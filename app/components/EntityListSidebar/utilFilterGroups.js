@@ -385,7 +385,7 @@ export const makePanelFilterGroups = ({
   panelGroups = Object.keys(panelGroups).reduce(
     (memo, groupId) => {
       const group = panelGroups[groupId];
-      if (group.includeAnyWithout && group.options && group.options.length > 0) {
+      if (group.includeAnyWithout && group.options && group.options.length > 1) {
         const allAnyOptions = makeAnyWithoutFilterOptions({
           config,
           locationQuery,
@@ -473,7 +473,6 @@ export const makeQuickFilterGroups = ({
                   includeMembers,
                   includeActorMembers,
                   includeActorChildren,
-                  without: false,
                 });
                 let typeLabel;
                 if (intl && connectionOption.entityType) {
@@ -487,6 +486,7 @@ export const makeQuickFilterGroups = ({
                 let filters = [];
                 const activeOption = filterOptions && filterOptions.options && Object.values(filterOptions.options).find((o) => o.checked);
                 const activeWithoutOption = filterOptions && filterOptions.options && Object.values(filterOptions.options).find((o) => o.checked && o.query === 'without');
+                const activeAnyOption = filterOptions && filterOptions.options && Object.values(filterOptions.options).find((o) => o.checked && o.query === 'any');
                 if (activeOption) {
                   filters = Object.values(filterOptions.options).reduce(
                     (memo2, o) => {
@@ -509,10 +509,11 @@ export const makeQuickFilterGroups = ({
                           },
                         };
                         if (
-                          connectionOption
+                          !activeWithoutOption
+                          && !activeAnyOption
+                          && connectionOption
                           && connectionOption.connectionAttributeFilter
                           && connectionOption.connectionAttributeFilter.options
-                          && !activeWithoutOption
                         ) {
                           const optionCAF = connectionOption.connectionAttributeFilter;
                           const optionCurrentFilter = currentFilters && currentFilters.find(
@@ -578,17 +579,14 @@ export const makeQuickFilterGroups = ({
                             };
                           }
                         }
-                        return [
-                          ...memo2,
-                          filter,
-                        ];
+                        return [...memo2, filter];
                       }
                       return memo2;
                     },
                     filters,
                   );
                 }
-                if (filters.length < 5 && !activeWithoutOption) {
+                if (filters.length < 5 && !activeWithoutOption && !activeAnyOption) {
                   filters = [
                     ...filters,
                     {
@@ -631,6 +629,7 @@ export const makeQuickFilterGroups = ({
                   {
                     id: group.connection, // filterGroupId
                     label: group.title,
+                    filteringOptions: group.filteringOptions,
                     show: true,
                     filters,
                   },
@@ -668,6 +667,7 @@ export const makeQuickFilterGroups = ({
                 {
                   id: group.connection, // filterGroupId
                   label: group.title,
+                  filteringOptions: group.filteringOptions,
                   show: true,
                   filters: types && types
                     .filter((type) => {
@@ -687,6 +687,10 @@ export const makeQuickFilterGroups = ({
                       return true;
                     }).reduce(
                       (memo2, type) => {
+                        // skip viaMember types when disabled
+                        if (type.get('viaMember') && !includeMembers) {
+                          return memo2;
+                        }
                         const filterOptions = makeActiveFilterOptions({
                           entities,
                           config,
@@ -704,15 +708,10 @@ export const makeQuickFilterGroups = ({
                           includeMembers,
                           includeActorMembers,
                           includeActorChildren,
-                          without: false,
                         });
                         let { label } = connectionOption;
-                        if (intl) {
-                          const msg = (connectionOption.messageByType
-                            && connectionOption.messageByType.indexOf('{typeid}') > -1
-                          )
-                            ? connectionOption.messageByType.replace('{typeid}', type.get('id'))
-                            : connectionOption.message;
+                        if (intl && connectionOption.messageByType) {
+                          const msg = connectionOption.messageByType.replace('{typeid}', type.get('id'));
                           label = appMessage(intl, msg);
                         }
                         if (type.get('viaMember')) {
@@ -729,8 +728,11 @@ export const makeQuickFilterGroups = ({
                           dropdownLabel = `Select ${typeLabel}`;
                         }
                         let filters = [];
-                        const hasChecked = filterOptions && filterOptions.options && Object.values(filterOptions.options).find((o) => o.checked);
-                        if (hasChecked) {
+                        const activeOption = filterOptions && filterOptions.options && Object.values(filterOptions.options).find((o) => o.checked);
+                        const activeWithoutOption = filterOptions && filterOptions.options && Object.values(filterOptions.options).find((o) => o.checked && o.query === 'without');
+                        const activeAnyOption = filterOptions && filterOptions.options && Object.values(filterOptions.options).find((o) => o.checked && o.query === 'any');
+
+                        if (activeOption) {
                           filters = Object.values(filterOptions.options).reduce(
                             (memo3, option) => {
                               if (option.checked) {
@@ -760,7 +762,7 @@ export const makeQuickFilterGroups = ({
                             filters,
                           );
                         }
-                        if (filters.length < 3) {
+                        if (filters.length < 5 && !activeWithoutOption && !activeAnyOption) {
                           filters = [
                             ...filters,
                             {
@@ -778,11 +780,11 @@ export const makeQuickFilterGroups = ({
                                 },
                                 [],
                               ),
-                              onSelect: (value) => {
+                              onSelect: (value, query) => {
                                 onUpdateFilters(fromJS([
                                   {
                                     hasChanged: true,
-                                    query: connectionOption.query,
+                                    query: query || connectionOption.query,
                                     value,
                                     replace: false,
                                     checked: true,
