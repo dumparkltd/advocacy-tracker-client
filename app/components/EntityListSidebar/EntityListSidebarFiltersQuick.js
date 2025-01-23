@@ -91,6 +91,7 @@ export const EntityListSidebarFiltersQuick = ({
   // filteringOptions,
   onUpdateFilters,
   allEntities,
+  entities,
   config,
   locationQuery,
   taxonomies,
@@ -126,7 +127,7 @@ export const EntityListSidebarFiltersQuick = ({
     intl,
     locationQuery,
     includeMembers: includeMembersWhenFiltering,
-    entities: allEntities,
+    entities,
     connections,
     messages: {
       titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),

@@ -850,6 +850,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
             showFilters={showFilters}
             showEditOptions={showEditOptions}
             allEntities={allEntities}
+            entities={entities}
             entitiesSelected={entitiesSelected}
             onUpdateQuery={onUpdateQuery}
             filteringOptions={filteringOptions}

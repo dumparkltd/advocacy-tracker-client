@@ -79,6 +79,7 @@ export const EntityListSidebar = ({
   showFilters,
   showEditOptions,
   allEntities,
+  entities, // filtered entities
   entitiesSelected,
   onUpdateQuery,
   filteringOptions,
@@ -191,6 +192,7 @@ export const EntityListSidebar = ({
               {showFilters && filterTypeClean === 'quick' && (
                 <EntityListSidebarFiltersQuick
                   allEntities={allEntities}
+                  entities={entities}
                   taxonomies={taxonomies}
                   actortypes={actortypes}
                   filterActortypes={filterActortypes}
@@ -226,6 +228,7 @@ export const EntityListSidebar = ({
 EntityListSidebar.propTypes = {
   entitiesSelected: PropTypes.instanceOf(List),
   allEntities: PropTypes.instanceOf(List),
+  entities: PropTypes.instanceOf(List),
   taxonomies: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
   filterActortypes: PropTypes.instanceOf(Map),

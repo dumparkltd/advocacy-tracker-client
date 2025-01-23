@@ -334,14 +334,14 @@ const selectActionsByActors = createSelector(
           entities,
           query,
           ['actors', 'actorsMembers', 'actorsAssociations'],
-          true, // any
+          false, // true, // any
         );
       }
       return filterEntitiesByMultipleConnections(
         entities,
         query,
         ['actors', 'actorsMembers'],
-        true, // any
+        false, // true, // any
       );
       // return filterEntitiesByConnection(entities, query, 'actors');
     }
@@ -352,7 +352,11 @@ const selectActionsByUsers = createSelector(
   selectActionsByActors,
   selectUserQuery,
   (entities, query) => query
-    ? filterEntitiesByConnection(entities, query, 'users')
+    ? filterEntitiesByConnection(
+      entities,
+      query,
+      'users',
+    )
     : entities
 );
 const selectActionsByIndicators = createSelector(
@@ -367,6 +371,7 @@ const selectActionsByIndicators = createSelector(
         id: 'indicator_id',
         path: 'indicatorConnections',
       },
+      false // any
     )
     : entities
 );
