@@ -54,9 +54,9 @@ import {
 
 import appMessages from 'containers/App/messages';
 import Loading from 'components/Loading';
-import MapContainer from 'containers/MapContainer';
-import SelectIndicators from 'containers/MapContainer/MapKeySettingsPanel/SelectIndicators';
+import SelectIndicators from 'components/SelectIndicators';
 import Icon from 'components/Icon';
+import MapContainer from 'containers/MapContainer';
 import ButtonPrimary from 'components/buttons/ButtonPrimaryNew';
 import ButtonSecondary from 'components/buttons/ButtonSecondaryNew';
 import Button from 'components/buttons/ButtonSimple';

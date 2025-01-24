@@ -6,9 +6,9 @@ import { Box, Text } from 'grommet';
 import TagList from 'components/TagList';
 import PrintHide from 'components/styled/PrintHide';
 import CheckboxOption from 'components/CheckboxOption';
+import SelectIndicators from 'components/SelectIndicators';
 
 import MapKey from './MapKey';
-import SelectIndicators from './SelectIndicators';
 
 const Title = styled((p) => <Text weight={500} {...p} />)`
   margin-right: ${({ hasInfo }) => hasInfo ? 8 : 0}px;
