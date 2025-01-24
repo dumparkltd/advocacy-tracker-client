@@ -30,8 +30,8 @@ import CheckboxOption from 'components/CheckboxOption';
 // import appMessages from 'containers/App/messages';
 // import { hasGroupActors } from 'utils/entities';
 import LeafletWrapper from './LeafletWrapper';
-import MapKey from './MapInfoOptions/MapKey';
-import MapInfoOptions from './MapInfoOptions';
+import MapKey from './MapKeySettingsPanel/MapKey';
+import MapKeySettingsPanel from './MapKeySettingsPanel';
 const MapKeyWrapper = styled((p) => <Box margin={{ horizontal: 'medium', top: 'xsmall', bottom: 'small' }} {...p} />)`
   max-width: 400px;
 `;
@@ -249,7 +249,7 @@ export function MapContainer({
         />
       </MapOuterWrapper>
       {mapInfo && (
-        <MapInfoOptions
+        <MapKeySettingsPanel
           isPrintView={isPrintView}
           option={mapInfo}
           minMaxValues={minMaxValues}

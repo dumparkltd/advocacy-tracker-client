@@ -67,7 +67,7 @@ const Pane = styled((p) => <Box {...p} />)`
 //   }
 // `;
 
-export function MapInfoOptions({
+export function MapKeySettingsPanel({
   option,
   countryMapSubject,
   minMaxValues,
@@ -153,7 +153,7 @@ export function MapInfoOptions({
   );
 }
 
-MapInfoOptions.propTypes = {
+MapKeySettingsPanel.propTypes = {
   option: PropTypes.object,
   filters: PropTypes.array,
   minMaxValues: PropTypes.object,
@@ -162,4 +162,4 @@ MapInfoOptions.propTypes = {
   onClearFilters: PropTypes.func,
 };
 
-export default MapInfoOptions;
+export default MapKeySettingsPanel;
