@@ -40,6 +40,7 @@ const Markdown = styled(ReactMarkdown)`
 const StyledButton = styled(Button)`
   color: ${({ theme, colorButton = 'hint' }) => theme.global.colors[colorButton]};
   stroke: ${({ theme, colorButton = 'hint' }) => theme.global.colors[colorButton]};
+  vertical-align: top;
   &:hover {
     color: ${({ theme }) => theme.global.colors.highlight};
     stroke: ${({ theme }) => theme.global.colors.highlight};
@@ -71,6 +72,7 @@ function InfoOverlay({
         style={inline ? { width: 'auto', display: 'inline' } : null}
         align="center"
         justify="center"
+        direction="row"
       >
         <StyledButton
           colorButton={colorButton}
@@ -89,12 +91,20 @@ function InfoOverlay({
                 <CircleQuestion
                   color="currentColor"
                   size="19px"
+                  style={{
+                    position: 'relative',
+                    top: '-2px',
+                  }}
                 />
               )
               : (
                 <CircleInformation
                   color="currentColor"
                   size="19px"
+                  style={{
+                    position: 'relative',
+                    top: '-2px',
+                  }}
                 />
               )
           }

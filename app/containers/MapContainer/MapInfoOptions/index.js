@@ -124,21 +124,28 @@ export function MapInfoOptions({
             {filters && (
               <TagList filters={filters} onClear={onClearFilters} />
             )}
-            {option.memberOption && (
-              <MapOption option={option.memberOption} type="info" />
+            {(
+              option.memberOption ||
+              (option.infoOptions && option.infoOptions.length > 0)
+            ) && (
+              <Box margin={{ top: 'xsmall' }}>
+                {option.memberOption && (
+                  <MapOption option={option.memberOption} type="info" />
+                )}
+                {option.infoOptions
+                  && option.infoOptions.length > 0
+                  && option.infoOptions.map(
+                    (infoOption, i) => (
+                      <MapOption
+                        key={i}
+                        option={{ ...infoOption, id: infoOption.id || i }}
+                        type="info"
+                      />
+                    )
+                  )
+                }
+              </Box>
             )}
-            {option.infoOptions
-              && option.infoOptions.length > 0
-              && option.infoOptions.map(
-                (infoOption, i) => (
-                  <MapOption
-                    key={i}
-                    option={{ ...infoOption, id: infoOption.id || i }}
-                    type="info"
-                  />
-                )
-              )
-            }
           </Box>
         </Box>
       </Pane>

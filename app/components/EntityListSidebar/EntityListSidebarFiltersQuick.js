@@ -167,7 +167,7 @@ export const EntityListSidebarFiltersQuick = ({
                 {group.label}
               </GroupTitle>
               {groupFilteringOptions && groupFilteringOptions.length > 0 && (
-                <Box flex={{ shrink: 0 }}>
+                <Box flex={{ shrink: 0 }} margin={{ top: 'xsmall' }}>
                   {groupFilteringOptions.map((option) => {
                     const o = {
                       ...option,
