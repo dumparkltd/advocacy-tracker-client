@@ -32,7 +32,7 @@ const StyledInput = styled.input`
 `;
 
 
-export function MapOption({
+export function CheckboxOption({
   option,
   type = 'option',
   plain,
@@ -85,10 +85,10 @@ export function MapOption({
   );
 }
 
-MapOption.propTypes = {
+CheckboxOption.propTypes = {
   option: PropTypes.object,
   type: PropTypes.string,
   plain: PropTypes.bool,
 };
 
-export default MapOption;
+export default CheckboxOption;

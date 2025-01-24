@@ -41,7 +41,7 @@ import { scaleColorCount } from 'containers/MapContainer/utils';
 import MapKeySimple from 'containers/MapContainer/MapKeySimple';
 import { usePrint } from 'containers/App/PrintContext';
 import LeafletWrapper from 'containers/MapContainer/LeafletWrapper';
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 
 // import messages from './messages';
 
@@ -49,7 +49,7 @@ const Styled = styled((p) => <Box {...p} />)`
   z-index: 0;
 `;
 const MapTitle = styled((p) => <Box margin={{ vertical: 'xsmall' }} {...p} />)``;
-const MapOptions = Box;
+
 const MapOuterWrapper = styled((p) => <Box {...p} />)`
   position: relative;
   height: 400px;
@@ -309,19 +309,19 @@ export function ActionMap({
         </Box>
       )}
       {(memberOption || childrenOption || memberChildrenOption) && (
-        <MapOptions gap="xxsmall">
+        <Box gap="xxsmall">
           {memberOption && (
-            <MapOption option={memberOption} type="member" plain />
+            <CheckboxOption option={memberOption} type="member" plain />
           )}
           {childrenOption && (
-            <MapOption option={childrenOption} type="children" plain />
+            <CheckboxOption option={childrenOption} type="children" plain />
           )}
           {memberChildrenOption && (
             <Box margin={{ left: 'medium' }}>
-              <MapOption option={memberChildrenOption} type="children-members" plain />
+              <CheckboxOption option={memberChildrenOption} type="children-members" plain />
             </Box>
           )}
-        </MapOptions>
+        </Box>
       )}
       <Box>
         <MapKeySimple

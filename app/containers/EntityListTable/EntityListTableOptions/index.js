@@ -14,10 +14,10 @@ import ButtonPill from 'components/buttons/ButtonPill';
 import SelectReset from 'components/SelectReset';
 import EntityListSearch from 'components/EntityListSearch';
 
-import MapSubjectOptions from 'containers/MapContainer/MapInfoOptions/MapSubjectOptions';
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 
 import appMessages from 'containers/App/messages';
+import SubjectOptions from './SubjectOptions';
 
 const EntityListSearchWrapper = styled((p) => <Box {...p} />)`
   width: 100%;
@@ -51,7 +51,7 @@ export function EntityListTableOptions({
       <Box direction="row" justify="between" align="center">
         {!isPrintView && subjectOptions && subjectOptions.length > 0 && (
           <Box style={{ position: 'relative', top: '5px' }}>
-            <MapSubjectOptions
+            <SubjectOptions
               inList
               options={subjectOptions}
             />
@@ -112,7 +112,7 @@ export function EntityListTableOptions({
               <Box>
                 {checkboxOptions && checkboxOptions.map(
                   (option, i) => (
-                    <MapOption key={i} option={option} />
+                    <CheckboxOption key={i} option={option} />
                   )
                 )}
               </Box>

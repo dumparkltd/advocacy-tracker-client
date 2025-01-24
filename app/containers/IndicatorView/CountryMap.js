@@ -24,7 +24,7 @@ import qe from 'utils/quasi-equals';
 import isDate from 'utils/is-date';
 // import { hasGroupActors } from 'utils/entities';
 import LeafletWrapper from 'containers/MapContainer/LeafletWrapper';
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 import MapKeySimple from 'containers/MapContainer/MapKeySimple';
 
 const Styled = styled((p) => <Box {...p} />)`
@@ -40,7 +40,7 @@ const MapOuterWrapper = styled((p) => <Box margin={{ horizontal: 'medium' }} {..
   }
 `;
 const MapTitle = styled((p) => <Box margin={{ vertical: 'xsmall' }} {...p} />)``;
-const MapOptions = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)``;
+const CheckboxOptionGroup = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)``;
 const StatementButton = styled((p) => <Button {...p} />)`
   font-weight: 500;
   font-size: 13px;
@@ -183,11 +183,11 @@ export function CountryMap({
           projection="gall-peters"
         />
       </MapOuterWrapper>
-      <MapOptions>
+      <CheckboxOptionGroup>
         <MapTitle>
           <Text weight={600}>UN Member States’ level of support</Text>
         </MapTitle>
-        <MapOption
+        <CheckboxOption
           option={{
             active: includeActorMembers,
             onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
@@ -195,7 +195,7 @@ export function CountryMap({
           }}
           type="member"
         />
-        <MapOption
+        <CheckboxOption
           option={{
             active: !includeInofficial,
             onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
@@ -203,13 +203,13 @@ export function CountryMap({
           }}
           type="official"
         />
-      </MapOptions>
-      <MapOptions>
+      </CheckboxOptionGroup>
+      <CheckboxOptionGroup>
         <MapKeySimple
           options={options}
           title="States by level of support"
         />
-      </MapOptions>
+      </CheckboxOptionGroup>
     </Styled>
   );
 }

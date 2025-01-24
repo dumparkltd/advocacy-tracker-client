@@ -5,9 +5,9 @@ import styled from 'styled-components';
 import { Box, Text } from 'grommet';
 import TagList from 'components/TagList';
 import PrintHide from 'components/styled/PrintHide';
+import CheckboxOption from 'components/CheckboxOption';
 
 import MapKey from './MapKey';
-import MapOption from './MapOption';
 import SelectIndicators from './SelectIndicators';
 
 const Title = styled((p) => <Text weight={500} {...p} />)`
@@ -130,13 +130,13 @@ export function MapInfoOptions({
             ) && (
               <Box margin={{ top: 'xsmall' }}>
                 {option.memberOption && (
-                  <MapOption option={option.memberOption} type="info" />
+                  <CheckboxOption option={option.memberOption} type="info" />
                 )}
                 {option.infoOptions
                   && option.infoOptions.length > 0
                   && option.infoOptions.map(
                     (infoOption, i) => (
-                      <MapOption
+                      <CheckboxOption
                         key={i}
                         option={{ ...infoOption, id: infoOption.id || i }}
                         type="info"

@@ -42,9 +42,9 @@ import {
 } from 'containers/App/selectors';
 
 import FieldGroup from 'components/fields/FieldGroup';
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 
-const MapOptions = styled(
+const CheckboxOptionGroup = styled(
   (p) => <Box margin={{ top: 'medium', bottom: 'small' }} {...p} />
 )``;
 
@@ -103,9 +103,9 @@ export function TabStatements(props) {
   );
   return (
     <div>
-      <MapOptions>
+      <CheckboxOptionGroup>
         {hasMemberOption(typeId) && (
-          <MapOption
+          <CheckboxOption
             option={{
               active: includeActorMembers,
               onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
@@ -114,7 +114,7 @@ export function TabStatements(props) {
             type="member"
           />
         )}
-        <MapOption
+        <CheckboxOption
           option={{
             active: !includeInofficial,
             onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
@@ -122,7 +122,7 @@ export function TabStatements(props) {
           }}
           type="official"
         />
-      </MapOptions>
+      </CheckboxOptionGroup>
       {indicators && (
         <FieldGroup
           seamless

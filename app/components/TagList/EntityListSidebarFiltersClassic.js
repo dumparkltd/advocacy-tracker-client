@@ -17,7 +17,7 @@ import qe from 'utils/quasi-equals';
 
 import { FILTER_FORM_MODEL, EDIT_FORM_MODEL } from 'containers/EntityListForm/constants';
 
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 import EntityListForm from 'containers/EntityListForm';
 import appMessages from 'containers/App/messages';
 
@@ -338,7 +338,7 @@ class EntityListSidebarFiltersClassic extends React.PureComponent { // eslint-di
                 };
                 return (
                   <Box margin={{ top: 'small' }} key={option.key}>
-                    <MapOption option={o} type="members" />
+                    <CheckboxOption option={o} type="members" />
                   </Box>
                 );
               })}

@@ -11,7 +11,7 @@ import {
 
 import { isMinSize } from 'utils/responsive';
 
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 
 import Button from 'components/buttons/ButtonSimple';
 import Dot from 'components/styled/Dot';
@@ -138,7 +138,7 @@ const ComponentOptions = ({
             alignSelf="start"
           >
             {options.map((option) => (
-              <MapOption
+              <CheckboxOption
                 key={option.id}
                 option={option}
               />

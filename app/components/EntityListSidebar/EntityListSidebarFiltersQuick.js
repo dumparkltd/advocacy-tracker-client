@@ -14,7 +14,7 @@ import { injectIntl, intlShape } from 'react-intl';
 
 // import qe from 'utils/quasi-equals';
 
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 // import appMessages from 'containers/App/messages';
 import FilterDropdown from 'components/forms/FilterDropdown';
 
@@ -177,7 +177,7 @@ export const EntityListSidebarFiltersQuick = ({
                     };
                     return (
                       <Box key={option.key}>
-                        <MapOption option={o} type="members" />
+                        <CheckboxOption option={o} type="members" />
                       </Box>
                     );
                   })}
