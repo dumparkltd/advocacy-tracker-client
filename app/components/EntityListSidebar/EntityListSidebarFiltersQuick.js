@@ -8,7 +8,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Box, Text } from 'grommet';
-import { Map, List } from 'immutable';
 
 import { injectIntl, intlShape } from 'react-intl';
 
@@ -20,7 +19,6 @@ import FilterDropdown from 'components/forms/FilterDropdown';
 
 import FilterPills from './FilterPills';
 
-import { makeQuickFilterGroups } from './utilFilterGroups';
 import messages from './messages';
 
 const Styled = styled((p) => (
@@ -86,58 +84,11 @@ const FilterTitle = styled((p) => <Text size="small" weight={600} {...p} />)``;
 
 export const EntityListSidebarFiltersQuick = ({
   intl,
-  onUpdateQuery,
   filteringOptions,
-  onUpdateFilters,
-  allEntities,
   config,
-  locationQuery,
-  taxonomies,
-  connections,
-  connectedTaxonomies,
-  typeId,
-  isAdmin,
-  includeMembersWhenFiltering,
-  includeActorMembers,
-  includeActorChildren,
-  // hasUserRole,
-  filterActortypes,
-  actortypes,
-  resourcetypes,
-  actiontypes,
-  membertypes,
-  filterAssociationtypes,
-  associationtypes,
-  currentFilters,
+  groups,
 }) => {
-  const groups = makeQuickFilterGroups({
-    config,
-    taxonomies,
-    connectedTaxonomies,
-    // hasUserRole,
-    actortypes: filterActortypes || actortypes,
-    resourcetypes,
-    actiontypes,
-    membertypes,
-    associationtypes: filterAssociationtypes || associationtypes,
-    currentFilters,
-    typeId,
-    intl,
-    locationQuery,
-    includeMembers: includeMembersWhenFiltering,
-    entities: allEntities,
-    connections,
-    messages: {
-      titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
-      without: intl.formatMessage(messages.filterFormWithoutPrefix),
-      any: intl.formatMessage(messages.filterFormAnyPrefix),
-    },
-    isAdmin,
-    includeActorMembers,
-    includeActorChildren,
-    onUpdateFilters,
-    onUpdateQuery,
-  });
+  // const groups =
   // console.log('config', config)
   // console.log('groups', groups)
 
@@ -226,29 +177,9 @@ export const EntityListSidebarFiltersQuick = ({
   );
 };
 EntityListSidebarFiltersQuick.propTypes = {
-  allEntities: PropTypes.instanceOf(List),
-  taxonomies: PropTypes.instanceOf(Map),
-  actortypes: PropTypes.instanceOf(Map),
-  filterActortypes: PropTypes.instanceOf(Map),
-  resourcetypes: PropTypes.instanceOf(Map),
-  actiontypes: PropTypes.instanceOf(Map),
-  membertypes: PropTypes.instanceOf(Map),
-  filterAssociationtypes: PropTypes.instanceOf(Map),
-  associationtypes: PropTypes.instanceOf(Map),
-  connections: PropTypes.instanceOf(Map),
-  connectedTaxonomies: PropTypes.instanceOf(Map),
-  locationQuery: PropTypes.instanceOf(Map),
-  onUpdateQuery: PropTypes.func,
-  onUpdateFilters: PropTypes.func,
+  groups: PropTypes.array,
+  filteringOptions: PropTypes.array,
   config: PropTypes.object,
-  // hasUserRole: PropTypes.object,
-  // filteringOptions: PropTypes.array,
-  currentFilters: PropTypes.array,
-  typeId: PropTypes.string,
-  isAdmin: PropTypes.bool,
-  includeMembersWhenFiltering: PropTypes.bool,
-  includeActorMembers: PropTypes.bool,
-  includeActorChildren: PropTypes.bool,
   intl: intlShape.isRequired,
 };
 

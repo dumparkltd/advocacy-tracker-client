@@ -19,6 +19,8 @@ import Button from 'components/buttons/ButtonSimple';
 import Sidebar from 'components/styled/Sidebar';
 import SidebarHeader from 'components/styled/SidebarHeader';
 
+import { makeQuickFilterGroups } from './utilFilterGroups';
+
 import EntityListSidebarFiltersClassic from './EntityListSidebarFiltersClassic';
 import EntityListSidebarFiltersQuick from './EntityListSidebarFiltersQuick';
 
@@ -112,10 +114,46 @@ export const EntityListSidebar = ({
   const onHideSidebar = showFilters ? onHideFilters : onHideEditOptions;
   const hasEntities = allEntities && allEntities.size > 0;
 
-  const hasFilterOptions = showFilters && !!config.quickFilterGroups;
+  let hasQuickFilterOptions = showFilters && !!config.quickFilterGroups;
   let filterTypeClean = filterType || 'classic';
-  if (hasFilterOptions && !filterType) {
-    filterTypeClean = 'quick';
+  let quickFilterGroups;
+  // default to quick filters - if any quickfilters are present
+  if (showFilters && hasQuickFilterOptions) {
+    quickFilterGroups = makeQuickFilterGroups({
+      isAdmin,
+      intl,
+      typeId,
+      config,
+      currentFilters,
+      locationQuery,
+      includeMembers: includeMembersWhenFiltering,
+      includeActorMembers,
+      includeActorChildren,
+      entities: allEntities,
+      taxonomies,
+      connections,
+      connectedTaxonomies,
+      // hasUserRole,
+      actortypes: filterActortypes || actortypes,
+      resourcetypes,
+      actiontypes,
+      membertypes,
+      associationtypes: filterAssociationtypes || associationtypes,
+      messages: {
+        titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
+        without: intl.formatMessage(messages.filterFormWithoutPrefix),
+        any: intl.formatMessage(messages.filterFormAnyPrefix),
+      },
+      onUpdateFilters,
+      onUpdateQuery,
+    });
+    hasQuickFilterOptions = quickFilterGroups && quickFilterGroups.length > 0;
+    if (!hasQuickFilterOptions) {
+      filterTypeClean = 'classic';
+    } else if (!filterType) {
+      // default to quick  if possible
+      filterTypeClean = 'quick';
+    }
   }
 
   const showEditPanel = !showFilters && hasEntities && !!entitiesSelected;
@@ -125,19 +163,19 @@ export const EntityListSidebar = ({
       <Sidebar onClick={(evt) => evt.stopPropagation()}>
         <ScrollableWrapper hasBackground={filterTypeClean === 'quick'}>
           <SidebarHeader
-            hasFilterOptions={hasFilterOptions}
+            hasFilterOptions={hasQuickFilterOptions}
           >
             <Box direction="row" justify="between" align="center">
-              {showFilters && hasFilterOptions && (
+              {showFilters && hasQuickFilterOptions && (
                 <Icon name="filter" alt={intl.formatMessage(messages.header.filter)} />
               )}
-              {showFilters && !hasFilterOptions && <SupTitle title={intl.formatMessage(messages.header.filter)} />}
+              {showFilters && !hasQuickFilterOptions && <SupTitle title={intl.formatMessage(messages.header.filter)} />}
               {!showFilters && <SupTitle title={intl.formatMessage(messages.header.edit)} />}
               <ButtonClose onClick={onHideSidebar}>
                 <Icon name="close" size="30px" />
               </ButtonClose>
             </Box>
-            {hasFilterOptions && (
+            {hasQuickFilterOptions && (
               <Box direction="row" margin={{ top: 'ms' }}>
                 <ButtonFilterType
                   onClick={() => setFilterType('quick')}
@@ -190,29 +228,9 @@ export const EntityListSidebar = ({
               )}
               {showFilters && filterTypeClean === 'quick' && (
                 <EntityListSidebarFiltersQuick
-                  allEntities={allEntities}
-                  taxonomies={taxonomies}
-                  actortypes={actortypes}
-                  filterActortypes={filterActortypes}
-                  actiontypes={actiontypes}
-                  resourcetypes={resourcetypes}
-                  membertypes={membertypes}
-                  filterAssociationtypes={filterAssociationtypes}
-                  associationtypes={associationtypes}
-                  connectedTaxonomies={connectedTaxonomies}
-                  onUpdateQuery={onUpdateQuery}
-                  filteringOptions={filteringOptions}
-                  onUpdateFilters={onUpdateFilters}
-                  connections={connections}
-                  includeActorMembers={includeActorMembers}
-                  includeActorChildren={includeActorChildren}
-                  includeMembersWhenFiltering={includeMembersWhenFiltering}
-                  typeId={typeId}
                   config={config}
-                  isAdmin={isAdmin}
-                  hasUserRole={hasUserRole}
-                  locationQuery={locationQuery}
-                  currentFilters={currentFilters}
+                  groups={quickFilterGroups}
+                  filteringOptions={filteringOptions}
                 />
               )}
             </div>

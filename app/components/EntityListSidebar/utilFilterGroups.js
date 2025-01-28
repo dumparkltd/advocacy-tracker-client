@@ -486,6 +486,9 @@ export const makeQuickFilterGroups = ({
               if (connectionOption.type === 'action-indicators') {
                 validType = INDICATOR_ACTIONTYPES.indexOf(typeId) > -1;
               }
+              if (connectionOption.type === 'actor-action-indicators') {
+                validType = INDICATOR_ACTION_ACTORTYPES.indexOf(typeId) > -1;
+              }
               if (connectionOption.type === 'action-users') {
                 validType = USER_ACTIONTYPES.indexOf(typeId) > -1;
               }
