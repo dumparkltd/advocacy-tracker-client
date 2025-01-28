@@ -23,6 +23,22 @@ import {
   makeActiveFilterOptions,
 } from './utilFilterOptions';
 
+
+// work out existing attribute filter options (ie supportlevels) from entities
+const filterAttributeOptions = ({
+  filterValue,
+  connectionAttributeValue,
+  entities,
+  connectionOption,
+}) => entities.some((e) => {
+  const eConnections = e.get(connectionOption.path);
+  return eConnections && eConnections.some(
+    (c) => qe(c.get(connectionOption.connectionId), filterValue)
+      && qe((c.get(connectionOption.attribute) || 0), connectionAttributeValue)
+  );
+});
+
+
 // figure out filter groups for filter panel
 const makeFilterGroups = ({
   config,
@@ -167,12 +183,11 @@ const makeFilterGroups = ({
                   const filterValue = filter.queryValue.split('>')[0];
                   const attributeOptions = Object.values(optionCAF.options)
                     .filter(
-                      (cafo) => entities.some((e) => {
-                        const eConnections = e.get(optionCAF.path);
-                        return eConnections && eConnections.some(
-                          (c) => qe(c.get(optionCAF.connectionId), filterValue)
-                            && qe(c.get(optionCAF.attribute), cafo.value)
-                        );
+                      (cafo) => filterAttributeOptions({
+                        filterValue,
+                        connectionAttributeValue: cafo.value,
+                        entities,
+                        connectionOption: optionCAF,
                       })
                     );
                   return ({
@@ -527,12 +542,11 @@ export const makeQuickFilterGroups = ({
                           );
                           const cafOptions = Object.values(optionCAF.options)
                             .filter( // only offer available options
-                              (cafo) => entities.some((e) => {
-                                const eConnections = e.get(optionCAF.path);
-                                return eConnections && eConnections.some(
-                                  (c) => qe(c.get(optionCAF.connectionId), o.value)
-                                    && qe(c.get(optionCAF.attribute), cafo.value)
-                                );
+                              (cafo) => filterAttributeOptions({
+                                filterValue: o.value,
+                                connectionAttributeValue: cafo.value,
+                                entities,
+                                connectionOption: optionCAF,
                               })
                             )
                             .map((cafo) => {
