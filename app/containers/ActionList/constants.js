@@ -12,6 +12,8 @@ import {
   AUTHORITY_TAXONOMY,
 } from 'themes/config';
 
+import qe from 'utils/quasi-equals';
+
 export const DEPENDENCIES = [
   API.ACTORS,
   API.ACTIONS,
@@ -124,7 +126,10 @@ export const CONFIG = {
         // query: 'indicatorConnections',
         attribute: 'supportlevel_id',
         message: 'attributes.supportlevel_id',
-        options: ACTION_INDICATOR_SUPPORTLEVELS,
+        options: Object.keys(ACTION_INDICATOR_SUPPORTLEVELS).reduce(
+          (memo, key) => qe(key, 99) ? memo : { ...memo, [key]: ACTION_INDICATOR_SUPPORTLEVELS[key] },
+          {},
+        ),
         optionMessages: 'supportlevels',
       },
     },

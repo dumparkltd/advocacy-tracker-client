@@ -290,7 +290,10 @@ const getRelatedEntities = (
             const myConnectionAttributeValues = connectionAttributeValues.get(entityId.toString());
             entityConnection = connectionAttributes.reduce(
               (memo2, attribute) => {
-                const value = myConnectionAttributeValues.get(attribute.attribute);
+                let value = myConnectionAttributeValues.get(attribute.attribute);
+                if ((typeof value === 'undefined' || value === null) && attribute.fallbackValue) {
+                  value = attribute.fallbackValue;
+                }
                 return memo2.set(
                   attribute.optionAs,
                   attribute.options[value],
@@ -481,6 +484,7 @@ export const prepareEntityRows = ({
             };
           case 'indicators':
             temp = entity.get('indicators');
+            console.log('entity', entity.toJS())
             relatedEntities = getRelatedEntities(
               temp,
               connections.get('indicators'),
@@ -490,6 +494,7 @@ export const prepareEntityRows = ({
                 attribute: 'supportlevel_id',
                 options: ACTION_INDICATOR_SUPPORTLEVELS,
                 optionAs: 'supportlevel',
+                fallbackValue: '0', // no supportlevel assigned
               }],
             );
             return {

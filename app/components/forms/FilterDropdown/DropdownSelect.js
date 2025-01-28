@@ -63,7 +63,7 @@ export function DropdownSelect({
       return valueA < valueB ? -1 : 1;
     }
   );
-  console.log('optionsSorted', optionsSorted)
+  // console.log('optionsSorted', optionsSorted)
   return (
     <Styled full={full}>
       {hasSearch && (

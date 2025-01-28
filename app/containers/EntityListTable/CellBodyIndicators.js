@@ -67,7 +67,7 @@ export function CellBodyIndicators({
                 <Dot size="11px" color={entity.single.getIn(['supportlevel', 'color'])} />
               </Box>
             )}
-            <Label textAlign={align} title={entity.value}>
+            <Label textAlign={align}>
               {truncateText(entity.value, 25)}
             </Label>
           </LabelWrap>

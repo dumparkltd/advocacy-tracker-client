@@ -10,6 +10,8 @@ import {
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
+import qe from 'utils/quasi-equals';
+
 export const DEPENDENCIES = [
   API.ACTORS,
   API.ACTIONS,
@@ -58,6 +60,15 @@ export const CONFIG = {
       types: [ACTORTYPES.COUNTRY],
     },
   },
+  quickFilterGroups: [
+    {
+      id: 'indicators',
+      title: 'Topics',
+      option: 'connections',
+      connection: 'indicators',
+      search: false,
+    },
+  ],
   taxonomies: { // filter by each category
     query: 'cat',
     search: true,
@@ -99,13 +110,17 @@ export const CONFIG = {
       message: 'entities.indicators.plural',
       path: API.INDICATORS,
       entityType: 'indicators',
+      sort: 'referenceThenTitle',
       connectionAttributeFilter: {
         addonOnly: true,
         path: 'indicatorConnections',
         // query: 'indicatorConnections',
         attribute: 'supportlevel_id',
         message: 'attributes.supportlevel_id',
-        options: ACTION_INDICATOR_SUPPORTLEVELS,
+        options: Object.keys(ACTION_INDICATOR_SUPPORTLEVELS).reduce(
+          (memo, key) => qe(key, 99) ? memo : { ...memo, [key]: ACTION_INDICATOR_SUPPORTLEVELS[key] },
+          {},
+        ),
         optionMessages: 'supportlevels',
       },
     },
