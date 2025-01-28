@@ -26,17 +26,37 @@ import {
 
 // work out existing attribute filter options (ie supportlevels) from entities
 const filterAttributeOptions = ({
-  filterValue,
-  connectionAttributeValue,
   entities,
+  filterValue,
   connectionOption,
+  connectionAttributeValue,
 }) => entities.some((e) => {
-  const eConnections = e.get(connectionOption.path);
-  return eConnections && eConnections.some(
-    (c) => qe(c.get(connectionOption.connectionId), filterValue)
-      && qe((c.get(connectionOption.attribute) || 0), connectionAttributeValue)
-  );
+    let eConnections;
+    // actors have the indicator positions stored like
+    //  {
+    //    indicatorPositions: {
+    //      [indicatorId]: [...statementsWithPosition] // array of statements by indicator id
+    //    }
+    //  }
+    if (connectionOption.byIndicator) {
+      eConnections = e.getIn([connectionOption.path, filterValue]);
+      return eConnections && eConnections.some(
+        (c) => qe((c.get(connectionOption.attribute) || 0), connectionAttributeValue)
+      );
+    }
+    // actions have the related indicators stored like
+    //  {
+    //    indicatorConnections: {
+    //      ...statementsWithPosition // object of statements by statement id
+    //    }
+    //  }
+    eConnections = e.get(connectionOption.path);
+    return eConnections && eConnections.some(
+      (c) => qe(c.get(connectionOption.connectionId), filterValue)
+        && qe((c.get(connectionOption.attribute) || 0), connectionAttributeValue)
+    );
 });
+
 
 
 // figure out filter groups for filter panel

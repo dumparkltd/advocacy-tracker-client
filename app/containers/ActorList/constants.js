@@ -113,7 +113,8 @@ export const CONFIG = {
       sort: 'referenceThenTitle',
       connectionAttributeFilter: {
         addonOnly: true,
-        path: 'indicatorConnections',
+        path: 'indicatorPositions',
+        byIndicator: true,
         // query: 'indicatorConnections',
         attribute: 'supportlevel_id',
         connectionId: 'indicator_id',
