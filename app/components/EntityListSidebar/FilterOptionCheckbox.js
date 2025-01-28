@@ -1,6 +1,6 @@
 /*
  *
- * EntityListSidebarFiltersClassic
+ * FilterOptionCheckbox
  *
  */
 

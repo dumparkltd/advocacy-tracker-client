@@ -277,6 +277,7 @@ class EntityListSidebarFiltersClassic extends React.PureComponent { // eslint-di
     const groups = showFilters
       ? makePanelFilterGroups({
         config,
+        entities: allEntities,
         taxonomies,
         connectedTaxonomies,
         hasUserRole,

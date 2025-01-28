@@ -484,7 +484,7 @@ export const prepareEntityRows = ({
             };
           case 'indicators':
             temp = entity.get('indicators');
-            console.log('entity', entity.toJS())
+            // console.log('entity', entity.toJS())
             relatedEntities = getRelatedEntities(
               temp,
               connections.get('indicators'),

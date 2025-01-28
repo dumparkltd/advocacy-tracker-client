@@ -125,6 +125,7 @@ export const CONFIG = {
         path: 'indicatorConnections',
         // query: 'indicatorConnections',
         attribute: 'supportlevel_id',
+        connectionId: 'indicator_id',
         message: 'attributes.supportlevel_id',
         options: Object.keys(ACTION_INDICATOR_SUPPORTLEVELS).reduce(
           (memo, key) => qe(key, 99) ? memo : { ...memo, [key]: ACTION_INDICATOR_SUPPORTLEVELS[key] },

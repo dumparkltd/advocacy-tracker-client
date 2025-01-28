@@ -26,6 +26,7 @@ import {
 // figure out filter groups for filter panel
 const makeFilterGroups = ({
   config,
+  entities,
   taxonomies,
   hasUserRole,
   actortypes,
@@ -128,49 +129,79 @@ const makeFilterGroups = ({
   // connections option group
   if (config.connections) {
     Object.keys(config.connections).forEach((connectionKey) => {
-      const option = config.connections[connectionKey];
+      const connectionOption = config.connections[connectionKey];
       const groupCurrentFilters = currentFilters && currentFilters.filter(
         (f) => qe(f.groupId, connectionKey)
       );
-      if (!option.groupByType) {
+      if (!connectionOption.groupByType) {
         let validType = true;
-        if (option.type === 'action-indicators') {
+        if (connectionOption.type === 'action-indicators') {
           validType = INDICATOR_ACTIONTYPES.indexOf(typeId) > -1;
         }
-        if (option.type === 'actor-action-indicators') {
+        if (connectionOption.type === 'actor-action-indicators') {
           validType = INDICATOR_ACTION_ACTORTYPES.indexOf(typeId) > -1;
         }
-        if (option.type === 'action-users') {
+        if (connectionOption.type === 'action-users') {
           validType = USER_ACTIONTYPES.indexOf(typeId) > -1;
         }
-        if (option.type === 'actor-users') {
+        if (connectionOption.type === 'actor-users') {
           validType = USER_ACTORTYPES.indexOf(typeId) > -1;
         }
         if (validType) {
-          const optionCurrentFilters = currentFilters && currentFilters.filter(
-            (f) => qe(f.groupId, connectionKey)
+          let optionCurrentFilters = currentFilters && currentFilters.filter(
+            (filter) => qe(filter.groupId, connectionKey)
           );
+          // console.log(optionCurrentFilters)
+          if (entities
+            && optionCurrentFilters
+            && connectionOption.connectionAttributeFilter
+            && connectionOption.connectionAttributeFilter.path
+            && connectionOption.connectionAttributeFilter.options
+            && connectionOption.connectionAttributeFilter.attribute
+            && connectionOption.connectionAttributeFilter.connectionId
+          ) {
+            const optionCAF = connectionOption.connectionAttributeFilter;
+            optionCurrentFilters = optionCurrentFilters
+              .map(
+                (filter) => {
+                  const filterValue = filter.queryValue.split('>')[0];
+                  const attributeOptions = Object.values(optionCAF.options)
+                    .filter(
+                      (cafo) => entities.some((e) => {
+                        const eConnections = e.get(optionCAF.path);
+                        return eConnections && eConnections.some(
+                          (c) => qe(c.get(optionCAF.connectionId), filterValue)
+                            && qe(c.get(optionCAF.attribute), cafo.value)
+                        );
+                      })
+                    );
+                  return ({
+                    ...filter,
+                    attributeOptions,
+                  });
+                }
+              );
+          }
           filterGroups[connectionKey] = {
             id: connectionKey, // filterGroupId
-            label: messages.connections(option.type),
+            label: messages.connections(connectionOption.type),
             show: true,
             optionsActiveCount: groupCurrentFilters ? groupCurrentFilters.length : 0,
             options: [{
-              id: option.type, // filterOptionId
-              label: option.label,
-              message: option.message,
+              id: connectionOption.type, // filterOptionId
+              label: connectionOption.label,
               active: !!activeFilterOption
                 && activeFilterOption.group === connectionKey
-                && activeFilterOption.optionId === option.type,
+                && activeFilterOption.optionId === connectionOption.type,
               currentFilters: optionCurrentFilters,
-              ...option,
+              ...connectionOption,
             }],
           };
         }
       } else {
         let types;
         let typeAbout;
-        switch (option.type) {
+          switch (connectionOption.type) {
           case 'actor-actions':
           case 'resource-actions':
           case 'action-parents':
@@ -195,7 +226,7 @@ const makeFilterGroups = ({
           default:
             break;
         }
-        switch (option.type) {
+        switch (connectionOption.type) {
           case 'action-actors':
             typeAbout = 'actortypes_about';
             break;
@@ -228,66 +259,36 @@ const makeFilterGroups = ({
         }
         filterGroups[connectionKey] = {
           id: connectionKey, // filterGroupId
-          label: messages.connections(option.type),
+          label: messages.connections(connectionOption.type),
           show: true,
           optionsActiveCount: groupCurrentFilters ? groupCurrentFilters.length : 0,
-          includeAnyWithout: !!option.groupByType,
+          includeAnyWithout: !!connectionOption.groupByType,
           options: types && types
             .filter((type) => {
-              if (option.type === 'action-parents') {
+              if (connectionOption.type === 'action-parents') {
                 return ACTIONTYPE_ACTIONTYPES[typeId] && ACTIONTYPE_ACTIONTYPES[typeId].indexOf(type.get('id')) > -1;
               }
-              if (option.type === 'action-children') {
+              if (connectionOption.type === 'action-children') {
                 const validActiontypeIds = Object.keys(ACTIONTYPE_ACTIONTYPES).filter((actiontypeId) => {
                   const actiontypeIds = ACTIONTYPE_ACTIONTYPES[actiontypeId];
                   return actiontypeIds && actiontypeIds.indexOf(typeId) > -1;
                 });
                 return validActiontypeIds.indexOf(type.get('id')) > -1;
               }
-              if (option.typeFilterPass === 'reverse') {
-                return !type.getIn(['attributes', option.typeFilter]);
-              }
-              if (!option.typeFilter) return true;
-              let attribute = option.typeFilter;
-              const notFilter = startsWith(option.typeFilter, '!');
-              if (notFilter) {
-                attribute = option.typeFilter.substring(1);
-              }
-              const typeCondition = notFilter
-                ? !type.getIn(['attributes', attribute])
-                : type.getIn(['attributes', attribute]);
-              if (includeMembers && option.typeMemberFilter) {
-                return typeCondition || type.getIn(['attributes', option.typeMemberFilter]);
-              }
-              return typeCondition;
+              return true;
             })
             .reduce((memo, type) => {
-              let memberType;
-              if (option.typeFilter) {
-                let attribute = option.typeFilter;
-                const notFilter = startsWith(option.typeFilter, '!');
-                if (notFilter) {
-                  attribute = option.typeFilter.substring(1);
-                }
-                const properType = notFilter
-                  ? !type.getIn(['attributes', attribute])
-                  : type.getIn(['attributes', attribute]);
-                if (includeMembers && option.typeMemberFilter) {
-                  memberType = !properType && type.getIn(['attributes', option.typeMemberFilter]);
-                }
-              }
-
-              const id = option.attribute || type.get('id');
+              const id = connectionOption.attribute || type.get('id');
               const optionCurrentFilters = currentFilters && currentFilters.filter(
                 (f) => qe(f.optionId, id) && qe(f.groupId, connectionKey)
               );
-              let { label } = option;
+              let { label } = connectionOption;
               if (intl) {
-                const msg = (option.messageByType
-                  && option.messageByType.indexOf('{typeid}') > -1
+                const msg = (connectionOption.messageByType
+                  && connectionOption.messageByType.indexOf('{typeid}') > -1
                 )
-                  ? option.messageByType.replace('{typeid}', type.get('id'))
-                  : option.message;
+                  ? connectionOption.messageByType.replace('{typeid}', type.get('id'))
+                  : connectionOption.message;
                 label = appMessage(intl, msg);
               }
               if (type.get('viaMember')) {
@@ -301,12 +302,11 @@ const makeFilterGroups = ({
                   && appMessages[typeAbout]
                   && appMessages[typeAbout][type.get('id')]
                   && intl.formatMessage(appMessages[typeAbout][type.get('id')]),
-                color: option.entityType,
+                color: connectionOption.entityType,
                 active: !!activeFilterOption
                   && activeFilterOption.group === connectionKey
                   && activeFilterOption.optionId === id,
                 currentFilters: optionCurrentFilters,
-                memberType,
               });
             }, []),
         };
@@ -347,6 +347,7 @@ const makeFilterGroups = ({
 
 export const makePanelFilterGroups = ({
   config,
+  entities,
   taxonomies,
   connectedTaxonomies,
   hasUserRole,
@@ -366,6 +367,7 @@ export const makePanelFilterGroups = ({
   let panelGroups = null;
   panelGroups = makeFilterGroups({
     config,
+    entities,
     taxonomies,
     connectedTaxonomies,
     hasUserRole,
@@ -511,15 +513,28 @@ export const makeQuickFilterGroups = ({
                         if (
                           !activeWithoutOption
                           && !activeAnyOption
+                          && entities
                           && connectionOption
                           && connectionOption.connectionAttributeFilter
+                          && connectionOption.connectionAttributeFilter.path
                           && connectionOption.connectionAttributeFilter.options
+                          && connectionOption.connectionAttributeFilter.attribute
+                          && connectionOption.connectionAttributeFilter.connectionId
                         ) {
                           const optionCAF = connectionOption.connectionAttributeFilter;
                           const optionCurrentFilter = currentFilters && currentFilters.find(
                             (f) => qe(f.query, o.query) && qe(f.queryValue.split('>')[0], o.value)
                           );
                           const cafOptions = Object.values(optionCAF.options)
+                            .filter( // only offer available options
+                              (cafo) => entities.some((e) => {
+                                const eConnections = e.get(optionCAF.path);
+                                return eConnections && eConnections.some(
+                                  (c) => qe(c.get(optionCAF.connectionId), o.value)
+                                    && qe(c.get(optionCAF.attribute), cafo.value)
+                                );
+                              })
+                            )
                             .map((cafo) => {
                               const label = intl.formatMessage(appMessages[optionCAF.optionMessages][cafo.value]);
                               let checked = false;
