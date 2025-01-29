@@ -41,34 +41,38 @@ const FilterPills = ({
     alignSelf="start"
     style={{ position: 'relative' }}
   >
-    {options && options.map((tag) => (
-      <TagButton
-        key={tag.value}
-        selected={tag.checked}
-        primary={primary}
-        hasDot={!!tag.color}
-        onClick={() => {
-          if (tag.onClick) {
-            tag.onClick();
-          } else if (onClick) {
-            onClick({
-              value: tag.value,
-              query: tag.query,
-              checked: !tag.checked,
-            });
-          }
-        }}
-      >
-        <Box direction="row" align="center" gap="xsmall">
-          {tag.color && (
-            <Dot size="11px" color={tag.color} />
-          )}
-          <Text size={primary ? 'xsmall' : 'xxxsmall'}>
-            {showCount && tag.count ? `${tag.label} (${tag.count})` : tag.label}
-          </Text>
-        </Box>
-      </TagButton>
-    ))}
+    {options && options.map((tag, i) => {
+      let label = tag.label;
+      if (showCount && tag.count) {
+        label = `${label} (${tag.count})`;
+      }
+      return (
+        <TagButton
+          key={tag.value}
+          selected={tag.checked}
+          primary={primary}
+          hasDot={!!tag.color}
+          onClick={() => {
+            if (tag.onClick) {
+              tag.onClick();
+            } else if (onClick) {
+              onClick({
+                value: tag.value,
+                query: tag.query,
+                checked: !tag.checked,
+              });
+            }
+          }}
+        >
+          <Box direction="row" align="center" gap="xsmall">
+            {tag.color && (
+              <Dot size="11px" color={tag.color} />
+            )}
+            <Text size={primary ? 'xsmall' : 'xxxsmall'}>{label}</Text>
+          </Box>
+        </TagButton>
+      );
+    })}
   </Box>
 );
 

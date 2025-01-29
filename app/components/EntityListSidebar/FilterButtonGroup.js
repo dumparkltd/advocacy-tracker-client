@@ -3,7 +3,9 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import { Box, Text } from 'grommet';
+import { intlShape, injectIntl } from 'react-intl';
 
+import appMessage from 'utils/app-message';
 
 import Button from 'components/buttons/ButtonSimple';
 import Dot from 'components/styled/Dot';
@@ -36,35 +38,40 @@ const FilterButtonGroup = ({
   options,
   onClick,
   showCount,
+  intl,
 }) => (
   <Box
     direction="row"
     alignSelf="start"
     style={{ position: 'relative' }}
   >
-    {options && options.map((tag, i) => (
-      <TagButton
-        key={tag.value}
-        first={i === 0}
-        last={i === options.length - 1}
-        selected={tag.checked}
-        onClick={() => {
-          if (tag.onClick) {
-            tag.onClick();
-          } else if (onClick) {
-            onClick({
-              value: tag.value,
-              query: tag.query,
-              checked: !tag.checked,
-            });
-          }
-        }}
-      >
-        <Text size="xxsmall">
-          {showCount && tag.count ? `${tag.label} (${tag.count})` : tag.label}
-        </Text>
-      </TagButton>
-    ))}
+    {options && options.map((tag, i) => {
+      let label = tag.label || appMessage(intl, tag.message);
+      if (showCount && tag.count) {
+        label = `${label} (${tag.count})`;
+      }
+      return (
+        <TagButton
+          key={tag.value}
+          first={i === 0}
+          last={i === options.length - 1}
+          selected={tag.checked}
+          onClick={() => {
+            if (tag.onClick) {
+              tag.onClick();
+            } else if (onClick) {
+              onClick({
+                value: tag.value,
+                query: tag.query,
+                checked: !tag.checked,
+              });
+            }
+          }}
+        >
+          <Text size="xxsmall">{label}</Text>
+        </TagButton>
+      )
+    })}
   </Box>
 );
 
@@ -72,5 +79,6 @@ FilterButtonGroup.propTypes = {
   options: PropTypes.array,
   onClick: PropTypes.func,
   showCount: PropTypes.bool,
+  intl: intlShape,
 };
-export default FilterButtonGroup;
+export default injectIntl(FilterButtonGroup);

@@ -73,12 +73,22 @@ export const CONFIG = {
   },
   quickFilterGroups: [
     {
+      id: 'attributes',
+      title: 'Confidentiality',
+      option: 'attributes',
+      attributes: [{
+        attribute: 'private',
+        filterType: 'buttonGroup',
+        multiple: false,
+      }],
+    },
+    {
       id: `taxonomies-${AUTHORITY_TAXONOMY}`,
       title: 'Levels of authority',
       option: 'taxonomies',
       taxonomies: [{
         id: AUTHORITY_TAXONOMY,
-        filterType: 'buttonGroup',
+        filterType: 'pills',
       }],
     },
     {
@@ -87,7 +97,7 @@ export const CONFIG = {
       option: 'taxonomies',
       taxonomies: [{
         id: PRIORITY_TAXONOMY,
-        filterType: 'buttonGroup',
+        filterType: 'pills',
       }],
     },
     {

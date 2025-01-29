@@ -121,6 +121,7 @@ export const EntityListSidebar = ({
   if (showFilters && hasQuickFilterOptions) {
     quickFilterGroups = makeQuickFilterGroups({
       isAdmin,
+      hasUserRole,
       intl,
       typeId,
       config,
@@ -133,7 +134,6 @@ export const EntityListSidebar = ({
       taxonomies,
       connections,
       connectedTaxonomies,
-      // hasUserRole,
       actortypes: filterActortypes || actortypes,
       resourcetypes,
       actiontypes,

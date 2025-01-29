@@ -477,6 +477,7 @@ export const makeQuickFilterGroups = ({
   includeActorChildren,
   onUpdateFilters,
   onUpdateQuery,
+  hasUserRole,
 }) => {
   const groups = config.quickFilterGroups.reduce(
     (memo, group) => {
@@ -485,6 +486,7 @@ export const makeQuickFilterGroups = ({
           group.option === 'connections'
           && group.connection
           && config.connections[group.connection]
+          && entities
         ) {
           const connectionOption = config.connections[group.connection];
           if (!group.groupByType) {
@@ -865,6 +867,7 @@ export const makeQuickFilterGroups = ({
           && group.taxonomies
           && config.taxonomies
           && taxonomies
+          && entities
         ) {
           // console.log('config', config.taxonomies)
           // console.log('taxonomies', taxonomies && taxonomies.toJS())
@@ -876,7 +879,7 @@ export const makeQuickFilterGroups = ({
               if (taxonomies.get(activeTaxId)) {
                 let label = tax.label;
                 if (!label && group.taxonomies.length > 1 && appMessages.entities.taxonomies[tax.id]) {
-                  label = intl.formatMessage(appMessages.entities.taxonomies[tax.id].single)
+                  label = intl.formatMessage(appMessages.entities.taxonomies[tax.id].single);
                 }
                 const taxOptions = makeTaxonomyFilterOptions({
                   entities,
@@ -895,6 +898,72 @@ export const makeQuickFilterGroups = ({
                       label,
                       filterType: tax.filterType,
                       options: Object.values(taxOptions.options),
+                      onClick: ({ value, query, checked }) => {
+                        onUpdateFilters(fromJS([
+                          {
+                            hasChanged: true,
+                            query: query || config.taxonomies.query,
+                            value,
+                            replace: false,
+                            checked,
+                          },
+                        ]));
+                      },
+                    },
+                  ];
+                }
+              }
+              return memo2;
+            },
+            [],
+          );
+          // console.log('filters', filters)
+          return [
+            ...memo,
+            {
+              id: group.id, // filterGroupId
+              label: group.title,
+              filters,
+            },
+          ];
+        }
+
+        // console.log(group, config.attributes)
+        if (
+          group.option === 'attributes'
+          && group.attributes
+          && config.attributes
+          && config.attributes.options
+        ) {
+          const filters = group.attributes.reduce(
+            (memo2, att) => {
+              const attConfig = config.attributes.options.find(
+                (o) => o.attribute === att.attribute
+              );
+              if (
+                attConfig
+                && (
+                  typeof attConfig.role === 'undefined'
+                  || (hasUserRole && hasUserRole[attConfig.role])
+                )
+              ) {
+                const attOptions = makeAttributeFilterOptions({
+                  config: config.attributes,
+                  activeOptionId: attConfig.attribute,
+                  locationQueryValue: locationQuery.get('where'),
+                });
+                if (attOptions && attOptions.options && Object.keys(attOptions.options).length > 0) {
+                  let label = att.label;
+                  if (!label && group.attributes.length > 1 && attOptions.message) {
+                    label = appMessage(intl, attOptions.message);
+                  }
+                  return [
+                    ...memo2,
+                    {
+                      id: att.attribute,
+                      label,
+                      filterType: att.filterType,
+                      options: Object.values(attOptions.options),
                       onClick: ({ value, query, checked }) => {
                         onUpdateFilters(fromJS([
                           {

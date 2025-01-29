@@ -4272,8 +4272,8 @@ export const PUBLISH_STATUSES = [
 ];
 // Entity publish statuses
 export const PRIVACY_STATUSES = [
-  { value: false, message: 'ui.privacyStatuses.public' },
   { value: true, message: 'ui.privacyStatuses.private' },
+  { value: false, message: 'ui.privacyStatuses.public' },
 ];
 export const NOTIFICATION_STATUSES = [
   { value: true, message: 'ui.notificationStatuses.enabled' },
