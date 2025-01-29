@@ -171,7 +171,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     super();
     this.state = {
       deleteConfirmed: false,
-      stepActive: null,
       stepsSeen: [],
     };
   }
@@ -210,8 +209,10 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     this.setState({ deleteConfirmed: confirm });
   }
 
-  setStepActive = (stepActive) => {
-    this.setState({ stepActive });
+  setStepActive = (stepActive, formData) => {
+    // this.setState({ stepActive });
+    this.props.handleUpdate(formData.set('step', stepActive));
+
   }
 
   addStepSeen = (stepSeen) => {
@@ -241,7 +242,8 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       hasFormChanges,
       // onBlockNavigation,
     } = this.props;
-    const { deleteConfirmed, stepActive, stepsSeen } = this.state;
+    const { deleteConfirmed, stepsSeen } = this.state;
+    const stepActive = formData.get('step');
     const closeMultiselectOnClickOutside = !newEntityModal || inModal;
     let byStep = fieldsByStep;
     const footerStep = byStep.find((step) => step.id === 'footer');
@@ -368,7 +370,22 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                     disabled={isBlocked}
                     onClick={(e) => {
                       if (e && e.preventDefault) e.preventDefault();
-                      handleSubmitRemote(e);
+                      handleUpdate(formData.set('close', false));
+                      handleSubmitRemote();
+                    }}
+                  >
+                    Save
+                  </ButtonSubmitSubtle>
+                </Box>
+                <Box>
+                  <ButtonSubmitSubtle
+                    type="button"
+                    disabled={isBlocked}
+                    onClick={(e) => {
+                      if (e && e.preventDefault) e.preventDefault();
+                      console.log(formData && formData.toJS())
+                      handleUpdate(formData.set('close', true));
+                      handleSubmitRemote(); // close
                     }}
                   >
                     Save & Close
@@ -424,7 +441,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                               onClick={(evt) => {
                                 if (evt !== undefined && evt.preventDefault) evt.preventDefault();
                                 if (!isActive) {
-                                  this.setStepActive(step.id);
+                                  this.setStepActive(step.id, formData);
                                   this.addStepSeen(cleanStepActive);
                                 }
                               }}
@@ -478,7 +495,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                       onClick={(evt) => {
                         if (evt && evt.preventDefault) evt.preventDefault();
                         if (byStep[prevStepIndex]) {
-                          this.setStepActive(byStep[prevStepIndex].id);
+                          this.setStepActive(byStep[prevStepIndex].id, formData);
                           this.addStepSeen(activeStep.id);
                         }
                       }}
@@ -498,7 +515,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                       onClick={(evt) => {
                         if (evt && evt.preventDefault) evt.preventDefault();
                         if (byStep[nextStepIndex]) {
-                          this.setStepActive(byStep[nextStepIndex].id);
+                          this.setStepActive(byStep[nextStepIndex].id, formData);
                           this.addStepSeen(byStep[nextStepIndex].id);
                         }
                       }}

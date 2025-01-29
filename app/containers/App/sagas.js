@@ -574,7 +574,11 @@ export function* saveEntitySaga({ data }, updateClient = true, multiple = false)
     yield put(saveSuccess(dataTS));
     yield put(blockNavigation(false));
     if (!multiple && data.redirect) {
-      yield put(updatePath(data.redirect, { replace: true }));
+      let args = { replace: true };
+      if (data.redirectQuery) {
+        args = { ...args, query: data.redirectQuery };
+      }
+      yield put(updatePath(data.redirect, args));
     }
     if (updateClient && data.invalidateEntitiesOnSuccess) {
       yield all(
@@ -795,10 +799,11 @@ export function* newEntitySaga({ data }, updateClient = true, multiple = false) 
           }
         ));
       } else {
-        yield put(updatePath(
-          `${data.redirect}/${entityCreated.data.id}`,
-          { replace: true },
-        ));
+        let args = { replace: true };
+        if (data.redirectQuery) {
+          args = { ...args, query: data.redirectQuery };
+        }
+        yield put(updatePath(`${data.redirect}/${entityCreated.data.id}`, args));
       }
     }
     if (updateClient && data.invalidateEntitiesOnSuccess) {
