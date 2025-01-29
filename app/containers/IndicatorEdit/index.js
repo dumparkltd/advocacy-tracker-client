@@ -51,6 +51,7 @@ import {
   selectIsUserMember,
   selectSessionUserId,
   selectTaxonomiesWithCategories,
+  selectStepQuery,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -101,6 +102,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
     const {
       viewEntity,
       actionsByActiontype,
+      step,
     } = props;
     return viewEntity
       ? Map({
@@ -112,6 +114,8 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
         associatedActionsByActiontype: actionsByActiontype
           ? actionsByActiontype.map((actions) => entityOptions({ entities: actions }))
           : Map(),
+        step,
+
       })
       : Map();
   };
@@ -246,6 +250,7 @@ IndicatorEdit.propTypes = {
   onServerErrorDismiss: PropTypes.func.isRequired,
   connectedTaxonomies: PropTypes.object,
   myId: PropTypes.string,
+  step: PropTypes.string,
 };
 
 IndicatorEdit.contextTypes = {
@@ -262,6 +267,7 @@ const mapStateToProps = (state, props) => ({
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   myId: selectSessionUserId(state),
+  step: selectStepQuery(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

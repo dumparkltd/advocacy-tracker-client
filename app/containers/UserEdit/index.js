@@ -41,6 +41,7 @@ import {
   selectIsUserMember,
   selectIsUserAdmin,
   selectTaxonomiesWithCategories,
+  selectStepQuery,
 } from 'containers/App/selectors';
 
 import {
@@ -97,6 +98,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
       actorsByActortype,
       actionsByActiontype,
       isAdmin,
+      step,
     } = props;
 
     return Map({
@@ -123,6 +125,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
           })
         )
         : Map(),
+      step,
     });
   };
 
@@ -241,6 +244,7 @@ UserEdit.propTypes = {
   connectedTaxonomies: PropTypes.object,
   actorsByActortype: PropTypes.object,
   actionsByActiontype: PropTypes.object,
+  step: PropTypes.object,
 };
 
 UserEdit.contextTypes = {
@@ -258,6 +262,7 @@ const mapStateToProps = (state, props) => ({
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   isMember: selectIsUserMember(state),
   isAdmin: selectIsUserAdmin(state),
+  step: selectStepQuery(state),
 });
 
 function mapDispatchToProps(dispatch) {

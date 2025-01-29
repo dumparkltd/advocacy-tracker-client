@@ -42,6 +42,7 @@ import {
   selectReadyForAuthCheck,
   selectIsUserAdmin,
   selectSessionUserId,
+  selectStepQuery,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -88,7 +89,7 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
-    const { viewEntity } = props;
+    const { viewEntity, step } = props;
     return viewEntity
       ? Map({
         id: viewEntity.get('id'),
@@ -96,6 +97,7 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
           (oldVal, newVal) => oldVal === null ? newVal : oldVal,
           FORM_INITIAL.get('attributes')
         ),
+        step,
       })
       : Map();
   };
@@ -197,6 +199,7 @@ PageEdit.propTypes = {
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   myId: PropTypes.string,
+  step: PropTypes.string,
 };
 
 PageEdit.contextTypes = {
@@ -211,6 +214,7 @@ const mapStateToProps = (state, props) => ({
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),
   myId: selectSessionUserId(state),
+  step: selectStepQuery(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
