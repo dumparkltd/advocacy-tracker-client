@@ -52,6 +52,7 @@ import {
   selectSessionUserId,
   selectActionIndicatorsForAction,
   selectTaxonomiesWithCategories,
+  selectStepQuery,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -117,6 +118,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       subActionsByActiontype,
       indicatorOptions,
       userOptions,
+      step,
     } = props;
     return viewEntity
       ? Map({
@@ -144,6 +146,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
         associatedUsers: userOptions
           ? entityOptions({ entities: userOptions })
           : Map(),
+        step,
       })
       : Map();
   };
@@ -296,6 +299,7 @@ ActionEdit.propTypes = {
   onServerErrorDismiss: PropTypes.func.isRequired,
   myId: PropTypes.string,
   entityIndicatorConnections: PropTypes.object,
+  step: PropTypes.string,
 };
 
 ActionEdit.contextTypes = {
@@ -320,6 +324,7 @@ const mapStateToProps = (state, { params }) => ({
   userOptions: selectUserOptions(state, params.id),
   myId: selectSessionUserId(state),
   entityIndicatorConnections: selectActionIndicatorsForAction(state, params.id),
+  step: selectStepQuery(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
