@@ -33,6 +33,7 @@ const FilterPills = ({
   options,
   onClick,
   primary,
+  showCount,
 }) => (
   <Box
     wrap
@@ -63,7 +64,7 @@ const FilterPills = ({
             <Dot size="11px" color={tag.color} />
           )}
           <Text size={primary ? 'xsmall' : 'xxxsmall'}>
-            {tag.label}
+            {showCount && tag.count ? `${tag.label} (${tag.count})` : tag.label}
           </Text>
         </Box>
       </TagButton>
@@ -75,5 +76,6 @@ FilterPills.propTypes = {
   options: PropTypes.array,
   onClick: PropTypes.func,
   primary: PropTypes.bool,
+  showCount: PropTypes.bool,
 };
 export default FilterPills;

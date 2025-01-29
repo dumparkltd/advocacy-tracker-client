@@ -178,11 +178,13 @@ export const EntityListSidebarFiltersQuick = ({
                           <FilterButtonGroup
                             options={filter.options.filter((o) => o.query !== 'without')}
                             onClick={filter.onClick}
+                            showCount
                           />
                           {filter.options.find((o) => o.query === 'without') && (
                             <FilterButtonGroup
                               options={filter.options.filter((o) => o.query === 'without')}
                               onClick={filter.onClick}
+                              showCount
                             />
                           )}
                         </Box>
@@ -191,6 +193,7 @@ export const EntityListSidebarFiltersQuick = ({
                         <Box gap="xsmall">
                           <FilterPills
                             primary
+                            showCount
                             options={filter.options}
                             onClick={filter.onClick}
                           />

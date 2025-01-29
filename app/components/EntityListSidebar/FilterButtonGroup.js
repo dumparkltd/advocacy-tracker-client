@@ -35,6 +35,7 @@ const TagButton = styled((p) => <Button {...p} />)`
 const FilterButtonGroup = ({
   options,
   onClick,
+  showCount,
 }) => (
   <Box
     direction="row"
@@ -59,8 +60,8 @@ const FilterButtonGroup = ({
           }
         }}
       >
-        <Text size="xsmall">
-          {tag.label}
+        <Text size="xxsmall">
+          {showCount && tag.count ? `${tag.label} (${tag.count})` : tag.label}
         </Text>
       </TagButton>
     ))}
@@ -70,5 +71,6 @@ const FilterButtonGroup = ({
 FilterButtonGroup.propTypes = {
   options: PropTypes.array,
   onClick: PropTypes.func,
+  showCount: PropTypes.bool,
 };
 export default FilterButtonGroup;
