@@ -72,7 +72,7 @@ const DropMenu = ({
           />
         </Layer>
       )}
-      {open && isMinSize(size, 'large') && (
+      {open && isMinSize(size, 'medium') && (
         <Drop
           target={ref.current}
           responsive
