@@ -140,6 +140,13 @@ export const CONFIG = {
         ACTORTYPES.GROUP,
       ],
     },
+    {
+      id: 'users',
+      title: 'WWF staff',
+      option: 'connections',
+      connection: 'users',
+      search: false,
+    },
   ],
   taxonomies: { // filter by each category
     query: 'cat',

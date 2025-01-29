@@ -118,6 +118,13 @@ export const CONFIG = {
       connection: 'indicators',
       search: false,
     },
+    {
+      id: 'users',
+      title: 'WWF staff',
+      option: 'connections',
+      connection: 'users',
+      search: false,
+    },
   ],
   taxonomies: { // filter by each category
     query: 'cat',
