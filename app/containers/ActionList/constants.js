@@ -10,6 +10,9 @@ import {
   ACTORTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
   AUTHORITY_TAXONOMY,
+  PRIORITY_TAXONOMY,
+  INTERACTION_TYPE_TAXONOMY,
+  EVENT_TYPE_TAXONOMY,
 } from 'themes/config';
 
 import qe from 'utils/quasi-equals';
@@ -70,20 +73,47 @@ export const CONFIG = {
   },
   quickFilterGroups: [
     {
+      id: `taxonomies-${AUTHORITY_TAXONOMY}`,
+      title: 'Levels of authority',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: AUTHORITY_TAXONOMY,
+        filterType: 'buttonGroup',
+      }],
+    },
+    {
+      id: `taxonomies-${PRIORITY_TAXONOMY}`,
+      title: 'Priorities',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: PRIORITY_TAXONOMY,
+        filterType: 'buttonGroup',
+      }],
+    },
+    {
+      id: `taxonomies-${INTERACTION_TYPE_TAXONOMY}`,
+      title: 'Interaction types',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: INTERACTION_TYPE_TAXONOMY,
+        filterType: 'pills',
+      }],
+    },
+    {
+      id: `taxonomies-${EVENT_TYPE_TAXONOMY}`,
+      title: 'Event types',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: EVENT_TYPE_TAXONOMY,
+        filterType: 'pills',
+      }],
+    },
+    {
       id: 'indicators',
       title: 'Topics',
       option: 'connections',
       connection: 'indicators',
       search: false,
-    },
-    {
-      id: 'taxonomies',
-      title: 'Level of authority',
-      option: 'taxonomies',
-      types: [{
-        id: AUTHORITY_TAXONOMY,
-        type: 'buttons',
-      }],
     },
     {
       id: 'actors',

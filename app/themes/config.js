@@ -133,8 +133,16 @@ export const RESOURCETYPES = {
 };
 
 export const OFFICIAL_STATEMENT_CATEGORY_ID = 55;
-export const AUTHORITY_TAXONOMY = 13;
+export const GENERAL_POS_TAXONOMY = 1;
+export const SECTOR_TAXONOMY = 2;
+export const ROLES_TAXONOMY = 3;
+export const REGION_TYPE_TAXONOMY = 4;
+export const GROUP_TYPE_TAXONOMY = 5;
 export const EXPRESSFORM_TAXONOMY = 7;
+export const EVENT_TYPE_TAXONOMY = 9;
+export const PRIORITY_TAXONOMY = 10;
+export const INTERACTION_TYPE_TAXONOMY = 12;
+export const AUTHORITY_TAXONOMY = 13;
 
 export const ACTION_INDICATOR_SUPPORTLEVELS = {
   // not assigned

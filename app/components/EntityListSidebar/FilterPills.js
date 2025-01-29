@@ -13,7 +13,12 @@ const TagButton = styled((p) => <Button {...p} />)`
   background: ${({ selected }) => selected ? palette('primary', 1) : 'white'};
   border: 1px solid ${({ selected }) => selected ? palette('primary', 1) : palette('light', 4)};
   border-radius: 9999px;
-  padding: 3px 8px 3px 5px;
+  padding: ${({ primary, hasDot }) => {
+    if (hasDot) {
+      return primary ? '4px 10px 4px 7px' : '3px 8px 3px 5px';
+    }
+    return primary ? '4px 10px' : '3px 8px';
+  }};
   margin-bottom: 4px;
   margin-right: 4px;
   &:last-child {
@@ -26,6 +31,8 @@ const TagButton = styled((p) => <Button {...p} />)`
 
 const FilterPills = ({
   options,
+  onClick,
+  primary,
 }) => (
   <Box
     wrap
@@ -37,13 +44,25 @@ const FilterPills = ({
       <TagButton
         key={tag.value}
         selected={tag.checked}
-        onClick={() => tag.onClick ? tag.onClick() : null}
+        primary={primary}
+        hasDot={!!tag.color}
+        onClick={() => {
+          if (tag.onClick) {
+            tag.onClick();
+          } else if (onClick) {
+            onClick({
+              value: tag.value,
+              query: tag.query,
+              checked: !tag.checked,
+            });
+          }
+        }}
       >
         <Box direction="row" align="center" gap="xsmall">
           {tag.color && (
             <Dot size="11px" color={tag.color} />
           )}
-          <Text size="xxxsmall">
+          <Text size={primary ? 'xsmall' : 'xxxsmall'}>
             {tag.label}
           </Text>
         </Box>
@@ -54,5 +73,7 @@ const FilterPills = ({
 
 FilterPills.propTypes = {
   options: PropTypes.array,
+  onClick: PropTypes.func,
+  primary: PropTypes.bool,
 };
 export default FilterPills;

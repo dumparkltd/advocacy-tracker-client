@@ -147,7 +147,10 @@ export const EntityListSidebar = ({
       onUpdateFilters,
       onUpdateQuery,
     });
-    hasQuickFilterOptions = quickFilterGroups && quickFilterGroups.length > 0;
+    // console.log(quickFilterGroups)
+    hasQuickFilterOptions = quickFilterGroups
+      && quickFilterGroups.length > 0
+      && quickFilterGroups.find((g) => g.filters && g.filters.length > 0);
     if (!hasQuickFilterOptions) {
       filterTypeClean = 'classic';
     } else if (!filterType) {

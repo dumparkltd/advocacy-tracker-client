@@ -7,6 +7,11 @@ import {
   EMAIL_STATUSES,
   ROUTES,
   ACTORTYPES,
+  GENERAL_POS_TAXONOMY,
+  REGION_TYPE_TAXONOMY,
+  GROUP_TYPE_TAXONOMY,
+  SECTOR_TAXONOMY,
+  ROLES_TAXONOMY,
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
@@ -61,6 +66,51 @@ export const CONFIG = {
     },
   },
   quickFilterGroups: [
+    {
+      id: `taxonomies-${GENERAL_POS_TAXONOMY}`,
+      title: 'Country general positions',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: GENERAL_POS_TAXONOMY,
+        filterType: 'pills',
+      }],
+    },
+    {
+      id: `taxonomies-${ROLES_TAXONOMY}`,
+      title: 'Roles',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: ROLES_TAXONOMY,
+        filterType: 'pills',
+      }],
+    },
+    {
+      id: `taxonomies-${SECTOR_TAXONOMY}`,
+      title: 'Sectors',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: SECTOR_TAXONOMY,
+        filterType: 'pills',
+      }],
+    },
+    {
+      id: `taxonomies-${GROUP_TYPE_TAXONOMY}`,
+      title: 'Group types',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: GROUP_TYPE_TAXONOMY,
+        filterType: 'pills',
+      }],
+    },
+    {
+      id: `taxonomies-${REGION_TYPE_TAXONOMY}`,
+      title: 'Region types',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: REGION_TYPE_TAXONOMY,
+        filterType: 'pills',
+      }],
+    },
     {
       id: 'indicators',
       title: 'Topics',

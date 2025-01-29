@@ -18,6 +18,7 @@ import CheckboxOption from 'components/CheckboxOption';
 import FilterDropdown from 'components/forms/FilterDropdown';
 
 import FilterPills from './FilterPills';
+import FilterButtonGroup from './FilterButtonGroup';
 
 import messages from './messages';
 
@@ -55,7 +56,7 @@ const Groups = styled((p) => (
 const Group = styled((p) => (
   <Box
     flex={{ shrink: 0 }}
-    margin={{ bottom: 'large' }}
+    margin={{ bottom: 'medium' }}
     {...p}
   />
 ))``;
@@ -88,7 +89,6 @@ export const EntityListSidebarFiltersQuick = ({
   config,
   groups,
 }) => {
-  // const groups =
   // console.log('config', config)
   // console.log('groups', groups)
 
@@ -100,78 +100,109 @@ export const EntityListSidebarFiltersQuick = ({
         </PanelTitle>
       </PanelTitleWrap>
       <Groups>
-        {groups && groups.map((group) => {
-          const groupFilteringOptions = group.filteringOptions
-            ? group.filteringOptions.reduce((memo, option) => {
-              const availableOption = filteringOptions.find((o) => o.key === option);
-              return availableOption
-                ? [...memo, availableOption]
-                : memo;
-            }, [])
-            : null;
-
-          return (
-            <Group
-              key={group.id}
-            >
-              <GroupTitle>
-                {group.label}
-              </GroupTitle>
-              {groupFilteringOptions && groupFilteringOptions.length > 0 && (
-                <Box flex={{ shrink: 0 }} margin={{ top: 'xsmall' }}>
-                  {groupFilteringOptions.map((option) => {
-                    const o = {
-                      ...option,
-                      onClick: () => {
-                        option.onClick();
-                      },
-                    };
-                    return (
-                      <Box key={option.key}>
-                        <CheckboxOption option={o} type="members" />
-                      </Box>
-                    );
-                  })}
-                </Box>
-              )}
-              <Filters>
-                {group.filters && group.filters.map((filter) => (
-                  <Filter key={filter.id}>
-                    {filter.label && (
-                      <FilterTitle>
-                        {filter.label}
-                      </FilterTitle>
-                    )}
-                    {filter.filterType === 'dropdownSelect' && (
-                      <FilterDropdown
-                        options={filter.options && Object.values(filter.options)}
-                        onClear={(value, query) => filter.onClear(value, query)}
-                        onSelect={(value, query) => filter.onSelect(value, query)}
-                        buttonLabel={filter.dropdownLabel}
-                        type="quickFilters"
-                        hasSearch={typeof filter.search === 'undefined' || filter.search}
-                      />
-                    )}
-                    {filter.connectionAttributeFilterOptions && (
-                      <Box margin={{ top: 'small', bottom: 'medium' }} gap="xxsmall">
-                        {filter.connectionAttributeFilterOptions.label && (
-                          <Text color="hint" size="xxsmall">
-                            {filter.connectionAttributeFilterOptions.label}
-                          </Text>
-                        )}
-                        {filter.connectionAttributeFilterOptions.filterType === 'pills' && (
-                          <FilterPills
-                            options={filter.connectionAttributeFilterOptions.options}
+        {groups && groups.filter(
+          (group) => group.filters && group.filters.length > 0
+        ).map(
+          (group) => {
+            const groupFilteringOptions = group.filteringOptions
+              ? group.filteringOptions.reduce((memo, option) => {
+                const availableOption = filteringOptions.find((o) => o.key === option);
+                return availableOption
+                  ? [...memo, availableOption]
+                  : memo;
+              }, [])
+              : null;
+            if (!group.filters || group.filters.length === 0) {
+              return null;
+            }
+            return (
+              <Group
+                key={group.id}
+              >
+                <GroupTitle>
+                  {group.label}
+                </GroupTitle>
+                {groupFilteringOptions && groupFilteringOptions.length > 0 && (
+                  <Box flex={{ shrink: 0 }} margin={{ top: 'xsmall' }}>
+                    {groupFilteringOptions.map((option) => {
+                      const o = {
+                        ...option,
+                        onClick: () => {
+                          option.onClick();
+                        },
+                      };
+                      return (
+                        <Box key={option.key}>
+                          <CheckboxOption option={o} type="members" />
+                        </Box>
+                      );
+                    })}
+                  </Box>
+                )}
+                <Filters>
+                  {group.filters && group.filters.map((filter) => (
+                    <Filter key={filter.id}>
+                      {filter.label && (
+                        <FilterTitle>
+                          {filter.label}
+                        </FilterTitle>
+                      )}
+                      {filter.filterType === 'dropdownSelect' && filter.options && (
+                        <>
+                          <FilterDropdown
+                            options={filter.options && Object.values(filter.options)}
+                            onClear={(value, query) => filter.onClear(value, query)}
+                            onSelect={(value, query) => filter.onSelect(value, query)}
+                            buttonLabel={filter.dropdownLabel}
+                            type="quickFilters"
+                            hasSearch={typeof filter.search === 'undefined' || filter.search}
                           />
-                        )}
-                      </Box>
-                    )}
-                  </Filter>
-                ))}
-              </Filters>
-            </Group>
-          );
-        })}
+                          {filter.connectionAttributeFilterOptions && (
+                            <Box margin={{ top: 'small', bottom: 'medium' }} gap="xxsmall">
+                              {filter.connectionAttributeFilterOptions.label && (
+                                <Text color="hint" size="xxsmall">
+                                  {filter.connectionAttributeFilterOptions.label}
+                                </Text>
+                              )}
+                              {filter.connectionAttributeFilterOptions.filterType === 'pills' && (
+                                <FilterPills
+                                  options={filter.connectionAttributeFilterOptions.options}
+                                />
+                              )}
+                            </Box>
+                          )}
+                        </>
+                      )}
+                      {filter.filterType === 'buttonGroup' && filter.options && (
+                        <Box gap="xsmall">
+                          <FilterButtonGroup
+                            options={filter.options.filter((o) => o.query !== 'without')}
+                            onClick={filter.onClick}
+                          />
+                          {filter.options.find((o) => o.query === 'without') && (
+                            <FilterButtonGroup
+                              options={filter.options.filter((o) => o.query === 'without')}
+                              onClick={filter.onClick}
+                            />
+                          )}
+                        </Box>
+                      )}
+                      {filter.filterType === 'pills' && filter.options && (
+                        <Box gap="xsmall">
+                          <FilterPills
+                            primary
+                            options={filter.options}
+                            onClick={filter.onClick}
+                          />
+                        </Box>
+                      )}
+                    </Filter>
+                  ))}
+                </Filters>
+              </Group>
+            );
+          }
+        )}
       </Groups>
     </Styled>
   );
