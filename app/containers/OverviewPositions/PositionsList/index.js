@@ -68,8 +68,9 @@ import Button from 'components/buttons/Button';
 import FilterDropdown from 'components/forms/FilterDropdown';
 
 import {
-  selectCountries,
   selectConnections,
+  selectCountries,
+  selectHasFilters,
 } from './selectors';
 import { DEPENDENCIES } from './constants';
 
@@ -203,6 +204,7 @@ export function PositionsList({
   onUpdateColumnFilters,
   actortypes,
   onCreateOption,
+  hasFilters,
 }) {
   const size = React.useContext(ResponsiveContext);
   const [search, setSearch] = useState('');
@@ -621,6 +623,7 @@ export function PositionsList({
               <Box height={isMinSize(size, 'medium') ? { min: '500px' } : null}>
                 <EntityListTable
                   entityPath={ROUTES.ACTOR}
+                  hasFilters={hasFilters}
                   reducePreviewItem={reducePreviewItem}
                   onUpdateColumnFilters={(...args) => onUpdateColumnFilters(...args, locationQuery)}
                   columns={[
@@ -730,6 +733,7 @@ PositionsList.propTypes = {
   locationQuery: PropTypes.object, // immutable Map
   actortypes: PropTypes.object, // immutable Map
   onCreateOption: PropTypes.func,
+  hasFilters: PropTypes.bool,
   intl: intlShape.isRequired,
 };
 
@@ -745,6 +749,7 @@ const mapStateToProps = (state) => ({
   actorsByType: selectActorsByType(state),
   locationQuery: selectLocationQuery(state),
   actortypes: selectActortypes(state),
+  hasFilters: selectHasFilters(state),
 });
 
 export function mapDispatchToProps(dispatch) {
