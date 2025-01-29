@@ -46,6 +46,7 @@ export function EntityFormWrapper({
     saveSending, saveError, deleteSending, deleteError, submitValid,
   } = viewDomain ? viewDomain.get('page').toJS() : {};
   const formDataTracked = viewDomain && viewDomain.getIn(['form', 'forms', 'data']);
+  const formData = viewDomain.getIn(['form', 'data']);
   const hasFormChanges = fieldsByStep && fieldsByStep.some(
     (step) => {
       if (!step.sections) return false;
@@ -63,7 +64,15 @@ export function EntityFormWrapper({
                   if (!fieldTracked) return memo3;
                   let hasFieldChanges = (fieldTracked.touched || !fieldTracked.pristine);
                   if (fieldTracked.$form && field.controlType === 'multiselect') {
-                    hasFieldChanges = (fieldTracked.$form.touched || !fieldTracked.$form.pristine);
+                    hasFieldChanges = (fieldTracked.touched || !fieldTracked.$form.pristine);
+                    if (!hasFieldChanges) {
+                      const fieldData = get(formData.toJS(), modelPath);
+                      if (fieldData) {
+                        hasFieldChanges = Object.keys(fieldData).some(
+                          (key) => fieldData[key].checked !== fieldTracked[key].checked.initialValue
+                        );
+                      }
+                    }
                   }
                   return memo3 || hasFieldChanges;
                 },
