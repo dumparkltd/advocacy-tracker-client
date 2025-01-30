@@ -23,8 +23,6 @@ import Icon from 'components/Icon';
 
 import FormWrapper from 'components/forms/FormWrapper';
 
-import appMessages from 'containers/App/messages';
-
 import FormContentWrapper from './FormContentWrapper';
 import FormHeader from './FormHeader';
 import FormFooter from './FormFooter';
@@ -165,7 +163,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     super();
     this.state = {
       deleteConfirmed: false,
-      showSaveOptions: false,
       stepsSeen: [],
     };
     this.saveOptionsButtonRef = React.createRef();
@@ -210,13 +207,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     this.props.handleUpdate(formData.set('step', stepActive));
   }
 
-  onShowSaveOptions = () => {
-    this.setState({ showSaveOptions: true });
-  }
-  onHideSaveOptions = () => {
-    this.setState({ showSaveOptions: false });
-  }
-
   addStepSeen = (stepSeen) => {
     this.setState((prevState) => ({ stepsSeen: [...prevState.stepsSeen, stepSeen] }));
   }
@@ -247,7 +237,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     const {
       deleteConfirmed,
       stepsSeen,
-      showSaveOptions,
     } = this.state;
     const stepActive = formData.get('step');
     const closeMultiselectOnClickOutside = !newEntityModal || inModal;
@@ -266,7 +255,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
         return (fieldTracked.touched || !fieldTracked.pristine);
       },
     );
-
     byStep = byStep.filter((step) => step.id !== 'footer');
     // the active step id
     const cleanStepActive = stepActive || (byStep && byStep[0] && byStep[0].id);
@@ -361,164 +349,164 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       <ResponsiveContext.Consumer>
         {(size) => (
           <Styled inModal={inModal}>
-              <StyledForm
-                model={model}
-                onSubmit={this.handleSubmit}
-                onSubmitFailed={handleSubmitFail}
-                validators={validators}
-              >
-                {!inModal && (
-                  <FormHeader
-                    fields={headerFields}
-                    formData={formData}
-                    formDataTracked={formDataTracked}
-                    handleCancel={handleCancel}
-                    handleUpdate={handleUpdate}
-                    handleSubmitRemote={handleSubmitRemote}
-                    isBlocked={isBlocked || saving}
-                  />
-                )}
-                <FormWrapper hasMarginBottom={false}>
-                  {stepsWithStatus && (
-                    <FormSteps>
-                      {stepsWithStatus.map((step, idx) => {
-                        const {
-                          hasEmptyRequired,
-                          hasUnseenAutofill,
-                          highlighted,
-                          isActive,
-                          hasErrors,
-                        } = step;
-                        let title = step.title || step.id;
-                        if (!isMinSize(size, 'medium')) {
-                          if (!isActive) {
-                            title = '';
-                          } else if (isActive && step.titleSmall) {
-                            title = step.titleSmall;
-                          }
+            <StyledForm
+              model={model}
+              onSubmit={this.handleSubmit}
+              onSubmitFailed={handleSubmitFail}
+              validators={validators}
+            >
+              {!inModal && (
+                <FormHeader
+                  fields={headerFields}
+                  formData={formData}
+                  formDataTracked={formDataTracked}
+                  handleCancel={handleCancel}
+                  handleUpdate={handleUpdate}
+                  handleSubmitRemote={handleSubmitRemote}
+                  isBlocked={isBlocked || saving}
+                />
+              )}
+              <FormWrapper hasMarginBottom={false}>
+                {stepsWithStatus && (
+                  <FormSteps>
+                    {stepsWithStatus.map((step, idx) => {
+                      const {
+                        hasEmptyRequired,
+                        hasUnseenAutofill,
+                        highlighted,
+                        isActive,
+                        hasErrors,
+                      } = step;
+                      let title = step.title || step.id;
+                      if (!isMinSize(size, 'medium')) {
+                        if (!isActive) {
+                          title = '';
+                        } else if (isActive && step.titleSmall) {
+                          title = step.titleSmall;
                         }
-                        if (byStep.length > 1) {
-                          title = `${idx + 1}.${title ? ' ' : ''}${title}`;
-                        }
-                        return (
-                          <FormStepWrapper
-                            key={step.id}
-                            basis={(isMinSize(size, 'medium') && byStep.length > 1)
-                              ? `1/${byStep.length}`
-                              : 'auto'}
-                            flex={((!isMinSize(size, 'medium') && isActive) || byStep.length === 1) ? { grow: 1 } : false}
-                            direction="row"
-                          >
-                            <ButtonStepArrow highlight={highlighted} lastItem={idx + 1 === byStep.length} prevHighlighted={activeStepIndex > idx} />
-                            {highlighted && (
-                              <HighlightBackground lastItem={idx + 1 === byStep.length} />
-                            )}
-                            <Box basis="full" style={{ position: 'relative', zIndex: 1 }}>
-                              <ButtonStep
-                                highlight={highlighted}
-                                disabled={activeStepHasErrors}
-                                onClick={(evt) => {
-                                  if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-                                  if (!isActive) {
-                                    this.setStepActive(step.id, formData);
-                                    this.addStepSeen(cleanStepActive);
-                                  }
-                                }}
-                                lastItem={idx + 1 === byStep.length}
-                              >
-                                <Box direction="row" align="center" gap="small">
-                                  <ButtonStepLabel>
-                                    {title}
-                                  </ButtonStepLabel>
-                                  <Box direction="row" align="center" gap="xxsmall">
-                                    {hasErrors && (
-                                      <WarningDot type="error" />
-                                    )}
-                                    {!hasErrors && hasEmptyRequired && (
-                                      <WarningDot type="required" />
-                                    )}
-                                    {hasUnseenAutofill && (
-                                      <WarningDot type="autofill" />
-                                    )}
-                                  </Box>
+                      }
+                      if (byStep.length > 1) {
+                        title = `${idx + 1}.${title ? ' ' : ''}${title}`;
+                      }
+                      return (
+                        <FormStepWrapper
+                          key={step.id}
+                          basis={(isMinSize(size, 'medium') && byStep.length > 1)
+                            ? `1/${byStep.length}`
+                            : 'auto'}
+                          flex={((!isMinSize(size, 'medium') && isActive) || byStep.length === 1) ? { grow: 1 } : false}
+                          direction="row"
+                        >
+                          <ButtonStepArrow highlight={highlighted} lastItem={idx + 1 === byStep.length} prevHighlighted={activeStepIndex > idx} />
+                          {highlighted && (
+                            <HighlightBackground lastItem={idx + 1 === byStep.length} />
+                          )}
+                          <Box basis="full" style={{ position: 'relative', zIndex: 1 }}>
+                            <ButtonStep
+                              highlight={highlighted}
+                              disabled={activeStepHasErrors}
+                              onClick={(evt) => {
+                                if (evt !== undefined && evt.preventDefault) evt.preventDefault();
+                                if (!isActive) {
+                                  this.setStepActive(step.id, formData);
+                                  this.addStepSeen(cleanStepActive);
+                                }
+                              }}
+                              lastItem={idx + 1 === byStep.length}
+                            >
+                              <Box direction="row" align="center" gap="small">
+                                <ButtonStepLabel>
+                                  {title}
+                                </ButtonStepLabel>
+                                <Box direction="row" align="center" gap="xxsmall">
+                                  {hasErrors && (
+                                    <WarningDot type="error" />
+                                  )}
+                                  {!hasErrors && hasEmptyRequired && (
+                                    <WarningDot type="required" />
+                                  )}
+                                  {hasUnseenAutofill && (
+                                    <WarningDot type="autofill" />
+                                  )}
                                 </Box>
-                              </ButtonStep>
-                            </Box>
-                          </FormStepWrapper>
-                        );
-                      })}
-                    </FormSteps>
-                  )}
-                  <FormContentWrapper
-                    step={activeStep}
-                    fields={activeStep && activeStep.fields}
-                    sections={activeStep && activeStep.sections}
-                    formData={formData}
-                    formDataTracked={formDataTracked}
-                    closeMultiselectOnClickOutside={closeMultiselectOnClickOutside}
-                    scrollContainer={scrollContainer}
-                    handleUpdate={handleUpdate}
-                    isNewEntityView={isNewEntityView}
-                  />
-                  {stepsWithStatus && stepsWithStatus.length > 1 && (
-                    <Box
-                      direction="row"
-                      justify="between"
-                      pad={{ vertical: 'medium', horizontal: 'medium' }}
-                      style={{
-                        borderTop: '1px solid #B7BCBF',
+                              </Box>
+                            </ButtonStep>
+                          </Box>
+                        </FormStepWrapper>
+                      );
+                    })}
+                  </FormSteps>
+                )}
+                <FormContentWrapper
+                  step={activeStep}
+                  fields={activeStep && activeStep.fields}
+                  sections={activeStep && activeStep.sections}
+                  formData={formData}
+                  formDataTracked={formDataTracked}
+                  closeMultiselectOnClickOutside={closeMultiselectOnClickOutside}
+                  scrollContainer={scrollContainer}
+                  handleUpdate={handleUpdate}
+                  isNewEntityView={isNewEntityView}
+                />
+                {stepsWithStatus && stepsWithStatus.length > 1 && (
+                  <Box
+                    direction="row"
+                    justify="between"
+                    pad={{ vertical: 'medium', horizontal: 'medium' }}
+                    style={{
+                      borderTop: '1px solid #B7BCBF',
+                    }}
+                  >
+                    <SkipButton
+                      disabled={activeStepHasErrors || prevStepIndex === null}
+                      onClick={(evt) => {
+                        if (evt && evt.preventDefault) evt.preventDefault();
+                        if (byStep[prevStepIndex]) {
+                          this.setStepActive(byStep[prevStepIndex].id, formData);
+                          this.addStepSeen(activeStep.id);
+                        }
                       }}
                     >
-                      <SkipButton
-                        disabled={activeStepHasErrors || prevStepIndex === null}
-                        onClick={(evt) => {
-                          if (evt && evt.preventDefault) evt.preventDefault();
-                          if (byStep[prevStepIndex]) {
-                            this.setStepActive(byStep[prevStepIndex].id, formData);
-                            this.addStepSeen(activeStep.id);
-                          }
-                        }}
-                      >
-                        <SkipButtonInner>
-                          <SkipIconNext reverse />
-                          <ButtonStepLabelUpper
-                            disabled={activeStepHasErrors || prevStepIndex === null}
-                          >
-                            Previous
-                          </ButtonStepLabelUpper>
-                        </SkipButtonInner>
-                      </SkipButton>
-                      <SkipButton
-                        disabled={activeStepHasErrors || nextStepIndex === null}
-                        plain
-                        onClick={(evt) => {
-                          if (evt && evt.preventDefault) evt.preventDefault();
-                          if (byStep[nextStepIndex]) {
-                            this.setStepActive(byStep[nextStepIndex].id, formData);
-                            this.addStepSeen(byStep[nextStepIndex].id);
-                          }
-                        }}
-                      >
-                        <SkipButtonInner>
-                          <ButtonStepLabelUpper
-                            disabled={activeStepHasErrors || nextStepIndex === null}
-                          >
-                            Next
-                          </ButtonStepLabelUpper>
-                          <SkipIconNext disabled={activeStepHasErrors || nextStepIndex === null} />
-                        </SkipButtonInner>
-                      </SkipButton>
-                    </Box>
-                  )}
-                  <FormFooter
-                    fields={footerFields}
-                    formData={formData}
-                    formDataTracked={formDataTracked}
-                    handleCancel={handleCancel}
-                    isBlocked={isBlocked || saving}
-                  />
-                </FormWrapper>
-              </StyledForm>
+                      <SkipButtonInner>
+                        <SkipIconNext reverse />
+                        <ButtonStepLabelUpper
+                          disabled={activeStepHasErrors || prevStepIndex === null}
+                        >
+                          Previous
+                        </ButtonStepLabelUpper>
+                      </SkipButtonInner>
+                    </SkipButton>
+                    <SkipButton
+                      disabled={activeStepHasErrors || nextStepIndex === null}
+                      plain
+                      onClick={(evt) => {
+                        if (evt && evt.preventDefault) evt.preventDefault();
+                        if (byStep[nextStepIndex]) {
+                          this.setStepActive(byStep[nextStepIndex].id, formData);
+                          this.addStepSeen(byStep[nextStepIndex].id);
+                        }
+                      }}
+                    >
+                      <SkipButtonInner>
+                        <ButtonStepLabelUpper
+                          disabled={activeStepHasErrors || nextStepIndex === null}
+                        >
+                          Next
+                        </ButtonStepLabelUpper>
+                        <SkipIconNext disabled={activeStepHasErrors || nextStepIndex === null} />
+                      </SkipButtonInner>
+                    </SkipButton>
+                  </Box>
+                )}
+                <FormFooter
+                  fields={footerFields}
+                  formData={formData}
+                  formDataTracked={formDataTracked}
+                  handleCancel={handleCancel}
+                  isBlocked={isBlocked || saving}
+                />
+              </FormWrapper>
+            </StyledForm>
             {handleDelete && !deleteConfirmed && (
               <DeleteWrapper>
                 <ButtonPreDelete type="button" onClick={this.setDeleteConfirmed}>

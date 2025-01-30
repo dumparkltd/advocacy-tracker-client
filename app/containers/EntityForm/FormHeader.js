@@ -81,9 +81,9 @@ const FormHeader = ({
           }}
         >
           <Box direction="row" gap="xsmall" align="center">
-            <span>Save &hellip;</span>
+            <span>Save & close</span>
             <span>
-            {showSaveOptions && (<CaretUpFill size="26px" />)}
+              {showSaveOptions && (<CaretUpFill size="26px" />)}
               {!showSaveOptions && (<CaretDownFill size="26px" />)}
             </span>
           </Box>
@@ -145,7 +145,7 @@ const FormHeader = ({
       </Box>
     </Box>
   );
-}
+};
 
 
 FormHeader.propTypes = {

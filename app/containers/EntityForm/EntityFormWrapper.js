@@ -125,7 +125,6 @@ export function EntityFormWrapper({
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
           handleUpdate={(d) => {
-            console.log(d && d.toJS());
             handleUpdate(d);
           }}
           handleDelete={handleDelete}
