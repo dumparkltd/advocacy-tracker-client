@@ -715,7 +715,7 @@ export const getRoleFormField = ({ formatMessage, roleOptions, hideByDefault }) 
 });
 
 export const getStatusFormField = ({
-  formatMessage, attribute = 'draft', options, hideByDefault,
+  formatMessage, attribute = 'draft', options, hideByDefault, controlType, onChange,
 }) => {
   let myOptions = options;
   if (attribute === 'draft') {
@@ -732,10 +732,11 @@ export const getStatusFormField = ({
   }
   return {
     id: `status-${attribute}`,
-    controlType: 'select',
+    controlType: controlType || 'select',
     model: `.attributes.${attribute}`,
     label: formatMessage(appMessages.attributes[attribute]),
     options: myOptions,
+    changeAction: onChange,
     hideByDefault,
   };
 };
@@ -911,22 +912,22 @@ export const getDateFormField = ({
   return field;
 };
 
-export const getCheckboxFormField = ({
-  formatMessage,
-  attribute,
-  onChange,
-  hideByDefault,
-}) => (
-  {
-    id: `checkbox-${attribute}`,
-    controlType: 'checkbox',
-    model: `.attributes.${attribute}`,
-    label: appMessages.attributes[attribute] && formatMessage(appMessages.attributes[attribute]),
-    // value: entity && entity.getIn(['attributes', attribute]) ? entity.getIn(['attributes', attribute]) : false,
-    changeAction: onChange,
-    hint: appMessages.hints[attribute] && formatMessage(appMessages.hints[attribute]),
-    hideByDefault,
-  });
+// export const getCheckboxFormField = ({
+//   formatMessage,
+//   attribute,
+//   onChange,
+//   hideByDefault,
+// }) => (
+//   {
+//     id: `checkbox-${attribute}`,
+//     controlType: 'checkbox',
+//     model: `.attributes.${attribute}`,
+//     label: appMessages.attributes[attribute] && formatMessage(appMessages.attributes[attribute]),
+//     // value: entity && entity.getIn(['attributes', attribute]) ? entity.getIn(['attributes', attribute]) : false,
+//     changeAction: onChange,
+//     hint: appMessages.hints[attribute] && formatMessage(appMessages.hints[attribute]),
+//     hideByDefault,
+//   });
 
 export const getUploadFormField = ({ formatMessage, hideByDefault }) => getFormField({
   formatMessage,
@@ -1034,7 +1035,7 @@ export const getPasswordConfirmationFormField = ({
   return field;
 };
 
-export const getFormField = ({
+const getFormField = ({
   formatMessage,
   controlType,
   attribute,
@@ -1115,10 +1116,10 @@ const getEntityFormField = (
     console.log('attribute, fieldConfig', attribute, fieldConfig);
   }
   if (attribute && fieldConfig) {
-    const attributeType = fieldConfig.type;
-    const cleanFieldType = fieldType || attributeType;
+    const { controlType, type } = fieldConfig;
+    const cleanFieldType = fieldType || type;
     const fieldArgs = {
-      formatMessage, attribute, required, hideByDefault, label, placeholder,
+      formatMessage, attribute, required, hideByDefault, label, placeholder, controlType,
     };
     // for attributes
     if (attribute === 'title') {

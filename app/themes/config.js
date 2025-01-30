@@ -361,14 +361,17 @@ export const ACTION_FIELDS = {
     },
     private: {
       defaultValue: false,
+      controlType: 'checkbox',
       type: 'bool',
     },
     is_archive: {
       defaultValue: false,
+      controlType: 'checkbox',
       type: 'bool',
     },
     notifications: {
       defaultValue: true,
+      controlType: 'checkbox',
       type: 'bool',
     },
     created_at: {

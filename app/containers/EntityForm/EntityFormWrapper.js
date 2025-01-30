@@ -45,12 +45,13 @@ export function EntityFormWrapper({
   const {
     saveSending, saveError, deleteSending, deleteError, submitValid,
   } = viewDomain ? viewDomain.get('page').toJS() : {};
-  const formDataTracked = viewDomain && viewDomain.getIn(['form', 'forms', 'data']);
   const formData = viewDomain.getIn(['form', 'data']);
+  const formDataTracked = viewDomain && viewDomain.getIn(['form', 'forms', 'data']);
+
   const hasFormChanges = fieldsByStep && fieldsByStep.some(
     (step) => {
       if (!step.sections) return false;
-      const hasChanges = step.sections.reduce(
+      return step.sections.reduce(
         (memo, section) => {
           if (!section.rows) return memo;
           const resultSection = section.rows.reduce(
@@ -86,7 +87,6 @@ export function EntityFormWrapper({
         },
         false,
       );
-      return hasChanges;
     }
   );
   return (
@@ -124,7 +124,10 @@ export function EntityFormWrapper({
           handleSubmitRemote={handleSubmitRemote}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
-          handleUpdate={handleUpdate}
+          handleUpdate={(d) => {
+            console.log(d && d.toJS());
+            handleUpdate(d);
+          }}
           handleDelete={handleDelete}
           fieldsByStep={fieldsByStep}
           scrollContainer={scrollContainer}

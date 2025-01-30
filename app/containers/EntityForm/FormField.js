@@ -116,7 +116,8 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
   getFieldComponent = (field) => {
     if (field.component) {
       return field.component; // Don't use this unless you really have to
-    } if (field.controlType in controls) {
+    }
+    if (field.controlType in controls) {
       return controls[field.controlType];
     }
     return controls.input; // Default to input type if not specified
