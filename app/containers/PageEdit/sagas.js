@@ -13,7 +13,9 @@ export function* save({ data }) {
   yield put(saveEntity({
     path: API.PAGES,
     entity: data,
-    redirect: `${ROUTES.PAGES}/${data.id}`,
+    redirect: data.close ? `${ROUTES.PAGES}/${data.id}` : `${ROUTES.PAGES}${ROUTES.EDIT}/${data.id}`,
+    redirectQuery: data.close || { arg: 'step', value: data.step },
+
   }));
 }
 

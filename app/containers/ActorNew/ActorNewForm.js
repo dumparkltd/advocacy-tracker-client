@@ -296,7 +296,7 @@ function mapDispatchToProps(
       userOptions,
       invalidateEntitiesOnSuccess,
     ) => {
-      // console.log('formData', formData.toJS())
+      console.log('formData', formData.toJS())
 
       let saveData = formData.setIn(
         ['attributes', 'actortype_id'],
@@ -413,11 +413,27 @@ function mapDispatchToProps(
           saveData = saveData.mergeIn(['attributes'], modalAttributes);
         }
       }
+      let redirect = null;
+      let redirectQuery = null;
+      if (!inModal) {
+        if (formData.get('close')) {
+          redirect = ROUTES.ACTOR;
+        } else {
+          redirect = `${ROUTES.ACTOR}${ROUTES.EDIT}`;
+          redirectQuery = {
+            arg: 'step',
+            value: formData.get('step'),
+          };
+        }
+      }
+      console.log(redirect)
+      console.log(redirectQuery)
       dispatch(
         newEntity({
           path: API.ACTORS,
           entity: saveData.toJS(),
-          redirect: !inModal ? ROUTES.ACTOR : null,
+          redirect,
+          redirectQuery,
           invalidateEntitiesOnSuccess,
           onSuccess: inModal && onSaveSuccess
             ? () => {

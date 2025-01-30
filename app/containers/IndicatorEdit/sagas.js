@@ -13,7 +13,8 @@ export function* save({ data }) {
   yield put(saveEntity({
     path: API.INDICATORS,
     entity: data,
-    redirect: `${ROUTES.INDICATOR}/${data.id}`,
+    redirect: data.close ? `${ROUTES.INDICATOR}/${data.id}` : `${ROUTES.INDICATOR}${ROUTES.EDIT}/${data.id}`,
+    redirectQuery: data.close || { arg: 'step', value: data.step },
     invalidateEntitiesOnSuccess: [API.INDICATORS, API.ACTORS],
   }));
 }

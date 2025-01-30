@@ -180,11 +180,25 @@ function mapDispatchToProps(
       dispatch(formActions.submit(model));
     },
     handleSubmit: (formData) => {
+      let redirect = null;
+      let redirectQuery = null;
+      if (!inModal) {
+        if (formData.get('close')) {
+          redirect = ROUTES.PAGES;
+        } else {
+          redirect = `${ROUTES.PAGES}${ROUTES.EDIT}`;
+          redirectQuery = {
+            arg: 'step',
+            value: formData.get('step'),
+          };
+        }
+      }
       dispatch(
         newEntity({
           path: API.PAGES,
           entity: formData.toJS(),
-          redirect: !inModal ? ROUTES.PAGES : null,
+          redirect,
+          redirectQuery,
           onSuccess: inModal && onSaveSuccess
             ? () => {
               // cleanup

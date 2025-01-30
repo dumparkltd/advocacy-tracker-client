@@ -257,11 +257,25 @@ function mapDispatchToProps(
             )
         );
       }
+      let redirect = null;
+      let redirectQuery = null;
+      if (!inModal) {
+        if (formData.get('close')) {
+          redirect = ROUTES.INDICATOR;
+        } else {
+          redirect = `${ROUTES.INDICATOR}${ROUTES.EDIT}`;
+          redirectQuery = {
+            arg: 'step',
+            value: formData.get('step'),
+          };
+        }
+      }
       dispatch(
         newEntity({
           path: API.INDICATORS,
           entity: saveData.toJS(),
-          redirect: !inModal ? ROUTES.INDICATOR : null,
+          redirect,
+          redirectQuery,
           onSuccess: inModal && onSaveSuccess
             ? () => {
               // cleanup

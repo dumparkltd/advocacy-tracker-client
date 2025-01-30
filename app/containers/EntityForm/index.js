@@ -368,6 +368,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   <ButtonSubmitSubtle
                     type="button"
                     disabled={isBlocked}
+                    title="Save & continue editing"
                     onClick={(e) => {
                       if (e && e.preventDefault) e.preventDefault();
                       handleUpdate(formData.set('close', false));
@@ -381,6 +382,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   <ButtonSubmitSubtle
                     type="button"
                     disabled={isBlocked}
+                    title="Save & close form"
                     onClick={(e) => {
                       if (e && e.preventDefault) e.preventDefault();
                       console.log(formData && formData.toJS())

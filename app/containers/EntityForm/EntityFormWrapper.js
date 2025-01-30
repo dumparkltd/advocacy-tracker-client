@@ -69,7 +69,7 @@ export function EntityFormWrapper({
                       const fieldData = get(formData.toJS(), modelPath);
                       if (fieldData) {
                         hasFieldChanges = Object.keys(fieldData).some(
-                          (key) => fieldData[key].checked !== fieldTracked[key].checked.initialValue
+                          (key) => fieldTracked[key] && fieldData[key].checked !== fieldTracked[key].checked.initialValue
                         );
                       }
                     }
