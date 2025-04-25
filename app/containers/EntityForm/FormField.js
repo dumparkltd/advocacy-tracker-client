@@ -27,6 +27,7 @@ import DateControl from 'components/forms/DateControl';
 import RadioControl from 'components/forms/RadioControl';
 import MultiSelectField from 'components/forms/MultiSelectField';
 import messages from 'components/forms/MultiSelectField/messages';
+import InfoOverlay from 'components/InfoOverlay';
 import { FORM_NON_CONTROL_PROPS } from 'themes/config';
 
 import WarningDot from './WarningDot';
@@ -299,6 +300,14 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
           )}
         {field.hint && <Hint>{field.hint}</Hint>}
         {field.controlType !== 'checkbox' && formField}
+        {field.info && (
+          <InfoOverlay
+            title={field.label}
+            content={field.info}
+            padButton={{ horizontal: 'xxsmall' }}
+            tooltip
+          />
+        )}
       </FormFieldWrap>
     );
   }

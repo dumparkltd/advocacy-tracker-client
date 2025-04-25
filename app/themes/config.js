@@ -349,7 +349,7 @@ export const ACTION_FIELDS = {
     },
     draft: {
       defaultValue: true,
-      required: Object.values(ACTIONTYPES), // all types
+      controlType: 'checkbox',
       type: 'bool',
       section: 'footer',
       // ui: 'dropdown',
@@ -686,8 +686,8 @@ export const ACTOR_FIELDS = {
     },
     draft: {
       defaultValue: true,
-      required: true,
       type: 'bool',
+      controlType: 'checkbox',
       skipImport: true,
       // ui: 'dropdown',
       // options: [
@@ -838,7 +838,7 @@ export const RESOURCE_FIELDS = {
     },
     draft: {
       defaultValue: true,
-      required: Object.values(RESOURCETYPES), // all types
+      controlType: 'checkbox',
       type: 'bool',
       skipImport: true,
       // ui: 'dropdown',
@@ -901,7 +901,7 @@ export const INDICATOR_FIELDS = {
     },
     draft: {
       defaultValue: true,
-      required: true,
+      controlType: 'checkbox',
       type: 'bool',
       skipImport: true,
     },
@@ -3862,7 +3862,7 @@ export const PAGE_CONFIG = {
   attributes: {
     draft: {
       defaultValue: true,
-      required: true, // all types
+      controlType: 'checkbox',
       type: 'bool',
     },
     private: {
@@ -3929,7 +3929,7 @@ export const CATEGORY_CONFIG = {
   attributes: {
     draft: {
       defaultValue: true,
-      required: true, // all types
+      controlType: 'checkbox',
       type: 'bool',
     },
     private: {
@@ -4007,7 +4007,7 @@ export const USER_CONFIG = {
   attributes: {
     draft: {
       defaultValue: true,
-      required: true, // all types
+      controlType: 'checkbox',
       type: 'bool',
     },
     private: {

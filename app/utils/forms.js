@@ -714,32 +714,18 @@ export const getRoleFormField = ({ formatMessage, roleOptions, hideByDefault }) 
   hideByDefault,
 });
 
-export const getStatusFormField = ({
-  formatMessage, attribute = 'draft', options, hideByDefault, controlType, onChange,
-}) => {
-  let myOptions = options;
-  if (attribute === 'draft') {
-    myOptions = PUBLISH_STATUSES;
-  }
-  if (attribute === 'private') {
-    myOptions = PRIVACY_STATUSES;
-  }
-  if (attribute === 'is_archive') {
-    myOptions = ARCHIVE_STATUSES;
-  }
-  if (attribute === 'notifications') {
-    myOptions = NOTIFICATION_STATUSES;
-  }
-  return {
-    id: `status-${attribute}`,
-    controlType: controlType || 'select',
-    model: `.attributes.${attribute}`,
-    label: formatMessage(appMessages.attributes[attribute]),
-    options: myOptions,
-    changeAction: onChange,
-    hideByDefault,
-  };
-};
+export const getCheckboxFormField = ({
+  formatMessage, attribute = 'draft', hideByDefault, controlType, onChange,
+}) => ({
+  id: `status-${attribute}`,
+  att: attribute,
+  controlType: controlType || 'checkbox',
+  model: `.attributes.${attribute}`,
+  label: formatMessage(appMessages.attributes[attribute]),
+  info: appMessages.attributeInfo[attribute] && formatMessage(appMessages.attributeInfo[attribute]),
+  changeAction: onChange,
+  hideByDefault,
+});
 
 export const getTitleFormField = ({
   formatMessage,
@@ -1055,6 +1041,7 @@ const getFormField = ({
     model: model || `.attributes.${attribute}`,
     placeholder: appMessages.placeholders[placeholder || attribute] && formatMessage(appMessages.placeholders[placeholder || attribute]),
     label: appMessages.attributes[label || attribute] && formatMessage(appMessages.attributes[label || attribute]),
+    info: appMessages.attributeInfo[attribute] && formatMessage(appMessages.attributeInfo[attribute]),
     validators: {},
     hasrequired: !!required,
     errorMessages: {},
@@ -1151,7 +1138,7 @@ const getEntityFormField = (
     } else if (cleanFieldType === 'url') {
       result = getLinkFormField(fieldArgs);
     } else if (cleanFieldType === 'bool') {
-      result = getStatusFormField(fieldArgs);
+      result = getCheckboxFormField(fieldArgs);
     }
   } else if (connection) {
     if (type && connection === API.ACTORS) {

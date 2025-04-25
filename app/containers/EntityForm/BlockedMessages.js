@@ -1,0 +1,61 @@
+import React from 'react';
+import PropTypes from 'prop-types';
+
+import { Box, Text } from 'grommet';
+import WarningDot from './WarningDot';
+
+export function BlockedMessages({
+  hasAnyEmptyRequired,
+  hasAnyUnseenAutofill,
+  hasAnyErrors,
+}) {
+  // console.log('isNewEntityView', isNewEntityView)
+  // // console.log('formData', formData && formData.toJS())
+  return (
+    <Box pad="small" gap="xsmall" style={{ maxWidth: '300px' }}>
+      <Box>
+        <Text size="xxsmall" weight={500}>
+          Saving is blocked due to the following issues:
+        </Text>
+      </Box>
+      {hasAnyErrors && (
+        <Box direction="row" gap="xsmall" align="center">
+          <Box flex={{ shrink: 0 }}>
+            <WarningDot type="error" />
+          </Box>
+          <Text size="xxxsmall">
+            There are some validation errors
+          </Text>
+        </Box>
+      )}
+      {hasAnyEmptyRequired && (
+        <Box direction="row" gap="xsmall" align="center">
+          <Box flex={{ shrink: 0 }}>
+            <WarningDot type="required" />
+          </Box>
+          <Text size="xxxsmall">
+            There are required fields that are empty
+          </Text>
+        </Box>
+      )}
+      {hasAnyUnseenAutofill && (
+        <Box direction="row" gap="xsmall" align="center">
+          <Box flex={{ shrink: 0 }}>
+            <WarningDot type="autofill" />
+          </Box>
+          <Text size="xxxsmall">
+            There are pre-populated fields on form steps that have not been viewed
+          </Text>
+        </Box>
+      )}
+    </Box>
+  );
+}
+
+BlockedMessages.propTypes = {
+  hasAnyEmptyRequired: PropTypes.bool,
+  hasAnyUnseenAutofill: PropTypes.bool,
+  hasAnyErrors: PropTypes.bool,
+};
+
+export default BlockedMessages;

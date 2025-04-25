@@ -3,45 +3,41 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import styled from 'styled-components';
-import { get } from 'lodash/object';
 import { Box, Drop } from 'grommet';
-import { CaretDownFill, CaretUpFill } from 'grommet-icons';
 
-//
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonCancel from 'components/buttons/ButtonCancel';
-import ButtonSubmit from 'components/buttons/ButtonSubmit';
 
 import appMessages from 'containers/App/messages';
-import FormField from './FormField';
+import BlockedMessages from './BlockedMessages';
 
-const ButtonSubmitSubtle = styled(ButtonForm)`
-  color: ${({ theme, disabled }) => disabled ? '#DADDE0' : theme.global.colors.highlight};
-  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
+const StyledButtonSubmitSubtle = styled(ButtonForm)`
+  color: ${({ theme, isBlocked }) => isBlocked ? '#DADDE0' : theme.global.colors.highlight};
+  cursor: ${({ isBlocked }) => isBlocked ? 'not-allowed' : 'pointer'};
   &:hover {
-    color: ${({ theme, disabled }) => disabled ? '#DADDE0' : theme.global.colors.highlightHover};
+    color: ${({ theme, isBlocked }) => isBlocked ? '#DADDE0' : theme.global.colors.highlightHover};
   }
 `;
 
 const FormHeader = ({
   isBlocked,
-  fields,
   formData,
-  formDataTracked,
   handleCancel,
   handleUpdate,
   handleSubmitRemote,
+  hasAnyEmptyRequired,
+  hasAnyUnseenAutofill,
+  hasAnyErrors,
+  // formDataTracked,
 }) => {
-  const [showSaveOptions, setShowSaveOptions] = React.useState(false);
-  const saveOptionsButtonRef = React.useRef(null);
-
+  const saveCloseRef = React.useRef(null);
+  const [blockedSaveHint, setBlockedSaveHint] = React.useState(false);
   return (
     <Box
       direction="row"
       justify="end"
       align="center"
       margin={{ bottom: 'small' }}
-      gap="xxsmall"
     >
       {handleCancel && (
         <Box>
@@ -57,99 +53,109 @@ const FormHeader = ({
         </Box>
       )}
       <Box>
-        <ButtonSubmitSubtle
+        <StyledButtonSubmitSubtle
           type="button"
-          disabled={isBlocked}
+          isBlocked={isBlocked}
           title="Save & continue editing"
           onClick={(e) => {
             if (e && e.preventDefault) e.preventDefault();
-            handleUpdate(formData.set('close', false));
-            handleSubmitRemote();
+            if (!isBlocked) {
+              handleUpdate(formData.set('close', false));
+              handleSubmitRemote();
+            }
+          }}
+          onMouseOver={(e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            if (isBlocked) {
+              setBlockedSaveHint(true);
+            }
+          }}
+          onFocus={(e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            if (isBlocked) {
+              setBlockedSaveHint(true);
+            }
+          }}
+          onMouseOut={(e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            if (isBlocked) {
+              setBlockedSaveHint(false);
+            }
+          }}
+          onBlur={(e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            if (isBlocked) {
+              setBlockedSaveHint(false);
+            }
           }}
         >
           Save
-        </ButtonSubmitSubtle>
+        </StyledButtonSubmitSubtle>
       </Box>
       <Box>
-        <ButtonSubmitSubtle
+        <StyledButtonSubmitSubtle
           type="button"
-          ref={saveOptionsButtonRef}
-          title={!showSaveOptions ? 'Show save options' : 'Hide save otions'}
+          isBlocked={isBlocked}
+          title="Save & close form"
+          ref={saveCloseRef}
           onClick={(e) => {
             if (e && e.preventDefault) e.preventDefault();
-            setShowSaveOptions(!showSaveOptions);
+            if (!isBlocked) {
+              // console.log(formData && formData.toJS())
+              handleUpdate(formData.set('close', true));
+              handleSubmitRemote(); // close
+            }
+          }}
+          onMouseOver={(e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            if (isBlocked) {
+              setBlockedSaveHint(true);
+            }
+          }}
+          onFocus={(e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            if (isBlocked) {
+              setBlockedSaveHint(true);
+            }
+          }}
+          onMouseOut={(e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            if (isBlocked) {
+              setBlockedSaveHint(false);
+            }
+          }}
+          onBlur={(e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            if (isBlocked) {
+              setBlockedSaveHint(false);
+            }
           }}
         >
-          <Box direction="row" gap="xsmall" align="center">
-            <span>Save & close</span>
-            <span>
-              {showSaveOptions && (<CaretUpFill size="26px" />)}
-              {!showSaveOptions && (<CaretDownFill size="26px" />)}
-            </span>
-          </Box>
-        </ButtonSubmitSubtle>
-        {saveOptionsButtonRef && showSaveOptions && (
-          <Drop
-            align={{ top: 'bottom', right: 'right' }}
-            target={saveOptionsButtonRef.current}
-            onClickOutside={() => setShowSaveOptions(false)}
-            margin={{ top: 'xxsmall' }}
-            plain
-          >
-            <Box
-              elevation="medium"
-              background="white"
-              style={{ minWidth: '300px', maxWidth: '100%' }}
-            >
-              {fields && fields.length > 0 && (
-                <Box
-                  align="start"
-                  gap="xsmall"
-                  pad={{ vertical: 'small', horizontal: 'medium' }}
-                >
-                  {fields.map((field, j) => {
-                    if (!field) return null;
-                    const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
-                    const fieldTracked = get(formDataTracked, modelPath);
-                    return (
-                      <Box key={j}>
-                        <FormField
-                          field={field}
-                          fieldTracked={fieldTracked}
-                          formData={formData}
-                        />
-                      </Box>
-                    );
-                  })}
-                </Box>
-              )}
-              <Box pad={{ vertical: 'small', horizontal: 'medium' }}>
-                <ButtonSubmit
-                  disabled={isBlocked}
-                  type="button"
-                  title="Save & close form"
-                  onClick={(e) => {
-                    if (e && e.preventDefault) e.preventDefault();
-                    // console.log(formData && formData.toJS())
-                    handleUpdate(formData.set('close', true));
-                    handleSubmitRemote(); // close
-                    setShowSaveOptions(false);
-                  }}
-                >
-                  Save & Close
-                </ButtonSubmit>
-              </Box>
-            </Box>
-          </Drop>
-        )}
+          Save & close
+        </StyledButtonSubmitSubtle>
       </Box>
+      {blockedSaveHint && (
+        <Drop
+          align={{ bottom: 'top', right: 'right' }}
+          target={saveCloseRef.current}
+          elevation="small"
+        >
+          <BlockedMessages
+            hasAnyEmptyRequired={hasAnyEmptyRequired}
+            hasAnyUnseenAutofill={hasAnyUnseenAutofill}
+            hasAnyErrors={hasAnyErrors}
+          />
+        </Drop>
+      )}
     </Box>
   );
 };
 
-
 FormHeader.propTypes = {
   isBlocked: PropTypes.bool,
+  hasAnyEmptyRequired: PropTypes.bool,
+  hasAnyUnseenAutofill: PropTypes.bool,
+  hasAnyErrors: PropTypes.bool,
   fields: PropTypes.array,
   formData: PropTypes.object,
   formDataTracked: PropTypes.object,

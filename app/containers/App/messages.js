@@ -1039,12 +1039,16 @@ export default defineMessages({
     },
   },
   attributeInfo: {
-    gdp: {
-      id: 'app.containers.App.attributeInfo.gdp',
+    draft: {
+      id: 'app.containers.App.attributeInfo.draft',
       defaultMessage: 'gdp',
     },
-    population: {
-      id: 'app.containers.App.attributeInfo.population',
+    private: {
+      id: 'app.containers.App.attributeInfo.private',
+      defaultMessage: 'population',
+    },
+    is_archive: {
+      id: 'app.containers.App.attributeInfo.is_archive',
       defaultMessage: 'population',
     },
   },
