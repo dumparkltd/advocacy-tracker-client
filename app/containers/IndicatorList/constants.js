@@ -2,9 +2,7 @@ import {
   API,
   ROUTES,
   USER_ROLES,
-  PUBLISH_STATUSES,
-  PRIVACY_STATUSES,
-  ARCHIVE_STATUSES,
+  ATTRIBUTE_STATUSES,
 } from 'themes/config';
 
 export const DEPENDENCIES = [
@@ -57,7 +55,7 @@ export const CONFIG = {
         search: false,
         message: 'attributes.draft',
         attribute: 'draft',
-        options: PUBLISH_STATUSES,
+        options: ATTRIBUTE_STATUSES.draft,
         role: USER_ROLES.MEMBER.value,
         filterUI: 'checkboxes',
       },
@@ -65,7 +63,7 @@ export const CONFIG = {
         search: false,
         message: 'attributes.private',
         attribute: 'private',
-        options: PRIVACY_STATUSES,
+        options: ATTRIBUTE_STATUSES.private,
         role: USER_ROLES.MEMBER.value,
         roleEdit: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
@@ -74,7 +72,7 @@ export const CONFIG = {
         search: false,
         message: 'attributes.is_archive',
         attribute: 'is_archive',
-        options: ARCHIVE_STATUSES,
+        options: ATTRIBUTE_STATUSES.is_archive,
         role: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
         default: false,

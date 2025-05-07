@@ -15,7 +15,7 @@ export function BlockedMessages({
     <Box pad="small" gap="xsmall" style={{ maxWidth: '300px' }}>
       <Box>
         <Text size="xxsmall" weight={500}>
-          Saving is blocked due to the following issues:
+          Saving is blocked:
         </Text>
       </Box>
       {hasAnyErrors && (

@@ -4268,29 +4268,32 @@ export const USER_ROLES = {
   VISITOR: { value: 3, message: 'ui.userRoles.visitor', order: 4 },
   DEFAULT: { value: 9999, message: 'ui.userRoles.default', order: 9999 }, // note: client side only - no role assigned on server
 };
-// Entity publish statuses
-export const PUBLISH_STATUSES = [
-  { value: true, message: 'ui.publishStatuses.draft' },
-  { value: false, message: 'ui.publishStatuses.public' },
-];
-// Entity publish statuses
-export const PRIVACY_STATUSES = [
-  { value: true, message: 'ui.privacyStatuses.private' },
-  { value: false, message: 'ui.privacyStatuses.public' },
-];
-export const NOTIFICATION_STATUSES = [
-  { value: true, message: 'ui.notificationStatuses.enabled' },
-  { value: false, message: 'ui.notificationStatuses.disabled' },
-];
-export const ARCHIVE_STATUSES = [
-  { value: false, message: 'ui.archiveStatuses.current' },
-  { value: true, message: 'ui.archiveStatuses.archived' },
-];
+
 export const EMAIL_STATUSES = [
   { value: 'valid', message: 'ui.emailStatuses.valid' },
   { value: 'invalid', message: 'ui.emailStatuses.invalid' },
   { value: 'empty', message: 'ui.emailStatuses.empty' },
 ];
+
+export const ATTRIBUTE_STATUSES = {
+  // Entity publish statuses
+  draft: [
+    { value: true, message: 'ui.publishStatuses.draft' },
+    { value: false, message: 'ui.publishStatuses.public' },
+  ],
+  private: [
+    { value: true, message: 'ui.privacyStatuses.private' },
+    { value: false, message: 'ui.privacyStatuses.public' },
+  ],
+  notifications: [
+    { value: true, message: 'ui.notificationStatuses.enabled' },
+    { value: false, message: 'ui.notificationStatuses.disabled' },
+  ],
+  is_archive: [
+    { value: true, message: 'ui.archiveStatuses.archived' },
+    { value: false, message: 'ui.archiveStatuses.current' },
+  ],
+};
 
 export const DEFAULT_RESOURCETYPE = RESOURCETYPES.REF;
 export const DEFAULT_ACTIONTYPE = ACTIONTYPES.TASK;

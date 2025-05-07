@@ -1,6 +1,7 @@
 import { Map, List } from 'immutable';
 
-import { filter } from 'lodash/collection';
+import { filter, find } from 'lodash/collection';
+import { get } from 'lodash/object';
 
 import {
   getEntityTitle,
@@ -17,10 +18,7 @@ import validateEmailFormat from 'components/forms/validators/validate-email-form
 import validateLength from 'components/forms/validators/validate-length';
 
 import {
-  PUBLISH_STATUSES,
-  PRIVACY_STATUSES,
-  ARCHIVE_STATUSES,
-  NOTIFICATION_STATUSES,
+  ATTRIBUTE_STATUSES,
   USER_ROLES,
   DATE_FORMAT,
   API,
@@ -716,16 +714,30 @@ export const getRoleFormField = ({ formatMessage, roleOptions, hideByDefault }) 
 
 export const getCheckboxFormField = ({
   formatMessage, attribute = 'draft', hideByDefault, controlType, onChange,
-}) => ({
-  id: `status-${attribute}`,
-  att: attribute,
-  controlType: controlType || 'checkbox',
-  model: `.attributes.${attribute}`,
-  label: formatMessage(appMessages.attributes[attribute]),
-  info: appMessages.attributeInfo[attribute] && formatMessage(appMessages.attributeInfo[attribute]),
-  changeAction: onChange,
-  hideByDefault,
-});
+}) => {
+  let message;
+  if (ATTRIBUTE_STATUSES[attribute]) {
+    const option = find(ATTRIBUTE_STATUSES[attribute], { value: true });
+    if (option) {
+      /* eslint-disable prefer-destructuring */
+      message = get(appMessages, option.message);
+      /* eslint-enable prefer-destructuring */
+    }
+  }
+  if (!message && appMessages.attributes[attribute]) {
+    message = appMessages.attributes[attribute];
+  }
+  return {
+    id: `status-${attribute}`,
+    att: attribute,
+    controlType: controlType || 'checkbox',
+    model: `.attributes.${attribute}`,
+    label: message ? formatMessage(message) : 'UNDEFINED',
+    info: appMessages.attributeInfo[attribute] && formatMessage(appMessages.attributeInfo[attribute]),
+    changeAction: onChange,
+    hideByDefault,
+  };
+};
 
 export const getTitleFormField = ({
   formatMessage,
@@ -1103,8 +1115,8 @@ const getEntityFormField = (
     console.log('attribute, fieldConfig', attribute, fieldConfig);
   }
   if (attribute && fieldConfig) {
-    const { controlType, type } = fieldConfig;
-    const cleanFieldType = fieldType || type;
+    const { controlType } = fieldConfig;
+    const cleanFieldType = fieldType || fieldConfig.type;
     const fieldArgs = {
       formatMessage, attribute, required, hideByDefault, label, placeholder, controlType,
     };
