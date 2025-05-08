@@ -40,6 +40,7 @@ export function FormFooter({
   hasAnyEmptyRequired,
   hasAnyUnseenAutofill,
   hasAnyErrors,
+  hasNoChanges,
 }) {
   const size = React.useContext(ResponsiveContext);
   const saveCloseRef = React.useRef(null);
@@ -54,15 +55,17 @@ export function FormFooter({
     >
       <Box
         direction={isMinSize(size, 'medium') ? 'row' : 'column'}
-        gap="small"
+        align="center"
+        gap="medium"
         fill={isMinSize(size, 'medium') ? false : 'horizontal'}
       >
         {fields && fields.length > 0 && (
           <Box
             direction={isMinSize(size, 'medium') ? 'row' : 'column'}
             align={isMinSize(size, 'medium') ? 'center' : 'start'}
-            gap="small"
+            gap={isMinSize(size, 'medium') ? 'medium' : 'small'}
             pad={isMinSize(size, 'medium') ? {} : { horizontal: 'small', vertical: 'small' }}
+            margin={{ top: 'xsmall' }}
           >
             {fields.map((field, j) => {
               if (!field) return null;
@@ -174,7 +177,7 @@ export function FormFooter({
           </ButtonSubmit>
           {blockedSaveHint && (
             <Drop
-              align={{ top: 'bottom', right: 'right' }}
+              align={{ bottom: 'top', right: 'right' }}
               target={saveCloseRef.current}
               elevation="small"
               margin={{ top: 'xsmall' }}
@@ -183,6 +186,7 @@ export function FormFooter({
                 hasAnyEmptyRequired={hasAnyEmptyRequired}
                 hasAnyUnseenAutofill={hasAnyUnseenAutofill}
                 hasAnyErrors={hasAnyErrors}
+                hasNoChanges={hasNoChanges}
               />
             </Drop>
           )}
@@ -201,6 +205,7 @@ FormFooter.propTypes = {
   hasAnyEmptyRequired: PropTypes.bool,
   hasAnyUnseenAutofill: PropTypes.bool,
   hasAnyErrors: PropTypes.bool,
+  hasNoChanges: PropTypes.bool,
   handleCancel: PropTypes.func,
   handleUpdate: PropTypes.func,
   handleSubmitRemote: PropTypes.func,

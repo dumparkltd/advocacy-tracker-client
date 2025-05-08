@@ -1291,6 +1291,9 @@ export const getEntityFormFields = (args, shape, attributes) => {
                           if (!checkPermission({ permissions: args, requirements: field })) {
                             return memo3;
                           }
+                          if (args.isNew && field.skipNew) {
+                            return memo3;
+                          }
                           const fieldConfig = (field.attribute && attributes)
                             ? attributes[field.attribute]
                             : null;
@@ -1309,13 +1312,23 @@ export const getEntityFormFields = (args, shape, attributes) => {
             [],
           ),
           // footer fields
-          fields: step.fields && step.fields.map(
-            (field) => {
+          fields: step.fields && step.fields.reduce(
+            (memo2, field) => {
+              if (!checkPermission({ permissions: args, requirements: field })) {
+                return memo2;
+              }
+              if (args.isNew && field.skipNew) {
+                return memo2;
+              }
               const fieldConfig = (field.attribute && attributes)
                 ? attributes[field.attribute]
                 : null;
-              return getEntityFormField(field, args, fieldConfig);
+              return [
+                ...memo2,
+                getEntityFormField(field, args, fieldConfig),
+              ];
             },
+            [],
           ),
         },
       ];

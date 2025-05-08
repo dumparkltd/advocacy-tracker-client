@@ -19,8 +19,9 @@ import Overlay from './Overlay';
 
 const DropContent = styled(({ dropBackground, ...p }) => (
   <Box
-    pad="xxsmall"
+    pad="xsmall"
     background={dropBackground}
+    elevation="small"
     {...p}
   />
 ))`
@@ -57,10 +58,11 @@ function InfoOverlay({
   icon,
   markdown,
   inline,
-  dropBackground,
+  dropBackground = 'white',
 }) {
   const infoRef = useRef(null);
   const [info, showInfo] = useState(false);
+
   return (
     <PrintHide displayProp={inline ? 'inline' : 'block'}>
       <Box
@@ -113,6 +115,7 @@ function InfoOverlay({
       {info && infoRef && tooltip && (
         <Drop
           align={{ bottom: 'top' }}
+          pad="xxsmall"
           target={infoRef.current}
           plain
           trapFocus={false}

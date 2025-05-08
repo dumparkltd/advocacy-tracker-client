@@ -339,11 +339,12 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     const hasAnyEmptyRequired = stepsWithStatus && stepsWithStatus.some((step) => step.hasEmptyRequired);
     const hasAnyUnseenAutofill = stepsWithStatus && stepsWithStatus.some((step) => step.hasUnseenAutofill);
     const hasAnyErrors = stepsWithStatus && stepsWithStatus.some((step) => step.hasErrors);
+    const hasNoChanges = !(hasFormChanges || hasFooterChanges);
     // saving is blocked if
     // 1. no changes were made
     // OR
     // 2. we have any steps with errors, unseen autofill or empty required fields
-    const isBlocked = !(hasFormChanges || hasFooterChanges)
+    const isBlocked = hasNoChanges
     || (stepsWithStatus && (hasAnyEmptyRequired || hasAnyUnseenAutofill || hasAnyErrors));
 
     const activeStep = stepsWithStatus && stepsWithStatus.find((step) => step.isActive);
@@ -372,6 +373,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   hasAnyEmptyRequired={hasAnyEmptyRequired}
                   hasAnyUnseenAutofill={hasAnyUnseenAutofill}
                   hasAnyErrors={hasAnyErrors}
+                  hasNoChanges={hasNoChanges}
                 />
               )}
               <FormWrapper hasMarginBottom={false}>
@@ -517,6 +519,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   hasAnyEmptyRequired={hasAnyEmptyRequired}
                   hasAnyUnseenAutofill={hasAnyUnseenAutofill}
                   hasAnyErrors={hasAnyErrors}
+                  hasNoChanges={hasNoChanges}
                 />
               </FormWrapper>
             </StyledForm>

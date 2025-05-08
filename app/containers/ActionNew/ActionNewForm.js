@@ -355,6 +355,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             resourcesByResourcetype,
             onCreateOption: inModal ? null : onCreateOption,
             intl,
+            isNew: true,
           })}
         />
       </Content>

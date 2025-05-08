@@ -1164,7 +1164,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -1383,7 +1383,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -1596,7 +1596,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -1806,7 +1806,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -1977,7 +1977,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -2234,7 +2234,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -2486,7 +2486,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -2762,7 +2762,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -3027,7 +3027,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -3299,7 +3299,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -3572,7 +3572,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -3652,7 +3652,7 @@ export const ACTIONTYPES_CONFIG = {
           },
           {
             id: 'staff-stakeholders',
-            title: 'WWF Staff',
+            title: 'Participating WWF Staff',
             rows: [
               [
                 {
@@ -3762,7 +3762,7 @@ export const RESOURCETYPES_CONFIG = {
     {
       id: 'footer',
       fields: [
-        { attribute: 'is_archive', needsAdmin: true },
+        { attribute: 'is_archive', needsAdmin: true, skipNew: true },
         { attribute: 'private', needsAdminOrOwn: true },
         { attribute: 'draft', needsAdminOrOwn: true },
       ],
@@ -3807,7 +3807,7 @@ export const INDICATOR_CONFIG = {
     {
       id: 'footer',
       fields: [
-        { attribute: 'is_archive', needsAdmin: true },
+        { attribute: 'is_archive', needsAdmin: true, skipNew: true },
         { attribute: 'private', needsAdminOrOwn: true },
         { attribute: 'draft', needsAdminOrOwn: true },
       ],
@@ -3963,7 +3963,7 @@ export const CATEGORY_CONFIG = {
     {
       id: 'footer',
       fields: [
-        { attribute: 'is_archive', needsAdmin: true },
+        { attribute: 'is_archive', needsAdmin: true, skipNew: true },
         { attribute: 'private', needsAdminOrOwn: true },
         { attribute: 'draft', needsAdminOrOwn: true },
       ],

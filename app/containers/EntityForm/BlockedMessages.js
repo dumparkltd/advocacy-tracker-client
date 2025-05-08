@@ -8,9 +8,9 @@ export function BlockedMessages({
   hasAnyEmptyRequired,
   hasAnyUnseenAutofill,
   hasAnyErrors,
+  hasNoChanges,
 }) {
-  // console.log('isNewEntityView', isNewEntityView)
-  // // console.log('formData', formData && formData.toJS())
+  const hideNoChangesHint = hasAnyEmptyRequired || hasAnyUnseenAutofill || hasAnyErrors;
   return (
     <Box pad="small" gap="xsmall" style={{ maxWidth: '300px' }}>
       <Box>
@@ -18,6 +18,16 @@ export function BlockedMessages({
           Saving is blocked:
         </Text>
       </Box>
+      {hasNoChanges && !hideNoChangesHint && (
+        <Box direction="row" gap="xsmall" align="center">
+          <Box flex={{ shrink: 0 }}>
+            <WarningDot type="info" />
+          </Box>
+          <Text size="xxxsmall">
+            There are no changes to save
+          </Text>
+        </Box>
+      )}
       {hasAnyErrors && (
         <Box direction="row" gap="xsmall" align="center">
           <Box flex={{ shrink: 0 }}>
@@ -56,6 +66,7 @@ BlockedMessages.propTypes = {
   hasAnyEmptyRequired: PropTypes.bool,
   hasAnyUnseenAutofill: PropTypes.bool,
   hasAnyErrors: PropTypes.bool,
+  hasNoChanges: PropTypes.bool,
 };
 
 export default BlockedMessages;

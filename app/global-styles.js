@@ -160,6 +160,11 @@ const GlobalStyle = createGlobalStyle`
     a {
       text-decoration: underline;
     }
+    p {
+      &:last-child{
+        margin: 0;
+      }
+    }
   }
 
   .content-page {

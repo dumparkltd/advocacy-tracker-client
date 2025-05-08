@@ -2368,11 +2368,11 @@ export default defineMessages({
     notificationStatuses: {
       enabled: {
         id: 'app.containers.App.ui.notificationStatuses.enabled',
-        defaultMessage: 'Enabled',
+        defaultMessage: 'Notifications enabled',
       },
       disabled: {
         id: 'app.containers.App.ui.notificationStatuses.disabled',
-        defaultMessage: 'Disabled',
+        defaultMessage: 'Notifications disabled',
       },
     },
     publishStatuses: {

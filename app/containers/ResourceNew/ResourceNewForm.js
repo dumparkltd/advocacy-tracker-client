@@ -147,6 +147,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
             actionsByActiontype,
             onCreateOption: inModal ? null : onCreateOption,
             intl,
+            isNew: true,
           })}
         />
       </Content>

@@ -11,6 +11,7 @@ import messages from 'components/forms/MultiSelectField/messages';
 import InfoOverlay from 'components/InfoOverlay';
 
 import WarningDot from './WarningDot';
+import FieldLabelWrap from './FieldLabelWrap';
 
 const Hint = styled.div`
   color: ${palette('text', 1)};
@@ -30,11 +31,6 @@ const AutoFillWrap = styled(
   (p) => <Box direction="row" align="center" gap="xxsmall" {...p} />
 )`
   color: ${palette('primary', 1)};
-`;
-const FieldLabelWrap = styled(
-  (p) => <Box direction="row" align="center" gap="xsmall" {...p} />
-)`
-  min-height: 32px;
 `;
 
 const FormFieldWrap = styled(

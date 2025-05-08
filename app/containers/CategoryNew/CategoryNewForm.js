@@ -134,6 +134,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
               isMine: true,
               taxonomy,
               intl,
+              isNew: true,
             },
             CATEGORY_CONFIG.form,
             CATEGORY_CONFIG.attributes,

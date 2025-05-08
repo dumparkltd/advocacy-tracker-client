@@ -133,6 +133,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
           fieldsByStep={dataReady && getIndicatorFormFields({
             isAdmin,
             isMine: true,
+            isNew: true,
             connectedTaxonomies,
             actionsByActiontype,
             onCreateOption: inModal ? null : onCreateOption,

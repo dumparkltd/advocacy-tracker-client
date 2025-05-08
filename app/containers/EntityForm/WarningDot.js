@@ -28,6 +28,10 @@ export function WarningDot({ type }) {
     palleteName = 'alert';
     paletteIndex = 3;
   }
+  if (type === 'info') {
+    palleteName = 'success';
+    paletteIndex = 2;
+  }
   return (
     <Inner palleteName={palleteName} paletteIndex={paletteIndex} />
   );

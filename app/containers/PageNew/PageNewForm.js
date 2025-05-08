@@ -105,6 +105,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
             {
               isAdmin: true,
               isMine: true,
+              isNew: true,
               intl,
             },
             PAGE_CONFIG.form, // shape

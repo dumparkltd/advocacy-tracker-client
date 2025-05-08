@@ -186,6 +186,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
             membersByActortype,
             onCreateOption: inModal ? null : onCreateOption,
             intl,
+            isNew: true,
           })}
         />
       </Content>
@@ -296,8 +297,6 @@ function mapDispatchToProps(
       userOptions,
       invalidateEntitiesOnSuccess,
     ) => {
-      console.log('formData', formData.toJS())
-
       let saveData = formData.setIn(
         ['attributes', 'actortype_id'],
         actortype.get('id'),
@@ -426,8 +425,7 @@ function mapDispatchToProps(
           };
         }
       }
-      console.log(redirect)
-      console.log(redirectQuery)
+
       dispatch(
         newEntity({
           path: API.ACTORS,

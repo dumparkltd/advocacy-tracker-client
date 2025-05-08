@@ -2,11 +2,19 @@ import React from 'react';
 import { injectIntl, intlShape } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Box } from 'grommet';
+import styled from 'styled-components';
 
 import FieldLabel from 'components/forms/Label';
 import InfoOverlay from 'components/InfoOverlay';
 
 import appMessages from 'containers/App/messages';
+import FieldLabelWrap from './FieldLabelWrap';
+
+const CheckboxLabel = styled(FieldLabel)`
+  font-size: ${({ theme }) => theme.text.medium.size};
+  color: black;
+  font-weight: 500;
+`;
 
 export function FormFieldCheckbox({
   field,
@@ -22,25 +30,31 @@ export function FormFieldCheckbox({
   return (
     <Box>
       {!withoutTitle && (
-        <FieldLabel>
-          {attributeTitle}
-        </FieldLabel>
+        <FieldLabelWrap>
+          <FieldLabel>
+            {attributeTitle}
+          </FieldLabel>
+        </FieldLabelWrap>
       )}
       <Box
         direction="row"
-        gap="small"
+        gap="xxsmall"
+        align="center"
       >
         {field.label && (
-          <FieldLabel>
-            {formField}
-            {field.label}
-          </FieldLabel>
+          <CheckboxLabel>
+            <Box direction="row" align="center">
+              <Box>{formField}</Box>
+              <Box>{field.label}</Box>
+            </Box>
+          </CheckboxLabel>
         )}
         {field.info && (
           <InfoOverlay
             title={attributeTitle}
             content={field.info}
             padButton={{ horizontal: 'xxsmall' }}
+            markdown
             tooltip
           />
         )}

@@ -16,7 +16,7 @@ const Field = styled.div`
 
 const FieldInnerWrapper = styled.div`
   margin-top: ${({ hideByDefault }) => hideByDefault ? 10 : 0}px;
-  margin-bottom: 5px;
+  margin-bottom: ${({ isFooter }) => isFooter ? 0 : 5}px;
 `;
 
 const ShowButton = styled(Button)`
@@ -61,7 +61,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
           </ShowButton>
         )}
         {!isHidden && (
-          <FieldInnerWrapper hideByDefault={field.hideByDefault}>
+          <FieldInnerWrapper hideByDefault={field.hideByDefault} isFooter={isFooter}>
             <FormFieldInner
               field={field}
               formData={formData}
