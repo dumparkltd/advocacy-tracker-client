@@ -4408,4 +4408,5 @@ export const FORM_NON_CONTROL_PROPS = [
   'autofill',
   'basis',
   'isBlocked',
+  'info',
 ];

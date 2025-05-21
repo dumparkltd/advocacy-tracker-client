@@ -28,6 +28,9 @@ const StyledButtonSubmitSubtle = styled(ButtonForm)`
     color: ${({ theme, isBlocked }) => isBlocked ? '#DADDE0' : theme.global.colors.highlightHover};
   }
 `;
+const StyledButtonSubmit = styled(ButtonSubmit)`
+  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
+`;
 
 export function FormFooter({
   fields,
@@ -145,7 +148,7 @@ export function FormFooter({
               Save
             </StyledButtonSubmitSubtle>
           </Box>
-          <ButtonSubmit
+          <StyledButtonSubmit
             type="submit"
             disabled={isBlocked}
             onMouseOver={(e) => {
@@ -174,7 +177,7 @@ export function FormFooter({
             }}
           >
             Save & Close
-          </ButtonSubmit>
+          </StyledButtonSubmit>
           {blockedSaveHint && (
             <Drop
               align={{ bottom: 'top', right: 'right' }}

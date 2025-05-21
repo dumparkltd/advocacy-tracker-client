@@ -733,7 +733,7 @@ export const getCheckboxFormField = ({
     controlType: controlType || 'checkbox',
     model: `.attributes.${attribute}`,
     label: message ? formatMessage(message) : 'UNDEFINED',
-    info: appMessages.attributeInfo[attribute] && formatMessage(appMessages.attributeInfo[attribute]),
+    info: !!appMessages.attributeInfo[attribute],
     changeAction: onChange,
     hideByDefault,
   };
@@ -1053,7 +1053,7 @@ const getFormField = ({
     model: model || `.attributes.${attribute}`,
     placeholder: appMessages.placeholders[placeholder || attribute] && formatMessage(appMessages.placeholders[placeholder || attribute]),
     label: appMessages.attributes[label || attribute] && formatMessage(appMessages.attributes[label || attribute]),
-    info: appMessages.attributeInfo[attribute] && formatMessage(appMessages.attributeInfo[attribute]),
+    info: !!appMessages.attributeInfo[attribute],
     validators: {},
     hasrequired: !!required,
     errorMessages: {},

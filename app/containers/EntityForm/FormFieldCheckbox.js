@@ -18,6 +18,7 @@ const CheckboxLabel = styled(FieldLabel)`
 
 export function FormFieldCheckbox({
   field,
+  fieldValue,
   formField,
   withoutTitle,
   intl,
@@ -27,6 +28,15 @@ export function FormFieldCheckbox({
   const attributeTitle = field.att && appMessages.attributes[field.att]
     ? intl.formatMessage(appMessages.attributes[field.att])
     : field.label;
+
+  let content;
+  if (field.info && appMessages.attributeInfo[field.att]) {
+    content = intl.formatMessage(appMessages.attributeInfo[field.att]);
+  }
+  if (typeof fieldValue !== 'undefined' && appMessages.attributeInfo[`${field.att}_${fieldValue}`]) {
+    content = `${content} \n\n ${intl.formatMessage(appMessages.attributeInfo[`${field.att}_${fieldValue}`])}`;
+  }
+  // console.log(field, fieldValue)
   return (
     <Box>
       {!withoutTitle && (
@@ -52,7 +62,7 @@ export function FormFieldCheckbox({
         {field.info && (
           <InfoOverlay
             title={attributeTitle}
-            content={field.info}
+            content={content}
             padButton={{ horizontal: 'xxsmall' }}
             markdown
             tooltip
@@ -66,6 +76,7 @@ export function FormFieldCheckbox({
 FormFieldCheckbox.propTypes = {
   field: PropTypes.object,
   formField: PropTypes.object,
+  fieldValue: PropTypes.bool,
   withoutTitle: PropTypes.bool,
   intl: intlShape.isRequired,
 };

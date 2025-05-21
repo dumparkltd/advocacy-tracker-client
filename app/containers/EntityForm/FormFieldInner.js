@@ -103,12 +103,20 @@ export function FormFieldInner({
   const hasError = hasChanges && !isValid;
   const fieldRequired = field.validators && field.validators.required;
   const stepSeen = step && step.previouslySeen;
-  const fieldData = field.dataPath && formData.getIn(field.dataPath) ? formData.getIn(field.dataPath).toJS() : null;
-  // console.log('field, fieldTracked, formData', field, fieldTracked, formData.toJS(), fieldData)
+  let fieldData;
+  if (field.dataPath && formData.getIn(field.dataPath)) {
+    fieldData = formData.getIn(field.dataPath).toJS();
+  } else if (field.att && typeof formData.getIn(['attributes', field.att]) !== 'undefined') {
+    fieldData = formData.getIn(['attributes', field.att]);
+  }
+  // console.log('field', field)
+  // console.log('fieldTracked', fieldTracked)
+  // console.log('formData', formData.toJS())
+  // console.log('fieldData', fieldData)
   // if (field.controlType === 'multiselect') console.log('isNewEntityView, stepSeen, !hasChanges', isNewEntityView, stepSeen, !hasChanges)
   let isAutofill = field.autofill;
   // in case dynamic prepopulation
-  if (fieldData) {
+  if (fieldData && typeof fieldData === 'object') {
     isAutofill = asArray(fieldData).some((d) => d.autofill);
   }
   const fieldAutofilledUnseen = isNewEntityView && !stepSeen && isAutofill && !hasChanges;
@@ -148,6 +156,7 @@ export function FormFieldInner({
       {field.controlType === 'checkbox' && (
         <FormFieldCheckbox
           field={field}
+          fieldValue={fieldData}
           formField={formField}
           withoutTitle={isFooter}
         />
