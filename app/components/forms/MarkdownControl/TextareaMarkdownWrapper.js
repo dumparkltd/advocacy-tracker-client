@@ -6,6 +6,7 @@ import { injectIntl, intlShape } from 'react-intl';
 import { palette } from 'styled-theme';
 import styled from 'styled-components';
 import { Box, Text } from 'grommet';
+import TurndownService from 'turndown';
 
 import {
   Bold,
@@ -21,6 +22,10 @@ import A from 'components/styled/A';
 import Button from 'components/buttons/ButtonSimple';
 
 import messages from './messages';
+
+const turndownService = new TurndownService({
+  headingStyle: 'atx',
+});
 
 const MIN_TEXTAREA_HEIGHT = 320;
 const MAX_TEXTAREA_HEIGHT = 640;
@@ -305,6 +310,23 @@ function TextareaMarkdownWrapper(props) {
                 }
               }
               onChange(e);
+            }}
+            onPaste={(e) => {
+              const html = e.clipboardData.getData('text/html');
+              // const text = e.clipboardData.getData('text/plain');
+              console.log(html)
+              if (html) {
+                e.preventDefault();
+                const textarea = e.currentTarget;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                console.log(start, end);
+                const markdown = turndownService.turndown(html);
+                console.log(markdown);
+                const newValue = value.slice(0, start) + markdown + value.slice(end);
+
+                onChange(newValue);
+              }
             }}
           />
           <MarkdownHint>
