@@ -200,7 +200,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
               {
                 active: includeActorChildren,
                 onClick: () => onSetIncludeActorChildren(includeActorChildren ? '0' : '1'),
-                label: `Show activities of ${typeLabel} members`,
+                label: `Show activities of ${typeLabel}' members`,
                 type: 'children',
               },
             ];
@@ -560,7 +560,6 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                 {
                   id: 'userActions',
                   type: 'userActions',
-                  type_id: viewTypeClean,
                   title: userEntityColumnTitle,
                 },
               ]}
