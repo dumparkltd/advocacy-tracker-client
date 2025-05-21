@@ -54,6 +54,7 @@ const Preview = styled((p) => <Box {...p} />)`
   color: ${palette('text', 0)};
   min-height: ${MIN_TEXTAREA_HEIGHT}px;
   max-height: ${MAX_TEXTAREA_HEIGHT}px;
+  overflow-y: auto;
 `;
 
 const MDButton = styled((p) => (
