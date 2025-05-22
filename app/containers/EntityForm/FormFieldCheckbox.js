@@ -66,6 +66,7 @@ export function FormFieldCheckbox({
             padButton={{ horizontal: 'xxsmall' }}
             markdown
             tooltip
+            size="xsmall"
           />
         )}
       </Box>

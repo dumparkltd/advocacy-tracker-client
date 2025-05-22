@@ -6,7 +6,6 @@
 
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import ReactMarkdown from 'react-markdown';
 
 import styled from 'styled-components';
 import { Box, Drop } from 'grommet';
@@ -15,7 +14,7 @@ import { CircleInformation, CircleQuestion } from 'grommet-icons';
 import Button from 'components/buttons/ButtonSimple';
 import PrintHide from 'components/styled/PrintHide';
 import Overlay from './Overlay';
-
+import Markdown from './Markdown';
 
 const DropContent = styled(({ dropBackground, ...p }) => (
   <Box
@@ -26,16 +25,6 @@ const DropContent = styled(({ dropBackground, ...p }) => (
   />
 ))`
   max-width: 280px;
-`;
-
-const Markdown = styled(ReactMarkdown)`
-  font-size: ${(props) => props.theme.text.medium.size};
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    font-size: ${(props) => props.theme.text.medium.size};
-  }
-  @media print {
-    font-size: ${(props) => props.theme.sizes.print.markdown};
-  }
 `;
 
 const StyledButton = styled(Button)`
@@ -59,6 +48,7 @@ function InfoOverlay({
   markdown,
   inline,
   dropBackground = 'white',
+  size = 'medium',
 }) {
   const infoRef = useRef(null);
   const [info, showInfo] = useState(false);
@@ -123,7 +113,12 @@ function InfoOverlay({
           <DropContent dropBackground={dropBackground}>
             {markdown && (
               <div>
-                <Markdown source={content} className="react-markdown" linkTarget="_blank" />
+                <Markdown
+                  source={content}
+                  className="react-markdown"
+                  linkTarget="_blank"
+                  size={size}
+                />
               </div>
             )}
             {!markdown && content}
@@ -136,6 +131,7 @@ function InfoOverlay({
           title={title}
           markdown={markdown}
           content={content}
+          size={size}
         />
       )}
     </PrintHide>
@@ -155,6 +151,7 @@ InfoOverlay.propTypes = {
   icon: PropTypes.string,
   dropBackground: PropTypes.string,
   colorButton: PropTypes.string,
+  size: PropTypes.string,
   padButton: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.string,
