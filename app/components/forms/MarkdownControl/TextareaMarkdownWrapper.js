@@ -327,6 +327,14 @@ function TextareaMarkdownWrapper(props) {
               linkTextPlaceholder: 'link-title',
               linkUrlPlaceholder: 'https://link-url.ext',
             }}
+            commands={[
+              {
+                name: 'strike-through',
+                shortcut: ['command+shift+x', 'ctrl+shift+x'],
+                shortcutPreventDefault: true,
+                enable: false,
+              },
+            ]}
             onScroll={(e) => {
               setScrollTop((e.target && e.target.scrollTop) || 0);
             }}
