@@ -111,6 +111,7 @@ const ButtonStep = styled(
   }
   &:focus {
     outline: 0;
+    text-decoration: underline;
     color: ${({ theme, highlight, disabled }) => {
     if (disabled) return highlight ? 'white' : '#777E7E';
     return highlight ? 'white' : theme.global.colors.highlightHover;
@@ -246,15 +247,15 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     const headerFields = footerFields && footerFields.filter(
       (f) => f.model === '.attributes.draft' || f.model === '.attributes.private'
     );
-    const hasFooterChanges = footerFields && footerFields.some(
-      (field) => {
-        if (!field) return false;
-        const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
-        const fieldTracked = get(formDataTracked, modelPath);
-        if (!fieldTracked) return false;
-        return (fieldTracked.touched || !fieldTracked.pristine);
-      },
-    );
+    // const hasFooterChanges = footerFields && footerFields.some(
+    //   (field) => {
+    //     if (!field) return false;
+    //     const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
+    //     const fieldTracked = get(formDataTracked, modelPath);
+    //     if (!fieldTracked) return false;
+    //     return !fieldTracked.pristine;
+    //   },
+    // );
     byStep = byStep.filter((step) => step.id !== 'footer');
     // the active step id
     const cleanStepActive = stepActive || (byStep && byStep[0] && byStep[0].id);
@@ -339,7 +340,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     const hasAnyEmptyRequired = stepsWithStatus && stepsWithStatus.some((step) => step.hasEmptyRequired);
     const hasAnyUnseenAutofill = stepsWithStatus && stepsWithStatus.some((step) => step.hasUnseenAutofill);
     const hasAnyErrors = stepsWithStatus && stepsWithStatus.some((step) => step.hasErrors);
-    const hasNoChanges = !(hasFormChanges || hasFooterChanges);
+    const hasNoChanges = !hasFormChanges;
     // saving is blocked if
     // 1. no changes were made
     // OR
@@ -471,10 +472,14 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                       disabled={activeStepHasErrors || prevStepIndex === null}
                       onClick={(evt) => {
                         if (evt && evt.preventDefault) evt.preventDefault();
+                        if (scrollContainer) {
+                          scrollContainer.scrollTop = 0;
+                        }
                         if (byStep[prevStepIndex]) {
                           this.setStepActive(byStep[prevStepIndex].id, formData);
                           this.addStepSeen(activeStep.id);
                         }
+                        setTimeout(() => scrollContainer && scrollContainer.focus(), 0);
                       }}
                     >
                       <SkipButtonInner>
@@ -491,10 +496,14 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                       plain
                       onClick={(evt) => {
                         if (evt && evt.preventDefault) evt.preventDefault();
+                        if (scrollContainer) {
+                          scrollContainer.scrollTop = 0;
+                        }
                         if (byStep[nextStepIndex]) {
                           this.setStepActive(byStep[nextStepIndex].id, formData);
                           this.addStepSeen(byStep[nextStepIndex].id);
                         }
+                        setTimeout(() => scrollContainer && scrollContainer.focus(), 0);
                       }}
                     >
                       <SkipButtonInner>

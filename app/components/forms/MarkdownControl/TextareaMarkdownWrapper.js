@@ -2,7 +2,7 @@ import React, {
   useRef, useState, useEffect,
 } from 'react';
 import PropTypes from 'prop-types';
-import { injectIntl, intlShape } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { palette } from 'styled-theme';
 import styled from 'styled-components';
 import { Box, Text } from 'grommet';
@@ -312,7 +312,9 @@ function TextareaMarkdownWrapper(props) {
               target="_blank"
               isOnLightBackground
             >
-              {intl.formatMessage(messages.anchor)}
+              <Text size="xxsmall">
+                <FormattedMessage {...messages.anchor} />
+              </Text>
             </A>
           </MarkdownHint>
         </Box>

@@ -47,11 +47,11 @@ const FormHeader = ({
     >
       <Box
         direction={isMinSize(size, 'medium') ? 'row' : 'column'}
-        align="center"
-        gap="medium"
+        align={isMinSize(size, 'medium') ? 'center' : 'start'}
+        gap={isMinSize(size, 'medium') ? 'medium' : 'small'}
         fill={isMinSize(size, 'medium') ? false : 'horizontal'}
       >
-        {fields && fields.length > 0 && (
+        {isMinSize(size, 'medium') && fields && fields.length > 0 && (
           <Box
             direction={isMinSize(size, 'medium') ? 'row' : 'column'}
             align={isMinSize(size, 'medium') ? 'center' : 'start'}
@@ -81,6 +81,7 @@ const FormHeader = ({
           direction="row"
           justify="end"
           align="center"
+          fill={isMinSize(size, 'medium') ? false : 'horizontal'}
         >
           {handleCancel && (
             <Box>
@@ -181,6 +182,7 @@ const FormHeader = ({
               align={{ bottom: 'top', right: 'right' }}
               target={saveCloseRef.current}
               elevation="small"
+              trapFocus={false}
             >
               <BlockedMessages
                 hasAnyEmptyRequired={hasAnyEmptyRequired}
