@@ -36,7 +36,7 @@ const Styled = styled.div`
 
 const ContainerWrapper = React.forwardRef((props, ref) => {
   const isPrint = usePrint();
-  return <Styled ref={ref} isPrint={isPrint} {...props} />;
+  return <Styled tabIndex={-1} ref={ref} isPrint={isPrint} {...props} />;
 });
 
 export default ContainerWrapper;

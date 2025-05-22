@@ -58,8 +58,8 @@ export function FormFooter({
     >
       <Box
         direction={isMinSize(size, 'medium') ? 'row' : 'column'}
-        align="center"
-        gap="medium"
+        align={isMinSize(size, 'medium') ? 'center' : 'start'}
+        gap={isMinSize(size, 'medium') ? 'medium' : 'small'}
         fill={isMinSize(size, 'medium') ? false : 'horizontal'}
       >
         {fields && fields.length > 0 && (
@@ -91,7 +91,8 @@ export function FormFooter({
           ref={saveCloseRef}
           direction="row"
           align="center"
-          justify={!isMinSize(size, 'medium') ? 'between' : 'start'}
+          justify="end"
+          fill={isMinSize(size, 'medium') ? false : 'horizontal'}
           style={!isMinSize(size, 'medium')
             ? { borderTop: '1px solid #B7BCBF' }
             : {}

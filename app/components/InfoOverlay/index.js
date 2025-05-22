@@ -71,7 +71,7 @@ function InfoOverlay({
           onMouseOver={() => tooltip && showInfo(true)}
           onMouseLeave={() => tooltip && showInfo(false)}
           onFocus={() => tooltip && showInfo(true)}
-          onBlur={() => null}
+          onBlur={() => tooltip && showInfo(false)}
           onClick={(evt) => {
             if (evt) evt.preventDefault();
             if (!tooltip) showInfo(!info);

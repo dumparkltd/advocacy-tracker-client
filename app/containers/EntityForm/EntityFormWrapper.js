@@ -50,43 +50,53 @@ export function EntityFormWrapper({
 
   const hasFormChanges = fieldsByStep && fieldsByStep.some(
     (step) => {
-      if (!step.sections) return false;
-      return step.sections.reduce(
-        (memo, section) => {
-          if (!section.rows) return memo;
-          const resultSection = section.rows.reduce(
-            (memo2, row) => {
-              if (!row.fields) return memo2;
-              const resultRow = row.fields.reduce(
-                (memo3, field) => {
-                  if (!field) return memo3;
-                  const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
-                  const fieldTracked = get(formDataTracked, modelPath);
-                  if (!fieldTracked) return memo3;
-                  let hasFieldChanges = (fieldTracked.touched || !fieldTracked.pristine);
-                  if (fieldTracked.$form && field.controlType === 'multiselect') {
-                    hasFieldChanges = (fieldTracked.touched || !fieldTracked.$form.pristine);
-                    if (!hasFieldChanges) {
-                      const fieldData = get(formData.toJS(), modelPath);
-                      if (fieldData) {
-                        hasFieldChanges = Object.keys(fieldData).some(
-                          (key) => fieldTracked[key] && fieldData[key].checked !== fieldTracked[key].checked.initialValue
-                        );
+      if (step.id === 'footer' && step.fields) {
+        const footerFields = step.fields && step.fields.filter((f) => !!f);
+        return footerFields.some(
+          (field) => {
+            if (!field) return false;
+            const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
+            const fieldTracked = get(formDataTracked, modelPath);
+            if (!fieldTracked) return false;
+            return !fieldTracked.pristine;
+          },
+        );
+      }
+      if (step.sections) {
+        return step.sections.some(
+          (section) => {
+            if (!section.rows) return false;
+            return section.rows.some(
+              (row) => {
+                if (!row.fields) return false;
+                return row.fields.some(
+                  (field) => {
+                    if (!field) return false;
+                    const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
+                    const fieldTracked = get(formDataTracked, modelPath);
+                    if (!fieldTracked) return false;
+                    let hasFieldChanges = (fieldTracked.touched || !fieldTracked.pristine);
+                    if (fieldTracked.$form && field.controlType === 'multiselect') {
+                      hasFieldChanges = (fieldTracked.touched || !fieldTracked.$form.pristine);
+                      if (!hasFieldChanges) {
+                        const fieldData = get(formData.toJS(), modelPath);
+                        if (fieldData) {
+                          hasFieldChanges = Object.keys(fieldData).some(
+                            (key) => fieldTracked[key] && fieldData[key].checked !== fieldTracked[key].checked.initialValue
+                          );
+                        }
                       }
                     }
-                  }
-                  return memo3 || hasFieldChanges;
-                },
-                memo2,
-              );
-              return resultRow;
-            },
-            memo,
-          );
-          return resultSection;
-        },
-        false,
-      );
+                    return hasFieldChanges;
+                  },
+                );
+              },
+            );
+          },
+        );
+      }
+      // not footer and no sections
+      return false;
     }
   );
   return (
