@@ -26,6 +26,7 @@ import messages from './messages';
 
 const turndownService = new TurndownService({
   headingStyle: 'atx',
+  bulletListMarker: '-',
 });
 
 // custom rule to ignore <b> tags that are styled to be NOT bold (Google Doc issue)
@@ -326,6 +327,7 @@ function TextareaMarkdownWrapper(props) {
               preferredItalicSyntax: '_',
               linkTextPlaceholder: 'link-title',
               linkUrlPlaceholder: 'https://link-url.ext',
+              enableIndentExtension: false,
             }}
             commands={[
               {
