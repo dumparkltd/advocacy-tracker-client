@@ -32,6 +32,8 @@ import {
   USER_ROLES,
 } from 'themes/config';
 
+import { PrintContext } from './PrintContext';
+
 import {
   selectIsSignedIn,
   selectHasUserRole,
@@ -58,7 +60,6 @@ import {
   setListPreview,
 } from './actions';
 
-import { PrintContext } from './PrintContext';
 
 import { DEPENDENCIES } from './constants';
 

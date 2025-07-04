@@ -2,8 +2,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
+import { injectIntl, intlShape } from 'react-intl';
 
 import Button from 'components/buttons/ButtonSimple';
+
+import { getOptionLabel } from './utils';
 
 const StyledButton = styled((p) => <Button {...p} />)`
   width: 100%;
@@ -19,14 +22,18 @@ const StyledButton = styled((p) => <Button {...p} />)`
   }
 `;
 
-const Label = styled.div``;
+const Label = styled.div`
+  font-style: ${({ withoutOrAny }) => withoutOrAny ? 'italic' : 'normal'};
+`;
 
 // <Label bold={props.bold} italic={props.isNew}>
-function Option({ option, onSelect }) {
+function Option({ option, onSelect, intl }) {
   return (
     <StyledButton onClick={() => onSelect(option)}>
-      <Label>
-        {option.title}
+      <Label
+        withoutOrAny={option.query === 'without' || option.query === 'any'}
+      >
+        {getOptionLabel(option, intl)}
       </Label>
     </StyledButton>
   );
@@ -35,6 +42,7 @@ function Option({ option, onSelect }) {
 Option.propTypes = {
   option: PropTypes.object,
   onSelect: PropTypes.func,
+  intl: intlShape,
 };
 
-export default Option;
+export default injectIntl(Option);

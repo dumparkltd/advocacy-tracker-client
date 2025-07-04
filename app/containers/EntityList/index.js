@@ -24,6 +24,8 @@ import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import Icon from 'components/Icon';
 import EntityListHeader from 'components/EntityListHeader';
+import EntityListSidebar from 'components/EntityListSidebar';
+
 import EntityListDownload from 'components/EntityListDownload';
 import EntityListDelete from 'components/EntityListDelete';
 import NavSecondary from 'containers/NavSecondary';
@@ -318,7 +320,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
 
   onHideFilters = (evt) => {
     if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ visibleFilters: false });
+    this.setState({ visibleFilters: null });
   };
 
   onShowEditOptions = (evt) => {
@@ -433,7 +435,6 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       filterActortypes,
       actiontypes,
       resourcetypes,
-      onSelectType,
       onSetView,
       typeId,
       view = 'list',
@@ -545,6 +546,10 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       ];
     }
     const hasSelected = dataReady && canEdit && entityIdsSelectedFiltered && entityIdsSelectedFiltered.size > 0;
+    const entitiesSelected = hasSelected
+      ? entities.filter((entity) => entityIdsSelected.includes(entity.get('id')))
+      : null;
+
     let allListActions;
     let destroyableEntityIdsSelected;
     if (hasSelected) {
@@ -595,297 +600,293 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
     // we only consider the search query for download when we are looking at the list and when we have the default map subject selected
     const isSearchQueryActiveForDownload = !!locationQuery.get('search') && showList;
     const isSelectionActiveForDownload = showList && entityIdsSelectedFiltered && entityIdsSelectedFiltered.size > 0;
+    const showFilters = this.state.visibleFilters;
+    const showEditOptions = isMember && showList && this.state.visibleEditOptions;
+
     return (
-      <ContainerWrapper ref={this.ScrollContainer} isPrintView={isPrintView}>
-        {secondaryNavItems && (<NavSecondary navItems={secondaryNavItems} />)}
-        {config.batchDelete && this.state.deleteConfirm && entityIdsSelectedFiltered && (
-          <ReactModal
-            isOpen
-            onRequestClose={() => this.onHideDeleteConfirm()}
-            className="delete-csv-modal"
-            overlayClassName="delete-csv-modal-overlay"
-            style={{
-              overlay: { zIndex: 99999999 },
-            }}
-            appElement={document.getElementById('app')}
-          >
-            <EntityListDelete
-              selectedCount={entityIdsSelectedFiltered.size}
-              destroyableCount={destroyableEntityIdsSelected.size}
-              onCancel={() => this.onHideDeleteConfirm()}
-              onConfirm={(evt) => {
-                this.onHideDeleteConfirm(evt);
-                onEntitiesDelete(config.serverPath, destroyableEntityIdsSelected);
-                onEntitySelectAll([]);
+      <>
+        <ContainerWrapper ref={this.ScrollContainer} isPrintView={isPrintView}>
+          {secondaryNavItems && (<NavSecondary navItems={secondaryNavItems} />)}
+          {config.batchDelete && this.state.deleteConfirm && entityIdsSelectedFiltered && (
+            <ReactModal
+              isOpen
+              onRequestClose={() => this.onHideDeleteConfirm()}
+              className="delete-csv-modal"
+              overlayClassName="delete-csv-modal-overlay"
+              style={{
+                overlay: { zIndex: 99999999 },
               }}
-            />
-          </ReactModal>
-        )}
-        {config.downloadCSV && this.state.downloadActive && (
-          <ReactModal
-            isOpen
-            onRequestClose={() => this.onDownloadDismiss()}
-            className="download-csv-modal"
-            overlayClassName="download-csv-modal-overlay"
-            style={{
-              overlay: { zIndex: 99999999 },
-            }}
-            appElement={document.getElementById('app')}
-          >
-            <EntityListDownload
-              config={config}
-              fields={this.getFields(config.types)}
-              typeId={typeId}
-              entities={entities}
-              taxonomies={taxonomies}
-              connections={connections}
-              onClose={() => this.onDownloadDismiss()}
-              typeNames={{
-                actiontypes: actiontypes && actiontypes.map(
-                  (type) => intl.formatMessage(appMessages.entities[`actions_${type.get('id')}`].single)
-                ).toJS(),
-                actortypes: actortypes && actortypes.map(
-                  (type) => intl.formatMessage(appMessages.entities[`actors_${type.get('id')}`].single)
-                ).toJS(),
+              appElement={document.getElementById('app')}
+            >
+              <EntityListDelete
+                selectedCount={entityIdsSelectedFiltered.size}
+                destroyableCount={destroyableEntityIdsSelected.size}
+                onCancel={() => this.onHideDeleteConfirm()}
+                onConfirm={(evt) => {
+                  this.onHideDeleteConfirm(evt);
+                  onEntitiesDelete(config.serverPath, destroyableEntityIdsSelected);
+                  onEntitySelectAll([]);
+                }}
+              />
+            </ReactModal>
+          )}
+          {config.downloadCSV && this.state.downloadActive && (
+            <ReactModal
+              isOpen
+              onRequestClose={() => this.onDownloadDismiss()}
+              className="download-csv-modal"
+              overlayClassName="download-csv-modal-overlay"
+              style={{
+                overlay: { zIndex: 99999999 },
               }}
-              isAdmin={isAdmin}
-              searchQuery={isSearchQueryActiveForDownload ? locationQuery.get('search') : null}
-              entityIdsSelected={isSelectionActiveForDownload ? entityIdsSelectedFiltered : null}
-            />
-          </ReactModal>
-        )}
-        {!dataReady && !isPrintView && (
-          <Loading loading={!dataReady} />
-        )}
-        {dataReady && (
-          <Container ref={this.ScrollReference} isPrint={isPrintView}>
-            <Content isPrint={isPrintView}>
-              {headerStyle === 'types' && !printing && (
-                <EntityListHeader
-                  typeId={typeId}
-                  dataReady={dataReady}
-                  currentFilters={filters}
-                  listUpdating={progress !== null && progress >= 0 && progress < 100}
-                  entities={entities}
-                  allEntities={allEntities}
-                  entityIdsSelected={entityIdsSelectedFiltered}
-                  taxonomies={taxonomies}
-                  actortypes={actortypes}
-                  filterActortypes={filterActortypes}
-                  resourcetypes={resourcetypes}
-                  actiontypes={actiontypes}
-                  membertypes={membertypes}
-                  filterAssociationtypes={filterAssociationtypes}
-                  connections={connections}
-                  associationtypes={associationtypes}
-                  connectedTaxonomies={connectedTaxonomies}
-                  config={config}
-                  locationQuery={locationQuery}
-                  canEdit={isMember && showList}
-                  isMember={isMember}
-                  isAdmin={isAdmin}
-                  hasUserRole={hasUserRole}
-                  onCreateOption={onCreateOption}
-                  onUpdate={
-                    (associations, activeEditOption) => handleEditSubmit(
-                      associations,
-                      activeEditOption,
-                      entityIdsSelectedFiltered,
-                      viewDomain.get('errors'),
-                      connections,
+              appElement={document.getElementById('app')}
+            >
+              <EntityListDownload
+                config={config}
+                fields={this.getFields(config.types)}
+                typeId={typeId}
+                entities={entities}
+                taxonomies={taxonomies}
+                connections={connections}
+                onClose={() => this.onDownloadDismiss()}
+                typeNames={{
+                  actiontypes: actiontypes && actiontypes.map(
+                    (type) => intl.formatMessage(appMessages.entities[`actions_${type.get('id')}`].single)
+                  ).toJS(),
+                  actortypes: actortypes && actortypes.map(
+                    (type) => intl.formatMessage(appMessages.entities[`actors_${type.get('id')}`].single)
+                  ).toJS(),
+                }}
+                isAdmin={isAdmin}
+                searchQuery={isSearchQueryActiveForDownload ? locationQuery.get('search') : null}
+                entityIdsSelected={isSelectionActiveForDownload ? entityIdsSelectedFiltered : null}
+              />
+            </ReactModal>
+          )}
+          {!dataReady && !isPrintView && (
+            <Loading loading={!dataReady} />
+          )}
+          {dataReady && (
+            <Container ref={this.ScrollReference} isPrint={isPrintView}>
+              <Content isPrint={isPrintView}>
+                {headerStyle === 'types' && !printing && (
+                  <EntityListHeader
+                    currentFilters={filters}
+                    canEdit={isMember && showList}
+                    headerActions={headerActions}
+                    viewOptions={viewOptions}
+                    isPrintView={isPrintView}
+                    isOnMap={showMap}
+                    onShowFilters={this.onShowFilters}
+                  />
+                )}
+                {headerStyle === 'simple' && (
+                  <EntityListHeader
+                    headerStyle={headerStyle}
+                    canEdit={isMember && showList}
+                    headerActions={headerOptions && headerOptions.actions}
+                    isPrintView={isPrintView}
+                  />
+                )}
+                {showList && dataReady && (
+                  <EntitiesListView
+                    reducePreviewItem={({ item, id, path }) => reducePreviewItem({
+                      item, id, path, intl, onUpdatePath,
+                    })}
+                    onScrollToTop={this.scrollToTop}
+                    searchQuery={searchQuery}
+                    isPrintView={isPrintView}
+                    headerInfo={headerOptions.info}
+                    listActions={allListActions}
+                    showEntitiesDelete={onEntitiesDelete}
+                    allEntityCount={allEntities && allEntities.size}
+                    hasHeader={includeHeader}
+                    headerStyle={headerStyle}
+                    listUpdating={progress !== null && progress >= 0 && progress < 100}
+                    entities={entities}
+                    errors={errors}
+                    taxonomies={taxonomies}
+                    connections={connections}
+                    connectedTaxonomies={connectedTaxonomies}
+                    entityIdsSelected={entityIdsSelectedFiltered}
+                    skipPreviews={skipPreviews}
+                    config={config}
+                    entityTitle={entityTitle}
+
+                    isMember={isMember}
+                    isAdmin={isAdmin}
+                    isVisitor={hasUserRole[USER_ROLES.VISITOR.value]}
+
+                    onEntitySelect={(id, checked) => {
+                      // reset when unchecking last selected item
+                      if (!checked && !this.state.visibleEditOptions && entityIdsSelectedFiltered.size === 1) {
+                        this.onResetEditOptions();
+                      }
+                      this.onHideDeleteConfirm();
+                      onEntitySelect(id, checked);
+                    }}
+                    onEntitySelectAll={(ids) => {
+                      // reset when unchecking last selected item
+                      if (!this.state.visibleEditOptions && (!ids || ids.length === 0)) {
+                        this.onResetEditOptions();
+                      }
+                      this.onHideDeleteConfirm();
+                      onEntitySelectAll(ids);
+                    }}
+                    onEntityClick={(id, path, componentId) => onEntityClick(
+                      {
+                        id, path, componentId, errors: viewDomain.get('errors'),
+                      }
                     )}
-                  onUpdateFilters={onUpdateFilters}
-                  showFilters={this.state.visibleFilters}
-                  showEditOptions={isMember && showList && this.state.visibleEditOptions}
-                  onShowFilters={this.onShowFilters}
-                  onHideFilters={this.onHideFilters}
-                  onHideEditOptions={this.onHideEditOptions}
-                  onSelectType={(type) => {
-                    // reset selection
-                    onEntitySelectAll([]);
-                    onSelectType(type);
-                  }}
-                  hasFilters={filters && filters.length > 0}
-                  onUpdateQuery={onUpdateQuery}
-                  filteringOptions={filteringOptions}
-                  includeMembersWhenFiltering={includeMembersWhenFiltering}
-                  includeActorMembers={includeActorMembers}
-                  includeActorChildren={includeActorChildren}
-                  headerActions={headerActions}
+                    onDismissError={onDismissError}
+                    typeId={typeId}
+                    hasFilters={filters && filters.length > 0}
+                    filters={filters}
+                    showCode={showCode}
+                    mapSubject={mapSubject}
+                    onSetMapSubject={onSetMapSubject}
+                    onSetIncludeActorMembers={onSetIncludeActorMembers}
+                    onSetIncludeActorChildren={onSetIncludeActorChildren}
+                    onSetIncludeInofficial={onSetIncludeInofficial}
+                    includeActorMembers={includeActorMembers}
+                    includeActorChildren={includeActorChildren}
+                    includeInofficial={includeInofficial}
+                    onClearFilters={this.onClearFilters}
+                  />
+                )}
+              </Content>
+              {showMap && (
+                <EntitiesMap
                   viewOptions={viewOptions}
-                  isOnMap={showMap}
-                  isPrintView={isPrintView}
-                />
-              )}
-              {headerStyle === 'simple' && (
-                <EntityListHeader
-                  headerStyle={headerStyle}
-                  dataReady={dataReady}
-                  config={config}
-                  canEdit={isMember && showList}
-                  isMember={isMember}
-                  hasUserRole={hasUserRole}
-                  headerActions={headerOptions && headerOptions.actions}
-                  isPrintView={isPrintView}
-                />
-              )}
-              {showList && dataReady && (
-                <EntitiesListView
-                  reducePreviewItem={({ item, id, path }) => reducePreviewItem({
-                    item, id, path, intl, onUpdatePath,
-                  })}
-                  onScrollToTop={this.scrollToTop}
-                  searchQuery={searchQuery}
-                  isPrintView={isPrintView}
-                  headerInfo={headerOptions.info}
-                  listActions={allListActions}
-                  showEntitiesDelete={onEntitiesDelete}
-                  allEntityCount={allEntities && allEntities.size}
-                  hasHeader={includeHeader}
-                  headerStyle={headerStyle}
-                  listUpdating={progress !== null && progress >= 0 && progress < 100}
                   entities={entities}
-                  errors={errors}
-                  taxonomies={taxonomies}
-                  connections={connections}
-                  connectedTaxonomies={connectedTaxonomies}
-                  entityIdsSelected={entityIdsSelectedFiltered}
-                  skipPreviews={skipPreviews}
+                  actortypes={actortypes}
+                  actiontypes={actiontypes}
                   config={config}
-                  entityTitle={entityTitle}
-
-                  isMember={isMember}
-                  isAdmin={isAdmin}
-                  isVisitor={hasUserRole[USER_ROLES.VISITOR.value]}
-
-                  onEntitySelect={(id, checked) => {
-                    // reset when unchecking last selected item
-                    if (!checked && !this.state.visibleEditOptions && entityIdsSelectedFiltered.size === 1) {
-                      this.onResetEditOptions();
-                    }
-                    this.onHideDeleteConfirm();
-                    onEntitySelect(id, checked);
-                  }}
-                  onEntitySelectAll={(ids) => {
-                    // reset when unchecking last selected item
-                    if (!this.state.visibleEditOptions && (!ids || ids.length === 0)) {
-                      this.onResetEditOptions();
-                    }
-                    this.onHideDeleteConfirm();
-                    onEntitySelectAll(ids);
-                  }}
+                  dataReady={dataReady}
                   onEntityClick={(id, path, componentId) => onEntityClick(
                     {
                       id, path, componentId, errors: viewDomain.get('errors'),
                     }
                   )}
-                  onDismissError={onDismissError}
                   typeId={typeId}
                   hasFilters={filters && filters.length > 0}
-                  filters={filters}
-                  showCode={showCode}
                   mapSubject={mapSubject}
                   onSetMapSubject={onSetMapSubject}
                   onSetIncludeActorMembers={onSetIncludeActorMembers}
                   onSetIncludeActorChildren={onSetIncludeActorChildren}
-                  onSetIncludeInofficial={onSetIncludeInofficial}
                   includeActorMembers={includeActorMembers}
                   includeActorChildren={includeActorChildren}
-                  includeInofficial={includeInofficial}
+                  isPrintView={isPrintView}
+                  filters={filters}
                   onClearFilters={this.onClearFilters}
                 />
               )}
-            </Content>
-            {showMap && (
-              <EntitiesMap
-                viewOptions={viewOptions}
-                entities={entities}
-                actortypes={actortypes}
-                actiontypes={actiontypes}
-                config={config}
-                dataReady={dataReady}
-                onEntityClick={(id, path, componentId) => onEntityClick(
-                  {
-                    id, path, componentId, errors: viewDomain.get('errors'),
-                  }
-                )}
-                typeId={typeId}
-                hasFilters={filters && filters.length > 0}
-                mapSubject={mapSubject}
-                onSetMapSubject={onSetMapSubject}
-                onSetIncludeActorMembers={onSetIncludeActorMembers}
-                onSetIncludeActorChildren={onSetIncludeActorChildren}
-                includeActorMembers={includeActorMembers}
-                includeActorChildren={includeActorChildren}
-                isPrintView={isPrintView}
-                filters={filters}
-                onClearFilters={this.onClearFilters}
-              />
-            )}
-          </Container>
-        )}
-        {isMember && (progress !== null && progress < 100) && (
-          <Progress>
-            <ProgressText>
-              <FormattedMessage
-                {...messages.processingUpdates}
-                values={{
-                  processNo: Math.min(success.size + errors.size + 1, sending.size),
-                  totalNo: sending.size,
-                  types:
-                    intl.formatMessage(messages[
-                      `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
-                    ]),
-                }}
-              />
-            </ProgressText>
-            <Loading
-              progress={progress}
-            />
-          </Progress>
-        )}
-        {isMember && (viewDomain.get('errors').size > 0 && progress >= 100) && (
-          <Progress error>
-            <Messages
-              type="error"
-              message={
-                intl.formatMessage(
-                  messages.updatesFailed,
-                  {
-                    errorNo: viewDomain.get('errors').size,
+            </Container>
+          )}
+          {isMember && (progress !== null && progress < 100) && (
+            <Progress>
+              <ProgressText>
+                <FormattedMessage
+                  {...messages.processingUpdates}
+                  values={{
+                    processNo: Math.min(success.size + errors.size + 1, sending.size),
+                    totalNo: sending.size,
                     types:
                       intl.formatMessage(messages[
                         `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
                       ]),
-                  },
-                )
-              }
-              onDismiss={onResetProgress}
-              preMessage={false}
-            />
-          </Progress>
+                  }}
+                />
+              </ProgressText>
+              <Loading
+                progress={progress}
+              />
+            </Progress>
+          )}
+          {isMember && (viewDomain.get('errors').size > 0 && progress >= 100) && (
+            <Progress error>
+              <Messages
+                type="error"
+                message={
+                  intl.formatMessage(
+                    messages.updatesFailed,
+                    {
+                      errorNo: viewDomain.get('errors').size,
+                      types:
+                        intl.formatMessage(messages[
+                          `type_${progressTypes.size === 1 ? progressTypes.first() : 'save'}`
+                        ]),
+                    },
+                  )
+                }
+                onDismiss={onResetProgress}
+                preMessage={false}
+              />
+            </Progress>
+          )}
+          {isMember && (viewDomain.get('errors').size === 0 && progress >= 100) && (
+            <Progress error>
+              <Messages
+                type="success"
+                message={
+                  intl.formatMessage(
+                    this.getMessageForType(
+                      progressTypes.size === 1 ? progressTypes.first() : 'save',
+                      viewDomain.get('success').size,
+                    ),
+                    {
+                      successNo: viewDomain.get('success').size,
+                    },
+                  )
+                }
+                onDismiss={onResetProgress}
+                autoDismiss={2000}
+              />
+            </Progress>
+          )}
+        </ContainerWrapper>
+        {dataReady && (showFilters || showEditOptions) && (
+          <EntityListSidebar
+            showFilters={showFilters}
+            showEditOptions={showEditOptions}
+            allEntities={allEntities}
+            entitiesSelected={entitiesSelected}
+            onUpdateQuery={onUpdateQuery}
+            filteringOptions={filteringOptions}
+            onUpdate={
+              (associations, activeEditOption) => handleEditSubmit(
+                associations,
+                activeEditOption,
+                entityIdsSelectedFiltered,
+                viewDomain.get('errors'),
+                connections,
+              )}
+            onUpdateFilters={onUpdateFilters}
+            connections={connections}
+            includeActorMembers={includeActorMembers}
+            includeActorChildren={includeActorChildren}
+            includeMembersWhenFiltering={includeMembersWhenFiltering}
+            typeId={typeId}
+            config={config}
+            isAdmin={isAdmin}
+            hasUserRole={hasUserRole}
+            locationQuery={locationQuery}
+            taxonomies={taxonomies}
+            connectedTaxonomies={connectedTaxonomies}
+            actortypes={actortypes}
+            filterActortypes={filterActortypes}
+            actiontypes={actiontypes}
+            resourcetypes={resourcetypes}
+            membertypes={membertypes}
+            filterAssociationtypes={filterAssociationtypes}
+            associationtypes={associationtypes}
+            currentFilters={filters}
+            onHideFilters={this.onHideFilters}
+            onHideEditOptions={this.onHideEditOptions}
+            onCreateOption={onCreateOption}
+          />
         )}
-        {isMember && (viewDomain.get('errors').size === 0 && progress >= 100) && (
-          <Progress error>
-            <Messages
-              type="success"
-              message={
-                intl.formatMessage(
-                  this.getMessageForType(
-                    progressTypes.size === 1 ? progressTypes.first() : 'save',
-                    viewDomain.get('success').size,
-                  ),
-                  {
-                    successNo: viewDomain.get('success').size,
-                  },
-                )
-              }
-              onDismiss={onResetProgress}
-              autoDismiss={2000}
-            />
-          </Progress>
-        )}
-      </ContainerWrapper>
+      </>
     );
   }
 }
@@ -945,7 +946,6 @@ EntityList.propTypes = {
   showCode: PropTypes.bool,
   includeMembersWhenFiltering: PropTypes.bool,
   listActions: PropTypes.array,
-  onSelectType: PropTypes.func,
   onSetView: PropTypes.func,
   // onSetFilterMemberOption: PropTypes.func,
   view: PropTypes.string,

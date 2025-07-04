@@ -4,7 +4,7 @@ import styled from 'styled-components';
 import { Box, Text } from 'grommet';
 
 import EntityListTable from 'containers/EntityListTable';
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 import { ROUTES } from 'themes/config';
 
 const SectionTitle = styled((p) => <Text size="xsmall" {...p} />)`
@@ -31,7 +31,7 @@ export function PreviewCountryPositionsList({ content, onUpdatePath }) {
         {options && (
           <Box direction="column" justify="end">
             {options.map((option) => (
-              <MapOption
+              <CheckboxOption
                 key={option.id}
                 option={option}
               />

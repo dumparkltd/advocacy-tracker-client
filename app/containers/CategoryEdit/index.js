@@ -44,6 +44,7 @@ import {
   selectIsUserAdmin,
   selectIsUserMember,
   selectSessionUserId,
+  selectStepQuery,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -90,7 +91,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
-    const { viewEntity } = props;
+    const { viewEntity, step } = props;
     return viewEntity
       ? Map({
         id: viewEntity.get('id'),
@@ -98,6 +99,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
           (oldVal, newVal) => oldVal === null ? newVal : oldVal,
           FORM_INITIAL.get('attributes')
         ),
+        step,
       })
       : Map();
   };
@@ -229,6 +231,7 @@ CategoryEdit.propTypes = {
   onServerErrorDismiss: PropTypes.func.isRequired,
   onCreateOption: PropTypes.func,
   myId: PropTypes.string,
+  step: PropTypes.string,
 };
 
 CategoryEdit.contextTypes = {
@@ -244,6 +247,7 @@ const mapStateToProps = (state, props) => ({
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),
   myId: selectSessionUserId(state),
+  step: selectStepQuery(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

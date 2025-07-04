@@ -1,6 +1,6 @@
 /*
  *
- * EntityListSidebarGroups
+ * FilterOptionList
  *
  */
 
@@ -25,7 +25,7 @@ export function FilterOptionList({
   intl,
   onUpdateQuery,
 }) {
-  const optionCAF = option.get('connectionAttributeFilter');
+const optionCAF = option.get('connectionAttributeFilter');
   return (
     <Box>
       <EntityListSidebarOption
@@ -45,48 +45,49 @@ export function FilterOptionList({
           gap="xxsmall"
         >
           {option.get('currentFilters').map(
-            (f, j) => {
-              const filter = f.toJS();
-              const hasAttributeOptions = optionCAF && ['without', 'any'].indexOf(filter.query) === -1;
+            (filter, j) => {
+              const filterJS = filter.toJS();
+              const hasAttributeOptions = filterJS.attributeOptions && ['without', 'any'].indexOf(filterJS.query) === -1;
               return (
                 <Box key={j} align="start">
                   <Box direction="row" align="center">
                     <ButtonTagFilterWrap
                       onClick={(args) => {
                         onHideOptions();
-                        filter.onClick(args);
+                        filterJS.onClick(args);
                       }}
-                      filter={filter}
-                      label={getFilterLabel(filter, intl, true)}
+                      filter={filterJS}
+                      label={getFilterLabel(filterJS, intl, true)}
                       showConnectedAttributes={false}
                     />
-                    {optionCAF && hasAttributeOptions && (
+                    {filterJS.attributeOptions && hasAttributeOptions && (
                       <OptionsOverlay
                         title="Select attribute options"
                         onChange={
                           (options) => {
-                            const [value] = filter.queryValue.split('>');
+                            const [value] = filterJS.queryValue.split('>');
                             const newValues = options
                               .filter((o) => o.get('checked'))
                               .map((o) => o.get('value'))
                               .toJS();
                             // option active
                             onUpdateQuery({
-                              arg: filter.query,
+                              arg: filterJS.query,
                               value: newValues.length > 0
                                 ? `${value}>${optionCAF.get('attribute')}=${newValues.join('|')}`
                                 : value,
-                              prevValue: filter.queryValue,
+                              prevValue: filterJS.queryValue,
                               replace: true,
                             });
                           }
                         }
-                        options={optionCAF
-                          .get('options')
+                        options={filter.get('attributeOptions')
                           .map((o) => {
-                            const label = intl.formatMessage(appMessages[optionCAF.get('optionMessages')][o.get('value')]);
-                            const checked = f.get('connectedAttributes')
-                              ? f.get('connectedAttributes').some(
+                            const label = intl.formatMessage(
+                              appMessages[optionCAF.get('optionMessages')][o.get('value')]
+                            );
+                            const checked = filter.get('connectedAttributes')
+                              ? filter.get('connectedAttributes').some(
                                 (att) => att.get('value') === o.get('value')
                               )
                               : false;
@@ -97,13 +98,13 @@ export function FilterOptionList({
                       />
                     )}
                   </Box>
-                  {filter.connectedAttributes && hasAttributeOptions && (
+                  {filterJS.connectedAttributes && hasAttributeOptions && (
                     <Box
                       margin={{ left: 'medium', vertical: 'xsmall' }}
                       gap="xxsmall"
                       align="start"
                     >
-                      {filter.connectedAttributes.map(
+                      {filterJS.connectedAttributes.map(
                         (att) => (
                           <Box
                             key={att.value}

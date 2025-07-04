@@ -38,9 +38,11 @@ export function CellBodyActors({
           title={entity.value}
           alignSelf={align}
         >
-          <Label textAlign={align}>
-            {truncateText(entity.value, 25)}
-          </Label>
+          <Box>
+            <Label textAlign={align} title={entity.value}>
+              {truncateText(entity.value, 25)}
+            </Label>
+          </Box>
         </Link>
       )}
       {entity.tooltip && (
@@ -73,6 +75,7 @@ export function CellBodyActors({
           }}
         >
           <DropEntityList
+            hasIndirect={!!entity.tooltipIndirect}
             entityType="actors"
             tooltipConfig={entity.tooltip}
             onEntityClick={(id) => {
@@ -80,6 +83,17 @@ export function CellBodyActors({
               onEntityClick(id, ROUTES.ACTOR);
             }}
           />
+          {entity.tooltipIndirect && (
+            <DropEntityList
+              indirect
+              entityType="actors"
+              tooltipConfig={entity.tooltipIndirect}
+              onEntityClick={(id) => {
+                setShowContent(false);
+                onEntityClick(id, ROUTES.ACTOR);
+              }}
+            />
+          )}
         </Drop>
       )}
     </Box>

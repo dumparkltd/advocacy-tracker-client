@@ -47,4 +47,6 @@ export const FORM_INITIAL = fromJS({
   associatedTopActionsByActiontype: {},
   associatedSubActionsByActiontype: {},
   associatedUsers: [],
+  close: true,
+  step: null,
 });

@@ -133,8 +133,16 @@ export const RESOURCETYPES = {
 };
 
 export const OFFICIAL_STATEMENT_CATEGORY_ID = 55;
-export const AUTHORITY_TAXONOMY = 13;
+export const GENERAL_POS_TAXONOMY = 1;
+export const SECTOR_TAXONOMY = 2;
+export const ROLES_TAXONOMY = 3;
+export const REGION_TYPE_TAXONOMY = 4;
+export const GROUP_TYPE_TAXONOMY = 5;
 export const EXPRESSFORM_TAXONOMY = 7;
+export const EVENT_TYPE_TAXONOMY = 9;
+export const PRIORITY_TAXONOMY = 10;
+export const INTERACTION_TYPE_TAXONOMY = 12;
+export const AUTHORITY_TAXONOMY = 13;
 
 export const ACTION_INDICATOR_SUPPORTLEVELS = {
   // not assigned
@@ -341,7 +349,7 @@ export const ACTION_FIELDS = {
     },
     draft: {
       defaultValue: true,
-      required: Object.values(ACTIONTYPES), // all types
+      controlType: 'checkbox',
       type: 'bool',
       section: 'footer',
       // ui: 'dropdown',
@@ -353,14 +361,17 @@ export const ACTION_FIELDS = {
     },
     private: {
       defaultValue: false,
+      controlType: 'checkbox',
       type: 'bool',
     },
     is_archive: {
       defaultValue: false,
+      controlType: 'checkbox',
       type: 'bool',
     },
     notifications: {
       defaultValue: true,
+      controlType: 'checkbox',
       type: 'bool',
     },
     created_at: {
@@ -675,8 +686,8 @@ export const ACTOR_FIELDS = {
     },
     draft: {
       defaultValue: true,
-      required: true,
       type: 'bool',
+      controlType: 'checkbox',
       skipImport: true,
       // ui: 'dropdown',
       // options: [
@@ -827,7 +838,7 @@ export const RESOURCE_FIELDS = {
     },
     draft: {
       defaultValue: true,
-      required: Object.values(RESOURCETYPES), // all types
+      controlType: 'checkbox',
       type: 'bool',
       skipImport: true,
       // ui: 'dropdown',
@@ -890,7 +901,7 @@ export const INDICATOR_FIELDS = {
     },
     draft: {
       defaultValue: true,
-      required: true,
+      controlType: 'checkbox',
       type: 'bool',
       skipImport: true,
     },
@@ -1074,7 +1085,11 @@ export const MEMBERSHIPS = {
 };
 
 export const INDICATOR_ACTIONTYPES = [ACTIONTYPES.EXPRESS];
-export const INDICATOR_ACTION_ACTORTYPES = [ACTORTYPES.COUNTRY];
+export const INDICATOR_ACTION_ACTORTYPES = [
+  ACTORTYPES.COUNTRY,
+  ACTORTYPES.CONTACT,
+  // ACTORTYPES.GROUP,
+];
 
 export const USER_ACTIONTYPES = [
   ACTIONTYPES.OP,
@@ -1149,7 +1164,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -1368,7 +1383,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -1581,7 +1596,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -1643,7 +1658,6 @@ export const ACTORTYPES_CONFIG = {
                 },
                 {
                   attribute: 'url',
-                  hideByDefault: true,
                 },
               ],
             ], // rows
@@ -1792,7 +1806,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -1963,7 +1977,7 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -2181,6 +2195,7 @@ export const ACTIONTYPES_CONFIG = {
         type_id: ACTORTYPES.COUNTRY,
         minSize: 'small',
         showOnSingle: false,
+        includeViaParent: true,
       },
       {
         id: `actors_${ACTORTYPES.CONTACT}`,
@@ -2219,7 +2234,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -2290,7 +2305,6 @@ export const ACTIONTYPES_CONFIG = {
               ],
               [{
                 attribute: 'url',
-                hideByDefault: true,
                 basis: '2/3',
               }],
               [{
@@ -2472,7 +2486,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -2556,7 +2570,6 @@ export const ACTIONTYPES_CONFIG = {
               ],
               [{
                 attribute: 'url',
-                hideByDefault: true,
                 basis: '2/3',
               }],
               [{
@@ -2749,7 +2762,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -2818,7 +2831,6 @@ export const ACTIONTYPES_CONFIG = {
               ],
               [{
                 attribute: 'url',
-                hideByDefault: true,
                 basis: '2/3',
               }],
               [{
@@ -3015,7 +3027,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -3084,7 +3096,6 @@ export const ACTIONTYPES_CONFIG = {
               ],
               [{
                 attribute: 'url',
-                hideByDefault: true,
                 basis: '2/3',
               }],
               [{
@@ -3288,7 +3299,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -3358,7 +3369,6 @@ export const ACTIONTYPES_CONFIG = {
               ],
               [{
                 attribute: 'url',
-                hideByDefault: true,
                 basis: '2/3',
               }],
               [{
@@ -3562,7 +3572,7 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true },
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
           { attribute: 'private', needsAdminOrOwn: true },
           { attribute: 'draft', needsAdminOrOwn: true },
         ],
@@ -3614,7 +3624,6 @@ export const ACTIONTYPES_CONFIG = {
               ],
               [{
                 attribute: 'url',
-                hideByDefault: true,
               }],
               [{
                 attribute: 'description',
@@ -3643,7 +3652,7 @@ export const ACTIONTYPES_CONFIG = {
           },
           {
             id: 'staff-stakeholders',
-            title: 'WWF Staff',
+            title: 'Participating WWF Staff',
             rows: [
               [
                 {
@@ -3753,7 +3762,7 @@ export const RESOURCETYPES_CONFIG = {
     {
       id: 'footer',
       fields: [
-        { attribute: 'is_archive', needsAdmin: true },
+        { attribute: 'is_archive', needsAdmin: true, skipNew: true },
         { attribute: 'private', needsAdminOrOwn: true },
         { attribute: 'draft', needsAdminOrOwn: true },
       ],
@@ -3798,7 +3807,7 @@ export const INDICATOR_CONFIG = {
     {
       id: 'footer',
       fields: [
-        { attribute: 'is_archive', needsAdmin: true },
+        { attribute: 'is_archive', needsAdmin: true, skipNew: true },
         { attribute: 'private', needsAdminOrOwn: true },
         { attribute: 'draft', needsAdminOrOwn: true },
       ],
@@ -3853,7 +3862,7 @@ export const PAGE_CONFIG = {
   attributes: {
     draft: {
       defaultValue: true,
-      required: true, // all types
+      controlType: 'checkbox',
       type: 'bool',
     },
     private: {
@@ -3920,7 +3929,7 @@ export const CATEGORY_CONFIG = {
   attributes: {
     draft: {
       defaultValue: true,
-      required: true, // all types
+      controlType: 'checkbox',
       type: 'bool',
     },
     private: {
@@ -3954,7 +3963,7 @@ export const CATEGORY_CONFIG = {
     {
       id: 'footer',
       fields: [
-        { attribute: 'is_archive', needsAdmin: true },
+        { attribute: 'is_archive', needsAdmin: true, skipNew: true },
         { attribute: 'private', needsAdminOrOwn: true },
         { attribute: 'draft', needsAdminOrOwn: true },
       ],
@@ -3998,7 +4007,7 @@ export const USER_CONFIG = {
   attributes: {
     draft: {
       defaultValue: true,
-      required: true, // all types
+      controlType: 'checkbox',
       type: 'bool',
     },
     private: {
@@ -4259,29 +4268,32 @@ export const USER_ROLES = {
   VISITOR: { value: 3, message: 'ui.userRoles.visitor', order: 4 },
   DEFAULT: { value: 9999, message: 'ui.userRoles.default', order: 9999 }, // note: client side only - no role assigned on server
 };
-// Entity publish statuses
-export const PUBLISH_STATUSES = [
-  { value: true, message: 'ui.publishStatuses.draft' },
-  { value: false, message: 'ui.publishStatuses.public' },
-];
-// Entity publish statuses
-export const PRIVACY_STATUSES = [
-  { value: false, message: 'ui.privacyStatuses.public' },
-  { value: true, message: 'ui.privacyStatuses.private' },
-];
-export const NOTIFICATION_STATUSES = [
-  { value: true, message: 'ui.notificationStatuses.enabled' },
-  { value: false, message: 'ui.notificationStatuses.disabled' },
-];
-export const ARCHIVE_STATUSES = [
-  { value: false, message: 'ui.archiveStatuses.current' },
-  { value: true, message: 'ui.archiveStatuses.archived' },
-];
+
 export const EMAIL_STATUSES = [
   { value: 'valid', message: 'ui.emailStatuses.valid' },
   { value: 'invalid', message: 'ui.emailStatuses.invalid' },
   { value: 'empty', message: 'ui.emailStatuses.empty' },
 ];
+
+export const ATTRIBUTE_STATUSES = {
+  // Entity publish statuses
+  draft: [
+    { value: true, message: 'ui.publishStatuses.draft' },
+    { value: false, message: 'ui.publishStatuses.public' },
+  ],
+  private: [
+    { value: true, message: 'ui.privacyStatuses.private' },
+    { value: false, message: 'ui.privacyStatuses.public' },
+  ],
+  notifications: [
+    { value: true, message: 'ui.notificationStatuses.enabled' },
+    { value: false, message: 'ui.notificationStatuses.disabled' },
+  ],
+  is_archive: [
+    { value: true, message: 'ui.archiveStatuses.archived' },
+    { value: false, message: 'ui.archiveStatuses.current' },
+  ],
+};
 
 export const DEFAULT_RESOURCETYPE = RESOURCETYPES.REF;
 export const DEFAULT_ACTIONTYPE = ACTIONTYPES.TASK;
@@ -4396,4 +4408,5 @@ export const FORM_NON_CONTROL_PROPS = [
   'autofill',
   'basis',
   'isBlocked',
+  'info',
 ];

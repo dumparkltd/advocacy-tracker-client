@@ -2,8 +2,7 @@ import {
   API,
   ROUTES,
   USER_ROLES,
-  PUBLISH_STATUSES,
-  PRIVACY_STATUSES,
+  ATTRIBUTE_STATUSES,
 } from 'themes/config';
 
 // specify the filter and query  options
@@ -27,7 +26,7 @@ export const CONFIG = {
         search: false,
         message: 'attributes.draft',
         attribute: 'draft',
-        options: PUBLISH_STATUSES,
+        options: ATTRIBUTE_STATUSES.draft,
         role: USER_ROLES.MEMBER.value,
         filterUI: 'checkboxes',
       },
@@ -35,7 +34,7 @@ export const CONFIG = {
         search: false,
         message: 'attributes.private',
         attribute: 'private',
-        options: PRIVACY_STATUSES,
+        options: ATTRIBUTE_STATUSES.private,
         role: USER_ROLES.MEMBER.value,
         roleEdit: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',

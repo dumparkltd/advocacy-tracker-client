@@ -134,6 +134,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
               isMine: true,
               taxonomy,
               intl,
+              isNew: true,
             },
             CATEGORY_CONFIG.form,
             CATEGORY_CONFIG.attributes,
@@ -219,11 +220,25 @@ function mapDispatchToProps(
     // handleSubmit: (formData, actions, actorsByActortype, taxonomy) => {
     handleSubmit: (formData, taxonomy, invalidateEntitiesOnSuccess) => {
       const saveData = formData.setIn(['attributes', 'taxonomy_id'], taxonomy.get('id'));
+      let redirect = null;
+      let redirectQuery = null;
+      if (!inModal) {
+        if (formData.get('close')) {
+          redirect = ROUTES.CATEGORY;
+        } else {
+          redirect = `${ROUTES.CATEGORY}${ROUTES.EDIT}`;
+          redirectQuery = {
+            arg: 'step',
+            value: formData.get('step'),
+          };
+        }
+      }
       dispatch(
         newEntity({
           path: API.CATEGORIES,
           entity: saveData.toJS(),
-          redirect: !inModal ? ROUTES.CATEGORY : null,
+          redirect,
+          redirectQuery,
           invalidateEntitiesOnSuccess,
           onSuccess: inModal && onSaveSuccess
             ? () => {

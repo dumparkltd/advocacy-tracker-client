@@ -70,7 +70,7 @@ export function CellHeaderPlain({ column }) {
         </PrintHide>
       )}
       {column.info && (
-        <Box style={{ position: 'relative', top: '-1px' }}>
+        <Box>
           <InfoOverlay
             tooltip
             icon="question"

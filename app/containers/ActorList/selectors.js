@@ -286,8 +286,8 @@ const selectActorsByTopicPosition = createSelector(
     if (INDICATOR_ACTION_ACTORTYPES.indexOf(type) > -1 && locationQuery.get('indicators')) {
       const locationQueryValue = locationQuery.get('indicators');
       // console.log('locationQueryValue', type, locationQueryValue)
-      return actors.filter((country) => {
-        const countryPositions = country.get('indicatorPositions');
+      return actors.filter((actor) => {
+        const countryPositions = actor.get('indicatorPositions');
         // countries pass when they pass all queried indicators
         const pass = asList(locationQueryValue).reduce(
           (memo, queryValue) => {

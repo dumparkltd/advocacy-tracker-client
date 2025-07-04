@@ -319,6 +319,11 @@ export const selectHiddenColumns = createSelector(
   (locationQuery) => locationQuery && locationQuery.get('xcol') && asList(locationQuery.get('xcol'))
 );
 
+export const selectStepQuery = createSelector(
+  selectLocationQuery,
+  (locationQuery) => locationQuery && locationQuery.get('step')
+);
+
 // filter queries //////////////////////////////////////////////////////////////
 
 const selectWhereQuery = createSelector(

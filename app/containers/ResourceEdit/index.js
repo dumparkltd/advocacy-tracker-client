@@ -45,6 +45,7 @@ import {
   selectIsUserMember,
   selectSessionUserId,
   selectTaxonomiesWithCategories,
+  selectStepQuery,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -96,6 +97,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
       viewEntity,
       actionsByActiontype,
       isAdmin,
+      step,
     } = props;
     return viewEntity
       ? Map({
@@ -107,6 +109,7 @@ export class ResourceEdit extends React.PureComponent { // eslint-disable-line r
         associatedActionsByActiontype: actionsByActiontype
           ? actionsByActiontype.map((actions) => entityOptions({ entities: actions, showCode: isAdmin }))
           : Map(),
+        step,
       })
       : Map();
   };
@@ -233,6 +236,7 @@ ResourceEdit.propTypes = {
   onServerErrorDismiss: PropTypes.func.isRequired,
   connectedTaxonomies: PropTypes.object,
   myId: PropTypes.string,
+  step: PropTypes.string,
 };
 
 ResourceEdit.contextTypes = {
@@ -249,6 +253,7 @@ const mapStateToProps = (state, props) => ({
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   myId: selectSessionUserId(state),
+  step: selectStepQuery(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

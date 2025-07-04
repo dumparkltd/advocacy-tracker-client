@@ -5,10 +5,10 @@ import styled from 'styled-components';
 import { Box, Text } from 'grommet';
 import TagList from 'components/TagList';
 import PrintHide from 'components/styled/PrintHide';
+import CheckboxOption from 'components/CheckboxOption';
+import SelectIndicators from 'components/SelectIndicators';
 
 import MapKey from './MapKey';
-import MapOption from './MapOption';
-import SelectIndicators from './SelectIndicators';
 
 const Title = styled((p) => <Text weight={500} {...p} />)`
   margin-right: ${({ hasInfo }) => hasInfo ? 8 : 0}px;
@@ -67,7 +67,7 @@ const Pane = styled((p) => <Box {...p} />)`
 //   }
 // `;
 
-export function MapInfoOptions({
+export function MapKeySettingsPanel({
   option,
   countryMapSubject,
   minMaxValues,
@@ -124,21 +124,28 @@ export function MapInfoOptions({
             {filters && (
               <TagList filters={filters} onClear={onClearFilters} />
             )}
-            {option.memberOption && (
-              <MapOption option={option.memberOption} type="info" />
+            {(
+              option.memberOption ||
+              (option.infoOptions && option.infoOptions.length > 0)
+            ) && (
+              <Box margin={{ top: 'xsmall' }}>
+                {option.memberOption && (
+                  <CheckboxOption option={option.memberOption} type="info" />
+                )}
+                {option.infoOptions
+                  && option.infoOptions.length > 0
+                  && option.infoOptions.map(
+                    (infoOption, i) => (
+                      <CheckboxOption
+                        key={i}
+                        option={{ ...infoOption, id: infoOption.id || i }}
+                        type="info"
+                      />
+                    )
+                  )
+                }
+              </Box>
             )}
-            {option.infoOptions
-              && option.infoOptions.length > 0
-              && option.infoOptions.map(
-                (infoOption, i) => (
-                  <MapOption
-                    key={i}
-                    option={{ ...infoOption, id: infoOption.id || i }}
-                    type="info"
-                  />
-                )
-              )
-            }
           </Box>
         </Box>
       </Pane>
@@ -146,7 +153,7 @@ export function MapInfoOptions({
   );
 }
 
-MapInfoOptions.propTypes = {
+MapKeySettingsPanel.propTypes = {
   option: PropTypes.object,
   filters: PropTypes.array,
   minMaxValues: PropTypes.object,
@@ -155,4 +162,4 @@ MapInfoOptions.propTypes = {
   onClearFilters: PropTypes.func,
 };
 
-export default MapInfoOptions;
+export default MapKeySettingsPanel;

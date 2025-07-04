@@ -83,6 +83,9 @@ export function FormContentWrapper({
                         if (field.basis === '1/3') {
                           return memo + 0.33;
                         }
+                        if (field.basis === '2/3') {
+                          return memo + 0.66;
+                        }
                       }
                       return 0;
                     }, 0);

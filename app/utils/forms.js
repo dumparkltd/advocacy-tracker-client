@@ -1,6 +1,7 @@
 import { Map, List } from 'immutable';
 
-import { filter } from 'lodash/collection';
+import { filter, find } from 'lodash/collection';
+import { get } from 'lodash/object';
 
 import {
   getEntityTitle,
@@ -17,10 +18,7 @@ import validateEmailFormat from 'components/forms/validators/validate-email-form
 import validateLength from 'components/forms/validators/validate-length';
 
 import {
-  PUBLISH_STATUSES,
-  PRIVACY_STATUSES,
-  ARCHIVE_STATUSES,
-  NOTIFICATION_STATUSES,
+  ATTRIBUTE_STATUSES,
   USER_ROLES,
   DATE_FORMAT,
   API,
@@ -714,28 +712,29 @@ export const getRoleFormField = ({ formatMessage, roleOptions, hideByDefault }) 
   hideByDefault,
 });
 
-export const getStatusFormField = ({
-  formatMessage, attribute = 'draft', options, hideByDefault,
+export const getCheckboxFormField = ({
+  formatMessage, attribute = 'draft', hideByDefault, controlType, onChange,
 }) => {
-  let myOptions = options;
-  if (attribute === 'draft') {
-    myOptions = PUBLISH_STATUSES;
+  let message;
+  if (ATTRIBUTE_STATUSES[attribute]) {
+    const option = find(ATTRIBUTE_STATUSES[attribute], { value: true });
+    if (option) {
+      /* eslint-disable prefer-destructuring */
+      message = get(appMessages, option.message);
+      /* eslint-enable prefer-destructuring */
+    }
   }
-  if (attribute === 'private') {
-    myOptions = PRIVACY_STATUSES;
-  }
-  if (attribute === 'is_archive') {
-    myOptions = ARCHIVE_STATUSES;
-  }
-  if (attribute === 'notifications') {
-    myOptions = NOTIFICATION_STATUSES;
+  if (!message && appMessages.attributes[attribute]) {
+    message = appMessages.attributes[attribute];
   }
   return {
     id: `status-${attribute}`,
-    controlType: 'select',
+    att: attribute,
+    controlType: controlType || 'checkbox',
     model: `.attributes.${attribute}`,
-    label: formatMessage(appMessages.attributes[attribute]),
-    options: myOptions,
+    label: message ? formatMessage(message) : 'UNDEFINED',
+    info: !!appMessages.attributeInfo[attribute],
+    changeAction: onChange,
     hideByDefault,
   };
 };
@@ -911,22 +910,22 @@ export const getDateFormField = ({
   return field;
 };
 
-export const getCheckboxFormField = ({
-  formatMessage,
-  attribute,
-  onChange,
-  hideByDefault,
-}) => (
-  {
-    id: `checkbox-${attribute}`,
-    controlType: 'checkbox',
-    model: `.attributes.${attribute}`,
-    label: appMessages.attributes[attribute] && formatMessage(appMessages.attributes[attribute]),
-    // value: entity && entity.getIn(['attributes', attribute]) ? entity.getIn(['attributes', attribute]) : false,
-    changeAction: onChange,
-    hint: appMessages.hints[attribute] && formatMessage(appMessages.hints[attribute]),
-    hideByDefault,
-  });
+// export const getCheckboxFormField = ({
+//   formatMessage,
+//   attribute,
+//   onChange,
+//   hideByDefault,
+// }) => (
+//   {
+//     id: `checkbox-${attribute}`,
+//     controlType: 'checkbox',
+//     model: `.attributes.${attribute}`,
+//     label: appMessages.attributes[attribute] && formatMessage(appMessages.attributes[attribute]),
+//     // value: entity && entity.getIn(['attributes', attribute]) ? entity.getIn(['attributes', attribute]) : false,
+//     changeAction: onChange,
+//     hint: appMessages.hints[attribute] && formatMessage(appMessages.hints[attribute]),
+//     hideByDefault,
+//   });
 
 export const getUploadFormField = ({ formatMessage, hideByDefault }) => getFormField({
   formatMessage,
@@ -1034,7 +1033,7 @@ export const getPasswordConfirmationFormField = ({
   return field;
 };
 
-export const getFormField = ({
+const getFormField = ({
   formatMessage,
   controlType,
   attribute,
@@ -1054,6 +1053,7 @@ export const getFormField = ({
     model: model || `.attributes.${attribute}`,
     placeholder: appMessages.placeholders[placeholder || attribute] && formatMessage(appMessages.placeholders[placeholder || attribute]),
     label: appMessages.attributes[label || attribute] && formatMessage(appMessages.attributes[label || attribute]),
+    info: !!appMessages.attributeInfo[attribute],
     validators: {},
     hasrequired: !!required,
     errorMessages: {},
@@ -1115,10 +1115,10 @@ const getEntityFormField = (
     console.log('attribute, fieldConfig', attribute, fieldConfig);
   }
   if (attribute && fieldConfig) {
-    const attributeType = fieldConfig.type;
-    const cleanFieldType = fieldType || attributeType;
+    const { controlType } = fieldConfig;
+    const cleanFieldType = fieldType || fieldConfig.type;
     const fieldArgs = {
-      formatMessage, attribute, required, hideByDefault, label, placeholder,
+      formatMessage, attribute, required, hideByDefault, label, placeholder, controlType,
     };
     // for attributes
     if (attribute === 'title') {
@@ -1150,7 +1150,7 @@ const getEntityFormField = (
     } else if (cleanFieldType === 'url') {
       result = getLinkFormField(fieldArgs);
     } else if (cleanFieldType === 'bool') {
-      result = getStatusFormField(fieldArgs);
+      result = getCheckboxFormField(fieldArgs);
     }
   } else if (connection) {
     if (type && connection === API.ACTORS) {
@@ -1291,6 +1291,9 @@ export const getEntityFormFields = (args, shape, attributes) => {
                           if (!checkPermission({ permissions: args, requirements: field })) {
                             return memo3;
                           }
+                          if (args.isNew && field.skipNew) {
+                            return memo3;
+                          }
                           const fieldConfig = (field.attribute && attributes)
                             ? attributes[field.attribute]
                             : null;
@@ -1309,13 +1312,23 @@ export const getEntityFormFields = (args, shape, attributes) => {
             [],
           ),
           // footer fields
-          fields: step.fields && step.fields.map(
-            (field) => {
+          fields: step.fields && step.fields.reduce(
+            (memo2, field) => {
+              if (!checkPermission({ permissions: args, requirements: field })) {
+                return memo2;
+              }
+              if (args.isNew && field.skipNew) {
+                return memo2;
+              }
               const fieldConfig = (field.attribute && attributes)
                 ? attributes[field.attribute]
                 : null;
-              return getEntityFormField(field, args, fieldConfig);
+              return [
+                ...memo2,
+                getEntityFormField(field, args, fieldConfig),
+              ];
             },
+            [],
           ),
         },
       ];

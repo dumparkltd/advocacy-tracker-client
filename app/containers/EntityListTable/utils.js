@@ -79,19 +79,6 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
           onSort,
         });
-      case 'actorsViaChildren':
-        return ({
-          ...col,
-          title: label || 'Indirect stakeholders',
-          sortActive,
-          sortOrder: sortActive && sortOrder ? sortOrder : 'asc',
-          onSort,
-          info: {
-            type: 'text',
-            title: 'Indirect stakeholders',
-            text: 'From sub-activities, e.g tasks',
-          },
-        });
       case 'actors':
       case 'userActors':
         if (col.type_id) {
@@ -303,7 +290,10 @@ const getRelatedEntities = (
             const myConnectionAttributeValues = connectionAttributeValues.get(entityId.toString());
             entityConnection = connectionAttributes.reduce(
               (memo2, attribute) => {
-                const value = myConnectionAttributeValues.get(attribute.attribute);
+                let value = myConnectionAttributeValues.get(attribute.attribute);
+                if ((typeof value === 'undefined' || value === null) && attribute.fallbackValue) {
+                  value = attribute.fallbackValue;
+                }
                 return memo2.set(
                   attribute.optionAs,
                   attribute.options[value],
@@ -390,6 +380,8 @@ export const prepareEntityRows = ({
       (memoEntity, col) => {
         const path = getEntityPath(entity);
         let relatedEntities;
+        let relatedEntitiesOther;
+        let relatedEntitiesMerged;
         let relatedEntityIds;
         let temp;
         let attribute;
@@ -476,21 +468,6 @@ export const prepareEntityRows = ({
                 sortValue: getRelatedSortValue(relatedEntities),
               },
             };
-          case 'actorsViaChildren':
-            temp = entity.get('actorsViaChildren');
-            relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
-            return {
-              ...memoEntity,
-              [col.id]: {
-                ...col,
-                value: getRelatedValue(relatedEntities, col.label || 'actors'),
-                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
-                tooltip: relatedEntities && relatedEntities.size > 1
-                  && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
-                multiple: relatedEntities && relatedEntities.size > 1,
-                sortValue: getRelatedSortValue(relatedEntities),
-              },
-            };
           case 'users':
             temp = entity.get('users');
             relatedEntities = getRelatedEntities(temp, connections.get('users'), col);
@@ -507,6 +484,7 @@ export const prepareEntityRows = ({
             };
           case 'indicators':
             temp = entity.get('indicators');
+            // console.log('entity', entity.toJS())
             relatedEntities = getRelatedEntities(
               temp,
               connections.get('indicators'),
@@ -516,6 +494,7 @@ export const prepareEntityRows = ({
                 attribute: 'supportlevel_id',
                 options: ACTION_INDICATOR_SUPPORTLEVELS,
                 optionAs: 'supportlevel',
+                fallbackValue: '0', // no supportlevel assigned
               }],
             );
             return {
@@ -539,16 +518,30 @@ export const prepareEntityRows = ({
               temp = entity.get('actors') || (entity.get('actorsByType') && entity.get('actorsByType').flatten(true));
             }
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
+            if (col.includeViaParent) {
+              temp = entity.getIn(['actorsMembersByType', parseInt(col.type_id, 10)]);
+              if (temp) {
+                if (relatedEntities) {
+                  temp = temp.filter((t) => !relatedEntities.get(t));
+                }
+                relatedEntitiesOther = getRelatedEntities(temp, connections.get('actors'), col);
+                relatedEntitiesMerged = relatedEntities
+                  ? relatedEntities.merge(relatedEntitiesOther)
+                  : relatedEntitiesOther;
+              }
+            }
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: getRelatedValue(relatedEntities, col.label || 'actors'),
+                value: getRelatedValue(relatedEntitiesMerged || relatedEntities, col.label || 'actors'),
                 single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
                 tooltip: relatedEntities && relatedEntities.size > 1
                   && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
+                tooltipIndirect: relatedEntitiesOther && relatedEntitiesOther.size > 1
+                  && relatedEntitiesOther.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
                 multiple: relatedEntities && relatedEntities.size > 1,
-                sortValue: getRelatedSortValue(relatedEntities),
+                sortValue: getRelatedSortValue(relatedEntitiesMerged || relatedEntities),
               },
             };
           case 'viaGroups':

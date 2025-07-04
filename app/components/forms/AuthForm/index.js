@@ -7,6 +7,8 @@ import styled from 'styled-components';
 import { omit } from 'lodash/object';
 import { startCase } from 'lodash/string';
 
+import { FORM_NON_CONTROL_PROPS } from 'themes/config';
+
 import appMessages from 'containers/App/messages';
 
 import ButtonCancel from 'components/buttons/ButtonCancel';
@@ -27,9 +29,9 @@ import Required from '../Required';
 import ControlInput from '../ControlInput';
 
 // These props will be omitted before being passed to the Control component
-const nonControlProps = [
-  'hint', 'label', 'component', 'controlType', 'children', 'errorMessages', 'hasrequired', 'hideByDefault',
-];
+// const nonControlProps = [
+//   'hint', 'label', 'component', 'controlType', 'children', 'errorMessages', 'hasrequired', 'hideByDefault',
+// ];
 
 const StyledForm = styled(Form)`
   display: table;
@@ -38,7 +40,7 @@ const StyledForm = styled(Form)`
 
 class AuthForm extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   renderField = (field) => {
-    const { id, model, ...props } = omit(field, nonControlProps);
+    const { id, model, ...props } = omit(field, FORM_NON_CONTROL_PROPS);
     return (
       <ControlInput
         id={id}

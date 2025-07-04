@@ -35,7 +35,7 @@ import {
 } from 'containers/App/selectors';
 import appMessages from 'containers/App/messages';
 
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 
 import {
   selectPreviewEntity,
@@ -62,7 +62,7 @@ export const DEPENDENCIES = [
 ];
 
 
-const MapOptions = styled(
+const CheckboxOptionGroup = styled(
   (p) => <Box margin={{ top: 'xsmall', bottom: 'small' }} {...p} />
 )``;
 
@@ -123,9 +123,9 @@ export function ActorIndicatorsField({
         </SectionTitle>
       )}
       {hasOptions && (
-        <MapOptions>
+        <CheckboxOptionGroup>
           {hasMemberOption(typeId) && (
-            <MapOption
+            <CheckboxOption
               option={{
                 active: includeActorMembers,
                 onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
@@ -134,7 +134,7 @@ export function ActorIndicatorsField({
               type="member"
             />
           )}
-          <MapOption
+          <CheckboxOption
             option={{
               active: !includeInofficial,
               onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
@@ -142,7 +142,7 @@ export function ActorIndicatorsField({
             }}
             type="official"
           />
-        </MapOptions>
+        </CheckboxOptionGroup>
       )}
       <FieldFactory
         field={{

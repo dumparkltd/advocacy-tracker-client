@@ -26,9 +26,11 @@ export function CellBodyCategories({
   return (
     <Box alignContent={align}>
       {entity.single && (
-        <Label textAlign={align}>
-          {truncateText(entity.value, 25)}
-        </Label>
+        <Box>
+          <Label textAlign={align} title={entity.value}>
+            {truncateText(entity.value, 25)}
+          </Label>
+        </Box>
       )}
       {entity.tooltip && (
         <LinkTooltip

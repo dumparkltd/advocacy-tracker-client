@@ -5,8 +5,6 @@ import WWFFontEOT from './fonts/wwf-webfont.eot';
 
 /* eslint no-unused-expressions: 0 */
 const GlobalStyle = createGlobalStyle`
-  @import url('https://unpkg.com/leaflet@1.7.1/dist/leaflet.css');
-
   @font-face {
     font-family: 'wwfregular';
     src: url(${WWFFontEOT});
@@ -161,6 +159,11 @@ const GlobalStyle = createGlobalStyle`
     }
     a {
       text-decoration: underline;
+    }
+    p {
+      &:last-child{
+        margin: 0;
+      }
     }
   }
 

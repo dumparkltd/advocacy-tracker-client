@@ -333,11 +333,17 @@ const selectActionsByActors = createSelector(
         return filterEntitiesByMultipleConnections(
           entities,
           query,
-          ['actors', 'actorsAssociations'],
+          ['actors', 'actorsMembers', 'actorsAssociations'],
           true, // any
         );
       }
-      return filterEntitiesByConnection(entities, query, 'actors');
+      return filterEntitiesByMultipleConnections(
+        entities,
+        query,
+        ['actors', 'actorsMembers'],
+        true, // any
+      );
+      // return filterEntitiesByConnection(entities, query, 'actors');
     }
     return entities;
   }

@@ -65,6 +65,7 @@ import Card from 'containers/OverviewPositions/Card';
 import TitleOnCard from 'containers/OverviewPositions/TitleOnCard';
 import TitleAboveCard from 'containers/OverviewPositions/TitleAboveCard';
 import Button from 'components/buttons/Button';
+import FilterDropdown from 'components/forms/FilterDropdown';
 
 import {
   selectConnections,
@@ -74,7 +75,6 @@ import {
 import { DEPENDENCIES } from './constants';
 
 import ComponentOptions from './ComponentOptions';
-import FilterDropdown from './FilterDropdown';
 
 import messages from './messages';
 
@@ -144,9 +144,9 @@ const prepareDropdownOptions = (entities, query, countries) => entities
   ).reduce(
     (memo, entity) => ([
       ...memo, {
-        title: getEntityTitle(entity),
-        id: entity.get('id'),
-        active: asArray(query).indexOf(entity.get('id')) > -1,
+        label: getEntityTitle(entity),
+        value: entity.get('id'),
+        checked: asArray(query).indexOf(entity.get('id')) > -1,
       },
     ]),
     [],
@@ -430,7 +430,6 @@ export function PositionsList({
                 id: 'supportlevel_id',
                 type: 'supportlevel',
                 title: intl.formatMessage(appMessages.attributes.supportlevel_id),
-                align: 'center',
                 info: {
                   type: 'key-categorical',
                   attribute: 'supportlevel_id',
@@ -529,7 +528,7 @@ export function PositionsList({
                         countriesFilteredByColumn,
                       )}
                       onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.REG })}
-                      onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.REG })}
+                      onSelect={(value) => onUpdateAssociationQuery({ value, type: ACTORTYPES.REG })}
                       label="Filter by region"
                       buttonLabel="Select region"
                     />
@@ -542,7 +541,7 @@ export function PositionsList({
                         countriesFilteredByColumn,
                       )}
                       onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.GROUP })}
-                      onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.GROUP })}
+                      onSelect={(value) => onUpdateAssociationQuery({ value, type: ACTORTYPES.GROUP })}
                       label="Filter by group"
                       buttonLabel="Select group"
                     />
@@ -651,7 +650,7 @@ export function PositionsList({
                     {
                       id: `action_${ACTIONTYPES.EXPRESS}`,
                       type: 'actiontype',
-                      actiontype_id: ACTIONTYPES.EXPRESS,
+                      type_id: ACTIONTYPES.EXPRESS,
                       actions: 'actionsByType',
                       actionsMembers: 'actionsAsMemberByType',
                       actionsChildren: 'actionsAsParentByType',
@@ -662,7 +661,7 @@ export function PositionsList({
                     {
                       id: `action_${ACTIONTYPES.INTERACTION}`,
                       type: 'actiontype',
-                      actiontype_id: ACTIONTYPES.INTERACTION,
+                      type_id: ACTIONTYPES.INTERACTION,
                       actions: 'actionsByType',
                       actionsMembers: 'actionsAsMemberByType',
                       actionsChildren: 'actionsAsParentByType',

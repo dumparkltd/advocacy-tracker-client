@@ -78,7 +78,7 @@ export const getEntitySortComparator = (valueA, valueB, sortOrder, type) => {
   } else if (isNumber(valueA) && isNumber(valueB)) {
     result = parseInt(valueA, 10) < parseInt(valueB, 10) ? -1 : 1;
   } else {
-    // compare stings incl partial numbers
+    // compare strings incl partial numbers
     // 1. prep sort targets
     const testValuesA = prepSortTarget(valueA);
     const testValuesB = prepSortTarget(valueB);

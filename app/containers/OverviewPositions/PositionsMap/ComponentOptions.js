@@ -11,7 +11,7 @@ import {
 
 import { isMinSize } from 'utils/responsive';
 
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 
 import Button from 'components/buttons/ButtonSimple';
 import Dot from 'components/styled/Dot';
@@ -39,7 +39,9 @@ const TagButton = styled((p) => <Button {...p} />)`
     margin-right: 0;
   }
   &:hover {
-    border: 1px solid ${({ selected }) => selected ? palette('primary', 0) : palette('dark', 3)};
+    border: 1px solid ${({ selected, disabled }) => {
+      if (disabled) return selected ? palette('primary', 1) : palette('light', 4);
+      return selected ? palette('primary', 0) : palette('dark', 3)}};
   }
 `;
 const ResetSupportTagsButton = styled((p) => <Button {...p} />)`
@@ -89,27 +91,33 @@ const ComponentOptions = ({
           alignSelf="start"
           style={{ position: 'relative' }}
         >
-          {supportLevels && supportLevels.map((tag) => (
-            <TagButton
-              key={tag.value}
-              selected={tag.active}
-              onClick={() => onUpdateQuery([{
-                arg: 'support',
-                value: tag.value,
-                add: !tag.active ? tag.value : false,
-                remove: tag.active ? tag.value : false,
-                replace: false,
-                multipleAttributeValues: true,
-              }])}
-            >
-              <Box direction="row" align="center" gap="xsmall">
-                <Dot size="18px" color={tag.color} />
-                <Text size={isMinSize(size, 'medium') ? 'xsmall' : 'xxsmall'}>
-                  {tag.label}
-                </Text>
-              </Box>
-            </TagButton>
-          ))}
+          {supportLevels && supportLevels.map(
+            ({ value, active, disabled, color, label }) => (
+              <TagButton
+                key={value}
+                selected={active}
+                disabled={disabled && !active}
+                onClick={() => (disabled && !active) || onUpdateQuery([{
+                  arg: 'support',
+                  value: value,
+                  add: !active ? value : false,
+                  remove: active ? value : false,
+                  replace: false,
+                  multipleAttributeValues: true,
+                }])}
+              >
+                <Box direction="row" align="center" gap="xsmall">
+                  <Dot size="18px" color={color} />
+                  <Text
+                    size={isMinSize(size, 'medium') ? 'xsmall' : 'xxsmall'}
+                    style={{ opacity: (disabled && !active) ? 0.66 : 1}}
+                  >
+                    {label}
+                  </Text>
+                </Box>
+              </TagButton>
+            )
+          )}
           {supportLevels.find((level) => level.active) && (
             <ResetSupport>
               <ResetSupportTagsButton
@@ -138,7 +146,7 @@ const ComponentOptions = ({
             alignSelf="start"
           >
             {options.map((option) => (
-              <MapOption
+              <CheckboxOption
                 key={option.id}
                 option={option}
               />

@@ -54,9 +54,9 @@ import {
 
 import appMessages from 'containers/App/messages';
 import Loading from 'components/Loading';
-import MapContainer from 'containers/MapContainer';
-import SelectIndicators from 'containers/MapContainer/MapInfoOptions/SelectIndicators';
+import SelectIndicators from 'components/SelectIndicators';
 import Icon from 'components/Icon';
+import MapContainer from 'containers/MapContainer';
 import ButtonPrimary from 'components/buttons/ButtonPrimaryNew';
 import ButtonSecondary from 'components/buttons/ButtonSecondaryNew';
 import Button from 'components/buttons/ButtonSimple';
@@ -454,9 +454,9 @@ export function PositionsMap({
   const supportQueryAsList = supportQuery
     ? asList(supportQuery)
     : List([]);
-  const reduceCountryAreas = (features) => features.reduce((memo, feature) => {
-    const country = countries.find((e) => qe(e.getIn(['attributes', 'code']), feature.properties.ADM0_A3 || feature.properties.code));
-    if (country) {
+
+  const countryValues = dataReady && countries.reduce(
+    (memo, country) => {
       const countryPosition = country.get('indicatorPositions')
         && country.getIn(['indicatorPositions', currentIndicatorId.toString()])
         && country.getIn(['indicatorPositions', currentIndicatorId.toString()]).first();
@@ -464,15 +464,26 @@ export function PositionsMap({
       const statement = countryPosition && countryPosition.get('measure');
       const level = countryPosition
         && parseInt(countryPosition.get('supportlevel_id'), 10);
-
       return [
         ...memo,
         {
-          ...feature,
           id: country.get('id'),
           previewItemId: `${ID}|${country.get('id')}`,
           attributes: country.get('attributes').toJS(),
           values: statement ? { [currentIndicatorId]: level || 0 } : {},
+        },
+      ];
+    },
+    [],
+  );
+  const reduceCountryAreas = (features) => features.reduce((memo, feature) => {
+    const country = countryValues.find((c) => qe(c.attributes.code, feature.properties.ADM0_A3 || feature.properties.code));
+    if (country) {
+      return [
+        ...memo,
+        {
+          ...feature,
+          ...country,
         },
       ];
     }
@@ -484,17 +495,25 @@ export function PositionsMap({
     plural: intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`].plural),
   };
 
-  let supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+  let supportLevels = dataReady && Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
     .filter((level) => parseInt(level.value, 10) > 0 && parseInt(level.value, 10) < 99) // exclude 0
     .sort((a, b) => a.order > b.order ? 1 : -1);
 
-  supportLevels = supportLevels
-    .map((level) => ({
-      ...level,
-      active: supportQuery
-        && supportQueryAsList.includes(level.value),
-      label: intl.formatMessage(appMessages.supportlevels[level.value]),
-    }));
+  supportLevels = dataReady && supportLevels
+    .map((level) => {
+      const count = countryValues ? countryValues.filter(
+        (c) => c.values && c.values[currentIndicatorId] && qe(level.value, c.values[currentIndicatorId])
+      ).length
+      : 0;
+      return {
+        ...level,
+        active: supportQuery
+          && supportQueryAsList.includes(level.value),
+        label: `${intl.formatMessage(appMessages.supportlevels[level.value])} (${count})`,
+        disabled: !count,
+        count,
+      };
+    });
 
   const currentIndicator = indicators
     && currentIndicatorId

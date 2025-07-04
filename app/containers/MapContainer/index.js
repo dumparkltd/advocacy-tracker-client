@@ -25,13 +25,13 @@ import {
 } from 'containers/App/actions';
 
 import { usePrint } from 'containers/App/PrintContext';
+import CheckboxOption from 'components/CheckboxOption';
 
 // import appMessages from 'containers/App/messages';
 // import { hasGroupActors } from 'utils/entities';
 import LeafletWrapper from './LeafletWrapper';
-import MapOption from './MapInfoOptions/MapOption';
-import MapKey from './MapInfoOptions/MapKey';
-import MapInfoOptions from './MapInfoOptions';
+import MapKey from './MapKeySettingsPanel/MapKey';
+import MapKeySettingsPanel from './MapKeySettingsPanel';
 const MapKeyWrapper = styled((p) => <Box margin={{ horizontal: 'medium', top: 'xsmall', bottom: 'small' }} {...p} />)`
   max-width: 400px;
 `;
@@ -47,7 +47,7 @@ const Styled = styled(
   }
 `;
 const MapTitle = styled((p) => <Box margin={{ horizontal: 'medium', vertical: 'xsmall' }} {...p} />)``;
-const MapOptions = styled((p) => <Box margin={{ horizontal: 'medium', top: 'small' }} {...p} />)`
+const CheckboxOptionGroup = styled((p) => <Box margin={{ horizontal: 'medium', top: 'small' }} {...p} />)`
 ${({ isPrint }) => isPrint && css`margin-left: 0`};
 @media print {
   margin-left: 0;
@@ -249,7 +249,7 @@ export function MapContainer({
         />
       </MapOuterWrapper>
       {mapInfo && (
-        <MapInfoOptions
+        <MapKeySettingsPanel
           isPrintView={isPrintView}
           option={mapInfo}
           minMaxValues={minMaxValues}
@@ -260,7 +260,7 @@ export function MapContainer({
         />
       )}
       {mapKey && Object.keys(mapKey).length > 0 && (
-        <MapOptions isPrint={isPrintView}>
+        <CheckboxOptionGroup isPrint={isPrintView}>
           <MapTitle>
             <Text weight={600}>{keyTitle}</Text>
           </MapTitle>
@@ -277,20 +277,20 @@ export function MapContainer({
               circleLayerConfig={circleLayerConfig}
             />
           </MapKeyWrapper>
-        </MapOptions>
+        </CheckboxOptionGroup>
       )}
       {allMapOptions && allMapOptions.length > 0 && (
-        <MapOptions isPrint={isPrintView}>
+        <CheckboxOptionGroup isPrint={isPrintView}>
           {allMapOptions.map(
             (option, id) => (
-              <MapOption
+              <CheckboxOption
                 key={id}
                 option={option}
                 type={option.type}
               />
             )
           )}
-        </MapOptions>
+        </CheckboxOptionGroup>
       )}
     </Styled>
   );

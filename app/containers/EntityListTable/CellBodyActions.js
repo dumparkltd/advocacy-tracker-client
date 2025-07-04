@@ -46,9 +46,11 @@ export function CellBodyActions({
           title={entity.value}
           alignSelf={align}
         >
-          <Label textAlign={align}>
-            {truncateText(entity.value, 25)}
-          </Label>
+          <Box>
+            <Label textAlign={align} title={entity.value}>
+              {truncateText(entity.value, 25)}
+            </Label>
+          </Box>
         </Link>
       )}
       {entity.tooltip && (

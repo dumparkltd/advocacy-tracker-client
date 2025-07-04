@@ -1,6 +1,6 @@
 /*
  *
- * EntityListSidebarGroups
+ * FilterOptionCheckboxes
  *
  */
 

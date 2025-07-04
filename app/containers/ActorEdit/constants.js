@@ -39,4 +39,6 @@ export const FORM_INITIAL = fromJS({
   associatedMembersByActortype: {},
   associatedAssociationsByActortype: {},
   associatedUsers: [],
+  close: true,
+  step: null,
 });

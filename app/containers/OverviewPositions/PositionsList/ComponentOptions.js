@@ -5,7 +5,7 @@ import { Box, Text } from 'grommet';
 
 import { isMinSize } from 'utils/responsive';
 
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 
 const SupportTagsTitle = styled((p) => <Text size="xsmall" {...p} />)`
   color: black;
@@ -37,7 +37,7 @@ const ComponentOptions = ({ options, size }) => (
           alignSelf="start"
         >
           {options.map((option) => (
-            <MapOption
+            <CheckboxOption
               key={option.id}
               option={option}
             />

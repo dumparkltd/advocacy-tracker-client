@@ -147,6 +147,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
             actionsByActiontype,
             onCreateOption: inModal ? null : onCreateOption,
             intl,
+            isNew: true,
           })}
         />
       </Content>
@@ -292,11 +293,25 @@ function mapDispatchToProps(
           }
         }
       }
+      let redirect = null;
+      let redirectQuery = null;
+      if (!inModal) {
+        if (formData.get('close')) {
+          redirect = ROUTES.RESOURCE;
+        } else {
+          redirect = `${ROUTES.RESOURCE}${ROUTES.EDIT}`;
+          redirectQuery = {
+            arg: 'step',
+            value: formData.get('step'),
+          };
+        }
+      }
       dispatch(
         newEntity({
           path: API.RESOURCES,
           entity: saveData.toJS(),
-          redirect: !inModal ? ROUTES.RESOURCE : null,
+          redirect,
+          redirectQuery,
           invalidateEntitiesOnSuccess,
           onSuccess: inModal && onSaveSuccess
             ? () => {

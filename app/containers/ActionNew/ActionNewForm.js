@@ -355,6 +355,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             resourcesByResourcetype,
             onCreateOption: inModal ? null : onCreateOption,
             intl,
+            isNew: true,
           })}
         />
       </Content>
@@ -610,11 +611,25 @@ function mapDispatchToProps(
           saveData = saveData.mergeIn(['attributes'], modalAttributes);
         }
       }
+      let redirect = null;
+      let redirectQuery = null;
+      if (!inModal) {
+        if (formData.get('close')) {
+          redirect = ROUTES.ACTION;
+        } else {
+          redirect = `${ROUTES.ACTION}${ROUTES.EDIT}`;
+          redirectQuery = {
+            arg: 'step',
+            value: formData.get('step'),
+          };
+        }
+      }
       dispatch(
         newEntity({
           path: API.ACTIONS,
           entity: saveData.toJS(),
-          redirect: !inModal ? ROUTES.ACTION : null,
+          redirect,
+          redirectQuery,
           invalidateEntitiesOnSuccess,
           onSuccess: inModal && onSaveSuccess
             ? () => {

@@ -12,14 +12,14 @@ export function CellBodyPosition({
   const { value, color } = entity;
   const { align = 'start', primary } = column;
   return (
-    <Box flex={{ shrink: 0 }} align={align}>
+    <Box flex={{ shrink: 0 }} align={color ? 'center' : align}>
       {color && (
         <Box flex={{ shrink: 0 }}>
-          <Dot size="40px" color={color} title={value} />
+          <Dot size="36px" color={color} title={value} />
         </Box>
       )}
       {!color && (
-        <Label weight={primary ? 500 : 300} textAlign={align}>
+        <Label weight={primary ? 500 : 300} textAlign={align} title={value}>
           {value}
         </Label>
       )}

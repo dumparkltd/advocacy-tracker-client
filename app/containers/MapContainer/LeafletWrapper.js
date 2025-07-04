@@ -11,6 +11,8 @@ import styled from 'styled-components';
 import L from 'leaflet';
 import 'proj4leaflet';
 import { ResponsiveContext } from 'grommet';
+import { Helmet } from 'react-helmet';
+
 import { merge } from 'lodash/object';
 
 import { MAP_OPTIONS } from 'themes/config';
@@ -50,7 +52,7 @@ const Map = styled.div`
   bottom: 0;
   right: 0;
   left: 0;
-  background: transparent;
+  background: transparent !important;
   z-index: 10;
   width: 100%;
 `;
@@ -653,6 +655,9 @@ export function LeafletWrapper({
 
   return (
     <Styled isPrint={isPrintView} fullMap={fullMap} hasInfo={hasInfo}>
+      <Helmet>
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+      </Helmet>
       <Map id={mapId} ref={ref} styleType={styleType} />
       {tooltip && tooltip.features && tooltip.features.length > 0 && (
         <Tooltip

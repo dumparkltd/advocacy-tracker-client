@@ -1039,13 +1039,41 @@ export default defineMessages({
     },
   },
   attributeInfo: {
-    gdp: {
-      id: 'app.containers.App.attributeInfo.gdp',
-      defaultMessage: 'gdp',
+    draft: {
+      id: 'app.containers.App.attributeInfo.draft',
+      defaultMessage: 'info-draft',
     },
-    population: {
-      id: 'app.containers.App.attributeInfo.population',
+    draft_true: {
+      id: 'app.containers.App.attributeInfo.draft_true',
+      defaultMessage: 'info-draft-true',
+    },
+    draft_false: {
+      id: 'app.containers.App.attributeInfo.draft_false',
+      defaultMessage: 'info-draft-false',
+    },
+    private: {
+      id: 'app.containers.App.attributeInfo.private',
+      defaultMessage: 'private',
+    },
+    private_true: {
+      id: 'app.containers.App.attributeInfo.private_true',
+      defaultMessage: 'info-private-true',
+    },
+    private_false: {
+      id: 'app.containers.App.attributeInfo.private_false',
+      defaultMessage: 'info-private-false',
+    },
+    is_archive: {
+      id: 'app.containers.App.attributeInfo.is_archive',
       defaultMessage: 'population',
+    },
+    is_archive_true: {
+      id: 'app.containers.App.attributeInfo.is_archive_true',
+      defaultMessage: 'info-is_archive-true',
+    },
+    is_archive_false: {
+      id: 'app.containers.App.attributeInfo.is_archive_false',
+      defaultMessage: 'info-is_archive-false',
     },
   },
   nav: {
@@ -2364,11 +2392,11 @@ export default defineMessages({
     notificationStatuses: {
       enabled: {
         id: 'app.containers.App.ui.notificationStatuses.enabled',
-        defaultMessage: 'Enabled',
+        defaultMessage: 'Notifications enabled',
       },
       disabled: {
         id: 'app.containers.App.ui.notificationStatuses.disabled',
-        defaultMessage: 'Disabled',
+        defaultMessage: 'Notifications disabled',
       },
     },
     publishStatuses: {

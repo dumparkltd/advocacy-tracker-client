@@ -6,7 +6,6 @@
 
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import ReactMarkdown from 'react-markdown';
 
 import styled from 'styled-components';
 import { Box, Drop } from 'grommet';
@@ -15,31 +14,23 @@ import { CircleInformation, CircleQuestion } from 'grommet-icons';
 import Button from 'components/buttons/ButtonSimple';
 import PrintHide from 'components/styled/PrintHide';
 import Overlay from './Overlay';
-
+import Markdown from './Markdown';
 
 const DropContent = styled(({ dropBackground, ...p }) => (
   <Box
-    pad="xxsmall"
+    pad="xsmall"
     background={dropBackground}
+    elevation="small"
     {...p}
   />
 ))`
   max-width: 280px;
 `;
 
-const Markdown = styled(ReactMarkdown)`
-  font-size: ${(props) => props.theme.text.medium.size};
-  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
-    font-size: ${(props) => props.theme.text.medium.size};
-  }
-  @media print {
-    font-size: ${(props) => props.theme.sizes.print.markdown};
-  }
-`;
-
 const StyledButton = styled(Button)`
   color: ${({ theme, colorButton = 'hint' }) => theme.global.colors[colorButton]};
   stroke: ${({ theme, colorButton = 'hint' }) => theme.global.colors[colorButton]};
+  vertical-align: top;
   &:hover {
     color: ${({ theme }) => theme.global.colors.highlight};
     stroke: ${({ theme }) => theme.global.colors.highlight};
@@ -56,10 +47,12 @@ function InfoOverlay({
   icon,
   markdown,
   inline,
-  dropBackground,
+  dropBackground = 'white',
+  size = 'medium',
 }) {
   const infoRef = useRef(null);
   const [info, showInfo] = useState(false);
+
   return (
     <PrintHide displayProp={inline ? 'inline' : 'block'}>
       <Box
@@ -71,13 +64,14 @@ function InfoOverlay({
         style={inline ? { width: 'auto', display: 'inline' } : null}
         align="center"
         justify="center"
+        direction="row"
       >
         <StyledButton
           colorButton={colorButton}
           onMouseOver={() => tooltip && showInfo(true)}
           onMouseLeave={() => tooltip && showInfo(false)}
           onFocus={() => tooltip && showInfo(true)}
-          onBlur={() => null}
+          onBlur={() => tooltip && showInfo(false)}
           onClick={(evt) => {
             if (evt) evt.preventDefault();
             if (!tooltip) showInfo(!info);
@@ -89,12 +83,20 @@ function InfoOverlay({
                 <CircleQuestion
                   color="currentColor"
                   size="19px"
+                  style={{
+                    position: 'relative',
+                    top: '-2px',
+                  }}
                 />
               )
               : (
                 <CircleInformation
                   color="currentColor"
                   size="19px"
+                  style={{
+                    position: 'relative',
+                    top: '-2px',
+                  }}
                 />
               )
           }
@@ -103,6 +105,7 @@ function InfoOverlay({
       {info && infoRef && tooltip && (
         <Drop
           align={{ bottom: 'top' }}
+          pad="xxsmall"
           target={infoRef.current}
           plain
           trapFocus={false}
@@ -110,7 +113,12 @@ function InfoOverlay({
           <DropContent dropBackground={dropBackground}>
             {markdown && (
               <div>
-                <Markdown source={content} className="react-markdown" linkTarget="_blank" />
+                <Markdown
+                  source={content}
+                  className="react-markdown"
+                  linkTarget="_blank"
+                  size={size}
+                />
               </div>
             )}
             {!markdown && content}
@@ -123,6 +131,7 @@ function InfoOverlay({
           title={title}
           markdown={markdown}
           content={content}
+          size={size}
         />
       )}
     </PrintHide>
@@ -142,6 +151,7 @@ InfoOverlay.propTypes = {
   icon: PropTypes.string,
   dropBackground: PropTypes.string,
   colorButton: PropTypes.string,
+  size: PropTypes.string,
   padButton: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.string,

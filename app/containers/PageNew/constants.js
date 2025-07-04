@@ -18,4 +18,6 @@ export const FORM_INITIAL = fromJS({
     private: false,
     order: '',
   },
+  close: true,
+  step: null,
 });

@@ -2,13 +2,17 @@ import {
   API,
   ROUTES,
   USER_ROLES,
-  PUBLISH_STATUSES,
-  PRIVACY_STATUSES,
-  ARCHIVE_STATUSES,
-  NOTIFICATION_STATUSES,
+  ATTRIBUTE_STATUSES,
   ACTIONTYPES,
+  ACTORTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
+  AUTHORITY_TAXONOMY,
+  PRIORITY_TAXONOMY,
+  INTERACTION_TYPE_TAXONOMY,
+  EVENT_TYPE_TAXONOMY,
 } from 'themes/config';
+
+import qe from 'utils/quasi-equals';
 
 export const DEPENDENCIES = [
   API.ACTORS,
@@ -64,6 +68,83 @@ export const CONFIG = {
       ],
     },
   },
+  quickFilterGroups: [
+    {
+      id: 'attributes',
+      title: 'Confidentiality',
+      option: 'attributes',
+      attributes: [{
+        attribute: 'private',
+        filterType: 'buttonGroup',
+        multiple: false,
+      }],
+    },
+    {
+      id: `taxonomies-${AUTHORITY_TAXONOMY}`,
+      title: 'Levels of authority',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: AUTHORITY_TAXONOMY,
+        filterType: 'pills',
+      }],
+    },
+    {
+      id: `taxonomies-${PRIORITY_TAXONOMY}`,
+      title: 'Priorities',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: PRIORITY_TAXONOMY,
+        filterType: 'pills',
+      }],
+    },
+    {
+      id: `taxonomies-${INTERACTION_TYPE_TAXONOMY}`,
+      title: 'Interaction types',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: INTERACTION_TYPE_TAXONOMY,
+        filterType: 'pills',
+      }],
+    },
+    {
+      id: `taxonomies-${EVENT_TYPE_TAXONOMY}`,
+      title: 'Event types',
+      option: 'taxonomies',
+      taxonomies: [{
+        id: EVENT_TYPE_TAXONOMY,
+        filterType: 'pills',
+      }],
+    },
+    {
+      id: 'indicators',
+      title: 'Topics',
+      option: 'connections',
+      connection: 'indicators',
+      search: false,
+    },
+    {
+      id: 'actors',
+      title: 'Stakeholders',
+      option: 'connections',
+      connection: 'actors',
+      groupByType: true,
+      filteringOptions: [
+        'filter-member-option',
+      ],
+      types: [
+        ACTORTYPES.COUNTRY,
+        ACTORTYPES.REG,
+        ACTORTYPES.GROUP,
+      ],
+    },
+    {
+      id: 'users',
+      title: 'WWF staff',
+      option: 'connections',
+      connection: 'users',
+      search: false,
+    },
+  ],
   taxonomies: { // filter by each category
     query: 'cat',
     search: true,
@@ -71,10 +152,32 @@ export const CONFIG = {
     key: 'category_id',
     ownKey: 'measure_id',
     invalidateEntitiesPaths: [API.CATEGORIES, API.ACTIONS],
-    // defaultGroupAttribute: 'groups_actions_default',
   },
   connections: { // filter by associated entity
     // filter by associated actor
+    indicators: {
+      edit: false,
+      query: 'indicators',
+      type: 'action-indicators',
+      search: true,
+      message: 'entities.indicators.plural',
+      path: API.INDICATORS,
+      entityType: 'indicators',
+      sort: 'referenceThenTitle',
+      connectionAttributeFilter: {
+        addonOnly: true,
+        path: 'indicatorConnections',
+        // query: 'indicatorConnections',
+        attribute: 'supportlevel_id',
+        connectionId: 'indicator_id',
+        message: 'attributes.supportlevel_id',
+        options: Object.keys(ACTION_INDICATOR_SUPPORTLEVELS).reduce(
+          (memo, key) => qe(key, 99) ? memo : { ...memo, [key]: ACTION_INDICATOR_SUPPORTLEVELS[key] },
+          {},
+        ),
+        optionMessages: 'supportlevels',
+      },
+    },
     actors: {
       query: 'actor',
       type: 'action-actors',
@@ -122,28 +225,6 @@ export const CONFIG = {
       key: 'measure_id', // child
       groupByType: true,
     },
-    indicators: {
-      edit: false,
-      query: 'indicators',
-      type: 'action-indicators',
-      search: true,
-      message: 'entities.indicators.plural',
-      path: API.INDICATORS,
-      entityType: 'indicators',
-      // clientPath: ROUTES.INDICATOR,
-      // connectPath: API.ACTION_INDICATORS, // filter by actor connection
-      // key: 'indicator_id',
-      // ownKey: 'measure_id',
-      connectionAttributeFilter: {
-        addonOnly: true,
-        path: 'indicatorConnections',
-        // query: 'indicatorConnections',
-        attribute: 'supportlevel_id',
-        message: 'attributes.supportlevel_id',
-        options: ACTION_INDICATOR_SUPPORTLEVELS,
-        optionMessages: 'supportlevels',
-      },
-    },
     // filter by associated entity
     resources: {
       query: 'resources',
@@ -181,7 +262,7 @@ export const CONFIG = {
         search: false,
         message: 'attributes.draft',
         attribute: 'draft',
-        options: PUBLISH_STATUSES,
+        options: ATTRIBUTE_STATUSES.draft,
         role: USER_ROLES.MEMBER.value,
         filterUI: 'checkboxes',
       },
@@ -189,7 +270,7 @@ export const CONFIG = {
         search: false,
         message: 'attributes.private',
         attribute: 'private',
-        options: PRIVACY_STATUSES,
+        options: ATTRIBUTE_STATUSES.private,
         role: USER_ROLES.MEMBER.value,
         roleEdit: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
@@ -198,7 +279,7 @@ export const CONFIG = {
         search: false,
         message: 'attributes.is_archive',
         attribute: 'is_archive',
-        options: ARCHIVE_STATUSES,
+        options: ATTRIBUTE_STATUSES.is_archive,
         role: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
         default: false,
@@ -207,7 +288,7 @@ export const CONFIG = {
         search: false,
         message: 'attributes.notifications',
         attribute: 'notifications',
-        options: NOTIFICATION_STATUSES,
+        options: ATTRIBUTE_STATUSES.notifications,
         role: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
         default: false,

@@ -10,7 +10,7 @@ import InfoOverlay from 'components/InfoOverlay';
 
 import { usePrint } from 'containers/App/PrintContext';
 
-const Styled = styled((p) => <Box direction="row" align="center" gap="7px" {...p} />)`
+const Styled = styled((p) => <Box direction="row" align="center" {...p} />)`
   padding: ${({ plain }) => plain ? '0' : '5px 0 5px 5px'};
   display: ${({ isPrint, active, printHide }) => (isPrint && (!active || printHide)) ? 'none' : 'flex'};
   pointer-events: ${({ isPrint }) => isPrint ? 'none' : 'all'};
@@ -20,6 +20,7 @@ const Styled = styled((p) => <Box direction="row" align="center" gap="7px" {...p
 `;
 
 const StyledInput = styled.input`
+  margin-right: 10px;
   accent-color: black;
   transform: scale(1.3);
   cursor: pointer;
@@ -31,7 +32,7 @@ const StyledInput = styled.input`
 `;
 
 
-export function MapOption({
+export function CheckboxOption({
   option,
   type = 'option',
   plain,
@@ -57,37 +58,37 @@ export function MapOption({
         size={isMinSize(size, 'medium') ? 'xsmall' : 'xxsmall'}
       >
         {label}
-        {info && (
-          <InfoOverlay
-            content={(
-              <Box
-                pad="small"
-                margin="xsmall"
-                background="white"
-                elevation="small"
-                overflow={{
-                  vertical: 'auto',
-                  horizontal: 'hidden',
-                }}
-              >
-                <Text size="small">{info}</Text>
-              </Box>
-            )}
-            inline
-            padButton={{ horizontal: 'xsmall' }}
-            tooltip
-            icon="question"
-          />
-        )}
       </Text>
+      {info && (
+        <InfoOverlay
+          content={(
+            <Box
+              pad="small"
+              margin="xsmall"
+              background="white"
+              elevation="small"
+              overflow={{
+                vertical: 'auto',
+                horizontal: 'hidden',
+              }}
+            >
+              <Text size="small">{info}</Text>
+            </Box>
+          )}
+          inline
+          padButton={{ horizontal: 'xsmall' }}
+          tooltip
+          icon="question"
+        />
+      )}
     </Styled>
   );
 }
 
-MapOption.propTypes = {
+CheckboxOption.propTypes = {
   option: PropTypes.object,
   type: PropTypes.string,
   plain: PropTypes.bool,
 };
 
-export default MapOption;
+export default CheckboxOption;

@@ -47,6 +47,7 @@ import {
   selectIsUserMember,
   selectSessionUserId,
   selectTaxonomiesWithCategories,
+  selectStepQuery,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -105,6 +106,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
       membersByActortype,
       associationsByActortype,
       userOptions,
+      step,
     } = props;
     return viewEntity
       ? Map({
@@ -126,6 +128,7 @@ export class ActorEdit extends React.PureComponent { // eslint-disable-line reac
         associatedUsers: userOptions
           ? entityOptions({ entities: userOptions })
           : Map(),
+        step,
       })
       : Map();
   };
@@ -262,6 +265,7 @@ ActorEdit.propTypes = {
   connectedTaxonomies: PropTypes.object,
   userOptions: PropTypes.object,
   myId: PropTypes.string,
+  step: PropTypes.string,
 };
 
 ActorEdit.contextTypes = {
@@ -282,6 +286,7 @@ const mapStateToProps = (state, props) => ({
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   userOptions: selectUserOptions(state, props.params.id),
   myId: selectSessionUserId(state),
+  step: selectStepQuery(state),
 });
 
 function mapDispatchToProps(dispatch, props) {

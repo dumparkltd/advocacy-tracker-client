@@ -52,6 +52,8 @@ export function DropEntityList({
   tooltipConfig,
   onEntityClick,
   entityType,
+  indirect,
+  hasIndirect,
 }) {
   let typeConfig = entityType === 'actors'
     ? Object.values(ACTORTYPES_CONFIG)
@@ -76,12 +78,17 @@ export function DropEntityList({
             || tooltipConfig.get(type.id.toString());
           if (tooltipTypes) {
             const count = tooltipTypes.size;
+            let title = getTitle(entityType, type.id, count, intl);
+            if (indirect) {
+              title = `${title} (as member)`;
+            }
+            if (hasIndirect) {
+              title = `${title} (direct)`;
+            }
             return (
               <Box key={type.id} flex={{ shrink: 0 }}>
                 <Box border="bottom" flex={{ shrink: 0 }} margin={{ bottom: 'small' }}>
-                  <Text size="small" weight={500}>
-                    {getTitle(entityType, type.id, count, intl)}
-                  </Text>
+                  <Text size="small" weight={500}>{title}</Text>
                 </Box>
                 <Box flex={{ shrink: 0 }} gap="xsmall">
                   {tooltipTypes
@@ -126,6 +133,8 @@ DropEntityList.propTypes = {
   entityType: PropTypes.string,
   onEntityClick: PropTypes.func,
   tooltipConfig: PropTypes.object,
+  indirect: PropTypes.bool,
+  hasIndirect: PropTypes.bool,
   intl: intlShape,
 };
 

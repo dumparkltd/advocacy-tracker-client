@@ -16,19 +16,19 @@ import { selectNewEntityModal } from 'containers/App/selectors';
 
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonCancel from 'components/buttons/ButtonCancel';
+
 import Button from 'components/buttons/ButtonSimple';
 
 import Icon from 'components/Icon';
 
 import FormWrapper from 'components/forms/FormWrapper';
 
-import appMessages from 'containers/App/messages';
-
 import FormContentWrapper from './FormContentWrapper';
+import FormHeader from './FormHeader';
 import FormFooter from './FormFooter';
+
 import SkipIconNext from './SkipIconNext';
 import WarningDot from './WarningDot';
-
 import messages from './messages';
 
 const DeleteConfirmText = styled.span`
@@ -111,6 +111,7 @@ const ButtonStep = styled(
   }
   &:focus {
     outline: 0;
+    text-decoration: underline;
     color: ${({ theme, highlight, disabled }) => {
     if (disabled) return highlight ? 'white' : '#777E7E';
     return highlight ? 'white' : theme.global.colors.highlightHover;
@@ -158,22 +159,14 @@ const SkipButtonInner = styled(
   (p) => <Box direction="row" gap="small" align="center" {...p} />
 )``;
 
-const ButtonSubmitSubtle = styled(ButtonForm)`
-  color: ${({ theme, disabled }) => disabled ? '#DADDE0' : theme.global.colors.highlight};
-  cursor: ${({ disabled }) => disabled ? 'not-allowed' : 'pointer'};
-  &:hover {
-    color: ${({ theme, disabled }) => disabled ? '#DADDE0' : theme.global.colors.highlightHover};
-  }
-`;
-
 class EntityForm extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor() {
     super();
     this.state = {
       deleteConfirmed: false,
-      stepActive: null,
       stepsSeen: [],
     };
+    this.saveOptionsButtonRef = React.createRef();
   }
 
   // dont update when saving
@@ -210,8 +203,9 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     this.setState({ deleteConfirmed: confirm });
   }
 
-  setStepActive = (stepActive) => {
-    this.setState({ stepActive });
+  setStepActive = (stepActive, formData) => {
+    // this.setState({ stepActive });
+    this.props.handleUpdate(formData.set('step', stepActive));
   }
 
   addStepSeen = (stepSeen) => {
@@ -241,11 +235,27 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       hasFormChanges,
       // onBlockNavigation,
     } = this.props;
-    const { deleteConfirmed, stepActive, stepsSeen } = this.state;
+    const {
+      deleteConfirmed,
+      stepsSeen,
+    } = this.state;
+    const stepActive = formData.get('step');
     const closeMultiselectOnClickOutside = !newEntityModal || inModal;
     let byStep = fieldsByStep;
     const footerStep = byStep.find((step) => step.id === 'footer');
     const footerFields = footerStep && footerStep.fields && footerStep.fields.filter((f) => !!f);
+    const headerFields = footerFields && footerFields.filter(
+      (f) => f.model === '.attributes.draft' || f.model === '.attributes.private'
+    );
+    // const hasFooterChanges = footerFields && footerFields.some(
+    //   (field) => {
+    //     if (!field) return false;
+    //     const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
+    //     const fieldTracked = get(formDataTracked, modelPath);
+    //     if (!fieldTracked) return false;
+    //     return !fieldTracked.pristine;
+    //   },
+    // );
     byStep = byStep.filter((step) => step.id !== 'footer');
     // the active step id
     const cleanStepActive = stepActive || (byStep && byStep[0] && byStep[0].id);
@@ -254,10 +264,6 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     const activeStepIndex = byStep.map((step) => step.id).indexOf(cleanStepActive);
     const nextStepIndex = activeStepIndex + 1 < byStep.length ? activeStepIndex + 1 : null;
     const prevStepIndex = activeStepIndex > 0 ? activeStepIndex - 1 : null;
-    // console.log('activeStepIndex, byStep[activeStepIndex]', activeStepIndex, byStep[activeStepIndex])
-    // console.log('prevStepIndex, byStep[prevStepIndex]', prevStepIndex, byStep[prevStepIndex])
-    // console.log('nextStepIndex, byStep[nextStepIndex]', nextStepIndex, byStep[nextStepIndex], activeStepIndex + 1 <= byStep.length)
-    // console.log('formDataTracked', formDataTracked)
     const stepsWithStatus = byStep && byStep.map(
       (step, idx) => {
         if (!step.sections) return step;
@@ -331,58 +337,47 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
         });
       }
     );
-    const isBlocked = !hasFormChanges
-    || (stepsWithStatus && stepsWithStatus.some(
-      (step) => (step.hasEmptyRequired || step.hasUnseenAutofill || step.hasErrors)
-    ));
-    // const isNavigationBlocked = stepsWithStatus && stepsWithStatus.some(
-    //   (step) => (step.hasChanges)
-    // );
+    const hasAnyEmptyRequired = stepsWithStatus && stepsWithStatus.some((step) => step.hasEmptyRequired);
+    const hasAnyUnseenAutofill = stepsWithStatus && stepsWithStatus.some((step) => step.hasUnseenAutofill);
+    const hasAnyErrors = stepsWithStatus && stepsWithStatus.some((step) => step.hasErrors);
+    const hasNoChanges = !hasFormChanges;
+    // saving is blocked if
+    // 1. no changes were made
+    // OR
+    // 2. we have any steps with errors, unseen autofill or empty required fields
+    const isBlocked = hasNoChanges
+    || (stepsWithStatus && (hasAnyEmptyRequired || hasAnyUnseenAutofill || hasAnyErrors));
+
     const activeStep = stepsWithStatus && stepsWithStatus.find((step) => step.isActive);
-    // console.log('stepsWithStatus', stepsWithStatus, isBlocked)
-    // console.log('hasChanges', isNavigationBlocked)
-    // console.log('formDataTracked', formDataTracked)
+
     const activeStepHasErrors = activeStep.hasErrors;
+
     return (
       <ResponsiveContext.Consumer>
         {(size) => (
           <Styled inModal={inModal}>
-            {!inModal && (
-              <Box direction="row" justify="end">
-                {handleCancel && (
-                  <Box>
-                    <ButtonCancel
-                      type="button"
-                      onClick={(e) => {
-                        if (e && e.preventDefault) e.preventDefault();
-                        handleCancel(e);
-                      }}
-                    >
-                      <FormattedMessage {...appMessages.buttons.cancel} />
-                    </ButtonCancel>
-                  </Box>
-                )}
-                <Box>
-                  <ButtonSubmitSubtle
-                    type="button"
-                    disabled={isBlocked}
-                    onClick={(e) => {
-                      if (e && e.preventDefault) e.preventDefault();
-                      handleSubmitRemote(e);
-                    }}
-                  >
-                    Save & Close
-                  </ButtonSubmitSubtle>
-                </Box>
-              </Box>
-            )}
-            <FormWrapper hasMarginBottom={false}>
-              <StyledForm
-                model={model}
-                onSubmit={this.handleSubmit}
-                onSubmitFailed={handleSubmitFail}
-                validators={validators}
-              >
+            <StyledForm
+              model={model}
+              onSubmit={this.handleSubmit}
+              onSubmitFailed={handleSubmitFail}
+              validators={validators}
+            >
+              {!inModal && (
+                <FormHeader
+                  fields={headerFields}
+                  formData={formData}
+                  formDataTracked={formDataTracked}
+                  handleCancel={handleCancel}
+                  handleUpdate={handleUpdate}
+                  handleSubmitRemote={handleSubmitRemote}
+                  isBlocked={isBlocked || saving}
+                  hasAnyEmptyRequired={hasAnyEmptyRequired}
+                  hasAnyUnseenAutofill={hasAnyUnseenAutofill}
+                  hasAnyErrors={hasAnyErrors}
+                  hasNoChanges={hasNoChanges}
+                />
+              )}
+              <FormWrapper hasMarginBottom={false}>
                 {stepsWithStatus && (
                   <FormSteps>
                     {stepsWithStatus.map((step, idx) => {
@@ -424,7 +419,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                               onClick={(evt) => {
                                 if (evt !== undefined && evt.preventDefault) evt.preventDefault();
                                 if (!isActive) {
-                                  this.setStepActive(step.id);
+                                  this.setStepActive(step.id, formData);
                                   this.addStepSeen(cleanStepActive);
                                 }
                               }}
@@ -477,10 +472,14 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                       disabled={activeStepHasErrors || prevStepIndex === null}
                       onClick={(evt) => {
                         if (evt && evt.preventDefault) evt.preventDefault();
+                        if (scrollContainer) {
+                          scrollContainer.scrollTop = 0;
+                        }
                         if (byStep[prevStepIndex]) {
-                          this.setStepActive(byStep[prevStepIndex].id);
+                          this.setStepActive(byStep[prevStepIndex].id, formData);
                           this.addStepSeen(activeStep.id);
                         }
+                        setTimeout(() => scrollContainer && scrollContainer.focus(), 0);
                       }}
                     >
                       <SkipButtonInner>
@@ -497,10 +496,14 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                       plain
                       onClick={(evt) => {
                         if (evt && evt.preventDefault) evt.preventDefault();
+                        if (scrollContainer) {
+                          scrollContainer.scrollTop = 0;
+                        }
                         if (byStep[nextStepIndex]) {
-                          this.setStepActive(byStep[nextStepIndex].id);
+                          this.setStepActive(byStep[nextStepIndex].id, formData);
                           this.addStepSeen(byStep[nextStepIndex].id);
                         }
+                        setTimeout(() => scrollContainer && scrollContainer.focus(), 0);
                       }}
                     >
                       <SkipButtonInner>
@@ -519,10 +522,16 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   formData={formData}
                   formDataTracked={formDataTracked}
                   handleCancel={handleCancel}
+                  handleUpdate={handleUpdate}
+                  handleSubmitRemote={handleSubmitRemote}
                   isBlocked={isBlocked || saving}
+                  hasAnyEmptyRequired={hasAnyEmptyRequired}
+                  hasAnyUnseenAutofill={hasAnyUnseenAutofill}
+                  hasAnyErrors={hasAnyErrors}
+                  hasNoChanges={hasNoChanges}
                 />
-              </StyledForm>
-            </FormWrapper>
+              </FormWrapper>
+            </StyledForm>
             {handleDelete && !deleteConfirmed && (
               <DeleteWrapper>
                 <ButtonPreDelete type="button" onClick={this.setDeleteConfirmed}>

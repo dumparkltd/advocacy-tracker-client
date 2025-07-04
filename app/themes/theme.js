@@ -20,9 +20,6 @@ theme.media = {
   // impactossLogo: [impactossLogo, impactossLogo2x],
 };
 
-// grid-styles settings https://github.com/jxnblk/grid-styled
-theme.gutter = 20;
-
 // global color palettes
 // primary color palette: dark to light
 // 0: main colour, darker, used for links and navigation elements, hover
@@ -51,7 +48,7 @@ const dark = coolorsToHex('https://coolors.co/1c2121-232b2b-323e3e-687271-8d9696
 // 2:  gray 1 (gray pattern)
 // 3:  gray 2 (icons light)
 // 4:  gray 3 (dark lines)
-const light = coolorsToHex('https://coolors.co/f0f0f0-f0f0f0-d5dddd-cdd6d6-c7d1d1');
+const light = coolorsToHex('https://coolors.co/f7f7f7-f0f0f0-d5dddd-cdd6d6-c7d1d1');
 
 // other palettes
 // 0: AA on light[0] and on error[3]
@@ -290,7 +287,7 @@ theme.sizes = {
     },
     width: {
       small: 300,
-      large: 340,
+      large: 400,
     },
   },
   mainListItem: {

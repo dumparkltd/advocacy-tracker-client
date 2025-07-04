@@ -10,7 +10,7 @@ const Styled = styled.div`
   width: 100%;
   overflow-y: scroll;
   position: absolute;
-  top: 80px;
+  top: ${({ hasSearch }) => hasSearch ? 80 : 0}px;
   left: 0;
   bottom: 0;
   right: 0;
@@ -29,16 +29,16 @@ const Empty = styled.div`
   color: ${palette('text', 1)};
 `;
 
-function OptionList({ options, onSelect }) {
+function OptionList({ options, onSelect, hasSearch }) {
   return (
-    <Styled>
+    <Styled hasSearch={hasSearch}>
       <ListWrapper>
         <OptionsWrapper>
           {options && options.map((option) => {
-            const { id } = option;
+            const { value, query } = option;
             return (
               <Option
-                key={id}
+                key={`${query}-${value}`}
                 option={option}
                 onSelect={onSelect}
               />
@@ -59,6 +59,7 @@ function OptionList({ options, onSelect }) {
 OptionList.propTypes = {
   options: PropTypes.array,
   onSelect: PropTypes.func,
+  hasSearch: PropTypes.bool,
 };
 
 export default OptionList;

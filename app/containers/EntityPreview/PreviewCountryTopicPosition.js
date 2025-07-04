@@ -13,7 +13,7 @@ import {
 import { isMinSize } from 'utils/responsive';
 
 import { ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 import A from 'components/styled/A';
 import Dot from 'components/styled/Dot';
 
@@ -116,7 +116,7 @@ export function PreviewCountryTopicPosition({ content, onUpdatePath }) {
         </Box>
         <Box basis="1/2">
           {options && options.map((option) => (
-            <MapOption
+            <CheckboxOption
               key={option.id}
               option={option}
             />

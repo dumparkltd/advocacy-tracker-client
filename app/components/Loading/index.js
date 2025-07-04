@@ -15,7 +15,7 @@ const Styled = styled.div`
   width: 100%;
   height: 3px;
   position: relative;
-  background-color: ${({ loading }) => loading ? palette('light', 2) : 'transparent'};
+  background-color: ${({ isLoading }) => isLoading ? palette('light', 2) : 'transparent'};
   overflow: hidden;
   z-index: 2;
   margin-top: 1px
@@ -79,7 +79,7 @@ class Loading extends React.PureComponent { // eslint-disable-line react/prefer-
 
   render() {
     return (
-      <Styled loading={this.props.loading}>
+      <Styled isLoading={this.props.loading}>
         {this.props.loading && this.props.progress >= 0
           && <BarDeterminate progress={Math.max(this.props.progress, 5)} />
         }
@@ -93,7 +93,7 @@ class Loading extends React.PureComponent { // eslint-disable-line react/prefer-
 
 Loading.propTypes = {
   progress: PropTypes.number,
-  dataReady: PropTypes.bool,
+  loading: PropTypes.bool,
 };
 
 Loading.defaultProps = {

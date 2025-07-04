@@ -7,8 +7,8 @@
     "url": "git://github.com/dumparkltd/advocacy-tracker-client"
   },
   "engines": {
-    "npm": ">=5",
-    "node": ">=8.15.1"
+    "npm": ">=6.12",
+    "node": ">=12.13.0"
   },
   "author": "tmfrnz",
   "license": "MIT",
@@ -20,15 +20,15 @@
     "npmcheckversion": "node ./internals/scripts/npmcheckversion.js",
     "preinstall": "npm run npmcheckversion",
     "prebuild": "npm run build:clean",
-    "build": "cross-env NODE_ENV=production SERVER=production webpack --config internals/webpack/webpack.prod.babel.js --color --progress",
-    "build:dev": "npm run prebuild && cross-env NODE_ENV=production SERVER=development webpack --config internals/webpack/webpack.prod.babel.js --color --progress",
+    "build": "cross-env NODE_ENV=production SERVER=production NODE_OPTIONS=--openssl-legacy-provider webpack --config internals/webpack/webpack.prod.babel.js --color --progress",
+    "build:dev": "npm run prebuild && cross-env NODE_ENV=production SERVER=development NODE_OPTIONS=--openssl-legacy-provider webpack --config internals/webpack/webpack.prod.babel.js --color --progress",
     "build:clean": "rimraf ./build",
-    "start": "cross-env NODE_ENV=development SERVER=development node server",
-    "start:pdb": "cross-env NODE_ENV=development SERVER=production node server",
+    "start": "cross-env NODE_ENV=development SERVER=development NODE_OPTIONS=--openssl-legacy-provider node server",
+    "start:pdb": "cross-env NODE_ENV=development SERVER=production NODE_OPTIONS=--openssl-legacy-provider node server",
     "start:tunnel": "cross-env NODE_ENV=development ENABLE_TUNNEL=true node server",
     "start:p": "npm run start:production",
     "start:production": "npm run build && npm run start:prod",
-    "start:prod": "cross-env NODE_ENV=production SERVER=production node server",
+    "start:prod": "cross-env NODE_ENV=production SERVER=production NODE_OPTIONS=--openssl-legacy-provider node server",
     "presetup": "npm i chalk shelljs",
     "setup": "node ./internals/scripts/setup.js",
     "clean": "shjs ./internals/scripts/clean.js",
@@ -73,11 +73,11 @@
     "cross-env": "3.1.3",
     "d3-scale": "^4.0.2",
     "date-fns": "^2.16.1",
+    "dompurify": "^3.2.6",
     "express": "4.14.0",
     "fontfaceobserver": "2.0.7",
-    "grid-styled": "^1.0.1",
     "grommet": "2.40",
-    "grommet-icons": "^4.4.0",
+    "grommet-icons": "^4.12.2",
     "history": "4.9.0",
     "hoist-non-react-statics": "3.3.0",
     "immer": "9.0.6",
@@ -93,7 +93,7 @@
     "prop-types": "^15.5.10",
     "querystring": "^0.2.0",
     "react": "^16.14.0",
-    "react-csv-downloader": "^2.7.0",
+    "react-csv-downloader": "^3.3.0",
     "react-day-picker": "^7.4.8",
     "react-debounce-input": "^3.2.2",
     "react-dom": "^16.14.0",
@@ -114,10 +114,11 @@
     "redux-saga": "^1.1.3",
     "reselect": "^4.0.0",
     "sanitize.css": "8.0.0",
-    "styled-components": "4.2.0",
+    "styled-components": "5.3.11",
     "styled-theme": "^0.3.3",
     "textarea-markdown-editor": "^1.0.1",
     "topojson-client": "^3.1.0",
+    "turndown": "^7.2.0",
     "url": "^0.11.0",
     "warning": "3.0.0",
     "whatwg-fetch": "3.0.0"
@@ -189,7 +190,6 @@
     "webpack-dev-middleware": "3.6.2",
     "webpack-git-hash": "^1.0.2",
     "webpack-hot-middleware": "2.24.3",
-    "webpack-pwa-manifest": "4.0.0",
-    "whatwg-fetch": "3.0.0"
+    "webpack-pwa-manifest": "4.0.0"
   }
 }
