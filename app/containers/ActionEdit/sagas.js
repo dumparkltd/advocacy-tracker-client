@@ -10,12 +10,16 @@ import { SAVE } from './constants';
 
 
 export function* save({ data }) {
-  yield put(saveEntity({
-    path: API.ACTIONS,
-    entity: data,
-    redirect: `${ROUTES.ACTION}/${data.id}`,
-    invalidateEntitiesOnSuccess: [API.ACTIONS, API.ACTORS, API.USERS, API.RESOURCES, API.INDICATORS],
-  }));
+  yield put(saveEntity(
+    {
+      path: API.ACTIONS,
+      entity: data,
+      redirect: data.close ? `${ROUTES.ACTION}/${data.id}` : `${ROUTES.ACTION}${ROUTES.EDIT}/${data.id}`,
+      redirectQuery: data.close || { arg: 'step', value: data.step },
+      invalidateEntitiesOnSuccess: [API.ACTIONS, API.ACTORS, API.USERS, API.RESOURCES, API.INDICATORS],
+    },
+    // data.close, // updaetClient
+  ));
 }
 
 // Individual exports for testing

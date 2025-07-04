@@ -11,37 +11,18 @@ import Helmet from 'react-helmet';
 import { FormattedMessage } from 'react-intl';
 import { actions as formActions } from 'react-redux-form/immutable';
 
-import { Map, List } from 'immutable';
+import { Map } from 'immutable';
 
-import {
-  userOptions,
-  entityOptions,
-  renderParentCategoryControl,
-  getTitleFormField,
-  getMarkdownFormField,
-  getFormField,
-  getCheckboxField,
-  getStatusField,
-  parentCategoryOptions,
-  getShortTitleFormField,
-  // renderUserControl,
-  // renderActionControl,
-  // renderActorsByActortypeControl,
-  // getConnectionUpdatesFromFormData,
-} from 'utils/forms';
+import { getEntityFormFields } from 'utils/forms';
 
-import {
-  getMetaField,
-} from 'utils/fields';
 
 import { scrollToTop } from 'utils/scroll-to-component';
 import { hasNewError } from 'utils/entity-form';
 import qe from 'utils/quasi-equals';
 
-import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
-
-import { CONTENT_SINGLE } from 'containers/App/constants';
-import { ROUTES, USER_ROLES, API } from 'themes/config';
+import {
+  ROUTES, USER_ROLES, API, CATEGORY_CONFIG,
+} from 'themes/config';
 import appMessages from 'containers/App/messages';
 
 import {
@@ -53,6 +34,8 @@ import {
   submitInvalid,
   saveErrorDismiss,
   openNewEntityModal,
+  invalidateEntities,
+  redirectIfNotSignedIn,
 } from 'containers/App/actions';
 
 import {
@@ -61,20 +44,18 @@ import {
   selectIsUserAdmin,
   selectIsUserMember,
   selectSessionUserId,
+  selectStepQuery,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
 import ContentHeader from 'containers/ContentHeader';
 
-import { getEntityTitle } from 'utils/entities';
-
-import FormWrapper from './FormWrapper';
+import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 
 import {
+  selectDomain,
   selectDomainPage,
   selectViewEntity,
-  selectParentOptions,
-  selectParentTaxonomy,
 } from './selectors';
 
 import messages from './messages';
@@ -88,11 +69,8 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
   }
 
   UNSAFE_componentWillMount() {
-    this.props.loadEntitiesIfNeeded();
-
-    if (this.props.dataReady && this.props.viewEntity) {
-      this.props.initialiseForm('categoryEdit.form.data', this.getInitialFormData());
-    }
+    this.props.onInvalidateEntities();
+    this.props.redirectIfNotSignedIn();
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -113,9 +91,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
 
   getInitialFormData = (nextProps) => {
     const props = nextProps || this.props;
-    const {
-      viewEntity, users, actions, actorsByActortype, parentOptions,
-    } = props;
+    const { viewEntity, step } = props;
     return viewEntity
       ? Map({
         id: viewEntity.get('id'),
@@ -123,113 +99,9 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
           (oldVal, newVal) => oldVal === null ? newVal : oldVal,
           FORM_INITIAL.get('attributes')
         ),
-        associatedActions: actions && entityOptions({ entities: actions }),
-        associatedActorsByActortype: actorsByActortype
-          ? actorsByActortype.map((actors) => entityOptions({ entities: actors }))
-          : Map(),
-        associatedUser: userOptions(users, viewEntity.getIn(['attributes', 'manager_id'])),
-        associatedCategory: parentCategoryOptions(parentOptions, viewEntity.getIn(['attributes', 'parent_id'])),
-        // TODO allow single value for singleSelect
+        step,
       })
       : Map();
-  };
-
-  getHeaderMainFields = () => {
-    const { intl } = this.context;
-    const groups = [];
-    groups.push({ // fieldGroup
-      fields: [
-        getTitleFormField(intl.formatMessage),
-        getShortTitleFormField(intl.formatMessage),
-      ],
-    });
-    return groups;
-  };
-
-
-  getHeaderAsideFields = (entity, isAdmin, isMine) => {
-    const { intl } = this.context;
-    const groups = []; // fieldGroups
-    groups.push({
-      fields: [
-        getStatusField(intl.formatMessage),
-        (isAdmin || isMine) && getStatusField(intl.formatMessage, 'private'),
-        isAdmin && getStatusField(intl.formatMessage, 'is_archive'),
-        getMetaField(entity),
-      ],
-    });
-    if (entity.getIn(['taxonomy', 'attributes', 'tags_users'])) {
-      groups.push({
-        fields: [
-          getCheckboxField(
-            intl.formatMessage,
-            'user_only',
-          ),
-        ],
-      });
-    }
-    return groups;
-  };
-
-  getBodyMainFields = (
-    entity,
-    parentOptions,
-    parentTaxonomy,
-    // connectedTaxonomies,
-    // actorsByActortype,
-    // actions,
-    // onCreateOption,
-    // userOnly,
-  ) => {
-    const { intl } = this.context;
-    const groups = [];
-    groups.push({
-      fields: [getMarkdownFormField(intl.formatMessage)],
-    });
-    if (parentOptions && parentTaxonomy) {
-      groups.push({
-        label: intl.formatMessage(appMessages.entities.taxonomies.parent),
-        icon: 'categories',
-        fields: [renderParentCategoryControl({
-          entities: parentOptions,
-          label: getEntityTitle(parentTaxonomy),
-          activeParentId: entity.getIn(['attributes', 'parent_id']),
-        })],
-      });
-    }
-    return groups;
-  };
-
-  // getBodyAsideFields = (entity, users, isAdmin) => {
-  getBodyAsideFields = () => {
-    const { intl } = this.context;
-    const fields = []; // fieldGroups
-    // if (isAdmin && !!entity.getIn(['taxonomy', 'attributes', 'has_manager'])) {
-    //   // fields.push({
-    //   //   fields: [
-    //   //     renderUserControl(
-    //   //       users,
-    //   //       intl.formatMessage(appMessages.attributes.manager_id.categories),
-    //   //       entity.getIn(['attributes', 'manager_id'])
-    //   //     ),
-    //   //   ],
-    //   // });
-    // }
-    fields.push({
-      fields: [
-        // entity.getIn(['taxonomy', 'attributes', 'has_date'])
-        //   && getDateField(
-        //     intl.formatMessage,
-        //     'date',
-        //   ),
-        getFormField({
-          formatMessage: intl.formatMessage,
-          controlType: 'url',
-          attribute: 'url',
-        }),
-      ],
-    });
-    return fields;
   };
 
   getTaxTitle = (id) => this.context.intl.formatMessage(appMessages.entities.taxonomies[id].single);
@@ -241,9 +113,8 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
       dataReady,
       isAdmin,
       isUserMember,
+      viewDomain,
       viewDomainPage,
-      parentOptions,
-      parentTaxonomy,
       myId,
       onErrorDismiss,
       onServerErrorDismiss,
@@ -256,14 +127,16 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
     } = this.props;
     const reference = this.props.params.id;
     const { saveSending, saveError, deleteSending } = viewDomainPage.toJS();
-
+    let typeLabel = 'Category';
     let pageTitle = intl.formatMessage(messages.pageTitle);
     if (viewEntity && viewEntity.get('taxonomy')) {
+      typeLabel = this.getTaxTitle(viewEntity.getIn(['taxonomy', 'id']));
       pageTitle = intl.formatMessage(messages.pageTitleTaxonomy, {
-        taxonomy: this.getTaxTitle(viewEntity.getIn(['taxonomy', 'id'])),
+        taxonomy: typeLabel,
       });
     }
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
+    const formDataPath = 'categoryEdit.form.data';
 
     // user can delete content
     // if they are admins or
@@ -282,19 +155,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
         <Content ref={this.scrollContainer}>
           <ContentHeader
             title={pageTitle}
-            type={CONTENT_SINGLE}
             icon="categories"
-            buttons={
-              viewEntity && dataReady ? [{
-                type: 'cancel',
-                onClick: () => handleCancel(reference),
-              },
-              {
-                type: 'save',
-                disabled: saveSending,
-                onClick: () => handleSubmitRemote('categoryEdit.form.data'),
-              }] : null
-            }
           />
           {!viewEntity && dataReady && !saveError && !deleteSending
             && (
@@ -305,15 +166,13 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
           }
           {viewEntity && !deleteSending
             && (
-              <FormWrapper
-                model="categoryEdit.form.data"
+              <EntityFormWrapper
+                typeLabel="Category"
+                model={formDataPath}
                 saving={saveSending}
-                handleSubmit={(formData) => handleSubmit(
-                  formData,
-                  // actions,
-                  // actorsByActortype,
-                  viewEntity.get('taxonomy'),
-                )}
+                viewDomain={viewDomain}
+                handleSubmit={handleSubmit}
+                handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={() => handleCancel(reference)}
                 handleUpdate={handleUpdate}
@@ -323,24 +182,15 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
                 }
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
-                fields={dataReady && {
-                  header: {
-                    main: this.getHeaderMainFields(),
-                    aside: this.getHeaderAsideFields(
-                      viewEntity,
-                      isAdmin,
-                      isMine,
-                    ),
+                fieldsByStep={dataReady && getEntityFormFields(
+                  {
+                    isAdmin,
+                    isMine,
+                    intl,
                   },
-                  body: {
-                    main: this.getBodyMainFields(
-                      viewEntity,
-                      parentOptions,
-                      parentTaxonomy,
-                    ),
-                    aside: this.getBodyAsideFields(),
-                  },
-                }}
+                  CATEGORY_CONFIG.form,
+                  CATEGORY_CONFIG.attributes,
+                )}
                 scrollContainer={this.scrollContainer.current}
               />
             )
@@ -353,6 +203,8 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
 
 CategoryEdit.propTypes = {
   loadEntitiesIfNeeded: PropTypes.func,
+  onInvalidateEntities: PropTypes.func,
+  redirectIfNotSignedIn: PropTypes.func,
   redirectIfNotPermitted: PropTypes.func,
   initialiseForm: PropTypes.func,
   handleSubmitRemote: PropTypes.func.isRequired,
@@ -361,6 +213,7 @@ CategoryEdit.propTypes = {
   handleCancel: PropTypes.func.isRequired,
   handleUpdate: PropTypes.func.isRequired,
   handleDelete: PropTypes.func,
+  viewDomain: PropTypes.object,
   viewDomainPage: PropTypes.object,
   viewEntity: PropTypes.object,
   dataReady: PropTypes.bool,
@@ -378,6 +231,7 @@ CategoryEdit.propTypes = {
   onServerErrorDismiss: PropTypes.func.isRequired,
   onCreateOption: PropTypes.func,
   myId: PropTypes.string,
+  step: PropTypes.string,
 };
 
 CategoryEdit.contextTypes = {
@@ -387,23 +241,27 @@ CategoryEdit.contextTypes = {
 const mapStateToProps = (state, props) => ({
   isAdmin: selectIsUserAdmin(state),
   isUserMember: selectIsUserMember(state),
+  viewDomain: selectDomain(state),
   viewDomainPage: selectDomainPage(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),
-  parentOptions: selectParentOptions(state, props.params.id),
-  parentTaxonomy: selectParentTaxonomy(state, props.params.id),
   myId: selectSessionUserId(state),
-  // users: selectUsers(state),
-  // actions: selectActions(state, props.params.id),
-  // actorsByActortype: selectActorsByActortype(state, props.params.id),
-  // connectedTaxonomies: selectConnectedTaxonomies(state),
+  step: selectStepQuery(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
   return {
     loadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
+    },
+    onInvalidateEntities: () => {
+      DEPENDENCIES.forEach((path) => {
+        dispatch(invalidateEntities(path));
+      });
+    },
+    redirectIfNotSignedIn: () => {
+      dispatch(redirectIfNotSignedIn());
     },
     redirectIfNotPermitted: () => {
       dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
@@ -424,67 +282,8 @@ function mapDispatchToProps(dispatch, props) {
     handleSubmitRemote: (model) => {
       dispatch(formActions.submit(model));
     },
-    handleSubmit: (
-      formData,
-      // actions,
-      // actorsByActortype,
-      // taxonomy,
-    ) => {
-      let saveData = formData;
-      // if (taxonomy.getIn(['attributes', 'tags_actions'])) {
-      //   saveData = saveData.set(
-      //     'actionCategories',
-      //     getConnectionUpdatesFromFormData({
-      //       formData: !formData.getIn(['attributes', 'user_only']) ? formData : null,
-      //       connections: actions,
-      //       connectionAttribute: 'associatedActions',
-      //       createConnectionKey: 'measure_id',
-      //       createKey: 'category_id',
-      //     })
-      //   );
-      // }
-      // if (actorsByActortype && taxonomy.getIn(['attributes', 'tags_actors'])) {
-      //   saveData = saveData.set(
-      //     'actorCategories',
-      //     actorsByActortype
-      //       .map((actors, actortypeid) => getConnectionUpdatesFromFormData({
-      //         formData: !formData.getIn(['attributes', 'user_only']) ? formData : null,
-      //         connections: actors,
-      //         connectionAttribute: ['associatedActorsByActortype', actortypeid.toString()],
-      //         createConnectionKey: 'actor_id',
-      //         createKey: 'category_id',
-      //       }))
-      //       .reduce(
-      //         (memo, deleteCreateLists) => {
-      //           const deletes = memo.get('delete').concat(deleteCreateLists.get('delete'));
-      //           const creates = memo.get('create').concat(deleteCreateLists.get('create'));
-      //           return memo
-      //             .set('delete', deletes)
-      //             .set('create', creates);
-      //         },
-      //         fromJS({
-      //           delete: [],
-      //           create: [],
-      //         }),
-      //       )
-      //   );
-      // }
-      //
-      // // TODO: remove once have singleselect instead of multiselect
-      // const formUserIds = getCheckedValuesFromOptions(formData.get('associatedUser'));
-      // if (List.isList(formUserIds) && formUserIds.size) {
-      //   saveData = saveData.setIn(['attributes', 'manager_id'], formUserIds.first());
-      // } else {
-      //   saveData = saveData.setIn(['attributes', 'manager_id'], null);
-      // }
-      // TODO: remove once have singleselect instead of multiselect
-      const formCategoryIds = getCheckedValuesFromOptions(formData.get('associatedCategory'));
-      if (List.isList(formCategoryIds) && formCategoryIds.size) {
-        saveData = saveData.setIn(['attributes', 'parent_id'], formCategoryIds.first());
-      } else {
-        saveData = saveData.setIn(['attributes', 'parent_id'], null);
-      }
-      dispatch(save(saveData.toJS()));
+    handleSubmit: (formData) => {
+      dispatch(save(formData.toJS()));
     },
     handleCancel: (reference) => {
       dispatch(updatePath(`${ROUTES.CATEGORY}/${reference}`, { replace: true }));

@@ -34,6 +34,7 @@ import qe from 'utils/quasi-equals';
 import {
   getEntityTitleTruncated,
   checkActionAttribute,
+  getIndicatorColumnsForStatement,
 } from 'utils/entities';
 
 import { keydownHandlerPrint } from 'utils/print';
@@ -47,14 +48,11 @@ import {
 } from 'containers/App/actions';
 
 import {
-  // ROUTES, ACTIONTYPES, ACTORTYPES_CONFIG, ACTORTYPES, RESOURCE_FIELDS,
   ROUTES,
   ACTIONTYPES,
-  ACTIONTYPE_TARGETTYPES,
   ACTIONTYPE_ACTORTYPES,
   ACTIONTYPE_ACTIONTYPES,
   INDICATOR_ACTIONTYPES,
-  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
 import { PRINT_TYPES } from 'containers/App/constants';
@@ -103,7 +101,7 @@ import {
   selectResourcesByType,
   selectTopActionsByActiontype,
   selectSubActionsByActiontype,
-  selectEntityIndicators,
+  selectActionIndicators,
   selectEntityUsers,
 } from './selectors';
 
@@ -113,29 +111,6 @@ const PrintSectionTitleWrapper = styled(
   (p) => <Box margin={{ top: 'large', bottom: 'small' }} pad={{ bottom: 'small' }} border="bottom" {...p} />
 )``;
 
-const getIndicatorColumns = (viewEntity, intl, isAdmin) => {
-  let columns = [{
-    id: 'main',
-    type: 'main',
-    sort: 'title',
-    attributes: isAdmin ? ['code', 'title'] : ['title'],
-  }];
-  if (
-    ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[viewEntity.getIn(['attributes', 'measuretype_id'])]
-    && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[viewEntity.getIn(['attributes', 'measuretype_id'])].length > 0
-  ) {
-    columns = [
-      ...columns,
-      {
-        id: 'supportlevel_id',
-        type: 'supportlevel',
-        actionId: viewEntity.get('id'),
-        title: intl.formatMessage(appMessages.attributes.supportlevel_id),
-      },
-    ];
-  }
-  return columns;
-};
 export function ActionView(props) {
   const {
     viewEntity,
@@ -184,8 +159,7 @@ export function ActionView(props) {
   // const type = `actions_${typeId}`;
   let viewSubject = subject || 'actors';
 
-  const hasMap = viewSubject === 'actors'
-    || viewSubject === 'targets';
+  const hasMap = viewSubject === 'actors';
 
   const mySetPrintView = () => onSetPrintView({
     printType: PRINT_TYPES.SINGLE,
@@ -245,7 +219,6 @@ export function ActionView(props) {
     ? `${pageTitle}: ${getEntityTitleTruncated(viewEntity)}`
     : `${pageTitle}: ${params.id}`;
 
-  const hasTarget = ACTIONTYPE_TARGETTYPES[typeId] && ACTIONTYPE_TARGETTYPES[typeId].length > 0;
   const hasActor = ACTIONTYPE_ACTORTYPES[typeId] && ACTIONTYPE_ACTORTYPES[typeId].length > 0;
   const childActiontypeIds = typeId
     ? Object.keys(ACTIONTYPE_ACTIONTYPES).reduce(
@@ -264,9 +237,6 @@ export function ActionView(props) {
   const validViewSubjects = [];
   if (hasActor) {
     validViewSubjects.push('actors');
-  }
-  if (hasTarget) {
-    validViewSubjects.push('targets');
   }
   if (hasChildren) {
     validViewSubjects.push('children');
@@ -315,7 +285,7 @@ export function ActionView(props) {
         )}
         {viewEntity && dataReady && (
           <ViewWrapper isPrint={isPrintView}>
-            {isPrintView && <HeaderPrint argsKeep={['am', 'tm', 'mtchm', 'subj', 'mtch', 'ac', 'tc']} />}
+            {isPrintView && <HeaderPrint argsKeep={['am', 'tm', 'achmmap', 'subj', 'achmap', 'ac', 'tc']} />}
             <ViewHeader
               isPrintView={isPrintView}
               title={typeId
@@ -391,7 +361,11 @@ export function ActionView(props) {
                             onEntityClick,
                             // connections: indicatorConnections,
                             skipLabel: true,
-                            columns: getIndicatorColumns(viewEntity, intl, isAdmin),
+                            columns: getIndicatorColumnsForStatement({
+                              action: viewEntity,
+                              intl,
+                              isAdmin,
+                            }),
                           }),
                         ],
                       }}
@@ -406,15 +380,7 @@ export function ActionView(props) {
                               onClick={() => onSetSubject('actors')}
                               active={viewSubject === 'actors'}
                             >
-                              <Text size="large">Actors</Text>
-                            </SubjectButton>
-                          )}
-                          {hasTarget && (
-                            <SubjectButton
-                              onClick={() => onSetSubject('targets')}
-                              active={viewSubject === 'targets'}
-                            >
-                              <Text size="large">Targets</Text>
+                              <Text size="large">Stakeholders</Text>
                             </SubjectButton>
                           )}
                           {hasChildren && (
@@ -422,7 +388,7 @@ export function ActionView(props) {
                               onClick={() => onSetSubject('children')}
                               active={viewSubject === 'children'}
                             >
-                              <Text size="large">Child activities</Text>
+                              <Text size="large">Sub-activities</Text>
                             </SubjectButton>
                           )}
                         </SubjectButtonGroup>
@@ -437,7 +403,7 @@ export function ActionView(props) {
                             <span key={vSubject}>
                               <PrintOnly>
                                 <PrintSectionTitleWrapper>
-                                  <Text size="large">Child Activities</Text>
+                                  <Text size="large">Sub-activities</Text>
                                 </PrintSectionTitleWrapper>
                               </PrintOnly>
                               <TabActivities
@@ -456,7 +422,7 @@ export function ActionView(props) {
                             <span key={vSubject}>
                               <PrintOnly>
                                 <PrintSectionTitleWrapper>
-                                  <Text size="large">{subject === 'actors' ? 'Actors' : 'Targets'}</Text>
+                                  <Text size="large">Stakeholders</Text>
                                 </PrintSectionTitleWrapper>
                               </PrintOnly>
                               <TabActors
@@ -553,8 +519,7 @@ export function ActionView(props) {
                         !datesEqual
                         && checkActionAttribute(typeId, 'date_end')
                         && getDateField(viewEntity, 'date_end', { specificity: dateSpecificity }),
-                        !dateSpecificity
-                        && checkActionAttribute(typeId, 'date_comment')
+                        checkActionAttribute(typeId, 'date_comment')
                         && getTextField(viewEntity, 'date_comment'),
                       ],
                     }}
@@ -652,7 +617,7 @@ const mapStateToProps = (state, props) => ({
   topActionsByType: selectTopActionsByActiontype(state, props.params.id),
   subActionsByType: selectSubActionsByActiontype(state, props.params.id),
   subject: selectSubjectQuery(state),
-  indicators: selectEntityIndicators(state, props.params.id),
+  indicators: selectActionIndicators(state, props.params.id),
   // indicatorConnections: selectIndicatorConnections(state),
   users: selectEntityUsers(state, props.params.id),
   userConnections: selectUserConnections(state),

@@ -29,13 +29,10 @@ import {
   selectIsUserAdmin,
   selectActortypes,
   selectActiontypesForActortype,
-  selectActiontypesForTargettype,
   selectMembertypesForActortype,
   selectAssociationtypesForActortype,
   selectParentAssociationtypesForActortype,
   selectViewQuery,
-  // selectIncludeActorMembers,
-  // selectIncludeActorChildren,
 } from 'containers/App/selectors';
 
 import { checkActorAttribute } from 'utils/entities';
@@ -43,7 +40,6 @@ import { keydownHandlerPrint } from 'utils/print';
 import { qe } from 'utils/quasi-equals';
 import appMessages from 'containers/App/messages';
 import { ROUTES, ACTORTYPES } from 'themes/config';
-
 
 import EntityList from 'containers/EntityList';
 import { PRINT_TYPES } from 'containers/App/constants';
@@ -89,18 +85,6 @@ const LayerContent = styled((p) => (
   />
 ))``;
 
-const prepareTypeOptions = (
-  types,
-  activeId,
-  intl,
-) => types.toList().toJS().map(
-  (type) => ({
-    value: type.id,
-    label: intl.formatMessage(appMessages.actortypes[type.id]),
-    active: activeId === type.id,
-  })
-);
-
 const VALID_VIEWS = ['map', 'list'];
 const getView = ({
   view,
@@ -133,12 +117,10 @@ export function ActorList({
   params, // { id: the action type }
   actiontypes,
   actortypes,
-  actiontypesForTarget,
   membertypes,
   parentAssociationtypes,
   associationtypes,
   onSelectType,
-  handleNew,
   handleImport,
   onSetPrintView,
   view,
@@ -191,14 +173,13 @@ export function ActorList({
     supTitle: intl.formatMessage(messages.pageTitle),
     actions: [],
     info: appMessages.actortypes_info[typeId]
-      && intl.formatMessage(appMessages.actiontypes_info[typeId]).trim() !== ''
+      && intl.formatMessage(appMessages.actortypes_info[typeId]).trim() !== ''
       ? {
         title: 'Please note',
         content: intl.formatMessage(appMessages.actortypes_info[typeId]),
       }
       : null,
   };
-
   if (isVisitor) {
     headerOptions.actions.push({
       type: 'bookmarker',
@@ -215,12 +196,6 @@ export function ActorList({
     });
   }
   if (isMember) {
-    headerOptions.actions.push({
-      title: 'Create new',
-      onClick: () => handleNew(typeId),
-      icon: 'add',
-      isMember,
-    });
     headerOptions.actions.push({
       title: intl.formatMessage(appMessages.buttons.import),
       onClick: () => handleImport(typeId),
@@ -250,6 +225,19 @@ export function ActorList({
   const filterAssociationtypes = includeMembersWhenFiltering && parentAssociationtypes
     ? associationtypes.merge(parentAssociationtypes)
     : associationtypes;
+
+  let navItems = [];
+  navItems = Object.values(ACTORTYPES).reduce(
+    (memo, actortypeId) => [
+      ...memo,
+      {
+        path: `${ROUTES.ACTORS}/${actortypeId}`,
+        title: intl.formatMessage(appMessages.actortypes_short[actortypeId]),
+        active: location.pathname && location.pathname.startsWith(`${ROUTES.ACTORS}/${actortypeId}`),
+      },
+    ],
+    navItems,
+  );
   return (
     <div>
       <Helmet
@@ -259,6 +247,7 @@ export function ActorList({
         ]}
       />
       <EntityList
+        secondaryNavItems={navItems}
         entities={entities}
         allEntities={allEntities.toList()}
         taxonomies={taxonomies}
@@ -273,15 +262,9 @@ export function ActorList({
         locationQuery={fromJS(location.query)}
         actortypes={actortypes}
         actiontypes={actiontypes}
-        actiontypesForTarget={actiontypesForTarget}
         membertypes={membertypes}
         filterAssociationtypes={filterAssociationtypes}
         associationtypes={associationtypes}
-        typeOptions={prepareTypeOptions(
-          actortypes,
-          typeId,
-          intl,
-        )}
         onSelectType={onSelectType}
         typeId={typeId}
         showCode={checkActorAttribute(typeId, 'code', isAdmin)}
@@ -318,7 +301,6 @@ export function ActorList({
 
 ActorList.propTypes = {
   onLoadEntitiesIfNeeded: PropTypes.func,
-  handleNew: PropTypes.func,
   handleImport: PropTypes.func,
   onSelectType: PropTypes.func,
   dataReady: PropTypes.bool,
@@ -332,7 +314,6 @@ ActorList.propTypes = {
   connections: PropTypes.instanceOf(Map),
   actortypes: PropTypes.instanceOf(Map),
   actiontypes: PropTypes.instanceOf(Map),
-  actiontypesForTarget: PropTypes.instanceOf(Map),
   membertypes: PropTypes.instanceOf(Map),
   parentAssociationtypes: PropTypes.instanceOf(Map),
   associationtypes: PropTypes.instanceOf(Map),
@@ -353,7 +334,6 @@ const mapStateToProps = (state, props) => ({
   isVisitor: selectIsUserVisitor(state),
   isAdmin: selectIsUserAdmin(state),
   actiontypes: selectActiontypesForActortype(state, { type: props.params.id }),
-  actiontypesForTarget: selectActiontypesForTargettype(state, { type: props.params.id }),
   membertypes: selectMembertypesForActortype(state, { type: props.params.id }),
   parentAssociationtypes: selectParentAssociationtypesForActortype(state, { type: props.params.id }),
   associationtypes: selectAssociationtypesForActortype(state, { type: props.params.id }),
@@ -368,9 +348,6 @@ function mapDispatchToProps(dispatch) {
   return {
     onLoadEntitiesIfNeeded: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
-    },
-    handleNew: (typeId) => {
-      dispatch(updatePath(`${ROUTES.ACTORS}/${typeId}${ROUTES.NEW}`, { replace: true }));
     },
     handleImport: (typeId) => {
       dispatch(updatePath(`${ROUTES.ACTORS}/${typeId}${ROUTES.IMPORT}`));

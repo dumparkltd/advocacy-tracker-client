@@ -15,10 +15,10 @@ import PrintHide from 'components/styled/PrintHide';
 
 const Styled = styled(PrintHide)`
   display: none;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     display: ${(props) => props.responsiveSmall ? 'block' : 'none'};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.xlarge}) {
     display: block;
   }
 `;
@@ -38,7 +38,7 @@ const Option = styled.div`
   width: 100%;
   background-color: ${palette('asideListItem', 2)};
   border-bottom: 1px solid ${palette('asideListItem', 4)};
-  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.xlarge}) {
     padding: 1em 8px 1em 24px;
     height: 50px;
   }

@@ -25,7 +25,7 @@ import FieldGroup from 'components/fields/FieldGroup';
 // import appMessages from 'containers/App/messages';
 // import ActorMap from './ActorMap';
 import { usePrint } from 'containers/App/PrintContext';
-import MapWrapper from 'containers/MapContainer/MapWrapper';
+import LeafletWrapper from 'containers/MapContainer/LeafletWrapper';
 // import messages from './messages';
 
 const MapOuterWrapper = styled((p) => <Box {...p} />)`
@@ -106,7 +106,7 @@ export function TabMembers({
       {countries && countries.size > 0 && (
         <Box>
           <MapOuterWrapper>
-            <MapWrapper
+            <LeafletWrapper
               countryData={countryData}
               countryPointData={countryPointData}
               countryFeatures={countriesJSON.features}
@@ -139,12 +139,6 @@ export function TabMembers({
                       subject: 'actors',
                       actions: 'actions',
                     },
-                    {
-                      id: 'actorActionsTargets',
-                      type: 'actionsSimple',
-                      subject: 'targets',
-                      actions: 'targetingActions',
-                    },
                   ],
                 }),
               ],
@@ -176,12 +170,6 @@ export function TabMembers({
                       type: 'actionsSimple',
                       subject: 'actors',
                       actions: 'actions',
-                    },
-                    {
-                      id: 'actorActionsTargets',
-                      type: 'actionsSimple',
-                      subject: 'targets',
-                      actions: 'targetingActions',
                     },
                   ],
                 }),

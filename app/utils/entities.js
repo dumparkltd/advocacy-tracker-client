@@ -1,4 +1,4 @@
-import { Map } from 'immutable';
+import { Map, fromJS } from 'immutable';
 
 import {
   TEXT_TRUNCATE,
@@ -8,7 +8,12 @@ import {
   INDICATOR_FIELDS,
   ACTIONTYPES_CONFIG,
   ACTORTYPES_CONFIG,
+  ACTION_INDICATOR_SUPPORTLEVELS,
+  ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
   API,
+  ROUTE_FOR_API,
+  MEMBERSHIPS,
+  ACTORTYPES,
 } from 'themes/config';
 import { find, reduce, every } from 'lodash/collection';
 
@@ -17,13 +22,14 @@ import {
   regExMultipleWords,
   truncateText,
   startsWith,
+  capitalize,
 } from 'utils/string';
 import asList from 'utils/as-list';
 import isNumber from 'utils/is-number';
 import appMessage from 'utils/app-message';
 import { qe } from 'utils/quasi-equals';
 import validateEmailFormat from 'components/forms/validators/validate-email-format';
-
+import appMessages from 'containers/App/messages';
 // check if entity has nested connection by id
 // - connectionAttributes: { path: 'indicatorConnections', id: 'indicator_id' }
 // - connectionAttributeQuery: { attribute: connectionAttribute, values: [value2,value3] }
@@ -222,52 +228,6 @@ export const filterEntitiesByCategories = (
       )
   );
 
-// filter entities by association with one or more categories
-// assumes prior nesting of relationships
-export const filterEntitiesByConnectedCategories = (
-  entities,
-  connections,
-  query,
-  any = true,
-) => entities && entities.filter(
-  // consider replacing with .every()
-  (entity) => any
-    ? asList(query).some(
-      (queryArg) => {
-        const pathValue = queryArg.split(':');
-        const path = pathValue[0];
-        const connectionsForPath = connections.get(path);
-        return !connectionsForPath || connectionsForPath.some(
-          (connection) => testEntityEntityAssociation(
-            entity,
-            path,
-            connection.get('id'),
-          ) && testEntityCategoryAssociation(
-            connection,
-            pathValue[1],
-          )
-        );
-      },
-    )
-    : asList(query).every(
-      (queryArg) => {
-        const pathValue = queryArg.split(':');
-        const path = pathValue[0];
-        const connectionsForPath = connections.get(path);
-        return !connectionsForPath || connectionsForPath.some(
-          (connection) => testEntityEntityAssociation(
-            entity,
-            path,
-            connection.get('id'),
-          ) && testEntityCategoryAssociation(
-            connection,
-            pathValue[1],
-          )
-        );
-      },
-    )
-);
-
 export const checkQuery = ({
   queryValue,
   path,
@@ -336,10 +296,30 @@ export const filterEntitiesByMultipleConnections = (
   query,
   paths,
   any = true,
-) => entities && entities.filter(
-  // consider replacing with .every()
-  (entity) => any
-    ? asList(query).some(
+) => {
+  if (any) {
+    // we want to be inclusive (OR/any/some) within each group, but exclusive (AND/all/every) across groups
+    const queryGroups = asList(query).map(
+      (q) => {
+        const [group, value] = q.split(':');
+        return fromJS({ group, value });
+      }
+    ).groupBy((q) => q.get('group'));
+    return entities && entities.filter(
+      (entity) => queryGroups.every(
+        (group) => group.some(
+          (q) => {
+            const value = q.get('value');
+            return paths.some(
+              (path) => entity.get(path) && testEntityEntityAssociation(entity, path, value)
+            );
+          },
+        )
+      )
+    );
+  }
+  return entities && entities.filter(
+    (entity) => asList(query).every(
       (queryArg) => {
         const [, value] = queryArg.split(':');
         return paths.some(
@@ -347,15 +327,8 @@ export const filterEntitiesByMultipleConnections = (
         );
       },
     )
-    : asList(query).every(
-      (queryArg) => {
-        const [, value] = queryArg.split(':');
-        return paths.some(
-          (path) => entity.get(path) && testEntityEntityAssociation(entity, path, value)
-        );
-      },
-    )
-);
+  );
+};
 
 const fieldEmpty = (entity, attribute) => !entity.getIn(['attributes', attribute])
   || qe(entity.getIn(['attributes', attribute]).trim(), '');
@@ -795,8 +768,15 @@ export const getEntityTitle = (entity, labels, intl) => {
       return appMessage(intl, label.message);
     }
   }
-  return entity.getIn(['attributes', 'title'])
+  let label = entity.getIn(['attributes', 'title'])
     || entity.getIn(['attributes', 'name']);
+  if (entity.get('type') === API.INDICATORS) {
+    label = getIndicatorMainTitle(label);
+  }
+  if (entity.getIn(['attributes', 'prefix']) && entity.getIn(['attributes', 'prefix']).trim().length > 0) {
+    label = `${label} (${entity.getIn(['attributes', 'prefix'])})`;
+  }
+  return label;
 };
 export const getEntityTitleTruncated = (
   entity,
@@ -968,6 +948,30 @@ const checkRequired = ({ typeId, att, attributes }) => {
   }
   return false;
 };
+const checkHidden = ({ typeId, att, attributes }) => {
+  if (typeId && attributes && attributes[att] && attributes[att].hideByDefault) {
+    return typeof attributes[att].hideByDefault === 'boolean'
+      ? attributes[att].hideByDefault
+      : attributes[att].hideByDefault[typeId.toString()];
+  }
+  return false;
+};
+const getFormStep = ({ typeId, att, attributes }) => {
+  if (typeId && attributes && attributes[att] && attributes[att].step) {
+    return typeof attributes[att].step === 'string'
+      ? attributes[att].step
+      : (attributes[att].step[typeId.toString()] || 'main');
+  }
+  return 'main';
+};
+const getFormSection = ({ typeId, att, attributes }) => {
+  if (typeId && attributes && attributes[att] && attributes[att].step) {
+    return isNumber(attributes[att].section)
+      ? attributes[att].section
+      : (attributes[att].section[typeId.toString()] || 1);
+  }
+  return 1;
+};
 export const checkActionAttribute = (typeId, att, isAdmin) => ACTION_FIELDS
   && ACTION_FIELDS.ATTRIBUTES
   && checkAttribute({
@@ -987,6 +991,27 @@ export const checkIndicatorAttribute = (att, isAdmin) => INDICATOR_FIELDS
 export const checkActionRequired = (typeId, att) => ACTION_FIELDS
   && ACTION_FIELDS.ATTRIBUTES
   && checkRequired({
+    typeId,
+    att,
+    attributes: ACTION_FIELDS.ATTRIBUTES,
+  });
+export const checkActionHidden = (typeId, att) => ACTION_FIELDS
+  && ACTION_FIELDS.ATTRIBUTES
+  && checkHidden({
+    typeId,
+    att,
+    attributes: ACTION_FIELDS.ATTRIBUTES,
+  });
+export const getActionFormStep = (typeId, att) => ACTION_FIELDS
+  && ACTION_FIELDS.ATTRIBUTES
+  && getFormStep({
+    typeId,
+    att,
+    attributes: ACTION_FIELDS.ATTRIBUTES,
+  });
+export const getActionFormSection = (typeId, att) => ACTION_FIELDS
+  && ACTION_FIELDS.ATTRIBUTES
+  && getFormSection({
     typeId,
     att,
     attributes: ACTION_FIELDS.ATTRIBUTES,
@@ -1040,7 +1065,6 @@ export const setActionConnections = ({
   action,
   actionConnections,
   actorActions, // as active actor
-  actionActors, // as passive target of action
   actionResources,
   actionIndicators,
   actionIndicatorAttributes,
@@ -1054,14 +1078,6 @@ export const setActionConnections = ({
   const entityActorsByActortype = entityActors
     && actionConnections.get(API.ACTORS)
     && entityActors
-      .filter((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString()]))
-      .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
-      .sortBy((val, key) => key);
-  // actors
-  const entityTargets = actionActors && actionActors.get(actionId);
-  const entityTargetsByActortype = entityTargets
-    && actionConnections.get(API.ACTORS)
-    && entityTargets
       .filter((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString()]))
       .groupBy((actorId) => actionConnections.getIn([API.ACTORS, actorId.toString(), 'attributes', 'actortype_id']).toString())
       .sortBy((val, key) => key);
@@ -1099,7 +1115,6 @@ export const setActionConnections = ({
   return action
     .set('categories', entityCategories)
     .set('actorsByType', entityActorsByActortype)
-    .set('targetsByType', entityTargetsByActortype)
     .set('resourcesByType', entityResourcesByResourcetype)
     .set('indicators', entityIndicators)
     .set('indicatorConnections', actionIndicatorAttributes && actionIndicatorAttributes.get(parseInt(action.get('id'), 10)))
@@ -1110,7 +1125,6 @@ export const setActorConnections = ({
   actor,
   actorConnections,
   actorActions,
-  actionActors,
   categories,
   actorCategories,
   memberships,
@@ -1124,15 +1138,6 @@ export const setActorConnections = ({
   const entityActionsByActiontype = entityActions
     && actorConnections.get(API.ACTIONS)
     && entityActions
-      .filter((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString()]))
-      .groupBy((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString(), 'attributes', 'measuretype_id']).toString())
-      .sortBy((val, key) => key);
-
-  // targets
-  const entityTargetingActions = actionActors && actionActors.get(actorId);
-  const entityTargetingActionsByType = entityTargetingActions
-    && actorConnections.get(API.ACTIONS)
-    && entityTargetingActions
       .filter((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString()]))
       .groupBy((actionId) => actorConnections.getIn([API.ACTIONS, actionId.toString(), 'attributes', 'measuretype_id']).toString())
       .sortBy((val, key) => key);
@@ -1174,7 +1179,6 @@ export const setActorConnections = ({
   return actor
     .set('categories', entityCategories)
     .set('actionsByType', entityActionsByActiontype)
-    .set('targetingActionsByType', entityTargetingActionsByType)
     .set('membersByType', entityMembersByActortype)
     .set('associationsByType', entityAssociationsByActortype)
     .set('users', entityUsers);
@@ -1335,6 +1339,153 @@ export const getActortypeColumns = ({
     columns = [
       ...columns,
       ...otherColumns,
+    ];
+  }
+  return columns;
+};
+
+export const getIndicatorMainTitle = (title) => {
+  let short = title;
+  if (short.indexOf(':') > -1) {
+    short = short.split(':')[0].trim();
+  } else if (short.indexOf(' - ') > -1) {
+    short = short.split('-')[0].trim();
+  }
+  return short;
+};
+
+export const getIndicatorSecondaryTitle = (title) => {
+  if (title && title.indexOf(':') > -1) {
+    return title.split(':')[1].trim().split(' ').map((w, i) => i === 0 ? capitalize(w) : w).join(' ');
+  }
+  return null;
+};
+export const getIndicatorAbbreviation = (title) => {
+  const short = getIndicatorMainTitle(title);
+  const words = short
+    .toUpperCase()
+    .replace('-', ' ')
+    .replace(' & ', ' ')
+    .split(' ');
+  if (words.length === 1) {
+    return words[0].length > 2 ? words[0].substr(0, 2) : words[0];
+  }
+  return truncateText(
+    words.reduce((memo, word) => `${memo}${word.substr(0, 1)}`, ''),
+    3, // limit
+    false, // keep words
+    false, // append ellipses
+    false, // grace
+  );
+};
+
+export const getIndicatorColumnsForStatement = ({
+  action, intl, isAdmin,
+}) => {
+  const actionType = action && action.getIn(['attributes', 'measuretype_id']);
+  let columns = [{
+    id: 'main',
+    type: 'main',
+    sort: 'reference',
+    attributes: isAdmin ? ['code', 'title'] : ['title'],
+  }];
+  if (
+    ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actionType]
+    && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actionType].length > 0
+  ) {
+    columns = [
+      ...columns,
+      {
+        id: 'supportlevel_id',
+        type: 'supportlevel',
+        actionId: action.get('id'),
+        title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+        info: {
+          type: 'key-categorical',
+          attribute: 'supportlevel_id',
+          options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+            .sort((a, b) => a.order < b.order ? -1 : 1)
+            .map((level) => ({
+              ...level,
+              label: intl.formatMessage(appMessages.supportlevels[level.value]),
+            })),
+        },
+      },
+    ];
+  }
+  return columns;
+};
+
+
+export const actionsByType = (actorActions, actions) => actorActions
+  && actions && actorActions.filter(
+  (id) => actions.get(id.toString())
+).groupBy(
+  (actionId) => actions.getIn([
+    actionId.toString(),
+    'attributes',
+    'measuretype_id',
+  ])
+).sortBy((val, key) => key);
+
+
+export const actorsByType = (actorActors, actors) => actorActors && actors && actorActors.filter(
+  (id) => actors.get(id.toString())
+).groupBy(
+  (actionId) => actors.getIn([
+    actionId.toString(),
+    'attributes',
+    'actortype_id',
+  ])
+).sortBy((val, key) => key);
+
+export const getEntityPath = (entity) => ROUTE_FOR_API[entity.get('type')];
+
+const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
+  && MEMBERSHIPS[typeId].length > 0
+  && !qe(typeId, ACTORTYPES.CONTACT);
+
+export const getIndicatorColumns = ({
+  typeId, intl, isAdmin,
+}) => {
+  let columns = [
+    {
+      id: 'main',
+      type: 'main',
+      sort: 'title',
+      attributes: isAdmin ? ['code', 'title'] : ['title'],
+    },
+    {
+      id: 'positionStatement',
+      type: 'positionStatement',
+    },
+    {
+      id: 'supportlevel_id',
+      type: 'supportlevel',
+      title: intl.formatMessage(appMessages.attributes.supportlevel_id),
+      info: {
+        type: 'key-categorical',
+        attribute: 'supportlevel_id',
+        options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+          .sort((a, b) => a.order < b.order ? -1 : 1)
+          .map((level) => ({
+            ...level,
+            label: intl.formatMessage(appMessages.supportlevels[level.value]),
+          })),
+      },
+    },
+    {
+      id: 'authority',
+      type: 'positionStatementAuthority',
+    },
+  ];
+  if (hasMemberOption(typeId)) {
+    columns = [
+      ...columns,
+      {
+        id: 'viaGroups',
+        type: 'viaGroups',
+      },
     ];
   }
   return columns;

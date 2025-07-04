@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box, Text, Button,
-} from 'grommet';
+import { Box, Text } from 'grommet';
 import styled from 'styled-components';
 
 import { injectIntl, intlShape } from 'react-intl';
@@ -10,8 +8,9 @@ import { injectIntl, intlShape } from 'react-intl';
 import { truncateText } from 'utils/string';
 import { ACTORTYPES_CONFIG, ACTIONTYPES_CONFIG, ROUTES } from 'themes/config';
 import appMessages from 'containers/App/messages';
+import Button from 'components/buttons/ButtonTableCell';
 
-const LinkInTT = styled((p) => <Button as="a" plain {...p} />)`
+const LinkInTT = styled((p) => <Button as="a" {...p} />)`
   line-height: 13px;
 `;
 const LabelInTT = styled((p) => <Text size="xsmall" wordBreak="keep-all" {...p} />)`
@@ -53,6 +52,8 @@ export function DropEntityList({
   tooltipConfig,
   onEntityClick,
   entityType,
+  indirect,
+  hasIndirect,
 }) {
   let typeConfig = entityType === 'actors'
     ? Object.values(ACTORTYPES_CONFIG)
@@ -77,12 +78,17 @@ export function DropEntityList({
             || tooltipConfig.get(type.id.toString());
           if (tooltipTypes) {
             const count = tooltipTypes.size;
+            let title = getTitle(entityType, type.id, count, intl);
+            if (indirect) {
+              title = `${title} (as member)`;
+            }
+            if (hasIndirect) {
+              title = `${title} (direct)`;
+            }
             return (
               <Box key={type.id} flex={{ shrink: 0 }}>
                 <Box border="bottom" flex={{ shrink: 0 }} margin={{ bottom: 'small' }}>
-                  <Text size="small" weight={500}>
-                    {getTitle(entityType, type.id, count, intl)}
-                  </Text>
+                  <Text size="small" weight={500}>{title}</Text>
                 </Box>
                 <Box flex={{ shrink: 0 }} gap="xsmall">
                   {tooltipTypes
@@ -127,6 +133,8 @@ DropEntityList.propTypes = {
   entityType: PropTypes.string,
   onEntityClick: PropTypes.func,
   tooltipConfig: PropTypes.object,
+  indirect: PropTypes.bool,
+  hasIndirect: PropTypes.bool,
   intl: intlShape,
 };
 

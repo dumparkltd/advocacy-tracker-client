@@ -19,6 +19,9 @@ import { lowerCase } from 'utils/string';
 import { MEMBERSHIPS, ACTORTYPES } from 'themes/config';
 
 import {
+  getIndicatorColumns,
+} from 'utils/entities';
+import {
   getIndicatorConnectionField,
 } from 'utils/fields';
 import { qe } from 'utils/quasi-equals';
@@ -39,51 +42,15 @@ import {
 } from 'containers/App/selectors';
 
 import FieldGroup from 'components/fields/FieldGroup';
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import CheckboxOption from 'components/CheckboxOption';
 
-const MapOptions = styled(
+const CheckboxOptionGroup = styled(
   (p) => <Box margin={{ top: 'medium', bottom: 'small' }} {...p} />
 )``;
 
 const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
   && MEMBERSHIPS[typeId].length > 0
   && !qe(typeId, ACTORTYPES.CONTACT);
-
-const getIndicatorColumns = (viewEntity, typeId, intl, isAdmin) => {
-  let columns = [
-    {
-      id: 'main',
-      type: 'main',
-      sort: 'title',
-      attributes: isAdmin ? ['code', 'title'] : ['title'],
-    },
-    {
-      id: 'positionStatement',
-      type: 'positionStatement',
-    },
-    {
-      id: 'supportlevel_id',
-      type: 'supportlevel',
-      actionId: viewEntity.get('id'),
-      title: intl.formatMessage(appMessages.attributes.supportlevel_id),
-    },
-    {
-      id: 'authority',
-      type: 'positionStatementAuthority',
-    },
-  ];
-  if (hasMemberOption(typeId)) {
-    columns = [
-      ...columns,
-      {
-        id: 'viaGroups',
-        type: 'viaGroups',
-      },
-    ];
-  }
-  return columns;
-};
-
 
 export function TabStatements(props) {
   const {
@@ -136,9 +103,9 @@ export function TabStatements(props) {
   );
   return (
     <div>
-      <MapOptions>
+      <CheckboxOptionGroup>
         {hasMemberOption(typeId) && (
-          <MapOption
+          <CheckboxOption
             option={{
               active: includeActorMembers,
               onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
@@ -147,7 +114,7 @@ export function TabStatements(props) {
             type="member"
           />
         )}
-        <MapOption
+        <CheckboxOption
           option={{
             active: !includeInofficial,
             onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
@@ -155,7 +122,7 @@ export function TabStatements(props) {
           }}
           type="official"
         />
-      </MapOptions>
+      </CheckboxOptionGroup>
       {indicators && (
         <FieldGroup
           seamless
@@ -165,7 +132,12 @@ export function TabStatements(props) {
                 indicators: indicatorsWithSupport,
                 onEntityClick,
                 skipLabel: true,
-                columns: getIndicatorColumns(viewEntity, typeId, intl, isAdmin),
+                columns: getIndicatorColumns({
+                  typeId,
+                  intl,
+                  isAdmin,
+                  hasMemberOption,
+                }),
               }),
             ],
           }}

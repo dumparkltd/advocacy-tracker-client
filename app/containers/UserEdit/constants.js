@@ -30,4 +30,6 @@ export const FORM_INITIAL = fromJS({
   },
   associatedActorsByActortype: {},
   associatedActionsByActiontype: {},
+  close: true,
+  step: null,
 });

@@ -83,7 +83,7 @@ export function EntityView({ fields, seamless, header }) {
                 seamless,
               )
             }
-            {fields.header.aside && isPrint && renderAside(fields.header.aside, false)}
+            {fields.header.aside && !isPrint && renderAside(fields.header.aside, false)}
           </ViewPanelInside>
         </ViewPanel>
       )}

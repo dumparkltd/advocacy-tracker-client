@@ -3,13 +3,10 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { connect } from 'react-redux';
 import styled from 'styled-components';
-import { Box } from 'grommet';
 import isNumber from 'utils/is-number';
-
-import {
-  OrderedMap, Map, List, fromJS,
-} from 'immutable';
-import { PAGE_ITEM_OPTIONS } from 'themes/config';
+import { ResponsiveContext } from 'grommet';
+import { Map, List, fromJS } from 'immutable';
+import { isMinSize } from 'utils/responsive';
 
 import {
   selectSortByQuery,
@@ -22,11 +19,18 @@ import {
   selectResources,
   selectIsPrintView,
   selectPrintConfig,
+  selectPreviewQuery,
+  selectHiddenColumns,
+  selectLocationQuery,
 } from 'containers/App/selectors';
-import { updateQuery } from 'containers/EntityList/actions';
-
-import SelectReset from 'components/SelectReset';
-import EntityListSearch from 'components/EntityListSearch';
+import {
+  setPreviewContent,
+  setListPreview,
+  updateRouteQuery,
+} from 'containers/App/actions';
+import {
+  updateQuery,
+} from 'containers/EntityList/actions';
 
 import ToggleAllItems from 'components/fields/ToggleAllItems';
 import appMessages from 'containers/App/messages';
@@ -37,6 +41,7 @@ import { prepSortTarget } from 'utils/sort';
 import qe from 'utils/quasi-equals';
 
 import EntitiesTable from './EntitiesTable';
+import EntityListTableOptions from './EntityListTableOptions';
 
 import EntityListFooter from './EntityListFooter';
 
@@ -44,7 +49,7 @@ import { getPager } from './pagination';
 import {
   prepareEntityRows,
   prepareHeader,
-  getListHeaderLabel,
+  getListHeaderLabels,
   getSelectedState,
   getColumnMaxValues,
 } from './utils';
@@ -73,19 +78,15 @@ export function EntityListTable({
   entityIdsSelected,
   config,
   columns,
-  headerColumnsUtility,
-  onEntityClick,
   canEdit,
   onEntitySelect,
   entityTitle,
   onEntitySelectAll,
   entities = List(),
   errors,
-  categories,
   connections,
   entityPath,
   url,
-  paginate,
   moreLess,
   onSort,
   onDismissError,
@@ -97,25 +98,35 @@ export function EntityListTable({
   hasFilters = false,
   searchQuery = '',
   onSearch,
-  hasSearch,
   inSingleView,
   label,
-  actortypes,
   taxonomies,
   resources,
-  memberOption,
-  childOption,
-  subjectOptions,
-  includeMembers,
-  includeChildren,
+  options = {},
   onPageItemsSelect,
   onPageSelect,
   printConfig,
   isPrintView,
   // allEntityCount,
   isByOption,
+  onResetScroll,
+  previewItemId,
+  onSetPreviewItemId,
+  onSetPreviewContent,
+  reducePreviewItem,
+  hiddenColumns,
+  onUpdateHiddenColumns,
+  onUpdateColumnFilters,
+  onEntityClick,
+  locationQuery,
+  skipPreviews,
+  typeId,
+  mapSubject,
 }) {
   if (!columns) return null;
+  const size = React.useContext(ResponsiveContext);
+
+  // list sorting
   const sortColumn = columns.find((c) => !!c.sortDefault);
   const sortDefault = {
     sort: sortColumn ? sortColumn.sort : 'main',
@@ -124,61 +135,124 @@ export function EntityListTable({
   const [showAllConnections, setShowAllConnections] = useState(false);
   const [localSort, setLocalSort] = useState(sortDefault);
 
-  const cleanSortOrder = inSingleView ? localSort.order : (sortOrder || sortDefault.order);
+  const updateHiddenColumns = () => {
+    // console.log('updateHiddenColumns')
+    const initiallyHiddenColumns = columns.reduce((memo, col) => {
+      if (col.type === 'main') {
+        return memo;
+      }
+      if (!size) {
+        return [...memo, col.id];
+      }
+      if (col.minSize) {
+        if (isMinSize(size, col.minSize)) {
+          return memo;
+        }
+        return [...memo, col.id];
+      }
+      // only show main when smaller than medium
+      if ((!isMinSize(size, 'medium') || isPrintView)) {
+        return [...memo, col.id];
+      }
+      return memo;
+    }, []);
+    const initiallyVisibleColumns = columns.filter(
+      (col) => initiallyHiddenColumns.indexOf(col.id) < 0
+    ).map(
+      (col) => col.id
+    );
+    onUpdateHiddenColumns({
+      addToHidden: initiallyHiddenColumns,
+      removeFromHidden: initiallyVisibleColumns,
+    });
+  };
+  React.useLayoutEffect(() => {
+    updateHiddenColumns();
+  }, [typeId, mapSubject, size]);
+
+  // list options
+  const {
+    hasSearch,
+    search,
+    paginate,
+    paginateOptions,
+    pageSize,
+    includeMembers,
+    includeChildren,
+    searchPlaceholder,
+  } = options;
+
+  // filter entitities by keyword
+  const searchAttributes = (
+    config
+    && config.views
+    && config.views.list
+    && config.views.list.search
+  ) || ['title'];
+
+  let searchedEntities = entities;
+  const searchQueryClean = search || searchQuery;
+
+  if (!inSingleView && searchQueryClean && searchQueryClean.length > 2) {
+    searchedEntities = filterEntitiesByKeywords(
+      searchedEntities,
+      searchQueryClean,
+      searchAttributes,
+    );
+  }
+  // hide initially if hidden columns have not been set
+  // console.log('hiddenColumns', hiddenColumns && hiddenColumns.toJS())
+  // console.log('columnsReady', columnsReady)
+  // if (!columnsReady) return null;
+  // const hideInitially = !columnsReady;
+  // console.log('hideInitially', hideInitially)
+  const availableColumns = columns
+    .filter((col) => {
+      if (col.printHideOnSingle && isPrintView) {
+        return false;
+      }
+      return true;
+    })
+    .map((col) => ({
+      ...col,
+      hidden: hiddenColumns && hiddenColumns.includes(col.id),
+    }));
+  const visibleColumns = inSingleView
+    ? availableColumns
+    : availableColumns.filter((col) => !col.hidden);
+
+  // warning converting List to Array
+  const entityRows = prepareEntityRows({
+    entities: searchedEntities,
+    columns: availableColumns,
+    entityIdsSelected,
+    config,
+    url,
+    entityPath,
+    onEntitySelect,
+    connections,
+    taxonomies,
+    resources,
+    intl,
+    includeMembers,
+    includeChildren,
+  });
+  const columnMaxValues = getColumnMaxValues(
+    entityRows,
+    visibleColumns,
+  );
+  const errorsWithoutEntities = errors && errors.filter(
+    (error, id) => !searchedEntities.find((entity) => qe(entity.get('id'), id))
+  );
+  // sort entities
   const cleanSortBy = inSingleView ? localSort.sort : (sortBy || sortDefault.sort);
+  const cleanSortOrder = inSingleView ? localSort.order : (sortOrder || sortDefault.order);
   const cleanOnSort = inSingleView
     ? (sort, order) => setLocalSort({
       sort: sort || cleanSortBy,
       order: order || cleanSortOrder,
     })
     : onSort;
-
-  // filter entitities by keyword
-  const searchAttributes = (
-    config.views
-    && config.views.list
-    && config.views.list.search
-  ) || ['title'];
-
-  let searchedEntities = entities;
-
-  if (hasSearch && searchQuery.length > 2) {
-    searchedEntities = filterEntitiesByKeywords(
-      searchedEntities,
-      searchQuery,
-      searchAttributes,
-    );
-  }
-  const activeColumns = columns.filter((col) => !col.skip && !(isPrintView && col.printHideOnSingle));
-  // warning converting List to Array
-  const entityRows = prepareEntityRows({
-    entities: searchedEntities,
-    columns: activeColumns,
-    config,
-    connections,
-    categories,
-    intl,
-    entityIdsSelected,
-    url,
-    entityPath,
-    onEntityClick,
-    onEntitySelect,
-    actortypes,
-    taxonomies,
-    resources,
-    includeMembers,
-    includeChildren,
-    isPrintView,
-    printConfig,
-  });
-  const columnMaxValues = getColumnMaxValues(
-    entityRows,
-    activeColumns,
-  );
-  const errorsWithoutEntities = errors && errors.filter(
-    (error, id) => !searchedEntities.find((entity) => qe(entity.get('id'), id))
-  );
-  // sort entities
   const sortedEntities = entityRows && entityRows.sort(
     (a, b) => {
       const aSortValue = a[cleanSortBy]
@@ -197,19 +271,16 @@ export function EntityListTable({
       let result;
       if (aHasSortValue && bHasSortValue) {
         if (isNumber(aSortValue) && !isNumber(bSortValue)) {
-          result = -1;
-        } else if (isNumber(bSortValue) && !isNumber(aSortValue)) {
           result = 1;
+        } else if (isNumber(bSortValue) && !isNumber(aSortValue)) {
+          result = -1;
         } else if (
           isNumber(bSortValue) && isNumber(aSortValue)
         ) {
-          if (
-            a[cleanSortBy].type === 'amount'
-            || a[cleanSortBy].type === 'actorActions'
-          ) {
-            result = aSortValue > bSortValue ? 1 : -1;
+          if (a[cleanSortBy].type === 'topicPosition') {
+            result = aSortValue > bSortValue ? -1 : 1;
           } else {
-            result = aSortValue < bSortValue ? 1 : -1;
+            result = aSortValue < bSortValue ? -1 : 1;
           }
         } else {
           const aClean = prepSortTarget(aSortValue);
@@ -221,15 +292,17 @@ export function EntityListTable({
     }
   );
 
-  let pageSize = PAGE_SIZE_MAX;
+  let pageSizeClean = PAGE_SIZE_MAX;
   let entitiesOnPage = sortedEntities;
   let pager;
   const isSortedOrPaged = !!pageNo || !!pageItems || !!cleanSortBy || !!cleanSortOrder;
   if (paginate) {
-    if (pageItems === 'all' || (isPrintView && printConfig && printConfig.printItems === 'all')) {
-      pageSize = sortedEntities.length;
+    if (pageSize) {
+      pageSizeClean = 10;
+    } else if (pageItems === 'all' || (isPrintView && printConfig && printConfig.printItems === 'all')) {
+      pageSizeClean = sortedEntities.length;
     } else {
-      pageSize = pageItems
+      pageSizeClean = pageItems
         ? Math.min(
           (pageItems && parseInt(pageItems, 10)),
           PAGE_SIZE_MAX
@@ -238,12 +311,12 @@ export function EntityListTable({
 
     // grouping and paging
     // if grouping required
-    if (sortedEntities.length > pageSize) {
+    if (sortedEntities.length > pageSizeClean) {
       // get new pager object for specified page
       pager = getPager(
         sortedEntities.length,
         pageNo && parseInt(pageNo, 10),
-        pageSize
+        pageSizeClean
       );
       entitiesOnPage = sortedEntities.slice(pager.startIndex, pager.endIndex + 1);
     }
@@ -253,8 +326,9 @@ export function EntityListTable({
       : (sortedEntities.slice(0, CONNECTIONMAX));
   }
   const entityIdsOnPage = entitiesOnPage.map((entity) => entity.id);
-  const headerColumns = prepareHeader({
-    columns: activeColumns,
+
+  const availableHeaderColumns = prepareHeader({
+    columns: availableColumns,
     // config,
     sortBy: cleanSortBy,
     sortOrder: cleanSortOrder,
@@ -265,7 +339,8 @@ export function EntityListTable({
       entityIdsSelected.size,
       entityIdsOnPage.length === entityIdsSelected.size,
     ),
-    title: label || getListHeaderLabel({
+    // main column title
+    title: label || getListHeaderLabels({
       intl,
       entityTitle,
       pageTotal: entityIdsOnPage.length,
@@ -273,69 +348,62 @@ export function EntityListTable({
       selectedTotal: canEdit && entityIdsSelected && entityIdsSelected.size,
       allSelectedOnPage: canEdit && entityIdsOnPage.length === entityIdsSelected.size,
       messages,
-      hasFilters: (searchQuery.length > 0 || hasFilters),
+      hasFilters: (searchQueryClean.length > 0 || hasFilters),
     }),
     intl,
   });
 
   const listEmpty = searchedEntities.size === 0;
   const listEmptyAfterQuery = listEmpty
-    && (searchQuery.length > 0 || hasFilters);
+    && (searchQueryClean.length > 0 || hasFilters);
   const listEmptyAfterQueryAndErrors = listEmptyAfterQuery
     && (errors && errors.size > 0);
-
-  const hasPageSelect = !isPrintView && entitiesOnPage && entitiesOnPage.length > 0 && paginate;
+  const visibleHeaderColumns = inSingleView
+    ? availableHeaderColumns
+    : availableHeaderColumns.filter((c) => !c.hidden);
   return (
     <div>
-      {(hasSearch || hasPageSelect) && (
-        <Box
-          direction="row"
-          align="center"
-          gap="medium"
-          pad={{ vertical: 'small' }}
-          justify={hasSearch ? 'start' : 'end'}
-        >
-          {hasSearch && (
-            <Box flex={{ shrink: 0, grow: 1 }}>
-              <EntityListSearch
-                searchQuery={searchQuery}
-                onSearch={onSearch}
-              />
-            </Box>
-          )}
-          {hasPageSelect && (
-            <Box flex={{ shrink: 1, grow: 0 }}>
-              <SelectReset
-                value={pageItems === 'all' ? pageItems : pageSize.toString()}
-                label={intl && intl.formatMessage(appMessages.labels.perPage)}
-                index="page-select"
-                options={PAGE_ITEM_OPTIONS && PAGE_ITEM_OPTIONS.map((option) => ({
-                  value: option.value.toString(),
-                  label: option.value.toString(),
-                }))}
-                isReset={false}
-                onChange={onPageItemsSelect}
-              />
-            </Box>
-          )}
-        </Box>
+      {options && Object.keys(options).length > 0 && (
+        <EntityListTableOptions
+          options={{
+            ...options,
+            hasPageSelect: paginateOptions && !isPrintView && entitiesOnPage && entitiesOnPage.length > 0 && paginate,
+            searchPlaceholder,
+          }}
+          onPageItemsSelect={onPageItemsSelect}
+          onSearch={hasSearch && onSearch}
+          searchQuery={searchQueryClean}
+          pageSelectValue={pageItems === 'all' ? pageItems : pageSizeClean.toString()}
+        />
       )}
       <EntitiesTable
         entities={entitiesOnPage}
-        columns={activeColumns}
-        headerColumns={headerColumns || []}
+        sortedEntities={sortedEntities}
+        searchedEntities={searchedEntities}
         canEdit={canEdit}
-        onEntityClick={onEntityClick}
+        visibleHeaderColumns={visibleHeaderColumns || []}
+        availableHeaderColumns={availableHeaderColumns || []}
+        previewColumns={columns}
+        visibleColumns={visibleColumns || []}
+        onEntityClick={(idOrPath, path, componentId) => {
+          if ((skipPreviews || inSingleView) && onEntityClick) {
+            onEntityClick(idOrPath, path);
+          }
+          if (!skipPreviews && !inSingleView && onSetPreviewItemId && componentId) {
+            onSetPreviewItemId(`${componentId}|${path}|${idOrPath}`);
+          }
+        }}
+        onUpdateHiddenColumns={onUpdateHiddenColumns}
+        onUpdateColumnFilters={onUpdateColumnFilters}
         columnMaxValues={columnMaxValues}
-        headerColumnsUtility={headerColumnsUtility}
-        memberOption={memberOption}
-        childOption={childOption}
-        subjectOptions={subjectOptions}
         inSingleView={inSingleView}
-        isPrintView={isPrintView}
+        previewItemId={previewItemId}
+        reducePreviewItem={reducePreviewItem}
+        onSetPreviewContent={onSetPreviewContent}
+        locationQuery={locationQuery}
       />
       <ListEntitiesMain>
-        {listEmpty && (
+        {entityTitle && listEmpty && (
           <ListEntitiesEmpty>
             {!listEmptyAfterQuery && (
               <FormattedMessage
@@ -383,7 +451,10 @@ export function EntityListTable({
           pager={pager}
           isPrintView={isPrintView}
           pageSize={(pageItems === 'all' || (isPrintView && printConfig.printItems === 'all')) ? 'all' : pageSize}
-          onPageSelect={onPageSelect}
+          onPageSelect={(val) => {
+            if (onResetScroll) onResetScroll();
+            onPageSelect(val);
+          }}
         />
       )}
       {moreLess && searchedEntities.size > CONNECTIONMAX && (
@@ -404,30 +475,28 @@ export function EntityListTable({
 
 EntityListTable.propTypes = {
   entities: PropTypes.instanceOf(List),
-  categories: PropTypes.instanceOf(Map),
   resources: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
-  actortypes: PropTypes.instanceOf(OrderedMap),
   connections: PropTypes.instanceOf(Map),
   entityIdsSelected: PropTypes.instanceOf(List),
-  // locationQuery: PropTypes.instanceOf(Map),
   errors: PropTypes.instanceOf(Map),
   // showValueForAction: PropTypes.instanceOf(Map),
+  typeId: PropTypes.string,
+  mapSubject: PropTypes.string,
   entityTitle: PropTypes.object,
   config: PropTypes.object,
   columns: PropTypes.array,
   headerColumnsUtility: PropTypes.array,
   canEdit: PropTypes.bool,
   onPageSelect: PropTypes.func,
+  onEntityClick: PropTypes.func,
   onPageItemsSelect: PropTypes.func,
-  onEntityClick: PropTypes.func.isRequired,
   onEntitySelect: PropTypes.func,
   onEntitySelectAll: PropTypes.func,
   onSort: PropTypes.func,
   onDismissError: PropTypes.func,
   showCode: PropTypes.bool,
   inSingleView: PropTypes.bool,
-  paginate: PropTypes.bool,
   moreLess: PropTypes.bool,
   entityPath: PropTypes.string,
   url: PropTypes.string,
@@ -439,18 +508,22 @@ EntityListTable.propTypes = {
   searchQuery: PropTypes.string,
   hasFilters: PropTypes.bool,
   onSearch: PropTypes.func,
-  hasSearch: PropTypes.bool,
   label: PropTypes.string,
-  memberOption: PropTypes.node,
-  childOption: PropTypes.node,
-  subjectOptions: PropTypes.node,
-  includeMembers: PropTypes.bool,
-  includeChildren: PropTypes.bool,
+  options: PropTypes.object,
   isByOption: PropTypes.bool,
+  skipPreviews: PropTypes.bool,
   isPrintView: PropTypes.bool,
   printConfig: PropTypes.object,
   pageItemSelectConfig: PropTypes.object,
-  // allEntityCount: PropTypes.number,
+  onResetScroll: PropTypes.func,
+  previewItemId: PropTypes.string,
+  reducePreviewItem: PropTypes.func,
+  onSetPreviewContent: PropTypes.func,
+  onSetPreviewItemId: PropTypes.func,
+  onUpdateHiddenColumns: PropTypes.func,
+  onUpdateColumnFilters: PropTypes.func,
+  hiddenColumns: PropTypes.object, // immutable List
+  locationQuery: PropTypes.object, // immutable Map
 };
 
 const mapStateToProps = (state) => ({
@@ -464,6 +537,9 @@ const mapStateToProps = (state) => ({
   resources: selectResources(state),
   isPrintView: selectIsPrintView(state),
   printConfig: selectPrintConfig(state),
+  previewItemId: selectPreviewQuery(state),
+  hiddenColumns: selectHiddenColumns(state),
+  locationQuery: selectLocationQuery(state),
 });
 function mapDispatchToProps(dispatch) {
   return {
@@ -485,6 +561,30 @@ function mapDispatchToProps(dispatch) {
           checked: value !== '',
         },
       ])));
+    },
+    onSetPreviewContent: (value) => dispatch(setPreviewContent(value)),
+    onSetPreviewItemId: (value) => dispatch(setListPreview(value)),
+    onUpdateHiddenColumns: ({ addToHidden, removeFromHidden }) => {
+      let query = [];
+      if (addToHidden && addToHidden.length > 0) {
+        query = addToHidden.reduce(
+          (memo, value) => ([
+            ...memo,
+            { arg: 'xcol', add: true, value },
+          ]),
+          query,
+        );
+      }
+      if (removeFromHidden && removeFromHidden.length > 0) {
+        query = removeFromHidden.reduce(
+          (memo, value) => ([
+            ...memo,
+            { arg: 'xcol', remove: true, value },
+          ]),
+          query,
+        );
+      }
+      dispatch(updateRouteQuery(query, true));
     },
   };
 }

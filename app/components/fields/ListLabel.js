@@ -1,16 +1,14 @@
 import styled from 'styled-components';
-import { palette } from 'styled-theme';
 
-const ListLabel = styled.h4`
+const ListLabel = styled.span`
   display: table-cell;
   vertical-align: middle;
-  font-weight: 500;
-  color: ${palette('text', 0)};
+  color: ${({ theme }) => theme.global.colors.hint};
   margin: 0;
-  font-size: ${(props) => props.theme.text.small.size};
-  line-height: ${(props) => props.theme.text.small.height};
+  font-size: ${(props) => props.theme.text.xxsmall.size};
+  line-height: ${(props) => props.theme.text.xxsmall.height};
   @media print {
-    font-size: ${(props) => props.theme.sizes.print.default};
+    font-size: ${(props) => props.theme.sizes.print.small};
   }
 `;
 

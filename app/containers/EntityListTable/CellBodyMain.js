@@ -1,14 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Box, Text, Button } from 'grommet';
+import { Box } from 'grommet';
 import PrintHide from 'components/styled/PrintHide';
+import Checkbox from 'components/styled/Checkbox';
 
 import styled from 'styled-components';
 import { injectIntl, intlShape } from 'react-intl';
 
 import { lowerCase, truncateText } from 'utils/string';
+import Button from 'components/buttons/ButtonTableCell';
 
 import appMessages from 'containers/App/messages';
+import Label from './LabelCellBody';
 
 const Select = styled(PrintHide)`
   width: 20px;
@@ -16,60 +19,51 @@ const Select = styled(PrintHide)`
   padding-right: 6px;
 `;
 
-const StyledInput = styled.input`
-  accent-color: ${({ theme }) => theme.global.colors.highlight};
-`;
-
-const Link = styled((p) => <Button as="a" plain {...p} />)`
+const Link = styled((p) => <Button as="a" {...p} />)`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 16px;
 `;
-const Label = styled((p) => <Text size="small" {...p} />)``;
 
-const Meta = styled((p) => <Box {...p} />)``;
-const Gap = styled((p) => <Box pad={{ horizontal: 'xxsmall' }} {...p} />)``;
+const Meta = styled((p) => <Box {...p} />)`
+  background-color: ${({ color, theme }) => (theme && color) ? theme.global.colors[color] : 'transparent'};
+  border-radius: 3px;
+  padding: 1px 3px;
+`;
 
 export function CellBodyMain({
   entity,
   // column,
   canEdit,
   intl,
+  onEntityClick,
 }) {
   const code = entity && entity.values && entity.values.code;
   const meta = [];
-  if (code) {
-    meta.push({
-      text: code,
-      color: 'dark-5',
-      size: 'small',
-    });
-  }
   if (entity.draft) {
     meta.push({
       text: intl.formatMessage(appMessages.ui.publishStatuses.draft),
       color: 'draft',
-      size: 'xxsmall',
+      bg: 'draftBackground',
     });
   }
   if (entity.private) {
     meta.push({
       text: intl.formatMessage(appMessages.ui.privacyStatuses.private),
       color: 'private',
-      size: 'xxsmall',
+      bg: 'privateBackground',
     });
   }
   if (entity.archived) {
     meta.push({
       text: intl.formatMessage(appMessages.ui.archiveStatuses.archived),
       color: 'archived',
-      size: 'xxsmall',
+      bg: 'archivedBackground',
     });
   }
   if (entity.noNotifications) {
     meta.push({
       text: `Email ${lowerCase(intl.formatMessage(appMessages.ui.notificationStatuses.disabled))}`,
       color: 'archived',
-      size: 'xxsmall',
+      bg: 'archivedBackground',
     });
   }
   return (
@@ -77,32 +71,36 @@ export function CellBodyMain({
       {canEdit && (
         <PrintHide>
           <Select>
-            <StyledInput
-              type="checkbox"
+            <Checkbox
               checked={entity.selected}
               onChange={(evt) => entity.onSelect(evt.target.checked)}
             />
           </Select>
         </PrintHide>
       )}
-      <Box gap="xsmall">
-        {meta.length > 0 && (
-          <Box direction="row" align="end">
+      <Box gap="xxsmall">
+        {(code || meta.length > 0) && (
+          <Box direction="row" align="center" gap="xxsmall">
+            {code && (
+              <Label color="dark-5" size="xxsmall" weight={500}>
+                {code}
+              </Label>
+            )}
             {meta.map((item, i) => (
-              <Meta key={i} direction="row" align="end">
-                <Label color={item.color || 'dark-5'} size={item.size || 'xsmall'}>
+              <Meta key={i} color={item.bg}>
+                <Label color={item.color || '#898989'} size="xxxsmall">
                   {item.text}
                 </Label>
-                {i + 1 < meta.length && (
-                  <Gap><Label color="draft" size="xxsmall">/</Label></Gap>
-                )}
               </Meta>
             ))}
           </Box>
         )}
         <Link
           href={entity.href}
-          onClick={entity.onClick}
+          onClick={(evt) => {
+            if (evt) evt.preventDefault();
+            onEntityClick(entity.id, entity.path);
+          }}
           title={entity.values.title}
         >
           <Box direction="row" gap="xsmall" align="center">
@@ -112,7 +110,7 @@ export function CellBodyMain({
               }
               if (key === 'title' || key === 'name') {
                 return (
-                  <Label size="small" key={key}>
+                  <Label key={key} title={entity.values[key]}>
                     {truncateText(entity.values[key], 45)}
                   </Label>
                 );
@@ -123,6 +121,7 @@ export function CellBodyMain({
                     key={key}
                     color="dark-5"
                     size="small"
+                    title={entity.values[key]}
                   >
                     {`[${entity.values[key]}]`}
                   </Label>
@@ -139,6 +138,7 @@ export function CellBodyMain({
 
 CellBodyMain.propTypes = {
   entity: PropTypes.object,
+  onEntityClick: PropTypes.func,
   // column: PropTypes.object,
   canEdit: PropTypes.bool,
   intl: intlShape,

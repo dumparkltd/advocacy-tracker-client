@@ -1,12 +1,9 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import {
-  Box,
-  Text,
-  Button,
-  Drop,
-} from 'grommet';
 import styled from 'styled-components';
+import { Box, Text, Drop } from 'grommet';
+
+import Button from 'components/buttons/ButtonSimple';
 
 import { ROUTES } from 'themes/config';
 
@@ -28,7 +25,7 @@ const Bar = styled.div`
   width: ${({ value, maxvalue }) => value / maxvalue * 100}%;
   min-width: 1px;
   height: 20px;
-  background-color: ${({ theme, subject }) => theme.global.colors[subject] || theme.global.colors.primary};
+  background-color: ${({ theme, color }) => color || theme.global.colors.primary};
   opacity: ${({ issecondary }) => issecondary ? 0.6 : 1};
   display: block;
   position: absolute;
@@ -36,7 +33,7 @@ const Bar = styled.div`
   top: 0;
 `;
 
-const BarButton = styled((p) => <Button plain {...p} />)`
+const BarButton = styled((p) => <Button {...p} />)`
   width: ${({ value, maxvalue }) => value / maxvalue * 100}%;
   min-width: 1px;
   height: 20px;
@@ -48,26 +45,26 @@ const BarButton = styled((p) => <Button plain {...p} />)`
   opacity: ${({ isHover }) => isHover ? 0.85 : 1};
 `;
 
-const LinkTT = styled(
-  React.forwardRef((p, ref) => <Button plain {...p} ref={ref} />)
+const LinkTooltip = styled(
+  React.forwardRef((p, ref) => <Button {...p} ref={ref} />)
 )`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
-  line-height: 12px;
   padding: 0 4px;
+  position: relative;
+  top: -2px;
 `;
 
 export function CellBodyBarChart({
   value,
   maxvalue,
   issecondary,
-  subject,
   rowConfig,
   entityType,
   onEntityClick,
   color,
 }) {
   const infoRef = useRef(null);
-  const [info, showInfo] = useState(false);
+  const [info, setInfo] = useState(false);
   const [hover, isHover] = useState(false);
   return (
     <Box>
@@ -75,28 +72,28 @@ export function CellBodyBarChart({
         <Box direction="row" gap="none" flex={{ shrink: 0 }} align="center">
           <Value>
             {!rowConfig.tooltip && (
-              <Text size="small" weight={500} textAlign="end">
+              <Text size="xsmall" textAlign="end">
                 {value}
               </Text>
             )}
             {rowConfig.tooltip && (
-              <LinkTT
-                onClick={() => showInfo(!info)}
+              <LinkTooltip
+                onClick={() => setInfo(!info)}
                 onMouseOver={() => isHover(true)}
                 onMouseLeave={() => isHover(false)}
                 onFocus={() => isHover(true)}
                 onBlur={() => null}
                 ref={infoRef}
               >
-                <Text size="small" weight={500} textAlign="end" wordBreak="keep-all">
+                <Text size="xsmall" textAlign="end" wordBreak="keep-all">
                   {value}
                 </Text>
-              </LinkTT>
+              </LinkTooltip>
             )}
           </Value>
           <BarWrapper>
             {!rowConfig.tooltip && (
-              <Bar value={value} maxvalue={maxvalue} issecondary={issecondary} subject={subject} />
+              <Bar value={value} maxvalue={maxvalue} issecondary={issecondary} color={color} />
             )}
             {rowConfig.tooltip && (
               <BarButton
@@ -104,10 +101,8 @@ export function CellBodyBarChart({
                 maxvalue={maxvalue}
                 issecondary={issecondary}
                 color={color}
-                subject={subject}
-                fill={false}
                 isHover={hover}
-                onClick={() => showInfo(true)}
+                onClick={() => setInfo(true)}
                 onMouseOver={() => isHover(true)}
                 onMouseLeave={() => isHover(false)}
                 onFocus={() => isHover(true)}
@@ -120,7 +115,7 @@ export function CellBodyBarChart({
       {info && infoRef && rowConfig.tooltip && (
         <Drop
           target={infoRef.current}
-          onClickOutside={() => showInfo(false)}
+          onClickOutside={() => setInfo(false)}
           align={{
             bottom: 'top',
             left: 'left',
@@ -134,7 +129,7 @@ export function CellBodyBarChart({
             entityType={entityType}
             tooltipConfig={rowConfig.tooltip}
             onEntityClick={(id) => {
-              showInfo(false);
+              setInfo(false);
               onEntityClick(id, entityType === 'actors' ? ROUTES.ACTOR : ROUTES.ACTION);
             }}
           />
@@ -148,7 +143,6 @@ CellBodyBarChart.propTypes = {
   value: PropTypes.number,
   maxvalue: PropTypes.number,
   issecondary: PropTypes.bool,
-  subject: PropTypes.string,
   entityType: PropTypes.string,
   color: PropTypes.string,
   rowConfig: PropTypes.object,

@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import ContainerWrapper from './ContainerWrapper';
 
 const ContainerWithSidebar = styled(ContainerWrapper)`
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     right: ${(props) => {
     if (props.noSidebar) return 0;
     // narrow sidebar
@@ -17,7 +17,7 @@ const ContainerWithSidebar = styled(ContainerWrapper)`
     return 0;
   }}px;
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.large}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.large}) {
     right: ${(props) => {
     if (props.noSidebar) return 0;
     if (props.sidebarAbsolute) return props.theme.sizes.aside.width.large;
@@ -31,7 +31,7 @@ const ContainerWithSidebar = styled(ContainerWrapper)`
     return 0;
   }}px;
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.xlarge}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.xlarge}) {
     right: ${(props) => props.noSidebar ? 0 : props.theme.sizes.aside.width.large}px;
   }
 `;

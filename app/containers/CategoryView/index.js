@@ -27,6 +27,7 @@ import {
   getTaxonomyFields,
   hasTaxonomyCategories,
   getDateField,
+  getReferenceField,
 } from 'utils/fields';
 
 import {
@@ -81,6 +82,7 @@ const getHeaderMainFields = (entity, isMember) => {
     { // fieldGroup
       fields: [
         // getReferenceField(entity, isMember),
+        getReferenceField(entity, isMember),
         getTitleField(entity, isMember),
         getCategoryShortTitleField(entity, isMember),
       ],
@@ -354,7 +356,6 @@ function CategoryView({
   // console.log('childActorsByActortype', childActorsByActortype && childActorsByActortype.toJS())
   // console.log('actortypes', actortypes && actortypes.toJS())
   const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
-
   return (
     <div>
       <Helmet

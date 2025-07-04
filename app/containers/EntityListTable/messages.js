@@ -55,8 +55,12 @@ export default defineMessages({
       id: 'app.containers.EntityListTable.entityListHeader.noneSelected',
       defaultMessage: '{type} (showing {pageTotal} of {entitiesTotal} total)',
     },
-    notPaged: {
-      id: 'app.containers.EntityListTable.entityListHeader.notPaged',
+    noneSelectedFiltered: {
+      id: 'app.containers.EntityListTable.entityListHeader.noneSelectedFiltered',
+      defaultMessage: '{type} (showing {pageTotal} of {entitiesTotal} total)',
+    },
+    notPagedFiltered: {
+      id: 'app.containers.EntityListTable.entityListHeader.notPagedFiltered',
       defaultMessage: '{entitiesTotal} {type}',
     },
   },

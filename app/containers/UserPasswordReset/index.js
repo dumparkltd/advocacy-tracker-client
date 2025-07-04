@@ -11,8 +11,8 @@ import Helmet from 'react-helmet';
 import { actions as formActions } from 'react-redux-form/immutable';
 
 import {
-  getPasswordField,
-  getPasswordConfirmationField,
+  getPasswordFormField,
+  getPasswordConfirmationFormField,
 } from 'utils/forms';
 
 import Messages from 'components/Messages';
@@ -67,8 +67,8 @@ export class UserPasswordReset extends React.PureComponent { // eslint-disable-l
                 handleCancel={this.props.handleCancel}
                 labels={{ submit: intl.formatMessage(messages.submit) }}
                 fields={[
-                  getPasswordField(intl.formatMessage, '.password'),
-                  getPasswordConfirmationField(intl.formatMessage, '.passwordConfirmation'),
+                  getPasswordFormField({ formatMessage: intl.formatMessage, model: '.password' }),
+                  getPasswordConfirmationFormField({ formatMessage: intl.formatMessage, model: '.passwordConfirmation' }),
                 ]}
               />
             )

@@ -17,6 +17,7 @@ export const DEPENDENCIES = [
   API.ACTIONTYPES,
   API.ACTIONTYPE_TAXONOMIES,
   API.ACTION_ACTORS,
+  API.ACTOR_ACTIONS,
   API.ACTION_INDICATORS,
   API.ACTION_CATEGORIES,
 ];
@@ -30,4 +31,6 @@ export const FORM_INITIAL = fromJS({
       : '',
   }), {}),
   associatedActionsByActiontype: [],
+  close: true,
+  step: null,
 });

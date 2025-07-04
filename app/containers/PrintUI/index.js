@@ -53,7 +53,7 @@ const StyledContainer = styled((p) => <Container isNarrow {...p} />)`
 `;
 const StyledFieldGroupWrapper = styled(FieldGroupWrapper)`
   padding: 15px 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 15px 0;
   }
 `;

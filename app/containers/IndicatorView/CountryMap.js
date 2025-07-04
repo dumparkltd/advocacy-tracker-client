@@ -21,9 +21,10 @@ import {
 } from 'themes/config';
 import appMessages from 'containers/App/messages';
 import qe from 'utils/quasi-equals';
+import isDate from 'utils/is-date';
 // import { hasGroupActors } from 'utils/entities';
-import MapWrapper from 'containers/MapContainer/MapWrapper';
-import MapOption from 'containers/MapContainer/MapInfoOptions/MapOption';
+import LeafletWrapper from 'containers/MapContainer/LeafletWrapper';
+import CheckboxOption from 'components/CheckboxOption';
 import MapKeySimple from 'containers/MapContainer/MapKeySimple';
 
 const Styled = styled((p) => <Box {...p} />)`
@@ -39,7 +40,7 @@ const MapOuterWrapper = styled((p) => <Box margin={{ horizontal: 'medium' }} {..
   }
 `;
 const MapTitle = styled((p) => <Box margin={{ vertical: 'xsmall' }} {...p} />)``;
-const MapOptions = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)``;
+const CheckboxOptionGroup = styled((p) => <Box margin={{ horizontal: 'medium' }} {...p} />)``;
 const StatementButton = styled((p) => <Button {...p} />)`
   font-weight: 500;
   font-size: 13px;
@@ -87,9 +88,14 @@ const reduceCountryData = ({
                       <Text size="xxxsmall" color="textSecondary">
                         Statement
                       </Text>
-                      {statement.get('date_start') && (
+                      {isDate(statement.get('date_start')) && (
                         <Text size="xxxsmall" color="textSecondary">
                           {`(${intl.formatDate(statement.get('date_start'))})`}
+                        </Text>
+                      )}
+                      {!isDate(statement.get('date_start')) && isDate(statement.get('created_at')) && (
+                        <Text size="xxxsmall" color="textSecondary">
+                          {`(${intl.formatDate(statement.get('created_at'))})`}
                         </Text>
                       )}
                     </Box>
@@ -167,7 +173,7 @@ export function CountryMap({
   return (
     <Styled hasHeader noOverflow>
       <MapOuterWrapper>
-        <MapWrapper
+        <LeafletWrapper
           countryData={countryData}
           countryPointData={countryPointData}
           countryFeatures={countriesJSON.features}
@@ -177,11 +183,11 @@ export function CountryMap({
           projection="gall-peters"
         />
       </MapOuterWrapper>
-      <MapOptions>
+      <CheckboxOptionGroup>
         <MapTitle>
           <Text weight={600}>UN Member States’ level of support</Text>
         </MapTitle>
-        <MapOption
+        <CheckboxOption
           option={{
             active: includeActorMembers,
             onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
@@ -189,7 +195,7 @@ export function CountryMap({
           }}
           type="member"
         />
-        <MapOption
+        <CheckboxOption
           option={{
             active: !includeInofficial,
             onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
@@ -197,13 +203,13 @@ export function CountryMap({
           }}
           type="official"
         />
-      </MapOptions>
-      <MapOptions>
+      </CheckboxOptionGroup>
+      <CheckboxOptionGroup>
         <MapKeySimple
           options={options}
           title="States by level of support"
         />
-      </MapOptions>
+      </CheckboxOptionGroup>
     </Styled>
   );
 }

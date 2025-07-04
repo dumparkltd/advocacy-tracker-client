@@ -5,41 +5,23 @@
  */
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
-import styled, { withTheme } from 'styled-components';
-import { Map, List } from 'immutable';
+import { injectIntl, intlShape } from 'react-intl';
+import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import {
-  Box, Text, Button, ResponsiveContext,
+  Box, Text, ResponsiveContext,
 } from 'grommet';
-import { Add, Multiple } from 'grommet-icons';
+import { Multiple } from 'grommet-icons';
 
-import { isEqual } from 'lodash/lang';
-import { truncateText } from 'utils/string';
 import { isMinSize } from 'utils/responsive';
 
-import { TEXT_TRUNCATE } from 'themes/config';
-import { FILTER_FORM_MODEL, EDIT_FORM_MODEL } from 'containers/EntityListForm/constants';
-
-import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
+import ButtonFlat from 'components/buttons/ButtonFlat';
 import Bookmarker from 'containers/Bookmarker';
 
-import EntityListForm from 'containers/EntityListForm';
-import appMessages from 'containers/App/messages';
+import EntityListViewOptions from 'components/EntityListViewOptions';
+
 import PrintHide from 'components/styled/PrintHide';
-import TagList from 'components/TagList';
 import Icon from 'components/Icon';
-import ButtonOld from 'components/buttons/Button';
-
-import EntityListSidebar from './EntityListSidebar';
-
-import { makeFilterGroups } from './utilFilterGroups';
-import { makeEditGroups } from './utilEditGroups';
-import {
-  makeActiveFilterOptions,
-  makeAnyWithoutFilterOptions,
-} from './utilFilterOptions';
-import { makeActiveEditOptions } from './utilEditOptions';
 
 import messages from './messages';
 
@@ -49,428 +31,75 @@ const Styled = styled(PrintHide)`
 
 const TheHeader = styled((p) => <Box direction="row" {...p} />)`
   height: ${({ theme }) => theme.sizes.headerList.banner.height}px;
-  padding: 0 3px;
-  background-color: ${palette('primary', 3)};
-  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
   position: relative;
   z-index: 96;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    padding: 0 15px 0 75px;
-  }
 `;
 const HeaderSection = styled((p) => <Box direction="row" {...p} />)`
   position: relative;
-  border-right: 1px solid ${({ noBorder }) => noBorder ? 'transparent' : palette('light', 4)};
-  height: 100%;
-  padding: 2px 5px;
-  flex: ${({ grow }) => grow ? '1' : '0'} ${({ shrink = '1' }) => shrink ? '1' : '0'} auto;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    padding: 2px 10px;
-  }
-`;
-const HeaderSectionType = styled((p) => <Box direction="column" {...p} />)`
-  position: relative;
-  border-right: 1px solid ${({ noBorder }) => noBorder ? 'transparent' : palette('light', 4)};
-  width: 240px;
-  padding: 18px 5px 2px;
-  height: 100%;
-`;
-const SelectType = styled(ButtonOld)`
-  display: none;
-  text-align: left;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    display: block;
-    padding-left: 2px;
-    padding-right: 2px;
-    max-width: 100%;
-  }
 `;
 
-const ButtonOptions = styled((p) => <Button plain {...p} />)`
-  color: ${palette('buttonFlat', 1)};
-`;
-
-const Label = styled.div`
-  font-size: ${({ theme }) => theme.sizes.text.smallMobile};
-  color: ${palette('text', 1)};
-  padding-left: 2px;
-  padding-right: 2px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    font-size: ${({ theme }) => theme.sizes.text.smaller};
-  }
-  @media print {
-    font-size: ${(props) => props.theme.sizes.print.smaller};
-  }
-`;
-const LinkTitle = styled.div`
-  font-size: ${({ theme }) => theme.sizes.text.small};
-  font-weight: bold;
-  color: ${(props) => props.active ? palette('headerNavMainItem', 1) : 'inherit'};
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    font-size: ${({ theme }) => theme.sizes.text.default};
-  }
-  @media print {
-    font-size: ${({ theme }) => theme.sizes.print.default};
-  }
-`;
-
-const TypeOptions = styled.div`
-  display: none;
-  @media (min-width: ${({ theme }) => theme.breakpoints.medium}) {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    display: block;
-  }
-  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
-    min-width: 240px;
-  }
+const HeaderActionsWrapper = styled(
+  (p) => (
+    <Box
+      direction="row"
+      align="center"
+      plain
+      responsive={false}
+      {...p}
+    />
+  )
+)`
   background: white;
-  box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
-  margin-top: 3px;
-  padding: 5px 0;
-`;
-const TypeOption = styled(ButtonOld)`
-  display: block;
-  width: 100%;
-  text-align: left;
-  &:hover {
-    color:${palette('headerNavMainItemHover', 0)};
+  box-shadow: ${({ isOnMap }) => isOnMap ? '0px 0px 5px 0px rgba(0,0,0,0.2)' : 'none'};
+  border-radius: 999px;
+  padding: 4px 13px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.ms}) {
+    padding: 4px 16px;
   }
-  color: ${(props) => props.active ? palette('headerNavMainItem', 1) : 'inherit'};
 `;
 
-const STATE_INITIAL = {
-  activeOption: null,
-  showTypes: false,
-};
+const ButtonActions = styled((p) => <ButtonFlat {...p} />)`
+  padding: 0;
+  min-height: 33px;
+  min-width: 33px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    padding: 0;
+  }
+`;
 
-const getFilterConnectionsMsg = (intl, type) => type
-  && messages.filterGroupLabel[`connections-${type}`]
-  ? intl.formatMessage(messages.filterGroupLabel[`connections-${type}`])
-  : intl.formatMessage(messages.filterGroupLabel.connections);
-
-const getEditConnectionsMsg = (intl, type) => type
-  && messages.editGroupLabel[`connections-${type}`]
-  ? intl.formatMessage(messages.editGroupLabel[`connections-${type}`])
-  : intl.formatMessage(messages.editGroupLabel.connections);
-
+const FilterButton = styled((p) => <ButtonFlat {...p} />)`
+  box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+  padding: 4px 13px;
+  border: none;
+  border-radius: 999px;
+  background: ${palette('primary', 1)};
+  color: white;
+  font-family: ${({ theme }) => theme.fonts.title};
+  text-transform: uppercase;
+  font-weight: 300;
+  min-height: 33px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.ms}) {
+    min-width: 33px;
+    padding: 4px 16px;
+  }
+  &:hover {
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.2);
+    background: ${palette('primary', 0)};
+    color: white;
+  }
+`;
 
 export class EntityListHeader extends React.Component { // eslint-disable-line react/prefer-stateless-function
-  constructor() {
-    super();
-    this.state = STATE_INITIAL;
-    this.typeWrapperRef = React.createRef();
-    this.typeButtonRef = React.createRef();
-    this.handleClickOutside = this.handleClickOutside.bind(this);
-  }
-
-  UNSAFE_componentWillMount() {
-    this.setState(STATE_INITIAL);
-  }
-
-  componentDidMount() {
-    window.addEventListener('resize', this.resize);
-    window.addEventListener('mousedown', this.handleClickOutside);
-  }
-
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (
-      this.props.showFilters !== nextProps.showFilters
-      || this.props.showEditOptions !== nextProps.showEditOptions
-    ) {
-      // close and reset option panel
-      this.setState({ activeOption: null });
-    }
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    // TODO consider targeting specific query params, eg where, without, cat, catx but also actors, etc
-    if (nextProps.listUpdating && isEqual(this.state, nextState)) {
-      return false;
-    }
-    if (this.props.listUpdating && !nextProps.listUpdating) {
-      return true;
-    }
-    return this.props.locationQuery !== nextProps.locationQuery
-      || this.props.entityIdsSelected !== nextProps.entityIdsSelected
-      || this.props.showFilters !== nextProps.showFilters
-      || this.props.showEditOptions !== nextProps.showEditOptions
-      || this.props.taxonomies !== nextProps.taxonomies
-      || this.props.connections !== nextProps.connections
-      || this.props.typeOptions !== nextProps.typeOptions
-      || !isEqual(this.state, nextState);
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.resize);
-    window.removeEventListener('mousedown', this.handleClickOutside);
-  }
-
-  handleClickOutside = (evt) => {
-    const wrapperContains = this.typeWrapperRef
-      && this.typeWrapperRef.current
-      && this.typeWrapperRef.current.contains(evt.target);
-    const buttonContains = this.typeButtonRef
-      && this.typeButtonRef.current
-      && this.typeButtonRef.current.contains(evt.target);
-    if (!wrapperContains && !buttonContains) {
-      this.setState({ showTypes: false });
-    }
-  };
-
-  onSetActiveOption = (option) => {
-    this.setState({ activeOption: option });
-  };
-
-  // onShowForm = (option) => {
-  //   this.setState({ activeOption: option.active ? null : option });
-  // };
-
-  onHideForm = (evt) => {
-    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ activeOption: null });
-  };
-
-  onShowTypes = (evt) => {
-    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ showTypes: true });
-  };
-
-  onHideTypes = (evt) => {
-    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-    this.setState({ showTypes: false });
-  };
-
-  getFormButtons = (activeOption, intl) => {
-    const { onCreateOption } = this.props;
-    return [
-      activeOption.create
-        ? {
-          type: 'addFlat',
-          position: 'left',
-          onClick: () => onCreateOption(activeOption.create),
-        }
-        : null,
-      {
-        type: 'simple',
-        title: intl.formatMessage(appMessages.buttons.cancel),
-        onClick: this.onHideForm,
-      },
-      {
-        type: 'primary',
-        title: intl.formatMessage(appMessages.buttons.assign),
-        submit: true,
-      },
-    ];
-  };
-
-  getFilterFormButtons = () => {
-    const { intl } = this.context;
-    return [
-      {
-        type: 'simple',
-        title: intl.formatMessage(appMessages.buttons.cancel),
-        onClick: this.onHideForm,
-      },
-      {
-        type: 'primary',
-        title: intl.formatMessage(appMessages.buttons.updateFilter),
-        submit: true,
-      },
-    ];
-  };
-
-  resize = () => {
-    // reset
-    this.setState(STATE_INITIAL);
-    this.forceUpdate();
-  };
-
   render() {
     const {
-      config,
-      onUpdate,
-      onUpdateFilters,
-      hasUserRole,
-      entities,
-      allEntities,
-      locationQuery,
-      taxonomies,
-      connectedTaxonomies,
-      connections,
-      entityIdsSelected,
-      actortypes,
-      filterActortypes,
-      actiontypes,
-      resourcetypes,
-      targettypes,
-      filterTargettypes,
-      actiontypesForTarget,
-      membertypes,
-      filterAssociationtypes,
-      associationtypes,
-      currentFilters,
       onShowFilters,
-      onHideFilters,
-      showFilters,
-      showEditOptions,
-      onHideEditOptions,
       canEdit,
-      onSelectType,
-      typeOptions,
-      dataReady,
-      typeId,
-      onUpdateQuery,
-      includeMembersWhenFiltering,
-      includeActorMembers,
-      includeTargetMembers,
-      includeActorChildren,
-      includeTargetChildren,
-      filteringOptions,
       headerActions,
-      isAdmin,
-      onClearFilters,
+      viewOptions,
       isPrintView,
+      isOnMap,
       intl,
     } = this.props;
-    const { activeOption } = this.state;
-    const hasSelected = dataReady && canEdit && entityIdsSelected && entityIdsSelected.size > 0;
-    const entitiesSelected = hasSelected
-      && entities.filter((entity) => entityIdsSelected.includes(entity.get('id')));
-    const formModel = showFilters ? FILTER_FORM_MODEL : EDIT_FORM_MODEL;
-
-    let panelGroups = null;
-    let formOptions = null;
-    if (dataReady && showFilters) {
-      panelGroups = makeFilterGroups({
-        config,
-        taxonomies,
-        connectedTaxonomies,
-        hasUserRole,
-        actortypes: filterActortypes || actortypes,
-        resourcetypes,
-        actiontypes,
-        targettypes: filterTargettypes || targettypes,
-        actiontypesForTarget,
-        membertypes,
-        associationtypes: filterAssociationtypes || associationtypes,
-        activeFilterOption: activeOption,
-        currentFilters,
-        typeId,
-        intl,
-        locationQuery,
-        messages: {
-          attributes: intl.formatMessage(messages.filterGroupLabel.attributes),
-          taxonomyGroup: intl.formatMessage(messages.filterGroupLabel.taxonomies),
-          connections: (type) => getFilterConnectionsMsg(intl, type),
-          connectedTaxonomies: intl.formatMessage(messages.filterGroupLabel.connectedTaxonomies),
-          taxonomies: (taxId) => this.context.intl.formatMessage(appMessages.entities.taxonomies[taxId].plural),
-        },
-        includeMembers: includeMembersWhenFiltering,
-      });
-      panelGroups = Object.keys(panelGroups).reduce(
-        (memo, groupId) => {
-          const group = panelGroups[groupId];
-          if (group.includeAnyWithout && group.options && group.options.length > 0) {
-            const allAnyOptions = makeAnyWithoutFilterOptions({
-              config,
-              locationQuery,
-              activeFilterOption: {
-                group: groupId,
-              },
-              intl,
-              messages: {
-                titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
-                without: intl.formatMessage(messages.filterFormWithoutPrefix),
-                any: intl.formatMessage(messages.filterFormAnyPrefix),
-                connections: (type) => getFilterConnectionsMsg(intl, type),
-              },
-            });
-            return {
-              ...memo,
-              [groupId]: {
-                ...group,
-                optionsGeneral: allAnyOptions,
-              },
-            };
-          }
-          return {
-            ...memo,
-            [groupId]: group,
-          };
-        },
-        {},
-      );
-      if (activeOption) {
-        formOptions = makeActiveFilterOptions({
-          entities: allEntities,
-          config,
-          locationQuery,
-          taxonomies,
-          connections,
-          // actortypes,
-          // actiontypes,
-          connectedTaxonomies,
-          activeFilterOption: activeOption,
-          intl,
-          typeId,
-          isAdmin,
-          messages: {
-            titlePrefix: intl.formatMessage(messages.filterFormTitlePrefix),
-            without: intl.formatMessage(messages.filterFormWithoutPrefix),
-            any: intl.formatMessage(messages.filterFormAnyPrefix),
-          },
-          includeMembers: includeMembersWhenFiltering,
-          includeActorMembers,
-          includeTargetMembers,
-          includeActorChildren,
-          includeTargetChildren,
-        });
-      }
-    } else if (dataReady && showEditOptions && hasSelected) {
-      panelGroups = makeEditGroups({
-        config,
-        taxonomies,
-        connectedTaxonomies,
-        activeEditOption: activeOption,
-        hasUserRole,
-        actortypes,
-        actiontypes,
-        targettypes,
-        resourcetypes,
-        actiontypesForTarget,
-        membertypes,
-        associationtypes,
-        typeId,
-        isAdmin,
-        messages: {
-          attributes: intl.formatMessage(messages.editGroupLabel.attributes),
-          taxonomyGroup: intl.formatMessage(messages.editGroupLabel.taxonomies),
-          connections: (type) => getEditConnectionsMsg(intl, type),
-          taxonomies: (taxId) => this.context.intl.formatMessage(appMessages.entities.taxonomies[taxId].plural),
-        },
-        // selectedActortypeIds: entitiesSelected.groupBy((e) => e.getIn(['attributes', 'actortype_id'])).keySeq(),
-        // selectedActiontypeIds: entitiesSelected.groupBy((e) => e.getIn(['attributes', 'measuretype_id'])).keySeq(),
-      });
-      if (activeOption && connections) {
-        formOptions = makeActiveEditOptions({
-          isAdmin,
-          entities: entitiesSelected,
-          config,
-          taxonomies,
-          connections,
-          connectedTaxonomies,
-          activeEditOption: activeOption,
-          intl,
-          messages: {
-            title: `${intl.formatMessage(messages.editFormTitlePrefix)} ${entitiesSelected.size} ${intl.formatMessage(messages.editFormTitlePostfix)}`,
-          },
-        });
-      }
-    }
-    const hasTypeOptions = typeOptions && typeOptions.length > 0;
-    const currentTypeOption = hasTypeOptions && typeOptions.find((option) => option.active);
 
     const managerActions = canEdit && headerActions && headerActions.filter(
       (action) => action.isMember
@@ -481,325 +110,116 @@ export class EntityListHeader extends React.Component { // eslint-disable-line r
 
     return (
       <ResponsiveContext.Consumer>
-        {(size) => {
-          const iconSize = isMinSize(size, 'medium') ? 'xxsmall' : 'small';
-          return (
-            <Styled isPrint={isPrintView}>
-              <TheHeader align="center">
-                {config.types && hasTypeOptions && (
-                  <HeaderSection noBorder>
-                    <ButtonFlatIconOnly onClick={() => onSelectType()}>
-                      <Icon name="arrowLeft" size="2em" />
-                    </ButtonFlatIconOnly>
-                  </HeaderSection>
-                )}
-                {currentTypeOption && !isMinSize(size, 'large') && (
-                  <Text>
-                    {truncateText(
-                      currentTypeOption.label,
-                      TEXT_TRUNCATE.TYPE_SELECT,
-                      false,
+        {(size) => (
+          <Styled isPrint={isPrintView}>
+            <TheHeader
+              margin={{ bottom: 'xsmall' }}
+              pad={{ top: 'ms' }}
+              align="center"
+              justify="between"
+            >
+              <HeaderSection>
+                <PrintHide>
+                  {viewOptions && viewOptions.length > 1
+                    && (
+                      <EntityListViewOptions
+                        options={viewOptions}
+                        isPrintView={isPrintView}
+                        isOnMap={isOnMap}
+                      />
                     )}
-                  </Text>
-                )}
-                {config.types && hasTypeOptions && isMinSize(size, 'large') && (
-                  <HeaderSectionType justify="start">
-                    {config.types && (
-                      <Label>
-                        <FormattedMessage
-                          {...messages.selectType}
-                          values={{
-                            types: intl.formatMessage(appMessages[config.types].single),
-                          }}
-                        />
-                      </Label>
-                    )}
-                    {currentTypeOption && (
-                      <SelectType
-                        as="button"
-                        ref={this.typeButtonRef}
-                        onClick={(evt) => this.state.showTypes
-                          ? this.onHideTypes(evt)
-                          : this.onShowTypes(evt)
-                        }
-                      >
-                        <LinkTitle active>
-                          {truncateText(
-                            currentTypeOption.label,
-                            TEXT_TRUNCATE.TYPE_SELECT,
-                            false,
-                          )}
-                          {!this.state.showTypes && (
-                            <Icon name="dropdownOpen" text textRight size="1em" />
-                          )}
-                          {this.state.showTypes && (
-                            <Icon name="dropdownClose" text textRight size="1em" />
-                          )}
-                        </LinkTitle>
-                      </SelectType>
-                    )}
-                    {this.state.showTypes && typeOptions && (
-                      <PrintHide>
-                        <TypeOptions ref={this.typeWrapperRef}>
-                          {typeOptions.map((option) => (
-                            <TypeOption
-                              key={option.value}
-                              active={option.active}
-                              onClick={() => {
-                                this.onHideTypes();
-                                onSelectType(option.value);
-                              }}
-                            >
-                              {option.label}
-                            </TypeOption>
-                          ))}
-                        </TypeOptions>
-                      </PrintHide>
-                    )}
-                  </HeaderSectionType>
-                )}
-                <HeaderSection
-                  grow
-                  align="center"
-                  gap="medium"
-                  justify="start"
-                  overflow={{ horizontal: 'auto' }}
-                >
-                  {dataReady && currentFilters && isMinSize(size, 'large') && (
-                    <TagList
-                      filters={currentFilters}
-                      onClear={onClearFilters}
-                      groupDropdownThreshold={isMinSize(size, 'xlarge') ? 3 : 2}
-                    />
-                  )}
-                </HeaderSection>
-                {dataReady && isMinSize(size, 'small') && (
-                  <HeaderSection align="center">
-                    <ButtonOptions
-                      onClick={onShowFilters}
-                      label={(
-                        <Box direction="row" gap="small" align="center">
-                          <Box>{<Icon name="filter" text />}</Box>
-                          {isMinSize(size, 'medium') && (
-                            <Text>{intl.formatMessage(messages.listOptions.showFilter)}</Text>
-                          )}
-                        </Box>
-                      )}
-                    />
-                  </HeaderSection>
-                )}
-                {normalActions && (
-                  <HeaderSection noBorder={!canEdit}>
-                    <Box
-                      fill="vertical"
-                      direction="row"
-                      align="center"
-                      pad={{ vertical: 'xsmall' }}
+                </PrintHide>
+              </HeaderSection>
+              <Box direction="row" gap="small">
+                {(normalActions || managerActions) && (
+                  <HeaderSection>
+                    <HeaderActionsWrapper
+                      isOnMap={isOnMap}
+                      gap={isMinSize(size, 'ms') ? 'xsmall' : 'xxsmall'}
                     >
-                      {normalActions.map(
+                      {normalActions && normalActions.map(
                         (action, i) => {
                           if (action.type === 'bookmarker') {
                             return (
                               <Box key={i}>
-                                <Bookmarker viewTitle={action.title} type={action.entityType} />
+                                <Bookmarker
+                                  viewTitle={action.title}
+                                  type={action.entityType}
+                                />
                               </Box>
                             );
                           }
                           if (action.type === 'icon') {
                             return (
                               <Box key={i}>
-                                <ButtonFlatIconOnly
+                                <ButtonActions
                                   onClick={action.onClick && (() => action.onClick())}
                                   title={action.title}
                                   alt={action.title}
                                   subtle
                                 >
                                   <Icon name={action.icon} title={action.title} />
-                                </ButtonFlatIconOnly>
+                                </ButtonActions>
                               </Box>
                             );
                           }
                           return null;
                         }
                       )}
-                    </Box>
+                      {managerActions && managerActions
+                        .filter(
+                          (action) => action.icon === 'import'
+                        ).map(
+                          (action, i) => (
+                            <Box key={i + 1000}>
+                              <ButtonActions
+                                onClick={action.onClick && (() => action.onClick())}
+                                title={action.title}
+                                alt={action.title}
+                                subtle
+                              >
+                                <Multiple size="small" style={{ stroke: 'currentColor' }} />
+                              </ButtonActions>
+                            </Box>
+                          )
+                        )}
+                    </HeaderActionsWrapper>
                   </HeaderSection>
                 )}
-                {isMinSize(size, 'small') && canEdit && managerActions && managerActions.length > 0 && (
-                  <HeaderSection noBorder>
-                    <Box
-                      fill="vertical"
-                      pad={{ top: 'xsmall', bottom: 'xxsmall' }}
-                      align={isMinSize(size, 'medium') ? 'start' : 'center'}
-                      justify="center"
-                      gap={isMinSize(size, 'medium') ? 'xsmall' : 'small'}
-                      direction={isMinSize(size, 'medium') ? 'column' : 'row'}
+                {isMinSize(size, 'small') && (
+                  <HeaderSection align="center">
+                    <FilterButton
+                      onClick={onShowFilters}
                     >
-                      {managerActions && managerActions.map(
-                        (action, i) => {
-                          if (action.icon === 'add') {
-                            return (
-                              <ButtonOptions
-                                key={i}
-                                onClick={action.onClick}
-                                label={(
-                                  <Box direction="row" gap="small" align="center">
-                                    <Box>
-                                      <Add color="dark-3" size={iconSize} />
-                                    </Box>
-                                    {isMinSize(size, 'medium') && (
-                                      <Text color="dark-3" size="small">{action.title}</Text>
-                                    )}
-                                  </Box>
-                                )}
-                              />
-                            );
-                          }
-                          if (isMinSize(size, 'medium')) {
-                            if (action.icon === 'import' && isMinSize(size, 'medium')) {
-                              return (
-                                <ButtonOptions
-                                  key={i}
-                                  onClick={action.onClick}
-                                  label={(
-                                    <Box direction="row" gap="small" align="center">
-                                      <Box>
-                                        <Multiple color="dark-3" size={iconSize} />
-                                      </Box>
-                                      <Text color="dark-3" size="small">{action.title}</Text>
-                                    </Box>
-                                  )}
-                                />
-                              );
-                            }
-                            return (
-                              <ButtonOptions
-                                key={i}
-                                onClick={action.onClick}
-                                label={(
-                                  <Box direction="row" gap="small">
-                                    <Text color="dark-3" size="small">{action.title}</Text>
-                                  </Box>
-                                )}
-                              />
-                            );
-                          }
-                          return null;
-                        }
-                      )}
-                    </Box>
+                      <Box direction="row" gap="xsmall" align="center" responsive={false}>
+                        {isMinSize(size, 'medium') && (
+                          <Text style={{ marginTop: '-3px' }}>
+                            {intl.formatMessage(messages.listOptions.showFilter)}
+                          </Text>
+                        )}
+                        <Box style={{ marginTop: '2px' }}>
+                          <Icon name="filter" size="30px" text />
+                        </Box>
+                      </Box>
+                    </FilterButton>
                   </HeaderSection>
                 )}
-              </TheHeader>
-              {showFilters && (
-                <EntityListSidebar
-                  hasEntities={allEntities && allEntities.size > 0}
-                  panelGroups={panelGroups}
-                  onHideSidebar={onHideFilters}
-                  onHideOptions={this.onHideForm}
-                  setActiveOption={this.onSetActiveOption}
-                  onUpdateQuery={(args) => {
-                    this.onHideForm();
-                    onUpdateQuery(args);
-                  }}
-                  filteringOptions={filteringOptions}
-                />
-              )}
-              {showEditOptions && (
-                <EntityListSidebar
-                  isEditPanel
-                  hasEntities={entities && entities.size > 0}
-                  hasSelected={hasSelected}
-                  panelGroups={panelGroups}
-                  onHideSidebar={onHideEditOptions}
-                  setActiveOption={this.onSetActiveOption}
-                />
-              )}
-              {activeOption && formOptions && (
-                <EntityListForm
-                  model={formModel}
-                  activeOptionId={`${activeOption.group}-${activeOption.optionId}`}
-                  formOptions={formOptions}
-                  buttons={showEditOptions
-                    ? this.getFormButtons(activeOption, intl)
-                    : this.getFilterFormButtons()
-                  }
-                  onCancel={this.onHideForm}
-                  showNew={showEditOptions}
-                  showCancelButton={showFilters}
-                  onSubmit={showEditOptions
-                    ? (associations) => {
-                      // close and reset option panel
-                      this.setState({ activeOption: null });
-                      onUpdate(associations, activeOption);
-                    }
-                    : (filterOptions) => {
-                      // close and reset option panel
-                      this.setState({ activeOption: null });
-                      onUpdateFilters(filterOptions && filterOptions.get('values'), activeOption);
-                    }
-                  }
-                />
-              )}
-            </Styled>
-          );
-        }}
+              </Box>
+            </TheHeader>
+          </Styled>
+        )}
       </ResponsiveContext.Consumer>
     );
   }
 }
 EntityListHeader.propTypes = {
-  entities: PropTypes.instanceOf(List),
-  allEntities: PropTypes.instanceOf(List),
-  entityIdsSelected: PropTypes.instanceOf(List),
-  taxonomies: PropTypes.instanceOf(Map),
-  actortypes: PropTypes.instanceOf(Map),
-  filterActortypes: PropTypes.instanceOf(Map),
-  filterTargettypes: PropTypes.instanceOf(Map),
-  resourcetypes: PropTypes.instanceOf(Map),
-  actiontypes: PropTypes.instanceOf(Map),
-  targettypes: PropTypes.instanceOf(Map),
-  membertypes: PropTypes.instanceOf(Map),
-  filterAssociationtypes: PropTypes.instanceOf(Map),
-  associationtypes: PropTypes.instanceOf(Map),
-  actiontypesForTarget: PropTypes.instanceOf(Map),
-  connections: PropTypes.instanceOf(Map),
-  connectedTaxonomies: PropTypes.instanceOf(Map),
-  locationQuery: PropTypes.instanceOf(Map),
-  hasUserRole: PropTypes.object,
-  config: PropTypes.object,
-  onUpdate: PropTypes.func.isRequired,
-  onUpdateFilters: PropTypes.func.isRequired,
-  onCreateOption: PropTypes.func.isRequired,
-  listUpdating: PropTypes.bool,
-  theme: PropTypes.object,
-  currentFilters: PropTypes.array,
-  onUpdateQuery: PropTypes.func.isRequired,
   onShowFilters: PropTypes.func,
-  onHideFilters: PropTypes.func,
-  showFilters: PropTypes.bool,
-  showEditOptions: PropTypes.bool,
-  onHideEditOptions: PropTypes.func,
   canEdit: PropTypes.bool,
-  dataReady: PropTypes.bool,
-  isAdmin: PropTypes.bool,
-  includeMembersWhenFiltering: PropTypes.bool,
-  includeActorMembers: PropTypes.bool,
-  includeTargetMembers: PropTypes.bool,
-  includeActorChildren: PropTypes.bool,
-  includeTargetChildren: PropTypes.bool,
-  filteringOptions: PropTypes.array,
   isPrintView: PropTypes.bool,
-  typeOptions: PropTypes.array,
-  onSelectType: PropTypes.func,
-  onClearFilters: PropTypes.func,
-  typeId: PropTypes.string,
+  isOnMap: PropTypes.bool,
   headerActions: PropTypes.array,
+  viewOptions: PropTypes.array,
   intl: intlShape.isRequired,
 };
 
-EntityListHeader.contextTypes = {
-  intl: PropTypes.object.isRequired,
-};
-
-export default withTheme(injectIntl(EntityListHeader));
+export default injectIntl(EntityListHeader);

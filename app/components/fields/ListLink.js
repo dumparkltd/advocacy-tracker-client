@@ -7,6 +7,7 @@ const ListLink = styled((props) => <Link {...props} />)`
   display: block;
   font-size: ${(props) => props.theme.text.small.size};
   line-height: ${(props) => props.theme.text.small.height};
+  font-weight: 500;
   &:hover {
     color: ${({ theme }) => theme.global.colors.text.highlight};
   }

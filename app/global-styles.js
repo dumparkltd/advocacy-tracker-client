@@ -5,8 +5,6 @@ import WWFFontEOT from './fonts/wwf-webfont.eot';
 
 /* eslint no-unused-expressions: 0 */
 const GlobalStyle = createGlobalStyle`
-  @import url('https://unpkg.com/leaflet@1.7.1/dist/leaflet.css');
-
   @font-face {
     font-family: 'wwfregular';
     src: url(${WWFFontEOT});
@@ -39,7 +37,11 @@ const GlobalStyle = createGlobalStyle`
     margin: 0;
   }
   :focus, :visited:focus {
-    outline: 5px auto rgb(77, 144, 254); /* TODO: improve focus styles and individualise for specific buttons and links */
+    outline-offset: 2px !important;
+    outline: 2px auto #00728f; /* TODO: improve focus styles and individualise for specific buttons and links */
+  }
+  :focus-visible {
+    outline: 2px auto #00728f; /* TODO: improve focus styles and individualise for specific buttons and links */
   }
   #app {
     background-color: #FFF;
@@ -89,7 +91,7 @@ const GlobalStyle = createGlobalStyle`
   h6 {
     font-size: 0.9em;
   }
-  @media (min-width: 769px) {
+  @media (min-width: 761px) {
     h1 {
       font-size: 2.3em;
     }
@@ -109,7 +111,7 @@ const GlobalStyle = createGlobalStyle`
       font-size: 1em;
     }
   }
-  @media (min-width: 1200px) {
+  @media (min-width: 1153px) {
     h1 {
       font-size: 2.6em;
     }
@@ -158,6 +160,11 @@ const GlobalStyle = createGlobalStyle`
     a {
       text-decoration: underline;
     }
+    p {
+      &:last-child{
+        margin: 0;
+      }
+    }
   }
 
   .content-page {
@@ -170,7 +177,7 @@ const GlobalStyle = createGlobalStyle`
       }
     }
   }
-  @media (min-width: 769px) {
+  @media (min-width: 761px) {
     .content-page {
       .react-markdown {
         p {
@@ -180,6 +187,16 @@ const GlobalStyle = createGlobalStyle`
           }
         }
       }
+    }
+  }
+
+  .advocacy-tracker-map-full .leaflet-top.leaflet-left .leaflet-control {
+    @media (max-width: 1152px) {
+      margin-top: 66px;
+      margin-left: 28px;
+    }
+    @media (max-width: 992px) {
+      margin-left: 12px;
     }
   }
 
@@ -200,7 +217,22 @@ const GlobalStyle = createGlobalStyle`
     margin-left: auto;
     max-width: 1122px;
   }
-  @media (min-width: 769px) {
+  .preview-item-modal {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 0;
+    width: 100%;
+    overflow: auto;
+    --webkit-overflow-scrolling: touch;
+    border-radius: 0;
+    outline: none;
+    margin-right: auto;
+    margin-left: auto;
+  }
+  @media (min-width: 761px) {
     .delete-csv-modal,
     .download-csv-modal,
     .new-entity-modal {
@@ -209,6 +241,15 @@ const GlobalStyle = createGlobalStyle`
       left: 40px;
       right: 40px;
       bottom: 40px;
+    }
+    .preview-item-modal {
+      max-width: 600px;
+      left: auto;
+    }
+  }
+  @media (min-width: 993px) {
+    .preview-item-modal {
+      max-width: 800px;
     }
   }
 
@@ -222,11 +263,17 @@ const GlobalStyle = createGlobalStyle`
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.85);
   }
+  .preview-item-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.001);
+  }
 
   [type="checkbox"] {
     vertical-align: middle;
-    position: relative;
-    bottom: 1px;
   }
 
   ._react-file-reader-input {

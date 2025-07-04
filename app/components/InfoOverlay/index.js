@@ -6,42 +6,39 @@
 
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import ReactMarkdown from 'react-markdown';
 
 import styled from 'styled-components';
-import {
-  Box,
-  Button,
-  Drop,
-} from 'grommet';
+import { Box, Drop } from 'grommet';
 import { CircleInformation, CircleQuestion } from 'grommet-icons';
 
+import Button from 'components/buttons/ButtonSimple';
 import PrintHide from 'components/styled/PrintHide';
 import Overlay from './Overlay';
-
+import Markdown from './Markdown';
 
 const DropContent = styled(({ dropBackground, ...p }) => (
   <Box
-    pad="xxsmall"
+    pad="xsmall"
     background={dropBackground}
+    elevation="small"
     {...p}
   />
 ))`
   max-width: 280px;
 `;
 
-const Markdown = styled(ReactMarkdown)`
-  font-size: ${(props) => props.theme.sizes.text.markdownMobile};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${(props) => props.theme.sizes.text.markdown};
-  }
-  @media print {
-    font-size: ${(props) => props.theme.sizes.print.markdown};
+const StyledButton = styled(Button)`
+  color: ${({ theme, colorButton = 'hint' }) => theme.global.colors[colorButton]};
+  stroke: ${({ theme, colorButton = 'hint' }) => theme.global.colors[colorButton]};
+  vertical-align: top;
+  &:hover {
+    color: ${({ theme }) => theme.global.colors.highlight};
+    stroke: ${({ theme }) => theme.global.colors.highlight};
   }
 `;
 
 function InfoOverlay({
-  dark,
+  // dark,
   content,
   tooltip,
   title,
@@ -50,10 +47,12 @@ function InfoOverlay({
   icon,
   markdown,
   inline,
-  dropBackground,
+  dropBackground = 'white',
+  size = 'medium',
 }) {
   const infoRef = useRef(null);
   const [info, showInfo] = useState(false);
+
   return (
     <PrintHide displayProp={inline ? 'inline' : 'block'}>
       <Box
@@ -65,42 +64,61 @@ function InfoOverlay({
         style={inline ? { width: 'auto', display: 'inline' } : null}
         align="center"
         justify="center"
+        direction="row"
       >
-        <Button
-          plain
-          icon={
+        <StyledButton
+          colorButton={colorButton}
+          onMouseOver={() => tooltip && showInfo(true)}
+          onMouseLeave={() => tooltip && showInfo(false)}
+          onFocus={() => tooltip && showInfo(true)}
+          onBlur={() => tooltip && showInfo(false)}
+          onClick={(evt) => {
+            if (evt) evt.preventDefault();
+            if (!tooltip) showInfo(!info);
+          }}
+        >
+          {
             (tooltip || icon === 'question')
               ? (
                 <CircleQuestion
-                  color={colorButton || (dark ? 'light-5' : 'dark-5')}
-                  size="21px"
+                  color="currentColor"
+                  size="19px"
+                  style={{
+                    position: 'relative',
+                    top: '-2px',
+                  }}
                 />
               )
               : (
                 <CircleInformation
-                  color={colorButton || (dark ? 'light-5' : 'dark-5')}
-                  size="21px"
+                  color="currentColor"
+                  size="19px"
+                  style={{
+                    position: 'relative',
+                    top: '-2px',
+                  }}
                 />
               )
           }
-          fill={false}
-          onMouseOver={() => tooltip && showInfo(true)}
-          onMouseLeave={() => tooltip && showInfo(false)}
-          onFocus={() => tooltip && showInfo(true)}
-          onBlur={() => null}
-          onClick={() => !tooltip && showInfo(!info)}
-        />
+        </StyledButton>
       </Box>
       {info && infoRef && tooltip && (
         <Drop
           align={{ bottom: 'top' }}
+          pad="xxsmall"
           target={infoRef.current}
           plain
+          trapFocus={false}
         >
           <DropContent dropBackground={dropBackground}>
             {markdown && (
               <div>
-                <Markdown source={content} className="react-markdown" linkTarget="_blank" />
+                <Markdown
+                  source={content}
+                  className="react-markdown"
+                  linkTarget="_blank"
+                  size={size}
+                />
               </div>
             )}
             {!markdown && content}
@@ -113,6 +131,7 @@ function InfoOverlay({
           title={title}
           markdown={markdown}
           content={content}
+          size={size}
         />
       )}
     </PrintHide>
@@ -120,7 +139,7 @@ function InfoOverlay({
 }
 
 InfoOverlay.propTypes = {
-  dark: PropTypes.bool,
+  // dark: PropTypes.bool,
   markdown: PropTypes.bool,
   inline: PropTypes.bool,
   tooltip: PropTypes.bool,
@@ -132,6 +151,7 @@ InfoOverlay.propTypes = {
   icon: PropTypes.string,
   dropBackground: PropTypes.string,
   colorButton: PropTypes.string,
+  size: PropTypes.string,
   padButton: PropTypes.oneOfType([
     PropTypes.object,
     PropTypes.string,

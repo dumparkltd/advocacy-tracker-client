@@ -1,7 +1,6 @@
 import { createSelector } from 'reselect';
 import {
   ACTIONTYPE_ACTORTYPES,
-  ACTIONTYPE_TARGETTYPES,
   USER_ACTORTYPES,
   MEMBERSHIPS,
 } from 'themes/config';
@@ -52,33 +51,6 @@ export const selectActionsByActiontype = createSelector(
     ));
   }
 );
-export const selectActionsAsTargetByActiontype = createSelector(
-  (state, id) => id,
-  selectActionsCategorised,
-  selectActiontypes,
-  (actortypeId, actions, actiontypes) => {
-    if (!actiontypes || !actions) return null;
-    // compare App/selectors/selectActiontypesForActortype
-    const validActiontypeIds = Object.keys(ACTIONTYPE_TARGETTYPES).filter((actiontypeId) => {
-      const actortypeIds = ACTIONTYPE_TARGETTYPES[actiontypeId];
-      return actortypeIds && actortypeIds.indexOf(actortypeId) > -1;
-    });
-    if (!validActiontypeIds || validActiontypeIds.length === 0) {
-      return null;
-    }
-    return actiontypes.filter(
-      (type) => validActiontypeIds
-        && validActiontypeIds.indexOf(type.get('id')) > -1
-        && type.getIn(['attributes', 'has_target'])
-    ).map((type) => actions.filter(
-      (action) => qe(
-        type.get('id'),
-        action.getIn(['attributes', 'measuretype_id']),
-      )
-    ));
-  }
-);
-
 export const selectMembersByActortype = createSelector(
   (state, id) => id,
   selectActorsCategorised,

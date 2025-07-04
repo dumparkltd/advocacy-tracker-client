@@ -1,6 +1,5 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import { Map } from 'immutable';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
@@ -11,9 +10,10 @@ import { fitComponent, SCROLL_PADDING } from 'utils/scroll-to-component';
 
 import { omit } from 'lodash/object';
 import Button from 'components/buttons/Button';
-import A from 'components/styled/A';
 
 import Icon from 'components/Icon';
+
+import { FORM_NON_CONTROL_PROPS } from 'themes/config';
 
 import MultiSelectControl from '../MultiSelectControl';
 import MultiSelectActiveOption from './MultiSelectActiveOption';
@@ -37,13 +37,12 @@ const MultiSelectWrapper = styled.div`
   border-bottom: 1px solid;
   border-color: ${palette('light', 2)};
   box-shadow: 0px 0px 15px 0px rgba(0,0,0,0.2);
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     min-width: 350px;
   }
 `;
 const MultiSelectFieldWrapper = styled.div`
   position: relative;
-  padding: 10px 0;
 `;
 const MultiselectActiveOptions = styled.div`
   position: relative;
@@ -56,51 +55,33 @@ const MultiSelectDropdownIcon = styled.div`
   position: absolute;
   right: 0;
   top: 0;
-  padding: 12px 8px 0 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  padding: 15px 8px 0 0;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding-right: 16px;
   }
 `;
-const MultiSelectDropdown = styled(Button)`
+const MultiSelectDropButton = styled((p) => <Button {...p} />)`
   position: relative;
   width: 100%;
-  font-size: 0.85em;
   text-align: left;
   color: ${palette('multiSelectFieldButton', 0)};
-  background-color: ${palette('multiSelectFieldButton', 1)};
+  background-color: #DADDE0;
+  font-size: 14px;
+  line-height: 18px;
+  border: 1px solid #f0f0f0;
+  padding: 0.7em;
+  min-height: 50px;
   &:hover {
-    color: white;
-    background-color: ${({ theme }) => theme.global.colors.highlightHover};
-  }
-  padding: 12px 0 12px 8px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: 0.85em;
-    padding: 12px 0 12px 16px;
+    background-color: #B7BCBF;
   }
   @media print {
     font-size: ${(props) => props.theme.sizes.print.smaller};
   }
 `;
 
-const MultiSelectWithout = styled.div`
-  color: ${palette('text', 1)};
-  padding: 12px 0 12px 8px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding-left: 16px;
-  }
-`;
 const Anchor = styled.div`
   position: relative;
 `;
-const MultiSelectWithoutLink = styled(A)`
-  color: ${palette('text', 1)};
-  &:hover {
-    color: ${palette('link', 0)};
-  }
-`;
-
-const NON_CONTROL_PROPS = ['hint', 'label', 'component', 'controlType', 'children', 'errorMessages'];
-
 class MultiSelectField extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor() {
     super();
@@ -194,29 +175,29 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
   render() {
     const { field, fieldData } = this.props;
     const { intl } = this.context;
-    const { id, model, ...controlProps } = omit(field, NON_CONTROL_PROPS);
+    const { id, model, ...controlProps } = omit(field, FORM_NON_CONTROL_PROPS);
     // console.log('field', field)
     // console.log('fieldData', fieldData && fieldData.toJS())
     const options = this.getMultiSelectActiveOptions(field, fieldData);
     return (
       <MultiSelectFieldWrapper>
         <Anchor>
-          <MultiSelectDropdown
+          <MultiSelectDropButton
             onClick={(evt) => {
               if (evt !== undefined && evt.preventDefault) evt.preventDefault();
               this.onToggleMultiselect(field);
             }}
           >
-            {intl.formatMessage(messages.update, { type: lowerCase(field.label) })}
+            {field.label}
             <MultiSelectDropdownIcon>
-              <Icon name={this.state.multiselectOpen === id ? 'dropdownOpen' : 'dropdownClose'} />
+              <Icon name={this.state.multiselectOpen === id ? 'dropdownClose' : 'dropdownOpen'} />
             </MultiSelectDropdownIcon>
-          </MultiSelectDropdown>
+          </MultiSelectDropButton>
           { this.state.multiselectOpen === id
             && (
               <MultiSelectWrapper
                 ref={this.controlRef}
-                align="bottom"
+                align="top"
                 wrapperHeight={(
                   this.props.scrollContainer
                   && this.props.scrollContainer.current
@@ -231,6 +212,7 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
                   model={model || `.${id}`}
                   title={intl.formatMessage(messages.update, { type: lowerCase(field.label) })}
                   onCancel={this.onCloseMultiselect}
+                  inSingleForm
                   closeOnClickOutside={this.props.closeOnClickOutside}
                   buttons={[
                     field.onCreate
@@ -251,40 +233,21 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
             )
           }
         </Anchor>
-        <MultiselectActiveOptions>
-          { options.size > 0
-            ? (
-              <MultiselectActiveOptionList>
-                {options.map((option, i) => (
-                  <MultiSelectActiveOption
-                    key={i}
-                    option={option}
-                    field={field}
-                    onItemRemove={this.onMultiSelectItemRemove}
-                    onConnectionAttributeChange={this.onMultiSelectItemConnectionAttributeChange}
-                  />
-                ))}
-              </MultiselectActiveOptionList>
-            )
-            : (
-              <MultiSelectWithout>
-                <FormattedMessage
-                  {...messages.empty}
-                  values={{ entities: lowerCase(field.label) }}
+        {options.size > 0 && (
+          <MultiselectActiveOptions>
+            <MultiselectActiveOptionList>
+              {options.map((option, i) => (
+                <MultiSelectActiveOption
+                  key={i}
+                  option={option}
+                  field={field}
+                  onItemRemove={this.onMultiSelectItemRemove}
+                  onConnectionAttributeChange={this.onMultiSelectItemConnectionAttributeChange}
                 />
-                <MultiSelectWithoutLink
-                  href="#add"
-                  onClick={(evt) => {
-                    if (evt !== undefined && evt.preventDefault) evt.preventDefault();
-                    this.onToggleMultiselect(field);
-                  }}
-                >
-                  <FormattedMessage {...messages.emptyLink} />
-                </MultiSelectWithoutLink>
-              </MultiSelectWithout>
-            )
-          }
-        </MultiselectActiveOptions>
+              ))}
+            </MultiselectActiveOptionList>
+          </MultiselectActiveOptions>
+        )}
       </MultiSelectFieldWrapper>
     );
   }

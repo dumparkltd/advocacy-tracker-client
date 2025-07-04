@@ -265,7 +265,7 @@ export function UserView({
                           onClick={() => onSetSubject('uactors')}
                           active={viewSubject === 'uactors'}
                         >
-                          <Text size="large">Actors</Text>
+                          <Text size="large">Stakeholders</Text>
                         </SubjectButton>
                       </SubjectButtonGroup>
                       {(viewSubject === 'uactivities') && (

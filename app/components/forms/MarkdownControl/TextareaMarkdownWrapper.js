@@ -2,10 +2,12 @@ import React, {
   useRef, useState, useEffect,
 } from 'react';
 import PropTypes from 'prop-types';
-import { injectIntl, intlShape } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { palette } from 'styled-theme';
-import styled, { withTheme } from 'styled-components';
-import { Box, Text, Button } from 'grommet';
+import styled from 'styled-components';
+import { Box, Text } from 'grommet';
+import TurndownService from 'turndown';
+import DOMPurify from 'dompurify';
 
 import {
   Bold,
@@ -18,9 +20,48 @@ import TextareaMarkdown from 'textarea-markdown-editor';
 import MarkdownField from 'components/fields/MarkdownField';
 import InfoOverlay from 'components/InfoOverlay';
 import A from 'components/styled/A';
+import Button from 'components/buttons/ButtonSimple';
+
 import messages from './messages';
 
+const turndownService = new TurndownService({
+  headingStyle: 'atx',
+  bulletListMarker: '-',
+});
+
+// custom rule to ignore <b> tags that are styled to be NOT bold (Google Doc issue)
+turndownService.addRule(
+  'nonBoldB', {
+    filter: (node) => (
+      node.nodeName === 'B'
+      && node.getAttribute('style')
+      && node.getAttribute('style').includes('font-weight:normal')
+    ),
+    replacement: (content) => content, // don't wrap in **
+  },
+);
+// custom rule to catch span tags with inline bold styling (Google Doc issue)
+turndownService.addRule('boldSpan', {
+  filter: (node) => {
+    if (node.nodeName !== 'SPAN') return false;
+    const style = node.getAttribute('style') ? node.getAttribute('style').toLowerCase() : '';
+    return style.includes('font-weight:bold') || style.includes('font-weight:700') || style.includes('font-weight:600');
+  },
+  replacement: (content) => `**${content}**`,
+});
+// custom rule to catch span tags with inline italic styling (Google Doc issue)
+turndownService.addRule('italicSpan', {
+  filter: (node) => {
+    if (node.nodeName !== 'SPAN') return false;
+    const style = node.getAttribute('style') ? node.getAttribute('style').toLowerCase() : '';
+    return style.includes('font-style:italic');
+  },
+  replacement: (content) => `_${content}_`,
+});
+
+
 const MIN_TEXTAREA_HEIGHT = 320;
+const MAX_TEXTAREA_HEIGHT = 640;
 
 const MarkdownHint = styled.div`
   text-align: right;
@@ -41,7 +82,7 @@ const StyledTextareaMarkdown = styled(
   border-radius: 0.5em;
   color: ${palette('text', 0)};
   min-height: ${MIN_TEXTAREA_HEIGHT}px;
-  resize: "none";
+  max-height: ${MAX_TEXTAREA_HEIGHT}px;
 `;
 const Preview = styled((p) => <Box {...p} />)`
   background-color: ${palette('background', 0)};
@@ -50,14 +91,12 @@ const Preview = styled((p) => <Box {...p} />)`
   padding: 0.7em;
   color: ${palette('text', 0)};
   min-height: ${MIN_TEXTAREA_HEIGHT}px;
+  max-height: ${MAX_TEXTAREA_HEIGHT}px;
+  overflow-y: auto;
 `;
 
 const MDButton = styled((p) => (
-  <Button
-    plain
-    as="div"
-    {...p}
-  />
+  <Button as="div" {...p} />
 ))`
   min-width: 30px;
   min-height: 30px;
@@ -68,10 +107,7 @@ const MDButton = styled((p) => (
   }
 `;
 const ViewButton = styled((p) => (
-  <Button
-    plain
-    {...p}
-  />
+  <Button {...p} />
 ))`
   background: none;
   opacity: ${({ active }) => active ? 1 : 0.6};
@@ -93,9 +129,10 @@ const MDButtonText = styled((p) => (
 `;
 
 function TextareaMarkdownWrapper(props) {
-  const { value, intl, theme } = props;
+  const { value, onChange, intl } = props;
   const textareaRef = useRef(null);
   const [view, setView] = useState('write');
+  const [scrollTop, setScrollTop] = useState(0);
   // const [hasFocus, setHasFocus] = useState(false);
   useEffect(() => {
     if (textareaRef.current) {
@@ -106,157 +143,175 @@ function TextareaMarkdownWrapper(props) {
     }
     // has textarea focus?
     // setHasFocus(document.activeElement === textareaRef.current);
-  });
+  }, [textareaRef]);
+
+  useEffect(() => {
+    if (textareaRef.current && textareaRef.current.scrollTop !== scrollTop) {
+      textareaRef.current.scrollTop = scrollTop;
+    }
+  }, [scrollTop]);
+
   const mdDisabled = view !== 'write';
   return (
     <Box>
       <Box direction="row" justify="between" align="center" margin={{ vertical: 'small' }} wrap>
         <Box direction="row" gap="small" align="center">
           <ViewButton
-            onClick={() => setView('write')}
+            onClick={(e) => {
+              if (e && e.preventDefault) e.preventDefault();
+              setView('write');
+            }}
             active={view === 'write'}
           >
             Write
           </ViewButton>
           <ViewButton
-            onClick={() => setView('preview')}
+            onClick={(e) => {
+              if (e && e.preventDefault) e.preventDefault();
+              setView('preview');
+            }}
             active={view === 'preview'}
           >
             Preview
           </ViewButton>
         </Box>
-        <Box direction="row" align="center" gap="xsmall" wrap justify="end">
-          <Box direction="row" align="center" gap="xsmall" justify="end">
-            <Box fill="vertical">
-              <Text size="xsmall" color="hint">Format text</Text>
+        {view === 'write' && (
+          <Box direction="row" align="center" gap="xsmall" wrap justify="end">
+            <Box direction="row" align="center" gap="xsmall" justify="end">
+              <Box fill="vertical">
+                <Text size="xsmall" color="hint">Format text</Text>
+              </Box>
+              <Box>
+                <InfoOverlay
+                  title="Format text using markdown"
+                  padButton="none"
+                  content={(
+                    <div>
+                      <p>
+                        <Text size="small">
+                          {'This text field supports basic formatting using markdown, incuding section headings, '}
+                          <strong>**bold**</strong>
+                          {', '}
+                          <em>_italic_</em>
+                          , links, and more.
+                        </Text>
+                      </p>
+                      <p>
+                        <Text size="small">
+                          You can either directly type markdown code or use one of the format buttons above the text area to insert it, by either
+                        </Text>
+                      </p>
+                      <ul>
+                        <li>
+                          <Text size="small">
+                            first clicking one of the buttons and then replace the generated placeholder text, or
+                          </Text>
+                        </li>
+                        <li>
+                          <Text size="small">
+                            first select some existing text and then apply a format using one the buttons.
+                          </Text>
+                        </li>
+                      </ul>
+                      <p>
+                        <Text size="small">
+                          {'You can learn more about '}
+                          <A
+                            href={intl.formatMessage(messages.url)}
+                            target="_blank"
+                            isOnLightBackground
+                          >
+                            markdown and additional formatting options here
+                          </A>
+                          .
+                        </Text>
+                      </p>
+                    </div>
+                  )}
+                />
+              </Box>
             </Box>
-            <Box>
-              <InfoOverlay
-                title="Format text using markdown"
-                colorButton={theme.global.colors.hint}
-                padButton="none"
-                content={(
-                  <div>
-                    <p>
-                      <Text size="small">
-                        {'This text field supports basic formatting using markdown, incuding section headings, '}
-                        <strong>**bold**</strong>
-                        {', '}
-                        <em>_italic_</em>
-                        , links, and more.
-                      </Text>
-                    </p>
-                    <p>
-                      <Text size="small">
-                        You can either directly type markdown code or use one of the format buttons above the text area to insert it, by either
-                      </Text>
-                    </p>
-                    <ul>
-                      <li>
-                        <Text size="small">
-                          first clicking one of the buttons and then replace the generated placeholder text, or
-                        </Text>
-                      </li>
-                      <li>
-                        <Text size="small">
-                          first select some existing text and then apply a format using one the buttons.
-                        </Text>
-                      </li>
-                    </ul>
-                    <p>
-                      <Text size="small">
-                        {'You can learn more about '}
-                        <A
-                          href={intl.formatMessage(messages.url)}
-                          target="_blank"
-                          isOnLightBackground
-                        >
-                          markdown and additional formatting options here
-                        </A>
-                        .
-                      </Text>
-                    </p>
-                  </div>
-                )}
-              />
+            <Box direction="row" align="center" gap="hair" justify="end">
+              <MDButton
+                title="## Heading"
+                disabled={mdDisabled}
+                onClick={() => {
+                  if (!mdDisabled && textareaRef.current) {
+                    textareaRef.current.trigger('h2');
+                  }
+                }}
+              >
+                <MDButtonText>H2</MDButtonText>
+              </MDButton>
+              <MDButton
+                title="### Secondary heading"
+                disabled={mdDisabled}
+                onClick={() => {
+                  if (!mdDisabled && textareaRef.current) {
+                    textareaRef.current.trigger('h3');
+                  }
+                }}
+              >
+                <MDButtonText>H3</MDButtonText>
+              </MDButton>
+              <MDButton
+                title="Bold: **bold**"
+                disabled={mdDisabled}
+                onClick={() => {
+                  if (!mdDisabled && textareaRef.current) {
+                    textareaRef.current.trigger('bold');
+                  }
+                }}
+              >
+                <Bold size="xsmall" />
+              </MDButton>
+              <MDButton
+                title="Italic: _italic_"
+                disabled={mdDisabled}
+                onClick={() => {
+                  if (!mdDisabled && textareaRef.current) {
+                    textareaRef.current.trigger('italic');
+                  }
+                }}
+              >
+                <Italic size="xsmall" />
+              </MDButton>
+              <MDButton
+                title="Link: (text)[url]"
+                disabled={mdDisabled}
+                onClick={() => {
+                  if (!mdDisabled && textareaRef.current) {
+                    textareaRef.current.trigger('link');
+                  }
+                }}
+              >
+                <LinkIcon size="18px" />
+              </MDButton>
+              <MDButton
+                title="Unordered list: -"
+                disabled={mdDisabled}
+                onClick={() => {
+                  if (!mdDisabled && textareaRef.current) {
+                    textareaRef.current.trigger('unordered-list');
+                  }
+                }}
+              >
+                <List size="xsmall" />
+              </MDButton>
+              <MDButton
+                title="Ordered list: 1."
+                disabled={mdDisabled}
+                onClick={() => {
+                  if (!mdDisabled && textareaRef.current) {
+                    textareaRef.current.trigger('ordered-list');
+                  }
+                }}
+              >
+                <MDButtonText size="xxsmall">123</MDButtonText>
+              </MDButton>
             </Box>
           </Box>
-          <Box direction="row" align="center" gap="hair" justify="end">
-            <MDButton
-              title="## Heading"
-              disabled={mdDisabled}
-              onClick={() => {
-                if (!mdDisabled && textareaRef.current) {
-                  textareaRef.current.trigger('h2');
-                }
-              }}
-            >
-              <MDButtonText>H2</MDButtonText>
-            </MDButton>
-            <MDButton
-              title="### Secondary heading"
-              disabled={mdDisabled}
-              onClick={() => {
-                if (!mdDisabled && textareaRef.current) {
-                  textareaRef.current.trigger('h3');
-                }
-              }}
-            >
-              <MDButtonText>H3</MDButtonText>
-            </MDButton>
-            <MDButton
-              title="Bold: **bold**"
-              disabled={mdDisabled}
-              onClick={() => {
-                if (!mdDisabled && textareaRef.current) {
-                  textareaRef.current.trigger('bold');
-                }
-              }}
-              icon={<Bold size="xsmall" />}
-            />
-            <MDButton
-              title="Italic: _italic_"
-              disabled={mdDisabled}
-              onClick={() => {
-                if (!mdDisabled && textareaRef.current) {
-                  textareaRef.current.trigger('italic');
-                }
-              }}
-              icon={<Italic size="xsmall" />}
-            />
-            <MDButton
-              title="Link: (text)[url]"
-              disabled={mdDisabled}
-              onClick={() => {
-                if (!mdDisabled && textareaRef.current) {
-                  textareaRef.current.trigger('link');
-                }
-              }}
-              icon={<LinkIcon size="18px" />}
-            />
-            <MDButton
-              title="Unordered list: -"
-              disabled={mdDisabled}
-              onClick={() => {
-                if (!mdDisabled && textareaRef.current) {
-                  textareaRef.current.trigger('unordered-list');
-                }
-              }}
-              icon={<List size="xsmall" />}
-            />
-            <MDButton
-              title="Ordered list: 1."
-              disabled={mdDisabled}
-              onClick={() => {
-                if (!mdDisabled && textareaRef.current) {
-                  textareaRef.current.trigger('ordered-list');
-                }
-              }}
-            >
-              <MDButtonText size="xxsmall" style={{ top: '-4px' }}>123</MDButtonText>
-            </MDButton>
-          </Box>
-        </Box>
+        )}
       </Box>
       {view === 'preview' && (
         <Preview>
@@ -266,13 +321,57 @@ function TextareaMarkdownWrapper(props) {
       {view === 'write' && (
         <Box>
           <StyledTextareaMarkdown
+            {...props}
             ref={textareaRef}
             options={{
               preferredItalicSyntax: '_',
               linkTextPlaceholder: 'link-title',
               linkUrlPlaceholder: 'https://link-url.ext',
+              enableIndentExtension: false,
             }}
-            {...props}
+            commands={[
+              {
+                name: 'strike-through',
+                shortcut: ['command+shift+x', 'ctrl+shift+x'],
+                shortcutPreventDefault: true,
+                enable: false,
+              },
+            ]}
+            onScroll={(e) => {
+              setScrollTop((e.target && e.target.scrollTop) || 0);
+            }}
+            onChange={(e) => {
+              onChange(e);
+              // wait until re-rendered
+              requestAnimationFrame(() => {
+                const scroll = textareaRef && textareaRef.current && textareaRef.current.scrollTop;
+                if (scroll !== scrollTop) {
+                  if (scroll !== 0) {
+                    setScrollTop(scroll);
+                  } else {
+                    setScrollTop(scrollTop);
+                  }
+                }
+              });
+            }}
+            onPaste={(e) => {
+              const html = e.clipboardData.getData('text/html');
+              if (html) {
+                e.preventDefault();
+                const cleanHtml = DOMPurify.sanitize(html);
+                const textarea = e.currentTarget;
+                const start = textarea.selectionStart;
+                const end = textarea.selectionEnd;
+                const markdown = turndownService.turndown(cleanHtml);
+                const newValue = value.slice(0, start) + markdown + value.slice(end);
+                onChange(newValue);
+                // wait until re-rendered
+                requestAnimationFrame(() => {
+                  const newCursorPos = start + markdown.length;
+                  setScrollTop(scrollTop + newCursorPos);
+                });
+              }
+            }}
           />
           <MarkdownHint>
             <A
@@ -280,7 +379,9 @@ function TextareaMarkdownWrapper(props) {
               target="_blank"
               isOnLightBackground
             >
-              {intl.formatMessage(messages.anchor)}
+              <Text size="xxsmall">
+                <FormattedMessage {...messages.anchor} />
+              </Text>
             </A>
           </MarkdownHint>
         </Box>
@@ -293,7 +394,6 @@ TextareaMarkdownWrapper.propTypes = {
   value: PropTypes.string,
   onChange: PropTypes.func,
   intl: intlShape,
-  theme: PropTypes.object,
 };
 
-export default injectIntl(withTheme(TextareaMarkdownWrapper));
+export default injectIntl(TextareaMarkdownWrapper);

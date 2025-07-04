@@ -1,14 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box } from 'grommet';
+import ButtonSort from 'components/buttons/ButtonSort';
 
+import { Box, Text } from 'grommet';
+
+import InfoOverlay from 'components/InfoOverlay';
 import IndeterminateCheckbox from 'components/forms/IndeterminateCheckbox';
 import PrintHide from 'components/styled/PrintHide';
 import BoxPrint from 'components/styled/BoxPrint';
 import TextPrint from 'components/styled/TextPrint';
-import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
 import Icon from 'components/Icon';
+import asArray from 'utils/as-array';
 
 import { SORT_ORDER_OPTIONS } from 'containers/App/constants';
 
@@ -20,28 +23,28 @@ const Select = styled(PrintHide)`
   text-align: center;
   padding-right: 6px;
   position: relative;
+  top: -2px;
 `;
 
-const SortButton = styled(ButtonFlatIconOnly)`
-  color: inherit;
-  padding: 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    padding: 0;
-  }
+const Label = styled.label`
+  max-width: 100%;
 `;
-
-const Label = styled.label``;
-
 
 export function CellHeaderMain({ column, canEdit }) {
   const sortOrderOption = column.onSort && SORT_ORDER_OPTIONS.find(
     (option) => column.sortOrder === option.value
   );
+  const [title, info] = asArray(column.title);
 
   return (
-    <Box direction="row" align="center" justify="start" flex={false}>
+    <Box
+      direction="row"
+      align="center"
+      justify="start"
+      style={{ width: '100%' }}
+    >
       {canEdit && (
-        <BoxPrint printHide>
+        <BoxPrint printHide flex={{ shrink: 0 }}>
           <Select>
             <Checkbox
               id="select-all"
@@ -51,22 +54,56 @@ export function CellHeaderMain({ column, canEdit }) {
           </Select>
         </BoxPrint>
       )}
-      {canEdit && (
-        <Label htmlFor="select-all">
-          <TextPrint weight={500} size="small" wordBreak="keep-all">
-            {column.title}
+      <Box
+        direction="row"
+        flex={{ shrink: 1 }}
+      >
+        {canEdit && (
+          <Label
+            htmlFor="select-all"
+            title={title}
+          >
+            <TextPrint
+              weight={500}
+              size="xxsmall"
+              color="textSecondary"
+              style={{
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+                width: '100%',
+                display: 'inline-block',
+              }}
+            >
+              {title}
+            </TextPrint>
+          </Label>
+        )}
+        {!canEdit && (
+          <TextPrint
+            weight={500}
+            size="xxsmall"
+            color="textSecondary"
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+            title={title}
+          >
+            {title}
           </TextPrint>
-        </Label>
-      )}
-      {!canEdit && (
-        <TextPrint weight={500} size="small">
-          {column.title}
-        </TextPrint>
-      )}
+        )}
+      </Box>
       {column.onSort && (
         <PrintHide>
-          <Box pad={{ left: 'xxsmall' }} flex={false}>
-            <SortButton
+          <Box
+            style={{ position: 'relative', top: '-1px' }}
+            pad={{ left: '2px' }}
+            flex={{ shrink: 0 }}
+          >
+            <ButtonSort
+              sortActive={column.sortActive}
               onClick={() => {
                 if (column.sortActive) {
                   const nextSortOrderOption = SORT_ORDER_OPTIONS.find((option) => sortOrderOption.nextValue === option.value);
@@ -81,14 +118,37 @@ export function CellHeaderMain({ column, canEdit }) {
                   ? sortOrderOption.icon
                   : 'sorting'
                 }
-                palette="dark"
-                paletteIndex={column.sortActive ? 1 : 4}
                 hidePrint={!column.sortActive}
                 size="20px"
               />
-            </SortButton>
+            </ButtonSort>
           </Box>
         </PrintHide>
+      )}
+      {info && (
+        <Box style={{ position: 'relative', top: '-1px' }}>
+          <InfoOverlay
+            tooltip
+            icon="question"
+            padButton={{ horizontal: 'xsmall' }}
+            content={(
+              <Box
+                pad="small"
+                margin={{ horizontal: 'xsmall', vertical: 'xsmall' }}
+                background="white"
+                elevation="small"
+                overflow={{
+                  vertical: 'auto',
+                  horizontal: 'hidden',
+                }}
+              >
+                <Text size="small">
+                  {info}
+                </Text>
+              </Box>
+            )}
+          />
+        </Box>
       )}
     </Box>
   );

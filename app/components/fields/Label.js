@@ -1,10 +1,10 @@
 import styled from 'styled-components';
-import { palette } from 'styled-theme';
 
 const Label = styled.div`
-  color: ${palette('text', 1)};
-  font-weight: 500;
-  font-size: ${(props) => props.theme.sizes.text.small};
+  color: ${({ theme }) => theme.global.colors.hint};
+  font-size: ${(props) => props.theme.text.xxsmall.size};
+  line-height: ${(props) => props.theme.text.small.height};
+  margin-bottom: 5px;
   position: relative;
   @media print {
     font-size: ${(props) => props.theme.sizes.print.small};

@@ -1,13 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box, Text, Button } from 'grommet';
+import {
+  Box, Text, Button, ResponsiveContext,
+} from 'grommet';
 import { FormNext, FormClose } from 'grommet-icons';
 import { ROUTES } from 'themes/config';
 
 import PrintHide from 'components/styled/PrintHide';
 
 import asArray from 'utils/as-array';
+import { isMinSize } from 'utils/responsive';
+
+const OFFSET_TOP = {
+  MEDIUM: 90,
+  SMALL: 80,
+};
 
 const Root = styled.div`
   position: absolute;
@@ -15,17 +23,17 @@ const Root = styled.div`
     if (isPrint) {
       return 0;
     }
-    return position ? position.y : 50;
+    return position ? position.y : OFFSET_TOP.SMALL;
   }}px;
   left: 0;
   right: 0;
   z-index: 2501;
   pointer-events: none;
-  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.ms}) {
     right: auto;
     bottom: 0;
-    top: ${({ position }) => position ? position.y : 0}px;
-    right: ${({ position }) => position ? 'auto' : '0px'};
+    top: ${({ position }) => position ? position.y : OFFSET_TOP.MEDIUM}px;
+    right: ${({ position }) => position ? 'auto' : '10px'};
     left: ${({ position }) => position ? position.x : 'auto'};
   }
   width: ${({ isPrint, orient }) => {
@@ -55,7 +63,7 @@ const Main = styled.div`
   overflow-x: hidden;
   overflow-y: auto;
   max-height: ${({ h }) => h}px;
-  @media (min-width: ${({ theme }) => theme.breakpoints.large}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.ms}) {
     height: auto;
     min-width: ${({ isPrint }) => isPrint ? 'auto' : '290px'};
     max-width: ${({ isPrint }) => isPrint ? 'auto' : '310px'};
@@ -69,7 +77,7 @@ const Main = styled.div`
 
 const TTTitle = styled.h4`
 margin: 0;
-font-size: ${({ theme }) => theme.sizes.text.default};
+font-size: ${({ theme }) => theme.text.medium.size};
 `;
 
 const CountryButton = styled((p) => <Button {...p} />)`
@@ -109,69 +117,79 @@ const Tooltip = ({
   isLocationData,
   printArgs,
   isPrintView,
-}) => (
-  <Root
-    position={position}
-    isPrint={isPrintView}
-    orient={printArgs && printArgs.printOrientation}
-  >
-    <Anchor dirLeft={direction && direction.x === 'left'} xy={{ x: 0, y: 0 }}>
-      <Main
-        dirLeft={direction && direction.x === 'left'}
-        h={mapRef && mapRef.current ? mapRef.current.clientHeight : 300}
-        isPrint={isPrintView}
-        orient={printArgs && printArgs.printOrientation}
-      >
-        <Box gap="xsmall">
-          {features.map((feature, i) => (
-            <Feature key={i}>
-              <Box direction="row" justify="between" align="center" margin={{ bottom: 'xsmall' }}>
-                <Box>
-                  <TTTitle>{feature.title}</TTTitle>
-                </Box>
-                <PrintHide>
-                  <Button
-                    plain
-                    icon={<FormClose size="small" />}
-                    onClick={() => onClose(feature.id)}
-                  />
-                </PrintHide>
-              </Box>
-              {feature.content && (
-                <Box>
-                  {asArray(feature.content).map(
-                    (c, j) => <TTContentWrap key={j}>{c}</TTContentWrap>
-                  )}
-                </Box>
-              )}
-              <PrintHide>
-                {onFeatureClick && feature.id && (
-                  <ButtonWrap>
-                    <CountryButton
-                      as="a"
+}) => {
+  const size = React.useContext(ResponsiveContext);
+  let mainHeight = mapRef && mapRef.current ? mapRef.current.clientHeight : 300;
+  if (isMinSize(size, 'ms')) {
+    mainHeight -= OFFSET_TOP.MEDIUM;
+  } else {
+    mainHeight -= OFFSET_TOP.SMALL;
+  }
+
+  return (
+    <Root
+      position={position}
+      isPrint={isPrintView}
+      orient={printArgs && printArgs.printOrientation}
+    >
+      <Anchor dirLeft={direction && direction.x === 'left'} xy={{ x: 0, y: 0 }}>
+        <Main
+          dirLeft={direction && direction.x === 'left'}
+          h={mainHeight}
+          isPrint={isPrintView}
+          orient={printArgs && printArgs.printOrientation}
+        >
+          <Box gap="xsmall">
+            {features.map((feature, i) => (
+              <Feature key={i}>
+                <Box direction="row" justify="between" align="center" margin={{ bottom: 'xsmall' }}>
+                  <Box>
+                    <TTTitle>{feature.title}</TTTitle>
+                  </Box>
+                  <PrintHide>
+                    <Button
                       plain
-                      href={`${ROUTES.ACTOR}/${feature.id}`}
-                      onClick={(evt) => {
-                        if (evt && evt.preventDefault) evt.preventDefault();
-                        if (evt && evt.stopPropagation) evt.stopPropagation();
-                        onFeatureClick(feature.id);
-                      }}
-                    >
-                      <Box direction="row" align="center">
-                        <Text size="small">{isLocationData ? 'Location details' : 'Country details'}</Text>
-                        <FormNext size="xsmall" style={{ stroke: 'inherit', fill: 'inherit' }} />
-                      </Box>
-                    </CountryButton>
-                  </ButtonWrap>
+                      icon={<FormClose size="small" />}
+                      onClick={() => onClose(feature.id)}
+                    />
+                  </PrintHide>
+                </Box>
+                {feature.content && (
+                  <Box>
+                    {asArray(feature.content).map(
+                      (c, j) => <TTContentWrap key={j}>{c}</TTContentWrap>
+                    )}
+                  </Box>
                 )}
-              </PrintHide>
-            </Feature>
-          ))}
-        </Box>
-      </Main>
-    </Anchor>
-  </Root>
-);
+                <PrintHide>
+                  {onFeatureClick && feature.id && (
+                    <ButtonWrap>
+                      <CountryButton
+                        as="a"
+                        plain
+                        href={`${ROUTES.ACTOR}/${feature.id}`}
+                        onClick={(evt) => {
+                          if (evt && evt.preventDefault) evt.preventDefault();
+                          if (evt && evt.stopPropagation) evt.stopPropagation();
+                          onFeatureClick(feature.id);
+                        }}
+                      >
+                        <Box direction="row" align="center">
+                          <Text size="small">{isLocationData ? 'Location details' : 'Country details'}</Text>
+                          <FormNext size="xsmall" style={{ stroke: 'inherit', fill: 'inherit' }} />
+                        </Box>
+                      </CountryButton>
+                    </ButtonWrap>
+                  )}
+                </PrintHide>
+              </Feature>
+            ))}
+          </Box>
+        </Main>
+      </Anchor>
+    </Root>
+  );
+};
 
 Tooltip.propTypes = {
   isLocationData: PropTypes.bool,

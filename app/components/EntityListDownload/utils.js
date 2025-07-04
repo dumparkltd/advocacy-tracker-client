@@ -229,78 +229,6 @@ const prepActionData = ({
     [`actions_${actiontypeId}`]: sanitiseText(actionsValue),
   });
 }, data);
-const prepTargetData = ({
-  entity,
-  targettypes,
-  targets,
-  data,
-}) => Object.keys(targettypes).reduce((memo, actortypeId) => {
-  if (!targettypes[actortypeId].active) {
-    return memo;
-  }
-  const entityActorIds = entity.getIn(['targetsByType', parseInt(actortypeId, 10)]);
-  let actorsValue = '';
-  // console.log(entityActorIds)
-  if (entityActorIds) {
-    actorsValue = entityActorIds.reduce((memo2, actorId) => {
-      // console.log(actorId)
-      const actor = targets.get(actorId.toString());
-      if (actor) {
-        const title = actor.getIn(['attributes', 'title']);
-        const code = actor.getIn(['attributes', 'code']);
-        let actorValue = (code && code !== '') ? `${code}|${title}` : title;
-        actorValue = addWarnings({
-          value: actorValue,
-          entity: actor,
-        });
-        return memo2 === ''
-          ? actorValue
-          : `${memo2}${IN_CELL_SEPARATOR}${actorValue}`;
-      }
-      return memo2;
-    }, '');
-  }
-  return ({
-    ...memo,
-    [`targets_${actortypeId}`]: sanitiseText(actorsValue),
-  });
-}, data);
-const prepActionsAsTargetData = ({
-  entity,
-  actiontypesAsTarget,
-  actions,
-  data,
-}) => Object.keys(actiontypesAsTarget).reduce((memo, actiontypeId) => {
-  if (!actiontypesAsTarget[actiontypeId].active) {
-    return memo;
-  }
-  const entityActionIds = entity.getIn(['targetingActionsByType', parseInt(actiontypeId, 10)]);
-  let actionsValue = '';
-  // console.log(entityActorIds)
-  if (entityActionIds) {
-    actionsValue = entityActionIds.reduce((memo2, actionId) => {
-      // console.log(actorId)
-      const action = actions.get(actionId.toString());
-      if (action) {
-        const title = action.getIn(['attributes', 'title']);
-        const code = action.getIn(['attributes', 'code']);
-        let actionValue = (code && code !== '') ? `${code}|${title}` : title;
-        actionValue = addWarnings({
-          value: actionValue,
-          entity: action,
-        });
-        return memo2 === ''
-          ? actionValue
-          : `${memo2}${IN_CELL_SEPARATOR}${actionValue}`;
-      }
-      return memo2;
-    }, '');
-  }
-  return ({
-    ...memo,
-    [`targeted-by-actions_${actiontypeId}`]: sanitiseText(actionsValue),
-  });
-}, data);
 
 const prepParentData = ({
   entity, // Map
@@ -685,8 +613,6 @@ export const prepareDataForActions = ({
   hasActors,
   actorsAsRows,
   actortypes,
-  hasTargets,
-  targettypes,
   hasIndicators,
   indicatorsAsRows,
   hasParents,
@@ -721,14 +647,6 @@ export const prepareDataForActions = ({
       entity,
       actortypes,
       actors: relationships && relationships.get('actors'),
-      data,
-    });
-  }
-  if (hasTargets) {
-    data = prepTargetData({
-      entity,
-      targettypes,
-      targets: relationships && relationships.get('actors'),
       data,
     });
   }
@@ -801,8 +719,6 @@ export const prepareDataForActors = ({
   hasActions,
   actionsAsRows,
   actiontypes,
-  hasActionsAsTarget,
-  actiontypesAsTarget,
   hasAssociations,
   associationtypes,
   hasMembers,
@@ -832,15 +748,6 @@ export const prepareDataForActors = ({
     data = prepActionData({
       entity,
       actiontypes,
-      actions: relationships && relationships.get('measures'),
-      data,
-    });
-  }
-
-  if (hasActionsAsTarget) {
-    data = prepActionsAsTargetData({
-      entity,
-      actiontypesAsTarget,
       actions: relationships && relationships.get('measures'),
       data,
     });

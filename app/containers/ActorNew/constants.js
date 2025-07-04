@@ -32,8 +32,9 @@ export const FORM_INITIAL = fromJS({
   }), {}),
   associatedTaxonomies: {},
   associatedActionsByActiontype: {},
-  associatedActionsAsTargetByActiontype: {},
   associatedMembersByActortype: {},
   associatedAssociationsByActortype: {},
   associatedUsers: [],
+  close: true,
+  step: null,
 });

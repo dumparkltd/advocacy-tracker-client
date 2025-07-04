@@ -6,12 +6,14 @@ import Icon from 'components/Icon';
 import Button from 'components/buttons/Button';
 
 const Styled = styled(Button)`
-  position: absolute;
-  right:0;
-  top:0;
+  padding: 0;
   color: ${palette('link', 3)};
   &:hover {
     color: ${palette('linkHover', 3)};
+  }
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    padding: 0;
+    font-size: ${(props) => props.small ? 0.9 : 1}em;
   }
 `;
 

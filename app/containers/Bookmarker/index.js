@@ -11,7 +11,7 @@ import {
 } from 'containers/App/actions';
 import { selectReady, selectLocation, selectEntities } from 'containers/App/selectors';
 import Icon from 'components/Icon';
-import ButtonFlatIconOnly from 'components/buttons/ButtonFlatIconOnly';
+import ButtonFlat from 'components/buttons/ButtonFlat';
 
 import BookmarkForm from './BookmarkForm';
 import { DEPENDENCIES } from './constants';
@@ -19,10 +19,20 @@ import { selectBookmarkForLocation } from './selectors';
 
 const BookmarkerContainer = styled.div`
   z-index: 10;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     position: relative;
   }
 `;
+
+const ButtonAction = styled((p) => <ButtonFlat {...p} />)`
+  padding: 0;
+  min-height: 33px;
+  min-width: 33px;
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
+    padding: 0;
+  }
+`;
+
 
 class Bookmarker extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -59,7 +69,7 @@ class Bookmarker extends React.PureComponent { // eslint-disable-line react/pref
     if (dataReady) {
       return (
         <BookmarkerContainer>
-          <ButtonFlatIconOnly
+          <ButtonAction
             subtle
             onClick={
               () => {
@@ -90,7 +100,7 @@ class Bookmarker extends React.PureComponent { // eslint-disable-line react/pref
           >
             {bookmark && <Icon name="bookmark_active" title="Edit bookmark for current view" />}
             {!bookmark && <Icon name="bookmark_inactive" title="Add bookmark for current view" />}
-          </ButtonFlatIconOnly>
+          </ButtonAction>
           {this.state.open && bookmark && (
             <BookmarkForm
               bookmark={bookmark}

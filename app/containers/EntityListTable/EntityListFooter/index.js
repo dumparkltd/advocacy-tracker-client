@@ -32,7 +32,7 @@ const ListInlineItem = styled.li`
   font-size: 1em;
   color: ${palette('linkHover', 0)};
   vertical-align: middle;
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.medium : '769px'}) {
     font-size: 1.25em;
   }
   @media print {
@@ -41,46 +41,51 @@ const ListInlineItem = styled.li`
   text-align: center;
 `;
 const ListInlineItemLink = styled(A)`
-  width: 1.5em;
-  height: 1.5em;
-  line-height: 1.6;
-  font-weight: bold;
+  width: 2.3em;
+  height: 2.3em;
+  line-height: 2.3;
+  font-size: 13px;
+  font-weight: 500;
   display: block;
   text-align: center;
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
-    width: 2em;
-    height: 2em;
-    line-height: 2;
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.medium : '769px'}) {
+    width: 2.5em;
+    height: 2.5em;
+    line-height: 2.5;
+    font-size: 14px;
   }
 `;
 const ListInlineItemActive = styled.div`
-  width: 1.5em;
-  height: 1.5em;
-  line-height: 1.6;
+  width: 2.3em;
+  height: 2.3em;
+  line-height: 2.3;
+  font-size: 13px;
   border-radius: 9999px;
-  font-weight: bold;
-  background-color: ${palette('buttonDefault', 1)};
+  font-weight: 500;
+  background-color: ${palette('primary', 2)};
   color: ${palette('buttonDefault', 0)};
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
-    width: 2em;
-    height: 2em;
-    line-height: 2;
+  @media (min-width: ${({ theme }) => theme && theme.breakpointsMin ? theme.breakpointsMin.medium : '769px'}) {
+    width: 2.5em;
+    height: 2.5em;
+    line-height: 2.5;
+    font-size: 14px;
   }
 `;
 const ListInlineItemNav = styled(A)`
   padding: 0;
   display: block;
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
-    padding: 0 0.5em;
-  }
+  padding: 0 0.5em;
+  position: relative;
+  top: -2px;
 `;
 
 const ListInlineItemNavDisabled = styled.div`
-  color: ${palette('buttonDefaultDisabled', 1)};
+  color: ${palette('light', 4)};
   padding: 0;
-  @media (min-width: ${(props) => props.theme && props.theme.breakpoints ? props.theme.breakpoints.medium : '769px'}) {
-    padding: 0 0.5em;
-  }`;
+  padding: 0 0.5em;
+  position: relative;
+  top: -2px;
+`;
 
 export class EntityListFooter extends React.Component { // eslint-disable-line react/prefer-stateless-function
   shouldComponentUpdate(nextProps) {
@@ -119,12 +124,12 @@ export class EntityListFooter extends React.Component { // eslint-disable-line r
                     }}
                     title={intl && intl.formatMessage(appMessages.buttons.previous)}
                   >
-                    <Icon name="arrowLeft" />
+                    <Icon name="arrowLeft" size="0.8em" />
                   </ListInlineItemNav>
                 )}
                 {pager.currentPage === 1 && (
                   <ListInlineItemNavDisabled>
-                    <Icon name="arrowLeft" />
+                    <Icon name="arrowLeft" size="0.8em" />
                   </ListInlineItemNavDisabled>
                 )}
               </ListInlineItem>
@@ -194,12 +199,12 @@ export class EntityListFooter extends React.Component { // eslint-disable-line r
                     }}
                     title={intl && intl.formatMessage(appMessages.buttons.next)}
                   >
-                    <Icon name="arrowRight" />
+                    <Icon name="arrowRight" size="0.8em" />
                   </ListInlineItemNav>
                 )}
                 {pager.currentPage === pager.totalPages && (
                   <ListInlineItemNavDisabled>
-                    <Icon name="arrowRight" />
+                    <Icon name="arrowRight" size="0.8em" />
                   </ListInlineItemNavDisabled>
                 )}
               </ListInlineItem>

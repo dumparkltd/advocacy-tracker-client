@@ -6,32 +6,21 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import ReactMarkdown from 'react-markdown';
 
-import styled from 'styled-components';
 import {
   Box,
-  Button,
   Layer,
   Text,
 } from 'grommet';
 import { FormClose } from 'grommet-icons';
+import Button from 'components/buttons/ButtonSimple';
 
 import Loading from 'components/Loading';
 
 import LayerHeader from './LayerHeader';
 import LayerWrap from './LayerWrap';
 import LayerContent from './LayerContent';
-
-const Markdown = styled(ReactMarkdown)`
-  font-size: ${(props) => props.theme.sizes.text.markdownMobile};
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
-    font-size: ${(props) => props.theme.sizes.text.markdown};
-  }
-  @media print {
-    font-size: ${(props) => props.theme.sizes.print.markdown};
-  }
-`;
+import Markdown from './Markdown';
 
 function Overlay({
   onClose,
@@ -39,6 +28,7 @@ function Overlay({
   markdown,
   content,
   loading,
+  size = 'medium',
 }) {
   return (
     <Layer
@@ -52,12 +42,14 @@ function Overlay({
         <LayerHeader flex={{ grow: 0, shrink: 0 }}>
           <Box>
             {title && (
-              <Text weight={600}>{title}</Text>
+              <Text size={size} weight={600}>{title}</Text>
             )}
           </Box>
           {onClose && (
             <Box flex={{ grow: 0 }}>
-              <Button plain icon={<FormClose size="medium" />} onClick={onClose} />
+              <Button onClick={onClose}>
+                <FormClose size="medium" />
+              </Button>
             </Box>
           )}
         </LayerHeader>
@@ -65,7 +57,12 @@ function Overlay({
         <LayerContent flex={{ grow: 1 }}>
           <div>
             {markdown && (
-              <Markdown source={content} className="react-markdown" linkTarget="_blank" />
+              <Markdown
+                source={content}
+                className="react-markdown"
+                linkTarget="_blank"
+                size={size}
+              />
             )}
             {!markdown && content}
           </div>
@@ -84,6 +81,7 @@ Overlay.propTypes = {
   ]),
   onClose: PropTypes.func,
   title: PropTypes.string,
+  size: PropTypes.string,
 };
 
 export default Overlay;

@@ -10,6 +10,9 @@ export const getOptionSortValueMapper = (option) => {
   if (option.get('order')) {
     return option.get('order');
   }
+  if (option.get('reference') && option.get('reference').trim().length > 0) {
+    return option.get('reference');
+  }
   return option.get('label');
 };
 export const getOptionSortCheckedValueMapper = (option) => {

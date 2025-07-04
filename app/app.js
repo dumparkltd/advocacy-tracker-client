@@ -28,6 +28,7 @@ import LanguageProvider from 'containers/LanguageProvider';
 // Import ThemeProvider
 // import { ThemeProvider } from 'styled-components';
 import theme from 'themes/theme';
+import configureStore from './store';
 import { Grommet } from 'grommet';
 
 // Load the favicon, and the .htaccess file
@@ -42,7 +43,6 @@ import '!file-loader?name=[name].[ext]!./safari-pinned-tab.svg';
 import 'file-loader?name=[name].[ext]!./.htaccess';
 /* eslint-enable import/no-unresolved, import/extensions */
 
-import configureStore from './store';
 
 // Import i18n messages
 import { translationMessages } from './i18n';

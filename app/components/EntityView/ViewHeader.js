@@ -1,9 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Box, Button, Text } from 'grommet';
+import { Box, Text } from 'grommet';
 import { LinkPrevious } from 'grommet-icons';
 import ButtonFactory from 'components/buttons/ButtonFactory';
+import Button from 'components/buttons/ButtonSimple';
 import PrintHide from 'components/styled/PrintHide';
 import PrintOnly from 'components/styled/PrintOnly';
 
@@ -13,6 +14,7 @@ import { CONTENT_PAGE } from 'containers/App/constants';
 import ViewPanel from './ViewPanel';
 import ViewPanelInside from './ViewPanelInside';
 import Main from './Main';
+
 
 const Styled = styled.div`
   padding-top: ${({ isPage, isPrint }) => isPage || isPrint ? '40px' : 0};
@@ -33,7 +35,7 @@ const Between = styled((p) => <Box plain {...p} />)`
     border-left: 1px solid rgba(0, 0, 0, 0.15);
   }
 `;
-const MyButton = styled((p) => <Button plain {...p} />)`
+const MyButton = styled((p) => <Button {...p} />)`
   color: ${({ theme }) => theme.global.colors.brand};
   stroke: ${({ theme }) => theme.global.colors.brand};
   &:hover {

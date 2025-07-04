@@ -22,7 +22,7 @@ const ButtonTagFilter = styled(Button)`
     fill: ${({ theme }) => theme.global.colors.text.dark};
     background-color: ${({ theme, isPrint }) => isPrint ? 'transparent' : theme.global.colors.highlightHover};
   }
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding:${({ isPrint }) => isPrint ? ' 1px 4px' : '1px 6px'};
     font-size:${({ isPrint }) => isPrint ? '9pt' : '0.85em'};
   }

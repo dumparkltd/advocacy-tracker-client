@@ -16,25 +16,29 @@ import appMessages from 'containers/App/messages';
 // import qe from 'utils/quasi-equals';
 
 const AttributeSelect = styled.select`
-  background:#ffffff;
-  border:1px solid #E0E1E2;
-  color:#000;
-  padding:5px;
+  background: #ffffff;
+  border: 1px solid #E0E1E2;
+  color: #000;
+  padding: 5px;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 500;
 `;
 const AttributeInput = styled.input`
-  background:#ffffff;
-  border:1px solid #E0E1E2;
-  color:#000;
-  padding:5px;
+  background: #ffffff;
+  border: 1px solid #E0E1E2;
+  color: #000;
+  padding: 5px;
 `;
 
 const Styled = styled(
   (p) => <Box direction="column" {...p} />
 )`
   position: relative;
-  background-color: ${palette('mainListItem', 1)};
   margin-bottom: 4px;
   margin-top: 4px;
+  border-bottom: 1px solid #B7BCBF;
+  background: white;
 `;
 
 const MultiselectActiveOptionRemove = styled(Button)`
@@ -44,7 +48,7 @@ const MultiselectActiveOptionRemove = styled(Button)`
     color: ${palette('linkHover', 2)};
   }
   padding: 0 8px;
-  @media (min-width: ${(props) => props.theme.breakpoints.medium}) {
+  @media (min-width: ${({ theme }) => theme.breakpointsMin.medium}) {
     padding: 0 16px;
   }
 `;
@@ -75,7 +79,7 @@ export function MultiSelectActiveOption({
 }) {
   return (
     <Styled>
-      <Box direction="row" align="center" justify="between" pad={{ vertical: 'xsmall' }}>
+      <Box direction="row" align="center" justify="between" pad={{ vertical: 'small' }}>
         <TitleWrap>
           <Box direction="row" gap="small">
             {option.get('reference') && (
@@ -85,7 +89,7 @@ export function MultiSelectActiveOption({
               <Box><ItemStatus draft /></Box>
             )}
           </Box>
-          <Box>{option.get('label')}</Box>
+          <Box><Text size="small" style={{ fontWeight: 500 }}>{option.get('label')}</Text></Box>
         </TitleWrap>
         <Box>
           <Box>

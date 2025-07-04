@@ -9,12 +9,13 @@ import PropTypes from 'prop-types';
 import { injectIntl, intlShape } from 'react-intl';
 import styled from 'styled-components';
 import { palette } from 'styled-theme';
-import { Button, Box, Text } from 'grommet';
+import { Box, Text } from 'grommet';
 import { FormUp, FormDown } from 'grommet-icons';
+import Button from 'components/buttons/ButtonSimple';
 
 import messages from './messages';
 
-const Styled = styled((p) => <Button plain {...p} />)`
+const Styled = styled((p) => <Button {...p} />)`
   color: ${palette('asideListGroup', 0)};
   padding: 0.25em 0;
   padding-right: 4px;

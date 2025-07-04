@@ -55,6 +55,9 @@ export const ROUTES = {
   CATEGORY: '/category',
   PAGES: '/pages',
   SEARCH: '/search',
+  POSITIONS: '/positions',
+  // OUTREACH: '/outreach',
+  MYSTUFF: '/mystuff',
 };
 
 // Server endpoints for database tables **************************
@@ -89,6 +92,23 @@ export const API = {
   BOOKMARKS: 'bookmarks',
 };
 
+export const API_FOR_ROUTE = {
+  [ROUTES.ACTOR]: API.ACTORS,
+  [ROUTES.ACTION]: API.ACTIONS,
+  [ROUTES.INDICATOR]: API.INDICATORS,
+  [ROUTES.CATEGORY]: API.CATEGORIES,
+  [ROUTES.RESOURCE]: API.RESOURCES,
+  [ROUTES.USERS]: API.USERS,
+};
+export const ROUTE_FOR_API = {
+  [API.ACTORS]: ROUTES.ACTOR,
+  [API.ACTIONS]: ROUTES.ACTION,
+  [API.INDICATORS]: ROUTES.INDICATOR,
+  [API.CATEGORIES]: ROUTES.CATEGORY,
+  [API.RESOURCES]: ROUTES.RESOURCE,
+  [API.USERS]: ROUTES.USERS,
+};
+
 export const ACTIONTYPES = {
   EXPRESS: '1',
   EVENT: '2',
@@ -100,28 +120,36 @@ export const ACTIONTYPES = {
 
 export const ACTORTYPES = {
   COUNTRY: '1',
-  ORG: '2',
   CONTACT: '3',
-  REG: '4',
+  ORG: '2',
   GROUP: '5',
+  REG: '4',
 };
 
 export const RESOURCETYPES = {
-  REF: '1',
   WEB: '2',
+  REF: '1',
   DOC: '3',
 };
 
 export const OFFICIAL_STATEMENT_CATEGORY_ID = 55;
+export const GENERAL_POS_TAXONOMY = 1;
+export const SECTOR_TAXONOMY = 2;
+export const ROLES_TAXONOMY = 3;
+export const REGION_TYPE_TAXONOMY = 4;
+export const GROUP_TYPE_TAXONOMY = 5;
+export const EXPRESSFORM_TAXONOMY = 7;
+export const EVENT_TYPE_TAXONOMY = 9;
+export const PRIORITY_TAXONOMY = 10;
+export const INTERACTION_TYPE_TAXONOMY = 12;
 export const AUTHORITY_TAXONOMY = 13;
-
 
 export const ACTION_INDICATOR_SUPPORTLEVELS = {
   // not assigned
   0: {
     value: '0',
     default: true,
-    color: '#EDEFF0',
+    color: '#d8d9d9',
     order: 100,
   },
   // strong
@@ -164,6 +192,12 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#67402E', // teal-brown
     order: 5,
   },
+  // proxy for no statement
+  99: {
+    value: '99',
+    color: '#EDEFF0',
+    order: 99,
+  },
 };
 
 export const ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS = {
@@ -177,79 +211,13 @@ export const ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS = {
   ],
 };
 
-export const MAP_OPTIONS = {
-  RANGE: ['#CAE0F7', '#164571'],
-  GRADIENT: {
-    // actors: ['#FAFA6E', '#81DD90', '#029481', '#035E93', '#043465'],
-    actors: ['#FAFA6E', '#81DD90', '#029481', '#00728f', '#043465'],
-    targets: ['#FAFA6E', '#FAAB4B', '#DD654A', '#BF0071', '#59004d'],
-  },
-  NO_DATA_COLOR: '#EDEFF0',
-  DEFAULT_STYLE: {
-    weight: 1,
-    color: '#CFD3D7',
-    fillOpacity: 1,
-    fillColor: '#EDEFF0',
-  },
-  STYLE: {
-    active: {
-      weight: 2,
-      color: '#000000',
-    },
-    members: {
-      fillColor: '#aaa',
-    },
-    country: {
-      fillColor: '#0063b5',
-      weight: 1.5,
-      color: '#333333',
-    },
-  },
-  TOOLTIP_STYLE: {
-    weight: 1,
-    fillOpacity: 0,
-    color: '#666666',
-    interactive: false,
-  },
-  OVER_STYLE: {
-    weight: 1,
-    fillOpacity: 0,
-    color: '#ADB4B9',
-    interactive: false,
-  },
-  BBOX_STYLE: {
-    fillColor: '#F9F9FA',
-    fillOpacity: 1,
-    weight: 0.5,
-    color: '#DEE1E3',
-  },
-  CENTER: [20, 0],
-  ZOOM: {
-    INIT: 1,
-    MIN: 0,
-    MAX: 9,
-  },
-  BOUNDS: {
-    N: 90,
-    W: -3600,
-    S: -90,
-    E: 3600,
-  },
-  PROJ: {
-    robinson: {
-      name: 'Robinson',
-      crs: 'ESRI:54030',
-      proj4def: '+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
-      resolutions: [
-        65536, 32768, 16384, 8192, 4096, 2048, 1024, 512, 256, 128,
-      ],
-      origin: [0, 0],
-      bounds: [[90, -180], [-90, 180]], // [[N, W], [S, E]]
-      addBBox: true,
-    },
-  },
-};
-
+export const OUTREACH_ACTIONTYPES = [
+  ACTIONTYPES.INTERACTION,
+  ACTIONTYPES.TASK,
+  ACTIONTYPES.OP,
+  ACTIONTYPES.AP,
+  ACTIONTYPES.EVENT,
+];
 export const ACTIONTYPE_NAVGROUPS = {
   // Plans & Tasks
   1: {
@@ -319,6 +287,136 @@ export const ACTION_FIELDS = {
         on: 'actortype_id',
       },
     },
+    indicators: {
+      table: API.INDICATORS,
+      preview: [ACTIONTYPES.EXPRESS],
+    },
+  },
+  ATTRIBUTES: {
+    measuretype_id: {
+      defaultValue: '1',
+      required: Object.values(ACTIONTYPES), // all types
+      type: 'number',
+      skipImport: true,
+      table: API.ACTIONTYPES,
+      exportColumn: 'activity_type',
+      export: true,
+      editable: false,
+    },
+    code: {
+      optional: Object.values(ACTIONTYPES), // all types
+      adminOnly: true,
+      type: 'text',
+    },
+    title: {
+      required: Object.values(ACTIONTYPES), // all types
+      type: 'text',
+      // exportRequired: true,
+    },
+    // parent_id: {
+    //   skipImport: true,
+    //   optional: Object.values(ACTIONTYPES), // controlled by type setting
+    //   type: 'number',
+    // },
+    description: {
+      optional: Object.values(ACTIONTYPES),
+      type: 'markdown',
+    },
+    comment: {
+      optional: Object.values(ACTIONTYPES),
+      type: 'markdown',
+      hideByDefault: true,
+    },
+    url: {
+      optional: Object.values(ACTIONTYPES),
+      type: 'url',
+    },
+    date_start: {
+      optional: Object.values(ACTIONTYPES),
+      preview: Object.values(ACTIONTYPES),
+      type: 'date',
+    },
+    date_end: {
+      optional: [ACTIONTYPES.EVENT],
+      section: 1,
+      type: 'date',
+    },
+    date_comment: {
+      optional: Object.values(ACTIONTYPES),
+      type: 'text',
+      section: 1,
+      hideByDefault: true,
+    },
+    draft: {
+      defaultValue: true,
+      controlType: 'checkbox',
+      type: 'bool',
+      section: 'footer',
+      // ui: 'dropdown',
+      skipImport: true,
+      // options: [
+      //   { value: true, message: 'ui.publishStatuses.draft' },
+      //   { value: false, message: 'ui.publishStatuses.public' },
+      // ],
+    },
+    private: {
+      defaultValue: false,
+      controlType: 'checkbox',
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      controlType: 'checkbox',
+      type: 'bool',
+    },
+    notifications: {
+      defaultValue: true,
+      controlType: 'checkbox',
+      type: 'bool',
+    },
+    created_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    created_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'created_by',
+    },
+    updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+    },
+    updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'updated_by',
+    },
+    relationship_updated_at: {
+      skipImport: true,
+      type: 'datetime',
+      adminOnly: true,
+      meta: true,
+      exportColumn: 'connection_updated_at',
+    },
+    relationship_updated_by_id: {
+      skipImport: true,
+      type: 'key',
+      adminOnly: true,
+      meta: true,
+      table: API.USERS,
+      exportColumn: 'connection_updated_by',
+    },
   },
   // additional
   RELATIONSHIPS_IMPORT: {
@@ -344,11 +442,7 @@ export const ACTION_FIELDS = {
     },
     'actor-code': {
       type: 'text',
-      optional: [
-        ACTIONTYPES.EXPRESS,
-        ACTIONTYPES.EVENT,
-        ACTIONTYPES.INTERACTION,
-      ],
+      optional: Object.values(ACTIONTYPES),
       lookup: {
         table: API.ACTORS,
         attribute: 'code',
@@ -360,45 +454,11 @@ export const ACTION_FIELDS = {
     // column: country-code
     'actor-id': {
       type: 'text',
-      optional: [
-        ACTIONTYPES.EXPRESS,
-        ACTIONTYPES.EVENT,
-        ACTIONTYPES.INTERACTION,
-      ],
+      optional: Object.values(ACTIONTYPES),
       multiple: true,
       table: API.ACTOR_ACTIONS,
       keyPair: ['measure_id', 'actor_id'], // own, other
       hint: 'one or more unique actor ids (as assigned by the database / comma-separated)',
-    },
-    // column: country-code
-    'target-code': {
-      type: 'text',
-      optional: [
-        ACTIONTYPES.OP,
-        ACTIONTYPES.AP,
-        ACTIONTYPES.TASK,
-      ],
-      multiple: true,
-      lookup: {
-        table: API.ACTORS,
-        attribute: 'code',
-      },
-      table: API.ACTION_ACTORS,
-      keyPair: ['measure_id', 'actor_id'], // own, other
-      hint: 'one or more unique actor codes (as assigned by the users / comma-separated) for actors targeted',
-    },
-    // column: country-code
-    'target-id': {
-      type: 'text',
-      optional: [
-        ACTIONTYPES.OP,
-        ACTIONTYPES.AP,
-        ACTIONTYPES.TASK,
-      ],
-      multiple: true,
-      table: API.ACTION_ACTORS,
-      keyPair: ['measure_id', 'actor_id'], // own, other
-      hint: 'one or more unique actor ids (as assigned by the database / comma-separated) for actors targeted',
     },
     // belongs to event
     'event-code': {
@@ -530,143 +590,27 @@ export const ACTION_FIELDS = {
       hint: 'one or more user email addresses (exact / comma-separated)',
     },
   },
-  ATTRIBUTES: {
-    measuretype_id: {
-      defaultValue: '1',
-      required: Object.values(ACTIONTYPES), // all types
-      type: 'number',
-      skipImport: true,
-      table: API.ACTIONTYPES,
-      exportColumn: 'activity_type',
-      export: true,
-    },
-    code: {
-      optional: Object.values(ACTIONTYPES), // all types
-      adminOnly: true,
-      type: 'text',
-    },
-    title: {
-      required: Object.values(ACTIONTYPES), // all types
-      type: 'text',
-      // exportRequired: true,
-    },
-    // parent_id: {
-    //   skipImport: true,
-    //   optional: Object.values(ACTIONTYPES), // controlled by type setting
-    //   type: 'number',
-    // },
-    description: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'markdown',
-    },
-    comment: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'markdown',
-    },
-    url: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'url',
-    },
-    date_start: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'date',
-    },
-    date_end: {
-      optional: [ACTIONTYPES.EVENT],
-      type: 'date',
-    },
-    date_comment: {
-      optional: Object.values(ACTIONTYPES),
-      type: 'text',
-    },
-    draft: {
-      defaultValue: true,
-      required: Object.values(ACTIONTYPES), // all types
-      type: 'bool',
-      // ui: 'dropdown',
-      skipImport: true,
-      // options: [
-      //   { value: true, message: 'ui.publishStatuses.draft' },
-      //   { value: false, message: 'ui.publishStatuses.public' },
-      // ],
-    },
-    private: {
-      defaultValue: false,
-      type: 'bool',
-    },
-    is_archive: {
-      defaultValue: false,
-      type: 'bool',
-    },
-    notifications: {
-      defaultValue: true,
-      type: 'bool',
-    },
-    created_at: {
-      skipImport: true,
-      type: 'datetime',
-      adminOnly: true,
-      meta: true,
-    },
-    created_by_id: {
-      skipImport: true,
-      type: 'key',
-      adminOnly: true,
-      meta: true,
-      table: API.USERS,
-      exportColumn: 'created_by',
-    },
-    updated_at: {
-      skipImport: true,
-      type: 'datetime',
-      adminOnly: true,
-      meta: true,
-    },
-    updated_by_id: {
-      skipImport: true,
-      type: 'key',
-      adminOnly: true,
-      meta: true,
-      table: API.USERS,
-      exportColumn: 'updated_by',
-    },
-    relationship_updated_at: {
-      skipImport: true,
-      type: 'datetime',
-      adminOnly: true,
-      meta: true,
-      exportColumn: 'connection_updated_at',
-    },
-    relationship_updated_by_id: {
-      skipImport: true,
-      type: 'key',
-      adminOnly: true,
-      meta: true,
-      table: API.USERS,
-      exportColumn: 'connection_updated_by',
-    },
-  },
 };
 
 export const ACTOR_FIELDS = {
-  CONNECTIONS: {
-    categories: {
-      table: API.CATEGORIES,
-      connection: API.ACTOR_CATEGORIES,
-      groupby: {
-        table: API.TAXONOMIES,
-        on: '_id',
-      },
-    },
-    actions: {
-      table: API.ACTIONS,
-      connection: API.ACTOR_ACTIONS,
-      groupby: {
-        table: API.ACTIONTYPES,
-        on: 'measuretype_id',
-      },
-    },
-  },
+  // CONNECTIONS: {
+  //   categories: {
+  //     table: API.CATEGORIES,
+  //     connection: API.ACTOR_CATEGORIES,
+  //     groupby: {
+  //       table: API.TAXONOMIES,
+  //       on: '_id',
+  //     },
+  //   },
+  //   actions: {
+  //     table: API.ACTIONS,
+  //     connection: API.ACTOR_ACTIONS,
+  //     groupby: {
+  //       table: API.ACTIONTYPES,
+  //       on: 'measuretype_id',
+  //     },
+  //   },
+  // },
   ATTRIBUTES: {
     actortype_id: {
       defaultValue: '1',
@@ -738,12 +682,12 @@ export const ACTOR_FIELDS = {
     },
     address: {
       optional: [ACTORTYPES.CONTACT],
-      type: 'text',
+      type: 'textarea',
     },
     draft: {
       defaultValue: true,
-      required: true,
       type: 'bool',
+      controlType: 'checkbox',
       skipImport: true,
       // ui: 'dropdown',
       // options: [
@@ -874,16 +818,16 @@ export const ACTOR_FIELDS = {
 };
 
 export const RESOURCE_FIELDS = {
-  CONNECTIONS: {
-    actions: {
-      table: API.ACTIONS,
-      connection: API.ACTION_RESOURCES,
-      groupby: {
-        table: API.ACTIONTYPES,
-        on: 'measuretype_id',
-      },
-    },
-  },
+  // CONNECTIONS: {
+  //   actions: {
+  //     table: API.ACTIONS,
+  //     connection: API.ACTION_RESOURCES,
+  //     groupby: {
+  //       table: API.ACTIONTYPES,
+  //       on: 'measuretype_id',
+  //     },
+  //   },
+  // },
   ATTRIBUTES: {
     resourcetype_id: {
       defaultValue: '1',
@@ -894,7 +838,7 @@ export const RESOURCE_FIELDS = {
     },
     draft: {
       defaultValue: true,
-      required: Object.values(RESOURCETYPES), // all types
+      controlType: 'checkbox',
       type: 'bool',
       skipImport: true,
       // ui: 'dropdown',
@@ -905,12 +849,12 @@ export const RESOURCE_FIELDS = {
     },
     private: {
       defaultValue: false,
-      required: Object.values(ACTIONTYPES), // all types
+      required: Object.values(RESOURCETYPES), // all types
       type: 'bool',
     },
     is_archive: {
       defaultValue: false,
-      required: Object.values(ACTIONTYPES), // all types
+      required: Object.values(RESOURCETYPES), // all types
       type: 'bool',
     },
     title: {
@@ -937,17 +881,12 @@ export const RESOURCE_FIELDS = {
 };
 
 export const INDICATOR_FIELDS = {
-  CONNECTIONS: {
-    actions: {
-      table: API.ACTIONS,
-      connection: API.ACTION_INDICATORS,
-      groupby: {
-        table: API.ACTIONTYPES,
-        on: 'measuretype_id',
-      },
-    },
-  },
   ATTRIBUTES: {
+    reference: {
+      type: 'text',
+      optional: true,
+      adminOnly: true,
+    },
     code: {
       type: 'text',
       optional: true,
@@ -962,14 +901,9 @@ export const INDICATOR_FIELDS = {
     },
     draft: {
       defaultValue: true,
-      required: true,
+      controlType: 'checkbox',
       type: 'bool',
       skipImport: true,
-      // ui: 'dropdown',
-      // options: [
-      //   { value: true, message: 'ui.publishStatuses.draft' },
-      //   { value: false, message: 'ui.publishStatuses.public' },
-      // ],
     },
     private: {
       defaultValue: false,
@@ -1050,23 +984,6 @@ export const ACTIONTYPE_ACTORTYPES = {
     ACTORTYPES.ORG,
     ACTORTYPES.GROUP,
   ],
-  // // outreach plans are targeting countries & contacts
-  // [ACTIONTYPES.OP]: [
-  //   ACTORTYPES.COUNTRY,
-  //   ACTORTYPES.CONTACT,
-  // ],
-  // // advocacy plans are targeting countries & contacts
-  // [ACTIONTYPES.AP]: [
-  //   ACTORTYPES.COUNTRY,
-  //   ACTORTYPES.CONTACT,
-  // ],
-  // // tasks target countries
-  // [ACTIONTYPES.TASK]: [
-  //   ACTORTYPES.COUNTRY,
-  // ],
-};
-
-export const ACTIONTYPE_TARGETTYPES = {
   // outreach plans are targeting countries & contacts
   [ACTIONTYPES.OP]: [
     ACTORTYPES.COUNTRY,
@@ -1090,7 +1007,6 @@ export const ACTIONTYPE_TARGETTYPES = {
     ACTORTYPES.GROUP,
   ],
 };
-
 
 export const ACTIONTYPE_RESOURCETYPES = {
   [ACTIONTYPES.EXPRESS]: [
@@ -1157,6 +1073,7 @@ export const MEMBERSHIPS = {
   ],
   [ACTORTYPES.ORG]: [
     ACTORTYPES.GROUP,
+    ACTORTYPES.COUNTRY,
   ],
   [ACTORTYPES.CONTACT]: [
     ACTORTYPES.COUNTRY,
@@ -1168,6 +1085,11 @@ export const MEMBERSHIPS = {
 };
 
 export const INDICATOR_ACTIONTYPES = [ACTIONTYPES.EXPRESS];
+export const INDICATOR_ACTION_ACTORTYPES = [
+  ACTORTYPES.COUNTRY,
+  ACTORTYPES.CONTACT,
+  // ACTORTYPES.GROUP,
+];
 
 export const USER_ACTIONTYPES = [
   ACTIONTYPES.OP,
@@ -1186,16 +1108,218 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'associations', // one row per type,
         type: 'associations', // one row per type,
+        title: 'Part of',
+        minSize: 'small',
       },
       {
         id: 'members', // one row per type,
         type: 'members', // one row per type,
+        type_id: ACTORTYPES.CONTACT,
+        minSize: 'ms',
+        showOnSingle: false,
       },
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        minSize: 'medium',
+      },
+      {
+        id: `action_${ACTIONTYPES.INTERACTION}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.INTERACTION,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'large',
+        showOnSingle: false,
+      },
+      {
+        id: `action_${ACTIONTYPES.EXPRESS}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.EXPRESS,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'medium',
+        showOnSingle: false,
+      },
+      {
+        id: `action_${ACTIONTYPES.TASK}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.TASK,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'large',
+        showOnSingle: false,
+      },
+      {
+        id: 'taxonomy',
+        type: 'taxonomy',
+        taxonomy_id: 1, // general position
+        minSize: 'optional',
       },
     ],
+    form: [
+      {
+        id: 'footer',
+        fields: [
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+          { attribute: 'private', needsAdminOrOwn: true },
+          { attribute: 'draft', needsAdminOrOwn: true },
+        ],
+      },
+      {
+        id: 'main',
+        title: 'Main',
+        sections: [
+          {
+            id: 'name',
+            title: 'Name & role',
+            rows: [
+              [
+                {
+                  attribute: 'title',
+                  required: true,
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'code',
+                  basis: '1/3',
+                },
+              ],
+              [{
+                taxonomy: 1, // general position
+                basis: '2/3',
+              }],
+            ],
+          },
+          {
+            id: 'staff',
+            title: 'Assigned staff',
+            rows: [
+              [
+                {
+                  connection: API.USERS,
+                  prepopulate: true, // current user
+                  basis: '2/3',
+                },
+              ],
+            ],
+          },
+          {
+            id: 'content',
+            title: 'Description, notes, summary of activities',
+            rows: [
+              [{
+                attribute: 'description',
+              }],
+              [{
+                attribute: 'activity_summary',
+                hideByDefault: true,
+              }],
+            ], // rows
+          }, // section
+        ], //
+      }, // step
+      {
+        id: 'stakeholders',
+        title: 'Associated stakeholders',
+        titleSmall: 'Stakeholders',
+        sections: [
+          {
+            id: 'stakeholders',
+            title: 'Regions & Groups the Country belongs to',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.REG,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.GROUP,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+          {
+            id: 'members',
+            title: 'Contacts (Members of Country)',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.CONTACT,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ], // sections
+      }, // step
+      {
+        id: 'activities',
+        title: 'Activities',
+        sections: [
+          {
+            id: 'statements',
+            title: 'Statements',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EXPRESS,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+          {
+            id: 'interactions',
+            title: 'Interactions & Events',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.INTERACTION,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EVENT,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+      {
+        id: 'outreach',
+        title: 'Outreach',
+        sections: [
+          {
+            id: 'outreach',
+            title: 'Outreach the country is targeted by',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.TASK,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.OP,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.AP,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+    ], // steps
   },
   2: { // ORG
     id: ACTORTYPES.ORG,
@@ -1205,22 +1329,218 @@ export const ACTORTYPES_CONFIG = {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 2, // sector
-      },
-      {
-        id: 'associations', // one row per type,
-        type: 'associations', // one row per type,
+        minSize: 'ms',
       },
       {
         id: 'members', // one row per type,
         type: 'members', // one row per type,
+        type_id: ACTORTYPES.CONTACT,
+        minSize: 'small',
+      },
+      {
+        id: 'associations', // one row per type,
+        type: 'associations', // one row per type,
+        title: 'Affiliation',
+        minSize: 'hidden',
       },
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        minSize: 'medium',
+      },
+      {
+        id: `action_${ACTIONTYPES.INTERACTION}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.INTERACTION,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'medium',
+        showOnSingle: false,
+      },
+      {
+        id: `action_${ACTIONTYPES.EXPRESS}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.EXPRESS,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+      {
+        id: `action_${ACTIONTYPES.TASK}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.TASK,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'hidden',
+        showOnSingle: false,
       },
     ],
+    form: [
+      {
+        id: 'footer',
+        fields: [
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+          { attribute: 'private', needsAdminOrOwn: true },
+          { attribute: 'draft', needsAdminOrOwn: true },
+        ],
+      },
+      {
+        id: 'main',
+        title: 'Main',
+        sections: [
+          {
+            id: 'name',
+            title: 'Title & sector',
+            rows: [
+              [
+                {
+                  attribute: 'title',
+                  required: true,
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'code',
+                  needsAdmin: true,
+                  basis: '1/3',
+                },
+              ],
+              [{
+                taxonomy: 2, // sector
+                basis: '2/3',
+              }],
+            ],
+          },
+          {
+            id: 'staff',
+            title: 'Assigned staff',
+            rows: [
+              [
+                {
+                  connection: API.USERS,
+                  prepopulate: true, // current user
+                  basis: '2/3',
+                },
+              ],
+            ],
+          },
+          {
+            id: 'contact',
+            title: 'Email & website',
+            asColumns: ['2/3'],
+            rows: [
+              [
+                {
+                  attribute: 'email',
+                },
+                {
+                  attribute: 'url',
+                },
+              ],
+            ], // rows
+          }, // section
+          {
+            id: 'content',
+            title: 'Description, notes,  summary of activities',
+            rows: [
+              [{
+                attribute: 'description',
+              }],
+              [{
+                attribute: 'activity_summary',
+                hideByDefault: true,
+              }],
+            ], // rows
+          }, // section
+        ], //
+      }, // step
+      {
+        id: 'stakeholders',
+        title: 'Associated stakeholders',
+        titleSmall: 'Stakeholders',
+        sections: [
+          {
+            id: 'stakeholders',
+            title: 'Country and Groups the Organisation belongs to',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.GROUP,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+          {
+            id: 'members',
+            title: 'Members of the organisation',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.CONTACT,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ], // sections
+      }, // step
+      {
+        id: 'activities',
+        title: 'Activities & outreach',
+        sections: [
+          {
+            id: 'statements',
+            title: 'Statements',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EXPRESS,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+          {
+            id: 'interactions',
+            title: 'Interactions & Events',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.INTERACTION,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EVENT,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+          {
+            id: 'outreach',
+            title: 'Tasks the organisation is targeted by',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.TASK,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+    ], // steps
   },
-  3: {
+  3: { // CONTACT
     id: ACTORTYPES.CONTACT,
     order: 5,
     columns: [
@@ -1228,16 +1548,227 @@ export const ACTORTYPES_CONFIG = {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 3, // role
+        minSize: 'ms',
       },
       {
         id: 'associations', // one row per type,
         type: 'associations', // one row per type,
+        title: 'Affiliation',
+        minSize: 'small',
       },
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        minSize: 'medium',
+      },
+      {
+        id: `action_${ACTIONTYPES.INTERACTION}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.INTERACTION,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'medium',
+        showOnSingle: false,
+      },
+      {
+        id: `action_${ACTIONTYPES.EXPRESS}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.EXPRESS,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'large',
+        showOnSingle: false,
+      },
+      {
+        id: `action_${ACTIONTYPES.TASK}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.TASK,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'large',
+        showOnSingle: false,
       },
     ],
+    form: [
+      {
+        id: 'footer',
+        fields: [
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+          { attribute: 'private', needsAdminOrOwn: true },
+          { attribute: 'draft', needsAdminOrOwn: true },
+        ],
+      },
+      {
+        id: 'main',
+        title: 'Main',
+        sections: [
+          {
+            id: 'name',
+            title: 'Name & role',
+            rows: [
+              [
+                {
+                  attribute: 'title',
+                  label: 'name',
+                  required: true,
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'prefix',
+                  basis: '1/3',
+                },
+              ],
+              [{
+                taxonomy: 3,
+                basis: '2/3',
+              }],
+            ],
+          },
+          {
+            id: 'staff',
+            title: 'Assigned staff',
+            rows: [
+              [
+                {
+                  connection: API.USERS,
+                  prepopulate: true, // current user
+                  basis: '2/3',
+                },
+              ],
+            ],
+          },
+          {
+            id: 'contact',
+            title: 'Contact details',
+            asColumns: ['2/3'],
+            rows: [
+              [
+                {
+                  attribute: 'email',
+                  required: true,
+                },
+                {
+                  attribute: 'phone',
+                },
+                {
+                  attribute: 'address',
+                },
+                {
+                  attribute: 'url',
+                },
+              ],
+            ], // rows
+          }, // section
+          {
+            id: 'content',
+            title: 'Description, notes, summary of activities',
+            rows: [
+              [{
+                attribute: 'description',
+              }],
+              [{
+                attribute: 'activity_summary',
+                hideByDefault: true,
+              }],
+            ], // rows
+          }, // section
+        ], //
+      }, // step
+      {
+        id: 'stakeholders',
+        title: 'Associated stakeholders',
+        titleSmall: 'Stakeholders',
+        sections: [
+          {
+            id: 'stakeholders',
+            title: 'Stakeholders the contact belongs to',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.GROUP,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.ORG,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ], // sections
+      }, // step
+      {
+        id: 'activities',
+        title: 'Activities',
+        sections: [
+          {
+            id: 'statements',
+            title: 'Statements',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EXPRESS,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+          {
+            id: 'interactions',
+            title: 'Interactions & Events',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.INTERACTION,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EVENT,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+      {
+        id: 'outreach',
+        title: 'Outreach',
+        sections: [
+          {
+            id: 'outreach',
+            title: 'Outreach the contact is targeted by',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.TASK,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.OP,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.AP,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+    ], // steps
   },
   4: { // REG
     id: ACTORTYPES.REG,
@@ -1247,16 +1778,135 @@ export const ACTORTYPES_CONFIG = {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 4, // region type
+        minSize: 'large',
       },
       {
-        id: 'members', // one row per type,
+        id: `members_${ACTORTYPES.COUNTRY}`, // one row per type,
         type: 'members', // one row per type,
+        type_id: ACTORTYPES.COUNTRY,
+        minSize: 'small',
       },
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        minSize: 'ms',
+      },
+      {
+        id: `action_${ACTIONTYPES.TASK}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.TASK,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'medium',
+        showOnSingle: false,
       },
     ],
+    form: [
+      {
+        id: 'footer',
+        fields: [
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+          { attribute: 'private', needsAdminOrOwn: true },
+          { attribute: 'draft', needsAdminOrOwn: true },
+        ],
+      },
+      {
+        id: 'main',
+        title: 'Main',
+        sections: [
+          {
+            id: 'name',
+            title: 'Title & type',
+            rows: [
+              [
+                {
+                  attribute: 'title',
+                  required: true,
+                  basis: '2/3',
+                },
+              ],
+              [{
+                taxonomy: 4, // region type
+                basis: '2/3',
+              }],
+            ],
+          },
+          {
+            id: 'staff',
+            title: 'Assigned staff',
+            rows: [
+              [
+                {
+                  connection: API.USERS,
+                  prepopulate: true, // current user
+                  basis: '2/3',
+                },
+              ],
+            ],
+          },
+          {
+            id: 'content',
+            title: 'Description, notes, summary of activities',
+            rows: [
+              [{
+                attribute: 'description',
+              }],
+              [{
+                attribute: 'activity_summary',
+                hideByDefault: true,
+              }],
+            ], // rows
+          }, // section
+        ], //
+      }, // step
+      {
+        id: 'stakeholders',
+        title: 'Countries',
+        titleSmall: 'Countries',
+        sections: [
+          {
+            id: 'members',
+            title: 'Countries (Members of Region)',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ], // sections
+      }, // step
+      {
+        id: 'outreach',
+        title: 'Outreach',
+        sections: [
+          {
+            id: 'outreach',
+            title: 'Outreach the region is targeted by',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.TASK,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.OP,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.AP,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+    ], // steps
   },
   5: { // GROUP
     id: ACTORTYPES.GROUP,
@@ -1266,23 +1916,240 @@ export const ACTORTYPES_CONFIG = {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 5, // group type
+        minSize: 'large',
       },
       {
-        id: 'members', // one row per type,
+        id: `members_${ACTORTYPES.COUNTRY}`, // one row per type,
         type: 'members', // one row per type,
+        type_id: ACTORTYPES.COUNTRY,
+        title: 'Member countries',
+        minSize: 'ms',
+      },
+      {
+        id: `members_${ACTORTYPES.CONTACT}`, // one row per type,
+        type: 'members', // one row per type,
+        type_id: ACTORTYPES.CONTACT,
+        minSize: 'medium',
+      },
+      {
+        id: `members_${ACTORTYPES.ORG}`, // one row per type,
+        type: 'members', // one row per type,
+        type_id: ACTORTYPES.ORG,
+        minSize: 'hidden',
       },
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
+        minSize: 'large',
+      },
+      {
+        id: `action_${ACTIONTYPES.INTERACTION}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.INTERACTION,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'medium',
+        showOnSingle: false,
+      },
+      {
+        id: `action_${ACTIONTYPES.EXPRESS}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.EXPRESS,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'small',
+        showOnSingle: false,
+      },
+      {
+        id: `action_${ACTIONTYPES.TASK}`,
+        type: 'actiontype',
+        type_id: ACTIONTYPES.TASK,
+        actions: 'actionsByType',
+        actionsMembers: 'actionsAsMemberByType',
+        actionsChildren: 'actionsAsParentByType',
+        minSize: 'large',
+        showOnSingle: false,
       },
     ],
+    form: [
+      {
+        id: 'footer',
+        fields: [
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+          { attribute: 'private', needsAdminOrOwn: true },
+          { attribute: 'draft', needsAdminOrOwn: true },
+        ],
+      },
+      {
+        id: 'main',
+        title: 'Main',
+        sections: [
+          {
+            id: 'name',
+            title: 'Title & type',
+            rows: [
+              [
+                {
+                  attribute: 'title',
+                  required: true,
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'code',
+                  needsAdmin: true,
+                  basis: '1/3',
+                },
+              ],
+              [{
+                taxonomy: 5, // group type
+                basis: '2/3',
+              }],
+            ],
+          },
+          {
+            id: 'staff',
+            title: 'Assigned staff',
+            rows: [
+              [
+                {
+                  connection: API.USERS,
+                  prepopulate: true, // current user
+                  basis: '2/3',
+                },
+              ],
+            ],
+          },
+          {
+            id: 'contact',
+            title: 'Website',
+            asColumns: ['2/3'],
+            rows: [
+              [
+                {
+                  attribute: 'email',
+                },
+                {
+                  attribute: 'url',
+                },
+              ],
+            ], // rows
+          }, // section
+          {
+            id: 'content',
+            title: 'Description, notes, summary of activities',
+            rows: [
+              [{
+                attribute: 'description',
+              }],
+              [{
+                attribute: 'activity_summary',
+                hideByDefault: true,
+              }],
+            ], // rows
+          }, // section
+        ], //
+      }, // step
+      {
+        id: 'stakeholders',
+        title: 'Members',
+        titleSmall: 'Members',
+        sections: [
+          {
+            id: 'members',
+            title: 'Group Members',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.CONTACT,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.ORG,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ], // sections
+      }, // step
+      {
+        id: 'activities',
+        title: 'Activities',
+        sections: [
+          {
+            id: 'statements',
+            title: 'Statements',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EXPRESS,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+          {
+            id: 'interactions',
+            title: 'Interactions & Events',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.INTERACTION,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EVENT,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+      {
+        id: 'outreach',
+        title: 'Outreach',
+        sections: [
+          {
+            id: 'outreach',
+            title: 'Outreach the group is targeted by',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.TASK,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.OP,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.AP,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+    ], // steps
   },
 };
 
 export const ACTIONTYPES_CONFIG = {
   1: {
     id: ACTIONTYPES.EXPRESS,
-    order: 3,
+    order: 1,
     columns: [
       {
         id: 'date',
@@ -1292,24 +2159,249 @@ export const ACTIONTYPES_CONFIG = {
         sortDefault: true,
         attribute: 'date_start',
         fallbackAttribute: 'created_at',
-        primary: true,
+        minSize: 'medium', // default
       },
       {
         id: 'indicators',
         type: 'indicators',
         sort: 'title',
+        minSize: 'ms',
       },
       {
         id: 'taxonomy-13',
         type: 'taxonomy',
         taxonomy_id: AUTHORITY_TAXONOMY, // level of authority
+        minSize: 'medium',
       },
       {
-        id: 'actors',
+        id: 'taxonomy-7',
+        type: 'taxonomy',
+        taxonomy_id: EXPRESSFORM_TAXONOMY, // level of authority
+        minSize: 'medium',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.GROUP}`,
         type: 'actors',
         sort: 'title',
+        type_id: ACTORTYPES.GROUP,
+        minSize: 'small',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.COUNTRY}`,
+        type: 'actors',
+        sort: 'title',
+        type_id: ACTORTYPES.COUNTRY,
+        minSize: 'small',
+        showOnSingle: false,
+        includeViaParent: true,
+      },
+      {
+        id: `actors_${ACTORTYPES.CONTACT}`,
+        type: 'actors',
+        sort: 'title',
+        type_id: ACTORTYPES.CONTACT,
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.ORG}`,
+        type: 'actors',
+        sort: 'title',
+        type_id: ACTORTYPES.ORG,
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+      {
+        id: `parents_${ACTIONTYPES.EVENT}`,
+        type: 'parentActions',
+        type_id: ACTIONTYPES.EVENT,
+        sort: 'title',
+        minSize: 'large',
+        showOnSingle: false,
+      },
+      {
+        id: `parents_${ACTIONTYPES.INTERACTION}`,
+        type: 'parentActions',
+        type_id: ACTIONTYPES.INTERACTION,
+        sort: 'title',
+        minSize: 'hidden',
+        showOnSingle: false,
       },
     ],
+    form: [
+      {
+        id: 'footer',
+        fields: [
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+          { attribute: 'private', needsAdminOrOwn: true },
+          { attribute: 'draft', needsAdminOrOwn: true },
+        ],
+      },
+      {
+        id: 'main',
+        title: 'Main',
+        sections: [
+          {
+            id: 'main',
+            title: 'General info',
+            asColumns: ['1/3', '2/3'],
+            rows: [
+              [{
+                attribute: 'date_start',
+                prepopulate: true, // today
+              },
+              {
+                attribute: 'date_comment',
+                fieldType: 'textarea',
+                hideByDefault: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EVENT,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+          {
+            id: 'indicators',
+            title: 'Topic positions',
+            rows: [
+              [{
+                connection: API.INDICATORS,
+              }],
+            ],
+          },
+          {
+            id: 'categories',
+            title: 'Type of statement',
+            rows: [
+              [
+                { taxonomy: 7, basis: '1/2' }, // form
+                { taxonomy: 13, basis: '1/2' }, // authority
+              ],
+              [
+                { taxonomy: 8, basis: '1/2' }, // tags
+              ],
+            ], // rows
+          }, // section
+          {
+            id: 'content',
+            title: 'Main content',
+            rows: [
+              [
+                {
+                  attribute: 'title',
+                  required: true,
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'code',
+                  needsAdmin: true,
+                  basis: '1/3',
+                },
+              ],
+              [{
+                attribute: 'url',
+                basis: '2/3',
+              }],
+              [{
+                attribute: 'description',
+              }],
+              [{
+                attribute: 'comment',
+                hideByDefault: true,
+              }],
+            ], // rows
+          }, // section
+        ], //
+      }, // step
+      {
+        id: 'stakeholders',
+        title: 'Issuing Stakeholders',
+        titleSmall: 'Stakeholders',
+        sections: [
+          {
+            id: 'stakeholders',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.CONTACT,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.GROUP,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.ORG,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ], // sections
+      }, // step
+      {
+        id: 'outreach',
+        title: 'Related Outreach',
+        titleSmall: 'Outreach',
+        sections: [
+          {
+            id: 'outreach',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.INTERACTION,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EVENT,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+      {
+        id: 'other',
+        title: 'Related Resources',
+        titleSmall: 'Resources',
+        sections: [
+          {
+            id: 'resources',
+            rows: [
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.REF,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.WEB,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.DOC,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+    ], // steps
   },
   2: {
     id: ACTIONTYPES.EVENT,
@@ -1323,24 +2415,265 @@ export const ACTIONTYPES_CONFIG = {
         sortOrder: 'desc',
         sortDefault: true,
         attribute: 'date_start',
-        primary: true,
+        minSize: 'medium',
+        title: 'Date (start)',
+      },
+      {
+        id: 'date_end',
+        type: 'date',
+        sort: 'date',
+        sortOrder: 'desc',
+        attribute: 'date_end',
+        minSize: 'medium',
+        title: 'Date (end)',
+        showOnSingle: false,
       },
       {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 9, // event type
-      },
-      {
-        id: 'actors', // one row per type,
-        type: 'actors', // one row per type,
-        showOnSingle: false,
+        minSize: 'hidden',
       },
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
         adminOnly: true,
+        minSize: 'small',
+      },
+      {
+        id: `childActions_${ACTIONTYPES.INTERACTION}`, // one row per type,
+        type: 'childActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.INTERACTION,
+        minSize: 'ms',
+      },
+      {
+        id: `childActions_${ACTIONTYPES.EXPRESS}`, // one row per type,
+        type: 'childActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.EXPRESS,
+        minSize: 'medium',
+      },
+      {
+        id: `childActions_${ACTIONTYPES.TASK}`, // one row per type,
+        type: 'childActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.TASK,
+        minSize: 'large',
+      },
+      {
+        id: `childActions_${ACTIONTYPES.OP}`, // one row per type,
+        type: 'childActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.OP,
+        minSize: 'hidden',
+      },
+      {
+        id: `parentActions_${ACTIONTYPES.AP}`, // one row per type,
+        type: 'parentActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.AP,
+        minSize: 'hidden',
+      },
+      {
+        id: 'actors', // one row per type,
+        type: 'actors', // one row per type,
+        showOnSingle: false,
+        minSize: 'large',
       },
     ],
+    form: [
+      {
+        id: 'footer',
+        fields: [
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+          { attribute: 'private', needsAdminOrOwn: true },
+          { attribute: 'draft', needsAdminOrOwn: true },
+        ],
+      },
+      {
+        id: 'main',
+        title: 'Main',
+        sections: [
+          {
+            id: 'date',
+            title: '(Target) date',
+            rows: [
+              [{
+                attribute: 'date_start',
+                basis: '1/3',
+              },
+              {
+                attribute: 'date_end',
+                basis: '1/3',
+              }],
+              [{
+                attribute: 'date_comment',
+                fieldType: 'textarea',
+                hideByDefault: true,
+              }],
+            ],
+          },
+          {
+            id: 'staff',
+            title: 'Assigned/participating staff',
+            rows: [
+              [
+                {
+                  connection: API.USERS,
+                  prepopulate: true, // current user
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'notifications',
+                  basis: '1/3',
+                },
+              ],
+            ],
+          },
+          {
+            id: 'statements',
+            title: 'Event statements',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EXPRESS,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+          {
+            id: 'categories',
+            title: 'Type of event',
+            rows: [
+              [
+                { taxonomy: 9, basis: '1/2' }, // event type
+              ],
+            ], // rows
+          }, // section
+          {
+            id: 'content',
+            title: 'Main content',
+            rows: [
+              [
+                {
+                  attribute: 'title',
+                  required: true,
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'code',
+                  needsAdmin: true,
+                  basis: '1/3',
+                },
+              ],
+              [{
+                attribute: 'url',
+                basis: '2/3',
+              }],
+              [{
+                attribute: 'description',
+              }],
+              [{
+                attribute: 'comment',
+                hideByDefault: true,
+              }],
+            ], // rows
+          }, // section
+        ], //
+      }, // step
+      {
+        id: 'stakeholders',
+        title: 'Participating stakeholders',
+        titleSmall: 'Stakeholders',
+        sections: [
+          {
+            id: 'stakeholders',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.CONTACT,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.GROUP,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.ORG,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ], // sections
+      }, // step
+      {
+        id: 'outreach',
+        title: 'Related Outreach',
+        titleSmall: 'Outreach',
+        sections: [
+          {
+            id: 'outreach',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.INTERACTION,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.TASK,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.OP,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.AP,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+      {
+        id: 'other',
+        title: 'Related Resources',
+        titleSmall: 'Resources',
+        sections: [
+          {
+            id: 'resources',
+            rows: [
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.WEB,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.DOC,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+    ], // steps
   },
   3: {
     id: ACTIONTYPES.OP,
@@ -1348,86 +2681,541 @@ export const ACTIONTYPES_CONFIG = {
     is_code_public: true,
     columns: [
       {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+        adminOnly: true,
+        minSize: 'medium',
+      },
+      {
         id: 'date',
         type: 'date',
         sort: 'date',
         sortOrder: 'desc',
         sortDefault: true,
         attribute: 'date_start',
-        primary: true,
+        minSize: 'large',
       },
       {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 10, // event type
+        minSize: 'large',
       },
       {
-        id: 'childActions', // one row per type,
-        type: 'childActions', // one row per type,
+        id: `actions_${ACTIONTYPES.TASK}`,
+        type: 'childActions',
+        type_id: ACTIONTYPES.TASK,
+        minSize: 'large',
         showOnSingle: false,
       },
       {
-        id: 'targets', // one row per type,
-        type: 'targets', // one row per type,
-        sort: 'title',
-      },
-      {
-        id: 'targetsViaChildren', // one row per type,
-        type: 'targetsViaChildren', // one row per type,
-        sort: 'title',
+        id: `actions_${ACTIONTYPES.EVENT}`,
+        type: 'parentActions',
+        type_id: ACTIONTYPES.EVENT,
+        minSize: 'large',
         showOnSingle: false,
       },
       {
-        id: 'users', // one row per type,
-        type: 'users', // one row per type,
-        adminOnly: true,
+        id: `actions_${ACTIONTYPES.INTERACTION}`,
+        type: 'parentActions',
+        type_id: ACTIONTYPES.INTERACTION,
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+      {
+        id: `actions_${ACTIONTYPES.AP}`,
+        type: 'parentActions',
+        type_id: ACTIONTYPES.AP,
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.CONTACT}`,
+        type_id: ACTORTYPES.CONTACT,
+        type: 'actors',
+        minSize: 'small',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.COUNTRY}`,
+        type_id: ACTORTYPES.COUNTRY,
+        type: 'actors',
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.GROUP}`,
+        type_id: ACTORTYPES.GROUP,
+        type: 'actors',
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.ORG}`,
+        type_id: ACTORTYPES.ORG,
+        type: 'actors',
+        minSize: 'hidden',
+        showOnSingle: false,
       },
     ],
+    form: [
+      {
+        id: 'footer',
+        fields: [
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+          { attribute: 'private', needsAdminOrOwn: true },
+          { attribute: 'draft', needsAdminOrOwn: true },
+        ],
+      },
+      {
+        id: 'main',
+        title: 'Main',
+        sections: [
+          {
+            id: 'date',
+            title: '(Target) date',
+            asColumns: ['1/3'],
+            rows: [
+              [{
+                attribute: 'date_start',
+                prepopulate: true, // today
+              },
+              {
+                attribute: 'date_comment',
+                fieldType: 'textarea',
+                hideByDefault: true,
+              }],
+            ],
+          },
+          {
+            id: 'main',
+            title: 'Assigned staff',
+            rows: [
+              [
+                {
+                  connection: API.USERS,
+                  prepopulate: true, // current user
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'notifications',
+                  basis: '1/3',
+                },
+              ],
+            ],
+          },
+          {
+            id: 'categories',
+            title: 'Priority',
+            rows: [
+              [
+                { taxonomy: 10, basis: '1/2' }, // priority
+              ],
+            ], // rows
+          }, // section
+          {
+            id: 'content',
+            title: 'Main content',
+            rows: [
+              [
+                {
+                  attribute: 'title',
+                  required: true,
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'code',
+                  needsAdmin: true,
+                  basis: '1/3',
+                },
+              ],
+              [{
+                attribute: 'url',
+                basis: '2/3',
+              }],
+              [{
+                attribute: 'description',
+              }],
+              [{
+                attribute: 'comment',
+                hideByDefault: true,
+              }],
+            ], // rows
+          }, // section
+        ], //
+      }, // step
+      {
+        id: 'stakeholders',
+        title: 'Targeted stakeholders',
+        titleSmall: 'Stakeholders',
+        sections: [
+          {
+            id: 'stakeholders',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.CONTACT,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.GROUP,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.REG,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.ORG,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ], // sections
+      }, // step
+      {
+        id: 'outreach',
+        title: 'Related Outreach',
+        titleSmall: 'Outreach',
+        sections: [
+          {
+            id: 'outreach',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.INTERACTION,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.TASK,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.AP,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EVENT,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+      {
+        id: 'other',
+        title: 'Related Resources',
+        titleSmall: 'Resources',
+        sections: [
+          {
+            id: 'resources',
+            rows: [
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.WEB,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.DOC,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+    ], // steps
   },
   4: {
     id: ACTIONTYPES.AP,
     order: 6,
     columns: [
       {
+        id: 'users', // one row per type,
+        type: 'users', // one row per type,
+        adminOnly: true,
+        minSize: 'medium',
+      },
+      {
         id: 'date',
         type: 'date',
         sort: 'date',
         sortOrder: 'desc',
         sortDefault: true,
         attribute: 'date_start',
-        primary: true,
+        minSize: 'large',
       },
       {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 10, // event type
+        minSize: 'large',
       },
       {
-        id: 'childActions', // one row per type,
-        type: 'childActions', // one row per type,
+        id: `actions_${ACTIONTYPES.TASK}`,
+        type: 'childActions',
+        type_id: ACTIONTYPES.TASK,
+        minSize: 'large',
         showOnSingle: false,
       },
       {
-        id: 'targets',
-        type: 'targets',
-        sort: 'title',
+        id: `actions_${ACTIONTYPES.EVENT}`,
+        type: 'parentActions',
+        type_id: ACTIONTYPES.EVENT,
+        minSize: 'hidden',
+        showOnSingle: false,
       },
       {
-        id: 'targetsViaChildren', // one row per type,
-        type: 'targetsViaChildren', // one row per type,
-        sort: 'title',
+        id: `actions_${ACTIONTYPES.INTERACTION}`,
+        type: 'parentActions',
+        type_id: ACTIONTYPES.INTERACTION,
+        minSize: 'hidden',
+        showOnSingle: false,
       },
+      {
+        id: `actions_${ACTIONTYPES.AP}`,
+        type: 'parentActions',
+        type_id: ACTIONTYPES.AP,
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.CONTACT}`,
+        type_id: ACTORTYPES.CONTACT,
+        type: 'actors',
+        minSize: 'small',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.COUNTRY}`,
+        type_id: ACTORTYPES.COUNTRY,
+        type: 'actors',
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.GROUP}`,
+        type_id: ACTORTYPES.GROUP,
+        type: 'actors',
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.ORG}`,
+        type_id: ACTORTYPES.ORG,
+        type: 'actors',
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+    ],
+    form: [
+      {
+        id: 'footer',
+        fields: [
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+          { attribute: 'private', needsAdminOrOwn: true },
+          { attribute: 'draft', needsAdminOrOwn: true },
+        ],
+      },
+      {
+        id: 'main',
+        title: 'Main',
+        sections: [
+          {
+            id: 'date',
+            title: '(Target) date',
+            asColumns: ['1/3'],
+            rows: [
+              [{
+                attribute: 'date_start',
+                prepopulate: true, // today
+              },
+              {
+                attribute: 'date_comment',
+                fieldType: 'textarea',
+                hideByDefault: true,
+              }],
+            ],
+          },
+          {
+            id: 'main',
+            title: 'Assigned staff',
+            rows: [
+              [
+                {
+                  connection: API.USERS,
+                  prepopulate: true, // current user
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'notifications',
+                  basis: '1/3',
+                },
+              ],
+            ],
+          },
+          {
+            id: 'categories',
+            title: 'Priority',
+            rows: [
+              [
+                { taxonomy: 10, basis: '1/2' }, // priority
+              ],
+            ], // rows
+          }, // section
+          {
+            id: 'content',
+            title: 'Main content',
+            rows: [
+              [
+                {
+                  attribute: 'title',
+                  required: true,
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'code',
+                  needsAdmin: true,
+                  basis: '1/3',
+                },
+              ],
+              [{
+                attribute: 'url',
+                basis: '2/3',
+              }],
+              [{
+                attribute: 'description',
+              }],
+              [{
+                attribute: 'comment',
+                hideByDefault: true,
+              }],
+            ], // rows
+          }, // section
+        ], //
+      }, // step
+      {
+        id: 'stakeholders',
+        title: 'Targeted Stakeholders',
+        titleSmall: 'Stakeholders',
+        sections: [
+          {
+            id: 'stakeholders',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.CONTACT,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.GROUP,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.REG,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.ORG,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ], // sections
+      }, // step
+      {
+        id: 'outreach',
+        title: 'Related Outreach',
+        titleSmall: 'Outreach',
+        sections: [
+          {
+            id: 'outreach',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.INTERACTION,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.TASK,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.OP,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EVENT,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+      {
+        id: 'other',
+        title: 'Related Resources',
+        titleSmall: 'Resources',
+        sections: [
+          {
+            id: 'resources',
+            rows: [
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.WEB,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.DOC,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+    ], // steps
+  },
+  5: {
+    id: ACTIONTYPES.TASK,
+    order: 3,
+    columns: [
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
         adminOnly: true,
+        minSize: 'medium',
       },
-    ],
-  },
-  5: {
-    id: ACTIONTYPES.TASK,
-    order: 1,
-    columns: [
       {
         id: 'date',
         type: 'date',
@@ -1435,33 +3223,261 @@ export const ACTIONTYPES_CONFIG = {
         sortOrder: 'desc',
         sortDefault: true,
         attribute: 'date_start',
-        primary: true,
+        minSize: 'large',
       },
       {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 11, // status
+        minSize: 'large',
       },
       {
         id: 'taxonomy-10',
         type: 'taxonomy',
         taxonomy_id: 10, // priority
+        minSize: 'large',
       },
       {
-        id: 'parentActions', // one row per type,
-        type: 'parentActions', // one row per type,
+        id: `actors_${ACTORTYPES.CONTACT}`,
+        type_id: ACTORTYPES.CONTACT,
+        type: 'actors',
+        minSize: 'small',
         showOnSingle: false,
       },
       {
-        id: 'targets', // one row per type,
-        type: 'targets', // one row per type,
+        id: `actors_${ACTORTYPES.COUNTRY}`,
+        type_id: ACTORTYPES.COUNTRY,
+        type: 'actors',
+        minSize: 'ms',
+        showOnSingle: false,
       },
       {
-        id: 'users', // one row per type,
-        type: 'users', // one row per type,
-        adminOnly: true,
+        id: `actors_${ACTORTYPES.GROUP}`,
+        type_id: ACTORTYPES.GROUP,
+        type: 'actors',
+        minSize: 'medium',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.ORG}`,
+        type_id: ACTORTYPES.ORG,
+        type: 'actors',
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+      {
+        id: `parentActions_${ACTIONTYPES.EVENT}`, // one row per type,
+        type: 'parentActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.EVENT,
+        minSize: 'hidden',
+      },
+      {
+        id: `parentActions_${ACTIONTYPES.OP}`, // one row per type,
+        type: 'parentActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.OP,
+        minSize: 'hidden',
+      },
+      {
+        id: `parentActions_${ACTIONTYPES.AP}`, // one row per type,
+        type: 'parentActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.AP,
+        title: 'Advocacy plans',
+        minSize: 'hidden',
+      },
+      {
+        id: `actions_${ACTIONTYPES.INTERACTION}`,
+        type: 'childActions',
+        type_id: ACTIONTYPES.INTERACTION,
+        minSize: 'hidden',
+        showOnSingle: false,
       },
     ],
+    form: [
+      {
+        id: 'footer',
+        fields: [
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+          { attribute: 'private', needsAdminOrOwn: true },
+          { attribute: 'draft', needsAdminOrOwn: true },
+        ],
+      },
+      {
+        id: 'main',
+        title: 'Main',
+        sections: [
+          {
+            id: 'date',
+            title: 'Target date',
+            asColumns: ['1/3'],
+            rows: [
+              [{
+                attribute: 'date_start',
+                prepopulate: true, // today
+              },
+              {
+                attribute: 'date_comment',
+                fieldType: 'textarea',
+                hideByDefault: true,
+              }],
+            ],
+          },
+          {
+            id: 'staff',
+            title: 'Assigned staff',
+            rows: [
+              [
+                {
+                  connection: API.USERS,
+                  prepopulate: true, // current user
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'notifications',
+                  basis: '1/3',
+                },
+              ],
+            ],
+          },
+          {
+            id: 'categories',
+            title: 'Priority & status',
+            rows: [
+              [
+                { taxonomy: 10 },
+                { taxonomy: 11 },
+              ],
+            ], // rows
+          }, // section
+          {
+            id: 'content',
+            title: 'Main content',
+            rows: [
+              [
+                {
+                  attribute: 'title',
+                  required: true,
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'code',
+                  needsAdmin: true,
+                  basis: '1/3',
+                },
+              ],
+              [{
+                attribute: 'url',
+                basis: '2/3',
+              }],
+              [{
+                attribute: 'description',
+              }],
+              [{
+                attribute: 'comment',
+                hideByDefault: true,
+              }],
+            ], // rows
+          }, // section
+        ], //
+      }, // step
+      {
+        id: 'stakeholders',
+        title: 'Targeted Stakeholders',
+        titleSmall: 'Stakeholders',
+        sections: [
+          {
+            id: 'stakeholders',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.CONTACT,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.GROUP,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.REG,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.ORG,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ], // sections
+      }, // step
+      {
+        id: 'outreach',
+        title: 'Related Outreach',
+        titleSmall: 'Outreach',
+        sections: [
+          {
+            id: 'outreach',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.INTERACTION,
+                asChildren: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.OP,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.AP,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EVENT,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+      {
+        id: 'other',
+        title: 'Related Resources',
+        titleSmall: 'Resources',
+        sections: [
+          {
+            id: 'resources',
+            rows: [
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.WEB,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.DOC,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+    ], // steps
   },
   6: {
     id: ACTIONTYPES.INTERACTION,
@@ -1474,24 +3490,663 @@ export const ACTIONTYPES_CONFIG = {
         sortOrder: 'desc',
         sortDefault: true,
         attribute: 'date_start',
-        primary: true,
+        minSize: 'small',
       },
       {
         id: 'taxonomy',
         type: 'taxonomy',
         taxonomy_id: 12, // interaction type
+        minSize: 'large',
       },
       {
-        id: 'actors', // one row per type,
-        type: 'actors', // one row per type,
+        id: `actors_${ACTORTYPES.CONTACT}`,
+        type_id: ACTORTYPES.CONTACT,
+        type: 'actors',
+        minSize: 'ms',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.COUNTRY}`,
+        type_id: ACTORTYPES.COUNTRY,
+        type: 'actors',
+        minSize: 'medium',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.GROUP}`,
+        type_id: ACTORTYPES.GROUP,
+        type: 'actors',
+        minSize: 'medium',
+        showOnSingle: false,
+      },
+      {
+        id: `actors_${ACTORTYPES.ORG}`,
+        type_id: ACTORTYPES.ORG,
+        type: 'actors',
+        minSize: 'hidden',
+        showOnSingle: false,
+      },
+      {
+        id: `parentActions_${ACTIONTYPES.EVENT}`, // one row per type,
+        type: 'parentActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.EVENT,
+        minSize: 'large',
+      },
+      {
+        id: `parentActions_${ACTIONTYPES.TASK}`, // one row per type,
+        type: 'parentActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.TASK,
+        minSize: 'hidden',
+      },
+      {
+        id: `parentActions_${ACTIONTYPES.OP}`, // one row per type,
+        type: 'parentActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.OP,
+        minSize: 'hidden',
+      },
+      {
+        id: `parentActions_${ACTIONTYPES.AP}`, // one row per type,
+        type: 'parentActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.AP,
+        minSize: 'hidden',
+      },
+      {
+        id: `childActions_${ACTIONTYPES.EXPRESS}`, // one row per type,
+        type: 'childActions', // one row per type,
+        showOnSingle: false,
+        type_id: ACTIONTYPES.EXPRESS,
+        minSize: 'hidden',
       },
       {
         id: 'users', // one row per type,
         type: 'users', // one row per type,
         adminOnly: true,
+        minSize: 'medium',
       },
     ],
+    form: [
+      {
+        id: 'footer',
+        fields: [
+          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+          { attribute: 'private', needsAdminOrOwn: true },
+          { attribute: 'draft', needsAdminOrOwn: true },
+        ],
+      },
+      {
+        id: 'main',
+        title: 'Main',
+        sections: [
+          {
+            id: 'main',
+            title: 'General info',
+            asColumns: ['1/3', '2/3'],
+            rows: [
+              [{
+                attribute: 'date_start',
+                prepopulate: true, // today
+                basis: '1/3',
+              },
+              {
+                attribute: 'date_comment',
+                fieldType: 'textarea',
+                hideByDefault: true,
+              },
+              ],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.EVENT,
+                asParents: true,
+                prepopulateIfPrevious: true,
+                basis: '2/3',
+              }],
+            ],
+          },
+          {
+            id: 'content',
+            title: 'Main content',
+            rows: [
+              [
+                {
+                  attribute: 'title',
+                  required: true,
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'code',
+                  // needsAdmin: true,
+                  basis: '1/3',
+                },
+              ],
+              [{
+                attribute: 'url',
+              }],
+              [{
+                attribute: 'description',
+              }],
+              [{
+                attribute: 'comment',
+                hideByDefault: true,
+              }],
+            ], // rows
+          }, // section
+        ], //
+      }, // step
+      {
+        id: 'stakeholders',
+        title: 'Participants',
+        sections: [
+          {
+            id: 'interaction',
+            title: 'Type of interaction',
+            rows: [
+              [{
+                taxonomy: 12, // interaction type,
+                type: 'pills',
+              }],
+            ],
+          },
+          {
+            id: 'staff-stakeholders',
+            title: 'Participating WWF Staff',
+            rows: [
+              [
+                {
+                  connection: API.USERS,
+                  prepopulate: true, // current user
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'notifications',
+                  basis: '1/3',
+                },
+              ],
+            ],
+          },
+          {
+            id: 'other-stakeholders',
+            title: 'Participating stakeholders',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.CONTACT,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.GROUP,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ], // sections
+      }, // step
+      {
+        id: 'outreach',
+        title: 'Related Outreach',
+        titleSmall: 'Outreach',
+        sections: [
+          {
+            id: 'outreach',
+            rows: [
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.TASK,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.OP,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTIONS,
+                type: ACTIONTYPES.AP,
+                asParents: true,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+      {
+        id: 'other',
+        title: 'Statements & resources',
+        titleSmall: 'Statements & more',
+        sections: [
+          {
+            id: 'statements',
+            title: 'Related Statements',
+            rows: [[{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.EXPRESS,
+              asChildren: true,
+              prepopulateIfPrevious: true,
+            }]],
+          },
+          {
+            id: 'resources',
+            title: 'Related Resources',
+            rows: [
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.WEB,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.RESOURCES,
+                type: RESOURCETYPES.DOC,
+                prepopulateIfPrevious: true,
+              }],
+            ],
+          },
+        ],
+      }, // step
+    ], // steps
   },
+};
+
+export const RESOURCETYPES_CONFIG = {
+  form: [
+    {
+      id: 'footer',
+      fields: [
+        { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+        { attribute: 'private', needsAdminOrOwn: true },
+        { attribute: 'draft', needsAdminOrOwn: true },
+      ],
+    },
+    {
+      id: 'main',
+      title: 'All content',
+      sections: [
+        {
+          id: 'content',
+          rows: [
+            [{
+              attribute: 'title',
+              required: true,
+              basis: '2/3',
+            }],
+            [{
+              attribute: 'url',
+              basis: '2/3',
+            }],
+            [{
+              attribute: 'publication_date',
+              basis: '1/2',
+            },
+            {
+              attribute: 'access_date',
+              basis: '1/2',
+            }],
+            [{
+              attribute: 'description',
+              hideByDefault: true,
+            }],
+          ], // rows
+        }, // section
+      ], // sectipms
+    },
+  ], // steps
+};
+
+export const INDICATOR_CONFIG = {
+  form: [
+    {
+      id: 'footer',
+      fields: [
+        { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+        { attribute: 'private', needsAdminOrOwn: true },
+        { attribute: 'draft', needsAdminOrOwn: true },
+      ],
+    },
+    {
+      id: 'main',
+      title: 'All content',
+      sections: [
+        {
+          id: 'content',
+          rows: [
+            [
+              {
+                attribute: 'code',
+                needsAdmin: true,
+                basis: '1/3',
+              },
+            ],
+            [
+              {
+                attribute: 'title',
+                required: true,
+                basis: '2/3',
+              },
+              {
+                attribute: 'reference',
+                label: 'order',
+                placeholder: 'order',
+              },
+            ],
+            [{
+              attribute: 'description',
+            }],
+          ], // rows
+        }, // section,
+        {
+          id: 'activities',
+          title: 'Statements (with Level of Support)',
+          rows: [
+            [{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.EXPRESS,
+              prepopulateIfPrevious: true,
+            }],
+          ],
+        }, // section,
+      ], // sections
+    }, // step
+  ],
+};
+export const PAGE_CONFIG = {
+  attributes: {
+    draft: {
+      defaultValue: true,
+      controlType: 'checkbox',
+      type: 'bool',
+    },
+    private: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    title: {
+      type: 'text',
+      required: true,
+    },
+    content: {
+      type: 'markdown',
+      required: true,
+    },
+    menu_title: {
+      type: 'short',
+    },
+    order: {
+      type: 'short',
+    },
+  },
+  form: [
+    {
+      id: 'footer',
+      fields: [
+        { attribute: 'private', needsAdminOrOwn: true },
+        { attribute: 'draft', needsAdminOrOwn: true },
+      ],
+    },
+    {
+      id: 'main',
+      title: 'All content',
+      sections: [
+        {
+          id: 'content',
+          rows: [
+            [{
+              attribute: 'title',
+              required: true,
+              basis: '2/3',
+            }],
+            [
+              {
+                attribute: 'menu_title',
+                basis: '1/3',
+              },
+              {
+                attribute: 'order',
+                basis: '1/3',
+              },
+            ],
+            [{
+              attribute: 'content',
+              required: true,
+            }],
+          ], // rows
+        }, // section,
+      ], // sections
+    }, // step
+  ],
+};
+export const CATEGORY_CONFIG = {
+  attributes: {
+    draft: {
+      defaultValue: true,
+      controlType: 'checkbox',
+      type: 'bool',
+    },
+    private: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    is_archive: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    reference: {
+      type: 'short',
+    },
+    title: {
+      type: 'text',
+      required: true,
+    },
+    short_title: {
+      type: 'short',
+    },
+    description: {
+      type: 'markdown',
+    },
+    url: {
+      type: 'url',
+    },
+  },
+  form: [
+    {
+      id: 'footer',
+      fields: [
+        { attribute: 'is_archive', needsAdmin: true, skipNew: true },
+        { attribute: 'private', needsAdminOrOwn: true },
+        { attribute: 'draft', needsAdminOrOwn: true },
+      ],
+    },
+    {
+      id: 'main',
+      title: 'All content',
+      sections: [
+        {
+          id: 'content',
+          rows: [
+            [
+              {
+                attribute: 'title',
+                required: true,
+                basis: '2/3',
+              },
+              {
+                attribute: 'reference',
+                label: 'order',
+                placeholder: 'order',
+                basis: '1/3',
+              },
+            ],
+            [{
+              attribute: 'short_title',
+            }],
+            [{
+              attribute: 'url',
+            }],
+            [{
+              attribute: 'description',
+            }],
+          ], // rows
+        }, // section,
+      ], // sections
+    }, // step
+  ],
+};
+export const USER_CONFIG = {
+  attributes: {
+    draft: {
+      defaultValue: true,
+      controlType: 'checkbox',
+      type: 'bool',
+    },
+    private: {
+      defaultValue: false,
+      required: true,
+      type: 'bool',
+    },
+    name: {
+      type: 'text',
+      required: true,
+    },
+    email: {
+      type: 'text',
+      required: true,
+    },
+
+  },
+  form: [
+    {
+      id: 'main',
+      title: 'User data',
+      sections: [
+        {
+          id: 'content',
+          title: 'User Details',
+          rows: [
+            [{
+              attribute: 'name',
+              required: true,
+              basis: '2/3',
+            }],
+            [
+              {
+                attribute: 'email',
+                required: true,
+                basis: '2/3',
+              },
+            ],
+          ], // rows
+        }, // section,
+        {
+          id: 'role',
+          title: 'User Role',
+          needsAdmin: true,
+          rows: [
+            [{
+              connection: API.ROLES,
+              needsAdmin: true,
+              basis: '2/3',
+            }],
+          ], // rows
+        }, // section,
+      ], // sections
+    }, // step
+    {
+      id: 'stakeholders',
+      title: 'Stakeholders',
+      needsMember: true,
+      sections: [
+        {
+          id: 'content',
+          title: 'Contacts',
+          rows: [
+            [{
+              connection: API.ACTORS,
+              type: ACTORTYPES.CONTACT,
+            }],
+          ], // rows
+        }, // section,
+        {
+          id: 'content1',
+          title: 'Countries & Organisations',
+          rows: [
+            [{
+              connection: API.ACTORS,
+              type: ACTORTYPES.COUNTRY,
+            }],
+            [{
+              connection: API.ACTORS,
+              type: ACTORTYPES.ORG,
+            }],
+          ], // rows
+        }, // section,
+        {
+          id: 'content2',
+          title: 'Countries Groups & Regions',
+          rows: [
+            [{
+              connection: API.ACTORS,
+              type: ACTORTYPES.GROUP,
+            }],
+            [{
+              connection: API.ACTORS,
+              type: ACTORTYPES.REG,
+            }],
+          ], // rows
+        }, // section,
+      ], // sections
+    }, // step
+    {
+      id: 'outreach',
+      title: 'Outreach',
+      needsMember: true,
+      sections: [
+        {
+          id: 'content',
+          title: 'Assigned Tasks & Plans',
+          rows: [
+            [{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.TASK,
+            }],
+            [{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.OP,
+            }],
+            [{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.AP,
+            }],
+          ], // rows
+        }, // section,
+        {
+          id: 'content2',
+          title: 'Interactions & Events',
+          rows: [
+            [{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.INTERACTION,
+            }],
+            [{
+              connection: API.ACTIONS,
+              type: ACTIONTYPES.EVENT,
+            }],
+          ], // rows
+        }, // section,
+      ], // sections
+    }, // step
+  ],
 };
 
 export const KEEP_FILTERS = ['view', 'ms', 'subj', 'msubj', 'tm', 'am'];
@@ -1558,7 +4213,7 @@ export const TEXT_TRUNCATE = {
   TYPE_SELECT: 24,
   GRACE: 2,
   META_TITLE: 20,
-  INDICATOR_SELECT: 30,
+  INDICATOR_SELECT: 35,
   INDICATOR_SELECT_OPTION: 40,
 };
 
@@ -1613,29 +4268,32 @@ export const USER_ROLES = {
   VISITOR: { value: 3, message: 'ui.userRoles.visitor', order: 4 },
   DEFAULT: { value: 9999, message: 'ui.userRoles.default', order: 9999 }, // note: client side only - no role assigned on server
 };
-// Entity publish statuses
-export const PUBLISH_STATUSES = [
-  { value: true, message: 'ui.publishStatuses.draft' },
-  { value: false, message: 'ui.publishStatuses.public' },
-];
-// Entity publish statuses
-export const PRIVACY_STATUSES = [
-  { value: false, message: 'ui.privacyStatuses.public' },
-  { value: true, message: 'ui.privacyStatuses.private' },
-];
-export const NOTIFICATION_STATUSES = [
-  { value: true, message: 'ui.notificationStatuses.enabled' },
-  { value: false, message: 'ui.notificationStatuses.disabled' },
-];
-export const ARCHIVE_STATUSES = [
-  { value: false, message: 'ui.archiveStatuses.current' },
-  { value: true, message: 'ui.archiveStatuses.archived' },
-];
+
 export const EMAIL_STATUSES = [
   { value: 'valid', message: 'ui.emailStatuses.valid' },
   { value: 'invalid', message: 'ui.emailStatuses.invalid' },
   { value: 'empty', message: 'ui.emailStatuses.empty' },
 ];
+
+export const ATTRIBUTE_STATUSES = {
+  // Entity publish statuses
+  draft: [
+    { value: true, message: 'ui.publishStatuses.draft' },
+    { value: false, message: 'ui.publishStatuses.public' },
+  ],
+  private: [
+    { value: true, message: 'ui.privacyStatuses.private' },
+    { value: false, message: 'ui.privacyStatuses.public' },
+  ],
+  notifications: [
+    { value: true, message: 'ui.notificationStatuses.enabled' },
+    { value: false, message: 'ui.notificationStatuses.disabled' },
+  ],
+  is_archive: [
+    { value: true, message: 'ui.archiveStatuses.archived' },
+    { value: false, message: 'ui.archiveStatuses.current' },
+  ],
+};
 
 export const DEFAULT_RESOURCETYPE = RESOURCETYPES.REF;
 export const DEFAULT_ACTIONTYPE = ACTIONTYPES.TASK;
@@ -1663,3 +4321,92 @@ export const PRINT = {
     landscape: { W: 1100, H: 680 }, // pt
   },
 };
+
+export const MAP_OPTIONS = {
+  RANGE: ['#CAE0F7', '#164571'],
+  GRADIENT: {
+    // actors: ['#FAFA6E', '#81DD90', '#029481', '#035E93', '#043465'],
+    actors: ['#FAFA6E', '#81DD90', '#029481', '#00728f', '#043465'],
+  },
+  NO_DATA_COLOR: '#EDEFF0',
+  DEFAULT_STYLE: {
+    weight: 1,
+    color: '#CFD3D7',
+    fillOpacity: 1,
+    fillColor: '#EDEFF0',
+  },
+  STYLE: {
+    active: {
+      weight: 2,
+      color: '#000000',
+    },
+    members: {
+      fillColor: '#aaa',
+    },
+    country: {
+      fillColor: '#0063b5',
+      weight: 1.5,
+      color: '#333333',
+    },
+  },
+  TOOLTIP_STYLE: {
+    weight: 1,
+    fillOpacity: 0,
+    color: '#666666',
+    interactive: false,
+  },
+  OVER_STYLE: {
+    weight: 1,
+    fillOpacity: 0,
+    color: '#ADB4B9',
+    interactive: false,
+  },
+  BBOX_STYLE: {
+    fillColor: '#F9F9FA',
+    fillOpacity: 1,
+    weight: 0.5,
+    color: '#DEE1E3',
+  },
+  CENTER: [20, 0],
+  ZOOM: {
+    INIT: 1,
+    MIN: 0,
+    MAX: 9,
+  },
+  BOUNDS: {
+    N: 90,
+    W: -3600,
+    S: -90,
+    E: 3600,
+  },
+  PROJ: {
+    robinson: {
+      name: 'Robinson',
+      crs: 'ESRI:54030',
+      proj4def: '+proj=robin +lon_0=0 +x_0=0 +y_0=0 +datum=WGS84 +units=m +no_defs',
+      resolutions: [
+        65536, 32768, 16384, 8192, 4096, 2048, 1024, 512, 256, 128,
+      ],
+      origin: [0, 0],
+      bounds: [[90, -180], [-90, 180]], // [[N, W], [S, E]]
+      addBBox: true,
+    },
+  },
+};
+
+
+export const FORM_NON_CONTROL_PROPS = [
+  'hint',
+  'label',
+  'component',
+  'controlType',
+  'children',
+  'errorMessages',
+  'hasrequired',
+  'hideByDefault',
+  'prepopulate',
+  'autofill',
+  'basis',
+  'isBlocked',
+  'info',
+];
