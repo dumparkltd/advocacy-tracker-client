@@ -1641,6 +1641,19 @@ export const ACTORTYPES_CONFIG = {
             ],
           },
           {
+            id: 'country',
+            title: 'Associated country',
+            rows: [
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.COUNTRY,
+                asParents: true,
+                prepopulateIfPrevious: true,
+                basis: '2/3',
+              }],
+            ],
+          },
+          {
             id: 'contact',
             title: 'Contact details',
             asColumns: ['2/3'],
@@ -1679,19 +1692,13 @@ export const ACTORTYPES_CONFIG = {
       }, // step
       {
         id: 'stakeholders',
-        title: 'Associated stakeholders',
-        titleSmall: 'Stakeholders',
+        title: 'Other associated stakeholders',
+        titleSmall: 'Other stakeholders',
         sections: [
           {
             id: 'stakeholders',
-            title: 'Stakeholders the contact belongs to',
+            title: 'Other stakeholders the contact belongs to',
             rows: [
-              [{
-                connection: API.ACTORS,
-                type: ACTORTYPES.COUNTRY,
-                asParents: true,
-                prepopulateIfPrevious: true,
-              }],
               [{
                 connection: API.ACTORS,
                 type: ACTORTYPES.GROUP,
