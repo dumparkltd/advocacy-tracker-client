@@ -263,6 +263,9 @@ export const CONFIG = {
         role: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
         default: false,
+        types: [
+          ACTORTYPES.COUNTRY,
+        ],
       },
       {
         search: false,

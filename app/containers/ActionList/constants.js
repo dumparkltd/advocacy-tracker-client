@@ -286,6 +286,18 @@ export const CONFIG = {
       },
       {
         search: false,
+        message: 'attributes.public_api',
+        attribute: 'public_api',
+        options: ATTRIBUTE_STATUSES.public_api,
+        role: USER_ROLES.ADMIN.value,
+        filterUI: 'checkboxes',
+        default: false,
+        types: [
+          ACTIONTYPES.EXPRESS,
+        ],
+      },
+      {
+        search: false,
         message: 'attributes.notifications',
         attribute: 'notifications',
         options: ATTRIBUTE_STATUSES.notifications,
