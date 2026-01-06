@@ -40,7 +40,7 @@ export function CellBodyMain({
   const meta = [];
   if (entity.draft) {
     meta.push({
-      text: intl.formatMessage(appMessages.ui.publishStatuses.draft),
+      text: intl.formatMessage(appMessages.ui.draftStatuses.draft),
       color: 'draft',
       bg: 'draftBackground',
     });
@@ -59,11 +59,18 @@ export function CellBodyMain({
       bg: 'archivedBackground',
     });
   }
+  if (entity.public_api) {
+    meta.push({
+      text: intl.formatMessage(appMessages.ui.publicAPIstatuses.publicAPI),
+      color: 'publicAPI',
+      bg: 'publicAPIBackground',
+    });
+  }
   if (entity.noNotifications) {
     meta.push({
       text: `Email ${lowerCase(intl.formatMessage(appMessages.ui.notificationStatuses.disabled))}`,
-      color: 'archived',
-      bg: 'archivedBackground',
+      color: 'notifications',
+      bg: 'notificationsBackground',
     });
   }
   return (

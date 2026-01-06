@@ -414,6 +414,7 @@ export const prepareEntityRows = ({
                 archived: entity.getIn(['attributes', 'is_archive']),
                 noNotifications: entity.getIn(['attributes', 'notifications']) === false,
                 private: entity.getIn(['attributes', 'private']),
+                public_api: entity.getIn(['attributes', 'public_api']),
                 sortValue: entity.getIn(['attributes', col.sort || 'title']),
                 selected: entityIdsSelected && entityIdsSelected.includes(id),
                 id,

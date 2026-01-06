@@ -294,6 +294,7 @@ export function ActorView({
                     <FieldGroup
                       group={{
                         fields: [
+                          checkActorAttribute(typeId, 'public_api') && getStatusField(viewEntity, 'public_api'),
                           getStatusField(viewEntity),
                           (isAdmin || isMine) && getStatusFieldIf({
                             entity: viewEntity,

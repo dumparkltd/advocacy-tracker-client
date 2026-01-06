@@ -1249,6 +1249,8 @@ const getEntityFormField = (
     hasrequired: !!required,
     autofill: !!prepopulate,
     hideByDefault,
+    activeIf: field.activeIf,
+    activeForAdmin: field.activeForAdmin,
     basis, // relative width within row
   };
   return result;

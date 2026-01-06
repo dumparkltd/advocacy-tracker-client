@@ -12,7 +12,7 @@ import { palette } from 'styled-theme';
 import { isMinSize } from 'utils/responsive';
 
 import { blockNavigation } from 'containers/App/actions';
-import { selectNewEntityModal } from 'containers/App/selectors';
+import { selectNewEntityModal, selectIsUserAdmin } from 'containers/App/selectors';
 
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonCancel from 'components/buttons/ButtonCancel';
@@ -233,6 +233,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       handleSubmitRemote,
       typeLabel,
       hasFormChanges,
+      isAdmin,
       // onBlockNavigation,
     } = this.props;
     const {
@@ -243,9 +244,52 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     const closeMultiselectOnClickOutside = !newEntityModal || inModal;
     let byStep = fieldsByStep;
     const footerStep = byStep.find((step) => step.id === 'footer');
-    const footerFields = footerStep && footerStep.fields && footerStep.fields.filter((f) => !!f);
+    const footerFields = footerStep
+      && footerStep.fields
+      && footerStep.fields.filter(
+        (field) => !!field
+      ).map(
+        (field) => {
+          let active = true;
+          let disabledMessages = [];
+          if (field.activeForAdmin) {
+            active = isAdmin;
+            if (!active) {
+              disabledMessages = [
+                ...disabledMessages,
+                'Can only be updated by admin users',
+              ];
+            }
+          }
+          if (active && field.activeIf && formDataTracked && formDataTracked.attributes) {
+            active = Object.keys(field.activeIf).reduce(
+              (memo, att) => {
+                const attValue = formDataTracked.attributes[att]
+                  ? formDataTracked.attributes[att].value
+                  : false;
+                if (field.activeIf[att] !== attValue) {
+                  disabledMessages = [
+                    ...disabledMessages,
+                    `Only editable if '${att}' is '${field.activeIf[att]}'`,
+                  ];
+                }
+                return memo && (field.activeIf[att] === attValue);
+              },
+              true,
+            );
+          }
+          if (!active) {
+            return {
+              ...field,
+              disabled: true,
+              disabledMessages,
+            };
+          }
+          return field;
+        },
+      );
     const headerFields = footerFields && footerFields.filter(
-      (f) => f.model === '.attributes.draft' || f.model === '.attributes.private'
+      (f) => f.model === '.attributes.draft' || f.model === '.attributes.private' || f.model === '.attributes.public_api'
     );
     // const hasFooterChanges = footerFields && footerFields.some(
     //   (field) => {
@@ -586,6 +630,7 @@ EntityForm.propTypes = {
   validators: PropTypes.object,
   scrollContainer: PropTypes.object,
   hasFormChanges: PropTypes.bool,
+  isAdmin: PropTypes.bool,
   typeLabel: PropTypes.string,
 };
 EntityForm.defaultProps = {
@@ -594,6 +639,7 @@ EntityForm.defaultProps = {
 };
 
 const mapStateToProps = (state) => ({
+  isAdmin: selectIsUserAdmin(state),
   newEntityModal: selectNewEntityModal(state),
 });
 

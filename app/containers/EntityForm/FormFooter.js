@@ -48,7 +48,7 @@ export function FormFooter({
   const size = React.useContext(ResponsiveContext);
   const saveCloseRef = React.useRef(null);
   const [blockedSaveHint, setBlockedSaveHint] = React.useState(false);
-
+  // console.log('fields', fields)
   return (
     <Styled
       direction="row"
@@ -74,6 +74,8 @@ export function FormFooter({
               if (!field) return null;
               const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
               const fieldTracked = get(formDataTracked, modelPath);
+              // console.log('fieldTracked', fieldTracked, modelPath)
+              // console.log('formDataTracked', formDataTracked)
               return (
                 <Box key={j}>
                   <FormField

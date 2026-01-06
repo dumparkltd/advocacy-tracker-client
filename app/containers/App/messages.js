@@ -831,6 +831,10 @@ export default defineMessages({
       id: 'app.containers.App.attributes.is_archive',
       defaultMessage: 'Archived?',
     },
+    public_api: {
+      id: 'app.containers.App.attributes.public_api',
+      defaultMessage: 'Publish to GPN?',
+    },
     private: {
       id: 'app.containers.App.attributes.private',
       defaultMessage: 'Confidentiality',
@@ -1065,7 +1069,7 @@ export default defineMessages({
     },
     is_archive: {
       id: 'app.containers.App.attributeInfo.is_archive',
-      defaultMessage: 'population',
+      defaultMessage: 'is_archive',
     },
     is_archive_true: {
       id: 'app.containers.App.attributeInfo.is_archive_true',
@@ -1074,6 +1078,18 @@ export default defineMessages({
     is_archive_false: {
       id: 'app.containers.App.attributeInfo.is_archive_false',
       defaultMessage: 'info-is_archive-false',
+    },
+    public_api: {
+      id: 'app.containers.App.attributeInfo.public_api',
+      defaultMessage: 'public_api',
+    },
+    public_api_true: {
+      id: 'app.containers.App.attributeInfo.public_api_true',
+      defaultMessage: 'info-public_api-true',
+    },
+    public_api_false: {
+      id: 'app.containers.App.attributeInfo.public_api_false',
+      defaultMessage: 'info-public_api-false',
     },
   },
   nav: {
@@ -2389,6 +2405,16 @@ export default defineMessages({
         defaultMessage: 'Not confidential',
       },
     },
+    publicAPIstatuses: {
+      privateAPI: {
+        id: 'app.containers.App.ui.publicAPIstatuses.privateAPI',
+        defaultMessage: 'Published on GPN',
+      },
+      publicAPI: {
+        id: 'app.containers.App.ui.publicAPIstatuses.publicAPI',
+        defaultMessage: 'Not published on GPN',
+      },
+    },
     notificationStatuses: {
       enabled: {
         id: 'app.containers.App.ui.notificationStatuses.enabled',
@@ -2399,13 +2425,13 @@ export default defineMessages({
         defaultMessage: 'Notifications disabled',
       },
     },
-    publishStatuses: {
+    draftStatuses: {
       draft: {
-        id: 'app.containers.App.ui.publishStatuses.draft',
+        id: 'app.containers.App.ui.draftStatuses.draft',
         defaultMessage: 'Draft',
       },
-      public: {
-        id: 'app.containers.App.ui.publishStatuses.public',
+      final: {
+        id: 'app.containers.App.ui.draftStatuses.final',
         defaultMessage: 'Completed',
       },
     },

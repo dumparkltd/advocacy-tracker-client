@@ -317,6 +317,7 @@ export function ActionView(props) {
                     <FieldGroup
                       group={{
                         fields: [
+                          checkActionAttribute(typeId, 'public_api') && getStatusField(viewEntity, 'public_api'),
                           getStatusField(viewEntity),
                           (isAdmin || isMine) && getStatusFieldIf({
                             entity: viewEntity,

@@ -216,6 +216,7 @@ export function IndicatorView({
                     <FieldGroup
                       group={{
                         fields: [
+                          getStatusField(viewEntity, 'public_api'),
                           getStatusField(viewEntity),
                           (isAdmin || isMine) && getStatusFieldIf({
                             entity: viewEntity,
