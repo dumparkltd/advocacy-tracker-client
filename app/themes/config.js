@@ -2389,10 +2389,16 @@ export const ACTIONTYPES_CONFIG = {
                   basis: '1/3',
                 },
               ],
-              [{
-                attribute: 'url',
-                basis: '2/3',
-              }],
+              [
+                {
+                  attribute: 'url',
+                  basis: '2/3',
+                },
+                {
+                  attribute: 'source_api',
+                  basis: '2/3',
+                },
+              ],
               [{
                 attribute: 'description',
               }],
@@ -2401,13 +2407,10 @@ export const ACTIONTYPES_CONFIG = {
                 hideByDefault: true,
               }],
               [{
-                attribute: 'source_api',
-                hideByDefault: true,
-              }],
-              [{
                 attribute: 'quote_api',
                 hideByDefault: true,
               }],
+              [],
             ], // rows
           }, // section
         ], //
