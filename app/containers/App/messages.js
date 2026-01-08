@@ -801,6 +801,10 @@ export default defineMessages({
       id: 'app.containers.App.placeholders.teaser_api',
       defaultMessage: 'Enter content',
     },
+    description_api: {
+      id: 'app.containers.App.placeholders.description_api',
+      defaultMessage: 'Enter content',
+    },
     annotation_api: {
       id: 'app.containers.App.placeholders.annotation_api',
       defaultMessage: 'Enter content',
@@ -1087,6 +1091,22 @@ export default defineMessages({
     },
   },
   attributeInfo: {
+    annotation_api: {
+      id: 'app.containers.App.attributeInfo.annotation_api',
+      defaultMessage: 'info-draft',
+    },
+    description_api: {
+      id: 'app.containers.App.attributeInfo.description_api',
+      defaultMessage: 'info-draft',
+    },
+    teaser_api: {
+      id: 'app.containers.App.attributeInfo.teaser_api',
+      defaultMessage: 'info-draft',
+    },
+    short_api: {
+      id: 'app.containers.App.attributeInfo.short_api',
+      defaultMessage: 'info-draft',
+    },
     draft: {
       id: 'app.containers.App.attributeInfo.draft',
       defaultMessage: 'info-draft',
@@ -1133,6 +1153,14 @@ export default defineMessages({
     },
     public_api_false: {
       id: 'app.containers.App.attributeInfo.public_api_false',
+      defaultMessage: 'info-public_api-false',
+    },
+    source_api: {
+      id: 'app.containers.App.attributeInfo.source_api',
+      defaultMessage: 'info-public_api-false',
+    },
+    quote_api: {
+      id: 'app.containers.App.attributeInfo.quote_api',
       defaultMessage: 'info-public_api-false',
     },
   },

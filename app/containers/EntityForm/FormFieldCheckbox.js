@@ -25,8 +25,6 @@ export function FormFieldCheckbox({
   withoutTitle,
   intl,
 }) {
-  // console.log(field)
-  // console.log(formField)
   const attributeTitle = field.att && appMessages.attributes[field.att]
     ? intl.formatMessage(appMessages.attributes[field.att])
     : field.label;

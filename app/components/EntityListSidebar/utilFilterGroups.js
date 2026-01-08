@@ -1,6 +1,6 @@
 import { reduce } from 'lodash/collection';
 import { sortEntities } from 'utils/sort';
-import { startsWith, lowerCase } from 'utils/string';
+import { lowerCase } from 'utils/string';
 import qe from 'utils/quasi-equals';
 import isNumber from 'utils/is-number';
 
@@ -17,8 +17,6 @@ import {
 
 import appMessage from 'utils/app-message';
 
-import messages from './messages'
-
 import {
   makeAttributeFilterOptions,
   makeAnyWithoutFilterOptions,
@@ -34,32 +32,31 @@ const filterAttributeOptions = ({
   connectionOption,
   connectionAttributeValue,
 }) => entities.some((e) => {
-    let eConnections;
-    // actors have the indicator positions stored like
-    //  {
-    //    indicatorPositions: {
-    //      [indicatorId]: [...statementsWithPosition] // array of statements by indicator id
-    //    }
-    //  }
-    if (connectionOption.byIndicator) {
-      eConnections = e.getIn([connectionOption.path, filterValue]);
-      return eConnections && eConnections.some(
-        (c) => qe((c.get(connectionOption.attribute) || 0), connectionAttributeValue)
-      );
-    }
-    // actions have the related indicators stored like
-    //  {
-    //    indicatorConnections: {
-    //      ...statementsWithPosition // object of statements by statement id
-    //    }
-    //  }
-    eConnections = e.get(connectionOption.path);
+  let eConnections;
+  // actors have the indicator positions stored like
+  //  {
+  //    indicatorPositions: {
+  //      [indicatorId]: [...statementsWithPosition] // array of statements by indicator id
+  //    }
+  //  }
+  if (connectionOption.byIndicator) {
+    eConnections = e.getIn([connectionOption.path, filterValue]);
     return eConnections && eConnections.some(
-      (c) => qe(c.get(connectionOption.connectionId), filterValue)
-        && qe((c.get(connectionOption.attribute) || 0), connectionAttributeValue)
+      (c) => qe((c.get(connectionOption.attribute) || 0), connectionAttributeValue)
     );
+  }
+  // actions have the related indicators stored like
+  //  {
+  //    indicatorConnections: {
+  //      ...statementsWithPosition // object of statements by statement id
+  //    }
+  //  }
+  eConnections = e.get(connectionOption.path);
+  return eConnections && eConnections.some(
+    (c) => qe(c.get(connectionOption.connectionId), filterValue)
+      && qe((c.get(connectionOption.attribute) || 0), connectionAttributeValue)
+  );
 });
-
 
 
 // figure out filter groups for filter panel
@@ -242,7 +239,7 @@ const makeFilterGroups = ({
       } else {
         let types;
         let typeAbout;
-          switch (connectionOption.type) {
+        switch (connectionOption.type) {
           case 'actor-actions':
           case 'resource-actions':
           case 'action-parents':
@@ -880,7 +877,7 @@ export const makeQuickFilterGroups = ({
             (memo2, tax) => {
               const activeTaxId = `${tax.id}`;
               if (taxonomies.get(activeTaxId)) {
-                let label = tax.label;
+                let { label } = tax;
                 if (!label && group.taxonomies.length > 1 && appMessages.entities.taxonomies[tax.id]) {
                   label = intl.formatMessage(appMessages.entities.taxonomies[tax.id].single);
                 }
@@ -956,7 +953,7 @@ export const makeQuickFilterGroups = ({
                   locationQueryValue: locationQuery.get('where'),
                 });
                 if (attOptions && attOptions.options && Object.keys(attOptions.options).length > 0) {
-                  let label = att.label;
+                  let { label } = att;
                   if (!label && group.attributes.length > 1 && attOptions.message) {
                     label = appMessage(intl, attOptions.message);
                   }

@@ -936,11 +936,9 @@ export const INDICATOR_FIELDS = {
     },
     description_api: {
       type: 'markdown',
-      hideByDefault: true,
     },
     short_api: {
-      type: 'markdown',
-      hideByDefault: true,
+      type: 'text',
     },
     teaser_api: {
       type: 'markdown',
@@ -3946,13 +3944,13 @@ export const INDICATOR_CONFIG = {
               },
             ],
             [{
+              attribute: 'short_api',
+            }],
+            [{
               attribute: 'description',
             }],
             [{
               attribute: 'description_api',
-            }],
-            [{
-              attribute: 'short_api',
             }],
             [{
               attribute: 'teaser_api',

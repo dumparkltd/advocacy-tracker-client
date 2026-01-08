@@ -345,6 +345,8 @@ export function ActionView(props) {
                       fields: [
                         checkActionAttribute(typeId, 'description')
                         && getMarkdownField(viewEntity, 'description', true),
+                        checkActionAttribute(typeId, 'quote_api')
+                        && getMarkdownField(viewEntity, 'quote_api', true),
                         checkActionAttribute(typeId, 'comment')
                         && getMarkdownField(viewEntity, 'comment', true),
                         checkActionAttribute(typeId, 'status_comment')
@@ -498,6 +500,7 @@ export function ActionView(props) {
                     group={{
                       fields: [
                         checkActionAttribute(typeId, 'url') && getLinkField(viewEntity),
+                        checkActionAttribute(typeId, 'source_api') && getTextField(viewEntity, 'source_api'),
                       ],
                     }}
                   />

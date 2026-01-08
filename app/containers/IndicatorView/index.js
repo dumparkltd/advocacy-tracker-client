@@ -14,6 +14,7 @@ import styled from 'styled-components';
 
 import {
   getTitleField,
+  getTextField,
   getStatusField,
   getStatusFieldIf,
   getMetaField,
@@ -207,6 +208,7 @@ export function IndicatorView({
                           'reference',
                           isAdmin,
                         ),
+                        getTextField(viewEntity, 'short_api'),
                       ],
                     }}
                   />
@@ -242,6 +244,9 @@ export function IndicatorView({
                     group={{
                       fields: [
                         getMarkdownField(viewEntity, 'description', true),
+                        getMarkdownField(viewEntity, 'description_api', true),
+                        getMarkdownField(viewEntity, 'teaser_api', true),
+                        getMarkdownField(viewEntity, 'annotation_api', true),
                       ],
                     }}
                   />
