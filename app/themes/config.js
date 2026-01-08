@@ -327,6 +327,16 @@ export const ACTION_FIELDS = {
       type: 'markdown',
       hideByDefault: true,
     },
+    source_api: {
+      optional: [ACTIONTYPES.EXPRESS],
+      type: 'text',
+      hideByDefault: true,
+    },
+    quote_api: {
+      optional: [ACTIONTYPES.EXPRESS],
+      type: 'markdown',
+      hideByDefault: true,
+    },
     url: {
       optional: Object.values(ACTIONTYPES),
       type: 'url',
@@ -775,6 +785,19 @@ export const ACTOR_FIELDS = {
       keyPair: ['member_id', 'memberof_id'], // own, other
       hint: 'one or more unique country codes (as assigned by the users/comma-separated) actors are member of',
     },
+    // belongs to group
+    'group-code': {
+      type: 'text',
+      optional: [ACTORTYPES.COUNTRY],
+      multiple: true,
+      lookup: {
+        table: API.ACTORS,
+        attribute: 'code',
+      },
+      table: API.MEMBERSHIPS,
+      keyPair: ['member_id', 'memberof_id'], // own, other
+      hint: 'one or more unique group codes (as assigned by the users / comma-separated) for groups the country belongs to',
+    },
     // belongs to event
     'event-code': {
       type: 'text',
@@ -911,6 +934,22 @@ export const INDICATOR_FIELDS = {
     description: {
       type: 'markdown',
     },
+    description_api: {
+      type: 'markdown',
+      hideByDefault: true,
+    },
+    short_api: {
+      type: 'markdown',
+      hideByDefault: true,
+    },
+    teaser_api: {
+      type: 'markdown',
+      hideByDefault: true,
+    },
+    annotation_api: {
+      type: 'markdown',
+      hideByDefault: true,
+    },
     draft: {
       defaultValue: true,
       controlType: 'checkbox',
@@ -931,6 +970,7 @@ export const INDICATOR_FIELDS = {
       defaultValue: false,
       controlType: 'checkbox',
       type: 'bool',
+      skipImport: true,
     },
     created_at: {
       skipImport: true,
@@ -2357,6 +2397,14 @@ export const ACTIONTYPES_CONFIG = {
               }],
               [{
                 attribute: 'comment',
+                hideByDefault: true,
+              }],
+              [{
+                attribute: 'source_api',
+                hideByDefault: true,
+              }],
+              [{
+                attribute: 'quote_api',
                 hideByDefault: true,
               }],
             ], // rows
@@ -3899,6 +3947,18 @@ export const INDICATOR_CONFIG = {
             ],
             [{
               attribute: 'description',
+            }],
+            [{
+              attribute: 'description_api',
+            }],
+            [{
+              attribute: 'short_api',
+            }],
+            [{
+              attribute: 'teaser_api',
+            }],
+            [{
+              attribute: 'annotation_api',
             }],
           ], // rows
         }, // section,

@@ -785,6 +785,26 @@ export default defineMessages({
       id: 'app.containers.App.placeholders.content',
       defaultMessage: 'Enter content',
     },
+    source_api: {
+      id: 'app.containers.App.placeholders.source_api',
+      defaultMessage: 'Enter content',
+    },
+    quote_api: {
+      id: 'app.containers.App.placeholders.quote_api',
+      defaultMessage: 'Enter content',
+    },
+    short_api: {
+      id: 'app.containers.App.placeholders.short_api',
+      defaultMessage: 'Enter content',
+    },
+    teaser_api: {
+      id: 'app.containers.App.placeholders.teaser_api',
+      defaultMessage: 'Enter content',
+    },
+    annotation_api: {
+      id: 'app.containers.App.placeholders.annotation_api',
+      defaultMessage: 'Enter content',
+    },
     date_comment: {
       id: 'app.containers.App.placeholders.target_date_comment',
       defaultMessage: 'Additional information',
@@ -871,6 +891,10 @@ export default defineMessages({
       id: 'app.containers.App.attributes.description',
       defaultMessage: 'Description',
     },
+    description_api: {
+      id: 'app.containers.App.attributes.description_api',
+      defaultMessage: 'Description (used in GPN)',
+    },
     comment: {
       id: 'app.containers.App.attributes.comment',
       defaultMessage: 'Comment',
@@ -878,6 +902,26 @@ export default defineMessages({
     content: {
       id: 'app.containers.App.attributes.content',
       defaultMessage: 'Comment',
+    },
+    source_api: {
+      id: 'app.containers.App.attributes.source_api',
+      defaultMessage: 'Name of the statement source (used in GPN)',
+    },
+    quote_api: {
+      id: 'app.containers.App.attributes.quote_api',
+      defaultMessage: 'The quote from the statement (used in GPN)',
+    },
+    short_api: {
+      id: 'app.containers.App.attributes.short_api',
+      defaultMessage: 'Short title (also used in GPN)',
+    },
+    teaser_api: {
+      id: 'app.containers.App.attributes.teaser_api',
+      defaultMessage: 'Teaser text (used in GPN)',
+    },
+    annotation_api: {
+      id: 'app.containers.App.attributes.annotation_api',
+      defaultMessage: 'Map annotation (used in GPN)',
     },
     url: {
       id: 'app.containers.App.attributes.url',
