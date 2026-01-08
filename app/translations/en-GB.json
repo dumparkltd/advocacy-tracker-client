@@ -710,7 +710,7 @@
   "app.containers.App.ui.userRoles.coordinator": "Coordinator",
   "app.containers.App.ui.userRoles.member": "Team member",
   "app.containers.App.ui.userRoles.visitor": "Visitor",
-  "app.containers.App.ui.userRoles.default": "External (no role assigned)",
+  "app.containers.App.ui.userRoles.default": "External (no role assigned/no access to content)",
   "app.containers.App.ui.archiveStatuses.archived": "Archived",
   "app.containers.App.ui.archiveStatuses.current": "Active",
   "app.containers.App.ui.privacyStatuses.private": "Confidential",

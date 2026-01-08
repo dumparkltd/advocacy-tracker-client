@@ -745,6 +745,7 @@ export const getTitleFormField = ({
   attribute = 'title',
   required,
   label,
+  placeholder,
   hideByDefault,
 }) => getFormField({
   formatMessage,
@@ -752,6 +753,7 @@ export const getTitleFormField = ({
   attribute,
   required,
   label,
+  placeholder,
   hideByDefault,
 });
 

@@ -1684,6 +1684,7 @@ export const ACTORTYPES_CONFIG = {
                 {
                   attribute: 'title',
                   label: 'name',
+                  placeholder: 'name',
                   required: true,
                   basis: '2/3',
                 },
