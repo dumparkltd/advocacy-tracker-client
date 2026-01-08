@@ -203,20 +203,23 @@ const makeFilterGroups = ({
             optionCurrentFilters = optionCurrentFilters
               .map(
                 (filter) => {
-                  const filterValue = filter.queryValue.split('>')[0];
-                  const attributeOptions = Object.values(optionCAF.options)
-                    .filter(
-                      (cafo) => filterAttributeOptions({
-                        filterValue,
-                        connectionAttributeValue: cafo.value,
-                        entities,
-                        connectionOption: optionCAF,
-                      })
-                    );
-                  return ({
-                    ...filter,
-                    attributeOptions,
-                  });
+                  if (filter.queryValue) {
+                    const filterValue = filter.queryValue.split('>')[0];
+                    const attributeOptions = Object.values(optionCAF.options)
+                      .filter(
+                        (cafo) => filterAttributeOptions({
+                          filterValue,
+                          connectionAttributeValue: cafo.value,
+                          entities,
+                          connectionOption: optionCAF,
+                        })
+                      );
+                    return ({
+                      ...filter,
+                      attributeOptions,
+                    });
+                  }
+                  return filter;
                 }
               );
           }
