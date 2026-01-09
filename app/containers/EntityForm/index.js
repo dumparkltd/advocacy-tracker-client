@@ -289,7 +289,10 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
         },
       );
     const headerFields = footerFields && footerFields.filter(
-      (f) => f.model === '.attributes.draft' || f.model === '.attributes.private' || f.model === '.attributes.public_api'
+      (f) => f.model === '.attributes.draft'
+        || f.model === '.attributes.private'
+        || f.model === '.attributes.public_api'
+        || f.model === '.attributes.is_official'
     );
     // const hasFooterChanges = footerFields && footerFields.some(
     //   (field) => {

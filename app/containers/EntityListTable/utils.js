@@ -17,6 +17,7 @@ import appMessages from 'containers/App/messages';
 import {
   API,
   USER_ROLES,
+  ATTRIBUTE_STATUSES,
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
@@ -63,6 +64,7 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'desc',
           onSort,
         });
+      case 'status':
       case 'attribute':
         return ({
           ...col,
@@ -387,11 +389,21 @@ export const prepareEntityRows = ({
         let attribute;
         let value;
         let sortValue = null;
-        // console.log(col)
         // let formattedDate;
         if (col.attribute) {
           value = entity.getIn(['attributes', col.attribute]);
-          if (!checkEmpty(value) && col.fallbackAttribute) {
+          if (col.type === 'status') {
+            if (ATTRIBUTE_STATUSES[col.attribute]) {
+              const option = ATTRIBUTE_STATUSES[col.attribute].find((s) => s.value === value);
+              if (option && option.message) {
+                value = appMessage(intl, option.message);
+              } else {
+                value = `${value}`;
+              }
+            } else {
+              value = `${value}`;
+            }
+          } else if (!checkEmpty(value) && col.fallbackAttribute) {
             value = entity.getIn(['attributes', col.fallbackAttribute]);
           }
         }
@@ -423,6 +435,7 @@ export const prepareEntityRows = ({
                 onSelect: (checked) => onEntitySelect(id, checked),
               },
             };
+          case 'status':
           case 'attribute':
             return {
               ...memoEntity,

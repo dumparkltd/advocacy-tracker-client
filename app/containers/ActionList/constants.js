@@ -80,8 +80,18 @@ export const CONFIG = {
       }],
     },
     {
-      id: `taxonomies-${AUTHORITY_TAXONOMY}`,
+      id: 'attributes-official',
       title: 'Levels of authority',
+      option: 'attributes',
+      attributes: [{
+        attribute: 'is_official',
+        filterType: 'buttonGroup',
+        multiple: false,
+      }],
+    },
+    {
+      id: `taxonomies-${AUTHORITY_TAXONOMY}`,
+      title: 'Levels of authority (cat)',
       option: 'taxonomies',
       taxonomies: [{
         id: AUTHORITY_TAXONOMY,
@@ -283,6 +293,17 @@ export const CONFIG = {
         role: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
         default: false,
+      },
+      {
+        search: false,
+        message: 'attributes.is_official',
+        attribute: 'is_official',
+        options: ATTRIBUTE_STATUSES.is_official,
+        filterUI: 'checkboxes',
+        default: false,
+        types: [
+          ACTIONTYPES.EXPRESS,
+        ],
       },
       {
         search: false,

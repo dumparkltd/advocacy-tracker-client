@@ -487,6 +487,7 @@ export function EntitiesTable({
                       {(
                         col.type === 'plain'
                         || col.type === 'attribute'
+                        || col.type === 'status'
                         || col.type === 'amount'
                         || col.type === 'userrole'
                         || col.type === 'date'

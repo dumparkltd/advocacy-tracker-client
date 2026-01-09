@@ -385,6 +385,12 @@ export const ACTION_FIELDS = {
       controlType: 'checkbox',
       type: 'bool',
     },
+    is_official: {
+      optional: [ACTIONTYPES.EXPRESS],
+      defaultValue: false,
+      controlType: 'checkbox',
+      type: 'bool',
+    },
     notifications: {
       defaultValue: true,
       controlType: 'checkbox',
@@ -926,6 +932,10 @@ export const INDICATOR_FIELDS = {
       type: 'text',
       optional: true,
       adminOnly: true,
+    },
+    code_api: {
+      type: 'text',
+      optional: true,
     },
     title: {
       required: true,
@@ -2222,6 +2232,14 @@ export const ACTIONTYPES_CONFIG = {
     order: 1,
     columns: [
       {
+        id: 'official',
+        type: 'status',
+        sortOrder: 'asc',
+        sortDefault: true,
+        attribute: 'is_official',
+        minSize: 'medium', // default
+      },
+      {
         id: 'date',
         type: 'date',
         sort: 'date',
@@ -2237,12 +2255,12 @@ export const ACTIONTYPES_CONFIG = {
         sort: 'title',
         minSize: 'ms',
       },
-      {
-        id: 'taxonomy-13',
-        type: 'taxonomy',
-        taxonomy_id: AUTHORITY_TAXONOMY, // level of authority
-        minSize: 'medium',
-      },
+      // {
+      //   id: 'taxonomy-13',
+      //   type: 'taxonomy',
+      //   taxonomy_id: AUTHORITY_TAXONOMY, // level of authority
+      //   minSize: 'medium',
+      // },
       {
         id: 'taxonomy-7',
         type: 'taxonomy',
@@ -2311,7 +2329,12 @@ export const ACTIONTYPES_CONFIG = {
               is_archive: false,
               private: false,
               draft: false,
+              is_official: true,
             },
+          },
+          {
+            attribute: 'is_official',
+            activeIf: { public_api: false },
           },
           {
             attribute: 'is_archive',
@@ -3930,6 +3953,11 @@ export const INDICATOR_CONFIG = {
                 needsAdmin: true,
                 basis: '1/3',
               },
+              {
+                attribute: 'code_api',
+                needsAdmin: true,
+                basis: '1/3',
+              },
             ],
             [
               {
@@ -4413,6 +4441,10 @@ export const ATTRIBUTE_STATUSES = {
   public_api: [
     { value: true, message: 'ui.publicAPIstatuses.publicAPI' },
     { value: false, message: 'ui.publicAPIstatuses.privateAPI' },
+  ],
+  is_official: [
+    { value: true, message: 'ui.officialStatuses.official' },
+    { value: false, message: 'ui.officialStatuses.inofficial' },
   ],
 };
 

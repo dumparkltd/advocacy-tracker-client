@@ -761,6 +761,10 @@ export default defineMessages({
       id: 'app.containers.App.placeholders.code',
       defaultMessage: 'ID',
     },
+    code_api: {
+      id: 'app.containers.App.placeholders.code_api',
+      defaultMessage: 'ID (GPN)',
+    },
     prefix: {
       id: 'app.containers.App.placeholders.prefix',
       defaultMessage: 'Dr/Ms/Mr',
@@ -855,6 +859,10 @@ export default defineMessages({
       id: 'app.containers.App.attributes.is_archive',
       defaultMessage: 'Archived?',
     },
+    is_official: {
+      id: 'app.containers.App.attributes.is_official',
+      defaultMessage: 'Official?',
+    },
     public_api: {
       id: 'app.containers.App.attributes.public_api',
       defaultMessage: 'Publish to GPN?',
@@ -874,6 +882,10 @@ export default defineMessages({
     code: {
       id: 'app.containers.App.attributes.code',
       defaultMessage: 'Code',
+    },
+    code_api: {
+      id: 'app.containers.App.attributes.code_api',
+      defaultMessage: 'Topic ID in GPN',
     },
     prefix: {
       id: 'app.containers.App.attributes.prefix',
@@ -1142,6 +1154,18 @@ export default defineMessages({
     is_archive_false: {
       id: 'app.containers.App.attributeInfo.is_archive_false',
       defaultMessage: 'info-is_archive-false',
+    },
+    is_official: {
+      id: 'app.containers.App.attributeInfo.is_official',
+      defaultMessage: 'is_official',
+    },
+    is_official_true: {
+      id: 'app.containers.App.attributeInfo.is_official_true',
+      defaultMessage: 'info-is_official-true',
+    },
+    is_official_false: {
+      id: 'app.containers.App.attributeInfo.is_official_false',
+      defaultMessage: 'info-is_official-false',
     },
     public_api: {
       id: 'app.containers.App.attributeInfo.public_api',
@@ -2465,6 +2489,16 @@ export default defineMessages({
       current: {
         id: 'app.containers.App.ui.archiveStatuses.current',
         defaultMessage: 'Active',
+      },
+    },
+    officialStatuses: {
+      official: {
+        id: 'app.containers.App.ui.officialStatuses.official',
+        defaultMessage: 'Official',
+      },
+      inofficial: {
+        id: 'app.containers.App.ui.officialStatuses.inofficial',
+        defaultMessage: 'Inofficial',
       },
     },
     privacyStatuses: {

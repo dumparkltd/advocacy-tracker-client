@@ -199,7 +199,6 @@ export function IndicatorView({
                           viewEntity,
                           'code',
                           isAdmin,
-                          false, // showLabel,
                         ),
                         getTitleField(viewEntity),
                         // order
@@ -209,6 +208,11 @@ export function IndicatorView({
                           isAdmin,
                         ),
                         getTextField(viewEntity, 'short_api'),
+                        getReferenceField(
+                          viewEntity,
+                          'code_api',
+                          isAdmin,
+                        ),
                       ],
                     }}
                   />
