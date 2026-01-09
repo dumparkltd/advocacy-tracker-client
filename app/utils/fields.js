@@ -1170,6 +1170,10 @@ export const getUserPreviewFields = ({
 export const getActiontypePreviewFields = (typeId) => {
   if (qe(typeId, ACTIONTYPES.EXPRESS)) {
     return {
+      is_official: {
+        attribute: 'is_official',
+        type: 'status',
+      },
       date: {
         attribute: 'date',
       },

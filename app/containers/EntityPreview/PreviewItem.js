@@ -8,7 +8,7 @@ import FieldFactory from 'components/fields/FieldFactory';
 // import styled from 'styled-components';
 import { Box } from 'grommet';
 
-import { ACTIONTYPES, API } from 'themes/config';
+import { ACTIONTYPES, API, ATTRIBUTE_STATUSES } from 'themes/config';
 
 import qe from 'utils/quasi-equals';
 import {
@@ -18,6 +18,7 @@ import {
   getDateField,
   getUserConnectionField,
   getMarkdownField,
+  getStatusField,
 } from 'utils/fields';
 import {
 } from 'utils/entities';
@@ -115,6 +116,14 @@ export function PreviewItem({
     fields = [
       ...fields,
       getDateField(item, 'date_end', { specificity: dateSpecificity }),
+    ];
+  }
+  if (item
+    && typeof item.getIn(['attributes', 'is_official']) !== 'undefined'
+  ) {
+    fields = [
+      ...fields,
+      getStatusField(item, 'is_official', ATTRIBUTE_STATUSES.is_official),
     ];
   }
   // description
