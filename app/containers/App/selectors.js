@@ -1698,6 +1698,24 @@ export const selectActionActionsGroupedBySubAction = createSelector(
     );
   },
 );
+export const selectParentEventsByStatement = createSelector(
+  (state) => selectEntities(state, API.ACTION_ACTIONS),
+  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EVENT }),
+  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
+  (connections, events, statements) => {
+    if (!connections || !events || !statements) return null;
+    return connections.filter(
+      (connection) => statements.has(`${connection.getIn(['attributes', 'measure_id'])}`)
+      && events.has(`${connection.getIn(['attributes', 'other_measure_id'])}`)
+    ).groupBy(
+      (connection) => connection.getIn(['attributes', 'measure_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.getIn(['attributes', 'other_measure_id'])
+      )
+    );
+  },
+);
 export const selectMembershipsGroupedByMember = createSelector(
   (state) => selectEntities(state, API.MEMBERSHIPS),
   (entities) => entities
@@ -1873,6 +1891,7 @@ const getActorStatementsAndPositions = ({
   includeMembers,
   includeInofficial,
   connectedCategoryQuery,
+  eventsByStatement,
 }) => {
   // 1. figure out any actor statements /////////////////////////////////////
   // actorActions
@@ -1984,8 +2003,26 @@ const getActorStatementsAndPositions = ({
             },
             Map(),
           ).sort(
-            // sort: first check for dates, then use higher level of suuport
+            // sort:
+            // first check for event and group statements,
+            // then dates
+            // then use higher level of suuport
             (a, b) => {
+              // const aEventId = eventsByStatement.get(a.get('measure_id'))
+              //   && eventsByStatement.get(a.get('measure_id')).first();
+              // const bEventId = eventsByStatement.get(b.get('measure_id'))
+              //   && eventsByStatement.get(b.get('measure_id')).first();
+              //
+              // // If both statements are from the same event
+              // if (aEventId && bEventId && aEventId === bEventId) {
+              //   // Individual statements (no viaGroups) come before group statements
+              //   if (!a.get('viaGroups') && !!b.get('viaGroups')) {
+              //     return -1;
+              //   }
+              //   if (!!a.get('viaGroups') && !b.get('viaGroups')) {
+              //     return 1;
+              //   }
+              // }
               let aDate = a.getIn(['measure', 'date_start']);
               let bDate = b.getIn(['measure', 'date_start']);
               /* eslint-disable no-restricted-globals */
@@ -2001,13 +2038,19 @@ const getActorStatementsAndPositions = ({
               }
               /* eslint-enable no-restricted-globals */
               if (aIsDate && bIsDate) {
+                const aDateOnly = new Date(new Date(aDate).toDateString()).getTime();
+                const bDateOnly = new Date(new Date(bDate).toDateString()).getTime();
                 // check for support level if dates equals
-                if (aDate === bDate) {
+                if (aDateOnly === bDateOnly) {
+                  // if (a) {
+                  //   console.log(aDate, a.get('supportlevel_id'), a.getIn(['measure', 'code']))
+                  //   console.log(bDate, b.get('supportlevel_id'), b.getIn(['measure', 'code']))
+                  // }
                   const aSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[a.get('supportlevel_id') || 0];
                   const bSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[b.get('supportlevel_id') || 0];
-                  return aSupportLevel < bSupportLevel ? -1 : 1;
+                  return aSupportLevel.order < bSupportLevel.order ? -1 : 1;
                 }
-                return new Date(aDate) < new Date(bDate) ? 1 : -1;
+                return aDateOnly < bDateOnly ? 1 : -1;
               }
               if (aIsDate) {
                 return -1;
@@ -2064,6 +2107,7 @@ export const selectActorsWithPositions = createSelector(
   selectActorActionsGroupedByActor,
   selectIndicators,
   selectActionIndicatorsGroupedByIndicatorAttributes,
+  selectParentEventsByStatement,
   (
     includeActorMembersParam,
     includeInofficialParam,
@@ -2079,6 +2123,7 @@ export const selectActorsWithPositions = createSelector(
     actorActions,
     indicators,
     actionIndicators,
+    eventsByStatement, // { [statement_id] : { [connection_id] : event_id } }
   ) => {
     if (
       !actors
@@ -2089,6 +2134,7 @@ export const selectActorsWithPositions = createSelector(
       || !indicators
       || !actionIndicators
       || !authorityCategories
+      || !eventsByStatement
     ) {
       return null;
     }
@@ -2134,6 +2180,7 @@ export const selectActorsWithPositions = createSelector(
         includeMembers,
         includeInofficial,
         connectedCategoryQuery,
+        eventsByStatement,
       })
     );
   }
@@ -2158,6 +2205,7 @@ export const selectActorWithPositions = createSelector(
   selectActorActionsGroupedByActor,
   selectIndicators,
   selectActionIndicatorsGroupedByIndicatorAttributes,
+  selectParentEventsByStatement,
   (
     actorId,
     includeActorMembersParam,
@@ -2174,6 +2222,7 @@ export const selectActorWithPositions = createSelector(
     actorActions,
     indicators,
     actionIndicators,
+    eventsByStatement,
   ) => {
     if (
       !actors
@@ -2184,6 +2233,7 @@ export const selectActorWithPositions = createSelector(
       || !indicators
       || !actionIndicators
       || !authorityCategories
+      || !eventsByStatement
     ) {
       return null;
     }
@@ -2223,6 +2273,7 @@ export const selectActorWithPositions = createSelector(
       includeMembers,
       includeInofficial,
       connectedCategoryQuery,
+      eventsByStatement,
     });
   }
 );
