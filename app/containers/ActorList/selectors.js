@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect';
-import { Map } from 'immutable';
+import { Map, List } from 'immutable';
 import asList from 'utils/as-list';
 
 import {
@@ -29,6 +29,7 @@ import {
   selectIncludeActorChildren,
   selectIndicators,
   selectLocationQuery,
+  selectActortypeActors,
 } from 'containers/App/selectors';
 
 import {
@@ -46,7 +47,7 @@ import {
 // import { qe } from 'utils/quasi-equals';
 import { getValueFromPositions } from 'containers/EntityListTable/utils';
 
-import { API, INDICATOR_ACTION_ACTORTYPES } from 'themes/config';
+import { API, INDICATOR_ACTION_ACTORTYPES, ACTORTYPES } from 'themes/config';
 
 import { DEPENDENCIES } from './constants';
 
@@ -98,7 +99,9 @@ export const selectConnections = createSelector(
 
 const selectActorsWithCategories = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectActorsWithPositions,
+  (state, params) => params && params.type === ACTORTYPES.COUNTRY
+    ? selectActorsWithPositions(state, { ...params, dependencies: DEPENDENCIES })
+    : selectActortypeActors(state, params),
   selectActorCategoriesGroupedByActor,
   selectCategories,
   (ready, entities, associationsGrouped, categories) => {

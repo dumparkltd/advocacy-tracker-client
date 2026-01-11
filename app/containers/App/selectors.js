@@ -9,6 +9,7 @@
  *
  */
 import { createSelector } from 'reselect';
+import createCachedSelector from 're-reselect';
 import { reduce } from 'lodash/collection';
 import { Map, List } from 'immutable';
 
@@ -47,6 +48,20 @@ import {
 } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
 import { PARAMS } from './constants';
+
+
+export const ACTORS_WITH_POSITIONS_DEPENDENCIES = [
+  API.ACTORS,
+  API.ACTIONS,
+  API.TAXONOMIES,
+  API.CATEGORIES,
+  API.ACTION_CATEGORIES,
+  API.MEMBERSHIPS,
+  API.INDICATORS,
+  API.ACTION_INDICATORS,
+  API.ACTION_ACTIONS,
+  API.ACTOR_ACTIONS,
+];
 
 // high level state selects
 const getRoute = (state) => state.get('route');
@@ -925,20 +940,19 @@ export const selectResourcetypeResources = createSelector(
   }
 );
 // all actions for a given type id
-export const selectActiontypeActions = createSelector(
+export const selectActiontypeActions = createCachedSelector(
   selectActions,
-  (state, args) => args ? args.type : null,
+  (state, type) => type,
   (entities, type) => {
     if (entities && type) {
       return entities.filter(
-        (actor) => qe(
-          type,
-          actor.getIn(['attributes', 'measuretype_id']),
-        )
+        (action) => qe(type, action.getIn(['attributes', 'measuretype_id']))
       );
     }
     return entities;
   }
+)(
+  (state, type) => type || 'all' // Cache key - creates separate memoized instance per type
 );
 
 // TODO check: likely not needed
@@ -1082,7 +1096,7 @@ export const selectResourcesSearchQuery = createSelector(
 // filter entities by attributes, using object
 export const selectActionsWhere = createSelector(
   (state, { where }) => where,
-  selectActiontypeActions, // type should be optional
+  (state, params) => selectActiontypeActions(state, params.type),
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
@@ -1091,7 +1105,7 @@ export const selectActionsWhere = createSelector(
 // filter entities by attributes, using locationQuery
 export const selectActionsWhereQuery = createSelector(
   selectAttributeQuery,
-  selectActiontypeActions, // type should be optional
+  (state, params) => selectActiontypeActions(state, params.type), // type should be optional
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
@@ -1177,7 +1191,7 @@ export const selectTaxonomiesWithCategories = createSelector(
 // all categories for a given taxonomy id
 export const selectTaxonomyCategories = createSelector(
   selectCategories,
-  (state, args) => args ? args.taxonomy_id : null,
+  (state, tax_id) => tax_id || null,
   (entities, taxonomy_id) => {
     if (entities && taxonomy_id) {
       return entities.filter(
@@ -1452,13 +1466,13 @@ export const selectActorConnections = createSelector(
     .set(API.USERS, users)
 );
 export const selectResourceConnections = createSelector(
-  selectActiontypeActions,
+  (state, params) => selectActiontypeActions(state, params.type),
   (actions) => Map()
     .set(API.ACTIONS, actions)
 );
 
 export const selectIndicatorConnections = createSelector(
-  selectActiontypeActions,
+  (state, params) => selectActiontypeActions(state, params.type),
   (actions) => Map()
     .set(API.ACTIONS, actions)
 );
@@ -1700,8 +1714,8 @@ export const selectActionActionsGroupedBySubAction = createSelector(
 );
 export const selectParentEventsByStatement = createSelector(
   (state) => selectEntities(state, API.ACTION_ACTIONS),
-  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EVENT }),
-  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
+  (state) => selectActiontypeActions(state, ACTIONTYPES.EVENT),
+  (state) => selectActiontypeActions(state, ACTIONTYPES.EXPRESS),
   (connections, events, statements) => {
     if (!connections || !events || !statements) return null;
     return connections.filter(
@@ -1893,6 +1907,7 @@ const getActorStatementsAndPositions = ({
   connectedCategoryQuery,
   eventsByStatement,
 }) => {
+  console.log('getActorStatementsAndPositions')
   // 1. figure out any actor statements /////////////////////////////////////
   // actorActions
   let actorIndicators;
@@ -2008,21 +2023,21 @@ const getActorStatementsAndPositions = ({
             // then dates
             // then use higher level of suuport
             (a, b) => {
-              // const aEventId = eventsByStatement.get(a.get('measure_id'))
-              //   && eventsByStatement.get(a.get('measure_id')).first();
-              // const bEventId = eventsByStatement.get(b.get('measure_id'))
-              //   && eventsByStatement.get(b.get('measure_id')).first();
-              //
-              // // If both statements are from the same event
-              // if (aEventId && bEventId && aEventId === bEventId) {
-              //   // Individual statements (no viaGroups) come before group statements
-              //   if (!a.get('viaGroups') && !!b.get('viaGroups')) {
-              //     return -1;
-              //   }
-              //   if (!!a.get('viaGroups') && !b.get('viaGroups')) {
-              //     return 1;
-              //   }
-              // }
+              const aEventId = eventsByStatement.get(a.get('measure_id'))
+                && eventsByStatement.get(a.get('measure_id')).first();
+              const bEventId = eventsByStatement.get(b.get('measure_id'))
+                && eventsByStatement.get(b.get('measure_id')).first();
+
+              // If both statements are from the same event
+              if (aEventId && bEventId && aEventId === bEventId) {
+                // Individual statements (no viaGroups) come before group statements
+                if (!a.get('viaGroups') && !!b.get('viaGroups')) {
+                  return -1;
+                }
+                if (!!a.get('viaGroups') && !b.get('viaGroups')) {
+                  return 1;
+                }
+              }
               let aDate = a.getIn(['measure', 'date_start']);
               let bDate = b.getIn(['measure', 'date_start']);
               /* eslint-disable no-restricted-globals */
@@ -2089,7 +2104,24 @@ const getActorStatementsAndPositions = ({
   return actor;
 };
 
-export const selectActorsWithPositions = createSelector(
+const selectGroupActors = createSelector(
+  (state) => selectActors(state),
+  (actors) => {
+    if (!actors) return null;
+    const groupActorTypes = Object.values(MEMBERSHIPS).reduce(
+      (memo, actorGroups) => [...memo, ...actorGroups],
+      [],
+    );
+    return actors.filter(
+      (actor) => groupActorTypes.indexOf(
+        actor.getIn(['attributes', 'actortype_id']).toString()
+      ) > -1
+    );
+  }
+);
+
+export const selectActorsWithPositionsData = createSelector(
+  (state) => selectReady(state, { path: ACTORS_WITH_POSITIONS_DEPENDENCIES }),
   // from param
   (state, params) => params && params.includeActorMembers,
   (state, params) => params && params.includeInofficial,
@@ -2100,15 +2132,17 @@ export const selectActorsWithPositions = createSelector(
   selectConnectedCategoryQuery,
   // from state
   (state) => selectActors(state),
-  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
-  (state) => selectTaxonomyCategories(state, { taxonomy_id: AUTHORITY_TAXONOMY }),
+  (state) => selectActiontypeActions(state, ACTIONTYPES.EXPRESS),
+  (state) => selectTaxonomyCategories(state, AUTHORITY_TAXONOMY),
   selectActionCategoriesGroupedByAction,
   selectMembershipsGroupedByMember,
   selectActorActionsGroupedByActor,
   selectIndicators,
   selectActionIndicatorsGroupedByIndicatorAttributes,
   selectParentEventsByStatement,
+  selectGroupActors,
   (
+    ready,
     includeActorMembersParam,
     includeInofficialParam,
     actortypeId,
@@ -2124,9 +2158,11 @@ export const selectActorsWithPositions = createSelector(
     indicators,
     actionIndicators,
     eventsByStatement, // { [statement_id] : { [connection_id] : event_id } }
+    groupActors,
   ) => {
     if (
-      !actors
+      !ready
+      || !actors
       || !statements
       || !actionCategoriesByAction
       || !memberships
@@ -2135,6 +2171,7 @@ export const selectActorsWithPositions = createSelector(
       || !actionIndicators
       || !authorityCategories
       || !eventsByStatement
+      || !groupActors
     ) {
       return null;
     }
@@ -2158,109 +2195,9 @@ export const selectActorsWithPositions = createSelector(
     } else if (typeof includeActorMembersQuery !== 'undefined') {
       includeMembers = includeActorMembersQuery;
     }
-    // figure out actors that can have members aka "group actors"
-    const groupActors = actors.filter(
-      (actor) => Object.values(MEMBERSHIPS).reduce(
-        (memo, actorGroups) => [...memo, ...actorGroups],
-        [],
-      ).indexOf(actor.getIn(['attributes', 'actortype_id']).toString()) > -1
-    );
-    return typeActors.map(
-      (actor) => getActorStatementsAndPositions({
-        actor,
-        actors,
-        indicators,
-        statements,
-        groupActors,
-        actorActions,
-        actionIndicators,
-        memberships,
-        authorityCategories,
-        actionCategoriesByAction,
-        includeMembers,
-        includeInofficial,
-        connectedCategoryQuery,
-        eventsByStatement,
-      })
-    );
-  }
-);
 
-export const selectActorWithPositions = createSelector(
-  // from param
-  (state, params) => params && params.id,
-  (state, params) => params && params.includeActorMembers,
-  (state, params) => params && params.includeInofficial,
-  (state, params) => params && params.type,
-  // from query
-  selectIncludeInofficialStatements,
-  selectIncludeActorMembers,
-  selectConnectedCategoryQuery,
-  // from state
-  (state) => selectActors(state),
-  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
-  (state) => selectTaxonomyCategories(state, { taxonomy_id: AUTHORITY_TAXONOMY }),
-  selectActionCategoriesGroupedByAction,
-  selectMembershipsGroupedByMember,
-  selectActorActionsGroupedByActor,
-  selectIndicators,
-  selectActionIndicatorsGroupedByIndicatorAttributes,
-  selectParentEventsByStatement,
-  (
-    actorId,
-    includeActorMembersParam,
-    includeInofficialParam,
-    actortypeId,
-    includeInofficialQuery,
-    includeActorMembersQuery,
-    connectedCategoryQuery,
-    actors,
-    statements,
-    authorityCategories,
-    actionCategoriesByAction,
-    memberships,
-    actorActions,
-    indicators,
-    actionIndicators,
-    eventsByStatement,
-  ) => {
-    if (
-      !actors
-      || !statements
-      || !actionCategoriesByAction
-      || !memberships
-      || !actorActions
-      || !indicators
-      || !actionIndicators
-      || !authorityCategories
-      || !eventsByStatement
-    ) {
-      return null;
-    }
-    // limit to type if set
-    const actor = actors.get(actorId);
-    // use query unless param set
-    let includeInofficial = true;
-    if (typeof includeInofficialParam !== 'undefined') {
-      includeInofficial = includeInofficialParam;
-    } else if (typeof includeInofficialQuery !== 'undefined') {
-      includeInofficial = includeInofficialQuery;
-    }
-    let includeMembers = true;
-    if (typeof includeActorMembersParam !== 'undefined') {
-      includeMembers = includeActorMembersParam;
-    } else if (typeof includeActorMembersQuery !== 'undefined') {
-      includeMembers = includeActorMembersQuery;
-    }
-    // figure out actors that can have members aka "group actors"
-    const groupActors = actors.filter(
-      (groupActor) => Object.values(MEMBERSHIPS).reduce(
-        (memo, actorGroups) => [...memo, ...actorGroups],
-        [],
-      ).indexOf(groupActor.getIn(['attributes', 'actortype_id']).toString()) > -1
-    );
-    return actor && getActorStatementsAndPositions({
-      actor,
+    return {
+      typeActors,
       actors,
       indicators,
       statements,
@@ -2274,10 +2211,35 @@ export const selectActorWithPositions = createSelector(
       includeInofficial,
       connectedCategoryQuery,
       eventsByStatement,
-    });
+    };
   }
 );
 
+export const selectActorsWithPositions = createSelector(
+  selectActorsWithPositionsData,
+  (data) => {
+    if (!data) return null;
+    const result = data.typeActors.map((actor) => getActorStatementsAndPositions({
+      actor,
+      ...data,
+    }));
+    return result;
+  }
+);
+
+export const selectActorWithPositions = createSelector(
+  selectActorsWithPositionsData,
+  (data, actorId) => {
+    if (!data || !actorId) return null;
+    const actor = data.actors.get(actorId);
+    if (!actor) return null;
+
+    return getActorStatementsAndPositions({
+      actor,
+      ...data,
+    });
+  }
+);
 
 export const selectActorsByType = createSelector(
   selectActors,

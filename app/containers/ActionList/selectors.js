@@ -109,7 +109,7 @@ export const selectConnections = createSelector(
 // nest category ids
 const selectActionsWithCategories = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
-  selectActiontypeActions,
+  (state, params) => selectActiontypeActions(state, params.type),
   selectActionCategoriesGroupedByAction,
   selectCategories,
   (ready, entities, associationsGrouped, categories) => {
