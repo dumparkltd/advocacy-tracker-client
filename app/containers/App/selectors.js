@@ -1482,13 +1482,13 @@ export const selectActorConnections = createSelector(
     .set(API.USERS, users)
 );
 export const selectResourceConnections = createSelector(
-  (state, params) => selectActiontypeActions(state, params.type),
+  (state, typeId) => selectActiontypeActions(state, typeId),
   (actions) => Map()
     .set(API.ACTIONS, actions)
 );
 
 export const selectIndicatorConnections = createSelector(
-  (state, params) => selectActiontypeActions(state, params.type),
+  (state, typeId) => selectActiontypeActions(state, typeId),
   (actions) => Map()
     .set(API.ACTIONS, actions)
 );

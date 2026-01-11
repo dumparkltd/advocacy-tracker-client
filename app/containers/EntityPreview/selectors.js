@@ -388,7 +388,7 @@ export const selectPreviewEntity = createSelector(
 export const selectPreviewEntityWithConnections = createSelector(
   selectPreviewEntity,
   selectIndicatorsAssociated,
-  selectIndicatorConnections,
+  (state, { actionType }) => selectIndicatorConnections(state, actionType),
   selectActionIndicatorsGroupedByActionAttributes,
   selectActionIndicatorsGroupedByIndicator,
   selectActionViewTaxonomyOptions,
@@ -558,7 +558,7 @@ export const selectActionIndicators = createSelector(
   (state, { id }) => id,
   (state, { actionType }) => actionType,
   selectIndicatorsAssociated,
-  selectIndicatorConnections,
+  (state, { actionType }) => selectIndicatorConnections(state, actionType),
   selectActionIndicatorsGroupedByActionAttributes,
   selectActionIndicatorsGroupedByIndicator,
   (
