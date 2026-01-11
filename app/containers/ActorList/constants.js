@@ -13,10 +13,10 @@ import {
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
+import qe from 'utils/quasi-equals';
+
 // required for selectActorsWithPositionsData
 import { ACTORS_WITH_POSITIONS_DEPENDENCIES } from 'containers/App/selectors';
-
-import qe from 'utils/quasi-equals';
 
 export const DEPENDENCIES = [
   ...new Set([
