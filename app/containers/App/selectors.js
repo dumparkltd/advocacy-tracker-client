@@ -1203,20 +1203,22 @@ export const selectTaxonomiesWithCategories = createSelector(
 );
 
 // all categories for a given taxonomy id
-export const selectTaxonomyCategories = createSelector(
+export const selectTaxonomyCategories = createCachedSelector(
   selectCategories,
-  (state, tax_id) => tax_id || null,
+  (state, taxonomy_id) => taxonomy_id,
   (entities, taxonomy_id) => {
     if (entities && taxonomy_id) {
       return entities.filter(
-        (actor) => qe(
+        (category) => qe(
           taxonomy_id,
-          actor.getIn(['attributes', 'taxonomy_id']),
+          category.getIn(['attributes', 'taxonomy_id']),
         )
       );
     }
     return entities;
   }
+)(
+  (state, taxonomy_id) => taxonomy_id || 'all' // Cache key
 );
 
 // get all actor taxonomies for a given type
