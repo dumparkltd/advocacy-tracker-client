@@ -1058,7 +1058,7 @@ export const selectEntitiesSearchQuery = createSelector(
 // filter entities by attributes, using object
 export const selectActorsWhere = createSelector(
   (state, { where }) => where,
-  (state, params) => selectActortypeActors(state, params.type), // type should be optional
+  (state, params) => selectActortypeActors(state, params && params.type), // type should be optional
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
@@ -1067,7 +1067,7 @@ export const selectActorsWhere = createSelector(
 // filter entities by attributes, using locationQuery
 export const selectActorsWhereQuery = createSelector(
   selectAttributeQuery,
-  (state, params) => selectActortypeActors(state, params.type), // type should be optional
+  (state, params) => selectActortypeActors(state, params && params.type), // type should be optional
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
@@ -1110,7 +1110,7 @@ export const selectResourcesSearchQuery = createSelector(
 // filter entities by attributes, using object
 export const selectActionsWhere = createSelector(
   (state, { where }) => where,
-  (state, params) => selectActiontypeActions(state, params.type),
+  (state, params) => selectActiontypeActions(state, params && params.type),
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
@@ -1119,7 +1119,7 @@ export const selectActionsWhere = createSelector(
 // filter entities by attributes, using locationQuery
 export const selectActionsWhereQuery = createSelector(
   selectAttributeQuery,
-  (state, params) => selectActiontypeActions(state, params.type), // type should be optional
+  (state, params) => selectActiontypeActions(state, params && params.type), // type should be optional
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
@@ -1843,7 +1843,7 @@ export const selectUserCategoriesGroupedByUser = createSelector(
 // TABLES with nested ids /////////////////////////////////////////////////////////////
 // get actors with category ids
 export const selectActorsCategorised = createSelector(
-  (state, params) => selectActortypeActors(state, params.type),
+  (state, params) => selectActortypeActors(state, params && params.type),
   selectActorCategoriesGroupedByActor,
   (entities, associationsGrouped) => entitiesSetCategoryIds(
     entities,
@@ -2039,21 +2039,21 @@ const getActorStatementsAndPositions = ({
             // then dates
             // then use higher level of suuport
             (a, b) => {
-              const aEventId = eventsByStatement.get(a.get('measure_id'))
-                && eventsByStatement.get(a.get('measure_id')).first();
-              const bEventId = eventsByStatement.get(b.get('measure_id'))
-                && eventsByStatement.get(b.get('measure_id')).first();
-
-              // If both statements are from the same event
-              if (aEventId && bEventId && aEventId === bEventId) {
-                // Individual statements (no viaGroups) come before group statements
-                if (!a.get('viaGroups') && !!b.get('viaGroups')) {
-                  return -1;
-                }
-                if (!!a.get('viaGroups') && !b.get('viaGroups')) {
-                  return 1;
-                }
-              }
+              // const aEventId = eventsByStatement.get(a.get('measure_id'))
+              //   && eventsByStatement.get(a.get('measure_id')).first();
+              // const bEventId = eventsByStatement.get(b.get('measure_id'))
+              //   && eventsByStatement.get(b.get('measure_id')).first();
+              //
+              // // If both statements are from the same event
+              // if (aEventId && bEventId && aEventId === bEventId) {
+              //   // Individual statements (no viaGroups) come before group statements
+              //   if (!a.get('viaGroups') && !!b.get('viaGroups')) {
+              //     return -1;
+              //   }
+              //   if (!!a.get('viaGroups') && !b.get('viaGroups')) {
+              //     return 1;
+              //   }
+              // }
               let aDate = a.getIn(['measure', 'date_start']);
               let bDate = b.getIn(['measure', 'date_start']);
               /* eslint-disable no-restricted-globals */
@@ -2148,7 +2148,7 @@ export const selectActorsWithPositionsData = createSelector(
   selectConnectedCategoryQuery,
   // from state
   (state) => selectActors(state),
-  (state, params) => selectActortypeActors(state, params.type),
+  (state, params) => selectActortypeActors(state, params && params.type),
   (state) => selectActiontypeActions(state, ACTIONTYPES.EXPRESS),
   (state) => selectTaxonomyCategories(state, AUTHORITY_TAXONOMY),
   selectActionCategoriesGroupedByAction,
