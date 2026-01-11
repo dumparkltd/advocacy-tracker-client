@@ -49,7 +49,7 @@ import {
 import { qe } from 'utils/quasi-equals';
 import { PARAMS } from './constants';
 
-
+// used for selectActorsWithPositionsData
 export const ACTORS_WITH_POSITIONS_DEPENDENCIES = [
   API.ACTORS,
   API.ACTIONS,
@@ -909,20 +909,34 @@ export const selectResourcetype = createSelector(
 //   }
 // );
 // all actors for a given type id
-export const selectActortypeActors = createSelector(
+// export const selectActortypeActors = createSelector(
+//   selectActors,
+//   (state, args) => args ? args.type : null,
+//   (entities, type) => {
+//     if (entities && type) {
+//       return entities.filter(
+//         (actor) => qe(
+//           type,
+//           actor.getIn(['attributes', 'actortype_id']),
+//         )
+//       );
+//     }
+//     return entities;
+//   }
+// );
+export const selectActortypeActors = createCachedSelector(
   selectActors,
-  (state, args) => args ? args.type : null,
+  (state, type) => type,
   (entities, type) => {
     if (entities && type) {
       return entities.filter(
-        (actor) => qe(
-          type,
-          actor.getIn(['attributes', 'actortype_id']),
-        )
+        (action) => qe(type, action.getIn(['attributes', 'actortype_id']))
       );
     }
     return entities;
   }
+)(
+  (state, type) => type || 'all' // Cache key - creates separate memoized instance per type
 );
 export const selectResourcetypeResources = createSelector(
   selectResources,
@@ -1044,7 +1058,7 @@ export const selectEntitiesSearchQuery = createSelector(
 // filter entities by attributes, using object
 export const selectActorsWhere = createSelector(
   (state, { where }) => where,
-  selectActortypeActors, // type should be optional
+  (state, params) => selectActortypeActors(state, params.type), // type should be optional
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
@@ -1053,7 +1067,7 @@ export const selectActorsWhere = createSelector(
 // filter entities by attributes, using locationQuery
 export const selectActorsWhereQuery = createSelector(
   selectAttributeQuery,
-  selectActortypeActors, // type should be optional
+  (state, params) => selectActortypeActors(state, params.type), // type should be optional
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
@@ -1827,7 +1841,7 @@ export const selectUserCategoriesGroupedByUser = createSelector(
 // TABLES with nested ids /////////////////////////////////////////////////////////////
 // get actors with category ids
 export const selectActorsCategorised = createSelector(
-  selectActortypeActors,
+  (state, params) => selectActortypeActors(state, params.type),
   selectActorCategoriesGroupedByActor,
   (entities, associationsGrouped) => entitiesSetCategoryIds(
     entities,
@@ -1907,7 +1921,7 @@ const getActorStatementsAndPositions = ({
   connectedCategoryQuery,
   eventsByStatement,
 }) => {
-  console.log('getActorStatementsAndPositions')
+  console.log('getActorStatementsAndPositions');
   // 1. figure out any actor statements /////////////////////////////////////
   // actorActions
   let actorIndicators;
@@ -2086,20 +2100,20 @@ const getActorStatementsAndPositions = ({
       actorStatements = actorStatements
         ? actorStatements.concat(actorStatementsAsMemberByGroup.flatten(true).toList()).toSet()
         : actorStatementsAsMemberByGroup.flatten(true).toList().toSet();
-      return actor
-        .set('statements', actorStatements)
-        .set('statementsAsGroup', actorStatementsAsMemberByGroup.flatten(true).toList().toSet())
-        .set('indicatorPositions', actorIndicators)
-        .set('indicators', actorIndicators && actorIndicators.reduce(
-          (memo, indicatorPosition, key) => {
-            if (indicatorPosition && indicatorPosition.size > 0) {
-              return memo.set(key, key);
-            }
-            return memo;
-          },
-          Map(),
-        ));
     }
+    return actor
+      .set('statements', actorStatements)
+      .set('statementsAsGroup', actorStatementsAsMemberByGroup && actorStatementsAsMemberByGroup.flatten(true).toList().toSet())
+      .set('indicatorPositions', actorIndicators)
+      .set('indicators', actorIndicators && actorIndicators.reduce(
+        (memo, indicatorPosition, key) => {
+          if (indicatorPosition && indicatorPosition.size > 0) {
+            return memo.set(key, key);
+          }
+          return memo;
+        },
+        Map(),
+      ));
   }
   return actor;
 };
@@ -2132,6 +2146,7 @@ export const selectActorsWithPositionsData = createSelector(
   selectConnectedCategoryQuery,
   // from state
   (state) => selectActors(state),
+  (state, params) => selectActortypeActors(state, params.type),
   (state) => selectActiontypeActions(state, ACTIONTYPES.EXPRESS),
   (state) => selectTaxonomyCategories(state, AUTHORITY_TAXONOMY),
   selectActionCategoriesGroupedByAction,
@@ -2150,6 +2165,7 @@ export const selectActorsWithPositionsData = createSelector(
     includeActorMembersQuery,
     connectedCategoryQuery,
     actors,
+    typeActors,
     statements,
     authorityCategories,
     actionCategoriesByAction,
@@ -2163,6 +2179,7 @@ export const selectActorsWithPositionsData = createSelector(
     if (
       !ready
       || !actors
+      || !typeActors
       || !statements
       || !actionCategoriesByAction
       || !memberships
@@ -2175,13 +2192,6 @@ export const selectActorsWithPositionsData = createSelector(
     ) {
       return null;
     }
-    // limit to type if set
-    const typeActors = actortypeId
-      ? actors.filter(
-        (actor) => qe(actor.getIn(['attributes', 'actortype_id']), actortypeId)
-      )
-      : actors;
-
     // use query unless param set
     let includeInofficial = true;
     if (typeof includeInofficialParam !== 'undefined') {
@@ -2229,15 +2239,17 @@ export const selectActorsWithPositions = createSelector(
 
 export const selectActorWithPositions = createSelector(
   selectActorsWithPositionsData,
+  (state, { id }) => id,
   (data, actorId) => {
     if (!data || !actorId) return null;
     const actor = data.actors.get(actorId);
     if (!actor) return null;
 
-    return getActorStatementsAndPositions({
+    const result = getActorStatementsAndPositions({
       actor,
       ...data,
     });
+    return result;
   }
 );
 

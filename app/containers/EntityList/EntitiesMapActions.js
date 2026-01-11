@@ -446,7 +446,7 @@ EntitiesMapActions.propTypes = {
 const mapStateToProps = (state, { typeId, includeActorMembers }) => ({
   countries: qe(typeId, ACTIONTYPES.EXPRESS)
     ? selectActorsWithPositions(state, { includeActorMembers, type: ACTORTYPES.COUNTRY })
-    : selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
+    : selectActortypeActors(state, ACTORTYPES.COUNTRY),
   mapIndicator: selectMapIndicator(state),
   catQuery: selectCategoryQuery(state),
   indicators: qe(typeId, ACTIONTYPES.EXPRESS) ? selectIndicators(state) : null,
