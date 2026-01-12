@@ -16,6 +16,7 @@ import {
   selectCategories,
   selectActors,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectUsers,
 } from 'containers/App/selectors';
 
@@ -32,7 +33,6 @@ import {
   API,
   ACTORTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
-  OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
 import { DEPENDENCIES } from './constants';
 
@@ -44,6 +44,7 @@ export const selectConnections = createSelector(
   selectActors,
   selectConnectedCategoryQuery,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectUsers,
   (
     ready,
@@ -53,6 +54,7 @@ export const selectConnections = createSelector(
     actors,
     connectedCategoryQuery,
     includeInofficial,
+    includeUnpublishedAPI,
     users,
   ) => {
     if (ready) {
@@ -65,11 +67,14 @@ export const selectConnections = createSelector(
         API.ACTIONS,
         actionsWithCategories.filter(
           (action) => {
-            const actionCategories = action.get('categories');
             let pass = true;
             if (!includeInofficial) {
-              pass = actionCategories && actionCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+              pass = pass && action.getIn(['attributes', 'is_official']);
             }
+            if (!includeUnpublishedAPI) {
+              pass = pass && action.getIn(['attributes', 'public_api']);
+            }
+            const actionCategories = action.get('categories');
             if (pass && connectedCategoryQuery) {
               pass = asList(connectedCategoryQuery).every(
                 (queryArg) => {

@@ -33,6 +33,7 @@ import {
   setSubject,
   setIncludeActorMembers,
   setIncludeInofficialStatements,
+  setIncludeUnpublishedAPIStatements,
   printView,
 } from 'containers/App/actions';
 
@@ -44,6 +45,7 @@ import {
   selectSubjectQuery,
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectIsPrintView,
   selectPrintConfig,
 } from 'containers/App/selectors';
@@ -99,7 +101,9 @@ export function IndicatorView({
   onSetSubject,
   subject,
   onSetIncludeInofficial,
+  onSetIncludeUnpublishedAPI,
   includeInofficial,
+  includeUnpublishedAPI,
   onSetIncludeActorMembers,
   includeActorMembers,
   onLoadEntitiesIfNeeded,
@@ -261,6 +265,8 @@ export function IndicatorView({
                       onEntityClick={(id, path) => onEntityClick(id, path || ROUTES.ACTOR)}
                       includeInofficial={includeInofficial}
                       onSetIncludeInofficial={onSetIncludeInofficial}
+                      includeUnpublishedAPI={includeUnpublishedAPI}
+                      onSetIncludeUnpublishedAPI={onSetIncludeUnpublishedAPI}
                       includeActorMembers={includeActorMembers}
                       onSetIncludeActorMembers={onSetIncludeActorMembers}
                     />
@@ -342,7 +348,9 @@ IndicatorView.propTypes = {
   subject: PropTypes.string,
   onSetSubject: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
+  onSetIncludeUnpublishedAPI: PropTypes.func,
   includeInofficial: PropTypes.bool,
+  includeUnpublishedAPI: PropTypes.bool,
   onSetIncludeActorMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   isPrintView: PropTypes.bool,
@@ -359,6 +367,7 @@ const mapStateToProps = (state, props) => ({
   actorsByActortype: selectActorsByType(state, props.params.id),
   subject: selectSubjectQuery(state),
   includeInofficial: selectIncludeInofficialStatements(state),
+  includeUnpublishedAPI: selectIncludeUnpublishedAPIStatements(state),
   includeActorMembers: selectIncludeActorMembers(state),
   isPrintView: selectIsPrintView(state),
   printArgs: selectPrintConfig(state),
@@ -383,6 +392,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetIncludeInofficial: (value) => {
       dispatch(setIncludeInofficialStatements(value));
+    },
+    onSetIncludeUnpublishedAPI: (value) => {
+      dispatch(setIncludeUnpublishedAPIStatements(value));
     },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));

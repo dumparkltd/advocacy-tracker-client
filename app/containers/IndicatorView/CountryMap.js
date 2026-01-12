@@ -135,6 +135,8 @@ export function CountryMap({
   intl,
   onSetIncludeInofficial,
   includeInofficial,
+  onSetIncludeUnpublishedAPI,
+  includeUnpublishedAPI,
   onSetIncludeActorMembers,
   includeActorMembers,
 }) {
@@ -199,9 +201,18 @@ export function CountryMap({
           option={{
             active: !includeInofficial,
             onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
-            label: 'Only show "official" statements (Level of Authority)',
+            label: 'Only show "official" statements',
           }}
           type="official"
+        />
+        {}
+        <CheckboxOption
+          option={{
+            active: !includeUnpublishedAPI,
+            onClick: () => onSetIncludeUnpublishedAPI(includeUnpublishedAPI ? '0' : '1'),
+            label: 'Only show statements published to GPN',
+          }}
+          type="unpublishedAPI"
         />
       </CheckboxOptionGroup>
       <CheckboxOptionGroup>
@@ -221,6 +232,8 @@ CountryMap.propTypes = {
   intl: intlShape,
   onSetIncludeInofficial: PropTypes.func,
   includeInofficial: PropTypes.bool,
+  onSetIncludeUnpublishedAPI: PropTypes.func,
+  includeUnpublishedAPI: PropTypes.bool,
   onSetIncludeActorMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
 };

@@ -47,6 +47,7 @@ import {
   selectActorsWithPositions,
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectSupportQuery,
   selectPreviewQuery,
   selectLocationQuery,
@@ -188,6 +189,7 @@ export function PositionsMap({
   onSetIncludeActorMembers,
   includeActorMembers,
   includeInofficialStatements,
+  includeUnpublishedAPIStatements,
   supportQuery,
   onUpdateQuery,
   onLoadData,
@@ -323,7 +325,11 @@ export function PositionsMap({
                   position: indicatorPosition ? {
                     supportlevelId: indicatorPosition.get('supportlevel_id'),
                     supportlevelTitle: intl.formatMessage(appMessages.supportlevels[indicatorPosition.get('supportlevel_id')]),
-                    levelOfAuthority: indicatorPosition.getIn(['authority', 'short_title']),
+                    levelOfAuthority: intl.formatMessage(
+                      indicatorPosition.getIn(['measure', 'is_official'])
+                        ? appMessages.ui.officialStatuses.official
+                        : appMessages.ui.officialStatuses.inofficial,
+                    ),
                   } : {
                     supportlevelId: 0,
                     supportlevelTitle: intl.formatMessage(appMessages.supportlevels[99]),
@@ -342,6 +348,17 @@ export function PositionsMap({
                       onClick: () => onUpdateQuery([{
                         arg: 'inofficial',
                         value: includeInofficialStatements ? 'false' : null,
+                        replace: true,
+                        multipleAttributeValues: false,
+                      }]),
+                    },
+                    {
+                      id: `${ID}-preview-2`,
+                      active: !includeUnpublishedAPIStatements,
+                      label: intl.formatMessage(appMessages.ui.statementOptions.excludeUnpublishedAPI),
+                      onClick: () => onUpdateQuery([{
+                        arg: 'unpublishedAPI',
+                        value: includeUnpublishedAPIStatements ? 'false' : null,
                         replace: true,
                         multipleAttributeValues: false,
                       }]),
@@ -409,7 +426,11 @@ export function PositionsMap({
                           path: `${ROUTES.ACTION}/${statement.get('id')}`,
                         },
                         levelOfAuthority: position && {
-                          value: position.getIn(['authority', 'short_title']),
+                          value: intl.formatMessage(
+                            statement.get('is_official')
+                              ? appMessages.ui.officialStatuses.official
+                              : appMessages.ui.officialStatuses.inofficial,
+                          ),
                         },
                         viaGroup: {
                           value: position.get('viaGroups')
@@ -501,10 +522,11 @@ export function PositionsMap({
 
   supportLevels = dataReady && supportLevels
     .map((level) => {
-      const count = countryValues ? countryValues.filter(
-        (c) => c.values && c.values[currentIndicatorId] && qe(level.value, c.values[currentIndicatorId])
-      ).length
-      : 0;
+      const count = countryValues
+        ? countryValues.filter(
+          (c) => c.values && c.values[currentIndicatorId] && qe(level.value, c.values[currentIndicatorId])
+        ).length
+        : 0;
       return {
         ...level,
         active: supportQuery
@@ -518,8 +540,7 @@ export function PositionsMap({
   const currentIndicator = indicators
     && currentIndicatorId
     && indicators.get(currentIndicatorId.toString());
-
-  const options = [
+  let options = [
     {
       id: `${ID}-0`,
       active: includeActorMembers,
@@ -538,6 +559,22 @@ export function PositionsMap({
       }]),
     },
   ];
+  if (currentIndicator && currentIndicator.getIn(['attributes', 'public_api'])) {
+    options = [
+      ...options,
+      {
+        id: `${ID}-2`,
+        active: !includeUnpublishedAPIStatements,
+        label: intl.formatMessage(appMessages.ui.statementOptions.excludeUnpublishedAPI),
+        onClick: () => onUpdateQuery([{
+          arg: 'unpublishedAPI',
+          value: includeUnpublishedAPIStatements ? 'false' : null,
+          replace: true,
+          multipleAttributeValues: false,
+        }]),
+      },
+    ];
+  }
   return (
     <Box pad={{ top: 'small', bottom: 'xsmall' }}>
       <Box>
@@ -726,6 +763,7 @@ PositionsMap.propTypes = {
   ]),
   includeActorMembers: PropTypes.bool,
   includeInofficialStatements: PropTypes.bool,
+  includeUnpublishedAPIStatements: PropTypes.bool,
   currentIndicatorId: PropTypes.number,
   indicators: PropTypes.object,
   locationQuery: PropTypes.object,
@@ -742,6 +780,7 @@ const mapStateToProps = (state) => ({
   indicators: selectIndicators(state),
   currentIndicatorId: selectIndicatorId(state),
   includeInofficialStatements: selectIncludeInofficialStatements(state),
+  includeUnpublishedAPIStatements: selectIncludeUnpublishedAPIStatements(state),
   supportQuery: selectSupportQuery(state),
   includeActorMembers: selectIncludeActorMembers(state),
   countries: selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),

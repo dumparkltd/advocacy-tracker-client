@@ -3,7 +3,6 @@ import { Map } from 'immutable';
 import {
   API,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
-  OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
 
 import {
@@ -23,6 +22,7 @@ import {
   selectUserActionsGroupedByAction,
   selectActorsWithPositions,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
 } from 'containers/App/selectors';
 
 import {
@@ -77,6 +77,7 @@ export const selectActionsByType = createSelector(
   selectUserActionsGroupedByAction,
   selectCategories,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   (
     ready,
     viewEntity,
@@ -91,6 +92,7 @@ export const selectActionsByType = createSelector(
     userActions,
     categories,
     includeInofficial,
+    includeUnpublishedAPI,
   ) => {
     if (!ready) return Map();
     let actionsWithConnections = actions && actions
@@ -99,11 +101,14 @@ export const selectActionsByType = createSelector(
           if (!action) {
             return false;
           }
-          if (includeInofficial) {
-            return true;
+          let pass = true;
+          if (!includeInofficial) {
+            pass = pass && action.getIn(['attributes', 'is_official']);
           }
-          const acs = actionCategories.get(parseInt(action.get('id'), 10));
-          return acs && acs.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+          if (!includeUnpublishedAPI) {
+            pass = pass && action.getIn(['attributes', 'public_api']);
+          }
+          return pass;
         }
       )
       .map((action) => setActionConnections({

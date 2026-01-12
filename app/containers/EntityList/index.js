@@ -42,6 +42,7 @@ import {
   selectIncludeActorMembers,
   selectIncludeActorChildren,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectTaxonomiesWithCategories,
   selectIsPrintView,
   selectSearchQuery,
@@ -57,6 +58,7 @@ import {
   setIncludeActorMembers,
   setIncludeActorChildren,
   setIncludeInofficialStatements,
+  setIncludeUnpublishedAPIStatements,
   saveMultipleEntities,
   newMultipleEntities,
   deleteMultipleEntities,
@@ -449,9 +451,11 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onSetIncludeActorMembers,
       onSetIncludeActorChildren,
       onSetIncludeInofficial,
+      onSetIncludeUnpublishedAPI,
       includeActorMembers,
       includeActorChildren,
       includeInofficial,
+      includeUnpublishedAPI,
       headerOptions,
       taxonomies,
       connectedTaxonomies,
@@ -748,9 +752,11 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                     onSetIncludeActorMembers={onSetIncludeActorMembers}
                     onSetIncludeActorChildren={onSetIncludeActorChildren}
                     onSetIncludeInofficial={onSetIncludeInofficial}
+                    onSetIncludeUnpublishedAPI={onSetIncludeUnpublishedAPI}
                     includeActorMembers={includeActorMembers}
                     includeActorChildren={includeActorChildren}
                     includeInofficial={includeInofficial}
+                    includeUnpublishedAPI={includeUnpublishedAPI}
                     onClearFilters={this.onClearFilters}
                   />
                 )}
@@ -955,9 +961,11 @@ EntityList.propTypes = {
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeActorChildren: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
+  onSetIncludeUnpublishedAPI: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   includeActorChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
+  includeUnpublishedAPI: PropTypes.bool,
   onEntitiesDelete: PropTypes.func,
   onUpdateFilters: PropTypes.func,
   onUpdatePath: PropTypes.func,
@@ -986,6 +994,7 @@ const mapStateToProps = (state) => ({
   includeActorMembers: selectIncludeActorMembers(state),
   includeActorChildren: selectIncludeActorChildren(state),
   includeInofficial: selectIncludeInofficialStatements(state),
+  includeUnpublishedAPI: selectIncludeUnpublishedAPIStatements(state),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   isPrintView: selectIsPrintView(state),
   searchQuery: selectSearchQuery(state),
@@ -1061,6 +1070,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetIncludeInofficial: (active) => {
       dispatch(setIncludeInofficialStatements(active));
+    },
+    onSetIncludeUnpublishedAPI: (active) => {
+      dispatch(setIncludeUnpublishedAPIStatements(active));
     },
     onEntitiesDelete: (path, entityIdsSelected) => {
       dispatch(deleteMultipleEntities({

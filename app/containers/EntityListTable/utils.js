@@ -813,12 +813,16 @@ export const prepareEntityRows = ({
               },
             };
           case 'positionStatementAuthority':
-            temp = entity.get('position') && entity.getIn(['position', 'authority']);
+            temp = entity.get('position') && entity.getIn(['position', 'measure', 'is_official']);
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: getSingleRelatedValueFromAttributes(temp),
+                value: intl.formatMessage(
+                  temp
+                    ? appMessages.ui.officialStatuses.official
+                    : appMessages.ui.officialStatuses.inofficial,
+                ),
                 single: temp,
                 // sortValue: getRelatedSortValue(temp),
               },

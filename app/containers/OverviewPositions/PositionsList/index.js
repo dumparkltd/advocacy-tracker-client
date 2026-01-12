@@ -47,6 +47,7 @@ import {
   selectIndicators,
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectAssociationTypeQuery,
   selectActorsByType,
   selectLocationQuery,
@@ -192,6 +193,7 @@ export function PositionsList({
   onSetIncludeActorMembers,
   includeActorMembers,
   includeInofficialStatements,
+  includeUnpublishedAPIStatements,
   onUpdateQuery,
   intl,
   onUpdatePath,
@@ -230,29 +232,7 @@ export function PositionsList({
       ...level,
       label: intl.formatMessage(appMessages.supportlevels[level.value]),
     }));
-  const options = [
-    {
-      id: `${ID}-0`,
-      active: includeActorMembers,
-      label: intl.formatMessage(appMessages.ui.statementOptions.includeMemberships),
-      onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
-      queryArg: 'am',
-    },
-    {
-      id: `${ID}-1`,
-      active: !includeInofficialStatements,
-      label: intl.formatMessage(appMessages.ui.statementOptions.excludeInofficial),
-      onClick: () => onUpdateQuery([{
-        arg: 'inofficial',
-        value: includeInofficialStatements ? 'false' : null,
-        replace: true,
-        multipleAttributeValues: false,
-      }]),
-      queryArg: 'inofficial',
-      inverse: true,
-    },
-  ];
-
+  let hasPublicAPIIndicators = false;
   const topicColumns = dataReady && indicators && indicators.reduce(
     (memo, indicator) => {
       const title = getIndicatorAbbreviation(indicator.getIn(['attributes', 'title']));
@@ -262,6 +242,9 @@ export function PositionsList({
       const ref = indicator.getIn(['attributes', 'reference']);
       if (isNumber(ref) && parseInt(ref, 10) < 5) {
         minSize = 'small';
+      }
+      if (indicator.getIn(['attributes', 'public_api'])) {
+        hasPublicAPIIndicators = hasPublicAPIIndicators || true;
       }
       return [
         ...memo,
@@ -292,6 +275,45 @@ export function PositionsList({
     },
     [],
   );
+  let options = [
+    {
+      id: `${ID}-0`,
+      active: includeActorMembers,
+      label: intl.formatMessage(appMessages.ui.statementOptions.includeMemberships),
+      onClick: () => onSetIncludeActorMembers(includeActorMembers ? '0' : '1'),
+      queryArg: 'am',
+    },
+    {
+      id: `${ID}-1`,
+      active: !includeInofficialStatements,
+      label: intl.formatMessage(appMessages.ui.statementOptions.excludeInofficial),
+      onClick: () => onUpdateQuery([{
+        arg: 'inofficial',
+        value: includeInofficialStatements ? 'false' : null,
+        replace: true,
+        multipleAttributeValues: false,
+      }]),
+      queryArg: 'inofficial',
+      inverse: true,
+    },
+  ];
+  if (hasPublicAPIIndicators) {
+    options = [
+      ...options,
+      {
+        id: `${ID}-2`,
+        active: !includeUnpublishedAPIStatements,
+        label: intl.formatMessage(appMessages.ui.statementOptions.excludeUnpublishedAPI),
+        onClick: () => onUpdateQuery([{
+          arg: 'unpublishedAPI',
+          value: includeUnpublishedAPIStatements ? 'false' : null,
+          replace: true,
+          multipleAttributeValues: false,
+        }]),
+      },
+    ];
+  }
+
   const reducePreviewItem = ({ id, path, item }) => {
     if (item && qe(item.getIn(['attributes', 'actortype_id']), ACTORTYPES.COUNTRY)) {
       const indicatorsWithSupport = indicators && indicators.reduce(
@@ -724,6 +746,7 @@ PositionsList.propTypes = {
   onUpdateAssociationQuery: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   includeInofficialStatements: PropTypes.bool,
+  includeUnpublishedAPIStatements: PropTypes.bool,
   onUpdateQuery: PropTypes.func,
   onUpdatePath: PropTypes.func,
   onUpdateColumnFilters: PropTypes.func,
@@ -741,6 +764,7 @@ const mapStateToProps = (state) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   indicators: selectIndicators(state),
   includeInofficialStatements: selectIncludeInofficialStatements(state),
+  includeUnpublishedAPIStatements: selectIncludeUnpublishedAPIStatements(state),
   includeActorMembers: selectIncludeActorMembers(state),
   countries: selectCountries(state),
   connections: selectConnections(state),

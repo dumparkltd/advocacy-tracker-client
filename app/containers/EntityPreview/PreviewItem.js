@@ -126,6 +126,14 @@ export function PreviewItem({
       getStatusField(item, 'is_official', ATTRIBUTE_STATUSES.is_official),
     ];
   }
+  // if (item
+  //   && typeof item.getIn(['attributes', 'public_api']) !== 'undefined'
+  // ) {
+  //   fields = [
+  //     ...fields,
+  //     getStatusField(item, 'public_api', ATTRIBUTE_STATUSES.public_api),
+  //   ];
+  // }
   // description
   if (item
     && item.getIn(['attributes', 'description'])

@@ -569,6 +569,7 @@ const getCurrentAttributeFilters = (
                   appMessage: !!attribute.message,
                   label,
                 }],
+                attribute: qAttribute,
                 type: 'attributes',
                 groupId: 'attributes',
                 groupLabel: intl.formatMessage(appMessages.nav.attributes),

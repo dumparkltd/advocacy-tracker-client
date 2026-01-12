@@ -80,6 +80,8 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       includeActorChildren,
       includeInofficial,
       onSetIncludeInofficial,
+      includeUnpublishedAPI,
+      onSetIncludeUnpublishedAPI,
       intl,
       allEntityCount,
       headerInfo,
@@ -384,8 +386,14 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {
           active: !includeInofficial,
           onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
-          label: 'Consider "official" statements only (category: Level of Authority)',
+          label: 'Consider "official" statements only',
           type: 'inoffical',
+        },
+        {
+          active: !includeUnpublishedAPI,
+          onClick: () => onSetIncludeUnpublishedAPI(includeUnpublishedAPI ? '0' : '1'),
+          label: 'Consider only statements published to GPN',
+          type: 'unpublishedAPI',
         },
       ];
     } else if (config.types === 'users') {
@@ -658,6 +666,7 @@ EntitiesListView.propTypes = {
   includeActorMembers: PropTypes.bool,
   includeActorChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
+  includeUnpublishedAPI: PropTypes.bool,
   listUpdating: PropTypes.bool,
   isAdmin: PropTypes.bool,
   hasFilters: PropTypes.bool,
@@ -676,6 +685,7 @@ EntitiesListView.propTypes = {
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeActorChildren: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
+  onSetIncludeUnpublishedAPI: PropTypes.func,
   onScrollToTop: PropTypes.func,
   onClearFilters: PropTypes.func,
   reducePreviewItem: PropTypes.func,

@@ -2594,11 +2594,15 @@ export default defineMessages({
     statementOptions: {
       includeMemberships: {
         id: 'app.containers.App.ui.statementOptions.includeMemberships',
-        defaultMessage: 'Include positions of country groups',
+        defaultMessage: 'Include positions of groups',
       },
       excludeInofficial: {
         id: 'app.containers.App.ui.statementOptions.excludeInofficial',
         defaultMessage: 'Only show "official" statements',
+      },
+      excludeUnpublishedAPI: {
+        id: 'app.containers.App.ui.statementOptions.excludeUnpublishedAPI',
+        defaultMessage: 'Only show statements published to GPN',
       },
     },
   },

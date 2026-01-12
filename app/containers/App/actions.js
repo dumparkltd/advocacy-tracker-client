@@ -78,6 +78,7 @@ import {
   SET_INCLUDE_ACTOR_CHILDREN,
   SET_INCLUDE_MEMBERS_FORFILTERS,
   SET_INCLUDE_INOFFICAL_STATEMENTS,
+  SET_INCLUDE_UNPUBLISHEDAPI_STATEMENTS,
   SET_INCLUDE_ACTOR_CHILDREN_ON_MAP,
   SET_INCLUDE_ACTOR_CHILDREN_MEMBERS_ON_MAP,
   PRINT_VIEW,
@@ -611,6 +612,12 @@ export function setIncludeMembersForFiltering(value) {
 export function setIncludeInofficialStatements(value) {
   return {
     type: SET_INCLUDE_INOFFICAL_STATEMENTS,
+    value,
+  };
+}
+export function setIncludeUnpublishedAPIStatements(value) {
+  return {
+    type: SET_INCLUDE_UNPUBLISHEDAPI_STATEMENTS,
     value,
   };
 }

@@ -6,7 +6,6 @@ import {
   ACTIONTYPES,
   ACTORTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
-  AUTHORITY_TAXONOMY,
   PRIORITY_TAXONOMY,
   INTERACTION_TYPE_TAXONOMY,
   EVENT_TYPE_TAXONOMY,
@@ -94,15 +93,6 @@ export const CONFIG = {
         attribute: 'is_official',
         filterType: 'buttonGroup',
         multiple: false,
-      }],
-    },
-    {
-      id: `taxonomies-${AUTHORITY_TAXONOMY}`,
-      title: 'Levels of authority (cat)',
-      option: 'taxonomies',
-      taxonomies: [{
-        id: AUTHORITY_TAXONOMY,
-        filterType: 'pills',
       }],
     },
     {

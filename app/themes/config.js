@@ -132,7 +132,6 @@ export const RESOURCETYPES = {
   DOC: '3',
 };
 
-export const OFFICIAL_STATEMENT_CATEGORY_ID = IS_DEV ? 56 : 55;
 export const GENERAL_POS_TAXONOMY = 1;
 export const SECTOR_TAXONOMY = 2;
 export const ROLES_TAXONOMY = 3;
@@ -2255,16 +2254,10 @@ export const ACTIONTYPES_CONFIG = {
         sort: 'title',
         minSize: 'ms',
       },
-      // {
-      //   id: 'taxonomy-13',
-      //   type: 'taxonomy',
-      //   taxonomy_id: AUTHORITY_TAXONOMY, // level of authority
-      //   minSize: 'medium',
-      // },
       {
         id: 'taxonomy-7',
         type: 'taxonomy',
-        taxonomy_id: EXPRESSFORM_TAXONOMY, // level of authority
+        taxonomy_id: EXPRESSFORM_TAXONOMY, // Form of expression
         minSize: 'medium',
         showOnSingle: false,
       },
@@ -2387,7 +2380,7 @@ export const ACTIONTYPES_CONFIG = {
             rows: [
               [
                 { taxonomy: 7, basis: '1/2' }, // form
-                { taxonomy: 13, basis: '1/2' }, // authority
+                { taxonomy: 13, basis: '1/2' }, // assessment
               ],
               [
                 { taxonomy: 8, basis: '1/2' }, // tags

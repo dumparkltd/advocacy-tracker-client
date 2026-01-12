@@ -968,10 +968,13 @@ export const makeQuickFilterGroups = ({
                         onUpdateFilters(fromJS([
                           {
                             hasChanged: true,
-                            query: query || config.taxonomies.query,
+                            query,
+                            multipleAttributeValues: false,
                             value,
                             replace: false,
                             checked,
+                            add: !!checked,
+                            prevValue: !value,
                           },
                         ]));
                       },

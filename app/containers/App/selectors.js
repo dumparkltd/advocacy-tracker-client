@@ -35,8 +35,6 @@ import {
   USER_ACTORTYPES,
   MEMBERSHIPS,
   ACTION_INDICATOR_SUPPORTLEVELS,
-  OFFICIAL_STATEMENT_CATEGORY_ID,
-  AUTHORITY_TAXONOMY,
 } from 'themes/config';
 
 import {
@@ -540,11 +538,33 @@ export const selectIncludeMembersForFiltering = createSelector(
     return true; // default
   }
 );
+
+// true if
+// - ?inofficial=true or
+// - not ?where=is_official:true or
+// - ?where=is_official:false
 export const selectIncludeInofficialStatements = createSelector(
   selectLocationQuery,
-  (locationQuery) => {
+  selectAttributeQuery,
+  (locationQuery, attributeQuery) => {
     if (locationQuery && locationQuery.get('inofficial')) {
       return qe(locationQuery.get('inofficial'), 1) || locationQuery.get('inofficial') === 'true';
+    }
+    if (attributeQuery && typeof attributeQuery.is_official !== 'undefined') {
+      return attributeQuery.is_official !== 'true';
+    }
+    return true; // default
+  }
+);
+export const selectIncludeUnpublishedAPIStatements = createSelector(
+  selectLocationQuery,
+  selectAttributeQuery,
+  (locationQuery, attributeQuery) => {
+    if (locationQuery && locationQuery.get('unpublishedAPI')) {
+      return qe(locationQuery.get('unpublishedAPI'), 1) || locationQuery.get('unpublishedAPI') === 'true';
+    }
+    if (attributeQuery && typeof attributeQuery.public_api !== 'undefined') {
+      return !attributeQuery.public_api;
     }
     return true; // default
   }
@@ -1880,17 +1900,22 @@ const filterStatements = (
   statements,
   statementId,
   includeInofficial,
+  includeUnpublishedAPI = true,
   actionCategoriesByAction,
   connectedCategoryQuery,
 ) => {
   let pass = true;
-  if (!statements.get(statementId.toString())) {
+  const statement = statements.get(statementId.toString());
+  if (!statement) {
     return false;
   }
-  const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
   if (!includeInofficial) {
-    pass = statementCategories && statementCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+    pass = statement.getIn(['attributes', 'is_official']);
   }
+  if (!includeUnpublishedAPI) {
+    pass = statement.getIn(['attributes', 'public_api']);
+  }
+  const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
   if (pass && connectedCategoryQuery) {
     pass = asList(connectedCategoryQuery).every(
       (queryArg) => {
@@ -1916,10 +1941,10 @@ const getActorStatementsAndPositions = ({
   actorActions,
   actionIndicators,
   memberships,
-  authorityCategories,
   actionCategoriesByAction,
   includeMembers,
   includeInofficial,
+  includeUnpublishedAPI,
   connectedCategoryQuery,
   eventsByStatement,
 }) => {
@@ -1936,6 +1961,7 @@ const getActorStatementsAndPositions = ({
         statements,
         statementId,
         includeInofficial,
+        includeUnpublishedAPI,
         actionCategoriesByAction,
         asList(connectedCategoryQuery),
       ))
@@ -1966,6 +1992,7 @@ const getActorStatementsAndPositions = ({
                   statements,
                   statementId,
                   includeInofficial,
+                  includeUnpublishedAPI,
                   actionCategoriesByAction,
                   asList(connectedCategoryQuery),
                 ))
@@ -2007,16 +2034,7 @@ const getActorStatementsAndPositions = ({
                     statement.get('attributes').set('id', statement.get('id')),
                   )
                   : indicatorStatement;
-                const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
-                const statementAuthority = statementCategories && authorityCategories.find(
-                  (cat, catId) => statementCategories.includes(parseInt(catId, 10))
-                );
-                if (statementAuthority) {
-                  result = result.set(
-                    'authority',
-                    statementAuthority.get('attributes').set('id', statementAuthority.get('id'))
-                  );
-                }
+                // result = result.set('authority', statement.getIn(['attributes', 'is_official']));
                 if (!hasDirectStatement && groupsWithStatement && groupsWithStatement.size > 0) {
                   result = result.set(
                     'viaGroupIds',
@@ -2141,16 +2159,17 @@ export const selectActorsWithPositionsData = createSelector(
   // from param
   (state, params) => params && params.includeActorMembers,
   (state, params) => params && params.includeInofficial,
+  (state, params) => params && params.includeUnpublishedAPI,
   (state, params) => params && params.type,
   // from query
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectIncludeActorMembers,
   selectConnectedCategoryQuery,
   // from state
   (state) => selectActors(state),
   (state, params) => selectActortypeActors(state, params && params.type),
   (state) => selectActiontypeActions(state, ACTIONTYPES.EXPRESS),
-  (state) => selectTaxonomyCategories(state, AUTHORITY_TAXONOMY),
   selectActionCategoriesGroupedByAction,
   selectMembershipsGroupedByMember,
   selectActorActionsGroupedByActor,
@@ -2162,14 +2181,15 @@ export const selectActorsWithPositionsData = createSelector(
     ready,
     includeActorMembersParam,
     includeInofficialParam,
+    includeUnpublishedAPIParam,
     actortypeId,
     includeInofficialQuery,
+    includeUnpublishedAPIQuery,
     includeActorMembersQuery,
     connectedCategoryQuery,
     actors,
     typeActors,
     statements,
-    authorityCategories,
     actionCategoriesByAction,
     memberships,
     actorActions,
@@ -2188,7 +2208,6 @@ export const selectActorsWithPositionsData = createSelector(
       || !actorActions
       || !indicators
       || !actionIndicators
-      || !authorityCategories
       || !eventsByStatement
       || !groupActors
     ) {
@@ -2200,6 +2219,12 @@ export const selectActorsWithPositionsData = createSelector(
       includeInofficial = includeInofficialParam;
     } else if (typeof includeInofficialQuery !== 'undefined') {
       includeInofficial = includeInofficialQuery;
+    }
+    let includeUnpublishedAPI = true;
+    if (typeof includeUnpublishedAPIParam !== 'undefined') {
+      includeUnpublishedAPI = includeUnpublishedAPIParam;
+    } else if (typeof includeUnpublishedAPIQuery !== 'undefined') {
+      includeUnpublishedAPI = includeUnpublishedAPIQuery;
     }
     let includeMembers = true;
     if (typeof includeActorMembersParam !== 'undefined') {
@@ -2217,10 +2242,10 @@ export const selectActorsWithPositionsData = createSelector(
       actorActions,
       actionIndicators,
       memberships,
-      authorityCategories,
       actionCategoriesByAction,
       includeMembers,
       includeInofficial,
+      includeUnpublishedAPI,
       connectedCategoryQuery,
       eventsByStatement,
     };
