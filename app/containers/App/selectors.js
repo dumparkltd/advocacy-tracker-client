@@ -147,14 +147,14 @@ export const selectSessionUserRoles = createSelector(
   (state) => state,
   selectIsSignedIn,
   selectSessionUserId,
-  (state, isSignedIn, sessionUserId) => isSignedIn && sessionUserId
-    ? selectEntitiesWhere(state, {
-      path: API.USER_ROLES,
-      where: { user_id: sessionUserId },
-    })
-      .map((role) => role.getIn(['attributes', 'role_id']))
-      .toList()
-    : Map()
+  (state) => selectEntities(state, API.USER_ROLES),
+  (state, isSignedIn, sessionUserId, userRoles) => isSignedIn && sessionUserId && userRoles && userRoles.size > 0
+    ? userRoles.toList().filter(
+      (userRoleConnection) => qe(userRoleConnection.getIn(['attributes', 'user_id']), sessionUserId)
+    ).map(
+      (userRoleConnection) => userRoleConnection.getIn(['attributes', 'role_id'])
+    )
+    : List()
 );
 
 // admins require the admin role
@@ -2039,21 +2039,21 @@ const getActorStatementsAndPositions = ({
             // then dates
             // then use higher level of suuport
             (a, b) => {
-              // const aEventId = eventsByStatement.get(a.get('measure_id'))
-              //   && eventsByStatement.get(a.get('measure_id')).first();
-              // const bEventId = eventsByStatement.get(b.get('measure_id'))
-              //   && eventsByStatement.get(b.get('measure_id')).first();
-              //
-              // // If both statements are from the same event
-              // if (aEventId && bEventId && aEventId === bEventId) {
-              //   // Individual statements (no viaGroups) come before group statements
-              //   if (!a.get('viaGroups') && !!b.get('viaGroups')) {
-              //     return -1;
-              //   }
-              //   if (!!a.get('viaGroups') && !b.get('viaGroups')) {
-              //     return 1;
-              //   }
-              // }
+              const aEventId = eventsByStatement.get(a.get('measure_id'))
+                && eventsByStatement.get(a.get('measure_id')).first();
+              const bEventId = eventsByStatement.get(b.get('measure_id'))
+                && eventsByStatement.get(b.get('measure_id')).first();
+
+              // If both statements are from the same event
+              if (aEventId && bEventId && aEventId === bEventId) {
+                // Individual statements (no viaGroups) come before group statements
+                if (!a.get('viaGroups') && !!b.get('viaGroups')) {
+                  return -1;
+                }
+                if (!!a.get('viaGroups') && !b.get('viaGroups')) {
+                  return 1;
+                }
+              }
               let aDate = a.getIn(['measure', 'date_start']);
               let bDate = b.getIn(['measure', 'date_start']);
               /* eslint-disable no-restricted-globals */

@@ -12,7 +12,11 @@ import { palette } from 'styled-theme';
 import { isMinSize } from 'utils/responsive';
 
 import { blockNavigation } from 'containers/App/actions';
-import { selectNewEntityModal, selectIsUserAdmin } from 'containers/App/selectors';
+import {
+  selectNewEntityModal,
+  selectIsUserAdmin,
+  selectIsUserCoordinator,
+} from 'containers/App/selectors';
 
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonCancel from 'components/buttons/ButtonCancel';
@@ -234,8 +238,10 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       typeLabel,
       hasFormChanges,
       isAdmin,
+      isCoordinator,
       // onBlockNavigation,
     } = this.props;
+
     const {
       deleteConfirmed,
       stepsSeen,
@@ -258,6 +264,15 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
               disabledMessages = [
                 ...disabledMessages,
                 'Can only be updated by admin users',
+              ];
+            }
+          }
+          if (field.activeForAdminOrCoordinator) {
+            active = isCoordinator;
+            if (!active) {
+              disabledMessages = [
+                ...disabledMessages,
+                'Can only be updated by users with admin or coordinator roles',
               ];
             }
           }
@@ -634,6 +649,7 @@ EntityForm.propTypes = {
   scrollContainer: PropTypes.object,
   hasFormChanges: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   typeLabel: PropTypes.string,
 };
 EntityForm.defaultProps = {
@@ -643,6 +659,7 @@ EntityForm.defaultProps = {
 
 const mapStateToProps = (state) => ({
   isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
   newEntityModal: selectNewEntityModal(state),
 });
 

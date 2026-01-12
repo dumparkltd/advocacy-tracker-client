@@ -1253,6 +1253,7 @@ const getEntityFormField = (
     hideByDefault,
     activeIf: field.activeIf,
     activeForAdmin: field.activeForAdmin,
+    activeForAdminOrCoordinator: field.activeForAdminOrCoordinator,
     basis, // relative width within row
   };
   return result;

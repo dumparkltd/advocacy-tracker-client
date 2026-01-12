@@ -1231,7 +1231,7 @@ export const ACTORTYPES_CONFIG = {
         fields: [
           {
             attribute: 'public_api',
-            activeForAdmin: true,
+            activeForAdminOrCoordinator: true,
             activeIf: {
               is_archive: false,
               private: false,
@@ -2324,7 +2324,7 @@ export const ACTIONTYPES_CONFIG = {
         fields: [
           {
             attribute: 'public_api',
-            activeForAdmin: true,
+            activeForAdminOrCoordinator: true,
             activeIf: {
               is_archive: false,
               private: false,
@@ -3923,7 +3923,7 @@ export const INDICATOR_CONFIG = {
       fields: [
         {
           attribute: 'public_api',
-          activeForAdmin: true,
+          activeForAdminOrCoordinator: true,
           activeIf: {
             is_archive: false,
             private: false,
@@ -4564,5 +4564,6 @@ export const FORM_NON_CONTROL_PROPS = [
   'info',
   'activeIf',
   'activeForAdmin',
+  'activeForAdminOrCoordinator',
   'disabledMessages',
 ];

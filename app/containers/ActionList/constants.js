@@ -317,7 +317,8 @@ export const CONFIG = {
         message: 'attributes.public_api',
         attribute: 'public_api',
         options: ATTRIBUTE_STATUSES.public_api,
-        role: USER_ROLES.ADMIN.value,
+        role: USER_ROLES.MEMBER.value,
+        roleEdit: USER_ROLES.COORDINATOR.value,
         filterUI: 'checkboxes',
         default: false,
         types: [

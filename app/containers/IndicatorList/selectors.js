@@ -5,8 +5,8 @@ import {
   selectIndicatorsWhereQuery,
   selectWithoutQuery,
   selectActionQuery,
-  selectSortByQuery,
-  selectSortOrderQuery,
+  // selectSortByQuery,
+  // selectSortOrderQuery,
   selectConnectedCategoryQuery,
   selectActions,
   selectActorsWithPositions,
@@ -27,14 +27,14 @@ import {
 
 import asList from 'utils/as-list';
 import qe from 'utils/quasi-equals';
-import { sortEntities, getSortOption } from 'utils/sort';
+// import { sortEntities, getSortOption } from 'utils/sort';
 import {
   API,
   ACTORTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
   OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
-import { CONFIG, DEPENDENCIES } from './constants';
+import { DEPENDENCIES } from './constants';
 
 export const selectConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
