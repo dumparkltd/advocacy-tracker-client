@@ -943,20 +943,6 @@ export const INDICATOR_FIELDS = {
     description: {
       type: 'markdown',
     },
-    description_api: {
-      type: 'markdown',
-    },
-    short_api: {
-      type: 'text',
-    },
-    teaser_api: {
-      type: 'markdown',
-      hideByDefault: true,
-    },
-    annotation_api: {
-      type: 'markdown',
-      hideByDefault: true,
-    },
     draft: {
       defaultValue: true,
       controlType: 'checkbox',
@@ -3965,19 +3951,7 @@ export const INDICATOR_CONFIG = {
               },
             ],
             [{
-              attribute: 'short_api',
-            }],
-            [{
               attribute: 'description',
-            }],
-            [{
-              attribute: 'description_api',
-            }],
-            [{
-              attribute: 'teaser_api',
-            }],
-            [{
-              attribute: 'annotation_api',
             }],
           ], // rows
         }, // section,

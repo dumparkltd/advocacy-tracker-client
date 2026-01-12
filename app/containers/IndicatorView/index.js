@@ -211,7 +211,6 @@ export function IndicatorView({
                           'reference',
                           isAdmin,
                         ),
-                        getTextField(viewEntity, 'short_api'),
                         getReferenceField(
                           viewEntity,
                           'code_api',
@@ -252,9 +251,6 @@ export function IndicatorView({
                     group={{
                       fields: [
                         getMarkdownField(viewEntity, 'description', true),
-                        getMarkdownField(viewEntity, 'description_api', true),
-                        getMarkdownField(viewEntity, 'teaser_api', true),
-                        getMarkdownField(viewEntity, 'annotation_api', true),
                       ],
                     }}
                   />
