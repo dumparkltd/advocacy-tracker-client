@@ -23,6 +23,7 @@ import {
   selectActorsWithPositions,
   selectIncludeInofficialStatements,
   selectIncludeUnpublishedAPIStatements,
+  selectIndicators,
 } from 'containers/App/selectors';
 
 import {
@@ -36,7 +37,16 @@ import { DEPENDENCIES } from './constants';
 export const selectViewEntity = createSelector(
   (state, id) => selectEntity(state, { path: API.INDICATORS, id }),
   (state) => selectEntities(state, API.USERS),
-  (entity, users) => entitySetUser(entity, users)
+  (state) => selectIndicators(state),
+  (entity, users, indicators) => entity && users && indicators && entitySetUser(
+    entity,
+    users,
+  ).set(
+    'parent',
+    indicators && indicators.find(
+      (indicator) => qe(entity.getIn(['attributes', 'parent_id']), indicator.get('id'))
+    ),
+  )
 );
 
 const selectActionAssociations = createSelector(
@@ -169,5 +179,21 @@ export const selectActorsByType = createSelector(
       .sortBy(
         (val, key) => key
       );
+  }
+);
+
+export const selectChildIndicators = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  (state, id) => id,
+  selectIndicators,
+  (
+    ready,
+    viewEntityId,
+    indicators,
+  ) => {
+    if (!ready) return null;
+    return indicators.filter(
+      (indicator) => qe(viewEntityId, indicator.getIn(['attributes', 'parent_id']))
+    );
   }
 );

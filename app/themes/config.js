@@ -943,6 +943,9 @@ export const INDICATOR_FIELDS = {
     description: {
       type: 'markdown',
     },
+    parent_id: {
+      type: 'number',
+    },
     draft: {
       defaultValue: true,
       controlType: 'checkbox',
@@ -3950,6 +3953,12 @@ export const INDICATOR_CONFIG = {
                 placeholder: 'order',
               },
             ],
+            [{
+              connection: API.INDICATORS,
+              asParents: true,
+              basis: '1/2',
+              multiple: false,
+            }],
             [{
               attribute: 'description',
             }],

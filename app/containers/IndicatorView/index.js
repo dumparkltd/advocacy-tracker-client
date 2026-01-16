@@ -14,15 +14,19 @@ import styled from 'styled-components';
 
 import {
   getTitleField,
-  getTextField,
+  getEntityLinkField,
   getStatusField,
   getStatusFieldIf,
   getMetaField,
   getMarkdownField,
   getReferenceField,
+  getIndicatorConnectionField,
 } from 'utils/fields';
 // import { qe } from 'utils/quasi-equals';
-import { getEntityTitleTruncated } from 'utils/entities';
+import {
+  getEntityTitleTruncated,
+  getIndicatorColumnsForStatement,
+} from 'utils/entities';
 import qe from 'utils/quasi-equals';
 import { keydownHandlerPrint } from 'utils/print';
 
@@ -80,6 +84,7 @@ import messages from './messages';
 import {
   selectViewEntity,
   selectActorsByType,
+  selectChildIndicators,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
@@ -111,6 +116,7 @@ export function IndicatorView({
   onSetPrintView,
   isPrintView,
   printArgs,
+  childIndicators,
 }) {
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
@@ -219,6 +225,38 @@ export function IndicatorView({
                       ],
                     }}
                   />
+                  {viewEntity.get('parent') && (
+                    <FieldGroup
+                      group={{ // fieldGroup
+                        label: appMessages.attributes.parent_id,
+                        fields: [
+                          getEntityLinkField(
+                            viewEntity.get('parent'),
+                            '/topic',
+                            '',
+                            'Parent topic'
+                          )],
+                      }}
+                    />
+                  )}
+                  {childIndicators && childIndicators.size > 0 && (
+                    <FieldGroup
+                      group={{
+                        label: appMessages.nav.indicators,
+                        fields: [
+                          getIndicatorConnectionField({
+                            indicators: childIndicators,
+                            onEntityClick,
+                            skipLabel: true,
+                            columns: getIndicatorColumnsForStatement({
+                              intl,
+                              isAdmin,
+                            }),
+                          }),
+                        ],
+                      }}
+                    />
+                  )}
                 </Main>
                 {isMember && !isPrintView && (
                   <Aside>
@@ -337,6 +375,7 @@ IndicatorView.propTypes = {
   onEntityClick: PropTypes.func,
   onSetPrintView: PropTypes.func,
   actorsByActortype: PropTypes.object,
+  childIndicators: PropTypes.object,
   params: PropTypes.object,
   myId: PropTypes.string,
   isMember: PropTypes.bool,
@@ -367,6 +406,7 @@ const mapStateToProps = (state, props) => ({
   includeActorMembers: selectIncludeActorMembers(state),
   isPrintView: selectIsPrintView(state),
   printArgs: selectPrintConfig(state),
+  childIndicators: selectChildIndicators(state, props.params.id),
 });
 
 function mapDispatchToProps(dispatch, props) {

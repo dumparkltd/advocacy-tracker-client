@@ -10,6 +10,7 @@ export const DEPENDENCIES = [
   API.USER_ROLES,
   API.CATEGORIES,
   API.TAXONOMIES,
+  API.INDICATORS,
   API.RESOURCES,
   API.ACTIONS,
   API.RESOURCETYPES,
@@ -27,6 +28,7 @@ export const FORM_INITIAL = fromJS({
       : '',
   }), {}),
   associatedActionsByActiontype: [],
+  associatedIndicators: [],
   close: true,
   step: null,
 });

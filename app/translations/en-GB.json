@@ -341,7 +341,7 @@
   "app.containers.App.attributes.name": "Full name",
   "app.containers.App.attributes.notifications": "Email notifications",
   "app.containers.App.attributes.order": "Order",
-  "app.containers.App.attributes.parent_id": "Predecessor",
+  "app.containers.App.attributes.parent_id": "Aggregate topic ",
   "app.containers.App.attributes.phone": "Phone/WhatsApp",
   "app.containers.App.attributes.population": "population",
   "app.containers.App.attributes.prefix": "Prefix",
