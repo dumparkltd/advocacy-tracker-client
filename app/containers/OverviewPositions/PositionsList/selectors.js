@@ -133,7 +133,7 @@ const selectCountriesByTopicPosition = createSelector(
   selectCountriesByGroup,
   selectLocationQuery,
   (countries, locationQuery) => {
-    if (locationQuery.get('indicators')) {
+    if (countries && locationQuery.get('indicators')) {
       const locationQueryValue = locationQuery.get('indicators');
       // console.log('locationQueryValue', locationQueryValue)
       return countries.map((country) => {
@@ -223,7 +223,7 @@ export const selectHasFilters = createSelector(
   selectLocationQuery,
   (state) => selectAssociationTypeQuery(state, { typeId: ACTORTYPES.REG }),
   (state) => selectAssociationTypeQuery(state, { typeId: ACTORTYPES.GROUP }),
-  (locationQuery, regionQuery, groupQuery) => locationQuery.get('indicators')
-    || regionQuery
-    || groupQuery
+  (locationQuery, regionQuery, groupQuery) => !!locationQuery.get('indicators')
+    || !!regionQuery
+    || !!groupQuery
 );

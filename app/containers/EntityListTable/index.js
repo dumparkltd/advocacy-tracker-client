@@ -134,6 +134,7 @@ export function EntityListTable({
   };
   const [showAllConnections, setShowAllConnections] = useState(false);
   const [localSort, setLocalSort] = useState(sortDefault);
+  const prevDepsRef = React.useRef({ typeId, mapSubject, size });
 
   const updateHiddenColumns = () => {
     // console.log('updateHiddenColumns')
@@ -167,8 +168,15 @@ export function EntityListTable({
     });
   };
   React.useLayoutEffect(() => {
-    updateHiddenColumns();
-  }, [typeId, mapSubject, size]);
+    const depsChanged = prevDepsRef.current.typeId !== typeId
+      || prevDepsRef.current.mapSubject !== mapSubject
+      || prevDepsRef.current.size !== size;
+
+    if (depsChanged) {
+      updateHiddenColumns();
+      prevDepsRef.current = { typeId, mapSubject, size };
+    }
+  }, [typeId, mapSubject, size, updateHiddenColumns]);
 
   // list options
   const {

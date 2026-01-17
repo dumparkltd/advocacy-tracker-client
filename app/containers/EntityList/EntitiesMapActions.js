@@ -150,19 +150,25 @@ export function EntitiesMapActions({
     });
 
     indicatorOptions = indicators.reduce(
-      (memo, entity) => ([
-        ...memo,
-        {
-          id: entity.get('id'),
-          value: entity.get('id'),
-          label: `${entity.getIn(['attributes', 'title'])}`,
-          supTitle: 'Country positions for topic',
-          active: qe(mapIndicator, entity.get('id')),
-          onClick: () => onEntityClick(entity.get('id'), ROUTES.INDICATOR),
-          href: `${ROUTES.INDICATOR}/${entity.get('id')}`,
-          // info: entity.getIn(['attributes', 'description']),
-        },
-      ]),
+      (memo, entity) => {
+        const isAggregate = indicators.some((child) => qe(child.getIn(['attributes', 'parent_id']), entity.get('id')));
+        if (isAggregate) {
+          return memo;
+        }
+        return [
+          ...memo,
+          {
+            id: entity.get('id'),
+            value: entity.get('id'),
+            label: `${entity.getIn(['attributes', 'title'])}`,
+            supTitle: 'Country positions for topic',
+            active: qe(mapIndicator, entity.get('id')),
+            onClick: () => onEntityClick(entity.get('id'), ROUTES.INDICATOR),
+            href: `${ROUTES.INDICATOR}/${entity.get('id')}`,
+            // info: entity.getIn(['attributes', 'description']),
+          },
+        ];
+      },
       [{
         id: 'all',
         value: 'all',

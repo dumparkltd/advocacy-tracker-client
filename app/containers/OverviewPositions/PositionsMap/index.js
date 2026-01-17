@@ -213,6 +213,9 @@ export function PositionsMap({
       onLoadData();
     }
   }, [dataReady]);
+
+  const childIndicators = indicators && indicators.filter((child) => qe(child.getIn(['attributes', 'parent_id']), currentIndicatorId));
+  const isAggregate = childIndicators && childIndicators.size > 0;
   useEffect(() => {
     if (dataReady) {
       if (previewItemId) {
@@ -229,6 +232,7 @@ export function PositionsMap({
             const indicatorPositions = country.getIn(['indicatorPositions', currentIndicatorId.toString()])
               && country.getIn(['indicatorPositions', currentIndicatorId.toString()]);
             const indicatorPosition = indicatorPositions && indicatorPositions.first();
+
             const content = {
               item: country,
               header: {
@@ -324,15 +328,19 @@ export function PositionsMap({
                   },
                   position: indicatorPosition ? {
                     supportlevelId: indicatorPosition.get('supportlevel_id'),
-                    supportlevelTitle: intl.formatMessage(appMessages.supportlevels[indicatorPosition.get('supportlevel_id')]),
-                    levelOfAuthority: intl.formatMessage(
+                    supportlevelTitle: isAggregate && appMessages.supportlevelsAggregate[indicatorPosition.get('supportlevel_id')]
+                      ? intl.formatMessage(appMessages.supportlevelsAggregate[indicatorPosition.get('supportlevel_id')])
+                      : intl.formatMessage(appMessages.supportlevels[indicatorPosition.get('supportlevel_id')]),
+                    levelOfAuthority: !isAggregate && intl.formatMessage(
                       indicatorPosition.getIn(['measure', 'is_official'])
                         ? appMessages.ui.officialStatuses.official
                         : appMessages.ui.officialStatuses.inofficial,
                     ),
                   } : {
                     supportlevelId: 0,
-                    supportlevelTitle: intl.formatMessage(appMessages.supportlevels[99]),
+                    supportlevelTitle: isAggregate && appMessages.supportlevelsAggregate[99]
+                      ? intl.formatMessage(appMessages.supportlevelsAggregate[99])
+                      : intl.formatMessage(appMessages.supportlevels[99]),
                   },
                   options: [
                     {
@@ -365,7 +373,7 @@ export function PositionsMap({
                     },
                   ],
                 },
-                topicStatements: indicatorPositions && {
+                topicStatements: indicatorPositions && !isAggregate && {
                   indicatorPositionsTableColumns: [
                     {
                       id: 'position',
@@ -378,10 +386,12 @@ export function PositionsMap({
                         attribute: 'supportlevel_id',
                         options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
                           .sort((a, b) => a.order < b.order ? -1 : 1)
-                          .map((level) => ({
-                            ...level,
-                            label: intl.formatMessage(appMessages.supportlevels[level.value]),
-                          })),
+                          .map((level) => {
+                            const label = isAggregate && appMessages.supportlevelsAggregate[level.value]
+                              ? intl.formatMessage(appMessages.supportlevelsAggregate[level.value])
+                              : intl.formatMessage(appMessages.supportlevels[level.value]);
+                            return { ...level, label };
+                          }),
                       },
                     },
                     {
@@ -403,13 +413,17 @@ export function PositionsMap({
                   ],
                   indicatorPositions: indicatorPositions.reduce((memo, position) => {
                     const statement = position.get('measure');
-                    let date = statement.get('date_start');
-                    if (date && isDate(date)) {
-                      date = intl.formatDate(date);
-                    } else if (statement.get('created_at') && isDate(statement.get('created_at'))) {
-                      date = intl.formatDate(statement.get('created_at'));
+                    let date;
+                    if (statement) {
+                      date = statement.get('date_start');
+                      if (date && isDate(date)) {
+                        date = intl.formatDate(date);
+                      } else if (statement.get('created_at') && isDate(statement.get('created_at'))) {
+                        date = intl.formatDate(statement.get('created_at'));
+                      }
                     }
                     const supportLevel = position.get('supportlevel_id') || 0;
+
                     return ([
                       ...memo,
                       {
@@ -426,12 +440,13 @@ export function PositionsMap({
                           path: `${ROUTES.ACTION}/${statement.get('id')}`,
                         },
                         levelOfAuthority: position && {
-                          value: intl.formatMessage(
+                          value: statement && intl.formatMessage(
                             statement.get('is_official')
                               ? appMessages.ui.officialStatuses.official
-                              : appMessages.ui.officialStatuses.inofficial,
+                              : appMessages.ui.officialStatuses.inofficial
                           ),
                         },
+                        is_parent: isAggregate,
                         viaGroup: {
                           value: position.get('viaGroups')
                             && position.get('viaGroups').first()
@@ -482,7 +497,7 @@ export function PositionsMap({
         && country.getIn(['indicatorPositions', currentIndicatorId.toString()])
         && country.getIn(['indicatorPositions', currentIndicatorId.toString()]).first();
 
-      const statement = countryPosition && countryPosition.get('measure');
+      // const statement = countryPosition && countryPosition.get('measure');
       const level = countryPosition
         && parseInt(countryPosition.get('supportlevel_id'), 10);
       return [
@@ -491,7 +506,7 @@ export function PositionsMap({
           id: country.get('id'),
           previewItemId: `${ID}|${country.get('id')}`,
           attributes: country.get('attributes').toJS(),
-          values: statement ? { [currentIndicatorId]: level || 0 } : {},
+          values: { [currentIndicatorId]: level || 0 },
         },
       ];
     },
@@ -516,22 +531,27 @@ export function PositionsMap({
     plural: intl.formatMessage(appMessages.entities[`actions_${ACTIONTYPES.EXPRESS}`].plural),
   };
 
-  let supportLevels = dataReady && Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
-    .filter((level) => parseInt(level.value, 10) > 0 && parseInt(level.value, 10) < 99) // exclude 0
-    .sort((a, b) => a.order > b.order ? 1 : -1);
-
-  supportLevels = dataReady && supportLevels
+  const supportLevels = dataReady && Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+    .filter(
+      (level) => parseInt(level.value, 10) > 0
+        && parseInt(level.value, 10) < 99
+        && (!isAggregate || level.aggregate)
+    ) // exclude 0
+    .sort((a, b) => a.order > b.order ? 1 : -1)
     .map((level) => {
       const count = countryValues
         ? countryValues.filter(
           (c) => c.values && c.values[currentIndicatorId] && qe(level.value, c.values[currentIndicatorId])
         ).length
         : 0;
+      const label = isAggregate && appMessages.supportlevelsAggregate[level.value]
+        ? intl.formatMessage(appMessages.supportlevelsAggregate[level.value])
+        : intl.formatMessage(appMessages.supportlevels[level.value]);
       return {
         ...level,
         active: supportQuery
           && supportQueryAsList.includes(level.value),
-        label: `${intl.formatMessage(appMessages.supportlevels[level.value])} (${count})`,
+        label: `${label} (${count})`,
         disabled: !count,
         count,
       };
@@ -559,7 +579,11 @@ export function PositionsMap({
       }]),
     },
   ];
-  if (currentIndicator && currentIndicator.getIn(['attributes', 'public_api'])) {
+  const hasPublicAPI = currentIndicator && (
+    currentIndicator.getIn(['attributes', 'public_api'])
+    || (childIndicators && childIndicators.some((child) => child.getIn(['attributes', 'public_api'])))
+  );
+  if (currentIndicator && hasPublicAPI) {
     options = [
       ...options,
       {

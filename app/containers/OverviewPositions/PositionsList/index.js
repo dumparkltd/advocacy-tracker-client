@@ -222,21 +222,32 @@ export function PositionsList({
       onLoadData();
     }
   }, [dataReady]);
-
-  let supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+  const parentIndicators = indicators && indicators.filter(
+    (parent) => indicators.some((child) => qe(child.getIn(['attributes', 'parent_id']), parent.get('id')))
+  );
+  const hasAggregateIndicators = parentIndicators && parentIndicators.size > 0;
+  const supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
     .filter((level) => parseInt(level.value, 10) > 0) // exclude 0
-    .sort((a, b) => a.order > b.order ? 1 : -1);
-
-  supportLevels = supportLevels
+    .sort((a, b) => a.order > b.order ? 1 : -1)
     .map((level) => ({
       ...level,
       label: intl.formatMessage(appMessages.supportlevels[level.value]),
     }));
+  const supportLevelsAggregate = parentIndicators
+    && parentIndicators.size > 0
+    && Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+      .filter((level) => level.aggregate) // exclude non aggregate levels
+      .sort((a, b) => a.order > b.order ? 1 : -1)
+      .map((level) => ({
+        ...level,
+        label: intl.formatMessage(appMessages.supportlevelsAggregate[level.value]),
+      }));
   let hasPublicAPIIndicators = false;
   const topicColumns = dataReady && indicators && indicators.reduce(
     (memo, indicator) => {
       const title = getIndicatorAbbreviation(indicator.getIn(['attributes', 'title']));
       const id = `topic_${indicator.get('id')}`;
+      const isAggregate = !!parentIndicators.find((parent) => qe(parent.get('id'), indicator.get('id')));
       const activeSupportLevels = getActiveSupportLevels(locationQuery, indicator.get('id'));
       let minSize = 'ms';
       const ref = indicator.getIn(['attributes', 'reference']);
@@ -246,6 +257,9 @@ export function PositionsList({
       if (indicator.getIn(['attributes', 'public_api'])) {
         hasPublicAPIIndicators = hasPublicAPIIndicators || true;
       }
+      const levels = isAggregate
+        ? supportLevelsAggregate
+        : supportLevels;
       return [
         ...memo,
         {
@@ -262,7 +276,7 @@ export function PositionsList({
           queryArg: 'indicators',
           queryValue: indicator.get('id'),
           queryArgRelated: 'supportlevel_id',
-          filterOptions: supportLevels
+          filterOptions: levels
             .filter((level) => filterAvailableLevels(level.value, indicator.get('id'), countries))
             .map((level) => ({
               ...level,
@@ -355,6 +369,7 @@ export function PositionsList({
       // }
       // console.log('actortypes', actortypes && actortypes.toJS())
       // console.log('item', item && item.toJS())
+
       const content = {
         header: {
           aboveTitle: actortypes.getIn(
@@ -460,6 +475,10 @@ export function PositionsList({
                     .map((level) => ({
                       ...level,
                       label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                      labelAgg: hasAggregateIndicators
+                        && level.aggregate
+                        && appMessages.supportlevelsAggregate[level.value]
+                        && intl.formatMessage(appMessages.supportlevelsAggregate[level.value]),
                     })),
                 },
               },
@@ -624,17 +643,34 @@ export function PositionsList({
                 align="start"
               >
                 <Box gap="xsmall">
-                  <SupportKeyTitle>Levels of support</SupportKeyTitle>
-                  <Box direction="row" wrap>
-                    {supportLevels && supportLevels.map((level) => (
-                      <SupportKeyItem
-                        key={level.value}
-                      >
-                        <Dot size="10px" color={level.color} />
-                        <Text size="xxsmall" color="textSecondary">{level.label}</Text>
-                      </SupportKeyItem>
-                    ))}
+                  <Box gap="xsmall">
+                    <SupportKeyTitle>Levels of support</SupportKeyTitle>
+                    <Box direction="row" wrap>
+                      {supportLevels && supportLevels.map((level) => (
+                        <SupportKeyItem
+                          key={level.value}
+                        >
+                          <Dot size="10px" color={level.color} />
+                          <Text size="xxsmall" color="textSecondary">{level.label}</Text>
+                        </SupportKeyItem>
+                      ))}
+                    </Box>
                   </Box>
+                  {supportLevelsAggregate && (
+                    <Box gap="xsmall">
+                      <SupportKeyTitle>Levels of support (aggregate topics)</SupportKeyTitle>
+                      <Box direction="row" wrap>
+                        {supportLevelsAggregate.map((level) => (
+                          <SupportKeyItem
+                            key={level.value}
+                          >
+                            <Dot size="10px" color={level.color} />
+                            <Text size="xxsmall" color="textSecondary">{level.label}</Text>
+                          </SupportKeyItem>
+                        ))}
+                      </Box>
+                    </Box>
+                  )}
                 </Box>
                 <ComponentOptions
                   size={size}

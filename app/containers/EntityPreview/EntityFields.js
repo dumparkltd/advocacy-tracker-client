@@ -252,7 +252,7 @@ export function EntityFields({
             />
           );
         }
-        if (fieldId === 'topicStatements') {
+        if (fieldId === 'topicStatements' && !fieldContent.isAggregateIndicator) {
           return (
             <PreviewCountryTopicStatementList
               key={fieldId}

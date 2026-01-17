@@ -139,7 +139,11 @@ export const selectIndicatorOptions = createSelector(
     const actiontypeId = action.getIn(['attributes', 'measuretype_id']).toString();
     if (INDICATOR_ACTIONTYPES.indexOf(actiontypeId) > -1) {
       return entitiesSetAssociated_NEW(
-        indicators,
+        indicators.filter(
+          (indicator) => !indicators.some(
+            (child) => qe(child.getIn(['attributes', 'parent_id']), indicator.get('id'))
+          ),
+        ),
         associations.get(parseInt(action.get('id'), 10)),
         'indicator_id',
       );

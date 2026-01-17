@@ -13,7 +13,6 @@ export function CellHeaderInfoOverlay({ info }) {
     <>
       {info.type === 'key-categorical' && (
         <Box
-          pad="small"
           margin={{ horizontal: 'xsmall', vertical: 'xsmall' }}
           background="white"
           overflow={{
@@ -30,7 +29,9 @@ export function CellHeaderInfoOverlay({ info }) {
           <Box gap="small">
             {info.options.map((option) => (
               <LabelWrap key={option.value}>
-                <Dot color={option.color} />
+                <Box flex={{ shrink: 0 }}>
+                  <Dot color={option.color} />
+                </Box>
                 <Text size="small">
                   {option.label}
                   {option.labelAgg && ` (${option.labelAgg})`}
@@ -42,7 +43,6 @@ export function CellHeaderInfoOverlay({ info }) {
       )}
       {info.type === 'text' && (
         <Box
-          pad="small"
           margin={{ horizontal: 'xsmall', vertical: 'xsmall' }}
           background="white"
           overflow={{

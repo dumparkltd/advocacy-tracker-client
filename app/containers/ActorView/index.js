@@ -220,7 +220,7 @@ export function ActorView({
         ...buttons,
         {
           type: 'edit',
-          onClick: handleEdit,
+          onClick: () => handleEdit(params.id),
         },
       ];
     }
@@ -530,13 +530,13 @@ const mapStateToProps = (state, props) => ({
   printArgs: selectPrintConfig(state),
 });
 
-function mapDispatchToProps(dispatch, props) {
+function mapDispatchToProps(dispatch) {
   return {
     onLoadData: () => {
       DEPENDENCIES.forEach((path) => dispatch(loadEntitiesIfNeeded(path)));
     },
-    handleEdit: () => {
-      dispatch(updatePath(`${ROUTES.ACTOR}${ROUTES.EDIT}/${props.params.id}`, { replace: true }));
+    handleEdit: (id) => {
+      dispatch(updatePath(`${ROUTES.ACTOR}${ROUTES.EDIT}/${id}`, { replace: true }));
     },
     handleClose: (typeId) => {
       dispatch(closeEntity(`${ROUTES.ACTORS}/${typeId}`));

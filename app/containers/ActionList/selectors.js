@@ -49,6 +49,8 @@ import {
   entitiesSetCategoryIds,
 } from 'utils/entities';
 
+import qe from 'utils/quasi-equals';
+
 import { API } from 'themes/config';
 
 import { DEPENDENCIES } from './constants';
@@ -75,6 +77,11 @@ export const selectConnections = createSelector(
     categories,
   ) => {
     if (ready) {
+      const childIndicators = indicators.filter(
+        (indicator) => !indicators.some(
+          (child) => qe(child.getIn(['attributes', 'parent_id']), indicator.get('id'))
+        )
+      );
       return new Map()
         .set(
           API.ACTORS,
@@ -88,7 +95,7 @@ export const selectConnections = createSelector(
           resources,
         ).set(
           API.INDICATORS,
-          indicators,
+          childIndicators,
         ).set(
           API.USERS,
           users,

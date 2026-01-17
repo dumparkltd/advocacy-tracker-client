@@ -814,17 +814,21 @@ export const prepareEntityRows = ({
             };
           case 'positionStatementAuthority':
             temp = entity.get('position') && entity.getIn(['position', 'measure', 'is_official']);
+            if (entity.get('position') && entity.getIn(['position', 'is_parent'])) {
+              value = '';
+            } else {
+              value = intl.formatMessage(
+                temp
+                  ? appMessages.ui.officialStatuses.official
+                  : appMessages.ui.officialStatuses.inofficial,
+              );
+            }
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: intl.formatMessage(
-                  temp
-                    ? appMessages.ui.officialStatuses.official
-                    : appMessages.ui.officialStatuses.inofficial,
-                ),
+                value,
                 single: temp,
-                // sortValue: getRelatedSortValue(temp),
               },
             };
           case 'stackedBarActions':

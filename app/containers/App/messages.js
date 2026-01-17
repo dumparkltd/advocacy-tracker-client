@@ -59,6 +59,10 @@ export default defineMessages({
       id: 'app.containers.App.supportlevelsAggregate.3',
       defaultMessage: 'SOME support for ANY child topic',
     },
+    99: {
+      id: 'app.containers.App.supportlevelsAggregate.99',
+      defaultMessage: 'No statements on child topics',
+    },
   },
   actortypes: {
     single: {
