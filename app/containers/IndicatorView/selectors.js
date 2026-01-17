@@ -2,6 +2,7 @@ import { createSelector } from 'reselect';
 import { Map } from 'immutable';
 import {
   API,
+  ACTORTYPES,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
@@ -29,6 +30,7 @@ import {
 import {
   entitySetUser,
   setActionConnections,
+  getIndicatorSupportLevels,
 } from 'utils/entities';
 import qe from 'utils/quasi-equals';
 
@@ -186,14 +188,24 @@ export const selectChildIndicators = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   (state, id) => id,
   selectIndicators,
+  (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
   (
     ready,
     viewEntityId,
     indicators,
+    countriesWithPositions,
   ) => {
     if (!ready) return null;
     return indicators.filter(
       (indicator) => qe(viewEntityId, indicator.getIn(['attributes', 'parent_id']))
+    ).map(
+      (indicator) => {
+        const support = getIndicatorSupportLevels({
+          indicator,
+          countriesWithPositions,
+        });
+        return indicator.set('supportlevels', support);
+      }
     );
   }
 );

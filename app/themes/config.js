@@ -150,6 +150,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     default: true,
     color: '#d8d9d9',
     order: 100,
+    aggregate: false,
   },
   // strong
   1: {
@@ -158,6 +159,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#02A650', // green-pink
     // color: '#029481', // teal-brown
     order: 1,
+    aggregate: true,
   },
   // quite positive
   2: {
@@ -166,6 +168,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#81DD90', // green-pink
     // color: '#80CDC1', // teal-brown
     order: 2,
+    aggregate: true,
   },
   // on the fence
   3: {
@@ -174,6 +177,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#EBB2D3', // green-pink
     // color: '#E2CDAD', // teal-brown
     order: 3,
+    aggregate: true,
   },
   // rather sceptical
   4: {
@@ -182,6 +186,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#D966A8', // green-pink
     // color: '#B88034', // teal-brown
     order: 4,
+    aggregate: false,
   },
   // opponent
   5: {
@@ -190,6 +195,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#BF0071', // green-pink
     // color: '#67402E', // teal-brown
     order: 5,
+    aggregate: false,
   },
   // proxy for no statement
   99: {

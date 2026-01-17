@@ -853,7 +853,7 @@ export const prepareEntityRows = ({
                 ...col,
                 values: temp && temp.map(
                   (val) => {
-                    if (val.actors) {
+                    if (val.actors && connections) {
                       relatedEntities = getRelatedEntities(val.actors, connections.get('actors'), col);
                       if (relatedEntities && relatedEntities.size > 0) {
                         return {
@@ -911,6 +911,7 @@ export const prepareEntityRows = ({
                       indicatorTitle: connections
                         && connections.getIn([API.INDICATORS, indicatorId, 'attributes', 'title'])
                         && getIndicatorMainTitle(connections.getIn([API.INDICATORS, indicatorId, 'attributes', 'title'])),
+                      isAggregate: latest && latest.get('is_parent'),
                     },
                   ]);
                 }, []),

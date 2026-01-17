@@ -46,6 +46,20 @@ export default defineMessages({
       defaultMessage: 'No statement on topic',
     },
   },
+  supportlevelsAggregate: {
+    1: {
+      id: 'app.containers.App.supportlevelsAggregate.1',
+      defaultMessage: 'STRONG support for ALL child topics',
+    },
+    2: {
+      id: 'app.containers.App.supportlevelsAggregate.2',
+      defaultMessage: 'SOME support for ALL child topics',
+    },
+    3: {
+      id: 'app.containers.App.supportlevelsAggregate.3',
+      defaultMessage: 'SOME support for ANY child topic',
+    },
+  },
   actortypes: {
     single: {
       id: 'app.containers.App.actortypes.single',

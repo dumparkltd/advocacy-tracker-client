@@ -11,6 +11,7 @@ import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import styled from 'styled-components';
 
 import {
+  API,
   ROUTES,
   ACTORTYPES,
   ACTIONTYPES,
@@ -243,6 +244,11 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         }),
       ];
       if (qe(typeId, ACTORTYPES.COUNTRY)) {
+        const hasAggregateIndicators = connections && connections.get(API.INDICATORS).some(
+          (parent) => connections && connections.get(API.INDICATORS).some(
+            (child) => qe(parent.get('id'), child.getIn(['attributes', 'parent_id']))
+          )
+        );
         columns = [
           ...columns,
           {
@@ -260,6 +266,10 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
                 .map((level) => ({
                   ...level,
                   label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                  labelAgg: hasAggregateIndicators
+                    && level.aggregate
+                    && appMessages.supportlevelsAggregate[level.value]
+                    && intl.formatMessage(appMessages.supportlevelsAggregate[level.value]),
                 })),
             },
           },
@@ -334,6 +344,12 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         },
       ];
     } else if (config.types === 'indicators') {
+      const hasAggregateIndicators = entities.some(
+        (parent) => entities.some(
+          (child) => qe(parent.get('id'), child.getIn(['attributes', 'parent_id']))
+        )
+      );
+      // console.log('hasParentIndicators', hasParentIndicators)
       subjectOptions = [
         {
           type: 'secondary',
@@ -371,6 +387,10 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
               .map((level) => ({
                 ...level,
                 label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                labelAgg: hasAggregateIndicators
+                  && level.aggregate
+                  && appMessages.supportlevelsAggregate[level.value]
+                  && intl.formatMessage(appMessages.supportlevelsAggregate[level.value]),
               })),
           },
         },

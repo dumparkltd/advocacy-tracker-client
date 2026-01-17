@@ -83,35 +83,37 @@ const reduceCountryData = ({
                   <Text weight={600}>
                     {intl.formatMessage(appMessages.supportlevels[position.value])}
                   </Text>
-                  <Box gap="xxsmall">
-                    <Box direction="row" gap="xxsmall" align="center">
-                      <Text size="xxxsmall" color="textSecondary">
-                        Statement
-                      </Text>
-                      {isDate(statement.get('date_start')) && (
+                  {statement && (
+                    <Box gap="xxsmall">
+                      <Box direction="row" gap="xxsmall" align="center">
                         <Text size="xxxsmall" color="textSecondary">
-                          {`(${intl.formatDate(statement.get('date_start'))})`}
+                          Statement
                         </Text>
-                      )}
-                      {!isDate(statement.get('date_start')) && isDate(statement.get('created_at')) && (
-                        <Text size="xxxsmall" color="textSecondary">
-                          {`(${intl.formatDate(statement.get('created_at'))})`}
-                        </Text>
-                      )}
+                        {isDate(statement.get('date_start')) && (
+                          <Text size="xxxsmall" color="textSecondary">
+                            {`(${intl.formatDate(statement.get('date_start'))})`}
+                          </Text>
+                        )}
+                        {!isDate(statement.get('date_start')) && isDate(statement.get('created_at')) && (
+                          <Text size="xxxsmall" color="textSecondary">
+                            {`(${intl.formatDate(statement.get('created_at'))})`}
+                          </Text>
+                        )}
+                      </Box>
+                      <StatementButton
+                        as="a"
+                        plain
+                        href={`${ROUTES.ACTION}/${statement.get('id')}`}
+                        onClick={(evt) => {
+                          if (evt && evt.preventDefault) evt.preventDefault();
+                          if (evt && evt.stopPropagation) evt.stopPropagation();
+                          onEntityClick(statement.get('id'), ROUTES.ACTION);
+                        }}
+                      >
+                        {statement.get('title')}
+                      </StatementButton>
                     </Box>
-                    <StatementButton
-                      as="a"
-                      plain
-                      href={`${ROUTES.ACTION}/${statement.get('id')}`}
-                      onClick={(evt) => {
-                        if (evt && evt.preventDefault) evt.preventDefault();
-                        if (evt && evt.stopPropagation) evt.stopPropagation();
-                        onEntityClick(statement.get('id'), ROUTES.ACTION);
-                      }}
-                    >
-                      {statement.get('title')}
-                    </StatementButton>
-                  </Box>
+                  )}
                 </Box>
               ),
             },
@@ -139,7 +141,9 @@ export function CountryMap({
   includeUnpublishedAPI,
   onSetIncludeActorMembers,
   includeActorMembers,
+  isAggregateIndicator,
 }) {
+  // console.log('countries', countries && countries.toJS())
   // const { intl } = this.context;
   // let type;
   const countriesJSON = topojson.feature(
@@ -160,6 +164,8 @@ export function CountryMap({
   });
   const options = Object.values(
     ACTION_INDICATOR_SUPPORTLEVELS
+  ).filter(
+    (option) => !isAggregateIndicator || option.aggregate
   ).sort(
     (a, b) => a.order < b.order ? -1 : 1
   ).map(
@@ -169,7 +175,9 @@ export function CountryMap({
         && countryData.filter(
           (country) => qe(country.positionId, option.value)
         ).length,
-      label: intl.formatMessage(appMessages.supportlevels[option.value]),
+      label: isAggregateIndicator
+        ? intl.formatMessage(appMessages.supportlevelsAggregate[option.value])
+        : intl.formatMessage(appMessages.supportlevels[option.value]),
     })
   );
   return (
@@ -218,7 +226,7 @@ export function CountryMap({
       <CheckboxOptionGroup>
         <MapKeySimple
           options={options}
-          title="States by level of support"
+          title={isAggregateIndicator ? 'States by number of topics supported' : 'States by level of support'}
         />
       </CheckboxOptionGroup>
     </Styled>
@@ -236,6 +244,7 @@ CountryMap.propTypes = {
   includeUnpublishedAPI: PropTypes.bool,
   onSetIncludeActorMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
+  isAggregateIndicator: PropTypes.bool,
 };
 
 export default injectIntl(CountryMap);

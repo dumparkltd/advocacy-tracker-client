@@ -1490,3 +1490,45 @@ export const getIndicatorColumns = ({
   }
   return columns;
 };
+
+export const getIndicatorSupportLevels = ({
+  indicator,
+  countriesWithPositions,
+}) => {
+  if (!indicator || !countriesWithPositions) return null;
+  return countriesWithPositions.reduce(
+    (levelsMemo, country) => {
+      const countrySupport = country
+        && country.getIn(['indicatorPositions', indicator.get('id')]);
+      if (countrySupport && countrySupport.size > 0) {
+        const latest = countrySupport.first();
+        const level = latest.get('supportlevel_id')
+          ? latest.get('supportlevel_id').toString()
+          : '0';
+        if (levelsMemo.get(level)) {
+          const actorIds = levelsMemo.getIn([level, 'actors'])
+            ? levelsMemo.getIn([level, 'actors']).set(country.get('id'), parseInt(country.get('id'), 10))
+            : Map().set(country.get('id'), parseInt(country.get('id'), 10));
+          let actorIdsViaGroups = null;
+          if (latest.get('viaGroups') && latest.get('viaGroups').size > 0) {
+            actorIdsViaGroups = levelsMemo.getIn([level, 'actorsViaGroups'])
+              ? levelsMemo.getIn([level, 'actorsViaGroups']).set(country.get('id'), parseInt(country.get('id'), 10))
+              : Map().set(country.get('id'), parseInt(country.get('id'), 10));
+          }
+          return levelsMemo.setIn(
+            [level, 'count'], actorIds ? actorIds.size : 0,
+          ).setIn(
+            [level, 'countViaGroups'], actorIdsViaGroups ? actorIdsViaGroups.size : 0,
+          ).setIn(
+            [level, 'actors'], actorIds,
+          ).setIn(
+            [level, 'actorsViaGroups'], actorIdsViaGroups,
+          );
+        }
+        return levelsMemo;
+      }
+      return levelsMemo;
+    },
+    Map(ACTION_INDICATOR_SUPPORTLEVELS),
+  );
+};

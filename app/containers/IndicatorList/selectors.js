@@ -24,6 +24,7 @@ import {
   filterEntitiesByConnection,
   filterEntitiesWithoutAssociation,
   entitiesSetCategoryIds,
+  getIndicatorSupportLevels,
 } from 'utils/entities';
 
 import asList from 'utils/as-list';
@@ -32,7 +33,6 @@ import qe from 'utils/quasi-equals';
 import {
   API,
   ACTORTYPES,
-  ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 import { DEPENDENCIES } from './constants';
 
@@ -121,7 +121,7 @@ export const selectIndicatorsWithConnections = createSelector(
   (
     ready,
     indicators,
-    countries,
+    countriesWithPositions,
     connections,
     indicatorAssociationsGrouped,
   ) => {
@@ -132,41 +132,10 @@ export const selectIndicatorsWithConnections = createSelector(
           const indicatorActions = indicatorAssociationsGrouped.get(parseInt(indicator.get('id'), 10));
           // console.log('indicatorActions', entity.toJS(), indicatorActions && indicatorActions.toJS());
           // currently requires both for filtering & display
-          const support = countries.reduce(
-            (levelsMemo, country) => {
-              const countrySupport = country
-                && country.getIn(['indicatorPositions', indicator.get('id')]);
-              if (countrySupport && countrySupport.size > 0) {
-                const latest = countrySupport.first();
-                const level = latest.get('supportlevel_id')
-                  ? latest.get('supportlevel_id').toString()
-                  : '0';
-                if (levelsMemo.get(level)) {
-                  const actorIds = levelsMemo.getIn([level, 'actors'])
-                    ? levelsMemo.getIn([level, 'actors']).set(country.get('id'), parseInt(country.get('id'), 10))
-                    : Map().set(country.get('id'), parseInt(country.get('id'), 10));
-                  let actorIdsViaGroups = null;
-                  if (latest.get('viaGroups') && latest.get('viaGroups').size > 0) {
-                    actorIdsViaGroups = levelsMemo.getIn([level, 'actorsViaGroups'])
-                      ? levelsMemo.getIn([level, 'actorsViaGroups']).set(country.get('id'), parseInt(country.get('id'), 10))
-                      : Map().set(country.get('id'), parseInt(country.get('id'), 10));
-                  }
-                  return levelsMemo.setIn(
-                    [level, 'count'], actorIds ? actorIds.size : 0,
-                  ).setIn(
-                    [level, 'countViaGroups'], actorIdsViaGroups ? actorIdsViaGroups.size : 0,
-                  ).setIn(
-                    [level, 'actors'], actorIds,
-                  ).setIn(
-                    [level, 'actorsViaGroups'], actorIdsViaGroups,
-                  );
-                }
-                return levelsMemo;
-              }
-              return levelsMemo;
-            },
-            Map(ACTION_INDICATOR_SUPPORTLEVELS),
-          );
+          const support = getIndicatorSupportLevels({
+            indicator,
+            countriesWithPositions,
+          });
           return indicator.set(
             'actions',
             indicatorActions

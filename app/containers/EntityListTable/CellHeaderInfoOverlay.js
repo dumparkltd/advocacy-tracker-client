@@ -16,7 +16,6 @@ export function CellHeaderInfoOverlay({ info }) {
           pad="small"
           margin={{ horizontal: 'xsmall', vertical: 'xsmall' }}
           background="white"
-          elevation="small"
           overflow={{
             vertical: 'auto',
             horizontal: 'hidden',
@@ -34,6 +33,7 @@ export function CellHeaderInfoOverlay({ info }) {
                 <Dot color={option.color} />
                 <Text size="small">
                   {option.label}
+                  {option.labelAgg && ` (${option.labelAgg})`}
                 </Text>
               </LabelWrap>
             ))}
@@ -45,7 +45,6 @@ export function CellHeaderInfoOverlay({ info }) {
           pad="small"
           margin={{ horizontal: 'xsmall', vertical: 'xsmall' }}
           background="white"
-          elevation="small"
           overflow={{
             vertical: 'auto',
             horizontal: 'hidden',

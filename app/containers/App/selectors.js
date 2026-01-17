@@ -1931,6 +1931,59 @@ const filterStatements = (
   }
   return pass;
 };
+const getAggregateSupport = (aggregateCounts, childCount) => {
+  if (!aggregateCounts) return 0;
+  const supportCount = aggregateCounts.get(1) + (aggregateCounts.get(2) || 0);
+  // country has strong support for all topics
+  if (aggregateCounts.get(1) === childCount) return 1;
+  // country has some support for all topics
+  if (supportCount === childCount) return 2;
+  // country has some support for any topic
+  if (supportCount > 0) return 3;
+  return 0;
+};
+const addAggregatePositions = ({
+  indicators,
+  indicatorPositions,
+}) => {
+  const childIndicatorsByParent = indicators
+    .filter((indicator) => indicator.getIn(['attributes', 'parent_id']))
+    .groupBy((indicator) => indicator.getIn(['attributes', 'parent_id']));
+
+  if (childIndicatorsByParent && childIndicatorsByParent.size > 0) {
+    const parentsIndicatorPositions = childIndicatorsByParent.map((children, parentId) => {
+      const aggregateCountSupport = children.reduce((memo, child) => {
+        const childPositions = indicatorPositions && indicatorPositions.get(child.get('id'));
+        const childPositionCurrent = childPositions && childPositions.first();
+        const childSupport = childPositionCurrent && childPositionCurrent.get('supportlevel_id');
+        if (typeof childSupport !== 'undefined') {
+          if (memo.has(childSupport)) {
+            return memo.set(childSupport, memo.get(childSupport) + 1);
+          }
+          return memo.set(childSupport, 1);
+        }
+        return memo;
+      }, Map());
+      const aggregateSupport = getAggregateSupport(aggregateCountSupport, children.size);
+      if (aggregateSupport) {
+        return List().push(
+          Map({
+            indicator_id: parentId,
+            supportlevel_id: aggregateSupport,
+            is_parent: true,
+          }).set(
+            'child_ids', children.map((child) => child.get('id'))
+          ).set(
+            'supportCount', aggregateCountSupport
+          )
+        );
+      }
+      return List();
+    });
+    return indicatorPositions.merge(parentsIndicatorPositions.mapKeys((key) => String(key)));
+  }
+  return indicatorPositions;
+};
 
 const getActorStatementsAndPositions = ({
   actor,
@@ -1948,10 +2001,10 @@ const getActorStatementsAndPositions = ({
   connectedCategoryQuery,
   eventsByStatement,
 }) => {
-  console.log('getActorStatementsAndPositions');
+  // console.log('getActorStatementsAndPositions');
   // 1. figure out any actor statements /////////////////////////////////////
   // actorActions
-  let actorIndicators;
+  let actorIndicatorPositions;
   let actorStatementsAsMemberByGroup = List();
   // direct
   let actorStatements = actorActions.get(parseInt(actor.get('id'), 10));
@@ -2012,7 +2065,10 @@ const getActorStatementsAndPositions = ({
     || (actorStatementsAsMemberByGroup && actorStatementsAsMemberByGroup.size > 0)
   ) {
     // now for each indicator
-    actorIndicators = indicators.map(
+    actorIndicatorPositions = indicators.filter(
+      // excluding parents/aggregates
+      (indicator) => !indicators.some((i) => qe(indicator.get('id'), i.getIn(['attributes', 'parent_id'])))
+    ).map(
       (indicator) => {
         // get all statements for topic
         let indicatorStatements = actionIndicators.get(parseInt(indicator.get('id'), 10));
@@ -2121,11 +2177,16 @@ const getActorStatementsAndPositions = ({
         ? actorStatements.concat(actorStatementsAsMemberByGroup.flatten(true).toList()).toSet()
         : actorStatementsAsMemberByGroup.flatten(true).toList().toSet();
     }
+    // figure out aggrgate positions (count support for child indicators)
+    actorIndicatorPositions = addAggregatePositions({
+      indicators,
+      indicatorPositions: actorIndicatorPositions,
+    });
     return actor
       .set('statements', actorStatements)
       .set('statementsAsGroup', actorStatementsAsMemberByGroup && actorStatementsAsMemberByGroup.flatten(true).toList().toSet())
-      .set('indicatorPositions', actorIndicators)
-      .set('indicators', actorIndicators && actorIndicators.reduce(
+      .set('indicatorPositions', actorIndicatorPositions)
+      .set('indicators', actorIndicatorPositions && actorIndicatorPositions.reduce(
         (memo, indicatorPosition, key) => {
           if (indicatorPosition && indicatorPosition.size > 0) {
             return memo.set(key, key);
@@ -2256,10 +2317,12 @@ export const selectActorsWithPositions = createSelector(
   selectActorsWithPositionsData,
   (data) => {
     if (!data) return null;
-    const result = data.typeActors.map((actor) => getActorStatementsAndPositions({
-      actor,
-      ...data,
-    }));
+    const result = data.typeActors.map(
+      (actor) => getActorStatementsAndPositions({
+        actor,
+        ...data,
+      }),
+    );
     return result;
   }
 );

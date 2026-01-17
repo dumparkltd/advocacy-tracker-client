@@ -25,7 +25,6 @@ import {
 // import { qe } from 'utils/quasi-equals';
 import {
   getEntityTitleTruncated,
-  getIndicatorColumnsForStatement,
 } from 'utils/entities';
 import qe from 'utils/quasi-equals';
 import { keydownHandlerPrint } from 'utils/print';
@@ -52,11 +51,13 @@ import {
   selectIncludeUnpublishedAPIStatements,
   selectIsPrintView,
   selectPrintConfig,
+  selectActorConnections,
 } from 'containers/App/selectors';
 
 import {
   ROUTES,
   ACTORTYPES,
+  ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
 import Loading from 'components/Loading';
@@ -117,6 +118,7 @@ export function IndicatorView({
   isPrintView,
   printArgs,
   childIndicators,
+  actorConnections,
 }) {
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
@@ -140,9 +142,10 @@ export function IndicatorView({
     };
   }, []);
   const countries = actorsByActortype && actorsByActortype.get(parseInt(ACTORTYPES.COUNTRY, 10));
+  const isAggregate = childIndicators && childIndicators.size > 0;
   // view subject
-  let viewSubject = subject || 'statements';
-  const validViewSubjects = ['statements', 'actors'];
+  let viewSubject = subject || (isAggregate ? 'actors' : 'statements');
+  const validViewSubjects = isAggregate ? ['actors'] : ['statements', 'actors'];
   if (validViewSubjects.indexOf(viewSubject) === -1) {
     viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
   }
@@ -246,12 +249,36 @@ export function IndicatorView({
                         fields: [
                           getIndicatorConnectionField({
                             indicators: childIndicators,
+                            connections: actorConnections,
                             onEntityClick,
                             skipLabel: true,
-                            columns: getIndicatorColumnsForStatement({
-                              intl,
-                              isAdmin,
-                            }),
+                            columns: [
+                              {
+                                id: 'main',
+                                type: 'main',
+                                sort: 'reference',
+                                attributes: ['code', 'title'],
+                              },
+                              {
+                                id: 'support', // one row per type,
+                                type: 'stackedBarActions', // one row per type,
+                                values: 'supportlevels',
+                                title: 'Support',
+                                options: ACTION_INDICATOR_SUPPORTLEVELS,
+                                minSize: 'small',
+                                info: {
+                                  type: 'key-categorical',
+                                  title: 'Support by number of countries',
+                                  attribute: 'supportlevel_id',
+                                  options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+                                    .sort((a, b) => a.order < b.order ? -1 : 1)
+                                    .map((level) => ({
+                                      ...level,
+                                      label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                                    })),
+                                },
+                              },
+                            ],
                           }),
                         ],
                       }}
@@ -296,6 +323,7 @@ export function IndicatorView({
                     <CountryMap
                       countries={countries}
                       indicatorId={viewEntity.get('id')}
+                      isAggregateIndicator={isAggregate}
                       onEntityClick={(id, path) => onEntityClick(id, path || ROUTES.ACTOR)}
                       includeInofficial={includeInofficial}
                       onSetIncludeInofficial={onSetIncludeInofficial}
@@ -308,12 +336,14 @@ export function IndicatorView({
                   <Box margin={{ vertical: 'large' }}>
                     <PrintHide>
                       <SubjectButtonGroup margin={{ horizontal: 'medium' }}>
-                        <SubjectButton
-                          onClick={() => onSetSubject('statements')}
-                          active={viewSubject === 'statements'}
-                        >
-                          <Text size="large">Statements</Text>
-                        </SubjectButton>
+                        {!isAggregate && (
+                          <SubjectButton
+                            onClick={() => onSetSubject('statements')}
+                            active={viewSubject === 'statements'}
+                          >
+                            <Text size="large">Statements</Text>
+                          </SubjectButton>
+                        )}
                         <SubjectButton
                           onClick={() => onSetSubject('actors')}
                           active={viewSubject === 'actors'}
@@ -322,7 +352,7 @@ export function IndicatorView({
                         </SubjectButton>
                       </SubjectButtonGroup>
                     </PrintHide>
-                    {(viewSubject === 'statements' || (isPrintView && printArgs && printArgs.printTabs === 'all')) && (
+                    {!isAggregate && (viewSubject === 'statements' || (isPrintView && printArgs && printArgs.printTabs === 'all')) && (
                       <>
                         {' '}
                         {isPrintView
@@ -352,6 +382,7 @@ export function IndicatorView({
                         <Actors
                           viewEntity={viewEntity}
                           isAdmin={isAdmin}
+                          isAggregateIndicator={isAggregate}
                         />
                       </>
                     )}
@@ -376,6 +407,7 @@ IndicatorView.propTypes = {
   onSetPrintView: PropTypes.func,
   actorsByActortype: PropTypes.object,
   childIndicators: PropTypes.object,
+  actorConnections: PropTypes.object,
   params: PropTypes.object,
   myId: PropTypes.string,
   isMember: PropTypes.bool,
@@ -407,6 +439,7 @@ const mapStateToProps = (state, props) => ({
   isPrintView: selectIsPrintView(state),
   printArgs: selectPrintConfig(state),
   childIndicators: selectChildIndicators(state, props.params.id),
+  actorConnections: selectActorConnections(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
