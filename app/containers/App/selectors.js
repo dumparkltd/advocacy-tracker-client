@@ -1933,7 +1933,7 @@ const filterStatements = (
 };
 const getAggregateSupport = (aggregateCounts, childCount) => {
   if (!aggregateCounts) return 0;
-  const supportCount = aggregateCounts.get(1) + (aggregateCounts.get(2) || 0);
+  const supportCount = (aggregateCounts.get(1) || 0) + (aggregateCounts.get(2) || 0);
   // country has strong support for all topics
   if (aggregateCounts.get(1) === childCount) return 1;
   // country has some support for all topics
