@@ -79,7 +79,7 @@ export function EntitiesMapActions({
 }) {
   let indicatorOptions;
   let infoOptions = [];
-  let indicator = includeActorMembers ? 'actionsTotal' : 'actions';
+  let mapIndicatorClean = includeActorMembers ? 'actionsTotal' : 'actions';
   let mapSubjectClean = mapSubject || 'actors';
   let reduceCountryAreas;
   let countryCounts;
@@ -150,21 +150,21 @@ export function EntitiesMapActions({
     });
 
     indicatorOptions = indicators.reduce(
-      (memo, entity) => {
-        const isAggregate = indicators.some((child) => qe(child.getIn(['attributes', 'parent_id']), entity.get('id')));
-        if (isAggregate) {
+      (memo, indicator) => {
+        // isAggregate
+        if (indicators.getIn(['attributes', 'is_parent'])) {
           return memo;
         }
         return [
           ...memo,
           {
-            id: entity.get('id'),
-            value: entity.get('id'),
-            label: `${entity.getIn(['attributes', 'title'])}`,
+            id: indicator.get('id'),
+            value: indicator.get('id'),
+            label: `${indicator.getIn(['attributes', 'title'])}`,
             supTitle: 'Country positions for topic',
-            active: qe(mapIndicator, entity.get('id')),
-            onClick: () => onEntityClick(entity.get('id'), ROUTES.INDICATOR),
-            href: `${ROUTES.INDICATOR}/${entity.get('id')}`,
+            active: qe(mapIndicator, indicator.get('id')),
+            onClick: () => onEntityClick(indicator.get('id'), ROUTES.INDICATOR),
+            href: `${ROUTES.INDICATOR}/${indicator.get('id')}`,
             // info: entity.getIn(['attributes', 'description']),
           },
         ];
@@ -276,7 +276,7 @@ export function EntitiesMapActions({
       }
       return memo;
     }, []);
-    indicator = mapIndicator;
+    mapIndicatorClean = mapIndicator;
     mapSubjectClean = null;
     mapInfo = {
       infoOptions,
@@ -411,7 +411,7 @@ export function EntitiesMapActions({
         mapData={{
           filters: filtersClean,
           typeLabels,
-          indicator,
+          indicator: mapIndicatorClean,
           includeSecondaryMembers: includeActorMembers,
           scrollWheelZoom: true,
           mapSubject: mapSubjectClean,

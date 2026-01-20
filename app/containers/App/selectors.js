@@ -663,7 +663,18 @@ export const selectResource = createSelector(
 );
 export const selectIndicators = createSelector(
   (state) => selectEntities(state, API.INDICATORS),
-  (entities) => sortEntities(entities, 'asc', 'referenceThenTitle', null, false)
+  (indicators) => sortEntities(
+    indicators.map((indicator) => {
+      const hasChildIndicators = indicators.some(
+        (child) => qe(child.getIn(['attributes', 'parent_id']), indicator.get('id'))
+      );
+      return indicator.setIn(['attributes', 'is_parent'], hasChildIndicators);
+    }),
+    'asc',
+    'referenceThenTitle',
+    null,
+    false,
+  )
 );
 export const selectIndicator = createSelector(
   (state, id) => selectEntity(state, { id, path: API.INDICATOR }),

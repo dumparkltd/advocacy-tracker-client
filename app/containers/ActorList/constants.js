@@ -185,6 +185,7 @@ export const CONFIG = {
           {},
         ),
         optionMessages: 'supportlevels',
+        optionMessagesAggregate: 'supportlevelsAggregate',
       },
     },
     members: { // filter by associated entity

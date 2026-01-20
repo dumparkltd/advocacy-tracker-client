@@ -142,7 +142,7 @@ export function IndicatorView({
     };
   }, []);
   const countries = actorsByActortype && actorsByActortype.get(parseInt(ACTORTYPES.COUNTRY, 10));
-  const isAggregate = childIndicators && childIndicators.size > 0;
+  const isAggregate = viewEntity && viewEntity.getIn(['attributes', 'is_parent']);
   // view subject
   let viewSubject = subject || (isAggregate ? 'actors' : 'statements');
   const validViewSubjects = isAggregate ? ['actors'] : ['statements', 'actors'];

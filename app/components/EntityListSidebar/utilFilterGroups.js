@@ -25,6 +25,34 @@ import {
 } from './utilFilterOptions';
 
 
+const getConnectionAttributeLabel = ({
+  isAggregate,
+  optionCAF,
+  value,
+  intl,
+}) => {
+  let label = 'UNDEFINED';
+  if (
+    isAggregate
+    && optionCAF.optionMessagesAggregate
+    && appMessages[optionCAF.optionMessagesAggregate]
+    && appMessages[optionCAF.optionMessagesAggregate][value]
+  ) {
+    label = intl.formatMessage(
+      appMessages[optionCAF.optionMessagesAggregate][value]
+    );
+  } else if (
+    optionCAF.optionMessages
+    && appMessages[optionCAF.optionMessages]
+    && appMessages[optionCAF.optionMessages][value]
+  ) {
+    label = intl.formatMessage(
+      appMessages[optionCAF.optionMessages][value]
+    );
+  }
+  return label;
+};
+
 // work out existing attribute filter options (ie supportlevels) from entities
 const filterAttributeOptions = ({
   entities,
@@ -187,7 +215,6 @@ const makeFilterGroups = ({
           let optionCurrentFilters = currentFilters && currentFilters.filter(
             (filter) => qe(filter.groupId, connectionKey)
           );
-          // console.log(optionCurrentFilters)
           if (entities
             && optionCurrentFilters
             && connectionOption.connectionAttributeFilter
@@ -203,13 +230,26 @@ const makeFilterGroups = ({
                   if (filter.queryValue) {
                     const filterValue = filter.queryValue.split('>')[0];
                     const attributeOptions = Object.values(optionCAF.options)
-                      .filter(
+                      .filter( // only offer available options
                         (cafo) => filterAttributeOptions({
                           filterValue,
                           connectionAttributeValue: cafo.value,
                           entities,
                           connectionOption: optionCAF,
                         })
+                      ).map(
+                        (cafo) => {
+                          const label = getConnectionAttributeLabel({
+                            isAggregate: filter.isAggregate,
+                            optionCAF,
+                            value: cafo.value,
+                            intl,
+                          });
+                          return ({
+                            ...cafo,
+                            label,
+                          });
+                        }
                       );
                     return ({
                       ...filter,
@@ -545,6 +585,8 @@ export const makeQuickFilterGroups = ({
                         dropdownLabel,
                         search: group.search,
                         options: [o],
+                        order: o.order ? parseInt(o.order, 10) : o.value,
+                        isAggregate: o.isAggregate,
                         onClear: (value, query) => {
                           onUpdateFilters(fromJS([
                             {
@@ -581,7 +623,12 @@ export const makeQuickFilterGroups = ({
                             })
                           )
                           .map((cafo) => {
-                            const label = intl.formatMessage(appMessages[optionCAF.optionMessages][cafo.value]);
+                            const label = getConnectionAttributeLabel({
+                              isAggregate: filter.isAggregate,
+                              optionCAF,
+                              value: cafo.value,
+                              intl,
+                            });
                             let checked = false;
                             if (
                               optionCurrentFilter
@@ -644,7 +691,7 @@ export const makeQuickFilterGroups = ({
                     return memo2;
                   },
                   filters,
-                );
+                ).sort((a, b) => a.order < b.order ? -1 : 1);
               }
               if (filters.length < 5 && !activeWithoutOption && !activeAnyOption) {
                 filters = [

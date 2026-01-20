@@ -47,6 +47,10 @@ export default defineMessages({
     },
   },
   supportlevelsAggregate: {
+    0: {
+      id: 'app.containers.App.supportlevelsAggregate.0',
+      defaultMessage: 'UNUSED',
+    },
     1: {
       id: 'app.containers.App.supportlevelsAggregate.1',
       defaultMessage: 'STRONG support for ALL child topics',
@@ -58,6 +62,14 @@ export default defineMessages({
     3: {
       id: 'app.containers.App.supportlevelsAggregate.3',
       defaultMessage: 'SOME support for ANY child topic',
+    },
+    4: {
+      id: 'app.containers.App.supportlevelsAggregate.4',
+      defaultMessage: 'UNUSED',
+    },
+    5: {
+      id: 'app.containers.App.supportlevelsAggregate.5',
+      defaultMessage: 'UNUSED',
     },
     99: {
       id: 'app.containers.App.supportlevelsAggregate.99',

@@ -223,7 +223,7 @@ export function PositionsList({
     }
   }, [dataReady]);
   const parentIndicators = indicators && indicators.filter(
-    (parent) => indicators.some((child) => qe(child.getIn(['attributes', 'parent_id']), parent.get('id')))
+    (indicator) => indicator.getIn(['attributes', 'is_parent'])
   );
   const hasAggregateIndicators = parentIndicators && parentIndicators.size > 0;
   const supportLevels = Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
@@ -247,7 +247,7 @@ export function PositionsList({
     (memo, indicator) => {
       const title = getIndicatorAbbreviation(indicator.getIn(['attributes', 'title']));
       const id = `topic_${indicator.get('id')}`;
-      const isAggregate = !!parentIndicators.find((parent) => qe(parent.get('id'), indicator.get('id')));
+      const isAggregate = indicator.getIn(['attributes', 'is_parent']);
       const activeSupportLevels = getActiveSupportLevels(locationQuery, indicator.get('id'));
       let minSize = 'ms';
       const ref = indicator.getIn(['attributes', 'reference']);

@@ -214,8 +214,10 @@ export function PositionsMap({
     }
   }, [dataReady]);
 
-  const childIndicators = indicators && indicators.filter((child) => qe(child.getIn(['attributes', 'parent_id']), currentIndicatorId));
-  const isAggregate = childIndicators && childIndicators.size > 0;
+  const currentIndicator = indicators
+    && currentIndicatorId
+    && indicators.get(currentIndicatorId.toString());
+  const isAggregate = currentIndicator && currentIndicator.getIn(['attributes', 'is_parent']);
   useEffect(() => {
     if (dataReady) {
       if (previewItemId) {
@@ -228,7 +230,6 @@ export function PositionsMap({
             const nextIndex = countryIndex < countryIds.length && countryIds.length > 1 ? countryIndex + 1 : 0;
             const prevIndex = countryIndex > 0 ? countryIndex - 1 : countryIds.length - 1;
 
-            const currentIndicator = indicators && indicators.get(currentIndicatorId.toString());
             const indicatorPositions = country.getIn(['indicatorPositions', currentIndicatorId.toString()])
               && country.getIn(['indicatorPositions', currentIndicatorId.toString()]);
             const indicatorPosition = indicatorPositions && indicatorPositions.first();
@@ -557,9 +558,6 @@ export function PositionsMap({
       };
     });
 
-  const currentIndicator = indicators
-    && currentIndicatorId
-    && indicators.get(currentIndicatorId.toString());
   let options = [
     {
       id: `${ID}-0`,
@@ -579,10 +577,13 @@ export function PositionsMap({
       }]),
     },
   ];
-  const hasPublicAPI = currentIndicator && (
-    currentIndicator.getIn(['attributes', 'public_api'])
-    || (childIndicators && childIndicators.some((child) => child.getIn(['attributes', 'public_api'])))
-  );
+  let hasPublicAPI = currentIndicator && currentIndicator.getIn(['attributes', 'public_api']);
+  // if parent and not directly published, check potential children
+  if (!hasPublicAPI && currentIndicator && currentIndicator.getIn(['attributes', 'is_parent']) && indicators) {
+    hasPublicAPI = indicators.some(
+      (indicator) => indicator.getIn(['attributes', 'public_api']) && qe(indicator.getIn(['attributes', 'parent_id']), currentIndicatorId)
+    );
+  }
   if (currentIndicator && hasPublicAPI) {
     options = [
       ...options,

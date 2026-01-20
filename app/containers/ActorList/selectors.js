@@ -284,7 +284,7 @@ const selectActorsByTopicPosition = createSelector(
   selectActorsByActions,
   selectLocationQuery,
   (type, actors, locationQuery) => {
-    if (INDICATOR_ACTION_ACTORTYPES.indexOf(type) > -1 && locationQuery.get('indicators')) {
+    if (actors && INDICATOR_ACTION_ACTORTYPES.indexOf(type) > -1 && locationQuery.get('indicators')) {
       const locationQueryValue = locationQuery.get('indicators');
       // console.log('locationQueryValue', type, locationQueryValue)
       return actors.filter((actor) => {
