@@ -207,7 +207,7 @@ export function* loadEntitiesIfNeededSaga({ path }) {
 /**
  * Check if user is authorized
  */
-export function* checkRoleSaga({ role }) {
+export function* checkRoleAndPermissionsSaga({ role, pass }) {
   const signedIn = yield select(selectIsSignedIn);
   if (!signedIn) {
     const authenticating = yield select(selectIsAuthenticating);
@@ -221,6 +221,9 @@ export function* checkRoleSaga({ role }) {
       ));
     }
   } else {
+    if (typeof pass !== 'undefined' && !pass) {
+      yield put(replaceUnauthorised(replace));
+    }
     const roleIds = yield select(selectSessionUserRoles);
     if (!hasRoleRequired(roleIds, role)) {
       yield put(replaceUnauthorised(replace));
@@ -1397,7 +1400,7 @@ export default function* rootSaga() {
   yield takeEvery(DELETE_MULTIPLE_ENTITIES, deleteMultipleEntitiesSaga);
   yield takeEvery(SAVE_CONNECTIONS, saveConnectionsSaga);
 
-  yield takeLatest(REDIRECT_IF_NOT_PERMITTED, checkRoleSaga);
+  yield takeLatest(REDIRECT_IF_NOT_PERMITTED, checkRoleAndPermissionsSaga);
   yield takeLatest(REDIRECT_IF_NOT_SIGNED_IN, redirectIfNotSignedInSaga);
   yield takeLatest(REDIRECT_IF_SIGNED_IN, redirectIfSignedInSaga);
   yield takeEvery(UPDATE_ROUTE_QUERY, updateRouteQuerySaga);

@@ -76,6 +76,7 @@ import PrintOnly from 'components/styled/PrintOnly';
 import {
   selectReady,
   selectIsUserMember,
+  selectIsUserCoordinator,
   selectIsUserAdmin,
   selectResourceConnections,
   selectTaxonomiesWithCategories,
@@ -116,6 +117,7 @@ export function ActionView(props) {
     viewEntity,
     dataReady,
     isMember,
+    isCoordinator,
     taxonomies,
     viewTaxonomies,
     resourcesByResourcetype,
@@ -201,7 +203,10 @@ export function ActionView(props) {
         icon: 'print',
       },
     ];
-    if (isMember) {
+    const canEdit = viewEntity.getIn(['attributes', 'public_api'])
+      ? isCoordinator
+      : isMember;
+    if (canEdit) {
       buttons = [
         ...buttons,
         {
@@ -586,6 +591,7 @@ ActionView.propTypes = {
   handleEdit: PropTypes.func,
   handleClose: PropTypes.func,
   onEntityClick: PropTypes.func,
+  isCoordinator: PropTypes.bool,
   isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
   isPrintView: PropTypes.bool,
@@ -613,6 +619,7 @@ ActionView.propTypes = {
 
 const mapStateToProps = (state, props) => ({
   isMember: selectIsUserMember(state),
+  isCoordinator: selectIsUserCoordinator(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   viewTaxonomies: selectViewTaxonomies(state, props.params.id),

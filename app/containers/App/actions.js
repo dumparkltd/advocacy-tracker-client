@@ -185,10 +185,11 @@ export function loadEntitiesIfNeeded(path) {
     path,
   };
 }
-export function redirectIfNotPermitted(role) {
+export function redirectIfNotPermitted(role, pass) {
   return {
     type: REDIRECT_IF_NOT_PERMITTED,
     role,
+    pass,
   };
 }
 export function redirectIfNotSignedIn() {
