@@ -44,6 +44,7 @@ export function FormFooter({
   hasAnyUnseenAutofill,
   hasAnyErrors,
   hasNoChanges,
+  inModal,
 }) {
   const size = React.useContext(ResponsiveContext);
   const saveCloseRef = React.useRef(null);
@@ -109,46 +110,48 @@ export function FormFooter({
               <FormattedMessage {...appMessages.buttons.cancel} />
             </ButtonCancel>
           </Box>
-          <Box>
-            <StyledButtonSubmitSubtle
-              type="button"
-              isBlocked={isBlocked}
-              title="Save & continue editing"
-              onClick={(e) => {
-                if (e && e.preventDefault) e.preventDefault();
-                if (!isBlocked) {
-                  handleUpdate(formData.set('close', false));
-                  handleSubmitRemote();
-                }
-              }}
-              onMouseOver={(e) => {
-                if (e && e.preventDefault) e.preventDefault();
-                if (isBlocked) {
-                  setBlockedSaveHint(true);
-                }
-              }}
-              onFocus={(e) => {
-                if (e && e.preventDefault) e.preventDefault();
-                if (isBlocked) {
-                  setBlockedSaveHint(true);
-                }
-              }}
-              onMouseOut={(e) => {
-                if (e && e.preventDefault) e.preventDefault();
-                if (isBlocked) {
-                  setBlockedSaveHint(false);
-                }
-              }}
-              onBlur={(e) => {
-                if (e && e.preventDefault) e.preventDefault();
-                if (isBlocked) {
-                  setBlockedSaveHint(false);
-                }
-              }}
-            >
-              Save
-            </StyledButtonSubmitSubtle>
-          </Box>
+          {!inModal && (
+            <Box>
+              <StyledButtonSubmitSubtle
+                type="button"
+                isBlocked={isBlocked}
+                title="Save & continue editing"
+                onClick={(e) => {
+                  if (e && e.preventDefault) e.preventDefault();
+                  if (!isBlocked) {
+                    handleUpdate(formData.set('close', false));
+                    handleSubmitRemote();
+                  }
+                }}
+                onMouseOver={(e) => {
+                  if (e && e.preventDefault) e.preventDefault();
+                  if (isBlocked) {
+                    setBlockedSaveHint(true);
+                  }
+                }}
+                onFocus={(e) => {
+                  if (e && e.preventDefault) e.preventDefault();
+                  if (isBlocked) {
+                    setBlockedSaveHint(true);
+                  }
+                }}
+                onMouseOut={(e) => {
+                  if (e && e.preventDefault) e.preventDefault();
+                  if (isBlocked) {
+                    setBlockedSaveHint(false);
+                  }
+                }}
+                onBlur={(e) => {
+                  if (e && e.preventDefault) e.preventDefault();
+                  if (isBlocked) {
+                    setBlockedSaveHint(false);
+                  }
+                }}
+              >
+                Save
+              </StyledButtonSubmitSubtle>
+            </Box>
+          )}
           <StyledButtonSubmit
             type="submit"
             disabled={isBlocked}
@@ -206,6 +209,7 @@ FormFooter.propTypes = {
   fields: PropTypes.array,
   // sections: PropTypes.array,
   isBlocked: PropTypes.bool,
+  inModal: PropTypes.bool,
   hasAnyEmptyRequired: PropTypes.bool,
   hasAnyUnseenAutofill: PropTypes.bool,
   hasAnyErrors: PropTypes.bool,

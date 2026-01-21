@@ -30,3 +30,5 @@ export const FORM_INITIAL = fromJS({
   close: true,
   step: null,
 });
+
+export const REDUCER_NAME = 'indicatorNew';

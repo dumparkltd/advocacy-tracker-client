@@ -349,9 +349,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     || (stepsWithStatus && (hasAnyEmptyRequired || hasAnyUnseenAutofill || hasAnyErrors));
 
     const activeStep = stepsWithStatus && stepsWithStatus.find((step) => step.isActive);
-
-    const activeStepHasErrors = activeStep.hasErrors;
-
+    const activeStepHasErrors = activeStep && activeStep.hasErrors;
     return (
       <ResponsiveContext.Consumer>
         {(size) => (
@@ -375,6 +373,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   hasAnyUnseenAutofill={hasAnyUnseenAutofill}
                   hasAnyErrors={hasAnyErrors}
                   hasNoChanges={hasNoChanges}
+                  inModal={inModal}
                 />
               )}
               <FormWrapper hasMarginBottom={false}>
@@ -529,6 +528,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                   hasAnyUnseenAutofill={hasAnyUnseenAutofill}
                   hasAnyErrors={hasAnyErrors}
                   hasNoChanges={hasNoChanges}
+                  inModal={inModal}
                 />
               </FormWrapper>
             </StyledForm>

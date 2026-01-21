@@ -107,6 +107,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
       handleSubmitFail,
       handleUpdate,
       formDataPath,
+      formId,
       inModal,
       invalidateEntitiesOnSuccess,
       isAdmin,
@@ -135,7 +136,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
           handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleSubmitFail={handleSubmitFail}
           handleCancel={() => handleCancel(typeId)}
-          handleUpdate={handleUpdate}
+          handleUpdate={(data) => handleUpdate(data, formId)}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
@@ -176,6 +177,7 @@ ResourceNew.propTypes = {
   resourcetype: PropTypes.instanceOf(Map),
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
+  formId: PropTypes.string,
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
   invalidateEntitiesOnSuccess: PropTypes.oneOfType([
@@ -334,8 +336,8 @@ function mapDispatchToProps(
         dispatch(updatePath(`${ROUTES.RESOURCES}/${typeId}`), { replace: true });
       }
     },
-    handleUpdate: (formData) => {
-      dispatch(updateEntityForm(formData));
+    handleUpdate: (formData, formId) => {
+      dispatch(updateEntityForm(formData, formId));
     },
     onCreateOption: (args) => {
       dispatch(openNewEntityModal(args));
