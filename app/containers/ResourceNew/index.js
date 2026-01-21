@@ -15,6 +15,7 @@ import messages from './messages';
 
 import ResourceNewForm from './ResourceNewForm';
 import { selectDomain } from './selectors';
+import { REDUCER_NAME } from './constants';
 
 export function ResourceNew({
   params,
@@ -37,7 +38,8 @@ export function ResourceNew({
       <ResourceNewForm
         typeId={typeId}
         viewDomain={viewDomain}
-        formDataPath="resourceNew.form.data"
+        formDataPath={`${REDUCER_NAME}.form.data`}
+        formId={REDUCER_NAME}
       />
     </div>
   );

@@ -8,3 +8,5 @@ export const FORM_INITIAL = fromJS({
     is_archive: false,
   },
 });
+
+export const REDUCER_NAME = 'entityNew';

@@ -14,6 +14,7 @@ import messages from './messages';
 
 import IndicatorNewForm from './IndicatorNewForm';
 import { selectDomain } from './selectors';
+import { REDUCER_NAME } from './constants';
 
 export function IndicatorNew({
   viewDomain,
@@ -32,7 +33,8 @@ export function IndicatorNew({
       />
       <IndicatorNewForm
         viewDomain={viewDomain}
-        formDataPath="indicatorNew.form.data"
+        formDataPath={`${REDUCER_NAME}.form.data`}
+        formId={REDUCER_NAME}
       />
     </div>
   );

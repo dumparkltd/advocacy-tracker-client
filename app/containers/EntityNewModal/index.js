@@ -13,9 +13,8 @@ import ActionNewForm from 'containers/ActionNew/ActionNewForm';
 import CategoryNewForm from 'containers/CategoryNew/CategoryNewForm';
 import ResourceNewForm from 'containers/ResourceNew/ResourceNewForm';
 
-import {
-  API,
-} from 'themes/config';
+import { API } from 'themes/config';
+import { REDUCER_NAME } from './constants';
 
 import { selectDomain } from './selectors';
 
@@ -42,7 +41,8 @@ export class EntityNewModal extends React.PureComponent { // eslint-disable-line
           onSaveSuccess={onSaveSuccess}
           invalidateEntitiesOnSuccess={invalidateEntitiesOnSuccess}
           onCancel={onCancel}
-          formDataPath="entityNew.form.data"
+          formDataPath={`${REDUCER_NAME}.form.data`}
+          formId={REDUCER_NAME}
           typeId={attributes.get('measuretype_id')}
           autoUser={autoUser}
         />
@@ -58,7 +58,8 @@ export class EntityNewModal extends React.PureComponent { // eslint-disable-line
           onSaveSuccess={onSaveSuccess}
           invalidateEntitiesOnSuccess={invalidateEntitiesOnSuccess}
           onCancel={onCancel}
-          formDataPath="entityNew.form.data"
+          formDataPath={`${REDUCER_NAME}.form.data`}
+          formId={REDUCER_NAME}
           typeId={attributes.get('actortype_id')}
           autoUser={autoUser}
         />
@@ -74,7 +75,8 @@ export class EntityNewModal extends React.PureComponent { // eslint-disable-line
           onSaveSuccess={onSaveSuccess}
           invalidateEntitiesOnSuccess={invalidateEntitiesOnSuccess}
           onCancel={onCancel}
-          formDataPath="entityNew.form.data"
+          formDataPath={`${REDUCER_NAME}.form.data`}
+          formId={REDUCER_NAME}
           typeId={attributes.get('taxonomy_id')}
         />
       );
@@ -89,7 +91,8 @@ export class EntityNewModal extends React.PureComponent { // eslint-disable-line
           onSaveSuccess={onSaveSuccess}
           invalidateEntitiesOnSuccess={invalidateEntitiesOnSuccess}
           onCancel={onCancel}
-          formDataPath="entityNew.form.data"
+          formDataPath={`${REDUCER_NAME}.form.data`}
+          formId={REDUCER_NAME}
           typeId={attributes.get('resourcetype_id')}
         />
       );

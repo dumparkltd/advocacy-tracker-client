@@ -63,7 +63,7 @@ import {
 
 import { save } from './actions';
 import messages from './messages';
-import { DEPENDENCIES, FORM_INITIAL } from './constants';
+import { DEPENDENCIES, FORM_INITIAL, REDUCER_NAME } from './constants';
 
 export class UserEdit extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -161,7 +161,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
     const { saveSending } = viewDomain.get('page').toJS();
     const isMine = qe(myId, reference);
     const editableRoles = this.getEditableUserRoles(roles, sessionUserHighestRoleId);
-    const formDataPath = 'userEdit.form.data';
+    const formDataPath = `${REDUCER_NAME}.form.data`;
     return (
       <div>
         <Helmet
@@ -189,7 +189,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
               saving={saveSending}
               handleSubmitFail={handleSubmitFail}
               handleCancel={() => handleCancel(reference)}
-              handleUpdate={handleUpdate}
+              handleUpdate={(data) => handleUpdate(data, REDUCER_NAME)}
               onErrorDismiss={onErrorDismiss}
               onServerErrorDismiss={onServerErrorDismiss}
               scrollContainer={this.scrollContainer.current}
@@ -244,7 +244,6 @@ UserEdit.propTypes = {
   connectedTaxonomies: PropTypes.object,
   actorsByActortype: PropTypes.object,
   actionsByActiontype: PropTypes.object,
-  step: PropTypes.object,
 };
 
 UserEdit.contextTypes = {
@@ -383,8 +382,8 @@ function mapDispatchToProps(dispatch) {
     handleCancel: (reference) => {
       dispatch(updatePath(`${ROUTES.USERS}/${reference}`, { replace: true }));
     },
-    handleUpdate: (formData) => {
-      dispatch(updateEntityForm(formData));
+    handleUpdate: (formData, formId) => {
+      dispatch(updateEntityForm(formData, formId));
     },
     onCreateOption: (args) => {
       dispatch(openNewEntityModal(args));
