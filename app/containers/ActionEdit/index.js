@@ -77,7 +77,7 @@ import {
 
 import messages from './messages';
 import { save } from './actions';
-import { DEPENDENCIES, FORM_INITIAL } from './constants';
+import { DEPENDENCIES, FORM_INITIAL, REDUCER_NAME } from './constants';
 
 export class ActionEdit extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -203,7 +203,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     // if they are at least members and its their own content
     const canDelete = isAdmin
       || (isUserMember && viewEntity && qe(myId, viewEntity.getIn(['attributes', 'created_by_id'])));
-    const formDataPath = 'actionEdit.form.data';
+    const formDataPath = `${REDUCER_NAME}.form.data`;
 
     return (
       <div>
@@ -244,7 +244,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                 handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={handleCancel}
-                handleUpdate={handleUpdate}
+                handleUpdate={(data) => handleUpdate(data, REDUCER_NAME)}
                 handleDelete={canDelete ? () => handleDelete(typeId) : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
@@ -523,8 +523,8 @@ function mapDispatchToProps(dispatch, props) {
     handleCancel: () => {
       dispatch(updatePath(`${ROUTES.ACTION}/${props.params.id}`, { replace: true }));
     },
-    handleUpdate: (formData) => {
-      dispatch(updateEntityForm(formData));
+    handleUpdate: (formData, formId) => {
+      dispatch(updateEntityForm(formData, formId));
     },
     handleDelete: (typeId) => {
       dispatch(deleteEntity({

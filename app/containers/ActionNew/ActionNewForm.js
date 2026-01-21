@@ -272,6 +272,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       invalidateEntitiesOnSuccess,
       isAdmin,
       dataReady,
+      formId,
     } = this.props;
     const typeLabel = intl.formatMessage(appMessages.entities[`actions_${typeId}`].single);
     let subTitle;
@@ -339,7 +340,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleSubmitFail={handleSubmitFail}
           handleCancel={() => handleCancel(typeId)}
-          handleUpdate={handleUpdate}
+          handleUpdate={(data) => handleUpdate(data, formId)}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
@@ -396,6 +397,7 @@ ActionNewForm.propTypes = {
   ]),
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
+  formId: PropTypes.string,
   invalidateEntitiesOnSuccess: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.array,
@@ -443,6 +445,7 @@ function mapDispatchToProps(
 ) {
   return {
     initialiseForm: (formData) => {
+      console.log(formDataPath, formData && formData.toJS())
       dispatch(formActions.reset(formDataPath));
       dispatch(formActions.change(formDataPath, formData, { silent: true }));
     },
@@ -654,8 +657,8 @@ function mapDispatchToProps(
         dispatch(updatePath(`${ROUTES.ACTIONS}/${typeId}`), { replace: true });
       }
     },
-    handleUpdate: (formData) => {
-      dispatch(updateEntityForm(formData));
+    handleUpdate: (formData, formId) => {
+      dispatch(updateEntityForm(formData, formId));
     },
     onCreateOption: (args) => {
       dispatch(openNewEntityModal(args));

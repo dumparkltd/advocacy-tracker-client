@@ -139,6 +139,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       isAdmin,
       invalidateEntitiesOnSuccess,
       dataReady,
+      formId,
     } = this.props;
 
     const type = intl.formatMessage(appMessages.entities[`actors_${typeId}`].single);
@@ -170,7 +171,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
           handleSubmitFail={handleSubmitFail}
           handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleCancel={() => handleCancel(typeId)}
-          handleUpdate={handleUpdate}
+          handleUpdate={(data) => handleUpdate(data, formId)}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
@@ -219,6 +220,7 @@ ActorNewForm.propTypes = {
   userOptions: PropTypes.object,
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
+  formId: PropTypes.string,
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
   invalidateEntitiesOnSuccess: PropTypes.oneOfType([
@@ -454,8 +456,8 @@ function mapDispatchToProps(
         dispatch(updatePath(`${ROUTES.ACTORS}/${typeId}`), { replace: true });
       }
     },
-    handleUpdate: (formData) => {
-      dispatch(updateEntityForm(formData));
+    handleUpdate: (formData, formId) => {
+      dispatch(updateEntityForm(formData, formId));
     },
     onCreateOption: (args) => {
       dispatch(openNewEntityModal(args));

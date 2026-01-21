@@ -57,7 +57,7 @@ import {
 
 import messages from './messages';
 import { save } from './actions';
-import { DEPENDENCIES, FORM_INITIAL } from './constants';
+import { DEPENDENCIES, FORM_INITIAL, REDUCER_NAME } from './constants';
 
 export class PageEdit extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -125,7 +125,7 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
     const pageTitle = intl.formatMessage(messages.pageTitle);
     const typeLabel = 'Page';
-    const formDataPath = 'pageEdit.form.data';
+    const formDataPath = `${REDUCER_NAME}.form.data`;
     return (
       <div>
         <Helmet
@@ -154,7 +154,7 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
                 handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={handleCancel}
-                handleUpdate={handleUpdate}
+                handleUpdate={(data) => handleUpdate(data, REDUCER_NAME)}
                 handleDelete={isAdmin ? handleDelete : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
@@ -255,8 +255,8 @@ function mapDispatchToProps(dispatch, props) {
     handleCancel: () => {
       dispatch(updatePath(`${ROUTES.PAGES}/${props.params.id}`, { replace: true }));
     },
-    handleUpdate: (formData) => {
-      dispatch(updateEntityForm(formData));
+    handleUpdate: (formData, formId) => {
+      dispatch(updateEntityForm(formData, formId));
     },
     handleDelete: () => {
       dispatch(deleteEntity({

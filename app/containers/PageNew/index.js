@@ -14,6 +14,7 @@ import messages from './messages';
 
 import PageNewForm from './PageNewForm';
 import { selectDomain } from './selectors';
+import { REDUCER_NAME } from './constants';
 
 export function PageNew({
   viewDomain,
@@ -32,7 +33,8 @@ export function PageNew({
       />
       <PageNewForm
         viewDomain={viewDomain}
-        formDataPath="pageNew.form.data"
+        formDataPath={`${REDUCER_NAME}.form.data`}
+        formId={REDUCER_NAME}
       />
     </div>
   );

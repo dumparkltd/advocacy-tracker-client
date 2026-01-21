@@ -517,10 +517,11 @@ export function forwardOnAuthenticationChange() {
   };
 }
 
-export function updateEntityForm(data) {
+export function updateEntityForm(data, formId) {
   return {
     type: UPDATE_ENTITY_FORM,
     data,
+    formId,
   };
 }
 
