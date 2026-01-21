@@ -5,8 +5,8 @@ import {
   selectIndicatorsWhereQuery,
   selectWithoutQuery,
   selectActionQuery,
-  selectSortByQuery,
-  selectSortOrderQuery,
+  // selectSortByQuery,
+  // selectSortOrderQuery,
   selectConnectedCategoryQuery,
   selectActions,
   selectActorsWithPositions,
@@ -16,6 +16,7 @@ import {
   selectCategories,
   selectActors,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectUsers,
 } from 'containers/App/selectors';
 
@@ -23,18 +24,17 @@ import {
   filterEntitiesByConnection,
   filterEntitiesWithoutAssociation,
   entitiesSetCategoryIds,
+  getIndicatorSupportLevels,
 } from 'utils/entities';
 
 import asList from 'utils/as-list';
 import qe from 'utils/quasi-equals';
-import { sortEntities, getSortOption } from 'utils/sort';
+// import { sortEntities, getSortOption } from 'utils/sort';
 import {
   API,
   ACTORTYPES,
-  ACTION_INDICATOR_SUPPORTLEVELS,
-  OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
-import { CONFIG, DEPENDENCIES } from './constants';
+import { DEPENDENCIES } from './constants';
 
 export const selectConnections = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
@@ -44,6 +44,7 @@ export const selectConnections = createSelector(
   selectActors,
   selectConnectedCategoryQuery,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectUsers,
   (
     ready,
@@ -53,6 +54,7 @@ export const selectConnections = createSelector(
     actors,
     connectedCategoryQuery,
     includeInofficial,
+    includeUnpublishedAPI,
     users,
   ) => {
     if (ready) {
@@ -65,11 +67,14 @@ export const selectConnections = createSelector(
         API.ACTIONS,
         actionsWithCategories.filter(
           (action) => {
-            const actionCategories = action.get('categories');
             let pass = true;
             if (!includeInofficial) {
-              pass = actionCategories && actionCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+              pass = pass && action.getIn(['attributes', 'is_official']);
             }
+            if (!includeUnpublishedAPI) {
+              pass = pass && action.getIn(['attributes', 'public_api']);
+            }
+            const actionCategories = action.get('categories');
             if (pass && connectedCategoryQuery) {
               pass = asList(connectedCategoryQuery).every(
                 (queryArg) => {
@@ -116,7 +121,7 @@ export const selectIndicatorsWithConnections = createSelector(
   (
     ready,
     indicators,
-    countries,
+    countriesWithPositions,
     connections,
     indicatorAssociationsGrouped,
   ) => {
@@ -127,41 +132,10 @@ export const selectIndicatorsWithConnections = createSelector(
           const indicatorActions = indicatorAssociationsGrouped.get(parseInt(indicator.get('id'), 10));
           // console.log('indicatorActions', entity.toJS(), indicatorActions && indicatorActions.toJS());
           // currently requires both for filtering & display
-          const support = countries.reduce(
-            (levelsMemo, country) => {
-              const countrySupport = country
-                && country.getIn(['indicatorPositions', indicator.get('id')]);
-              if (countrySupport && countrySupport.size > 0) {
-                const latest = countrySupport.first();
-                const level = latest.get('supportlevel_id')
-                  ? latest.get('supportlevel_id').toString()
-                  : '0';
-                if (levelsMemo.get(level)) {
-                  const actorIds = levelsMemo.getIn([level, 'actors'])
-                    ? levelsMemo.getIn([level, 'actors']).set(country.get('id'), parseInt(country.get('id'), 10))
-                    : Map().set(country.get('id'), parseInt(country.get('id'), 10));
-                  let actorIdsViaGroups = null;
-                  if (latest.get('viaGroups') && latest.get('viaGroups').size > 0) {
-                    actorIdsViaGroups = levelsMemo.getIn([level, 'actorsViaGroups'])
-                      ? levelsMemo.getIn([level, 'actorsViaGroups']).set(country.get('id'), parseInt(country.get('id'), 10))
-                      : Map().set(country.get('id'), parseInt(country.get('id'), 10));
-                  }
-                  return levelsMemo.setIn(
-                    [level, 'count'], actorIds ? actorIds.size : 0,
-                  ).setIn(
-                    [level, 'countViaGroups'], actorIdsViaGroups ? actorIdsViaGroups.size : 0,
-                  ).setIn(
-                    [level, 'actors'], actorIds,
-                  ).setIn(
-                    [level, 'actorsViaGroups'], actorIdsViaGroups,
-                  );
-                }
-                return levelsMemo;
-              }
-              return levelsMemo;
-            },
-            Map(ACTION_INDICATOR_SUPPORTLEVELS),
-          );
+          const support = getIndicatorSupportLevels({
+            indicator,
+            countriesWithPositions,
+          });
           return indicator.set(
             'actions',
             indicatorActions

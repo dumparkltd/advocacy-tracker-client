@@ -40,8 +40,9 @@ const TagButton = styled((p) => <Button {...p} />)`
   }
   &:hover {
     border: 1px solid ${({ selected, disabled }) => {
-      if (disabled) return selected ? palette('primary', 1) : palette('light', 4);
-      return selected ? palette('primary', 0) : palette('dark', 3)}};
+    if (disabled) return selected ? palette('primary', 1) : palette('light', 4);
+    return selected ? palette('primary', 0) : palette('dark', 3);
+  }};
   }
 `;
 const ResetSupportTagsButton = styled((p) => <Button {...p} />)`
@@ -92,14 +93,20 @@ const ComponentOptions = ({
           style={{ position: 'relative' }}
         >
           {supportLevels && supportLevels.map(
-            ({ value, active, disabled, color, label }) => (
+            ({
+              value,
+              active,
+              disabled,
+              color,
+              label,
+            }) => (
               <TagButton
                 key={value}
                 selected={active}
                 disabled={disabled && !active}
                 onClick={() => (disabled && !active) || onUpdateQuery([{
                   arg: 'support',
-                  value: value,
+                  value,
                   add: !active ? value : false,
                   remove: active ? value : false,
                   replace: false,
@@ -110,7 +117,7 @@ const ComponentOptions = ({
                   <Dot size="18px" color={color} />
                   <Text
                     size={isMinSize(size, 'medium') ? 'xsmall' : 'xxsmall'}
-                    style={{ opacity: (disabled && !active) ? 0.66 : 1}}
+                    style={{ opacity: (disabled && !active) ? 0.66 : 1 }}
                   >
                     {label}
                   </Text>
@@ -144,6 +151,7 @@ const ComponentOptions = ({
             flex={{ grow: 0 }}
             fill={false}
             alignSelf="start"
+            wrap
           >
             {options.map((option) => (
               <CheckboxOption

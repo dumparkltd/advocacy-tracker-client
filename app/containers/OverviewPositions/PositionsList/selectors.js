@@ -5,7 +5,6 @@ import {
   ACTORTYPES,
   ACTIONTYPES,
   API,
-  OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
 import {
   selectReady,
@@ -15,9 +14,8 @@ import {
   selectActorActionsGroupedByActor,
   selectMembershipsGroupedByParent,
   selectMembershipsGroupedByMember,
-  selectActionCategoriesGroupedByAction,
-  selectCategories,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectAssociationTypeQuery,
   selectLocationQuery,
   selectActorConnections,
@@ -29,7 +27,6 @@ import { getValueFromPositions } from 'containers/EntityListTable/utils';
 import qe from 'utils/quasi-equals';
 import asList from 'utils/as-list';
 import {
-  getEntityCategories,
   filterEntitiesByConnection,
   actionsByType,
   actorsByType,
@@ -42,35 +39,37 @@ export const selectConnections = createSelector(
   selectActions,
   selectActors,
   selectUsers,
-  selectActionCategoriesGroupedByAction,
-  selectCategories,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   (
     ready,
     actions,
     actors,
     users,
-    actionAssociationsGrouped,
-    categories,
     includeInofficial,
+    includeUnpublishedAPI,
   ) => {
     if (ready) {
       const result = new Map()
         .set(
           API.ACTIONS,
-          includeInofficial ? actions : actions.filter(
-            (entity) => {
-              if (qe(entity.getIn(['attributes', 'measuretype_id']), ACTIONTYPES.EXPRESS)) {
-                const entityCategories = getEntityCategories(
-                  parseInt(entity.get('id'), 10),
-                  actionAssociationsGrouped,
-                  categories,
-                );
-                return entityCategories && entityCategories.toList().includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+          (!includeInofficial || !includeUnpublishedAPI)
+            ? actions.filter(
+              (action) => {
+                if (qe(action.getIn(['attributes', 'measuretype_id']), ACTIONTYPES.EXPRESS)) {
+                  let pass = true;
+                  if (!includeInofficial) {
+                    pass = pass && action.getIn(['attributes', 'is_official']);
+                  }
+                  if (!includeUnpublishedAPI) {
+                    pass = pass && action.getIn(['attributes', 'public_api']);
+                  }
+                  return pass;
+                }
+                return true;
               }
-              return true;
-            }
-          )
+            )
+            : actions,
         )
         .set(API.ACTORS, actors)
         .set(API.USERS, users);
@@ -134,7 +133,7 @@ const selectCountriesByTopicPosition = createSelector(
   selectCountriesByGroup,
   selectLocationQuery,
   (countries, locationQuery) => {
-    if (locationQuery.get('indicators')) {
+    if (countries && locationQuery.get('indicators')) {
       const locationQueryValue = locationQuery.get('indicators');
       // console.log('locationQueryValue', locationQueryValue)
       return countries.map((country) => {
@@ -224,7 +223,7 @@ export const selectHasFilters = createSelector(
   selectLocationQuery,
   (state) => selectAssociationTypeQuery(state, { typeId: ACTORTYPES.REG }),
   (state) => selectAssociationTypeQuery(state, { typeId: ACTORTYPES.GROUP }),
-  (locationQuery, regionQuery, groupQuery) => locationQuery.get('indicators')
-    || regionQuery
-    || groupQuery
+  (locationQuery, regionQuery, groupQuery) => !!locationQuery.get('indicators')
+    || !!regionQuery
+    || !!groupQuery
 );

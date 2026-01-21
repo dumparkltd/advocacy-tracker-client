@@ -12,8 +12,10 @@ import FieldLabelWrap from './FieldLabelWrap';
 
 const CheckboxLabel = styled(FieldLabel)`
   font-size: ${({ theme }) => theme.text.medium.size};
-  color: black;
   font-weight: 500;
+  color: black;
+  opacity: ${(props) => props.disabled ? 0.4 : 1};
+  cursor: ${(props) => props.disabled ? 'not-allowed' : 'pointer'};
 `;
 
 export function FormFieldCheckbox({
@@ -23,20 +25,27 @@ export function FormFieldCheckbox({
   withoutTitle,
   intl,
 }) {
-  // console.log(field)
-  // console.log(formField)
   const attributeTitle = field.att && appMessages.attributes[field.att]
     ? intl.formatMessage(appMessages.attributes[field.att])
     : field.label;
 
-  let content;
+  let content = '';
   if (field.info && appMessages.attributeInfo[field.att]) {
     content = intl.formatMessage(appMessages.attributeInfo[field.att]);
   }
-  if (typeof fieldValue !== 'undefined' && appMessages.attributeInfo[`${field.att}_${fieldValue}`]) {
+  if (field.disabled && field.disabledMessages && field.disabledMessages.length > 0) {
+    content = `${content} \n\n **Field disabled**`;
+    if (field.disabledMessages.length === 1) {
+      content = `${content}: _${field.disabledMessages[0]}_`;
+    } else {
+      content = field.disabledMessages.reduce(
+        (memo, msg) => `${memo} \n\n * _${msg}_`,
+        content,
+      );
+    }
+  } else if (typeof fieldValue !== 'undefined' && appMessages.attributeInfo[`${field.att}_${fieldValue}`]) {
     content = `${content} \n\n ${intl.formatMessage(appMessages.attributeInfo[`${field.att}_${fieldValue}`])}`;
   }
-  // console.log(field, fieldValue)
   return (
     <Box>
       {!withoutTitle && (
@@ -52,7 +61,7 @@ export function FormFieldCheckbox({
         align="center"
       >
         {field.label && (
-          <CheckboxLabel>
+          <CheckboxLabel disabled={!!field.disabled}>
             <Box direction="row" align="center">
               <Box>{formField}</Box>
               <Box>{field.label}</Box>

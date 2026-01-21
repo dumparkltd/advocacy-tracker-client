@@ -2,8 +2,8 @@ import { createSelector } from 'reselect';
 import { Map } from 'immutable';
 import {
   API,
+  ACTORTYPES,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
-  OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
 
 import {
@@ -23,11 +23,14 @@ import {
   selectUserActionsGroupedByAction,
   selectActorsWithPositions,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
+  selectIndicators,
 } from 'containers/App/selectors';
 
 import {
   entitySetUser,
   setActionConnections,
+  getIndicatorSupportLevels,
 } from 'utils/entities';
 import qe from 'utils/quasi-equals';
 
@@ -36,7 +39,16 @@ import { DEPENDENCIES } from './constants';
 export const selectViewEntity = createSelector(
   (state, id) => selectEntity(state, { path: API.INDICATORS, id }),
   (state) => selectEntities(state, API.USERS),
-  (entity, users) => entitySetUser(entity, users)
+  (state) => selectIndicators(state),
+  (entity, users, indicators) => entity && users && indicators && entitySetUser(
+    entity,
+    users,
+  ).set(
+    'parent',
+    indicators && indicators.find(
+      (indicator) => qe(entity.getIn(['attributes', 'parent_id']), indicator.get('id'))
+    ),
+  )
 );
 
 const selectActionAssociations = createSelector(
@@ -77,6 +89,7 @@ export const selectActionsByType = createSelector(
   selectUserActionsGroupedByAction,
   selectCategories,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   (
     ready,
     viewEntity,
@@ -91,6 +104,7 @@ export const selectActionsByType = createSelector(
     userActions,
     categories,
     includeInofficial,
+    includeUnpublishedAPI,
   ) => {
     if (!ready) return Map();
     let actionsWithConnections = actions && actions
@@ -99,11 +113,14 @@ export const selectActionsByType = createSelector(
           if (!action) {
             return false;
           }
-          if (includeInofficial) {
-            return true;
+          let pass = true;
+          if (!includeInofficial) {
+            pass = pass && action.getIn(['attributes', 'is_official']);
           }
-          const acs = actionCategories.get(parseInt(action.get('id'), 10));
-          return acs && acs.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+          if (!includeUnpublishedAPI) {
+            pass = pass && action.getIn(['attributes', 'public_api']);
+          }
+          return pass;
         }
       )
       .map((action) => setActionConnections({
@@ -164,5 +181,31 @@ export const selectActorsByType = createSelector(
       .sortBy(
         (val, key) => key
       );
+  }
+);
+
+export const selectChildIndicators = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  (state, id) => id,
+  selectIndicators,
+  (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
+  (
+    ready,
+    viewEntityId,
+    indicators,
+    countriesWithPositions,
+  ) => {
+    if (!ready) return null;
+    return indicators.filter(
+      (indicator) => qe(viewEntityId, indicator.getIn(['attributes', 'parent_id']))
+    ).map(
+      (indicator) => {
+        const support = getIndicatorSupportLevels({
+          indicator,
+          countriesWithPositions,
+        });
+        return indicator.set('supportlevels', support);
+      }
+    );
   }
 );

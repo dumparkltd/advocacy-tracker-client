@@ -46,7 +46,6 @@ export function CellBodyPositionsCompactSingle({
   const { id, path, href } = mainEntity;
   const size = React.useContext(ResponsiveContext);
   const isSmall = !isMinSize(size, 'medium');
-
   return (
     <>
       <LinkTooltip
@@ -115,7 +114,12 @@ export function CellBodyPositionsCompactSingle({
               <Box direction="row" gap="xsmall" align="center">
                 <Dot color={position.color} />
                 <Value>
-                  <FormattedMessage {...appMessages.supportlevels[position.supportlevelId]} />
+                  {position.isAggregate && appMessages.supportlevelsAggregate[position.supportlevelId] && (
+                    <FormattedMessage {...appMessages.supportlevelsAggregate[position.supportlevelId]} />
+                  )}
+                  {!position.isAggregate && (
+                    <FormattedMessage {...appMessages.supportlevels[position.supportlevelId]} />
+                  )}
                 </Value>
               </Box>
             </LabelValueWrap>

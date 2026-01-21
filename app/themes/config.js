@@ -132,7 +132,6 @@ export const RESOURCETYPES = {
   DOC: '3',
 };
 
-export const OFFICIAL_STATEMENT_CATEGORY_ID = 55;
 export const GENERAL_POS_TAXONOMY = 1;
 export const SECTOR_TAXONOMY = 2;
 export const ROLES_TAXONOMY = 3;
@@ -151,6 +150,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     default: true,
     color: '#d8d9d9',
     order: 100,
+    aggregate: false,
   },
   // strong
   1: {
@@ -159,6 +159,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#02A650', // green-pink
     // color: '#029481', // teal-brown
     order: 1,
+    aggregate: true,
   },
   // quite positive
   2: {
@@ -167,6 +168,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#81DD90', // green-pink
     // color: '#80CDC1', // teal-brown
     order: 2,
+    aggregate: true,
   },
   // on the fence
   3: {
@@ -175,6 +177,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#EBB2D3', // green-pink
     // color: '#E2CDAD', // teal-brown
     order: 3,
+    aggregate: true,
   },
   // rather sceptical
   4: {
@@ -183,6 +186,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#D966A8', // green-pink
     // color: '#B88034', // teal-brown
     order: 4,
+    aggregate: false,
   },
   // opponent
   5: {
@@ -191,6 +195,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     // color: '#BF0071', // green-pink
     // color: '#67402E', // teal-brown
     order: 5,
+    aggregate: false,
   },
   // proxy for no statement
   99: {
@@ -327,6 +332,16 @@ export const ACTION_FIELDS = {
       type: 'markdown',
       hideByDefault: true,
     },
+    source_api: {
+      optional: [ACTIONTYPES.EXPRESS],
+      type: 'text',
+      hideByDefault: true,
+    },
+    quote_api: {
+      optional: [ACTIONTYPES.EXPRESS],
+      type: 'markdown',
+      hideByDefault: true,
+    },
     url: {
       optional: Object.values(ACTIONTYPES),
       type: 'url',
@@ -355,8 +370,8 @@ export const ACTION_FIELDS = {
       // ui: 'dropdown',
       skipImport: true,
       // options: [
-      //   { value: true, message: 'ui.publishStatuses.draft' },
-      //   { value: false, message: 'ui.publishStatuses.public' },
+      //   { value: true, message: 'ui.draftStatuses.draft' },
+      //   { value: false, message: 'ui.draftStatuses.public' },
       // ],
     },
     private: {
@@ -365,6 +380,18 @@ export const ACTION_FIELDS = {
       type: 'bool',
     },
     is_archive: {
+      defaultValue: false,
+      controlType: 'checkbox',
+      type: 'bool',
+    },
+    public_api: {
+      optional: [ACTIONTYPES.EXPRESS],
+      defaultValue: false,
+      controlType: 'checkbox',
+      type: 'bool',
+    },
+    is_official: {
+      optional: [ACTIONTYPES.EXPRESS],
       defaultValue: false,
       controlType: 'checkbox',
       type: 'bool',
@@ -691,8 +718,8 @@ export const ACTOR_FIELDS = {
       skipImport: true,
       // ui: 'dropdown',
       // options: [
-      //   { value: true, message: 'ui.publishStatuses.draft' },
-      //   { value: false, message: 'ui.publishStatuses.public' },
+      //   { value: true, message: 'ui.draftStatuses.draft' },
+      //   { value: false, message: 'ui.draftStatuses.public' },
       // ],
     },
     private: {
@@ -703,6 +730,12 @@ export const ACTOR_FIELDS = {
     is_archive: {
       defaultValue: false,
       required: true,
+      type: 'bool',
+    },
+    public_api: {
+      optional: [ACTORTYPES.COUNTRY],
+      defaultValue: false,
+      controlType: 'checkbox',
       type: 'bool',
     },
     created_at: {
@@ -762,6 +795,19 @@ export const ACTOR_FIELDS = {
       table: API.MEMBERSHIPS,
       keyPair: ['member_id', 'memberof_id'], // own, other
       hint: 'one or more unique country codes (as assigned by the users/comma-separated) actors are member of',
+    },
+    // belongs to group
+    'group-code': {
+      type: 'text',
+      optional: [ACTORTYPES.COUNTRY],
+      multiple: true,
+      lookup: {
+        table: API.ACTORS,
+        attribute: 'code',
+      },
+      table: API.MEMBERSHIPS,
+      keyPair: ['member_id', 'memberof_id'], // own, other
+      hint: 'one or more unique group codes (as assigned by the users / comma-separated) for groups the country belongs to',
     },
     // belongs to event
     'event-code': {
@@ -843,8 +889,8 @@ export const RESOURCE_FIELDS = {
       skipImport: true,
       // ui: 'dropdown',
       // options: [
-      //   { value: true, message: 'ui.publishStatuses.draft' },
-      //   { value: false, message: 'ui.publishStatuses.public' },
+      //   { value: true, message: 'ui.draftStatuses.draft' },
+      //   { value: false, message: 'ui.draftStatuses.public' },
       // ],
     },
     private: {
@@ -892,12 +938,19 @@ export const INDICATOR_FIELDS = {
       optional: true,
       adminOnly: true,
     },
+    code_api: {
+      type: 'text',
+      optional: true,
+    },
     title: {
       required: true,
       type: 'text',
     },
     description: {
       type: 'markdown',
+    },
+    parent_id: {
+      type: 'number',
     },
     draft: {
       defaultValue: true,
@@ -914,6 +967,12 @@ export const INDICATOR_FIELDS = {
       defaultValue: false,
       required: true,
       type: 'bool',
+    },
+    public_api: {
+      defaultValue: false,
+      controlType: 'checkbox',
+      type: 'bool',
+      skipImport: true,
     },
     created_at: {
       skipImport: true,
@@ -1164,9 +1223,23 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-          { attribute: 'private', needsAdminOrOwn: true },
-          { attribute: 'draft', needsAdminOrOwn: true },
+          {
+            attribute: 'public_api',
+            activeForAdminOrCoordinator: true,
+            activeIf: {
+              is_archive: false,
+              private: false,
+              draft: false,
+            },
+          },
+          {
+            attribute: 'is_archive',
+            needsAdmin: true,
+            skipNew: true,
+            activeIf: { public_api: false },
+          },
+          { attribute: 'private', needsAdminOrOwn: true, activeIf: { public_api: false } },
+          { attribute: 'draft', needsAdminOrOwn: true, activeIf: { public_api: false } },
         ],
       },
       {
@@ -1613,6 +1686,7 @@ export const ACTORTYPES_CONFIG = {
                 {
                   attribute: 'title',
                   label: 'name',
+                  placeholder: 'name',
                   required: true,
                   basis: '2/3',
                 },
@@ -2152,6 +2226,14 @@ export const ACTIONTYPES_CONFIG = {
     order: 1,
     columns: [
       {
+        id: 'official',
+        type: 'status',
+        sortOrder: 'asc',
+        sortDefault: true,
+        attribute: 'is_official',
+        minSize: 'medium', // default
+      },
+      {
         id: 'date',
         type: 'date',
         sort: 'date',
@@ -2168,15 +2250,9 @@ export const ACTIONTYPES_CONFIG = {
         minSize: 'ms',
       },
       {
-        id: 'taxonomy-13',
-        type: 'taxonomy',
-        taxonomy_id: AUTHORITY_TAXONOMY, // level of authority
-        minSize: 'medium',
-      },
-      {
         id: 'taxonomy-7',
         type: 'taxonomy',
-        taxonomy_id: EXPRESSFORM_TAXONOMY, // level of authority
+        taxonomy_id: EXPRESSFORM_TAXONOMY, // Form of expression
         minSize: 'medium',
         showOnSingle: false,
       },
@@ -2234,9 +2310,28 @@ export const ACTIONTYPES_CONFIG = {
       {
         id: 'footer',
         fields: [
-          { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-          { attribute: 'private', needsAdminOrOwn: true },
-          { attribute: 'draft', needsAdminOrOwn: true },
+          {
+            attribute: 'public_api',
+            activeForAdminOrCoordinator: true,
+            activeIf: {
+              is_archive: false,
+              private: false,
+              draft: false,
+              is_official: true,
+            },
+          },
+          {
+            attribute: 'is_official',
+            activeIf: { public_api: false },
+          },
+          {
+            attribute: 'is_archive',
+            needsAdmin: true,
+            skipNew: true,
+            activeIf: { public_api: false },
+          },
+          { attribute: 'private', needsAdminOrOwn: true, activeIf: { public_api: false } },
+          { attribute: 'draft', needsAdminOrOwn: true, activeIf: { public_api: false } },
         ],
       },
       {
@@ -2280,7 +2375,7 @@ export const ACTIONTYPES_CONFIG = {
             rows: [
               [
                 { taxonomy: 7, basis: '1/2' }, // form
-                { taxonomy: 13, basis: '1/2' }, // authority
+                { taxonomy: 13, basis: '1/2' }, // assessment
               ],
               [
                 { taxonomy: 8, basis: '1/2' }, // tags
@@ -2308,7 +2403,14 @@ export const ACTIONTYPES_CONFIG = {
                 basis: '2/3',
               }],
               [{
+                attribute: 'source_api',
+                basis: '2/3',
+              }],
+              [{
                 attribute: 'description',
+              }],
+              [{
+                attribute: 'quote_api',
               }],
               [{
                 attribute: 'comment',
@@ -3807,9 +3909,23 @@ export const INDICATOR_CONFIG = {
     {
       id: 'footer',
       fields: [
-        { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-        { attribute: 'private', needsAdminOrOwn: true },
-        { attribute: 'draft', needsAdminOrOwn: true },
+        {
+          attribute: 'public_api',
+          activeForAdminOrCoordinator: true,
+          activeIf: {
+            is_archive: false,
+            private: false,
+            draft: false,
+          },
+        },
+        {
+          attribute: 'is_archive',
+          needsAdmin: true,
+          skipNew: true,
+          activeIf: { public_api: false },
+        },
+        { attribute: 'private', needsAdminOrOwn: true, activeIf: { public_api: false } },
+        { attribute: 'draft', needsAdminOrOwn: true, activeIf: { public_api: false } },
       ],
     },
     {
@@ -3822,6 +3938,11 @@ export const INDICATOR_CONFIG = {
             [
               {
                 attribute: 'code',
+                needsAdmin: true,
+                basis: '1/3',
+              },
+              {
+                attribute: 'code_api',
                 needsAdmin: true,
                 basis: '1/3',
               },
@@ -3838,6 +3959,12 @@ export const INDICATOR_CONFIG = {
                 placeholder: 'order',
               },
             ],
+            [{
+              connection: API.INDICATORS,
+              asParents: true,
+              basis: '1/2',
+              multiple: false,
+            }],
             [{
               attribute: 'description',
             }],
@@ -4278,8 +4405,8 @@ export const EMAIL_STATUSES = [
 export const ATTRIBUTE_STATUSES = {
   // Entity publish statuses
   draft: [
-    { value: true, message: 'ui.publishStatuses.draft' },
-    { value: false, message: 'ui.publishStatuses.public' },
+    { value: true, message: 'ui.draftStatuses.draft' },
+    { value: false, message: 'ui.draftStatuses.final' },
   ],
   private: [
     { value: true, message: 'ui.privacyStatuses.private' },
@@ -4292,6 +4419,14 @@ export const ATTRIBUTE_STATUSES = {
   is_archive: [
     { value: true, message: 'ui.archiveStatuses.archived' },
     { value: false, message: 'ui.archiveStatuses.current' },
+  ],
+  public_api: [
+    { value: true, message: 'ui.publicAPIstatuses.publicAPI' },
+    { value: false, message: 'ui.publicAPIstatuses.privateAPI' },
+  ],
+  is_official: [
+    { value: true, message: 'ui.officialStatuses.official' },
+    { value: false, message: 'ui.officialStatuses.inofficial' },
   ],
 };
 
@@ -4409,4 +4544,8 @@ export const FORM_NON_CONTROL_PROPS = [
   'basis',
   'isBlocked',
   'info',
+  'activeIf',
+  'activeForAdmin',
+  'activeForAdminOrCoordinator',
+  'disabledMessages',
 ];

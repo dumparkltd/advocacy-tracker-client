@@ -59,35 +59,43 @@ export const entityOptions = ({
   )
   : List();
 
-export const userOption = (entity, activeUserId) => Map({
-  value: entity.get('id'),
-  label: entity.getIn(['attributes', 'name']),
-  checked: activeUserId ? entity.get('id') === activeUserId.toString() : false,
-});
+// export const userOption = (entity, activeUserId) => Map({
+//   value: entity.get('id'),
+//   label: entity.getIn(['attributes', 'name']),
+//   checked: activeUserId ? entity.get('id') === activeUserId.toString() : false,
+// });
+//
+// export const getUserOptions = (entities, activeUserId) => entities
+//   ? entities.reduce((options, entity) => options.push(userOption(entity, activeUserId)), List())
+//   : List();
 
-export const getUserOptions = (entities, activeUserId) => entities
-  ? entities.reduce((options, entity) => options.push(userOption(entity, activeUserId)), List())
-  : List();
-
-export const parentCategoryOption = (entity, activeParentId) => Map({
+// export const parentCategoryOption = (entity, activeParentId) => Map({
+//   value: entity.get('id'),
+//   label: entity.getIn(['attributes', 'title']),
+//   checked: activeParentId ? entity.get('id') === activeParentId.toString() : false,
+// });
+// export const parentCategoryOptions = (entities, activeParentId) => entities
+//   ? entities.reduce((options, entity) => options.push(parentCategoryOption(entity, activeParentId)), List())
+//   : List();
+export const parentIndicatorOption = (entity, activeParentId) => Map({
   value: entity.get('id'),
   label: entity.getIn(['attributes', 'title']),
   checked: activeParentId ? entity.get('id') === activeParentId.toString() : false,
 });
-export const parentCategoryOptions = (entities, activeParentId) => entities
-  ? entities.reduce((options, entity) => options.push(parentCategoryOption(entity, activeParentId)), List())
+export const parentIndicatorOptions = (entities, activeParentId) => entities
+  ? entities.reduce((options, entity) => options.push(parentIndicatorOption(entity, activeParentId)), List())
   : List();
 
-export const parentActionOption = (entity, activeParentId) => Map({
-  value: entity.get('id'),
-  label: getEntityTitle(entity),
-  draft: entity.getIn(['attributes', 'draft']),
-  checked: activeParentId ? entity.get('id') === activeParentId.toString() : false,
-});
-
-export const parentActionOptions = (entities, activeParentId) => entities
-  ? entities.reduce((options, entity) => options.push(parentActionOption(entity, activeParentId)), List())
-  : List();
+// export const parentActionOption = (entity, activeParentId) => Map({
+//   value: entity.get('id'),
+//   label: getEntityTitle(entity),
+//   draft: entity.getIn(['attributes', 'draft']),
+//   checked: activeParentId ? entity.get('id') === activeParentId.toString() : false,
+// });
+//
+// export const parentActionOptions = (entities, activeParentId) => entities
+//   ? entities.reduce((options, entity) => options.push(parentActionOption(entity, activeParentId)), List())
+//   : List();
 
 export const dateOption = (entity, activeDateId) => Map({
   value: entity.get('id'),
@@ -159,6 +167,7 @@ export const renderIndicatorControl = ({
   connectionAttributes,
   showCode,
   hideByDefault,
+  multiple,
 }) => entities
   ? {
     id: 'indicators',
@@ -175,6 +184,7 @@ export const renderIndicatorControl = ({
     connections,
     connectionAttributes,
     hideByDefault,
+    multiple,
     // onCreate: onCreateOption
     //   ? () => onCreateOption({ path: API.INDICATORS })
     //   : null,
@@ -472,24 +482,24 @@ export const getSingleTaxonomyFormControl = ({
 });
 
 // taxonomies with categories "embedded"
-export const renderTaxonomyControl = ({
-  taxonomies,
-  onCreateOption,
-  intl,
-  hideByDefault,
-}) => taxonomies
-  ? taxonomies.toList().reduce(
-    (memo, taxonomy) => memo.concat(
-      getSingleTaxonomyFormControl(
-        taxonomy,
-        onCreateOption,
-        intl,
-        hideByDefault,
-      )
-    ),
-    [],
-  )
-  : [];
+// export const renderTaxonomyControl = ({
+//   taxonomies,
+//   onCreateOption,
+//   intl,
+//   hideByDefault,
+// }) => taxonomies
+//   ? taxonomies.toList().reduce(
+//     (memo, taxonomy) => memo.concat(
+//       getSingleTaxonomyFormControl(
+//         taxonomy,
+//         onCreateOption,
+//         intl,
+//         hideByDefault,
+//       )
+//     ),
+//     [],
+//   )
+//   : [];
 
 // export const renderUserControl = ({ entities, label, activeUserId }) => entities
 //   ? {
@@ -503,20 +513,34 @@ export const renderTaxonomyControl = ({
 //   }
 //   : null;
 
-export const renderParentCategoryControl = ({
+export const renderParentIndicatorControl = ({
   entities, label, activeParentId, hideByDefault,
 }) => entities
   ? {
-    id: 'associatedCategory',
-    model: '.associatedCategory',
-    dataPath: ['associatedCategory'],
+    id: 'associatedIndicator',
+    model: '.associatedIndicator',
+    dataPath: ['associatedIndicator'],
     label,
     controlType: 'multiselect',
     multiple: false,
-    options: parentCategoryOptions(entities, activeParentId),
+    options: parentIndicatorOptions(entities, activeParentId),
     hideByDefault,
   }
   : null;
+// export const renderParentCategoryControl = ({
+//   entities, label, activeParentId, hideByDefault,
+// }) => entities
+//   ? {
+//     id: 'associatedCategory',
+//     model: '.associatedCategory',
+//     dataPath: ['associatedCategory'],
+//     label,
+//     controlType: 'multiselect',
+//     multiple: false,
+//     options: parentCategoryOptions(entities, activeParentId),
+//     hideByDefault,
+//   }
+//   : null;
 // export const renderParentActionControl = ({ entities, label, activeParentId }) => entities
 //   ? {
 //     id: 'associatedParent',
@@ -745,6 +769,7 @@ export const getTitleFormField = ({
   attribute = 'title',
   required,
   label,
+  placeholder,
   hideByDefault,
 }) => getFormField({
   formatMessage,
@@ -752,6 +777,7 @@ export const getTitleFormField = ({
   attribute,
   required,
   label,
+  placeholder,
   hideByDefault,
 });
 
@@ -1109,6 +1135,7 @@ const getEntityFormField = (
     asChildren,
     fieldType,
     basis,
+    multiple,
   } = field;
   let result;
   if (attribute && !fieldConfig) {
@@ -1123,7 +1150,13 @@ const getEntityFormField = (
     // for attributes
     if (attribute === 'title') {
       result = getTitleFormField(fieldArgs);
-    } else if (attribute === 'code' || attribute === 'prefix' || attribute === 'reference') {
+    } else if (
+      attribute === 'code'
+      || attribute === 'prefix'
+      || attribute === 'reference'
+      || attribute === 'code_api'
+      || attribute === 'parent_id'
+    ) {
       result = getCodeFormField(fieldArgs);
     } else if (attribute === 'email') {
       result = getEmailFormField(fieldArgs);
@@ -1199,23 +1232,32 @@ const getEntityFormField = (
         });
       }
     }
-    if (typeId && connection === API.INDICATORS && indicatorOptions) {
-      result = renderIndicatorControl({
-        entities: indicatorOptions,
-        intl,
-        connections: entityIndicatorConnections || null,
-        connectionAttributes: [{
-          attribute: 'supportlevel_id',
-          type: 'select',
-          showCode: isAdmin,
-          options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId].map(
-            (level) => ({
-              label: intl.formatMessage(appMessages.supportlevels[level.value]),
-              ...level,
-            }),
-          ),
-        }],
-      });
+    if (connection === API.INDICATORS && indicatorOptions) {
+      if (typeId) {
+        result = renderIndicatorControl({
+          entities: indicatorOptions,
+          intl,
+          connections: entityIndicatorConnections || null,
+          connectionAttributes: [{
+            attribute: 'supportlevel_id',
+            type: 'select',
+            showCode: isAdmin,
+            options: ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[typeId].map(
+              (level) => ({
+                label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                ...level,
+              }),
+            ),
+          }],
+        });
+      } else {
+        result = renderIndicatorControl({
+          entities: indicatorOptions,
+          multiple,
+          selectAll: !!multiple,
+          intl,
+        });
+      }
     } else if (type && connection === API.RESOURCES && resourcesByResourcetype) {
       result = getResourcesFormControl({
         typeId: type,
@@ -1249,6 +1291,9 @@ const getEntityFormField = (
     hasrequired: !!required,
     autofill: !!prepopulate,
     hideByDefault,
+    activeIf: field.activeIf,
+    activeForAdmin: field.activeForAdmin,
+    activeForAdminOrCoordinator: field.activeForAdminOrCoordinator,
     basis, // relative width within row
   };
   return result;

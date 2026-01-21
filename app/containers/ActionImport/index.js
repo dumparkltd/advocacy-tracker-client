@@ -41,6 +41,7 @@ import {
   selectReadyForAuthCheck,
   selectActionConnections,
   selectCategories,
+  selectIsUserAdmin,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -82,7 +83,12 @@ export class ActionImport extends React.PureComponent { // eslint-disable-line r
 
   render() {
     const { intl } = this.context;
-    const { connections, categories, params } = this.props;
+    const {
+      connections,
+      categories,
+      params,
+      isAdmin,
+    } = this.props;
     const typeId = params.id;
     const typeLabel = typeId
       ? intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural)
@@ -92,7 +98,7 @@ export class ActionImport extends React.PureComponent { // eslint-disable-line r
       const val = ACTION_FIELDS.ATTRIBUTES[key];
       if (
         !val.skipImport
-        && checkActionAttribute(typeId, key)
+        && checkActionAttribute(typeId, key, isAdmin)
       ) {
         return [
           ...memo,
@@ -167,7 +173,7 @@ export class ActionImport extends React.PureComponent { // eslint-disable-line r
             fieldModel="import"
             formData={this.props.formData}
             handleSubmit={(formData) => {
-              this.props.handleSubmit(formData, connections, categories);
+              this.props.handleSubmit(formData, connections, categories, isAdmin);
             }}
             handleCancel={this.props.handleCancel}
             handleReset={this.props.handleReset}
@@ -203,6 +209,7 @@ ActionImport.propTypes = {
   params: PropTypes.object,
   connections: PropTypes.object,
   categories: PropTypes.object,
+  isAdmin: PropTypes.bool,
 };
 
 ActionImport.contextTypes = {
@@ -216,6 +223,7 @@ const mapStateToProps = (state) => ({
   success: selectSuccess(state),
   connections: selectActionConnections(state),
   categories: selectCategories(state),
+  isAdmin: selectIsUserAdmin(state),
   dataReady: selectReady(state, {
     path: [
       API.USER_ROLES,
@@ -239,7 +247,7 @@ function mapDispatchToProps(dispatch, { params }) {
     initialiseForm: (model, formData) => {
       dispatch(formActions.load(model, formData));
     },
-    handleSubmit: (formData, connections, categories) => {
+    handleSubmit: (formData, connections, categories, isAdmin) => {
       if (formData.get('import') !== null) {
         fromJS(formData.get('import').rows).forEach((row, index) => {
           let rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
@@ -249,7 +257,7 @@ function mapDispatchToProps(dispatch, { params }) {
           let rowClean = {
             attributes: rowCleanColumns
               // make sure only valid fields are imported
-              .filter((val, att) => checkActionAttribute(typeId, att))
+              .filter((val, att) => checkActionAttribute(typeId, att, isAdmin))
               // make sure we store well formatted date
               .map((val, att) => {
                 const config = ACTION_FIELDS.ATTRIBUTES[att];
@@ -329,12 +337,18 @@ function mapDispatchToProps(dispatch, { params }) {
                               (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
                             );
                             connectionId = category ? category.get('id') : 'INVALID';
+                            if (!category) {
+                              console.log('INVALID category', `id: "${id}"`, relConfig.lookup.attribute);
+                            }
                           } else if (connections) {
                             const connection = connections.get(relConfig.lookup.table)
                               && connections.get(relConfig.lookup.table).find(
                                 (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
                               );
                             connectionId = connection ? connection.get('id') : 'INVALID';
+                            if (!connection) {
+                              console.log('INVALID connection', `id: "${id}"`, relConfig.lookup.table, relConfig.lookup.attribute);
+                            }
                           }
                         }
                         // actionIndicators by code
