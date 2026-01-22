@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router';
 import { FormattedMessage } from 'react-intl';
 
 import { Form } from 'react-redux-form/immutable';
@@ -12,7 +13,7 @@ import { palette } from 'styled-theme';
 import { isMinSize } from 'utils/responsive';
 
 import { blockNavigation } from 'containers/App/actions';
-import { selectNewEntityModal } from 'containers/App/selectors';
+import { selectNewEntityModal, selectBlockNavigation } from 'containers/App/selectors';
 
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonCancel from 'components/buttons/ButtonCancel';
@@ -169,6 +170,16 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     this.saveOptionsButtonRef = React.createRef();
   }
 
+  componentDidMount() {
+    // Add React Router navigation guard
+    const { router, routes } = this.props;
+
+    if (router && routes && routes.length > 0) {
+      const currentRoute = routes[routes.length - 1];
+      this.unblock = router.setRouteLeaveHook(currentRoute, this.handleRouteLeave);
+    }
+  }
+
   // dont update when saving
   shouldComponentUpdate(nextProps) {
     if (this.props.saving || nextProps.saving) {
@@ -179,10 +190,11 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
 
   UNSAFE_componentWillReceiveProps(nextProps) {
     const { hasFormChanges } = nextProps;
-    if (hasFormChanges) this.props.onBlockNavigation(true);
     if (hasFormChanges && !this.props.hasFormChanges) {
+      this.props.onBlockNavigation(true);
       window.addEventListener('beforeunload', this.handleBeforeUnload);
     } else if (!hasFormChanges && this.props.hasFormChanges) {
+      this.props.onBlockNavigation(false);
       window.removeEventListener('beforeunload', this.handleBeforeUnload);
     }
   }
@@ -190,6 +202,10 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
   componentWillUnmount() {
     this.props.onBlockNavigation(false);
     window.removeEventListener('beforeunload', this.handleBeforeUnload);
+    // Clean up router hook
+    if (this.unblock) {
+      this.unblock();
+    }
   }
 
   handleBeforeUnload = (e) => {
@@ -197,6 +213,25 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       e.preventDefault();
       e.returnValue = ''; // Modern browsers require this to show the confirmation dialog
     }
+  };
+
+  handleRouteLeave = () => {
+    if (!this.props.navBlocked) {
+      // Not blocked - either no changes or saga already cleared it (e.g., after save)
+      return true;
+    }
+
+    // Blocked - ask user to confirm
+    const confirmLeave = window.confirm(
+      'You have unsaved changes. Are you sure you want to leave?'
+    );
+
+    if (confirmLeave) {
+      this.props.onBlockNavigation(false);
+      return true;
+    }
+
+    return false; // Block navigation
   };
 
   setDeleteConfirmed = (confirm = true) => {
@@ -587,6 +622,9 @@ EntityForm.propTypes = {
   scrollContainer: PropTypes.object,
   hasFormChanges: PropTypes.bool,
   typeLabel: PropTypes.string,
+  navBlocked: PropTypes.bool,
+  routes: PropTypes.array,
+  router: PropTypes.object,
 };
 EntityForm.defaultProps = {
   saving: false,
@@ -595,6 +633,7 @@ EntityForm.defaultProps = {
 
 const mapStateToProps = (state) => ({
   newEntityModal: selectNewEntityModal(state),
+  navBlocked: selectBlockNavigation(state),
 });
 
 export function mapDispatchToProps(dispatch) {
@@ -603,4 +642,4 @@ export function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(EntityForm);
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(EntityForm));

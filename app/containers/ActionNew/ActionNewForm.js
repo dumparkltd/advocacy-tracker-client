@@ -443,7 +443,6 @@ function mapDispatchToProps(
 ) {
   return {
     initialiseForm: (formData) => {
-      console.log(formDataPath, formData && formData.toJS())
       dispatch(formActions.reset(formDataPath));
       dispatch(formActions.change(formDataPath, formData, { silent: true }));
     },
