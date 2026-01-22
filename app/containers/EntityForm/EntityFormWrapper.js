@@ -16,7 +16,7 @@ import Loading from 'components/Loading';
 import EntityForm from 'containers/EntityForm';
 
 
-const HintP = styled.p`
+const HintP = styled.div`
   margin: 25px 0 15px;
   max-width: 800px;
 `;
@@ -118,7 +118,9 @@ export function EntityFormWrapper({
       {saveError && (
         <HintP>
           <Hint>
-            To not lose your changes, you can load the Advocacy Tracker in a new/separate tab/window, and:
+            <p>
+              To not lose your changes, you can load the Advocacy Tracker in a new/separate tab/window, and:
+            </p>
             <ul>
               <li>
                 Renew your login, if needed, and then come back here to proceed with saving your data.
