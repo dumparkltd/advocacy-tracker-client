@@ -107,7 +107,6 @@ import {
   selectLocation,
   selectSessionUserRoles,
   selectIsAuthenticating,
-  selectBlockNavigation,
 } from 'containers/App/selectors';
 
 import {
@@ -1288,18 +1287,6 @@ export function* dismissQueryMessagesSaga() {
 export function* updatePathSaga({ path = '', args }) {
   const relativePath = (path && path.startsWith('/')) ? path : `/${path}`;
   const location = yield select(selectLocation);
-  const navBlocked = yield select(selectBlockNavigation);
-  if (navBlocked) {
-    /* eslint-disable no-alert */
-    const confirmLeave = window.confirm(
-      'You have unsaved changes. Are you sure you want to leave?'
-    );
-
-    if (!confirmLeave) {
-      return; // Do not navigate
-    }
-    yield put(blockNavigation(false));
-  }
   let queryNext = {};
   let queryNextString = '';
   if (args) {
