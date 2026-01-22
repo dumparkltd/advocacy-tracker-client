@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { FormattedMessage } from 'react-intl';
+import { List } from 'immutable';
 
 import { Form } from 'react-redux-form/immutable';
 import styled from 'styled-components';
@@ -11,6 +12,7 @@ import { Box, ResponsiveContext } from 'grommet';
 import { palette } from 'styled-theme';
 
 import { isMinSize } from 'utils/responsive';
+import qe from 'utils/quasi-equals';
 
 import { blockNavigation } from 'containers/App/actions';
 import { selectNewEntityModal, selectBlockNavigation } from 'containers/App/selectors';
@@ -189,13 +191,37 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
-    const { hasFormChanges } = nextProps;
+    const { hasFormChanges, newEntityModal, formData } = nextProps;
     if (hasFormChanges && !this.props.hasFormChanges) {
       this.props.onBlockNavigation(true);
       window.addEventListener('beforeunload', this.handleBeforeUnload);
     } else if (!hasFormChanges && this.props.hasFormChanges) {
       this.props.onBlockNavigation(false);
       window.removeEventListener('beforeunload', this.handleBeforeUnload);
+    }
+    // if modal was just closed, figure out new entity
+    const modalJustClosed = this.props.newEntityModal && !newEntityModal;
+    if (modalJustClosed && nextProps.fieldsByStep && this.props.handleUpdate && formData) {
+      const fieldInfo = this.props.newEntityModal.get('fieldInfo');
+      if (fieldInfo) {
+        const fieldConfig = this.getFieldFromSteps(fieldInfo, nextProps.fieldsByStep);
+        if (fieldConfig && fieldConfig.options) {
+          const prevOptionIds = fieldInfo.get('optionIds');
+          if (prevOptionIds) {
+            const newEntityOption = fieldConfig.options.find(
+              (o) => !prevOptionIds.includes(o.get('value'))
+            );
+            if (newEntityOption) {
+              const formDataCurrent = formData.getIn(fieldConfig.dataPath) || List();
+              const formDataUpdated = formData.setIn(
+                fieldConfig.dataPath,
+                formDataCurrent.push(newEntityOption.set('checked', true)),
+              );
+              this.props.handleUpdate(formDataUpdated);
+            }
+          }
+        }
+      }
     }
   }
 
@@ -222,8 +248,9 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     }
 
     // Blocked - ask user to confirm
+    /* eslint-disable no-alert */
     const confirmLeave = window.confirm(
-      'You have unsaved changes. Are you sure you want to leave?'
+      'You have unsaved changes. Do you really want to leave and discard your changes?'
     );
 
     if (confirmLeave) {
@@ -256,6 +283,33 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
   }
 
   handleSubmit = (formData) => !this.props.saving && this.props.handleSubmit(formData);
+
+  getFieldFromSteps = (fieldInfo, fieldsByStep) => {
+    if (!fieldInfo || !fieldsByStep) return null;
+
+    const stepId = fieldInfo.get('stepId');
+    const sectionId = fieldInfo.get('sectionId');
+    const rowIndex = fieldInfo.get('rowIndex');
+    const fieldIndex = fieldInfo.get('fieldIndex');
+
+    if (!stepId || !sectionId || typeof rowIndex === 'undefined' || typeof fieldIndex === 'undefined') {
+      return null;
+    }
+
+    const step = fieldsByStep.find((s) => qe(s.id, stepId));
+    if (!step || !step.sections) return null;
+
+    const section = step.sections.find((s) => qe(s.id, sectionId));
+    if (!section || !section.rows) return null;
+
+    const row = section.rows[rowIndex];
+    if (!row || !row.fields) return null;
+
+    const field = row.fields[fieldIndex];
+    if (!field || !field.options) return null;
+
+    return field;
+  }
 
   render() {
     const {

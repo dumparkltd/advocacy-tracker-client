@@ -125,6 +125,12 @@ export function FormContentWrapper({
                                 {field.controlType && (
                                   <FormField
                                     step={step}
+                                    fieldInfo={{
+                                      stepId: step.id,
+                                      rowIndex: i,
+                                      fieldIndex: j,
+                                      sectionId: section.id,
+                                    }}
                                     field={field}
                                     fieldTracked={fieldTracked}
                                     formData={formData}
