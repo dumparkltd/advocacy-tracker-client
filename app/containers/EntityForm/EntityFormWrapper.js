@@ -17,8 +17,8 @@ import EntityForm from 'containers/EntityForm';
 
 
 const HintP = styled.p`
-  margin-top: 40px;
-  max-width: 666px;
+  margin: 25px 0 15px;
+  max-width: 800px;
 `;
 
 const Hint = styled((p) => <Text size="small" {...p} />)`
@@ -118,7 +118,15 @@ export function EntityFormWrapper({
       {saveError && (
         <HintP>
           <Hint>
-            To prevent losing your form data, it is recommended to load the Advocacy Tracker in a separate tab/window and renew your login. Once logged in, you should be able to proceed with saving your data
+            To not lose your changes, you can load the Advocacy Tracker in a new/separate tab/window, and:
+            <ul>
+              <li>
+                Renew your login, if needed, and then come back here to proceed with saving your data.
+              </li>
+              <li>
+                Load and review the latest version of this item from the server, if available, and re-enter your changes there.
+              </li>
+            </ul>
           </Hint>
         </HintP>
       )}
