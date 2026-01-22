@@ -231,6 +231,14 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       return true;
     }
 
+    // Restore URL after user cancels
+    setTimeout(() => {
+      const { router, location } = this.props;
+      if (router && location) {
+        router.replace(location);
+      }
+    }, 0);
+
     return false; // Block navigation
   };
 
@@ -625,6 +633,7 @@ EntityForm.propTypes = {
   navBlocked: PropTypes.bool,
   routes: PropTypes.array,
   router: PropTypes.object,
+  location: PropTypes.object,
 };
 EntityForm.defaultProps = {
   saving: false,
