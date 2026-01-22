@@ -1,7 +1,7 @@
 {
   "projects": {
-    "default": "advocacy-tracker-test",
-    "dev": "advocacy-tracker-test",
+    "default": "advocacy-tracker-dev",
+    "dev": "advocacy-tracker-dev",
     "test": "advocacy-tracker-test",
     "prod": "advocacy-tracker",
     "production": "advocacy-tracker",
