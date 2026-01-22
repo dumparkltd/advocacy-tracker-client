@@ -30,7 +30,7 @@ export const selectDomainPage = createSelector(
 );
 
 export const selectActionsByActiontype = createSelector(
-  selectActionsCategorised,
+  (state) => selectActionsCategorised(state), // do not pass type, we want all
   selectActiontypes,
   (actions, actiontypes) => {
     if (!actiontypes || !actions) return null;
