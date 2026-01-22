@@ -134,31 +134,6 @@ export const makeTagFilterGroups = (taxonomies, intl) => taxonomies
     })).valueSeq().toArray(),
   })).toArray();
 
-// export const renderActionControl = (
-//   entities,
-//   taxonomies,
-//   onCreateOption,
-//   intl,
-//   showCode,
-// ) => entities
-//   ? {
-//     id: 'actions',
-//     model: '.associatedActions',
-//     dataPath: ['associatedActions'],
-//     label: intl.formatMessage(appMessages.entities.actions.plural),
-//     controlType: 'multiselect',
-//     options: entityOptions({
-//       entities,
-//       showCode,
-//     }),
-//     advanced: true,
-//     selectAll: true,
-//     tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
-//     onCreate: onCreateOption
-//       ? () => onCreateOption({ path: API.ACTIONS })
-//       : null,
-//   }
-//   : null;
 export const renderIndicatorControl = ({
   entities,
   // onCreateOption,
@@ -208,9 +183,6 @@ export const renderUserMultiControl = ({
     advanced: true,
     selectAll: true,
     hideByDefault,
-    // onCreate: onCreateOption
-    //   ? () => onCreateOption({ path: API.INDICATORS })
-    //   : null,
   }
   : null;
 
@@ -224,28 +196,35 @@ export const getActorsFormControl = ({
   typeId,
   path = 'associatedActorsByActortype',
   fieldId,
-}) => ({
-  id: fieldId || `actors.${typeId}`,
-  typeId,
-  model: `.${path}.${typeId}`,
-  dataPath: [path, typeId],
-  label: intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural),
-  controlType: 'multiselect',
-  options: entityOptions({
+}) => {
+  const options = entityOptions({
     entities,
     showCode: isAdmin || qe(typeId, ACTORTYPES.COUNTRY),
-  }),
-  advanced: true,
-  selectAll: true,
-  tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
-  onCreate: onCreateOption
-    ? () => onCreateOption({
-      path: API.ACTORS,
-      attributes: { actortype_id: typeId },
-    })
-    : null,
-  hideByDefault,
-});
+  });
+  return {
+    id: fieldId || `actors.${typeId}`,
+    typeId,
+    model: `.${path}.${typeId}`,
+    dataPath: [path, typeId],
+    label: intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural),
+    controlType: 'multiselect',
+    options,
+    advanced: true,
+    selectAll: true,
+    tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
+    onCreate: onCreateOption
+      ? (fieldInfo) => onCreateOption({
+        path: API.ACTORS,
+        attributes: { actortype_id: typeId },
+        fieldInfo: {
+          ...fieldInfo,
+          optionIds: options.map((o) => o.get('value')),
+        },
+      })
+      : null,
+    hideByDefault,
+  };
+};
 
 // actors grouped by actortype
 export const renderActorsByActortypeControl = ({
@@ -349,26 +328,33 @@ export const getActionsFormControl = ({
   path = 'associatedActionsByActiontype',
   fieldId,
   connectionAttributesForType,
-}) => ({
-  id: fieldId || `actions.${typeId}`,
-  typeId,
-  model: `.${path}.${typeId}`,
-  dataPath: [path, typeId],
-  label: intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural),
-  controlType: 'multiselect',
-  options: entityOptions({ entities, showCode: isAdmin }),
-  advanced: true,
-  selectAll: true,
-  connectionAttributes: connectionAttributesForType && connectionAttributesForType(typeId),
-  tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
-  onCreate: onCreateOption
-    ? () => onCreateOption({
-      path: API.ACTIONS,
-      attributes: { measuretype_id: typeId },
-    })
-    : null,
-  hideByDefault,
-});
+}) => {
+  const options = entityOptions({ entities, showCode: isAdmin });
+  return {
+    id: fieldId || `actions.${typeId}`,
+    typeId,
+    model: `.${path}.${typeId}`,
+    dataPath: [path, typeId],
+    label: intl.formatMessage(appMessages.entities[`actions_${typeId}`].plural),
+    controlType: 'multiselect',
+    options,
+    advanced: true,
+    selectAll: true,
+    connectionAttributes: connectionAttributesForType && connectionAttributesForType(typeId),
+    tagFilterGroups: makeTagFilterGroups(taxonomies, intl),
+    onCreate: onCreateOption
+      ? (fieldInfo) => onCreateOption({
+        path: API.ACTIONS,
+        attributes: { measuretype_id: typeId },
+        fieldInfo: {
+          ...fieldInfo,
+          optionIds: options.map((o) => o.get('value')),
+        },
+      })
+      : null,
+    hideByDefault,
+  };
+};
 
 export const renderActionsByActiontypeControl = ({
   entitiesByActiontype,
@@ -412,23 +398,30 @@ export const getResourcesFormControl = ({
   typeId,
   path = 'associatedResourcesByResourcetype',
   fieldId,
-}) => ({
-  id: fieldId || `resources.${typeId}`,
-  model: `.${path}.${typeId}`,
-  dataPath: [path, typeId],
-  label: intl.formatMessage(appMessages.entities[`resources_${typeId}`].plural),
-  controlType: 'multiselect',
-  options: entityOptions({ entities, showCode: isAdmin }),
-  advanced: true,
-  selectAll: true,
-  onCreate: onCreateOption
-    ? () => onCreateOption({
-      path: API.RESOURCES,
-      attributes: { resourcetype_id: typeId },
-    })
-    : null,
-  hideByDefault,
-});
+}) => {
+  const options = entityOptions({ entities, showCode: isAdmin });
+  return {
+    id: fieldId || `resources.${typeId}`,
+    model: `.${path}.${typeId}`,
+    dataPath: [path, typeId],
+    label: intl.formatMessage(appMessages.entities[`resources_${typeId}`].plural),
+    controlType: 'multiselect',
+    options,
+    advanced: true,
+    selectAll: true,
+    onCreate: onCreateOption
+      ? (fieldInfo) => onCreateOption({
+        path: API.RESOURCES,
+        attributes: { resourcetype_id: typeId },
+        fieldInfo: {
+          ...fieldInfo,
+          optionIds: options.map((o) => o.get('value')),
+        },
+      })
+      : null,
+    hideByDefault,
+  };
+};
 
 // actors grouped by actortype
 export const renderResourcesByResourcetypeControl = ({
@@ -461,25 +454,32 @@ export const getSingleTaxonomyFormControl = ({
   onCreateOption,
   intl,
   hideByDefault,
-}) => ({
-  id: taxonomy.get('id'),
-  model: `.associatedTaxonomies.${taxonomy.get('id')}`,
-  dataPath: ['associatedTaxonomies', taxonomy.get('id')],
-  label: getTaxTitle(parseInt(taxonomy.get('id'), 10), intl),
-  controlType: 'multiselect',
-  multiple: taxonomy.getIn(['attributes', 'allow_multiple']),
-  options: entityOptions({
+}) => {
+  const options = entityOptions({
     entities: taxonomy.get('categories'),
     defaultToId: false,
-  }),
-  onCreate: onCreateOption
-    ? () => onCreateOption({
-      path: API.CATEGORIES,
-      attributes: { taxonomy_id: taxonomy.get('id') },
-    })
-    : null,
-  hideByDefault,
-});
+  });
+  return {
+    id: taxonomy.get('id'),
+    model: `.associatedTaxonomies.${taxonomy.get('id')}`,
+    dataPath: ['associatedTaxonomies', taxonomy.get('id')],
+    label: getTaxTitle(parseInt(taxonomy.get('id'), 10), intl),
+    controlType: 'multiselect',
+    multiple: taxonomy.getIn(['attributes', 'allow_multiple']),
+    options,
+    onCreate: onCreateOption
+      ? (fieldInfo) => onCreateOption({
+        path: API.CATEGORIES,
+        attributes: { taxonomy_id: taxonomy.get('id') },
+        fieldInfo: {
+          ...fieldInfo,
+          optionIds: options.map((o) => o.get('value')),
+        },
+      })
+      : null,
+    hideByDefault,
+  };
+};
 
 // taxonomies with categories "embedded"
 // export const renderTaxonomyControl = ({

@@ -47,6 +47,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
       step,
       isNewEntityView,
       isFooter,
+      fieldInfo,
     } = this.props;
     const isEmpty = (fieldTracked && fieldTracked.value) ? fieldTracked.value === '' : true;
     let isHidden = field.hideByDefault && this.state.hidden;
@@ -70,6 +71,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
               handleUpdate={handleUpdate}
               inline={inline}
               step={step}
+              fieldInfo={fieldInfo}
               fieldTracked={fieldTracked}
               isEmpty={isEmpty}
               isNewEntityView={isNewEntityView}
@@ -94,6 +96,7 @@ class FormField extends React.Component { // eslint-disable-line react/prefer-st
 
 FormField.propTypes = {
   step: PropTypes.object,
+  fieldInfo: PropTypes.object,
   formData: PropTypes.object,
   scrollContainer: PropTypes.object,
   field: PropTypes.object,

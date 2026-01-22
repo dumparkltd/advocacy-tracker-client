@@ -2454,11 +2454,12 @@ export const ACTIONTYPES_CONFIG = {
       }, // step
       {
         id: 'outreach',
-        title: 'Related Outreach',
-        titleSmall: 'Outreach',
+        title: 'Interactions & Resources',
+        titleSmall: 'More',
         sections: [
           {
             id: 'outreach',
+            title: 'Related Interactions',
             rows: [
               [{
                 connection: API.ACTIONS,
@@ -2466,23 +2467,11 @@ export const ACTIONTYPES_CONFIG = {
                 asParents: true,
                 prepopulateIfPrevious: true,
               }],
-              [{
-                connection: API.ACTIONS,
-                type: ACTIONTYPES.EVENT,
-                asParents: true,
-                prepopulateIfPrevious: true,
-              }],
             ],
           },
-        ],
-      }, // step
-      {
-        id: 'other',
-        title: 'Related Resources',
-        titleSmall: 'Resources',
-        sections: [
           {
             id: 'resources',
+            title: 'Related Resources',
             rows: [
               [{
                 connection: API.RESOURCES,

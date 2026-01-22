@@ -608,7 +608,7 @@ export function PositionsMap({
         </TitleAboveCard>
       </Box>
       {!dataReady && <Loading loading={!dataReady} />}
-      {dataReady && (
+      {dataReady && currentIndicator && (
         <Card>
           <Box direction={isMinSize(size, 'medium') ? 'row' : 'column'}>
             {isMinSize(size, 'medium') && (

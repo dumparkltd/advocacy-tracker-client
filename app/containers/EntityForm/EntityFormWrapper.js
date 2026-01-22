@@ -16,9 +16,9 @@ import Loading from 'components/Loading';
 import EntityForm from 'containers/EntityForm';
 
 
-const HintP = styled.p`
-  margin-top: 40px;
-  max-width: 666px;
+const HintP = styled.div`
+  margin: 25px 0 15px;
+  max-width: 800px;
 `;
 
 const Hint = styled((p) => <Text size="small" {...p} />)`
