@@ -18,6 +18,7 @@ import { jumpToComponent } from 'utils/scroll-to-component';
 import {
   getActiontypePreviewFields,
   getActortypePreviewFields,
+  getIndicatorPreviewFields,
 } from 'utils/fields';
 
 import Messages from 'components/Messages';
@@ -232,6 +233,7 @@ const reducePreviewItem = ({
           },
         }],
       },
+      fields: getIndicatorPreviewFields(),
       item,
       footer: {
         primaryLink: item && {

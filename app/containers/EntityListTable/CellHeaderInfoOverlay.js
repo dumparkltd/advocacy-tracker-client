@@ -34,7 +34,7 @@ export function CellHeaderInfoOverlay({ info }) {
                 </Box>
                 <Text size="small">
                   {option.label}
-                  {option.labelAgg && ` (${option.labelAgg})`}
+                  {option.labelAgg && ` / ${option.labelAgg}`}
                 </Text>
               </LabelWrap>
             ))}

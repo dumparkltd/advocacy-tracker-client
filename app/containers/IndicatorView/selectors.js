@@ -48,6 +48,11 @@ export const selectViewEntity = createSelector(
     indicators && indicators.some(
       (indicator) => qe(indicator.getIn(['attributes', 'parent_id']), entity.get('id'))
     ),
+  ).set(
+    'parent',
+    indicators && indicators.find(
+      (parent) => qe(entity.getIn(['attributes', 'parent_id']), parent.get('id'))
+    )
   )
 );
 

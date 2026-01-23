@@ -238,7 +238,8 @@ export function IndicatorView({
                             '/topic',
                             '',
                             'Parent topic'
-                          )],
+                          ),
+                        ],
                       }}
                     />
                   )}

@@ -1976,7 +1976,8 @@ const addAggregatePositions = ({
         return memo;
       }, Map());
       const aggregateSupport = getAggregateSupport(aggregateCountSupport, children.size);
-      if (aggregateSupport) {
+
+      if (typeof aggregateSupport !== 'undefined') {
         return List().push(
           Map({
             indicator_id: parentId,

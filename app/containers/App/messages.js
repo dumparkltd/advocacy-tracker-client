@@ -49,19 +49,19 @@ export default defineMessages({
   supportlevelsAggregate: {
     0: {
       id: 'app.containers.App.supportlevelsAggregate.0',
-      defaultMessage: 'UNUSED',
+      defaultMessage: 'No support for any must-have',
     },
     1: {
       id: 'app.containers.App.supportlevelsAggregate.1',
-      defaultMessage: 'STRONG support for ALL child topics',
+      defaultMessage: 'Strong support for all must-haves',
     },
     2: {
       id: 'app.containers.App.supportlevelsAggregate.2',
-      defaultMessage: 'SOME support for ALL child topics',
+      defaultMessage: 'Some support for all must-haves',
     },
     3: {
       id: 'app.containers.App.supportlevelsAggregate.3',
-      defaultMessage: 'SOME support for ANY child topic',
+      defaultMessage: 'Some support for any must-have',
     },
     4: {
       id: 'app.containers.App.supportlevelsAggregate.4',
@@ -73,7 +73,7 @@ export default defineMessages({
     },
     99: {
       id: 'app.containers.App.supportlevelsAggregate.99',
-      defaultMessage: 'No statements on child topics',
+      defaultMessage: 'No statements on must-haves',
     },
   },
   actortypes: {
@@ -1201,12 +1201,24 @@ export default defineMessages({
       id: 'app.containers.App.attributeInfo.public_api',
       defaultMessage: 'public_api',
     },
+    public_api_indicators: {
+      id: 'app.containers.App.attributeInfo.public_api_indicators',
+      defaultMessage: 'public_api',
+    },
     public_api_true: {
       id: 'app.containers.App.attributeInfo.public_api_true',
       defaultMessage: 'info-public_api-true',
     },
     public_api_false: {
       id: 'app.containers.App.attributeInfo.public_api_false',
+      defaultMessage: 'info-public_api-false',
+    },
+    public_api_true_indicators: {
+      id: 'app.containers.App.attributeInfo.public_api_true_indicators',
+      defaultMessage: 'info-public_api-true',
+    },
+    public_api_false_indicators: {
+      id: 'app.containers.App.attributeInfo.public_api_false_indicators',
       defaultMessage: 'info-public_api-false',
     },
     source_api: {

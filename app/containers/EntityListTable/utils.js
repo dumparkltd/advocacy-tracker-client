@@ -350,7 +350,7 @@ export const getValueFromPositions = (positions) => {
 };
 const getColorFromPositions = (positions) => {
   const value = getValueFromPositions(positions);
-  const level = value && ACTION_INDICATOR_SUPPORTLEVELS[parseInt(value, 10)];
+  const level = typeof value !== 'undefined' && ACTION_INDICATOR_SUPPORTLEVELS[value];
   if (level) {
     return level.color;
   }
@@ -777,7 +777,7 @@ export const prepareEntityRows = ({
               },
             };
           case 'supportlevel':
-            if (entity.get('supportlevel')) {
+            if (typeof entity.get('supportlevel') !== 'undefined') {
               temp = entity.get('supportlevel')
                 && entity.getIn(['supportlevel', col.actionId]);
             }
@@ -785,7 +785,7 @@ export const prepareEntityRows = ({
               temp = entity.get('position')
                 && entity.getIn(['position', 'supportlevel_id']);
             }
-            if (!temp) {
+            if (typeof temp === 'undefined') {
               return {
                 ...memoEntity,
                 [col.id]: {
@@ -793,11 +793,15 @@ export const prepareEntityRows = ({
                 },
               };
             }
+            value = entity.getIn(['attributes', 'is_parent'])
+              && appMessages.supportlevelsAggregate[temp]
+              ? intl.formatMessage(appMessages.supportlevelsAggregate[temp])
+              : intl.formatMessage(appMessages.supportlevels[temp]);
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: intl.formatMessage(appMessages.supportlevels[temp]),
+                value,
                 color: ACTION_INDICATOR_SUPPORTLEVELS[temp].color,
               },
             };
@@ -880,7 +884,7 @@ export const prepareEntityRows = ({
               [col.id]: {
                 ...col,
                 color: getColorFromPositions(temp),
-                sortValue: getValueFromPositions(temp) || 99,
+                sortValue: getValueFromPositions(temp),
               },
             };
           case 'positionsCompact':
@@ -903,11 +907,12 @@ export const prepareEntityRows = ({
                 },
                 positions: temp && temp.reduce((memo, indicatorPositions, indicatorId) => {
                   const latest = indicatorPositions && indicatorPositions.first();
+                  const supportLevelId = latest && latest.get('supportlevel_id') && parseInt(latest.get('supportlevel_id'), 10);
                   return ([
                     ...memo,
                     {
                       indicatorId: parseInt(indicatorId, 10),
-                      supportlevelId: (latest && latest.get('supportlevel_id') && parseInt(latest.get('supportlevel_id'), 10)) || 99,
+                      supportlevelId: typeof supportLevelId !== 'undefined' ? supportLevelId : 99,
                       color: getColorFromPositions(indicatorPositions),
                       authority: latest && getSingleRelatedValueFromAttributes(latest.get('authority')),
                       actorTitle: getEntityTitle(entity),

@@ -30,7 +30,9 @@ export function FormFieldCheckbox({
     : field.label;
 
   let content = '';
-  if (field.info && appMessages.attributeInfo[field.att]) {
+  if (field.info && appMessages.attributeInfo[`${field.att}_${field.entityType}`]) {
+    content = intl.formatMessage(appMessages.attributeInfo[`${field.att}_${field.entityType}`]);
+  } else if (field.info && appMessages.attributeInfo[field.att]) {
     content = intl.formatMessage(appMessages.attributeInfo[field.att]);
   }
   if (field.disabled && field.disabledMessages && field.disabledMessages.length > 0) {
@@ -43,7 +45,15 @@ export function FormFieldCheckbox({
         content,
       );
     }
-  } else if (typeof fieldValue !== 'undefined' && appMessages.attributeInfo[`${field.att}_${fieldValue}`]) {
+  } else if (
+    typeof fieldValue !== 'undefined'
+    && appMessages.attributeInfo[`${field.att}_${fieldValue}_${field.entityType}`]
+  ) {
+    content = `${content} \n\n ${intl.formatMessage(appMessages.attributeInfo[`${field.att}_${fieldValue}_${field.entityType}`])}`;
+  } else if (
+    typeof fieldValue !== 'undefined'
+    && appMessages.attributeInfo[`${field.att}_${fieldValue}`]
+  ) {
     content = `${content} \n\n ${intl.formatMessage(appMessages.attributeInfo[`${field.att}_${fieldValue}`])}`;
   }
   return (

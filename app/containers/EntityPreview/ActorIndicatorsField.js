@@ -114,6 +114,7 @@ export function ActorIndicatorsField({
       typeId,
       intl,
       isAdmin,
+      indicators: indicatorsWithSupport,
     }),
   });
   const hasOptions = typeof content.get('withOptions') !== 'undefined'

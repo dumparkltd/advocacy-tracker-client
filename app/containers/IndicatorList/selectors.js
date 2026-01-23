@@ -157,6 +157,11 @@ export const selectIndicatorsWithConnections = createSelector(
           ).set(
             'supportlevels',
             support,
+          ).set(
+            'parentIndicator',
+            indicators.find(
+              (parent) => qe(indicator.getIn(['attributes', 'parent_id']), parent.get('id'))
+            ),
           );
         }
       );

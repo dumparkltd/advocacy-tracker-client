@@ -149,6 +149,7 @@ export function TabStatements(props) {
                   intl,
                   isAdmin,
                   hasMemberOption,
+                  indicators,
                 }),
               }),
             ],

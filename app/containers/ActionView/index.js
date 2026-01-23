@@ -374,6 +374,7 @@ export function ActionView(props) {
                               action: viewEntity,
                               intl,
                               isAdmin,
+                              indicators,
                             }),
                           }),
                         ],

@@ -736,8 +736,9 @@ export const getRoleFormField = ({ formatMessage, roleOptions, hideByDefault }) 
   hideByDefault,
 });
 
-export const getCheckboxFormField = ({
-  formatMessage, attribute = 'draft', hideByDefault, controlType, onChange,
+export const getAttributeLabel = ({
+  attribute,
+  formatMessage,
 }) => {
   let message;
   if (ATTRIBUTE_STATUSES[attribute]) {
@@ -751,17 +752,30 @@ export const getCheckboxFormField = ({
   if (!message && appMessages.attributes[attribute]) {
     message = appMessages.attributes[attribute];
   }
-  return {
-    id: `status-${attribute}`,
-    att: attribute,
-    controlType: controlType || 'checkbox',
-    model: `.attributes.${attribute}`,
-    label: message ? formatMessage(message) : 'UNDEFINED',
-    info: !!appMessages.attributeInfo[attribute],
-    changeAction: onChange,
-    hideByDefault,
-  };
+  return message ? formatMessage(message) : 'UNDEFINED';
 };
+
+export const getCheckboxFormField = ({
+  formatMessage,
+  attribute = 'draft',
+  hideByDefault,
+  controlType,
+  onChange,
+  entityType,
+}) => ({
+  id: `status-${attribute}`,
+  att: attribute,
+  controlType: controlType || 'checkbox',
+  model: `.attributes.${attribute}`,
+  label: getAttributeLabel({
+    attribute,
+    formatMessage,
+  }),
+  info: !!appMessages.attributeInfo[attribute],
+  changeAction: onChange,
+  hideByDefault,
+  entityType,
+});
 
 export const getTitleFormField = ({
   formatMessage,
@@ -1071,6 +1085,7 @@ const getFormField = ({
   type,
   model,
   hideByDefault,
+  entityType,
 }) => {
   const field = {
     id: attribute,
@@ -1085,6 +1100,7 @@ const getFormField = ({
     errorMessages: {},
     hint,
     hideByDefault: required ? false : hideByDefault,
+    entityType,
   };
   if (onChange) {
     field.changeAction = onChange;
@@ -1117,6 +1133,7 @@ const getEntityFormField = (
     onCreateOption,
     connectionAttributesForType,
     intl,
+    entityType,
   },
   fieldConfig,
 ) => {
@@ -1145,7 +1162,14 @@ const getEntityFormField = (
     const { controlType } = fieldConfig;
     const cleanFieldType = fieldType || fieldConfig.type;
     const fieldArgs = {
-      formatMessage, attribute, required, hideByDefault, label, placeholder, controlType,
+      formatMessage,
+      attribute,
+      required,
+      hideByDefault,
+      label,
+      placeholder,
+      controlType,
+      entityType,
     };
     // for attributes
     if (attribute === 'title') {
@@ -1389,7 +1413,12 @@ export const getActiontypeFormFields = (args) => {
   const shape = ACTIONTYPES_CONFIG[parseInt(typeId, 10)]
     && ACTIONTYPES_CONFIG[parseInt(typeId, 10)].form;
   return shape && getEntityFormFields(
-    args, shape, ACTION_FIELDS.ATTRIBUTES
+    {
+      ...args,
+      entityType: API.ACTIONS,
+    },
+    shape,
+    ACTION_FIELDS.ATTRIBUTES,
   );
 };
 
@@ -1398,22 +1427,41 @@ export const getActortypeFormFields = (args) => {
   const shape = ACTORTYPES_CONFIG[parseInt(typeId, 10)]
     && ACTORTYPES_CONFIG[parseInt(typeId, 10)].form;
   return shape && getEntityFormFields(
-    args, shape, ACTOR_FIELDS.ATTRIBUTES
+    {
+      ...args,
+      entityType: API.ACTORS,
+    },
+    shape,
+    ACTOR_FIELDS.ATTRIBUTES,
   );
 };
-export const getCategoryFormFields = (args) => {
-  const { typeId } = args;
-  const shape = ACTORTYPES_CONFIG[parseInt(typeId, 10)]
-    && ACTORTYPES_CONFIG[parseInt(typeId, 10)].form;
-  return shape && getEntityFormFields(
-    args, shape, ACTOR_FIELDS.ATTRIBUTES
-  );
-};
+// export const getCategoryFormFields = (args) => {
+//   const { typeId } = args;
+//   const shape = ACTORTYPES_CONFIG[parseInt(typeId, 10)]
+//     && ACTORTYPES_CONFIG[parseInt(typeId, 10)].form;
+//   return shape && getEntityFormFields(
+//     {
+//       ...args,
+//       entityType: API.CATEGORIES,
+//     },
+//     shape, ACTOR_FIELDS.ATTRIBUTES,
+//   );
+// };
 
 export const getResourcetypeFormFields = (args) => getEntityFormFields(
-  args, RESOURCETYPES_CONFIG.form, RESOURCE_FIELDS.ATTRIBUTES
+  {
+    ...args,
+    entityType: API.RESOURCES,
+  },
+  RESOURCETYPES_CONFIG.form,
+  RESOURCE_FIELDS.ATTRIBUTES,
 );
 
 export const getIndicatorFormFields = (args) => getEntityFormFields(
-  args, INDICATOR_CONFIG.form, INDICATOR_FIELDS.ATTRIBUTES
+  {
+    ...args,
+    entityType: API.INDICATORS,
+  },
+  INDICATOR_CONFIG.form,
+  INDICATOR_FIELDS.ATTRIBUTES,
 );

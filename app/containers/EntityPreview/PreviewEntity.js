@@ -7,21 +7,21 @@ import { ROUTES, API, API_FOR_ROUTE } from 'themes/config';
 import qe from 'utils/quasi-equals';
 
 import {
-  getActionPreviewHeader,
-  getActionPreviewFields,
-  getActionPreviewFooter,
-  getActorPreviewHeader,
-  getActorPreviewFields,
-  getActorPreviewFooter,
-  getIndicatorPreviewHeader,
-  getIndicatorPreviewFields,
-  getIndicatorPreviewFooter,
-  getResourcePreviewHeader,
-  getResourcePreviewFields,
-  getResourcePreviewFooter,
-  getUserPreviewHeader,
-  getUserPreviewFields,
-  getUserPreviewFooter,
+  getPreviewHeaderForAction,
+  getPreviewFieldsForAction,
+  getPreviewFooterForAction,
+  getPreviewHeaderForActor,
+  getPreviewFieldsForActor,
+  getPreviewFooterForActor,
+  // getPreviewHeaderForIndicator,
+  // getIndicatorPreviewFields,
+  // getPreviewFooterForIndicator,
+  getPreviewHeaderForResource,
+  getPreviewFieldsForResource,
+  getPreviewFooterForResource,
+  getPreviewHeaderForUser,
+  getPreviewFieldsForUser,
+  getPreviewFooterForUser,
 } from 'utils/fields';
 
 import {
@@ -83,9 +83,9 @@ export function PreviewEntity({
   let fields = {};
   let footerContent;
   if (previewEntity && qe(content.get('path'), ROUTES.ACTION)) {
-    headerContent = getActionPreviewHeader(previewEntity, intl, onUpdatePath);
+    headerContent = getPreviewHeaderForAction(previewEntity, intl, onUpdatePath);
     fields = {
-      fields: getActionPreviewFields({
+      fields: getPreviewFieldsForAction({
         action: previewEntity,
         indicators: previewEntity.get('indicators'),
         categories: previewEntity.get('categories'),
@@ -96,10 +96,10 @@ export function PreviewEntity({
         intl,
       }),
     };
-    footerContent = getActionPreviewFooter(previewEntity, intl);
+    footerContent = getPreviewFooterForAction(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.ACTOR)) {
-    headerContent = getActorPreviewHeader(
+    headerContent = getPreviewHeaderForActor(
       previewEntity,
       intl,
       onUpdatePath,
@@ -109,7 +109,7 @@ export function PreviewEntity({
       actorIndicators: {
         withOptions: true,
       },
-      fields: getActorPreviewFields({
+      fields: getPreviewFieldsForActor({
         actor: previewEntity,
         associationsByType: previewEntity.get('associationsByType'),
         membersByType: previewEntity.get('membersByType'),
@@ -118,39 +118,40 @@ export function PreviewEntity({
         intl,
       }),
     };
-    footerContent = previewEntity && getActorPreviewFooter(previewEntity, intl);
+    footerContent = previewEntity && getPreviewFooterForActor(previewEntity, intl);
   }
-  if (previewEntity && qe(content.get('path'), ROUTES.INDICATOR)) {
-    headerContent = previewEntity && getIndicatorPreviewHeader(previewEntity, intl, onUpdatePath);
-    fields = {
-      fields: getIndicatorPreviewFields({
-        indicator: previewEntity,
-        onEntityClick,
-        intl,
-      }),
-    };
-    footerContent = previewEntity && getIndicatorPreviewFooter(previewEntity, intl);
-  }
+  // if (previewEntity && qe(content.get('path'), ROUTES.INDICATOR)) {
+  //   console.log('hello')
+  //   headerContent = previewEntity && getPreviewHeaderForIndicator(previewEntity, intl, onUpdatePath);
+  //   fields = {
+  //     fields: getIndicatorPreviewFields({
+  //       indicator: previewEntity,
+  //       onEntityClick,
+  //       intl,
+  //     }),
+  //   };
+  //   footerContent = previewEntity && getPreviewFooterForIndicator(previewEntity, intl);
+  // }
   if (previewEntity && qe(content.get('path'), ROUTES.RESOURCE)) {
-    headerContent = previewEntity && getResourcePreviewHeader(previewEntity, intl, onUpdatePath);
+    headerContent = previewEntity && getPreviewHeaderForResource(previewEntity, intl, onUpdatePath);
     fields = {
-      fields: getResourcePreviewFields({
+      fields: getPreviewFieldsForResource({
         resource: previewEntity,
         onEntityClick,
         intl,
       }),
     };
-    footerContent = previewEntity && getResourcePreviewFooter(previewEntity, intl);
+    footerContent = previewEntity && getPreviewFooterForResource(previewEntity, intl);
   }
   if (previewEntity && qe(content.get('path'), ROUTES.USERS)) {
-    headerContent = previewEntity && getUserPreviewHeader(
+    headerContent = previewEntity && getPreviewHeaderForUser(
       previewEntity,
       intl,
       onUpdatePath,
       onCreateOption,
     );
     fields = {
-      fields: getUserPreviewFields({
+      fields: getPreviewFieldsForUser({
         user: previewEntity,
         actionsByType: previewEntity.get('actionsByType'),
         onEntityClick,
@@ -158,7 +159,7 @@ export function PreviewEntity({
         isMember,
       }),
     };
-    footerContent = previewEntity && getUserPreviewFooter(previewEntity, intl);
+    footerContent = previewEntity && getPreviewFooterForUser(previewEntity, intl);
   }
   // console.log(previewEntity && previewEntity.toJS())
   return (

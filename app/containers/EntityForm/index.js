@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { List } from 'immutable';
 
 import { Form } from 'react-redux-form/immutable';
@@ -11,6 +11,7 @@ import { get } from 'lodash/object';
 import { Box, ResponsiveContext } from 'grommet';
 import { palette } from 'styled-theme';
 
+import { getAttributeLabel } from 'utils/forms';
 import { isMinSize } from 'utils/responsive';
 import qe from 'utils/quasi-equals';
 
@@ -338,6 +339,7 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       hasFormChanges,
       isAdmin,
       isCoordinator,
+      intl,
       // onBlockNavigation,
     } = this.props;
 
@@ -381,10 +383,21 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
                 const attValue = formDataTracked.attributes[att]
                   ? formDataTracked.attributes[att].value
                   : false;
-                if (field.activeIf[att] !== attValue) {
+                const activeCondition = field.activeIf[att];
+                if (activeCondition !== attValue) {
+                  const attLabel = getAttributeLabel({
+                    attribute: att,
+                    formatMessage: intl.formatMessage,
+                  });
+                  let attRequiredLabel;
+                  if (activeCondition === true && attValue === false) {
+                    attRequiredLabel = 'checked';
+                  } else if (activeCondition === false && attValue === true) {
+                    attRequiredLabel = 'unchecked';
+                  }
                   disabledMessages = [
                     ...disabledMessages,
-                    `Only editable if '${att}' is '${field.activeIf[att]}'`,
+                    `Only editable if '${attLabel}' is '${attRequiredLabel}'.`,
                   ];
                 }
                 return memo && (field.activeIf[att] === attValue);
@@ -754,6 +767,7 @@ EntityForm.propTypes = {
   routes: PropTypes.array,
   router: PropTypes.object,
   location: PropTypes.object,
+  intl: intlShape,
 };
 EntityForm.defaultProps = {
   saving: false,
@@ -773,4 +787,4 @@ export function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(EntityForm));
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(injectIntl(EntityForm)));

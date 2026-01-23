@@ -4,6 +4,7 @@ import {
   API,
   ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS,
   ACTORTYPES_CONFIG,
+  ACTORTYPES,
 } from 'themes/config';
 import {
   selectEntity,
@@ -34,6 +35,7 @@ import {
   selectUserActionsGroupedByAction,
   selectActionCategoriesGroupedByAction,
   selectActorWithPositions,
+  selectActorsWithPositions,
 } from 'containers/App/selectors';
 
 import qe from 'utils/quasi-equals';
@@ -43,6 +45,7 @@ import {
   setActionConnections,
   prepareTaxonomiesIsAssociated,
   setUserConnections,
+  getIndicatorSupportLevels,
 } from 'utils/entities';
 
 const selectIndicatorAssociations = createSelector(
@@ -635,5 +638,29 @@ export const selectIndicatorsWithSupport = createSelector(
       Map()
     );
     return indicatorsWithSupport;
+  }
+);
+
+export const selectChildIndicators = createSelector(
+  (state, id) => id,
+  selectIndicators,
+  (state) => selectActorsWithPositions(state, { type: ACTORTYPES.COUNTRY }),
+  (
+    viewEntityId,
+    indicators,
+    countriesWithPositions,
+  ) => {
+    if (!indicators || !countriesWithPositions) return null;
+    return indicators.filter(
+      (indicator) => qe(viewEntityId, indicator.getIn(['attributes', 'parent_id']))
+    ).map(
+      (indicator) => {
+        const support = getIndicatorSupportLevels({
+          indicator,
+          countriesWithPositions,
+        });
+        return indicator.set('supportlevels', support);
+      }
+    );
   }
 );

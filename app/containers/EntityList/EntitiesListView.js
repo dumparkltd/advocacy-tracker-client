@@ -30,7 +30,11 @@ import ContentHeader from 'containers/ContentHeader';
 
 import qe from 'utils/quasi-equals';
 import { lowerCase } from 'utils/string';
-import { getActiontypeColumns, getActortypeColumns } from 'utils/entities';
+import {
+  getActiontypeColumns,
+  getActortypeColumns,
+  mapIndicatorSupportLevels,
+} from 'utils/entities';
 import appMessages from 'containers/App/messages';
 
 import { getActorsForEntities, getUsersForEntities } from './utils';
@@ -245,9 +249,7 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       ];
       if (qe(typeId, ACTORTYPES.COUNTRY)) {
         const hasAggregateIndicators = connections && connections.get(API.INDICATORS).some(
-          (parent) => connections && connections.get(API.INDICATORS).some(
-            (child) => qe(parent.get('id'), child.getIn(['attributes', 'parent_id']))
-          )
+          (parent) => parent.getIn(['attributes', 'is_parent'])
         );
         columns = [
           ...columns,
@@ -261,16 +263,10 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
               title: intl.formatMessage(appMessages.attributes.supportlevel_id),
               type: 'key-categorical',
               attribute: 'supportlevel_id',
-              options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
-                .sort((a, b) => a.order < b.order ? -1 : 1)
-                .map((level) => ({
-                  ...level,
-                  label: intl.formatMessage(appMessages.supportlevels[level.value]),
-                  labelAgg: hasAggregateIndicators
-                    && level.aggregate
-                    && appMessages.supportlevelsAggregate[level.value]
-                    && intl.formatMessage(appMessages.supportlevelsAggregate[level.value]),
-                })),
+              options: mapIndicatorSupportLevels({
+                hasAggregateIndicators,
+                intl,
+              }),
             },
           },
         ];

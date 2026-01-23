@@ -45,7 +45,11 @@ import {
 } from 'containers/App/selectors';
 
 import {
-  ROUTES, USER_ROLES, ACTORTYPES, USER_CONFIG,
+  ROUTES,
+  USER_ROLES,
+  ACTORTYPES,
+  USER_CONFIG,
+  API,
 } from 'themes/config';
 
 import Loading from 'components/Loading';
@@ -204,6 +208,7 @@ export class UserEdit extends React.PureComponent { // eslint-disable-line react
                   connectedTaxonomies,
                   onCreateOption,
                   intl,
+                  entityType: API.USERS,
                 },
                 USER_CONFIG.form, // shape
                 USER_CONFIG.attributes, // attributes

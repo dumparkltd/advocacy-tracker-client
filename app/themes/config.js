@@ -150,7 +150,7 @@ export const ACTION_INDICATOR_SUPPORTLEVELS = {
     default: true,
     color: '#d8d9d9',
     order: 100,
-    aggregate: false,
+    aggregate: true,
   },
   // strong
   1: {
@@ -4537,4 +4537,5 @@ export const FORM_NON_CONTROL_PROPS = [
   'activeForAdmin',
   'activeForAdminOrCoordinator',
   'disabledMessages',
+  'entityType',
 ];
