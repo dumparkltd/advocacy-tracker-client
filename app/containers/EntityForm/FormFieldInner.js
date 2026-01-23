@@ -92,6 +92,7 @@ export function FormFieldInner({
   isNewEntityView,
   intl,
   isFooter,
+  fieldInfo,
 }) {
   let hasChanges = fieldTracked && (fieldTracked.touched || !fieldTracked.pristine);
   let isValid = hasChanges && fieldTracked && typeof fieldTracked.valid !== 'undefined' && fieldTracked.valid;
@@ -125,9 +126,11 @@ export function FormFieldInner({
 
   let formField;
   if (field.controlType && field.controlType === 'multiselect') {
+    // console.log('field.options', field.options && field.options.toJS())
     formField = (
       <MultiSelectField
         field={field}
+        fieldInfo={fieldInfo}
         scrollContainer={scrollContainer}
         fieldData={formData.getIn(field.dataPath)}
         closeOnClickOutside={closeMultiselectOnClickOutside}
@@ -184,6 +187,7 @@ FormFieldInner.propTypes = {
   handleUpdate: PropTypes.func,
   inline: PropTypes.bool,
   step: PropTypes.object,
+  fieldInfo: PropTypes.object,
   fieldTracked: PropTypes.object,
   isEmpty: PropTypes.bool,
   isNewEntityView: PropTypes.bool,

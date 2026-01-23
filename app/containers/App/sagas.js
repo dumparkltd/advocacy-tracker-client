@@ -107,7 +107,6 @@ import {
   selectLocation,
   selectSessionUserRoles,
   selectIsAuthenticating,
-  selectBlockNavigation,
 } from 'containers/App/selectors';
 
 import {
@@ -442,7 +441,7 @@ function* createConnectionsSaga({
 export function* saveEntitySaga({ data }, updateClient = true, multiple = false) {
   const dataTS = stampPayload(data, 'save');
   try {
-    yield put(validateToken());
+    // yield put(validateToken());
     yield put(saveSending(dataTS));
     // update entity attributes
     const entityUpdated = yield call(updateEntityRequest, data.path, data.entity);
@@ -675,7 +674,7 @@ export function* deleteMultipleEntitiesSaga({ path, data, invalidateEntitiesPath
 export function* newEntitySaga({ data }, updateClient = true, multiple = false) {
   const dataTS = stampPayload(data, 'new');
   try {
-    yield put(validateToken());
+    // yield put(validateToken());
     yield put(saveSending(dataTS));
     // update entity attributes
     // on the server
@@ -858,7 +857,7 @@ export function* saveConnectionsSaga({ data }) {
   )) {
     const dataTS = stampPayload(data);
     try {
-      yield put(validateToken());
+      // yield put(validateToken());
       yield put(saveSending(dataTS));
       // on the server
       const connectionsUpdated = yield call(updateAssociationsRequest, data.path, data.updates);
@@ -1288,18 +1287,18 @@ export function* dismissQueryMessagesSaga() {
 export function* updatePathSaga({ path = '', args }) {
   const relativePath = (path && path.startsWith('/')) ? path : `/${path}`;
   const location = yield select(selectLocation);
-  const navBlocked = yield select(selectBlockNavigation);
-  if (navBlocked) {
-    /* eslint-disable no-alert */
-    const confirmLeave = window.confirm(
-      'You have unsaved changes. Are you sure you want to leave?'
-    );
-
-    if (!confirmLeave) {
-      return; // Do not navigate
-    }
-    yield put(blockNavigation(false));
-  }
+  // const navBlocked = yield select(selectBlockNavigation);
+  // if (navBlocked) {
+  //   /* eslint-disable no-alert */
+  //   const confirmLeave = window.confirm(
+  //     'You have unsaved changes. Are you sure you want to leave?'
+  //   );
+  //
+  //   if (!confirmLeave) {
+  //     return; // Do not navigate
+  //   }
+  //   yield put(blockNavigation(false));
+  // }
   let queryNext = {};
   let queryNextString = '';
   if (args) {

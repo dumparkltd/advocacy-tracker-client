@@ -67,7 +67,7 @@ import {
 
 import messages from './messages';
 import { save } from './actions';
-import { DEPENDENCIES, FORM_INITIAL } from './constants';
+import { DEPENDENCIES, FORM_INITIAL, REDUCER_NAME } from './constants';
 
 export class IndicatorEdit extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -153,7 +153,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
     // if they are at least members and its their own content
     const canDelete = isAdmin
       || (isUserMember && viewEntity && qe(myId, viewEntity.getIn(['attributes', 'created_by_id'])));
-    const formDataPath = 'indicatorEdit.form.data';
+    const formDataPath = `${REDUCER_NAME}.form.data`;
     return (
       <div>
         <Helmet
@@ -187,7 +187,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
                 handleSubmitFail={handleSubmitFail}
                 handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
                 handleCancel={handleCancel}
-                handleUpdate={handleUpdate}
+                handleUpdate={(data) => handleUpdate(data, REDUCER_NAME)}
                 handleDelete={canDelete ? handleDelete : null}
                 onErrorDismiss={onErrorDismiss}
                 onServerErrorDismiss={onServerErrorDismiss}
@@ -342,8 +342,8 @@ function mapDispatchToProps(dispatch, props) {
     handleCancel: () => {
       dispatch(updatePath(`${ROUTES.INDICATOR}/${props.params.id}`, { replace: true }));
     },
-    handleUpdate: (formData) => {
-      dispatch(updateEntityForm(formData));
+    handleUpdate: (formData, formId) => {
+      dispatch(updateEntityForm(formData, formId));
     },
     handleDelete: () => {
       dispatch(deleteEntity({

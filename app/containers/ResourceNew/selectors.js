@@ -22,7 +22,7 @@ export const selectDomain = createSelector(
 
 export const selectActionsByActiontype = createSelector(
   (state, id) => id,
-  selectActionsCategorised,
+  (state) => selectActionsCategorised(state), // do not pass type, we want all
   selectActiontypes,
   (resourcetypeId, actions, actiontypes) => {
     if (!actiontypes || !actions) return null;
