@@ -101,6 +101,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
       handleSubmitFail,
       handleUpdate,
       formDataPath,
+      formId,
       inModal,
       isAdmin,
     } = this.props;
@@ -126,7 +127,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
           handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
-          handleUpdate={handleUpdate}
+          handleUpdate={(data) => handleUpdate(data, formId)}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
@@ -178,6 +179,7 @@ IndicatorNewForm.propTypes = {
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   formDataPath: PropTypes.string,
+  formId: PropTypes.string,
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
 };
@@ -298,8 +300,8 @@ function mapDispatchToProps(
         dispatch(updatePath(ROUTES.INDICATORS), { replace: true });
       }
     },
-    handleUpdate: (formData) => {
-      dispatch(updateEntityForm(formData));
+    handleUpdate: (formData, formId) => {
+      dispatch(updateEntityForm(formData, formId));
     },
     onCreateOption: (args) => {
       dispatch(openNewEntityModal(args));

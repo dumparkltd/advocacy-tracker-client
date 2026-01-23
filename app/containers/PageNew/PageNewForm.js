@@ -78,6 +78,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
       handleSubmitFail,
       handleUpdate,
       formDataPath,
+      formId,
       inModal,
     } = this.props;
     const { saveSending } = viewDomain.get('page').toJS();
@@ -97,7 +98,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
           saving={saveSending}
           handleSubmitFail={handleSubmitFail}
           handleCancel={handleCancel}
-          handleUpdate={handleUpdate}
+          handleUpdate={(data) => handleUpdate(data, formId)}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
@@ -133,6 +134,7 @@ PageNew.propTypes = {
   authReady: PropTypes.bool,
   initialiseForm: PropTypes.func,
   formDataPath: PropTypes.string,
+  formId: PropTypes.string,
   inModal: PropTypes.bool,
 };
 
@@ -221,8 +223,8 @@ function mapDispatchToProps(
         dispatch(updatePath(ROUTES.PAGES, { replace: true }));
       }
     },
-    handleUpdate: (formData) => {
-      dispatch(updateEntityForm(formData));
+    handleUpdate: (formData, formId) => {
+      dispatch(updateEntityForm(formData, formId));
     },
   };
 }

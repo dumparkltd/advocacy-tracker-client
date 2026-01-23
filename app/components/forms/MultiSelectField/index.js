@@ -173,7 +173,7 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
   )
 
   render() {
-    const { field, fieldData } = this.props;
+    const { field, fieldData, fieldInfo } = this.props;
     const { intl } = this.context;
     const { id, model, ...controlProps } = omit(field, FORM_NON_CONTROL_PROPS);
     // console.log('field', field)
@@ -219,7 +219,7 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
                       ? {
                         type: 'addFlat',
                         position: 'left',
-                        onClick: field.onCreate,
+                        onClick: () => field.onCreate(fieldInfo),
                       }
                       : null,
                     {
@@ -256,6 +256,7 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
 MultiSelectField.propTypes = {
   field: PropTypes.object,
   fieldData: PropTypes.object,
+  fieldInfo: PropTypes.object,
   handleUpdate: PropTypes.func,
   closeOnClickOutside: PropTypes.bool,
   scrollContainer: PropTypes.object,

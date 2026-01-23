@@ -60,7 +60,7 @@ export const selectViewEntity = createSelector(
 export const selectTopActionsByActiontype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectViewEntity,
-  selectActionsCategorised,
+  (state) => selectActionsCategorised(state), // do not pass type, we want all
   selectActionActionsGroupedByTopAction,
   selectActiontypes,
   (ready, viewAction, actions, associations, actiontypes) => {
@@ -94,7 +94,7 @@ export const selectTopActionsByActiontype = createSelector(
 export const selectSubActionsByActiontype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectViewEntity,
-  selectActionsCategorised,
+  (state) => selectActionsCategorised(state), // do not pass type, we want all
   selectActionActionsGroupedBySubAction,
   selectActiontypes,
   (ready, viewAction, actions, associations, actiontypes) => {
@@ -194,7 +194,7 @@ export const selectTaxonomyOptions = createSelector(
 export const selectActorsByActortype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectViewEntity,
-  selectActorsCategorised,
+  (state) => selectActorsCategorised(state), // do not pass type, we want all
   selectActorActionsGroupedByAction,
   selectActortypes,
   (ready, action, actors, associations, actortypes) => {

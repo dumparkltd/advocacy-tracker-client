@@ -92,6 +92,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
       handleUpdate,
       typeId,
       formDataPath,
+      formId,
       inModal,
       invalidateEntitiesOnSuccess,
     } = this.props;
@@ -125,7 +126,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
           handleSubmitFail={handleSubmitFail}
           handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
           handleCancel={() => handleCancel(typeId)}
-          handleUpdate={handleUpdate}
+          handleUpdate={(data) => handleUpdate(data, formId)}
           onErrorDismiss={onErrorDismiss}
           onServerErrorDismiss={onServerErrorDismiss}
           scrollContainer={this.scrollContainer.current}
@@ -164,6 +165,7 @@ CategoryNewForm.propTypes = {
   onServerErrorDismiss: PropTypes.func.isRequired,
   typeId: PropTypes.string,
   formDataPath: PropTypes.string,
+  formId: PropTypes.string,
   inModal: PropTypes.bool,
   invalidateEntitiesOnSuccess: PropTypes.oneOfType([
     PropTypes.string,
@@ -261,8 +263,8 @@ function mapDispatchToProps(
         dispatch(updatePath(`${ROUTES.TAXONOMIES}/${typeId}`, { replace: true }));
       }
     },
-    handleUpdate: (formData) => {
-      dispatch(updateEntityForm(formData));
+    handleUpdate: (formData, formId) => {
+      dispatch(updateEntityForm(formData, formId));
     },
     onCreateOption: (args) => {
       dispatch(openNewEntityModal(args));
