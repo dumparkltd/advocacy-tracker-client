@@ -15,7 +15,7 @@ export function* save({ data }) {
     entity: data,
     redirect: data.close ? `${ROUTES.PAGES}/${data.id}` : `${ROUTES.PAGES}${ROUTES.EDIT}/${data.id}`,
     redirectQuery: data.close || { arg: 'step', value: data.step },
-
+    invalidateEntitiesOnSuccess: [API.PAGES],
   }));
 }
 
