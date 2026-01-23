@@ -37,7 +37,7 @@ export const FORM_INITIAL = fromJS({
   }), {}),
   associatedTaxonomies: {},
   associatedActorsByActortype: {},
-  associatedResourcesByResource: {},
+  associatedResourcesByResourcetype: {},
   associatedTopActionsByActiontype: {},
   associatedSubActionsByActiontype: {},
   associatedIndicators: [],
@@ -45,3 +45,5 @@ export const FORM_INITIAL = fromJS({
   close: true,
   step: null,
 });
+
+export const REDUCER_NAME = 'actionNew'; // must match route id

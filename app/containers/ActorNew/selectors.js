@@ -29,7 +29,7 @@ export const selectDomain = createSelector(
 
 export const selectActionsByActiontype = createSelector(
   (state, id) => id,
-  selectActionsCategorised,
+  (state) => selectActionsCategorised(state), // do not pass type, we want all
   selectActiontypes,
   (actortypeId, actions, actiontypes) => {
     if (!actiontypes || !actions) return null;
@@ -53,7 +53,7 @@ export const selectActionsByActiontype = createSelector(
 );
 export const selectMembersByActortype = createSelector(
   (state, id) => id,
-  selectActorsCategorised,
+  (state) => selectActorsCategorised(state), // do not pass type, we want all
   selectActortypes,
   (viewActortypeId, actors, actortypes) => {
     if (!actortypes || !actors) return null;
@@ -78,7 +78,7 @@ export const selectMembersByActortype = createSelector(
 
 export const selectAssociationsByActortype = createSelector(
   (state, id) => id,
-  selectActorsCategorised,
+  (state) => selectActorsCategorised(state), // do not pass type, we want all
   selectActortypes,
   (viewActortypeId, actors, actortypes) => {
     if (!actortypes || !actors) return null;

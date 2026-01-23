@@ -60,7 +60,7 @@ import {
 
 import messages from './messages';
 import { save } from './actions';
-import { DEPENDENCIES, FORM_INITIAL } from './constants';
+import { DEPENDENCIES, FORM_INITIAL, REDUCER_NAME } from './constants';
 
 export class CategoryEdit extends React.PureComponent { // eslint-disable-line react/prefer-stateless-function
   constructor(props) {
@@ -136,7 +136,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
       });
     }
     const isMine = viewEntity && qe(viewEntity.getIn(['attributes', 'created_by_id']), myId);
-    const formDataPath = 'categoryEdit.form.data';
+    const formDataPath = `${REDUCER_NAME}.form.data`;
 
     // user can delete content
     // if they are admins or
@@ -175,7 +175,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
                 handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
                 handleSubmitFail={handleSubmitFail}
                 handleCancel={() => handleCancel(reference)}
-                handleUpdate={handleUpdate}
+                handleUpdate={(data) => handleUpdate(data, REDUCER_NAME)}
                 handleDelete={() => canDelete
                   ? handleDelete(viewEntity.getIn(['attributes', 'taxonomy_id']))
                   : null
@@ -288,8 +288,8 @@ function mapDispatchToProps(dispatch, props) {
     handleCancel: (reference) => {
       dispatch(updatePath(`${ROUTES.CATEGORY}/${reference}`, { replace: true }));
     },
-    handleUpdate: (formData) => {
-      dispatch(updateEntityForm(formData));
+    handleUpdate: (formData, formId) => {
+      dispatch(updateEntityForm(formData, formId));
     },
     handleDelete: (taxonomyId) => {
       dispatch(deleteEntity({

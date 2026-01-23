@@ -10,7 +10,7 @@ import { qe } from 'utils/quasi-equals';
 
 import {
   selectActortypes,
-  selectActions,
+  selectActionsCategorised,
   selectActiontypes,
   selectActorsCategorised,
   selectIndicators,
@@ -45,7 +45,7 @@ export const selectIndicatorOptions = createSelector(
 
 export const selectActorsByActortype = createSelector(
   (state, id) => id,
-  selectActorsCategorised,
+  (state) => selectActorsCategorised(state), // do not pass type, we want all
   selectActortypes,
   (actiontypeId, actors, actortypes) => {
     // compare App/selectors/selectActortypesForActiontype
@@ -84,7 +84,7 @@ export const selectResourcesByResourcetype = createSelector(
 
 export const selectTopActionsByActiontype = createSelector(
   (state, id) => id,
-  selectActions,
+  (state) => selectActionsCategorised(state), // do not pass type, we want all
   selectActiontypes,
   (viewActiontypeId, actions, actiontypes) => {
     // compare App/selectors/selectActortypesForActiontype
@@ -104,7 +104,7 @@ export const selectTopActionsByActiontype = createSelector(
 );
 export const selectSubActionsByActiontype = createSelector(
   (state, id) => id,
-  selectActions,
+  (state) => selectActionsCategorised(state), // do not pass type, we want all
   selectActiontypes,
   (viewActiontypeId, actions, actiontypes) => {
     // compare App/selectors/selectActortypesForActiontype

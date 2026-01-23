@@ -14,6 +14,7 @@ import messages from './messages';
 
 import CategoryNewForm from './CategoryNewForm';
 import { selectDomain } from './selectors';
+import { REDUCER_NAME } from './constants';
 
 export function CategoryNew({
   params,
@@ -35,7 +36,8 @@ export function CategoryNew({
       <CategoryNewForm
         typeId={typeId}
         viewDomain={viewDomain}
-        formDataPath="categoryNew.form.data"
+        formDataPath={`${REDUCER_NAME}.form.data`}
+        formId={REDUCER_NAME}
       />
     </div>
   );

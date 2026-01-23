@@ -37,7 +37,7 @@ export const selectViewEntity = createSelector(
 export const selectActionsByActiontype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectViewEntity,
-  selectActionsCategorised,
+  (state) => selectActionsCategorised(state), // do not pass type, we want all
   selectActionResourcesGroupedByResource,
   selectActiontypes,
   (ready, viewResource, actions, associations, actiontypes) => {

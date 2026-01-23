@@ -96,7 +96,7 @@ export const selectTaxonomyOptions = createSelector(
 export const selectActionsByActiontype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectViewEntity,
-  selectActionsCategorised,
+  (state) => selectActionsCategorised(state), // do not pass type, we want all
   selectActorActionsGroupedByActor,
   selectActiontypes,
   (ready, viewActor, actions, associations, actiontypes) => {
@@ -131,7 +131,7 @@ export const selectActionsByActiontype = createSelector(
 export const selectMembersByActortype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectViewEntity,
-  selectActorsCategorised,
+  (state) => selectActorsCategorised(state), // do not pass type, we want all
   selectMembershipsGroupedByParent,
   selectActortypes,
   (ready, viewActor, actors, associations, actortypes) => {
@@ -166,7 +166,7 @@ export const selectMembersByActortype = createSelector(
 export const selectAssociationsByActortype = createSelector(
   (state) => selectReady(state, { path: DEPENDENCIES }),
   selectViewEntity,
-  selectActorsCategorised,
+  (state) => selectActorsCategorised(state), // do not pass type, we want all
   selectMembershipsGroupedByMember,
   selectActortypes,
   (ready, viewActor, actors, joins, actortypes) => {

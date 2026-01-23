@@ -15,6 +15,7 @@ import messages from './messages';
 
 import ActionNewForm from './ActionNewForm';
 import { selectDomain } from './selectors';
+import { REDUCER_NAME } from './constants';
 
 export function ActionNew({
   params,
@@ -37,7 +38,8 @@ export function ActionNew({
       <ActionNewForm
         typeId={typeId}
         viewDomain={viewDomain}
-        formDataPath="actionNew.form.data"
+        formDataPath={`${REDUCER_NAME}.form.data`}
+        formId={REDUCER_NAME}
         autoUser
       />
     </div>
