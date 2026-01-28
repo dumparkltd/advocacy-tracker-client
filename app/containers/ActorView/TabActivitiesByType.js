@@ -62,6 +62,7 @@ export function TabActivitiesByType(props) {
     onCreateOption,
     isAdmin,
   } = props;
+
   const [actives, setActive] = useState(defaultState);
 
   // reset state
@@ -103,7 +104,7 @@ export function TabActivitiesByType(props) {
   }
   const hasAsMemberPanel = canBeMember && uniqueActionsAsMember && uniqueActionsAsMember.size > 0;
   const hasViaMembersPanel = canHaveMembers && uniqueActionsViaMembers && uniqueActionsViaMembers.size > 0;
-
+  // console.log(hasAsMemberPanel, hasViaMembersPanel, membersWithActionsViaMembership && membersWithActionsViaMembership.toJS())
   return (
     <Box margin={{ bottom: 'xlarge' }}>
       <Accordion
@@ -118,7 +119,7 @@ export function TabActivitiesByType(props) {
               } ${
                 getTypeLabel(activeActiontypeId, activeActiontypeActions ? activeActiontypeActions.size : 0, intl)
               }`,
-            content: actives.indexOf(0) > -1 && (
+            renderContent: actives.indexOf(0) > -1 && (() => (
               <Box pad={{ vertical: 'small' }}>
                 <FieldGroup
                   seamless
@@ -154,12 +155,12 @@ export function TabActivitiesByType(props) {
                   }}
                 />
               </Box>
-            ),
+            )),
           },
           hasAsMemberPanel ? {
             id: 1,
             titleButton: `As member: ${uniqueActionsAsMember.size} ${getTypeLabel(activeActiontypeId, uniqueActionsAsMember.size, intl)}`,
-            content: actives.indexOf(1) > -1 && (
+            renderContent: (() => (
               <div>
                 {associationsWithActionsViaMemberships && associationsWithActionsViaMemberships.entrySeq().map(
                   ([actorId, actor]) => {
@@ -191,15 +192,16 @@ export function TabActivitiesByType(props) {
                   }
                 )}
               </div>
-            ),
+            )),
           } : null,
           hasViaMembersPanel ? {
             id: 2,
             titleButton: `From members: ${uniqueActionsViaMembers.size} ${getTypeLabel(activeActiontypeId, uniqueActionsViaMembers.size, intl)}`,
-            content: actives.indexOf(2) > -1 && (
+            renderContent: (() => (
               <div>
                 {membersWithActionsViaMembership && membersWithActionsViaMembership.entrySeq().map(
                   ([actorId, actor]) => {
+                    // console.log(actorId)
                     const actortypeLabel = lowerCase(intl.formatMessage(appMessages.entities[`actors_${actor.getIn(['attributes', 'actortype_id'])}`].singleShort));
                     return (
                       <Box key={actorId} pad={{ top: 'medium', bottom: 'hair' }}>
@@ -240,7 +242,7 @@ export function TabActivitiesByType(props) {
                   }
                 )}
               </div>
-            ),
+            )),
           } : null,
         ]}
       />

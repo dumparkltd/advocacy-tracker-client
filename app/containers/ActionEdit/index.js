@@ -48,6 +48,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectIsUserCoordinator,
   selectIsUserMember,
   selectSessionUserId,
   selectActionIndicatorsForAction,
@@ -100,7 +101,14 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
     }
     //
     if (nextProps.authReady && !this.props.authReady) {
-      this.props.redirectIfNotPermitted();
+      this.props.redirectIfNotPermitted(USER_ROLES.MEMBER.value);
+    }
+    if (nextProps.viewEntity && nextProps.authReady) {
+      const minRole = USER_ROLES.MEMBER.value;
+      const canEdit = nextProps.viewEntity.getIn(['attributes', 'public_api'])
+        ? nextProps.isCoordinator
+        : nextProps.isUserMember;
+      this.props.redirectIfNotPermitted(minRole, canEdit);
     }
     if (hasNewError(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
@@ -284,6 +292,7 @@ ActionEdit.propTypes = {
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   isUserMember: PropTypes.bool,
   params: PropTypes.object,
   taxonomies: PropTypes.object,
@@ -310,6 +319,7 @@ const mapStateToProps = (state, { params }) => ({
   viewDomain: selectDomain(state),
   viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
   isUserMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
@@ -339,8 +349,8 @@ function mapDispatchToProps(dispatch, props) {
         dispatch(invalidateEntities(path));
       });
     },
-    redirectIfNotPermitted: () => {
-      dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
+    redirectIfNotPermitted: (role, pass) => {
+      dispatch(redirectIfNotPermitted(role, pass));
     },
     redirectIfNotSignedIn: () => {
       dispatch(redirectIfNotSignedIn());

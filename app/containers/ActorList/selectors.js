@@ -29,6 +29,7 @@ import {
   selectIncludeActorChildren,
   selectIndicators,
   selectLocationQuery,
+  // selectActortypeActors,
 } from 'containers/App/selectors';
 
 import {
@@ -101,15 +102,15 @@ const selectActorsWithCategories = createSelector(
   selectActorsWithPositions,
   selectActorCategoriesGroupedByActor,
   selectCategories,
-  (ready, entities, associationsGrouped, categories) => {
+  (ready, actors, associationsGrouped, categories) => {
     if (ready) {
       return entitiesSetCategoryIds(
-        entities,
+        actors,
         associationsGrouped,
         categories,
       );
     }
-    return entities;
+    return actors;
   }
 );
 // const selectActorsWithActions = createSelector(
@@ -283,7 +284,7 @@ const selectActorsByTopicPosition = createSelector(
   selectActorsByActions,
   selectLocationQuery,
   (type, actors, locationQuery) => {
-    if (INDICATOR_ACTION_ACTORTYPES.indexOf(type) > -1 && locationQuery.get('indicators')) {
+    if (actors && INDICATOR_ACTION_ACTORTYPES.indexOf(type) > -1 && locationQuery.get('indicators')) {
       const locationQueryValue = locationQuery.get('indicators');
       // console.log('locationQueryValue', type, locationQueryValue)
       return actors.filter((actor) => {

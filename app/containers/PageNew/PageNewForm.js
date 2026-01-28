@@ -108,6 +108,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
               isMine: true,
               isNew: true,
               intl,
+              entityType: API.PAGES,
             },
             PAGE_CONFIG.form, // shape
             PAGE_CONFIG.attributes, // attributes

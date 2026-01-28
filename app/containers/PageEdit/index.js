@@ -163,6 +163,7 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
                     isAdmin: true,
                     isMine,
                     intl,
+                    entityType: API.PAGES,
                   },
                   PAGE_CONFIG.form, // shape
                   PAGE_CONFIG.attributes, // attributes

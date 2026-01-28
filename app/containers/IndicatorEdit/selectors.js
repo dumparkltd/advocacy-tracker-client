@@ -1,6 +1,7 @@
 import { createSelector } from 'reselect';
 import { API, INDICATOR_ACTIONTYPES } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
+import { Map } from 'immutable';
 
 import {
   selectEntity,
@@ -9,6 +10,7 @@ import {
   selectActiontypes,
   selectActionIndicatorsGroupedByIndicatorAttributes,
   selectReady,
+  selectIndicators,
 } from 'containers/App/selectors';
 
 import {
@@ -57,5 +59,36 @@ export const selectActionsByActiontype = createSelector(
         'measure_id'
       );
     });
+  }
+);
+
+export const selectIndicatorOptions = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectViewEntity,
+  selectIndicators,
+  (ready, indicator, indicators) => {
+    if (!indicator || !ready) return null;
+    // can only have a parent if not already a parent
+    const isParent = indicators.some(
+      (option) => qe(option.getIn(['attributes', 'parent_id']), indicator.get('id')),
+    );
+    if (isParent) return null;
+    // figure out parents (children cannot also be parents)
+    return indicators
+      .filter(
+        // exclude self and child indicators
+        (option) => !qe(option.get('id'), indicator.get('id')) && !option.getIn(['attributes', 'parent_id'])
+      )
+      .map((option) => {
+        if (qe(option.get('id'), indicator.getIn(['attributes', 'parent_id']))) {
+          return option
+            .set('associated', true)
+            .set('association', Map({
+              child_id: indicator.get('id'),
+              parent_id: option.get('id'),
+            }));
+        }
+        return option.set('associated', false);
+      });
   }
 );

@@ -15,25 +15,31 @@ import {
 
 import qe from 'utils/quasi-equals';
 
+// required for selectActorsWithPositionsData
+import { ACTORS_WITH_POSITIONS_DEPENDENCIES } from 'containers/App/selectors';
+
 export const DEPENDENCIES = [
-  API.ACTORS,
-  API.ACTIONS,
-  API.ACTOR_ACTIONS,
-  API.ACTION_ACTORS,
-  API.ACTOR_CATEGORIES,
-  API.ACTION_CATEGORIES,
-  API.ACTORTYPES,
-  API.ACTIONTYPES,
-  API.ACTORTYPE_TAXONOMIES,
-  API.ACTIONTYPE_TAXONOMIES,
-  API.TAXONOMIES,
-  API.CATEGORIES,
-  API.USERS,
-  API.USER_ROLES,
-  API.USER_ACTORS,
-  API.MEMBERSHIPS,
-  API.INDICATORS,
-  API.ACTION_INDICATORS,
+  ...new Set([
+    ...ACTORS_WITH_POSITIONS_DEPENDENCIES,
+    API.ACTORS,
+    API.ACTIONS,
+    API.ACTOR_ACTIONS,
+    API.ACTION_ACTORS,
+    API.ACTOR_CATEGORIES,
+    API.ACTION_CATEGORIES,
+    API.ACTORTYPES,
+    API.ACTIONTYPES,
+    API.ACTORTYPE_TAXONOMIES,
+    API.ACTIONTYPE_TAXONOMIES,
+    API.TAXONOMIES,
+    API.CATEGORIES,
+    API.USERS,
+    API.USER_ROLES,
+    API.USER_ACTORS,
+    API.MEMBERSHIPS,
+    API.INDICATORS,
+    API.ACTION_INDICATORS,
+  ]),
 ];
 
 export const CONFIG = {
@@ -179,6 +185,7 @@ export const CONFIG = {
           {},
         ),
         optionMessages: 'supportlevels',
+        optionMessagesAggregate: 'supportlevelsAggregate',
       },
     },
     members: { // filter by associated entity
@@ -254,6 +261,19 @@ export const CONFIG = {
         role: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
         default: false,
+      },
+      {
+        search: false,
+        message: 'attributes.public_api',
+        attribute: 'public_api',
+        options: ATTRIBUTE_STATUSES.public_api,
+        role: USER_ROLES.MEMBER.value,
+        roleEdit: USER_ROLES.COORDINATOR.value,
+        filterUI: 'checkboxes',
+        default: false,
+        types: [
+          ACTORTYPES.COUNTRY,
+        ],
       },
       {
         search: false,

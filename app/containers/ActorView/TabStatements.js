@@ -30,6 +30,7 @@ import {
   updatePath,
   setIncludeActorMembers,
   setIncludeInofficialStatements,
+  setIncludeUnpublishedAPIStatements,
 } from 'containers/App/actions';
 
 import appMessages from 'containers/App/messages';
@@ -38,6 +39,7 @@ import {
   selectActorsWithPositions,
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectIsUserAdmin,
 } from 'containers/App/selectors';
 
@@ -57,9 +59,11 @@ export function TabStatements(props) {
     indicators,
     actorsWithPositions,
     includeInofficial,
+    includeUnpublishedAPI,
     includeActorMembers,
     onEntityClick,
     onSetIncludeInofficial,
+    onSetIncludeUnpublishedAPI,
     onSetIncludeActorMembers,
     intl,
     viewEntity,
@@ -118,9 +122,17 @@ export function TabStatements(props) {
           option={{
             active: !includeInofficial,
             onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
-            label: 'Only consider "official" statements (Level of Authority)',
+            label: 'Only consider "official" statements',
           }}
           type="official"
+        />
+        <CheckboxOption
+          option={{
+            active: !includeUnpublishedAPI,
+            onClick: () => onSetIncludeUnpublishedAPI(includeUnpublishedAPI ? '0' : '1'),
+            label: 'Only consider statements published to GPN',
+          }}
+          type="unpublishedAPI"
         />
       </CheckboxOptionGroup>
       {indicators && (
@@ -137,6 +149,7 @@ export function TabStatements(props) {
                   intl,
                   isAdmin,
                   hasMemberOption,
+                  indicators,
                 }),
               }),
             ],
@@ -152,7 +165,9 @@ TabStatements.propTypes = {
   indicators: PropTypes.instanceOf(Map),
   actorsWithPositions: PropTypes.instanceOf(Map),
   includeInofficial: PropTypes.bool,
+  includeUnpublishedAPI: PropTypes.bool,
   onSetIncludeInofficial: PropTypes.func,
+  onSetIncludeUnpublishedAPI: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   isAdmin: PropTypes.bool,
   onSetIncludeActorMembers: PropTypes.func,
@@ -165,6 +180,7 @@ const mapStateToProps = (state) => ({
   indicators: selectIndicators(state),
   actorsWithPositions: selectActorsWithPositions(state),
   includeInofficial: selectIncludeInofficialStatements(state),
+  includeUnpublishedAPI: selectIncludeUnpublishedAPIStatements(state),
   includeActorMembers: selectIncludeActorMembers(state),
   isAdmin: selectIsUserAdmin(state),
 });
@@ -176,6 +192,9 @@ function mapDispatchToProps(dispatch) {
     },
     onSetIncludeInofficial: (value) => {
       dispatch(setIncludeInofficialStatements(value));
+    },
+    onSetIncludeUnpublishedAPI: (value) => {
+      dispatch(setIncludeUnpublishedAPIStatements(value));
     },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));

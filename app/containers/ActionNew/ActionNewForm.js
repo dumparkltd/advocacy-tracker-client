@@ -222,6 +222,8 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
                 .find((item) => item.keySeq().includes('indicator_id'))
                 .get('indicator_id');
               const indicator = indicatorId && indicatorOptions && indicatorOptions.get(indicatorId);
+
+              if (!indicator) return memo;
               return memo
                 .set(
                   'associatedIndicators',

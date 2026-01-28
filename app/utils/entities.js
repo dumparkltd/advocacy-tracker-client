@@ -1379,8 +1379,25 @@ export const getIndicatorAbbreviation = (title) => {
   );
 };
 
+export const mapIndicatorSupportLevels = ({
+  hasAggregateIndicators,
+  intl,
+}) => {
+  if (!intl) return null;
+  return Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+    .sort((a, b) => a.order < b.order ? -1 : 1)
+    .map((level) => ({
+      ...level,
+      label: intl.formatMessage(appMessages.supportlevels[level.value]),
+      labelAgg: hasAggregateIndicators
+        && level.aggregate
+        && appMessages.supportlevelsAggregate[level.value]
+        && intl.formatMessage(appMessages.supportlevelsAggregate[level.value]),
+    }));
+};
+
 export const getIndicatorColumnsForStatement = ({
-  action, intl, isAdmin,
+  action, intl, isAdmin, indicators, hasAggregateIndicators,
 }) => {
   const actionType = action && action.getIn(['attributes', 'measuretype_id']);
   let columns = [{
@@ -1389,6 +1406,9 @@ export const getIndicatorColumnsForStatement = ({
     sort: 'reference',
     attributes: isAdmin ? ['code', 'title'] : ['title'],
   }];
+  const hasAggregate = hasAggregateIndicators || (indicators && indicators.some(
+    (parent) => parent.getIn(['attributes', 'is_parent'])
+  ));
   if (
     ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actionType]
     && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actionType].length > 0
@@ -1403,12 +1423,10 @@ export const getIndicatorColumnsForStatement = ({
         info: {
           type: 'key-categorical',
           attribute: 'supportlevel_id',
-          options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
-            .sort((a, b) => a.order < b.order ? -1 : 1)
-            .map((level) => ({
-              ...level,
-              label: intl.formatMessage(appMessages.supportlevels[level.value]),
-            })),
+          options: mapIndicatorSupportLevels({
+            hasAggregateIndicators: hasAggregate,
+            intl,
+          }),
         },
       },
     ];
@@ -1446,8 +1464,11 @@ const hasMemberOption = (typeId) => MEMBERSHIPS[typeId]
   && !qe(typeId, ACTORTYPES.CONTACT);
 
 export const getIndicatorColumns = ({
-  typeId, intl, isAdmin,
+  typeId, intl, isAdmin, indicators,
 }) => {
+  const hasAggregateIndicators = indicators && indicators.some(
+    (parent) => parent.getIn(['attributes', 'is_parent'])
+  );
   let columns = [
     {
       id: 'main',
@@ -1466,12 +1487,10 @@ export const getIndicatorColumns = ({
       info: {
         type: 'key-categorical',
         attribute: 'supportlevel_id',
-        options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
-          .sort((a, b) => a.order < b.order ? -1 : 1)
-          .map((level) => ({
-            ...level,
-            label: intl.formatMessage(appMessages.supportlevels[level.value]),
-          })),
+        options: mapIndicatorSupportLevels({
+          hasAggregateIndicators,
+          intl,
+        }),
       },
     },
     {
@@ -1489,4 +1508,46 @@ export const getIndicatorColumns = ({
     ];
   }
   return columns;
+};
+
+export const getIndicatorSupportLevels = ({
+  indicator,
+  countriesWithPositions,
+}) => {
+  if (!indicator || !countriesWithPositions) return null;
+  return countriesWithPositions.reduce(
+    (levelsMemo, country) => {
+      const countrySupport = country
+        && country.getIn(['indicatorPositions', indicator.get('id')]);
+      if (countrySupport && countrySupport.size > 0) {
+        const latest = countrySupport.first();
+        const level = latest.get('supportlevel_id')
+          ? latest.get('supportlevel_id').toString()
+          : '0';
+        if (levelsMemo.get(level)) {
+          const actorIds = levelsMemo.getIn([level, 'actors'])
+            ? levelsMemo.getIn([level, 'actors']).set(country.get('id'), parseInt(country.get('id'), 10))
+            : Map().set(country.get('id'), parseInt(country.get('id'), 10));
+          let actorIdsViaGroups = null;
+          if (latest.get('viaGroups') && latest.get('viaGroups').size > 0) {
+            actorIdsViaGroups = levelsMemo.getIn([level, 'actorsViaGroups'])
+              ? levelsMemo.getIn([level, 'actorsViaGroups']).set(country.get('id'), parseInt(country.get('id'), 10))
+              : Map().set(country.get('id'), parseInt(country.get('id'), 10));
+          }
+          return levelsMemo.setIn(
+            [level, 'count'], actorIds ? actorIds.size : 0,
+          ).setIn(
+            [level, 'countViaGroups'], actorIdsViaGroups ? actorIdsViaGroups.size : 0,
+          ).setIn(
+            [level, 'actors'], actorIds,
+          ).setIn(
+            [level, 'actorsViaGroups'], actorIdsViaGroups,
+          );
+        }
+        return levelsMemo;
+      }
+      return levelsMemo;
+    },
+    Map(ACTION_INDICATOR_SUPPORTLEVELS),
+  );
 };

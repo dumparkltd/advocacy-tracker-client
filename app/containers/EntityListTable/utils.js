@@ -17,6 +17,7 @@ import appMessages from 'containers/App/messages';
 import {
   API,
   USER_ROLES,
+  ATTRIBUTE_STATUSES,
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
@@ -63,6 +64,7 @@ export const prepareHeader = ({
           sortOrder: sortActive && sortOrder ? sortOrder : 'desc',
           onSort,
         });
+      case 'status':
       case 'attribute':
         return ({
           ...col,
@@ -348,7 +350,7 @@ export const getValueFromPositions = (positions) => {
 };
 const getColorFromPositions = (positions) => {
   const value = getValueFromPositions(positions);
-  const level = value && ACTION_INDICATOR_SUPPORTLEVELS[parseInt(value, 10)];
+  const level = typeof value !== 'undefined' && ACTION_INDICATOR_SUPPORTLEVELS[value];
   if (level) {
     return level.color;
   }
@@ -387,11 +389,21 @@ export const prepareEntityRows = ({
         let attribute;
         let value;
         let sortValue = null;
-        // console.log(col)
         // let formattedDate;
         if (col.attribute) {
           value = entity.getIn(['attributes', col.attribute]);
-          if (!checkEmpty(value) && col.fallbackAttribute) {
+          if (col.type === 'status') {
+            if (ATTRIBUTE_STATUSES[col.attribute]) {
+              const option = ATTRIBUTE_STATUSES[col.attribute].find((s) => s.value === value);
+              if (option && option.message) {
+                value = appMessage(intl, option.message);
+              } else {
+                value = `${value}`;
+              }
+            } else {
+              value = `${value}`;
+            }
+          } else if (!checkEmpty(value) && col.fallbackAttribute) {
             value = entity.getIn(['attributes', col.fallbackAttribute]);
           }
         }
@@ -414,6 +426,7 @@ export const prepareEntityRows = ({
                 archived: entity.getIn(['attributes', 'is_archive']),
                 noNotifications: entity.getIn(['attributes', 'notifications']) === false,
                 private: entity.getIn(['attributes', 'private']),
+                public_api: entity.getIn(['attributes', 'public_api']),
                 sortValue: entity.getIn(['attributes', col.sort || 'title']),
                 selected: entityIdsSelected && entityIdsSelected.includes(id),
                 id,
@@ -422,6 +435,7 @@ export const prepareEntityRows = ({
                 onSelect: (checked) => onEntitySelect(id, checked),
               },
             };
+          case 'status':
           case 'attribute':
             return {
               ...memoEntity,
@@ -763,7 +777,7 @@ export const prepareEntityRows = ({
               },
             };
           case 'supportlevel':
-            if (entity.get('supportlevel')) {
+            if (typeof entity.get('supportlevel') !== 'undefined') {
               temp = entity.get('supportlevel')
                 && entity.getIn(['supportlevel', col.actionId]);
             }
@@ -771,7 +785,7 @@ export const prepareEntityRows = ({
               temp = entity.get('position')
                 && entity.getIn(['position', 'supportlevel_id']);
             }
-            if (!temp) {
+            if (typeof temp === 'undefined') {
               return {
                 ...memoEntity,
                 [col.id]: {
@@ -779,11 +793,15 @@ export const prepareEntityRows = ({
                 },
               };
             }
+            value = entity.getIn(['attributes', 'is_parent'])
+              && appMessages.supportlevelsAggregate[temp]
+              ? intl.formatMessage(appMessages.supportlevelsAggregate[temp])
+              : intl.formatMessage(appMessages.supportlevels[temp]);
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: intl.formatMessage(appMessages.supportlevels[temp]),
+                value,
                 color: ACTION_INDICATOR_SUPPORTLEVELS[temp].color,
               },
             };
@@ -799,14 +817,22 @@ export const prepareEntityRows = ({
               },
             };
           case 'positionStatementAuthority':
-            temp = entity.get('position') && entity.getIn(['position', 'authority']);
+            temp = entity.get('position') && entity.getIn(['position', 'measure', 'is_official']);
+            if (entity.get('position') && entity.getIn(['position', 'is_parent'])) {
+              value = '';
+            } else {
+              value = intl.formatMessage(
+                temp
+                  ? appMessages.ui.officialStatuses.official
+                  : appMessages.ui.officialStatuses.inofficial,
+              );
+            }
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
-                value: getSingleRelatedValueFromAttributes(temp),
+                value,
                 single: temp,
-                // sortValue: getRelatedSortValue(temp),
               },
             };
           case 'stackedBarActions':
@@ -835,7 +861,7 @@ export const prepareEntityRows = ({
                 ...col,
                 values: temp && temp.map(
                   (val) => {
-                    if (val.actors) {
+                    if (val.actors && connections) {
                       relatedEntities = getRelatedEntities(val.actors, connections.get('actors'), col);
                       if (relatedEntities && relatedEntities.size > 0) {
                         return {
@@ -858,7 +884,7 @@ export const prepareEntityRows = ({
               [col.id]: {
                 ...col,
                 color: getColorFromPositions(temp),
-                sortValue: getValueFromPositions(temp) || 99,
+                sortValue: getValueFromPositions(temp),
               },
             };
           case 'positionsCompact':
@@ -881,11 +907,12 @@ export const prepareEntityRows = ({
                 },
                 positions: temp && temp.reduce((memo, indicatorPositions, indicatorId) => {
                   const latest = indicatorPositions && indicatorPositions.first();
+                  const supportLevelId = latest && latest.get('supportlevel_id') && parseInt(latest.get('supportlevel_id'), 10);
                   return ([
                     ...memo,
                     {
                       indicatorId: parseInt(indicatorId, 10),
-                      supportlevelId: (latest && latest.get('supportlevel_id') && parseInt(latest.get('supportlevel_id'), 10)) || 99,
+                      supportlevelId: typeof supportLevelId !== 'undefined' ? supportLevelId : 99,
                       color: getColorFromPositions(indicatorPositions),
                       authority: latest && getSingleRelatedValueFromAttributes(latest.get('authority')),
                       actorTitle: getEntityTitle(entity),
@@ -893,6 +920,7 @@ export const prepareEntityRows = ({
                       indicatorTitle: connections
                         && connections.getIn([API.INDICATORS, indicatorId, 'attributes', 'title'])
                         && getIndicatorMainTitle(connections.getIn([API.INDICATORS, indicatorId, 'attributes', 'title'])),
+                      isAggregate: latest && latest.get('is_parent'),
                     },
                   ]);
                 }, []),

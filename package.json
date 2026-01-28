@@ -1,6 +1,6 @@
 {
   "name": "advocacy-tracker-client",
-  "version": "2.0.8",
+  "version": "2.1.0a",
   "description": "WWF Global Plastic Advocacy Tracker",
   "repository": {
     "type": "git",
@@ -8,7 +8,7 @@
   },
   "engines": {
     "npm": ">=6.12",
-    "node": ">=12.13.0"
+    "node": ">=16.20.0"
   },
   "author": "tmfrnz",
   "license": "MIT",
@@ -23,12 +23,12 @@
     "build": "cross-env NODE_ENV=production SERVER=production webpack --config internals/webpack/webpack.prod.babel.js --color --progress",
     "build:dev": "npm run prebuild && cross-env NODE_ENV=production SERVER=development webpack --config internals/webpack/webpack.prod.babel.js --color --progress",
     "build:clean": "rimraf ./build",
-    "start": "cross-env NODE_ENV=development SERVER=development node server",
-    "start:pdb": "cross-env NODE_ENV=development SERVER=production node server",
+    "start": "cross-env PORT=3001 NODE_ENV=development SERVER=development node server",
+    "start:pdb": "cross-env PORT=3001 NODE_ENV=development SERVER=production node server",
     "start:tunnel": "cross-env NODE_ENV=development ENABLE_TUNNEL=true node server",
     "start:p": "npm run start:production",
     "start:production": "npm run build && npm run start:prod",
-    "start:prod": "cross-env NODE_ENV=production SERVER=production node server",
+    "start:prod": "cross-env NODE_ENV=production SERVER=production  node server",
     "presetup": "npm i chalk shelljs",
     "setup": "node ./internals/scripts/setup.js",
     "clean": "shjs ./internals/scripts/clean.js",
@@ -92,6 +92,7 @@
     "proj4leaflet": "^1.0.2",
     "prop-types": "^15.5.10",
     "querystring": "^0.2.0",
+    "re-reselect": "^4.0.1",
     "react": "^16.14.0",
     "react-csv-downloader": "^3.3.0",
     "react-day-picker": "^7.4.8",

@@ -1,5 +1,5 @@
 import { reduce } from 'lodash/collection';
-import { startsWith } from 'utils/string';
+// import { startsWith } from 'utils/string';
 
 import { qe } from 'utils/quasi-equals';
 import {
@@ -42,6 +42,7 @@ export const makeEditGroups = ({
           if (
             (typeof option.edit === 'undefined' || option.edit)
             && (typeof option.role === 'undefined' || hasUserRole[option.roleEdit || option.role])
+            && (typeof option.types === 'undefined' || option.types.indexOf(typeId) > -1)
           ) {
             return optionsMemo.concat({
               id: option.attribute, // filterOptionId

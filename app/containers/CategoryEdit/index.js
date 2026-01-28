@@ -187,6 +187,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
                     isAdmin,
                     isMine,
                     intl,
+                    entityType: API.CATEGORIES,
                   },
                   CATEGORY_CONFIG.form,
                   CATEGORY_CONFIG.attributes,

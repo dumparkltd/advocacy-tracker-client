@@ -38,6 +38,7 @@ import {
   selectReadyForAuthCheck,
   selectActorConnections,
   selectCategories,
+  selectIsUserAdmin,
 } from 'containers/App/selectors';
 
 // import Loading from 'components/Loading';
@@ -79,7 +80,12 @@ export class ActorImport extends React.PureComponent { // eslint-disable-line re
 
   render() {
     const { intl } = this.context;
-    const { connections, categories, params } = this.props;
+    const {
+      connections,
+      categories,
+      params,
+      isAdmin,
+    } = this.props;
     const typeId = params.id;
     const typeLabel = typeId
       ? intl.formatMessage(appMessages.entities[`actors_${typeId}`].plural)
@@ -88,7 +94,7 @@ export class ActorImport extends React.PureComponent { // eslint-disable-line re
       const val = ACTOR_FIELDS.ATTRIBUTES[key];
       if (
         !val.skipImport
-        && checkActorAttribute(typeId, key)
+        && checkActorAttribute(typeId, key, isAdmin)
       ) {
         return [
           ...memo,
@@ -159,7 +165,7 @@ export class ActorImport extends React.PureComponent { // eslint-disable-line re
             model="actorImport.form.data"
             fieldModel="import"
             formData={this.props.formData}
-            handleSubmit={(formData) => this.props.handleSubmit(formData, connections, categories)}
+            handleSubmit={(formData) => this.props.handleSubmit(formData, connections, categories, isAdmin)}
             handleCancel={this.props.handleCancel}
             handleReset={this.props.handleReset}
             resetProgress={this.props.resetProgress}
@@ -194,6 +200,7 @@ ActorImport.propTypes = {
   params: PropTypes.object,
   connections: PropTypes.object,
   categories: PropTypes.object,
+  isAdmin: PropTypes.bool,
 };
 
 ActorImport.contextTypes = {
@@ -207,6 +214,7 @@ const mapStateToProps = (state) => ({
   success: selectSuccess(state),
   connections: selectActorConnections(state),
   categories: selectCategories(state),
+  isAdmin: selectIsUserAdmin(state),
   dataReady: selectReady(state, {
     path: [
       API.USER_ROLES,
@@ -230,7 +238,7 @@ function mapDispatchToProps(dispatch, { params }) {
     redirectIfNotPermitted: () => {
       dispatch(redirectIfNotPermitted(USER_ROLES.MEMBER.value));
     },
-    handleSubmit: (formData, connections, categories) => {
+    handleSubmit: (formData, connections, categories, isAdmin) => {
       if (formData.get('import') !== null) {
         fromJS(formData.get('import').rows).forEach((row, index) => {
           let rowCleanColumns = row.mapKeys((k) => getColumnAttribute(k));
@@ -240,7 +248,7 @@ function mapDispatchToProps(dispatch, { params }) {
           let rowClean = {
             attributes: rowCleanColumns
               // make sure only valid fields are imported
-              .filter((val, att) => checkActorAttribute(typeId, att))
+              .filter((val, att) => checkActorAttribute(typeId, att, isAdmin))
               // make sure we store well formatted date
               .map((val, att) => {
                 const config = ACTOR_FIELDS.ATTRIBUTES[att];
@@ -319,17 +327,24 @@ function mapDispatchToProps(dispatch, { params }) {
                               (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
                             );
                             connectionId = category ? category.get('id') : 'INVALID';
+                            if (!category) {
+                              console.log('INVALID category', `id: "${id}"`, relConfig.lookup.attribute);
+                            }
                           } else if (connections) {
                             const connection = connections.get(relConfig.lookup.table)
                               && connections.get(relConfig.lookup.table).find(
                                 (entity) => qe(entity.getIn(['attributes', relConfig.lookup.attribute]), id)
                               );
                             connectionId = connection ? connection.get('id') : 'INVALID';
+                            if (!connection) {
+                              console.log('INVALID connection', `id: "${id}"`, relConfig.lookup.table, relConfig.lookup.attribute);
+                            }
                           }
                         }
                         // memberships by code or id
                         if (
                           relField === 'country-code'
+                          || relField === 'group-code'
                           || relField === 'actor-code'
                           || relField === 'actor-id'
                         ) {

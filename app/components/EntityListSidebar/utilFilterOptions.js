@@ -737,6 +737,7 @@ const getConnectionFilterOptions = ({
           count: 0,
           query,
           checked: true,
+          isAggregate: connection && connection.getIn(['attributes', 'is_parent']),
           tags: connection ? connection.get('categories') : null,
           draft: connection && connection.getIn(['attributes', 'draft']),
         };
@@ -766,7 +767,7 @@ const getConnectionFilterOptions = ({
       locationQueryValue = locationQuery.get('any');
       asList(locationQueryValue).forEach((queryValue) => {
         if (query === queryValue) {
-          filterOptions.options[queryValue] = {
+          resultOptions.options[queryValue] = {
             messagePrefix: messages.any,
             label: option.label,
             message: option.message,
@@ -808,6 +809,7 @@ const getConnectionFilterOptions = ({
               count: 1,
               query,
               checked: optionChecked(locationQueryValue, value),
+              isAggregate: connection && connection.getIn(['attributes', 'is_parent']),
               tags: connection.get('categories'),
               draft: connection.getIn(['attributes', 'draft']),
               order: sortValue,
@@ -822,8 +824,8 @@ const getConnectionFilterOptions = ({
           // add some option
           resultOptions.options.any.count += 1;
         } else {
-          let { message } = option;
-          filterOptions.options.any = {
+          const { message } = option;
+          resultOptions.options.any = {
             messagePrefix: messages.any,
             label: option.label,
             message,
@@ -836,26 +838,24 @@ const getConnectionFilterOptions = ({
             order: '-1',
           };
         }
+      } else if (resultOptions.options.without) {
+        // no connection present
+        // add without option
+        resultOptions.options.without.count += 1;
       } else {
-        if (resultOptions.options.without) {
-          // no connection present
-          // add without option
-          resultOptions.options.without.count += 1;
-        } else {
-          const { message } = option;
-          resultOptions.options.without = {
-            messagePrefix: messages.without,
-            label: option.label,
-            message,
-            showCount: true,
-            labelEmphasis: true,
-            value: entityType,
-            count: 1,
-            query: 'without',
-            checked: optionChecked(locationQuery.get('without'), entityType),
-            order: '-1',
-          };
-        }
+        const { message } = option;
+        resultOptions.options.without = {
+          messagePrefix: messages.without,
+          label: option.label,
+          message,
+          showCount: true,
+          labelEmphasis: true,
+          value: entityType,
+          count: 1,
+          query: 'without',
+          checked: optionChecked(locationQuery.get('without'), entityType),
+          order: '-1',
+        };
       }
     }); // for each entities
   }

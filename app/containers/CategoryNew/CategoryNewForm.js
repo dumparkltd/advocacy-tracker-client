@@ -136,6 +136,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
               taxonomy,
               intl,
               isNew: true,
+              entityType: API.CATEGORIES,
             },
             CATEGORY_CONFIG.form,
             CATEGORY_CONFIG.attributes,

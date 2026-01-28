@@ -2,10 +2,15 @@ import { createSelector } from 'reselect';
 import { INDICATOR_ACTIONTYPES } from 'themes/config';
 import { qe } from 'utils/quasi-equals';
 
+
 import {
   selectActiontypes,
   selectActionsCategorised,
+  selectReady,
+  selectIndicators,
 } from 'containers/App/selectors';
+
+import { DEPENDENCIES } from './constants';
 
 export const selectDomain = createSelector(
   (state) => state.get('indicatorNew'),
@@ -38,5 +43,16 @@ export const selectActionsByActiontype = createSelector(
         action.getIn(['attributes', 'measuretype_id']),
       )
     ));
+  }
+);
+
+export const selectIndicatorOptions = createSelector(
+  (state) => selectReady(state, { path: DEPENDENCIES }),
+  selectIndicators,
+  (ready, indicators) => {
+    if (!ready) return null;
+    // figure out parents (children cannot also be parents)
+    // exclude child indicators
+    return indicators.filter((option) => !option.getIn(['attributes', 'parent_id']));
   }
 );
