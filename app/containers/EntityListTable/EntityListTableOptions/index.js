@@ -57,7 +57,11 @@ export function EntityListTableOptions({
             />
           </Box>
         )}
-        {isMinSize(size, 'large') && hasPageSelect && (
+        {isMinSize(size, 'large')
+          && hasPageSelect
+          && PAGE_ITEM_OPTIONS
+          && PAGE_ITEM_OPTIONS.length > 1
+          && (
           <Box>
             <SelectReset
               value={pageSelectValue}
@@ -134,7 +138,11 @@ export function EntityListTableOptions({
               </EntityListSearchWrapper>
             )}
           </Box>
-          {!isMinSize(size, 'large') && hasPageSelect && (
+          {!isMinSize(size, 'large')
+            && hasPageSelect
+            && PAGE_ITEM_OPTIONS
+            && PAGE_ITEM_OPTIONS.length > 1
+            && (
             <Box alignSelf="end">
               <SelectReset
                 value={pageSelectValue}
