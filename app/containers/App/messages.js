@@ -549,6 +549,10 @@ export default defineMessages({
       id: 'app.containers.App.buttons.close',
       defaultMessage: 'Close',
     },
+    closeMultiselect: {
+      id: 'app.containers.App.buttons.closeMultiselect',
+      defaultMessage: 'Confirm',
+    },
     add: {
       id: 'app.containers.App.buttons.add',
       defaultMessage: 'New',

@@ -415,6 +415,7 @@ class MultiSelect extends React.Component {
     const showChangeHint = this.props.advanced && hasChanges;
     options = this.filterOptions(options, this.props, this.state);
     const filteredOptionsSelected = options.filter((option) => option.get('checked') || this.isOptionIndeterminate(option));
+    console.log(this.props.buttons)
     return (
       <div ref={this.setWrapperRef}>
         <Header
@@ -476,20 +477,18 @@ class MultiSelect extends React.Component {
         </ControlMain>
         {showChangeHint && (
           <ChangeHint hasFooter={this.props.buttons}>
-            {messages.changeHint && this.props.intl.formatMessage(messages.changeHint).trim() !== '' && (
-              <FormattedMessage {...messages.changeHint} />
-            )}
             {optionsChangedToChecked.size > 0 && (
               <ChangeHintHighlighted>
                 <FormattedMessage {...messages.changeHintSelected} values={{ no: optionsChangedToChecked.size }} />
-              .
               </ChangeHintHighlighted>
             )}
             {optionsChangedToUnchecked.size > 0 && (
               <ChangeHintHighlighted>
                 <FormattedMessage {...messages.changeHintUnselected} values={{ no: optionsChangedToUnchecked.size }} />
-              .
               </ChangeHintHighlighted>
+            )}
+            {messages.changeHint && this.props.intl.formatMessage(messages.changeHint).trim() !== '' && (
+              <FormattedMessage {...messages.changeHint} />
             )}
           </ChangeHint>
         )}
