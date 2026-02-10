@@ -41,6 +41,7 @@ import {
   selectResourcetype,
   selectIsUserAdmin,
   selectTaxonomiesWithCategories,
+  selectLocationKey,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -74,6 +75,9 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
     }
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
+    }
+    if (nextProps.locationKey !== this.props.locationKey) {
+      this.props.initialiseForm(this.getInitialFormData());
     }
     if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
@@ -184,6 +188,7 @@ ResourceNew.propTypes = {
     PropTypes.string,
     PropTypes.array,
   ]),
+  locationKey: PropTypes.string,
 };
 
 ResourceNew.contextTypes = {
@@ -197,6 +202,7 @@ const mapStateToProps = (state, { typeId }) => ({
   resourcetype: selectResourcetype(state, typeId),
   actionsByActiontype: selectActionsByActiontype(state, typeId),
   isAdmin: selectIsUserAdmin(state),
+  locationKey: selectLocationKey(state),
 });
 
 function mapDispatchToProps(

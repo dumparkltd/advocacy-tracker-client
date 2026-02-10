@@ -108,6 +108,7 @@ import {
   selectLocation,
   selectSessionUserRoles,
   selectIsAuthenticating,
+  selectBlockNavigation,
 } from 'containers/App/selectors';
 
 import {
@@ -1339,6 +1340,18 @@ export function* updatePathSaga({ path = '', args }) {
     queryNextString = `?${getNextQueryString(queryNext)}`;
   }
   const nextPath = `${relativePath}${queryNextString}`;
+
+  // guard against data loss when path doesnt change (ie using create new on create new form)
+  if (relativePath === location.get('pathname')) {
+    const navBlocked = yield select(selectBlockNavigation);
+    if (navBlocked) {
+      const confirmLeave = window.confirm(
+        'Saga: You have unsaved changes. Do you really want to leave and discard your changes?'
+      );
+      if (!confirmLeave) return;
+      yield put(blockNavigation(false));
+    }
+  }
   if (args && args.replace) {
     yield put(replace(nextPath));
   } else {

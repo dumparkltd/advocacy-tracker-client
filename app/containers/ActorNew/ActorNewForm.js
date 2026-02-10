@@ -46,6 +46,7 @@ import {
   selectSessionUser,
   selectIsUserAdmin,
   selectTaxonomiesWithCategories,
+  selectLocationKey,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -81,12 +82,17 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
     if (!nextProps.dataReady) {
       this.props.loadEntitiesIfNeeded();
     }
-    // repopulate if new data becomes ready
-    if (nextProps.dataReady && !this.props.dataReady && nextProps.sessionUser) {
-      this.props.initialiseForm(this.getInitialFormData(nextProps));
-    }
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
+    }
+    // repopulate
+    if (
+      // if new data becomes ready
+      (nextProps.dataReady && !this.props.dataReady && nextProps.sessionUser)
+      // if locationKey changes
+      || (nextProps.locationKey !== this.props.locationKey)
+    ) {
+      this.props.initialiseForm(this.getInitialFormData(nextProps));
     }
     if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
@@ -228,6 +234,7 @@ ActorNewForm.propTypes = {
     PropTypes.array,
   ]),
   // autoUser: PropTypes.bool,
+  locationKey: PropTypes.string,
 };
 
 ActorNewForm.contextTypes = {
@@ -252,6 +259,7 @@ const mapStateToProps = (state, { typeId, autoUser }) => ({
   userOptions: selectUserOptions(state, typeId),
   sessionUser: autoUser && selectSessionUser(state),
   isAdmin: selectIsUserAdmin(state),
+  locationKey: selectLocationKey(state),
 });
 
 function mapDispatchToProps(

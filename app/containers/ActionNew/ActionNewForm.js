@@ -53,6 +53,7 @@ import {
   selectSessionUser,
   selectIsUserAdmin,
   selectTaxonomiesWithCategories,
+  selectLocationKey,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -93,8 +94,13 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
     }
-    // repopulate if new data becomes ready
-    if (nextProps.dataReady && !this.props.dataReady && nextProps.sessionUser) {
+    // repopulate
+    if (
+      // if new data becomes ready
+      (nextProps.dataReady && !this.props.dataReady && nextProps.sessionUser)
+      // if locationKey changes
+      || (nextProps.locationKey !== this.props.locationKey)
+    ) {
       this.props.initialiseForm(this.getInitialFormData(nextProps));
     }
     if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
@@ -405,6 +411,7 @@ ActionNewForm.propTypes = {
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
   // autoUser: PropTypes.bool,
+  locationKey: PropTypes.string,
 };
 
 ActionNewForm.contextTypes = {
@@ -413,6 +420,7 @@ ActionNewForm.contextTypes = {
 
 const mapStateToProps = (state, { typeId, autoUser }) => ({
   isAdmin: selectIsUserAdmin(state),
+  locationKey: selectLocationKey(state),
   authReady: selectReadyForAuthCheck(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   taxonomies: selectActiontypeTaxonomiesWithCats(

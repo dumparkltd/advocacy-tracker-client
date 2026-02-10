@@ -47,6 +47,7 @@ import {
   selectReadyForAuthCheck,
   selectIsUserAdmin,
   selectTaxonomiesWithCategories,
+  selectLocationKey,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -81,6 +82,10 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
     }
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
+    }
+    // repopulate if locationKey changes
+    if (nextProps.locationKey !== this.props.locationKey) {
+      this.props.initialiseForm(FORM_INITIAL);
     }
     if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
@@ -188,6 +193,7 @@ IndicatorNewForm.propTypes = {
   formId: PropTypes.string,
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  locationKey: PropTypes.string,
 };
 
 IndicatorNewForm.contextTypes = {
@@ -201,6 +207,7 @@ const mapStateToProps = (state) => ({
   actionsByActiontype: selectActionsByActiontype(state),
   isAdmin: selectIsUserAdmin(state),
   parentOptions: selectIndicatorOptions(state),
+  locationKey: selectLocationKey(state),
 });
 
 function mapDispatchToProps(

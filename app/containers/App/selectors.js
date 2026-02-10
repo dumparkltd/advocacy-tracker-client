@@ -322,6 +322,16 @@ export const selectLocation = createSelector(
     }
   }
 );
+export const selectLocationKey = createSelector(
+  getRoute,
+  (routeState) => {
+    try {
+      return routeState.getIn(['locationBeforeTransitions', 'key']);
+    } catch (error) {
+      return null;
+    }
+  }
+);
 
 export const selectLocationQuery = createSelector(
   selectLocation,
