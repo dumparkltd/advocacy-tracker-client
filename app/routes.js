@@ -33,7 +33,7 @@ export default function createRoutes(store) {
 
   return [
     {
-      path: '/',
+      path: ROUTES.HOME,
       name: 'home',
       onEnter: redirectIfSignedIn(ROUTES.POSITIONS),
       getComponent(nextState, cb) {

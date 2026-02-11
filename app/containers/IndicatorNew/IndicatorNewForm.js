@@ -15,6 +15,7 @@ import {
   getConnectionUpdatesFromFormData,
   getIndicatorFormFields,
 } from 'utils/forms';
+import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
 // import { qe } from 'utils/quasi-equals';
 import { scrollToTop } from 'utils/scroll-to-component';
@@ -46,6 +47,7 @@ import {
   selectReadyForAuthCheck,
   selectIsUserAdmin,
   selectTaxonomiesWithCategories,
+  selectLocationKey,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -53,6 +55,7 @@ import ContentHeader from 'containers/ContentHeader';
 
 import EntityFormWrapper from 'containers/EntityForm/EntityFormWrapper';
 import {
+  selectIndicatorOptions,
   selectActionsByActiontype,
 } from './selectors';
 
@@ -80,6 +83,10 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
     }
+    // repopulate if locationKey changes
+    if (nextProps.locationKey !== this.props.locationKey) {
+      this.props.initialiseForm(FORM_INITIAL);
+    }
     if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
     }
@@ -104,6 +111,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
       formId,
       inModal,
       isAdmin,
+      parentOptions,
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
@@ -122,6 +130,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
           handleSubmit={(formData) => handleSubmit(
             formData,
             actionsByActiontype,
+            parentOptions,
           )}
           saving={saving}
           handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
@@ -139,6 +148,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
             actionsByActiontype,
             onCreateOption: inModal ? null : onCreateOption,
             intl,
+            indicatorOptions: parentOptions,
             connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
               ? [
                 {
@@ -176,12 +186,14 @@ IndicatorNewForm.propTypes = {
   initialiseForm: PropTypes.func,
   actionsByActiontype: PropTypes.object,
   connectedTaxonomies: PropTypes.object,
+  parentOptions: PropTypes.object,
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   formDataPath: PropTypes.string,
   formId: PropTypes.string,
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  locationKey: PropTypes.string,
 };
 
 IndicatorNewForm.contextTypes = {
@@ -194,6 +206,8 @@ const mapStateToProps = (state) => ({
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   actionsByActiontype: selectActionsByActiontype(state),
   isAdmin: selectIsUserAdmin(state),
+  parentOptions: selectIndicatorOptions(state),
+  locationKey: selectLocationKey(state),
 });
 
 function mapDispatchToProps(
@@ -234,6 +248,7 @@ function mapDispatchToProps(
     handleSubmit: (
       formData,
       actionsByActiontype,
+      parentOptions,
     ) => {
       let saveData = formData;
       //
@@ -271,6 +286,16 @@ function mapDispatchToProps(
             arg: 'step',
             value: formData.get('step'),
           };
+        }
+      }
+      if (parentOptions) {
+        const indicatorUpdates = getCheckedValuesFromOptions(
+          formData.get('associatedIndicators'),
+        );
+        if (indicatorUpdates && indicatorUpdates.first()) {
+          saveData = saveData.setIn(['attributes', 'parent_id'], parseInt(indicatorUpdates.first(), 10));
+        } else {
+          saveData = saveData.setIn(['attributes', 'parent_id'], null);
         }
       }
       dispatch(

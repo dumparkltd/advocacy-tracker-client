@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import { List } from 'immutable';
 
 import { Form } from 'react-redux-form/immutable';
@@ -11,11 +11,18 @@ import { get } from 'lodash/object';
 import { Box, ResponsiveContext } from 'grommet';
 import { palette } from 'styled-theme';
 
+import { getAttributeLabel } from 'utils/forms';
 import { isMinSize } from 'utils/responsive';
 import qe from 'utils/quasi-equals';
 
 import { blockNavigation } from 'containers/App/actions';
-import { selectNewEntityModal, selectBlockNavigation } from 'containers/App/selectors';
+
+import {
+  selectNewEntityModal,
+  selectIsUserAdmin,
+  selectIsUserCoordinator,
+  selectBlockNavigation,
+} from 'containers/App/selectors';
 
 import ButtonForm from 'components/buttons/ButtonForm';
 import ButtonCancel from 'components/buttons/ButtonCancel';
@@ -330,8 +337,12 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
       handleSubmitRemote,
       typeLabel,
       hasFormChanges,
+      isAdmin,
+      isCoordinator,
+      intl,
       // onBlockNavigation,
     } = this.props;
+
     const {
       deleteConfirmed,
       stepsSeen,
@@ -340,9 +351,75 @@ class EntityForm extends React.Component { // eslint-disable-line react/prefer-s
     const closeMultiselectOnClickOutside = !newEntityModal || inModal;
     let byStep = fieldsByStep;
     const footerStep = byStep.find((step) => step.id === 'footer');
-    const footerFields = footerStep && footerStep.fields && footerStep.fields.filter((f) => !!f);
+    const footerFields = footerStep
+      && footerStep.fields
+      && footerStep.fields.filter(
+        (field) => !!field
+      ).map(
+        (field) => {
+          let active = true;
+          let disabledMessages = [];
+          if (field.activeForAdmin) {
+            active = isAdmin;
+            if (!active) {
+              disabledMessages = [
+                ...disabledMessages,
+                'Can only be updated by admin users',
+              ];
+            }
+          }
+          if (field.activeForAdminOrCoordinator) {
+            active = isCoordinator;
+            if (!active) {
+              disabledMessages = [
+                ...disabledMessages,
+                'Can only be updated by users with admin or coordinator roles',
+              ];
+            }
+          }
+          if (active && field.activeIf && formDataTracked && formDataTracked.attributes) {
+            active = Object.keys(field.activeIf).reduce(
+              (memo, att) => {
+                const attValue = formDataTracked.attributes[att]
+                  ? formDataTracked.attributes[att].value
+                  : false;
+                const activeCondition = field.activeIf[att];
+                if (activeCondition !== attValue) {
+                  const attLabel = getAttributeLabel({
+                    attribute: att,
+                    formatMessage: intl.formatMessage,
+                  });
+                  let attRequiredLabel;
+                  if (activeCondition === true && attValue === false) {
+                    attRequiredLabel = 'checked';
+                  } else if (activeCondition === false && attValue === true) {
+                    attRequiredLabel = 'unchecked';
+                  }
+                  disabledMessages = [
+                    ...disabledMessages,
+                    `Only editable if '${attLabel}' is '${attRequiredLabel}'.`,
+                  ];
+                }
+                return memo && (field.activeIf[att] === attValue);
+              },
+              true,
+            );
+          }
+          if (!active) {
+            return {
+              ...field,
+              disabled: true,
+              disabledMessages,
+            };
+          }
+          return field;
+        },
+      );
     const headerFields = footerFields && footerFields.filter(
-      (f) => f.model === '.attributes.draft' || f.model === '.attributes.private'
+      (f) => f.model === '.attributes.draft'
+        || f.model === '.attributes.private'
+        || f.model === '.attributes.public_api'
+        || f.model === '.attributes.is_official'
     );
     // const hasFooterChanges = footerFields && footerFields.some(
     //   (field) => {
@@ -683,11 +760,14 @@ EntityForm.propTypes = {
   validators: PropTypes.object,
   scrollContainer: PropTypes.object,
   hasFormChanges: PropTypes.bool,
-  typeLabel: PropTypes.string,
+  isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   navBlocked: PropTypes.bool,
+  typeLabel: PropTypes.string,
   routes: PropTypes.array,
   router: PropTypes.object,
   location: PropTypes.object,
+  intl: intlShape,
 };
 EntityForm.defaultProps = {
   saving: false,
@@ -695,6 +775,8 @@ EntityForm.defaultProps = {
 };
 
 const mapStateToProps = (state) => ({
+  isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
   newEntityModal: selectNewEntityModal(state),
   navBlocked: selectBlockNavigation(state),
 });
@@ -705,4 +787,4 @@ export function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(EntityForm));
+export default connect(mapStateToProps, mapDispatchToProps)(withRouter(injectIntl(EntityForm)));

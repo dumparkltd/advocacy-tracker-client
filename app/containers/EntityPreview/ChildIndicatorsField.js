@@ -6,11 +6,8 @@ import styled from 'styled-components';
 import { Box, Text } from 'grommet';
 import { injectIntl, intlShape } from 'react-intl';
 
-import { API, ACTIONTYPES } from 'themes/config';
+import { API, ACTION_INDICATOR_SUPPORTLEVELS } from 'themes/config';
 
-// import qe from 'utils/quasi-equals';
-
-import { getIndicatorColumnsForStatement } from 'utils/entities';
 import { getIndicatorConnectionField } from 'utils/fields';
 
 import {
@@ -19,16 +16,20 @@ import {
 
 import {
   selectReady,
+  selectActorConnections,
 } from 'containers/App/selectors';
 
-import {
-  selectActionIndicators,
-} from './selectors';
+
+import appMessages from 'containers/App/messages';
+
+import { selectChildIndicators } from './selectors';
 
 export const DEPENDENCIES = [
   API.INDICATORS,
   API.ACTIONS,
   API.ACTION_INDICATORS,
+  API.ACTORS,
+  API.ACTOR_ACTIONS,
 ];
 
 const SectionTitle = styled((p) => <Text size="xsmall" {...p} />)`
@@ -36,30 +37,51 @@ const SectionTitle = styled((p) => <Text size="xsmall" {...p} />)`
   font-weight: bold;
 `;
 
-export function StatementIndicatorsField({
+export function ChildIndicatorsField({
   content,
   onEntityClick,
   onLoadEntitiesIfNeeded,
   dataReady,
-  statement,
   intl,
-  isAdmin,
-  indicators,
+  // isAdmin,
+  actorConnections,
+  childIndicators,
 }) {
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
   }, [dataReady]);
   const field = getIndicatorConnectionField({
-    indicators,
+    indicators: childIndicators,
+    connections: actorConnections,
     onEntityClick,
-    // connections: indicatorConnections,
     skipLabel: true,
-    columns: getIndicatorColumnsForStatement({
-      action: statement,
-      intl,
-      isAdmin,
-      indicators,
-    }),
+    columns: [
+      {
+        id: 'main',
+        type: 'main',
+        sort: 'reference',
+        attributes: ['code', 'title'],
+      },
+      {
+        id: 'support', // one row per type,
+        type: 'stackedBarActions', // one row per type,
+        values: 'supportlevels',
+        title: 'Support',
+        options: ACTION_INDICATOR_SUPPORTLEVELS,
+        minSize: 'small',
+        info: {
+          type: 'key-categorical',
+          title: 'Support by number of countries',
+          attribute: 'supportlevel_id',
+          options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+            .sort((a, b) => a.order < b.order ? -1 : 1)
+            .map((level) => ({
+              ...level,
+              label: intl.formatMessage(appMessages.supportlevels[level.value]),
+            })),
+        },
+      },
+    ],
   });
 
   return (
@@ -80,26 +102,21 @@ export function StatementIndicatorsField({
   );
 }
 
-StatementIndicatorsField.propTypes = {
+ChildIndicatorsField.propTypes = {
   onLoadEntitiesIfNeeded: PropTypes.func,
   content: PropTypes.object, // immutable Map
-  statement: PropTypes.object, // immutable Map
-  indicators: PropTypes.object, // immutable Map
+  // indicator: PropTypes.object, // immutable Map
+  childIndicators: PropTypes.object, // immutable Map
+  actorConnections: PropTypes.object, // immutable Map
   onEntityClick: PropTypes.func,
   dataReady: PropTypes.bool,
-  isAdmin: PropTypes.bool,
   intl: intlShape,
 };
 
-const mapStateToProps = (state, { statement }) => ({
+const mapStateToProps = (state, { indicator }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
-  indicators: selectActionIndicators(
-    state,
-    {
-      id: statement.get('id'),
-      actionType: ACTIONTYPES.EXPRESS,
-    },
-  ),
+  actorConnections: selectActorConnections(state),
+  childIndicators: selectChildIndicators(state, indicator.get('id')),
 });
 export function mapDispatchToProps(dispatch) {
   return {
@@ -109,4 +126,4 @@ export function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(StatementIndicatorsField));
+export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(ChildIndicatorsField));

@@ -14,14 +14,18 @@ import styled from 'styled-components';
 
 import {
   getTitleField,
+  getEntityLinkField,
   getStatusField,
   getStatusFieldIf,
   getMetaField,
   getMarkdownField,
   getReferenceField,
+  getIndicatorConnectionField,
 } from 'utils/fields';
 // import { qe } from 'utils/quasi-equals';
-import { getEntityTitleTruncated } from 'utils/entities';
+import {
+  getEntityTitleTruncated,
+} from 'utils/entities';
 import qe from 'utils/quasi-equals';
 import { keydownHandlerPrint } from 'utils/print';
 
@@ -32,6 +36,7 @@ import {
   setSubject,
   setIncludeActorMembers,
   setIncludeInofficialStatements,
+  setIncludeUnpublishedAPIStatements,
   printView,
 } from 'containers/App/actions';
 
@@ -43,13 +48,16 @@ import {
   selectSubjectQuery,
   selectIncludeActorMembers,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectIsPrintView,
   selectPrintConfig,
+  selectActorConnections,
 } from 'containers/App/selectors';
 
 import {
   ROUTES,
   ACTORTYPES,
+  ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
 import Loading from 'components/Loading';
@@ -77,6 +85,7 @@ import messages from './messages';
 import {
   selectViewEntity,
   selectActorsByType,
+  selectChildIndicators,
 } from './selectors';
 
 import { DEPENDENCIES } from './constants';
@@ -98,7 +107,9 @@ export function IndicatorView({
   onSetSubject,
   subject,
   onSetIncludeInofficial,
+  onSetIncludeUnpublishedAPI,
   includeInofficial,
+  includeUnpublishedAPI,
   onSetIncludeActorMembers,
   includeActorMembers,
   onLoadEntitiesIfNeeded,
@@ -106,6 +117,8 @@ export function IndicatorView({
   onSetPrintView,
   isPrintView,
   printArgs,
+  childIndicators,
+  actorConnections,
 }) {
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
@@ -129,9 +142,10 @@ export function IndicatorView({
     };
   }, []);
   const countries = actorsByActortype && actorsByActortype.get(parseInt(ACTORTYPES.COUNTRY, 10));
+  const isAggregate = viewEntity && viewEntity.getIn(['attributes', 'is_parent']);
   // view subject
-  let viewSubject = subject || 'statements';
-  const validViewSubjects = ['statements', 'actors'];
+  let viewSubject = subject || (isAggregate ? 'actors' : 'statements');
+  const validViewSubjects = isAggregate ? ['actors'] : ['statements', 'actors'];
   if (validViewSubjects.indexOf(viewSubject) === -1) {
     viewSubject = validViewSubjects.length > 0 ? validViewSubjects[0] : null;
   }
@@ -198,7 +212,6 @@ export function IndicatorView({
                           viewEntity,
                           'code',
                           isAdmin,
-                          false, // showLabel,
                         ),
                         getTitleField(viewEntity),
                         // order
@@ -207,15 +220,78 @@ export function IndicatorView({
                           'reference',
                           isAdmin,
                         ),
+                        getReferenceField(
+                          viewEntity,
+                          'code_api',
+                          isAdmin,
+                        ),
                       ],
                     }}
                   />
+                  {viewEntity.get('parent') && (
+                    <FieldGroup
+                      group={{ // fieldGroup
+                        label: appMessages.attributes.parent_id,
+                        fields: [
+                          getEntityLinkField(
+                            viewEntity.get('parent'),
+                            '/topic',
+                            '',
+                            'Parent topic'
+                          ),
+                        ],
+                      }}
+                    />
+                  )}
+                  {childIndicators && childIndicators.size > 0 && (
+                    <FieldGroup
+                      group={{
+                        label: appMessages.nav.indicators,
+                        fields: [
+                          getIndicatorConnectionField({
+                            indicators: childIndicators,
+                            connections: actorConnections,
+                            onEntityClick,
+                            skipLabel: true,
+                            columns: [
+                              {
+                                id: 'main',
+                                type: 'main',
+                                sort: 'reference',
+                                attributes: ['code', 'title'],
+                              },
+                              {
+                                id: 'support', // one row per type,
+                                type: 'stackedBarActions', // one row per type,
+                                values: 'supportlevels',
+                                title: 'Support',
+                                options: ACTION_INDICATOR_SUPPORTLEVELS,
+                                minSize: 'small',
+                                info: {
+                                  type: 'key-categorical',
+                                  title: 'Support by number of countries',
+                                  attribute: 'supportlevel_id',
+                                  options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
+                                    .sort((a, b) => a.order < b.order ? -1 : 1)
+                                    .map((level) => ({
+                                      ...level,
+                                      label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                                    })),
+                                },
+                              },
+                            ],
+                          }),
+                        ],
+                      }}
+                    />
+                  )}
                 </Main>
                 {isMember && !isPrintView && (
                   <Aside>
                     <FieldGroup
                       group={{
                         fields: [
+                          getStatusField(viewEntity, 'public_api'),
                           getStatusField(viewEntity),
                           (isAdmin || isMine) && getStatusFieldIf({
                             entity: viewEntity,
@@ -248,9 +324,12 @@ export function IndicatorView({
                     <CountryMap
                       countries={countries}
                       indicatorId={viewEntity.get('id')}
+                      isAggregateIndicator={isAggregate}
                       onEntityClick={(id, path) => onEntityClick(id, path || ROUTES.ACTOR)}
                       includeInofficial={includeInofficial}
                       onSetIncludeInofficial={onSetIncludeInofficial}
+                      includeUnpublishedAPI={includeUnpublishedAPI}
+                      onSetIncludeUnpublishedAPI={onSetIncludeUnpublishedAPI}
                       includeActorMembers={includeActorMembers}
                       onSetIncludeActorMembers={onSetIncludeActorMembers}
                     />
@@ -258,12 +337,14 @@ export function IndicatorView({
                   <Box margin={{ vertical: 'large' }}>
                     <PrintHide>
                       <SubjectButtonGroup margin={{ horizontal: 'medium' }}>
-                        <SubjectButton
-                          onClick={() => onSetSubject('statements')}
-                          active={viewSubject === 'statements'}
-                        >
-                          <Text size="large">Statements</Text>
-                        </SubjectButton>
+                        {!isAggregate && (
+                          <SubjectButton
+                            onClick={() => onSetSubject('statements')}
+                            active={viewSubject === 'statements'}
+                          >
+                            <Text size="large">Statements</Text>
+                          </SubjectButton>
+                        )}
                         <SubjectButton
                           onClick={() => onSetSubject('actors')}
                           active={viewSubject === 'actors'}
@@ -272,7 +353,7 @@ export function IndicatorView({
                         </SubjectButton>
                       </SubjectButtonGroup>
                     </PrintHide>
-                    {(viewSubject === 'statements' || (isPrintView && printArgs && printArgs.printTabs === 'all')) && (
+                    {!isAggregate && (viewSubject === 'statements' || (isPrintView && printArgs && printArgs.printTabs === 'all')) && (
                       <>
                         {' '}
                         {isPrintView
@@ -302,6 +383,7 @@ export function IndicatorView({
                         <Actors
                           viewEntity={viewEntity}
                           isAdmin={isAdmin}
+                          isAggregateIndicator={isAggregate}
                         />
                       </>
                     )}
@@ -325,6 +407,8 @@ IndicatorView.propTypes = {
   onEntityClick: PropTypes.func,
   onSetPrintView: PropTypes.func,
   actorsByActortype: PropTypes.object,
+  childIndicators: PropTypes.object,
+  actorConnections: PropTypes.object,
   params: PropTypes.object,
   myId: PropTypes.string,
   isMember: PropTypes.bool,
@@ -332,7 +416,9 @@ IndicatorView.propTypes = {
   subject: PropTypes.string,
   onSetSubject: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
+  onSetIncludeUnpublishedAPI: PropTypes.func,
   includeInofficial: PropTypes.bool,
+  includeUnpublishedAPI: PropTypes.bool,
   onSetIncludeActorMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   isPrintView: PropTypes.bool,
@@ -349,9 +435,12 @@ const mapStateToProps = (state, props) => ({
   actorsByActortype: selectActorsByType(state, props.params.id),
   subject: selectSubjectQuery(state),
   includeInofficial: selectIncludeInofficialStatements(state),
+  includeUnpublishedAPI: selectIncludeUnpublishedAPIStatements(state),
   includeActorMembers: selectIncludeActorMembers(state),
   isPrintView: selectIsPrintView(state),
   printArgs: selectPrintConfig(state),
+  childIndicators: selectChildIndicators(state, props.params.id),
+  actorConnections: selectActorConnections(state),
 });
 
 function mapDispatchToProps(dispatch, props) {
@@ -373,6 +462,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetIncludeInofficial: (value) => {
       dispatch(setIncludeInofficialStatements(value));
+    },
+    onSetIncludeUnpublishedAPI: (value) => {
+      dispatch(setIncludeUnpublishedAPIStatements(value));
     },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));

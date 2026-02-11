@@ -46,6 +46,36 @@ export default defineMessages({
       defaultMessage: 'No statement on topic',
     },
   },
+  supportlevelsAggregate: {
+    0: {
+      id: 'app.containers.App.supportlevelsAggregate.0',
+      defaultMessage: 'No support for any must-have',
+    },
+    1: {
+      id: 'app.containers.App.supportlevelsAggregate.1',
+      defaultMessage: 'Strong support for all must-haves',
+    },
+    2: {
+      id: 'app.containers.App.supportlevelsAggregate.2',
+      defaultMessage: 'Some support for all must-haves',
+    },
+    3: {
+      id: 'app.containers.App.supportlevelsAggregate.3',
+      defaultMessage: 'Some support for any must-have',
+    },
+    4: {
+      id: 'app.containers.App.supportlevelsAggregate.4',
+      defaultMessage: 'UNUSED',
+    },
+    5: {
+      id: 'app.containers.App.supportlevelsAggregate.5',
+      defaultMessage: 'UNUSED',
+    },
+    99: {
+      id: 'app.containers.App.supportlevelsAggregate.99',
+      defaultMessage: 'No statements on must-haves',
+    },
+  },
   actortypes: {
     single: {
       id: 'app.containers.App.actortypes.single',
@@ -519,6 +549,10 @@ export default defineMessages({
       id: 'app.containers.App.buttons.close',
       defaultMessage: 'Close',
     },
+    closeMultiselect: {
+      id: 'app.containers.App.buttons.closeMultiselect',
+      defaultMessage: 'Confirm',
+    },
     add: {
       id: 'app.containers.App.buttons.add',
       defaultMessage: 'New',
@@ -761,6 +795,10 @@ export default defineMessages({
       id: 'app.containers.App.placeholders.code',
       defaultMessage: 'ID',
     },
+    code_api: {
+      id: 'app.containers.App.placeholders.code_api',
+      defaultMessage: 'ID (GPN)',
+    },
     prefix: {
       id: 'app.containers.App.placeholders.prefix',
       defaultMessage: 'Dr/Ms/Mr',
@@ -783,6 +821,30 @@ export default defineMessages({
     },
     content: {
       id: 'app.containers.App.placeholders.content',
+      defaultMessage: 'Enter content',
+    },
+    source_api: {
+      id: 'app.containers.App.placeholders.source_api',
+      defaultMessage: 'Enter content',
+    },
+    quote_api: {
+      id: 'app.containers.App.placeholders.quote_api',
+      defaultMessage: 'Enter content',
+    },
+    short_api: {
+      id: 'app.containers.App.placeholders.short_api',
+      defaultMessage: 'Enter content',
+    },
+    teaser_api: {
+      id: 'app.containers.App.placeholders.teaser_api',
+      defaultMessage: 'Enter content',
+    },
+    description_api: {
+      id: 'app.containers.App.placeholders.description_api',
+      defaultMessage: 'Enter content',
+    },
+    annotation_api: {
+      id: 'app.containers.App.placeholders.annotation_api',
       defaultMessage: 'Enter content',
     },
     date_comment: {
@@ -831,6 +893,14 @@ export default defineMessages({
       id: 'app.containers.App.attributes.is_archive',
       defaultMessage: 'Archived?',
     },
+    is_official: {
+      id: 'app.containers.App.attributes.is_official',
+      defaultMessage: 'Official?',
+    },
+    public_api: {
+      id: 'app.containers.App.attributes.public_api',
+      defaultMessage: 'Publish to GPN?',
+    },
     private: {
       id: 'app.containers.App.attributes.private',
       defaultMessage: 'Confidentiality',
@@ -846,6 +916,10 @@ export default defineMessages({
     code: {
       id: 'app.containers.App.attributes.code',
       defaultMessage: 'Code',
+    },
+    code_api: {
+      id: 'app.containers.App.attributes.code_api',
+      defaultMessage: 'Topic ID in GPN',
     },
     prefix: {
       id: 'app.containers.App.attributes.prefix',
@@ -867,6 +941,10 @@ export default defineMessages({
       id: 'app.containers.App.attributes.description',
       defaultMessage: 'Description',
     },
+    description_api: {
+      id: 'app.containers.App.attributes.description_api',
+      defaultMessage: 'Description (used in GPN)',
+    },
     comment: {
       id: 'app.containers.App.attributes.comment',
       defaultMessage: 'Comment',
@@ -874,6 +952,26 @@ export default defineMessages({
     content: {
       id: 'app.containers.App.attributes.content',
       defaultMessage: 'Comment',
+    },
+    source_api: {
+      id: 'app.containers.App.attributes.source_api',
+      defaultMessage: 'Name of the statement source (used in GPN)',
+    },
+    quote_api: {
+      id: 'app.containers.App.attributes.quote_api',
+      defaultMessage: 'The quote from the statement (used in GPN)',
+    },
+    short_api: {
+      id: 'app.containers.App.attributes.short_api',
+      defaultMessage: 'Short title (also used in GPN)',
+    },
+    teaser_api: {
+      id: 'app.containers.App.attributes.teaser_api',
+      defaultMessage: 'Teaser text (used in GPN)',
+    },
+    annotation_api: {
+      id: 'app.containers.App.attributes.annotation_api',
+      defaultMessage: 'Map annotation (used in GPN)',
     },
     url: {
       id: 'app.containers.App.attributes.url',
@@ -1039,6 +1137,22 @@ export default defineMessages({
     },
   },
   attributeInfo: {
+    annotation_api: {
+      id: 'app.containers.App.attributeInfo.annotation_api',
+      defaultMessage: 'info-draft',
+    },
+    description_api: {
+      id: 'app.containers.App.attributeInfo.description_api',
+      defaultMessage: 'info-draft',
+    },
+    teaser_api: {
+      id: 'app.containers.App.attributeInfo.teaser_api',
+      defaultMessage: 'info-draft',
+    },
+    short_api: {
+      id: 'app.containers.App.attributeInfo.short_api',
+      defaultMessage: 'info-draft',
+    },
     draft: {
       id: 'app.containers.App.attributeInfo.draft',
       defaultMessage: 'info-draft',
@@ -1065,7 +1179,7 @@ export default defineMessages({
     },
     is_archive: {
       id: 'app.containers.App.attributeInfo.is_archive',
-      defaultMessage: 'population',
+      defaultMessage: 'is_archive',
     },
     is_archive_true: {
       id: 'app.containers.App.attributeInfo.is_archive_true',
@@ -1074,6 +1188,50 @@ export default defineMessages({
     is_archive_false: {
       id: 'app.containers.App.attributeInfo.is_archive_false',
       defaultMessage: 'info-is_archive-false',
+    },
+    is_official: {
+      id: 'app.containers.App.attributeInfo.is_official',
+      defaultMessage: 'is_official',
+    },
+    is_official_true: {
+      id: 'app.containers.App.attributeInfo.is_official_true',
+      defaultMessage: 'info-is_official-true',
+    },
+    is_official_false: {
+      id: 'app.containers.App.attributeInfo.is_official_false',
+      defaultMessage: 'info-is_official-false',
+    },
+    public_api: {
+      id: 'app.containers.App.attributeInfo.public_api',
+      defaultMessage: 'public_api',
+    },
+    public_api_indicators: {
+      id: 'app.containers.App.attributeInfo.public_api_indicators',
+      defaultMessage: 'public_api',
+    },
+    public_api_true: {
+      id: 'app.containers.App.attributeInfo.public_api_true',
+      defaultMessage: 'info-public_api-true',
+    },
+    public_api_false: {
+      id: 'app.containers.App.attributeInfo.public_api_false',
+      defaultMessage: 'info-public_api-false',
+    },
+    public_api_true_indicators: {
+      id: 'app.containers.App.attributeInfo.public_api_true_indicators',
+      defaultMessage: 'info-public_api-true',
+    },
+    public_api_false_indicators: {
+      id: 'app.containers.App.attributeInfo.public_api_false_indicators',
+      defaultMessage: 'info-public_api-false',
+    },
+    source_api: {
+      id: 'app.containers.App.attributeInfo.source_api',
+      defaultMessage: 'info-public_api-false',
+    },
+    quote_api: {
+      id: 'app.containers.App.attributeInfo.quote_api',
+      defaultMessage: 'info-public_api-false',
     },
   },
   nav: {
@@ -2379,6 +2537,16 @@ export default defineMessages({
         defaultMessage: 'Active',
       },
     },
+    officialStatuses: {
+      official: {
+        id: 'app.containers.App.ui.officialStatuses.official',
+        defaultMessage: 'Official',
+      },
+      inofficial: {
+        id: 'app.containers.App.ui.officialStatuses.inofficial',
+        defaultMessage: 'Inofficial',
+      },
+    },
     privacyStatuses: {
       private: {
         id: 'app.containers.App.ui.privacyStatuses.private',
@@ -2387,6 +2555,16 @@ export default defineMessages({
       public: {
         id: 'app.containers.App.ui.privacyStatuses.public',
         defaultMessage: 'Not confidential',
+      },
+    },
+    publicAPIstatuses: {
+      privateAPI: {
+        id: 'app.containers.App.ui.publicAPIstatuses.privateAPI',
+        defaultMessage: 'Published on GPN',
+      },
+      publicAPI: {
+        id: 'app.containers.App.ui.publicAPIstatuses.publicAPI',
+        defaultMessage: 'Not published on GPN',
       },
     },
     notificationStatuses: {
@@ -2399,13 +2577,13 @@ export default defineMessages({
         defaultMessage: 'Notifications disabled',
       },
     },
-    publishStatuses: {
+    draftStatuses: {
       draft: {
-        id: 'app.containers.App.ui.publishStatuses.draft',
+        id: 'app.containers.App.ui.draftStatuses.draft',
         defaultMessage: 'Draft',
       },
-      public: {
-        id: 'app.containers.App.ui.publishStatuses.public',
+      final: {
+        id: 'app.containers.App.ui.draftStatuses.final',
         defaultMessage: 'Completed',
       },
     },
@@ -2462,11 +2640,15 @@ export default defineMessages({
     statementOptions: {
       includeMemberships: {
         id: 'app.containers.App.ui.statementOptions.includeMemberships',
-        defaultMessage: 'Include positions of country groups',
+        defaultMessage: 'Include positions of groups',
       },
       excludeInofficial: {
         id: 'app.containers.App.ui.statementOptions.excludeInofficial',
         defaultMessage: 'Only show "official" statements',
+      },
+      excludeUnpublishedAPI: {
+        id: 'app.containers.App.ui.statementOptions.excludeUnpublishedAPI',
+        defaultMessage: 'Only show statements published to GPN',
       },
     },
   },

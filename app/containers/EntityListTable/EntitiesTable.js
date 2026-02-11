@@ -487,10 +487,12 @@ export function EntitiesTable({
                       {(
                         col.type === 'plain'
                         || col.type === 'attribute'
+                        || col.type === 'status'
                         || col.type === 'amount'
                         || col.type === 'userrole'
                         || col.type === 'date'
                         || col.type === 'topicPosition'
+                        || col.type === 'positionStatementAuthority'
                       ) && (
                         <CellBodyPlain
                           entity={entity[col.id]}
@@ -545,7 +547,6 @@ export function EntitiesTable({
                       )}
                       {(
                         col.type === 'taxonomy'
-                        || col.type === 'positionStatementAuthority'
                       ) && (
                         <CellBodyCategories
                           entity={entity[col.id]}

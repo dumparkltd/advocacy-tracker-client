@@ -99,6 +99,7 @@ export function EntityFormWrapper({
       return false;
     }
   );
+
   return (
     <div>
       {!submitValid && (
@@ -116,21 +117,21 @@ export function EntityFormWrapper({
         />
       )}
       {saveError && (
-        <HintP>
-          <Hint>
-            <p>
-              To not lose your changes, you can load the Advocacy Tracker in a new/separate tab/window, and:
-            </p>
-            <ul>
-              <li>
-                Renew your login, if needed, and then come back here to proceed with saving your data.
-              </li>
-              <li>
-                Load and review the latest version of this item from the server, if available, and re-enter your changes there.
-              </li>
-            </ul>
-          </Hint>
-        </HintP>
+        <>
+          <HintP>
+            <Hint>
+              To prevent losing your form data, it is recommended to load the Advocacy Tracker in a separate tab/window, especially when your login expired or when the record you are editing has become outdated.
+            </Hint>
+          </HintP>
+          <ul>
+            <li>
+              <Hint>Login expired: Log in in new tab/window and proceed with saving your data in current tab/window.</Hint>
+            </li>
+            <li>
+              <Hint>Record outdated: Load form in new tab/window for comparison and reconcile any differences.</Hint>
+            </li>
+          </ul>
+        </>
       )}
       {deleteError && <Messages type="error" messages={deleteError} />}
       {(saveSending || deleteSending || !fieldsByStep) && <Loading />}

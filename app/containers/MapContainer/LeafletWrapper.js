@@ -119,6 +119,7 @@ export function LeafletWrapper({
   includeSecondaryMembers,
   mapSubject,
   fitBounds,
+  fitBoundsOnce,
   options = {},
   projection = 'robinson',
   styleType,
@@ -309,12 +310,52 @@ export function LeafletWrapper({
       });
     }
   };
+
+  const zoomToLayer = ({
+    data,
+    overlayRef,
+    mapRef,
+  }) => {
+    if (
+      data
+      && data.length > 0
+      && overlayRef
+      && overlayRef.current
+      && overlayRef.current.getLayers()
+      && overlayRef.current.getLayers().length > 0
+    ) {
+      const jsonLayer = overlayRef.current.getLayers()[0];
+      if (jsonLayer.getBounds) {
+        const boundsZoom = mapRef.current.getBoundsZoom(
+          jsonLayer.getBounds(),
+          false, // inside,
+          [20, 20], // padding in px
+        );
+        const boundsCenter = jsonLayer.getBounds().getCenter();
+        // add zoom level to account for custom proj issue
+        const ZOOM_OFFSET = 0;
+        const MAX_ZOOM = 7;
+        mapRef.current.setView(
+          boundsCenter,
+          Math.min(
+            Math.max(boundsZoom - ZOOM_OFFSET, 0),
+            MAX_ZOOM,
+          ),
+          {
+            animate: false,
+          },
+        );
+      }
+    }
+  }
   const onFeatureOver = (e, feature) => {
     if (e && L.DomEvent) L.DomEvent.stopPropagation(e);
     if (!e || !feature || feature.id) setFeatureOver(null);
     if (feature && feature.id) setFeatureOver(feature.id);
   };
   useLayoutEffect(() => {
+    // console.log('[printArgs]')
+
     if (mapRef.current) {
       mapRef.current.invalidateSize();
     }
@@ -340,6 +381,8 @@ export function LeafletWrapper({
   //   };
   // }, [ref]);
   useEffect(() => {
+    // console.log('[]')
+
     mapRef.current = L.map(mapId, leafletOptions).on(mapEvents);
     // create an background rectangle
     if (customMapProjection && customMapProjection.addBBox) {
@@ -378,6 +421,8 @@ export function LeafletWrapper({
 
   // add countryFeatures basemap
   useEffect(() => {
+    // console.log('[countryFeatures]')
+
     if (countryFeatures) {
       countryLayerGroupRef.current.clearLayers();
       const jsonLayer = L.geoJSON(
@@ -394,6 +439,8 @@ export function LeafletWrapper({
 
   // add countryPointData
   useEffect(() => {
+    // console.log('[countryPointData, zoom, indicator, tooltip, mapSubject, printArgs, isPrintView]')
+
     countryPointOverlayGroupRef.current.clearLayers();
     const showMarkers = !isPrintView || (printArgs && printArgs.printMapMarkers);
     if (countryPointData && countryPointData.length > 0 && showMarkers) {
@@ -420,6 +467,8 @@ export function LeafletWrapper({
 
   // add countryData
   useEffect(() => {
+    // console.log('[countryData, indicator, tooltip, mapSubject, zoom]')
+
     countryOverlayGroupRef.current.clearLayers();
     if (countryData && countryData.length > 0) {
       const jsonLayer = L.geoJSON(
@@ -492,80 +541,56 @@ export function LeafletWrapper({
   }, [countryData, indicator, tooltip, mapSubject, zoom]);
   // add zoom to countryData
   useEffect(() => {
-    if (
-      fitBounds
-      && countryData
-      && countryData.length > 0
-      && countryOverlayGroupRef
-      && countryOverlayGroupRef.current
-      && countryOverlayGroupRef.current.getLayers()
-      && countryOverlayGroupRef.current.getLayers().length > 0
-    ) {
-      const jsonLayer = countryOverlayGroupRef.current.getLayers()[0];
-      if (jsonLayer.getBounds) {
-        const boundsZoom = mapRef.current.getBoundsZoom(
-          jsonLayer.getBounds(),
-          false, // inside,
-          [20, 20], // padding in px
-        );
-        const boundsCenter = jsonLayer.getBounds().getCenter();
-        // add zoom level to account for custom proj issue
-        const ZOOM_OFFSET = 0;
-        const MAX_ZOOM = 7;
-        mapRef.current.setView(
-          boundsCenter,
-          Math.min(
-            Math.max(boundsZoom - ZOOM_OFFSET, 0),
-            MAX_ZOOM,
-          ),
-          {
-            animate: false,
-          },
-        );
-      }
+    // console.log('[countryData]', countryData)
+    if (fitBounds && countryData) {
+      zoomToLayer({
+        data: countryData,
+        overlayRef: countryOverlayGroupRef,
+        mapRef,
+      });
     }
   }, [countryData]);
+
+  useEffect(() => {
+    // console.log('[]')
+
+    if (fitBoundsOnce && countryData) {
+      zoomToLayer({
+        data: countryData,
+        overlayRef: countryOverlayGroupRef,
+        mapRef,
+      });
+    }
+  }, []);
   // add zoom to locationData
   useEffect(() => {
-    if (
-      fitBounds
-      && locationData
-      && locationData.length > 0
-      && locationOverlayGroupRef
-      && locationOverlayGroupRef.current
-      && locationOverlayGroupRef.current.getLayers()
-      && locationOverlayGroupRef.current.getLayers().length > 0
-    ) {
-      const jsonLayer = locationOverlayGroupRef.current.getLayers()[0];
-      if (jsonLayer.getBounds) {
-        const boundsZoom = mapRef.current.getBoundsZoom(
-          jsonLayer.getBounds(),
-          false, // inside,
-          [20, 20], // padding in px
-        );
-        const boundsCenter = jsonLayer.getBounds().getCenter();
-        // add zoom level to account for custom proj issue
-        const ZOOM_OFFSET = 0;
-        const MAX_ZOOM = 7;
-        mapRef.current.setView(
-          boundsCenter,
-          Math.min(
-            Math.max(
-              boundsZoom - ZOOM_OFFSET,
-              0,
-            ),
-            MAX_ZOOM,
-          ),
-          {
-            animate: false,
-          },
-        );
-      }
+    // console.log('[locationData]')
+
+    if (fitBounds && locationData) {
+      zoomToLayer({
+        data: locationData,
+        overlayRef: locationOverlayGroupRef,
+        mapRef,
+      });
     }
   }, [locationData]);
+  // add zoom to locationData
+  useEffect(() => {
+    // console.log('[]')
+
+    if (fitBoundsOnce && locationData) {
+      zoomToLayer({
+        data: locationData,
+        overlayRef: locationOverlayGroupRef,
+        mapRef,
+      });
+    }
+  }, []);
 
   // add locationData
   useEffect(() => {
+    // console.log('[locationData, indicator, tooltip, mapSubject, circleLayerConfig]')
+
     locationOverlayGroupRef.current.clearLayers();
     if (locationData && locationData.length > 0) {
       const layer = L.featureGroup(null, { pane: 'overlayPane' });
@@ -584,6 +609,8 @@ export function LeafletWrapper({
 
   // highlight tooltip feature
   useEffect(() => {
+    // console.log('[tooltip, mapSubject, includeSecondaryMembers]')
+
     countryTooltipGroupRef.current.clearLayers();
     if (countryData && tooltip && tooltip.features && tooltip.features.length > 0) {
       tooltip.features.forEach(
@@ -622,6 +649,8 @@ export function LeafletWrapper({
   }, [tooltip, mapSubject, includeSecondaryMembers]);
 
   useEffect(() => {
+    // console.log('[featureOver]')
+
     countryOverGroupRef.current.clearLayers();
     if (featureOver && countryData) {
       const jsonLayer = L.geoJSON(
@@ -635,6 +664,7 @@ export function LeafletWrapper({
   }, [featureOver]);
   // update tooltip
   useEffect(() => {
+    // console.log('[mapSubject, countryData]')
     if (tooltip && countryData) {
       if (tooltip.features && tooltip.features.length > 0) {
         setTooltip({
@@ -693,6 +723,7 @@ LeafletWrapper.propTypes = {
   maxValueCountries: PropTypes.number,
   includeSecondaryMembers: PropTypes.bool,
   fitBounds: PropTypes.bool,
+  fitBoundsOnce: PropTypes.bool,
   interactive: PropTypes.bool,
   scrollWheelZoom: PropTypes.bool,
   isPrintView: PropTypes.bool,

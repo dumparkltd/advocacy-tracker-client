@@ -6,6 +6,9 @@ import styled from 'styled-components';
 import isNumber from 'utils/is-number';
 import { ResponsiveContext } from 'grommet';
 import { Map, List, fromJS } from 'immutable';
+
+import { PAGE_SIZE, PAGE_SIZE_MAX } from 'themes/config';
+
 import { isMinSize } from 'utils/responsive';
 
 import {
@@ -67,8 +70,6 @@ const ListEntitiesMain = styled.div`
 const ListEntitiesEmpty = styled.div``;
 
 const CONNECTIONMAX = 5;
-const PAGE_SIZE = 20;
-const PAGE_SIZE_MAX = 100;
 
 const transformMessage = (msg, entityId, intl) => intl
   ? intl.formatMessage(messages.entityNoLongerPresent, { entityId })
@@ -134,6 +135,7 @@ export function EntityListTable({
   };
   const [showAllConnections, setShowAllConnections] = useState(false);
   const [localSort, setLocalSort] = useState(sortDefault);
+  const prevDepsRef = React.useRef({ typeId, mapSubject, size });
 
   const updateHiddenColumns = () => {
     // console.log('updateHiddenColumns')
@@ -167,8 +169,15 @@ export function EntityListTable({
     });
   };
   React.useLayoutEffect(() => {
-    updateHiddenColumns();
-  }, [typeId, mapSubject, size]);
+    const depsChanged = prevDepsRef.current.typeId !== typeId
+      || prevDepsRef.current.mapSubject !== mapSubject
+      || prevDepsRef.current.size !== size;
+
+    if (depsChanged) {
+      updateHiddenColumns();
+      prevDepsRef.current = { typeId, mapSubject, size };
+    }
+  }, [typeId, mapSubject, size, updateHiddenColumns]);
 
   // list options
   const {

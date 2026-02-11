@@ -18,6 +18,7 @@ import { jumpToComponent } from 'utils/scroll-to-component';
 import {
   getActiontypePreviewFields,
   getActortypePreviewFields,
+  getIndicatorPreviewFields,
 } from 'utils/fields';
 
 import Messages from 'components/Messages';
@@ -42,6 +43,7 @@ import {
   selectIncludeActorMembers,
   selectIncludeActorChildren,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectTaxonomiesWithCategories,
   selectIsPrintView,
   selectSearchQuery,
@@ -57,6 +59,7 @@ import {
   setIncludeActorMembers,
   setIncludeActorChildren,
   setIncludeInofficialStatements,
+  setIncludeUnpublishedAPIStatements,
   saveMultipleEntities,
   newMultipleEntities,
   deleteMultipleEntities,
@@ -137,7 +140,7 @@ const STATE_INITIAL = {
   downloadActive: false,
 };
 const reducePreviewItem = ({
-  item, id, path, intl, onUpdatePath,
+  item, id, path, intl, onUpdatePath, isCoordinator, isMember,
 }) => {
   if (id && path) {
     return { entity: { path, id } };
@@ -179,19 +182,27 @@ const reducePreviewItem = ({
     const label = intl.formatMessage(
       appMessages.entities[`actions_${item.getIn(['attributes', 'measuretype_id'])}`].single
     );
-    const content = {
-      header: {
-        aboveTitle: label,
-        title: item && item.getIn(['attributes', 'title']),
-        titlePath: `${ROUTES.ACTION}/${item.get('id')}`,
-        topActions: [{
+    let topActions = [];
+    const canEdit = item.getIn(['attributes', 'public_api']) ? isCoordinator : isMember;
+    if (canEdit) {
+      topActions = [
+        ...topActions,
+        {
           label: 'Edit',
           path: `${ROUTES.ACTION}${ROUTES.EDIT}/${item.get('id')}`,
           onClick: (e) => {
             if (e && e.preventDefault) e.preventDefault();
             onUpdatePath(`${ROUTES.ACTION}${ROUTES.EDIT}/${item.get('id')}`);
           },
-        }],
+        },
+      ];
+    }
+    const content = {
+      header: {
+        aboveTitle: label,
+        title: item && item.getIn(['attributes', 'title']),
+        titlePath: `${ROUTES.ACTION}/${item.get('id')}`,
+        topActions,
       },
       fields: getActiontypePreviewFields(item.getIn(['attributes', 'measuretype_id'])),
       item,
@@ -213,7 +224,16 @@ const reducePreviewItem = ({
       header: {
         aboveTitle: label,
         title: item && item.getIn(['attributes', 'title']),
+        topActions: [{
+          label: 'Edit',
+          path: `${ROUTES.INDICATOR}${ROUTES.EDIT}/${item.get('id')}`,
+          onClick: (e) => {
+            if (e && e.preventDefault) e.preventDefault();
+            onUpdatePath(`${ROUTES.INDICATOR}${ROUTES.EDIT}/${item.get('id')}`);
+          },
+        }],
       },
+      fields: getIndicatorPreviewFields(),
       item,
       footer: {
         primaryLink: item && {
@@ -449,9 +469,11 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       onSetIncludeActorMembers,
       onSetIncludeActorChildren,
       onSetIncludeInofficial,
+      onSetIncludeUnpublishedAPI,
       includeActorMembers,
       includeActorChildren,
       includeInofficial,
+      includeUnpublishedAPI,
       headerOptions,
       taxonomies,
       connectedTaxonomies,
@@ -494,6 +516,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
       ? entityIdsSelected.filter((id) => entities.map((entity) => entity.get('id')).includes(id))
       : entityIdsSelected;
     const isMember = canEdit && hasUserRole[USER_ROLES.MEMBER.value];
+    const isCoordinator = canEdit && hasUserRole[USER_ROLES.COORDINATOR.value];
     const isAdmin = canEdit && hasUserRole[USER_ROLES.ADMIN.value];
 
     const filters = currentFilters(
@@ -691,7 +714,7 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                 {showList && dataReady && (
                   <EntitiesListView
                     reducePreviewItem={({ item, id, path }) => reducePreviewItem({
-                      item, id, path, intl, onUpdatePath,
+                      item, id, path, intl, onUpdatePath, isCoordinator, isMember,
                     })}
                     onScrollToTop={this.scrollToTop}
                     searchQuery={searchQuery}
@@ -748,9 +771,11 @@ export class EntityList extends React.PureComponent { // eslint-disable-line rea
                     onSetIncludeActorMembers={onSetIncludeActorMembers}
                     onSetIncludeActorChildren={onSetIncludeActorChildren}
                     onSetIncludeInofficial={onSetIncludeInofficial}
+                    onSetIncludeUnpublishedAPI={onSetIncludeUnpublishedAPI}
                     includeActorMembers={includeActorMembers}
                     includeActorChildren={includeActorChildren}
                     includeInofficial={includeInofficial}
+                    includeUnpublishedAPI={includeUnpublishedAPI}
                     onClearFilters={this.onClearFilters}
                   />
                 )}
@@ -955,9 +980,11 @@ EntityList.propTypes = {
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeActorChildren: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
+  onSetIncludeUnpublishedAPI: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   includeActorChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
+  includeUnpublishedAPI: PropTypes.bool,
   onEntitiesDelete: PropTypes.func,
   onUpdateFilters: PropTypes.func,
   onUpdatePath: PropTypes.func,
@@ -986,6 +1013,7 @@ const mapStateToProps = (state) => ({
   includeActorMembers: selectIncludeActorMembers(state),
   includeActorChildren: selectIncludeActorChildren(state),
   includeInofficial: selectIncludeInofficialStatements(state),
+  includeUnpublishedAPI: selectIncludeUnpublishedAPIStatements(state),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   isPrintView: selectIsPrintView(state),
   searchQuery: selectSearchQuery(state),
@@ -1061,6 +1089,9 @@ function mapDispatchToProps(dispatch, props) {
     },
     onSetIncludeInofficial: (active) => {
       dispatch(setIncludeInofficialStatements(active));
+    },
+    onSetIncludeUnpublishedAPI: (active) => {
+      dispatch(setIncludeUnpublishedAPIStatements(active));
     },
     onEntitiesDelete: (path, entityIdsSelected) => {
       dispatch(deleteMultipleEntities({

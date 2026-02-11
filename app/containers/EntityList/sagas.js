@@ -39,15 +39,16 @@ export function* updateQuery({ value }) {
 }
 
 export function* updateQueryMultiple({ values }) {
-  // console.log('updateQueryMultiple', values && values.toJS())
   const params = values.filter(
     (value) => value.get('hasChanged')
   ).map(
     (value) => ({
       arg: value.get('query'),
       value: value.get('value') || 1,
+      prevValue: value.get('prevValue'),
       replace: value.get('replace'),
       add: value.get('checked'),
+      multipleAttributeValues: value.get('multipleAttributeValues'),
       remove: !value.get('checked'),
     })
   ).toJS();

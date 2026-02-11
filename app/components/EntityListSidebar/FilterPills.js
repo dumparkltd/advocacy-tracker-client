@@ -41,8 +41,8 @@ const FilterPills = ({
     alignSelf="start"
     style={{ position: 'relative' }}
   >
-    {options && options.map((tag, i) => {
-      let label = tag.label;
+    {options && options.map((tag) => {
+      let { label } = tag;
       if (showCount && tag.count) {
         label = `${label} (${tag.count})`;
       }

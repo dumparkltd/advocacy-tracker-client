@@ -107,6 +107,7 @@ export function MapContainer({
     hasPointOption,
     hasPointOverlay,
     fitBounds,
+    fitBoundsOnce,
     typeLabels,
     includeSecondaryMembers,
     scrollWheelZoom,
@@ -237,6 +238,7 @@ export function MapContainer({
           }
           mapSubject={mapSubject}
           fitBounds={fitBounds}
+          fitBoundsOnce={fitBoundsOnce}
           projection={projection}
           mapId={mapId}
           hasInfo={!!mapInfo}

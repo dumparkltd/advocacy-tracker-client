@@ -351,7 +351,7 @@ ActionMap.propTypes = {
 };
 
 const mapStateToProps = (state) => ({
-  countries: selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
+  countries: selectActortypeActors(state, ACTORTYPES.COUNTRY),
   includeActorMembers: selectIncludeActorMembers(state),
   includeActorChildren: selectIncludeActorChildrenOnMap(state),
   includeActorChildrenMembers: selectIncludeActorChildrenMembersOnMap(state),

@@ -8,7 +8,7 @@ import {
 import {
   push, replace, goBack,
 } from 'react-router-redux';
-import { reduce, keyBy } from 'lodash/collection';
+import { keyBy } from 'lodash/collection';
 // import { without } from 'lodash/array';
 
 import asArray from 'utils/as-array';
@@ -16,6 +16,7 @@ import {
   hasRoleRequired,
   replaceUnauthorised,
   replaceIfNotSignedIn,
+  getNextQueryString,
 } from 'utils/redirects';
 
 
@@ -53,6 +54,7 @@ import {
   SET_INCLUDE_ACTOR_CHILDREN,
   SET_INCLUDE_MEMBERS_FORFILTERS,
   SET_INCLUDE_INOFFICAL_STATEMENTS,
+  SET_INCLUDE_UNPUBLISHEDAPI_STATEMENTS,
   SET_INCLUDE_SUPPORT_LEVEL,
   SET_INCLUDE_ACTOR_CHILDREN_ON_MAP,
   SET_INCLUDE_ACTOR_CHILDREN_MEMBERS_ON_MAP,
@@ -107,6 +109,7 @@ import {
   selectLocation,
   selectSessionUserRoles,
   selectIsAuthenticating,
+  selectBlockNavigation,
 } from 'containers/App/selectors';
 
 import {
@@ -205,7 +208,7 @@ export function* loadEntitiesIfNeededSaga({ path }) {
 /**
  * Check if user is authorized
  */
-export function* checkRoleSaga({ role }) {
+export function* checkRoleAndPermissionsSaga({ role, pass }) {
   const signedIn = yield select(selectIsSignedIn);
   if (!signedIn) {
     const authenticating = yield select(selectIsAuthenticating);
@@ -219,6 +222,9 @@ export function* checkRoleSaga({ role }) {
       ));
     }
   } else {
+    if (typeof pass !== 'undefined' && !pass) {
+      yield put(replaceUnauthorised(replace));
+    }
     const roleIds = yield select(selectSessionUserRoles);
     if (!hasRoleRequired(roleIds, role)) {
       yield put(replaceUnauthorised(replace));
@@ -298,7 +304,7 @@ export function* authChangeSaga() {
     yield put(updatePath(redirectPathname, { replace: true, search: redirectQuery }));
   } else {
     // forward to home
-    yield put(updatePath('/', { replace: true }));
+    yield put(updatePath(ROUTES.HOME, { replace: true }));
   }
 }
 
@@ -308,11 +314,11 @@ export function* logoutSaga() {
     yield call(apiRequest, 'delete', ENDPOINTS.SIGN_OUT);
     yield call(clearAuthValues);
     yield put(logoutSuccess());
-    yield put(updatePath('/', { replace: true }));
+    yield put(updatePath(ROUTES.HOME, { replace: true }));
   } catch (err) {
     console.log('ERROR in logoutSaga - user likely already logged out');
     yield put(authenticateError(err));
-    yield put(updatePath('/', { replace: true }));
+    yield put(updatePath(ROUTES.HOME, { replace: true }));
   }
 }
 
@@ -995,17 +1001,6 @@ const getNextQuery = (query, extend, location) => {
   }, queryPrevious);
 };
 
-// convert to string
-export const getNextQueryString = (queryNext) => reduce(queryNext, (result, value, key) => {
-  let params;
-  if (Array.isArray(value)) {
-    params = value.reduce((memo, val) => `${memo}${memo.length > 0 ? '&' : ''}${key}=${encodeURIComponent(val)}`, '');
-  } else {
-    params = `${key}=${encodeURIComponent(value)}`;
-  }
-  return `${result}${result.length > 0 ? '&' : ''}${params}`;
-}, '');
-
 export function* updateRouteQuerySaga({ query, extend = true }) {
   const location = yield select(selectLocation);
   yield put(updatePath(
@@ -1175,6 +1170,19 @@ export function* setIncludeInofficialStatementsSaga({ value }) {
   );
   yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
 }
+export function* setIncludeUnpublishedAPIStatementsSaga({ value }) {
+  const location = yield select(selectLocation);
+  const queryNext = getNextQuery(
+    {
+      arg: 'unpublishedAPI',
+      value,
+      replace: true,
+    },
+    true, // extend
+    location,
+  );
+  yield put(replace(`${location.get('pathname')}?${getNextQueryString(queryNext)}`));
+}
 
 export function* setIncludeSupportLevelSaga({ value }) {
   const location = yield select(selectLocation);
@@ -1285,7 +1293,7 @@ export function* dismissQueryMessagesSaga() {
 }
 
 export function* updatePathSaga({ path = '', args }) {
-  const relativePath = (path && path.startsWith('/')) ? path : `/${path}`;
+  const relativePath = (path && path.startsWith(ROUTES.HOME)) ? path : `/${path}`;
   const location = yield select(selectLocation);
   // const navBlocked = yield select(selectBlockNavigation);
   // if (navBlocked) {
@@ -1301,6 +1309,7 @@ export function* updatePathSaga({ path = '', args }) {
   // }
   let queryNext = {};
   let queryNextString = '';
+  const savedQuery = location.getIn(['queriesForPath', relativePath]);
   if (args) {
     // if query set as search string
     if (args.search) {
@@ -1308,6 +1317,9 @@ export function* updatePathSaga({ path = '', args }) {
     } else {
       if (args.query) {
         queryNext = getNextQuery(args.query, args.extend, location);
+        // use saved query for path
+      } else if (savedQuery && savedQuery.size > 0) {
+        queryNext = savedQuery.toJS();
       } else if (args.keepQuery) {
         queryNext = location.get('query').toJS();
       }
@@ -1315,13 +1327,30 @@ export function* updatePathSaga({ path = '', args }) {
       queryNextString = `?${getNextQueryString(queryNext)}`;
     }
   } else {
-    // always keep "specific filters"
-    queryNext = location.get('query').filter(
-      (val, key) => KEEP_FILTERS.indexOf(key) > -1
-    ).toJS();
+    // use saved query for path
+    if (savedQuery && savedQuery.size > 0) {
+      queryNext = savedQuery.toJS();
+    } else {
+      // otherwise keep "specific filters"
+      queryNext = location.get('query').filter(
+        (val, key) => KEEP_FILTERS.indexOf(key) > -1
+      ).toJS();
+    }
     queryNextString = `?${getNextQueryString(queryNext)}`;
   }
   const nextPath = `${relativePath}${queryNextString}`;
+
+  // guard against data loss when path doesnt change (ie using create new on create new form)
+  if (relativePath === location.get('pathname')) {
+    const navBlocked = yield select(selectBlockNavigation);
+    if (navBlocked) {
+      const confirmLeave = window.confirm(
+        'Saga: You have unsaved changes. Do you really want to leave and discard your changes?'
+      );
+      if (!confirmLeave) return;
+      yield put(blockNavigation(false));
+    }
+  }
   if (args && args.replace) {
     yield put(replace(nextPath));
   } else {
@@ -1338,7 +1367,7 @@ export function* closeEntitySaga({ path }) {
   yield put(
     !isPreviousValid && previousPath && (previousPath !== currentPath)
       ? goBack()
-      : updatePath(path || '/')
+      : updatePath(path || ROUTES.HOME)
   );
 }
 
@@ -1382,7 +1411,7 @@ export default function* rootSaga() {
   yield takeEvery(DELETE_MULTIPLE_ENTITIES, deleteMultipleEntitiesSaga);
   yield takeEvery(SAVE_CONNECTIONS, saveConnectionsSaga);
 
-  yield takeLatest(REDIRECT_IF_NOT_PERMITTED, checkRoleSaga);
+  yield takeLatest(REDIRECT_IF_NOT_PERMITTED, checkRoleAndPermissionsSaga);
   yield takeLatest(REDIRECT_IF_NOT_SIGNED_IN, redirectIfNotSignedInSaga);
   yield takeLatest(REDIRECT_IF_SIGNED_IN, redirectIfSignedInSaga);
   yield takeEvery(UPDATE_ROUTE_QUERY, updateRouteQuerySaga);
@@ -1399,6 +1428,7 @@ export default function* rootSaga() {
   yield takeEvery(SET_INCLUDE_ACTOR_CHILDREN_MEMBERS_ON_MAP, setIncludeActorChildrenMembersOnMapSaga);
   yield takeEvery(SET_INCLUDE_MEMBERS_FORFILTERS, setIncludeMembersForFilterSaga);
   yield takeEvery(SET_INCLUDE_INOFFICAL_STATEMENTS, setIncludeInofficialStatementsSaga);
+  yield takeEvery(SET_INCLUDE_UNPUBLISHEDAPI_STATEMENTS, setIncludeUnpublishedAPIStatementsSaga);
   yield takeEvery(SET_INCLUDE_SUPPORT_LEVEL, setIncludeSupportLevelSaga);
   yield takeEvery(SET_LIST_PREVIEW, setListPreviewSaga);
   // yield takeEvery(PRINT_VIEW, printViewSaga);

@@ -169,6 +169,8 @@ export function ActorList({
     };
   }, []);
 
+  if (!entities || !allEntities) return null;
+
   const headerOptions = {
     supTitle: intl.formatMessage(messages.pageTitle),
     actions: [],
@@ -308,7 +310,7 @@ ActorList.propTypes = {
   isAdmin: PropTypes.bool,
   isVisitor: PropTypes.bool,
   view: PropTypes.string,
-  entities: PropTypes.instanceOf(List).isRequired,
+  entities: PropTypes.instanceOf(List),
   allEntities: PropTypes.instanceOf(Map),
   taxonomies: PropTypes.instanceOf(Map),
   connections: PropTypes.instanceOf(Map),
@@ -325,24 +327,38 @@ ActorList.propTypes = {
   intl: intlShape,
 };
 
-const mapStateToProps = (state, props) => ({
-  dataReady: selectReady(state, { path: DEPENDENCIES }),
-  entities: selectListActors(state, { type: props.params.id }),
-  taxonomies: selectActortypeTaxonomiesWithCats(state, { type: props.params.id }),
-  connections: selectConnections(state),
-  isMember: selectIsUserMember(state),
-  isVisitor: selectIsUserVisitor(state),
-  isAdmin: selectIsUserAdmin(state),
-  actiontypes: selectActiontypesForActortype(state, { type: props.params.id }),
-  membertypes: selectMembertypesForActortype(state, { type: props.params.id }),
-  parentAssociationtypes: selectParentAssociationtypesForActortype(state, { type: props.params.id }),
-  associationtypes: selectAssociationtypesForActortype(state, { type: props.params.id }),
-  actortypes: selectActortypes(state),
-  allEntities: selectActorsWithConnections(state, { type: props.params.id }),
-  view: selectViewQuery(state),
-  // includeActorMembers: selectIncludeActorMembers(state),
-  // includeActorChildren: selectIncludeActorChildren(state),
-});
+const makeMapStateToProps = () => {
+  // Create stable params object per component instance
+  let cachedParams = null;
+  let cachedType = null;
+
+  return (state, props) => {
+    const type = props.params.id;
+
+    // Only create new params object if type actually changed
+    if (type !== cachedType) {
+      cachedType = type;
+      cachedParams = { type };
+    }
+
+    return {
+      dataReady: selectReady(state, { path: DEPENDENCIES }),
+      entities: selectListActors(state, cachedParams),
+      taxonomies: selectActortypeTaxonomiesWithCats(state, cachedParams),
+      connections: selectConnections(state),
+      isMember: selectIsUserMember(state),
+      isVisitor: selectIsUserVisitor(state),
+      isAdmin: selectIsUserAdmin(state),
+      actiontypes: selectActiontypesForActortype(state, cachedParams),
+      membertypes: selectMembertypesForActortype(state, cachedParams),
+      parentAssociationtypes: selectParentAssociationtypesForActortype(state, cachedParams),
+      associationtypes: selectAssociationtypesForActortype(state, cachedParams),
+      actortypes: selectActortypes(state),
+      allEntities: selectActorsWithConnections(state, cachedParams),
+      view: selectViewQuery(state),
+    };
+  };
+};
 
 function mapDispatchToProps(dispatch) {
   return {
@@ -365,4 +381,4 @@ function mapDispatchToProps(dispatch) {
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(injectIntl(ActorList));
+export default connect(makeMapStateToProps, mapDispatchToProps)(injectIntl(ActorList));

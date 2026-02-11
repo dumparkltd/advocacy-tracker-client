@@ -37,7 +37,11 @@ export const selectIndicatorOptions = createSelector(
   selectIndicators,
   (actiontypeId, indicators) => {
     if (INDICATOR_ACTIONTYPES.indexOf(actiontypeId) > -1) {
-      return indicators;
+      return indicators.filter(
+        (indicator) => !indicators.some(
+          (child) => qe(child.getIn(['attributes', 'parent_id']), indicator.get('id'))
+        ),
+      );
     }
     return null;
   }

@@ -9,6 +9,7 @@
  *
  */
 import { createSelector } from 'reselect';
+import createCachedSelector from 're-reselect';
 import { reduce } from 'lodash/collection';
 import { Map, List } from 'immutable';
 
@@ -34,8 +35,6 @@ import {
   USER_ACTORTYPES,
   MEMBERSHIPS,
   ACTION_INDICATOR_SUPPORTLEVELS,
-  OFFICIAL_STATEMENT_CATEGORY_ID,
-  AUTHORITY_TAXONOMY,
 } from 'themes/config';
 
 import {
@@ -47,6 +46,20 @@ import {
 } from 'utils/entities';
 import { qe } from 'utils/quasi-equals';
 import { PARAMS } from './constants';
+
+// used for selectActorsWithPositionsData
+export const ACTORS_WITH_POSITIONS_DEPENDENCIES = [
+  API.ACTORS,
+  API.ACTIONS,
+  API.TAXONOMIES,
+  API.CATEGORIES,
+  API.ACTION_CATEGORIES,
+  API.MEMBERSHIPS,
+  API.INDICATORS,
+  API.ACTION_INDICATORS,
+  API.ACTION_ACTIONS,
+  API.ACTOR_ACTIONS,
+];
 
 // high level state selects
 const getRoute = (state) => state.get('route');
@@ -132,14 +145,14 @@ export const selectSessionUserRoles = createSelector(
   (state) => state,
   selectIsSignedIn,
   selectSessionUserId,
-  (state, isSignedIn, sessionUserId) => isSignedIn && sessionUserId
-    ? selectEntitiesWhere(state, {
-      path: API.USER_ROLES,
-      where: { user_id: sessionUserId },
-    })
-      .map((role) => role.getIn(['attributes', 'role_id']))
-      .toList()
-    : Map()
+  (state) => selectEntities(state, API.USER_ROLES),
+  (state, isSignedIn, sessionUserId, userRoles) => isSignedIn && sessionUserId && userRoles && userRoles.size > 0
+    ? userRoles.toList().filter(
+      (userRoleConnection) => qe(userRoleConnection.getIn(['attributes', 'user_id']), sessionUserId)
+    ).map(
+      (userRoleConnection) => userRoleConnection.getIn(['attributes', 'role_id'])
+    )
+    : List()
 );
 
 // admins require the admin role
@@ -309,10 +322,25 @@ export const selectLocation = createSelector(
     }
   }
 );
+export const selectLocationKey = createSelector(
+  getRoute,
+  (routeState) => {
+    try {
+      return routeState.getIn(['locationBeforeTransitions', 'key']);
+    } catch (error) {
+      return null;
+    }
+  }
+);
 
 export const selectLocationQuery = createSelector(
   selectLocation,
   (location) => location && location.get('query')
+);
+export const selectSavedQuery = createSelector(
+  (state, path) => path,
+  selectLocation,
+  (path, location) => location && location.getIn(['queriesForPath', path])
 );
 export const selectHiddenColumns = createSelector(
   selectLocationQuery,
@@ -525,11 +553,33 @@ export const selectIncludeMembersForFiltering = createSelector(
     return true; // default
   }
 );
+
+// true if
+// - ?inofficial=true or
+// - not ?where=is_official:true or
+// - ?where=is_official:false
 export const selectIncludeInofficialStatements = createSelector(
   selectLocationQuery,
-  (locationQuery) => {
+  selectAttributeQuery,
+  (locationQuery, attributeQuery) => {
     if (locationQuery && locationQuery.get('inofficial')) {
       return qe(locationQuery.get('inofficial'), 1) || locationQuery.get('inofficial') === 'true';
+    }
+    if (attributeQuery && typeof attributeQuery.is_official !== 'undefined') {
+      return attributeQuery.is_official !== 'true';
+    }
+    return true; // default
+  }
+);
+export const selectIncludeUnpublishedAPIStatements = createSelector(
+  selectLocationQuery,
+  selectAttributeQuery,
+  (locationQuery, attributeQuery) => {
+    if (locationQuery && locationQuery.get('unpublishedAPI')) {
+      return qe(locationQuery.get('unpublishedAPI'), 1) || locationQuery.get('unpublishedAPI') === 'true';
+    }
+    if (attributeQuery && typeof attributeQuery.public_api !== 'undefined') {
+      return !attributeQuery.public_api;
     }
     return true; // default
   }
@@ -628,7 +678,18 @@ export const selectResource = createSelector(
 );
 export const selectIndicators = createSelector(
   (state) => selectEntities(state, API.INDICATORS),
-  (entities) => sortEntities(entities, 'asc', 'referenceThenTitle', null, false)
+  (indicators) => sortEntities(
+    indicators.map((indicator) => {
+      const hasChildIndicators = indicators.some(
+        (child) => qe(child.getIn(['attributes', 'parent_id']), indicator.get('id'))
+      );
+      return indicator.setIn(['attributes', 'is_parent'], hasChildIndicators);
+    }),
+    'asc',
+    'referenceThenTitle',
+    null,
+    false,
+  )
 );
 export const selectIndicator = createSelector(
   (state, id) => selectEntity(state, { id, path: API.INDICATOR }),
@@ -894,20 +955,34 @@ export const selectResourcetype = createSelector(
 //   }
 // );
 // all actors for a given type id
-export const selectActortypeActors = createSelector(
+// export const selectActortypeActors = createSelector(
+//   selectActors,
+//   (state, args) => args ? args.type : null,
+//   (entities, type) => {
+//     if (entities && type) {
+//       return entities.filter(
+//         (actor) => qe(
+//           type,
+//           actor.getIn(['attributes', 'actortype_id']),
+//         )
+//       );
+//     }
+//     return entities;
+//   }
+// );
+export const selectActortypeActors = createCachedSelector(
   selectActors,
-  (state, args) => args ? args.type : null,
+  (state, type) => type,
   (entities, type) => {
     if (entities && type) {
       return entities.filter(
-        (actor) => qe(
-          type,
-          actor.getIn(['attributes', 'actortype_id']),
-        )
+        (action) => qe(type, action.getIn(['attributes', 'actortype_id']))
       );
     }
     return entities;
   }
+)(
+  (state, type) => type || 'all' // Cache key - creates separate memoized instance per type
 );
 export const selectResourcetypeResources = createSelector(
   selectResources,
@@ -925,20 +1000,19 @@ export const selectResourcetypeResources = createSelector(
   }
 );
 // all actions for a given type id
-export const selectActiontypeActions = createSelector(
+export const selectActiontypeActions = createCachedSelector(
   selectActions,
-  (state, args) => args ? args.type : null,
+  (state, type) => type,
   (entities, type) => {
     if (entities && type) {
       return entities.filter(
-        (actor) => qe(
-          type,
-          actor.getIn(['attributes', 'measuretype_id']),
-        )
+        (action) => qe(type, action.getIn(['attributes', 'measuretype_id']))
       );
     }
     return entities;
   }
+)(
+  (state, type) => type || 'all' // Cache key - creates separate memoized instance per type
 );
 
 // TODO check: likely not needed
@@ -1030,7 +1104,7 @@ export const selectEntitiesSearchQuery = createSelector(
 // filter entities by attributes, using object
 export const selectActorsWhere = createSelector(
   (state, { where }) => where,
-  selectActortypeActors, // type should be optional
+  (state, params) => selectActortypeActors(state, params && params.type), // type should be optional
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
@@ -1039,7 +1113,7 @@ export const selectActorsWhere = createSelector(
 // filter entities by attributes, using locationQuery
 export const selectActorsWhereQuery = createSelector(
   selectAttributeQuery,
-  selectActortypeActors, // type should be optional
+  (state, params) => selectActortypeActors(state, params && params.type), // type should be optional
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
@@ -1082,7 +1156,7 @@ export const selectResourcesSearchQuery = createSelector(
 // filter entities by attributes, using object
 export const selectActionsWhere = createSelector(
   (state, { where }) => where,
-  selectActiontypeActions, // type should be optional
+  (state, params) => selectActiontypeActions(state, params && params.type),
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
@@ -1091,7 +1165,7 @@ export const selectActionsWhere = createSelector(
 // filter entities by attributes, using locationQuery
 export const selectActionsWhereQuery = createSelector(
   selectAttributeQuery,
-  selectActiontypeActions, // type should be optional
+  (state, params) => selectActiontypeActions(state, params && params.type), // type should be optional
   (query, entities) => query
     ? filterEntitiesByAttributes(entities, query)
     : entities
@@ -1175,20 +1249,22 @@ export const selectTaxonomiesWithCategories = createSelector(
 );
 
 // all categories for a given taxonomy id
-export const selectTaxonomyCategories = createSelector(
+export const selectTaxonomyCategories = createCachedSelector(
   selectCategories,
-  (state, args) => args ? args.taxonomy_id : null,
+  (state, taxonomy_id) => taxonomy_id,
   (entities, taxonomy_id) => {
     if (entities && taxonomy_id) {
       return entities.filter(
-        (actor) => qe(
+        (category) => qe(
           taxonomy_id,
-          actor.getIn(['attributes', 'taxonomy_id']),
+          category.getIn(['attributes', 'taxonomy_id']),
         )
       );
     }
     return entities;
   }
+)(
+  (state, taxonomy_id) => taxonomy_id || 'all' // Cache key
 );
 
 // get all actor taxonomies for a given type
@@ -1452,13 +1528,13 @@ export const selectActorConnections = createSelector(
     .set(API.USERS, users)
 );
 export const selectResourceConnections = createSelector(
-  selectActiontypeActions,
+  (state, typeId) => selectActiontypeActions(state, typeId),
   (actions) => Map()
     .set(API.ACTIONS, actions)
 );
 
 export const selectIndicatorConnections = createSelector(
-  selectActiontypeActions,
+  (state, typeId) => selectActiontypeActions(state, typeId),
   (actions) => Map()
     .set(API.ACTIONS, actions)
 );
@@ -1698,6 +1774,24 @@ export const selectActionActionsGroupedBySubAction = createSelector(
     );
   },
 );
+export const selectParentEventsByStatement = createSelector(
+  (state) => selectEntities(state, API.ACTION_ACTIONS),
+  (state) => selectActiontypeActions(state, ACTIONTYPES.EVENT),
+  (state) => selectActiontypeActions(state, ACTIONTYPES.EXPRESS),
+  (connections, events, statements) => {
+    if (!connections || !events || !statements) return null;
+    return connections.filter(
+      (connection) => statements.has(`${connection.getIn(['attributes', 'measure_id'])}`)
+      && events.has(`${connection.getIn(['attributes', 'other_measure_id'])}`)
+    ).groupBy(
+      (connection) => connection.getIn(['attributes', 'measure_id'])
+    ).map(
+      (group) => group.map(
+        (entity) => entity.getIn(['attributes', 'other_measure_id'])
+      )
+    );
+  },
+);
 export const selectMembershipsGroupedByMember = createSelector(
   (state) => selectEntities(state, API.MEMBERSHIPS),
   (entities) => entities
@@ -1795,7 +1889,7 @@ export const selectUserCategoriesGroupedByUser = createSelector(
 // TABLES with nested ids /////////////////////////////////////////////////////////////
 // get actors with category ids
 export const selectActorsCategorised = createSelector(
-  selectActortypeActors,
+  (state, params) => selectActortypeActors(state, params && params.type),
   selectActorCategoriesGroupedByActor,
   (entities, associationsGrouped) => entitiesSetCategoryIds(
     entities,
@@ -1832,17 +1926,22 @@ const filterStatements = (
   statements,
   statementId,
   includeInofficial,
+  includeUnpublishedAPI = true,
   actionCategoriesByAction,
   connectedCategoryQuery,
 ) => {
   let pass = true;
-  if (!statements.get(statementId.toString())) {
+  const statement = statements.get(statementId.toString());
+  if (!statement) {
     return false;
   }
-  const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
   if (!includeInofficial) {
-    pass = statementCategories && statementCategories.includes(OFFICIAL_STATEMENT_CATEGORY_ID);
+    pass = statement.getIn(['attributes', 'is_official']);
   }
+  if (!includeUnpublishedAPI) {
+    pass = statement.getIn(['attributes', 'public_api']);
+  }
+  const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
   if (pass && connectedCategoryQuery) {
     pass = asList(connectedCategoryQuery).every(
       (queryArg) => {
@@ -1858,6 +1957,60 @@ const filterStatements = (
   }
   return pass;
 };
+const getAggregateSupport = (aggregateCounts, childCount) => {
+  if (!aggregateCounts) return 0;
+  const supportCount = (aggregateCounts.get(1) || 0) + (aggregateCounts.get(2) || 0);
+  // country has strong support for all topics
+  if (aggregateCounts.get(1) === childCount) return 1;
+  // country has some support for all topics
+  if (supportCount === childCount) return 2;
+  // country has some support for any topic
+  if (supportCount > 0) return 3;
+  return 0;
+};
+const addAggregatePositions = ({
+  indicators,
+  indicatorPositions,
+}) => {
+  const childIndicatorsByParent = indicators
+    .filter((indicator) => indicator.getIn(['attributes', 'parent_id']))
+    .groupBy((indicator) => indicator.getIn(['attributes', 'parent_id']));
+
+  if (childIndicatorsByParent && childIndicatorsByParent.size > 0) {
+    const parentsIndicatorPositions = childIndicatorsByParent.map((children, parentId) => {
+      const aggregateCountSupport = children.reduce((memo, child) => {
+        const childPositions = indicatorPositions && indicatorPositions.get(child.get('id'));
+        const childPositionCurrent = childPositions && childPositions.first();
+        const childSupport = childPositionCurrent && childPositionCurrent.get('supportlevel_id');
+        if (typeof childSupport !== 'undefined') {
+          if (memo.has(childSupport)) {
+            return memo.set(childSupport, memo.get(childSupport) + 1);
+          }
+          return memo.set(childSupport, 1);
+        }
+        return memo;
+      }, Map());
+      const aggregateSupport = getAggregateSupport(aggregateCountSupport, children.size);
+
+      if (typeof aggregateSupport !== 'undefined') {
+        return List().push(
+          Map({
+            indicator_id: parentId,
+            supportlevel_id: aggregateSupport,
+            is_parent: true,
+          }).set(
+            'child_ids', children.map((child) => child.get('id'))
+          ).set(
+            'supportCount', aggregateCountSupport
+          )
+        );
+      }
+      return List();
+    });
+    return indicatorPositions.merge(parentsIndicatorPositions.mapKeys((key) => String(key)));
+  }
+  return indicatorPositions;
+};
 
 const getActorStatementsAndPositions = ({
   actor,
@@ -1868,15 +2021,17 @@ const getActorStatementsAndPositions = ({
   actorActions,
   actionIndicators,
   memberships,
-  authorityCategories,
   actionCategoriesByAction,
   includeMembers,
   includeInofficial,
+  includeUnpublishedAPI,
   connectedCategoryQuery,
+  eventsByStatement,
 }) => {
+  // console.log('getActorStatementsAndPositions');
   // 1. figure out any actor statements /////////////////////////////////////
   // actorActions
-  let actorIndicators;
+  let actorIndicatorPositions;
   let actorStatementsAsMemberByGroup = List();
   // direct
   let actorStatements = actorActions.get(parseInt(actor.get('id'), 10));
@@ -1886,6 +2041,7 @@ const getActorStatementsAndPositions = ({
         statements,
         statementId,
         includeInofficial,
+        includeUnpublishedAPI,
         actionCategoriesByAction,
         asList(connectedCategoryQuery),
       ))
@@ -1916,6 +2072,7 @@ const getActorStatementsAndPositions = ({
                   statements,
                   statementId,
                   includeInofficial,
+                  includeUnpublishedAPI,
                   actionCategoriesByAction,
                   asList(connectedCategoryQuery),
                 ))
@@ -1935,7 +2092,10 @@ const getActorStatementsAndPositions = ({
     || (actorStatementsAsMemberByGroup && actorStatementsAsMemberByGroup.size > 0)
   ) {
     // now for each indicator
-    actorIndicators = indicators.map(
+    actorIndicatorPositions = indicators.filter(
+      // excluding parents/aggregates
+      (indicator) => !indicators.some((i) => qe(indicator.get('id'), i.getIn(['attributes', 'parent_id'])))
+    ).map(
       (indicator) => {
         // get all statements for topic
         let indicatorStatements = actionIndicators.get(parseInt(indicator.get('id'), 10));
@@ -1957,16 +2117,7 @@ const getActorStatementsAndPositions = ({
                     statement.get('attributes').set('id', statement.get('id')),
                   )
                   : indicatorStatement;
-                const statementCategories = actionCategoriesByAction.get(parseInt(statementId, 10));
-                const statementAuthority = statementCategories && authorityCategories.find(
-                  (cat, catId) => statementCategories.includes(parseInt(catId, 10))
-                );
-                if (statementAuthority) {
-                  result = result.set(
-                    'authority',
-                    statementAuthority.get('attributes').set('id', statementAuthority.get('id'))
-                  );
-                }
+                // result = result.set('authority', statement.getIn(['attributes', 'is_official']));
                 if (!hasDirectStatement && groupsWithStatement && groupsWithStatement.size > 0) {
                   result = result.set(
                     'viaGroupIds',
@@ -1984,8 +2135,26 @@ const getActorStatementsAndPositions = ({
             },
             Map(),
           ).sort(
-            // sort: first check for dates, then use higher level of suuport
+            // sort:
+            // first check for event and group statements,
+            // then dates
+            // then use higher level of suuport
             (a, b) => {
+              const aEventId = eventsByStatement.get(a.get('measure_id'))
+                && eventsByStatement.get(a.get('measure_id')).first();
+              const bEventId = eventsByStatement.get(b.get('measure_id'))
+                && eventsByStatement.get(b.get('measure_id')).first();
+
+              // If both statements are from the same event
+              if (aEventId && bEventId && aEventId === bEventId) {
+                // Individual statements (no viaGroups) come before group statements
+                if (!a.get('viaGroups') && !!b.get('viaGroups')) {
+                  return -1;
+                }
+                if (!!a.get('viaGroups') && !b.get('viaGroups')) {
+                  return 1;
+                }
+              }
               let aDate = a.getIn(['measure', 'date_start']);
               let bDate = b.getIn(['measure', 'date_start']);
               /* eslint-disable no-restricted-globals */
@@ -2001,13 +2170,19 @@ const getActorStatementsAndPositions = ({
               }
               /* eslint-enable no-restricted-globals */
               if (aIsDate && bIsDate) {
+                const aDateOnly = new Date(new Date(aDate).toDateString()).getTime();
+                const bDateOnly = new Date(new Date(bDate).toDateString()).getTime();
                 // check for support level if dates equals
-                if (aDate === bDate) {
+                if (aDateOnly === bDateOnly) {
+                  // if (a) {
+                  //   console.log(aDate, a.get('supportlevel_id'), a.getIn(['measure', 'code']))
+                  //   console.log(bDate, b.get('supportlevel_id'), b.getIn(['measure', 'code']))
+                  // }
                   const aSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[a.get('supportlevel_id') || 0];
                   const bSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[b.get('supportlevel_id') || 0];
-                  return aSupportLevel < bSupportLevel ? -1 : 1;
+                  return aSupportLevel.order < bSupportLevel.order ? -1 : 1;
                 }
-                return new Date(aDate) < new Date(bDate) ? 1 : -1;
+                return aDateOnly < bDateOnly ? 1 : -1;
               }
               if (aIsDate) {
                 return -1;
@@ -2028,167 +2203,104 @@ const getActorStatementsAndPositions = ({
       actorStatements = actorStatements
         ? actorStatements.concat(actorStatementsAsMemberByGroup.flatten(true).toList()).toSet()
         : actorStatementsAsMemberByGroup.flatten(true).toList().toSet();
-      return actor
-        .set('statements', actorStatements)
-        .set('statementsAsGroup', actorStatementsAsMemberByGroup.flatten(true).toList().toSet())
-        .set('indicatorPositions', actorIndicators)
-        .set('indicators', actorIndicators && actorIndicators.reduce(
-          (memo, indicatorPosition, key) => {
-            if (indicatorPosition && indicatorPosition.size > 0) {
-              return memo.set(key, key);
-            }
-            return memo;
-          },
-          Map(),
-        ));
     }
+    // figure out aggrgate positions (count support for child indicators)
+    actorIndicatorPositions = addAggregatePositions({
+      indicators,
+      indicatorPositions: actorIndicatorPositions,
+    });
+    return actor
+      .set('statements', actorStatements)
+      .set('statementsAsGroup', actorStatementsAsMemberByGroup && actorStatementsAsMemberByGroup.flatten(true).toList().toSet())
+      .set('indicatorPositions', actorIndicatorPositions)
+      .set('indicators', actorIndicatorPositions && actorIndicatorPositions.reduce(
+        (memo, indicatorPosition, key) => {
+          if (indicatorPosition && indicatorPosition.size > 0) {
+            return memo.set(key, key);
+          }
+          return memo;
+        },
+        Map(),
+      ));
   }
   return actor;
 };
 
-export const selectActorsWithPositions = createSelector(
-  // from param
-  (state, params) => params && params.includeActorMembers,
-  (state, params) => params && params.includeInofficial,
-  (state, params) => params && params.type,
-  // from query
-  selectIncludeInofficialStatements,
-  selectIncludeActorMembers,
-  selectConnectedCategoryQuery,
-  // from state
+const selectGroupActors = createSelector(
   (state) => selectActors(state),
-  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
-  (state) => selectTaxonomyCategories(state, { taxonomy_id: AUTHORITY_TAXONOMY }),
-  selectActionCategoriesGroupedByAction,
-  selectMembershipsGroupedByMember,
-  selectActorActionsGroupedByActor,
-  selectIndicators,
-  selectActionIndicatorsGroupedByIndicatorAttributes,
-  (
-    includeActorMembersParam,
-    includeInofficialParam,
-    actortypeId,
-    includeInofficialQuery,
-    includeActorMembersQuery,
-    connectedCategoryQuery,
-    actors,
-    statements,
-    authorityCategories,
-    actionCategoriesByAction,
-    memberships,
-    actorActions,
-    indicators,
-    actionIndicators,
-  ) => {
-    if (
-      !actors
-      || !statements
-      || !actionCategoriesByAction
-      || !memberships
-      || !actorActions
-      || !indicators
-      || !actionIndicators
-      || !authorityCategories
-    ) {
-      return null;
-    }
-    // limit to type if set
-    const typeActors = actortypeId
-      ? actors.filter(
-        (actor) => qe(actor.getIn(['attributes', 'actortype_id']), actortypeId)
-      )
-      : actors;
-
-    // use query unless param set
-    let includeInofficial = true;
-    if (typeof includeInofficialParam !== 'undefined') {
-      includeInofficial = includeInofficialParam;
-    } else if (typeof includeInofficialQuery !== 'undefined') {
-      includeInofficial = includeInofficialQuery;
-    }
-    let includeMembers = true;
-    if (typeof includeActorMembersParam !== 'undefined') {
-      includeMembers = includeActorMembersParam;
-    } else if (typeof includeActorMembersQuery !== 'undefined') {
-      includeMembers = includeActorMembersQuery;
-    }
-    // figure out actors that can have members aka "group actors"
-    const groupActors = actors.filter(
-      (actor) => Object.values(MEMBERSHIPS).reduce(
-        (memo, actorGroups) => [...memo, ...actorGroups],
-        [],
-      ).indexOf(actor.getIn(['attributes', 'actortype_id']).toString()) > -1
+  (actors) => {
+    if (!actors) return null;
+    const groupActorTypes = Object.values(MEMBERSHIPS).reduce(
+      (memo, actorGroups) => [...memo, ...actorGroups],
+      [],
     );
-    return typeActors.map(
-      (actor) => getActorStatementsAndPositions({
-        actor,
-        actors,
-        indicators,
-        statements,
-        groupActors,
-        actorActions,
-        actionIndicators,
-        memberships,
-        authorityCategories,
-        actionCategoriesByAction,
-        includeMembers,
-        includeInofficial,
-        connectedCategoryQuery,
-      })
+    return actors.filter(
+      (actor) => groupActorTypes.indexOf(
+        actor.getIn(['attributes', 'actortype_id']).toString()
+      ) > -1
     );
   }
 );
 
-export const selectActorWithPositions = createSelector(
+export const selectActorsWithPositionsData = createSelector(
+  (state) => selectReady(state, { path: ACTORS_WITH_POSITIONS_DEPENDENCIES }),
   // from param
-  (state, params) => params && params.id,
   (state, params) => params && params.includeActorMembers,
   (state, params) => params && params.includeInofficial,
+  (state, params) => params && params.includeUnpublishedAPI,
   (state, params) => params && params.type,
   // from query
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectIncludeActorMembers,
   selectConnectedCategoryQuery,
   // from state
   (state) => selectActors(state),
-  (state) => selectActiontypeActions(state, { type: ACTIONTYPES.EXPRESS }),
-  (state) => selectTaxonomyCategories(state, { taxonomy_id: AUTHORITY_TAXONOMY }),
+  (state, params) => selectActortypeActors(state, params && params.type),
+  (state) => selectActiontypeActions(state, ACTIONTYPES.EXPRESS),
   selectActionCategoriesGroupedByAction,
   selectMembershipsGroupedByMember,
   selectActorActionsGroupedByActor,
   selectIndicators,
   selectActionIndicatorsGroupedByIndicatorAttributes,
+  selectParentEventsByStatement,
+  selectGroupActors,
   (
-    actorId,
+    ready,
     includeActorMembersParam,
     includeInofficialParam,
+    includeUnpublishedAPIParam,
     actortypeId,
     includeInofficialQuery,
+    includeUnpublishedAPIQuery,
     includeActorMembersQuery,
     connectedCategoryQuery,
     actors,
+    typeActors,
     statements,
-    authorityCategories,
     actionCategoriesByAction,
     memberships,
     actorActions,
     indicators,
     actionIndicators,
+    eventsByStatement, // { [statement_id] : { [connection_id] : event_id } }
+    groupActors,
   ) => {
     if (
-      !actors
+      !ready
+      || !actors
+      || !typeActors
       || !statements
       || !actionCategoriesByAction
       || !memberships
       || !actorActions
       || !indicators
       || !actionIndicators
-      || !authorityCategories
+      || !eventsByStatement
+      || !groupActors
     ) {
       return null;
     }
-    // limit to type if set
-    const actor = actors.get(actorId);
     // use query unless param set
     let includeInofficial = true;
     if (typeof includeInofficialParam !== 'undefined') {
@@ -2196,21 +2308,21 @@ export const selectActorWithPositions = createSelector(
     } else if (typeof includeInofficialQuery !== 'undefined') {
       includeInofficial = includeInofficialQuery;
     }
+    let includeUnpublishedAPI = true;
+    if (typeof includeUnpublishedAPIParam !== 'undefined') {
+      includeUnpublishedAPI = includeUnpublishedAPIParam;
+    } else if (typeof includeUnpublishedAPIQuery !== 'undefined') {
+      includeUnpublishedAPI = includeUnpublishedAPIQuery;
+    }
     let includeMembers = true;
     if (typeof includeActorMembersParam !== 'undefined') {
       includeMembers = includeActorMembersParam;
     } else if (typeof includeActorMembersQuery !== 'undefined') {
       includeMembers = includeActorMembersQuery;
     }
-    // figure out actors that can have members aka "group actors"
-    const groupActors = actors.filter(
-      (groupActor) => Object.values(MEMBERSHIPS).reduce(
-        (memo, actorGroups) => [...memo, ...actorGroups],
-        [],
-      ).indexOf(groupActor.getIn(['attributes', 'actortype_id']).toString()) > -1
-    );
-    return actor && getActorStatementsAndPositions({
-      actor,
+
+    return {
+      typeActors,
       actors,
       indicators,
       statements,
@@ -2218,15 +2330,45 @@ export const selectActorWithPositions = createSelector(
       actorActions,
       actionIndicators,
       memberships,
-      authorityCategories,
       actionCategoriesByAction,
       includeMembers,
       includeInofficial,
+      includeUnpublishedAPI,
       connectedCategoryQuery,
-    });
+      eventsByStatement,
+    };
   }
 );
 
+export const selectActorsWithPositions = createSelector(
+  selectActorsWithPositionsData,
+  (data) => {
+    if (!data) return null;
+    const result = data.typeActors.map(
+      (actor) => getActorStatementsAndPositions({
+        actor,
+        ...data,
+      }),
+    );
+    return result;
+  }
+);
+
+export const selectActorWithPositions = createSelector(
+  selectActorsWithPositionsData,
+  (state, { id }) => id,
+  (data, actorId) => {
+    if (!data || !actorId) return null;
+    const actor = data.actors.get(actorId);
+    if (!actor) return null;
+
+    const result = getActorStatementsAndPositions({
+      actor,
+      ...data,
+    });
+    return result;
+  }
+);
 
 export const selectActorsByType = createSelector(
   selectActors,

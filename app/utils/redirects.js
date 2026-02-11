@@ -1,13 +1,24 @@
 import { PARAMS } from 'containers/App/constants';
 import { USER_ROLES, ROUTES } from 'themes/config';
-
+import { reduce } from 'lodash/collection';
 import {
   selectIsSignedIn,
   selectSessionUserRoles,
   selectReadyForAuthCheck,
+  selectSavedQuery,
 } from 'containers/App/selectors';
 
 import checkStore from './checkStore';
+
+export const getNextQueryString = (queryNext) => reduce(queryNext, (result, value, key) => {
+  let params;
+  if (Array.isArray(value)) {
+    params = value.reduce((memo, val) => `${memo}${memo.length > 0 ? '&' : ''}${key}=${encodeURIComponent(val)}`, '');
+  } else {
+    params = `${key}=${encodeURIComponent(value)}`;
+  }
+  return `${result}${result.length > 0 ? '&' : ''}${params}`;
+}, '');
 
 export function replaceIfNotSignedIn(location, replace, info = PARAMS.NOT_SIGNED_IN, replacePath) {
   const redirectOnAuthSuccess = location.pathname;
@@ -36,7 +47,12 @@ function redirectIfSignedIn(store, replacePath) {
     // console.log('redirectIfSignedIn', replacePath, selectIsSignedIn(store.getState()));
     if (selectIsSignedIn(store.getState())) {
       if (replacePath) {
-        replace(replacePath);
+        const savedQuery = selectSavedQuery(store.getState(), replacePath);
+        if (savedQuery && savedQuery.size > 0) {
+          replace(`${replacePath}?${getNextQueryString(savedQuery.toJS())}`);
+        } else {
+          replace(replacePath);
+        }
       } else {
         replaceAlreadySignedIn(replace);
       }
