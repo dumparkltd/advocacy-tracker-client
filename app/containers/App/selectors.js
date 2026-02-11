@@ -337,6 +337,11 @@ export const selectLocationQuery = createSelector(
   selectLocation,
   (location) => location && location.get('query')
 );
+export const selectSavedQuery = createSelector(
+  (state, path) => path,
+  selectLocation,
+  (path, location) => location && location.getIn(['queriesForPath', path])
+);
 export const selectHiddenColumns = createSelector(
   selectLocationQuery,
   (locationQuery) => locationQuery && locationQuery.get('xcol') && asList(locationQuery.get('xcol'))

@@ -8,7 +8,7 @@ import {
 import {
   push, replace, goBack,
 } from 'react-router-redux';
-import { reduce, keyBy } from 'lodash/collection';
+import { keyBy } from 'lodash/collection';
 // import { without } from 'lodash/array';
 
 import asArray from 'utils/as-array';
@@ -16,6 +16,7 @@ import {
   hasRoleRequired,
   replaceUnauthorised,
   replaceIfNotSignedIn,
+  getNextQueryString,
 } from 'utils/redirects';
 
 
@@ -999,17 +1000,6 @@ const getNextQuery = (query, extend, location) => {
     return queryUpdated;
   }, queryPrevious);
 };
-
-// convert to string
-export const getNextQueryString = (queryNext) => reduce(queryNext, (result, value, key) => {
-  let params;
-  if (Array.isArray(value)) {
-    params = value.reduce((memo, val) => `${memo}${memo.length > 0 ? '&' : ''}${key}=${encodeURIComponent(val)}`, '');
-  } else {
-    params = `${key}=${encodeURIComponent(value)}`;
-  }
-  return `${result}${result.length > 0 ? '&' : ''}${params}`;
-}, '');
 
 export function* updateRouteQuerySaga({ query, extend = true }) {
   const location = yield select(selectLocation);

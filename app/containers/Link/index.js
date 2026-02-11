@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 
 import { startsWith } from 'utils/string';
 import { updatePath } from 'containers/App/actions';
-import { getNextQueryString } from 'containers/App/sagas';
+import { getNextQueryString } from 'utils/redirects';
 import { selectActortypeQuery, selectActiontypeQuery } from 'containers/App/selectors';
 
 // const A = styled.a``;
