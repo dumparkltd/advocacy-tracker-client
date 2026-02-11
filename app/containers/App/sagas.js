@@ -303,7 +303,7 @@ export function* authChangeSaga() {
     yield put(updatePath(redirectPathname, { replace: true, search: redirectQuery }));
   } else {
     // forward to home
-    yield put(updatePath('/', { replace: true }));
+    yield put(updatePath(ROUTES.HOME, { replace: true }));
   }
 }
 
@@ -313,11 +313,11 @@ export function* logoutSaga() {
     yield call(apiRequest, 'delete', ENDPOINTS.SIGN_OUT);
     yield call(clearAuthValues);
     yield put(logoutSuccess());
-    yield put(updatePath('/', { replace: true }));
+    yield put(updatePath(ROUTES.HOME, { replace: true }));
   } catch (err) {
     console.log('ERROR in logoutSaga - user likely already logged out');
     yield put(authenticateError(err));
-    yield put(updatePath('/', { replace: true }));
+    yield put(updatePath(ROUTES.HOME, { replace: true }));
   }
 }
 
@@ -1303,7 +1303,7 @@ export function* dismissQueryMessagesSaga() {
 }
 
 export function* updatePathSaga({ path = '', args }) {
-  const relativePath = (path && path.startsWith('/')) ? path : `/${path}`;
+  const relativePath = (path && path.startsWith(ROUTES.HOME)) ? path : `/${path}`;
   const location = yield select(selectLocation);
   // const navBlocked = yield select(selectBlockNavigation);
   // if (navBlocked) {
@@ -1319,6 +1319,7 @@ export function* updatePathSaga({ path = '', args }) {
   // }
   let queryNext = {};
   let queryNextString = '';
+  const savedQuery = location.getIn(['queriesForPath', relativePath]);
   if (args) {
     // if query set as search string
     if (args.search) {
@@ -1326,6 +1327,9 @@ export function* updatePathSaga({ path = '', args }) {
     } else {
       if (args.query) {
         queryNext = getNextQuery(args.query, args.extend, location);
+        // use saved query for path
+      } else if (savedQuery && savedQuery.size > 0) {
+        queryNext = savedQuery.toJS();
       } else if (args.keepQuery) {
         queryNext = location.get('query').toJS();
       }
@@ -1333,10 +1337,15 @@ export function* updatePathSaga({ path = '', args }) {
       queryNextString = `?${getNextQueryString(queryNext)}`;
     }
   } else {
-    // always keep "specific filters"
-    queryNext = location.get('query').filter(
-      (val, key) => KEEP_FILTERS.indexOf(key) > -1
-    ).toJS();
+    // use saved query for path
+    if (savedQuery && savedQuery.size > 0) {
+      queryNext = savedQuery.toJS();
+    } else {
+      // otherwise keep "specific filters"
+      queryNext = location.get('query').filter(
+        (val, key) => KEEP_FILTERS.indexOf(key) > -1
+      ).toJS();
+    }
     queryNextString = `?${getNextQueryString(queryNext)}`;
   }
   const nextPath = `${relativePath}${queryNextString}`;
@@ -1368,7 +1377,7 @@ export function* closeEntitySaga({ path }) {
   yield put(
     !isPreviousValid && previousPath && (previousPath !== currentPath)
       ? goBack()
-      : updatePath(path || '/')
+      : updatePath(path || ROUTES.HOME)
   );
 }
 

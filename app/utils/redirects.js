@@ -6,6 +6,7 @@ import {
   selectSessionUserRoles,
   selectReadyForAuthCheck,
 } from 'containers/App/selectors';
+import { updatePath } from 'containers/App/actions';
 
 import checkStore from './checkStore';
 
@@ -36,7 +37,7 @@ function redirectIfSignedIn(store, replacePath) {
     // console.log('redirectIfSignedIn', replacePath, selectIsSignedIn(store.getState()));
     if (selectIsSignedIn(store.getState())) {
       if (replacePath) {
-        replace(replacePath);
+        store.dispatch(updatePath(replacePath, { replace: true }));
       } else {
         replaceAlreadySignedIn(replace);
       }

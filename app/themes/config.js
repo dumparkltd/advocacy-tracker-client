@@ -27,6 +27,7 @@ export const ENDPOINTS = {
 
 // client app routes **************************
 export const ROUTES = {
+  HOME: '/',
   ID: '/:id',
   VIEW: '/:view', //  e.g. list or map or stats
   NEW: '/new',
