@@ -1661,7 +1661,6 @@ export const ACTORTYPES_CONFIG = {
               [
                 {
                   attribute: 'email',
-                  required: true,
                 },
                 {
                   attribute: 'phone',
