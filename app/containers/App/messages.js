@@ -57,7 +57,7 @@ export default defineMessages({
     },
     2: {
       id: 'app.containers.App.supportlevelsAggregate.2',
-      defaultMessage: 'Some support for all must-haves',
+      defaultMessage: 'Strong support for any must-have',
     },
     3: {
       id: 'app.containers.App.supportlevelsAggregate.3',

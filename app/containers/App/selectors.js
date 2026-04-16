@@ -1960,10 +1960,10 @@ const filterStatements = (
 const getAggregateSupport = (aggregateCounts, childCount) => {
   if (!aggregateCounts) return 0;
   const supportCount = (aggregateCounts.get(1) || 0) + (aggregateCounts.get(2) || 0);
-  // country has strong support for all topics
+  // country has strong support (value 1) for all topics
   if (aggregateCounts.get(1) === childCount) return 1;
-  // country has some support for all topics
-  if (supportCount === childCount) return 2;
+  // country has strong support for any topic
+  if (aggregateCounts.get(1) > 0 ) return 2;
   // country has some support for any topic
   if (supportCount > 0) return 3;
   return 0;
