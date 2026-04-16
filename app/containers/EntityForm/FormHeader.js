@@ -124,15 +124,11 @@ const FormHeader = ({
                 }}
                 onMouseOut={(e) => {
                   if (e && e.preventDefault) e.preventDefault();
-                  if (isBlocked) {
-                    setBlockedSaveHint(false);
-                  }
+                  setBlockedSaveHint(isBlocked);
                 }}
                 onBlur={(e) => {
                   if (e && e.preventDefault) e.preventDefault();
-                  if (isBlocked) {
-                    setBlockedSaveHint(false);
-                  }
+                  setBlockedSaveHint(isBlocked);
                 }}
               >
                 Save
@@ -166,15 +162,11 @@ const FormHeader = ({
               }}
               onMouseOut={(e) => {
                 if (e && e.preventDefault) e.preventDefault();
-                if (isBlocked) {
-                  setBlockedSaveHint(false);
-                }
+                setBlockedSaveHint(false);
               }}
               onBlur={(e) => {
                 if (e && e.preventDefault) e.preventDefault();
-                if (isBlocked) {
-                  setBlockedSaveHint(false);
-                }
+                setBlockedSaveHint(false);
               }}
             >
               Save & close

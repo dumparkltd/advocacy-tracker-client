@@ -139,15 +139,11 @@ export function FormFooter({
                 }}
                 onMouseOut={(e) => {
                   if (e && e.preventDefault) e.preventDefault();
-                  if (isBlocked) {
-                    setBlockedSaveHint(false);
-                  }
+                  setBlockedSaveHint(false);
                 }}
                 onBlur={(e) => {
                   if (e && e.preventDefault) e.preventDefault();
-                  if (isBlocked) {
-                    setBlockedSaveHint(false);
-                  }
+                  setBlockedSaveHint(false);
                 }}
               >
                 Save
@@ -157,6 +153,11 @@ export function FormFooter({
           <StyledButtonSubmit
             type="submit"
             disabled={isBlocked}
+            onClick={() => {
+              if (!isBlocked) {
+                handleUpdate(formData.set('close', true));
+              }
+            }}
             onMouseOver={(e) => {
               if (e && e.preventDefault) e.preventDefault();
               if (isBlocked) {
@@ -171,15 +172,11 @@ export function FormFooter({
             }}
             onMouseOut={(e) => {
               if (e && e.preventDefault) e.preventDefault();
-              if (isBlocked) {
-                setBlockedSaveHint(false);
-              }
+              setBlockedSaveHint(false);
             }}
             onBlur={(e) => {
               if (e && e.preventDefault) e.preventDefault();
-              if (isBlocked) {
-                setBlockedSaveHint(false);
-              }
+              setBlockedSaveHint(false);
             }}
           >
             Save & Close
