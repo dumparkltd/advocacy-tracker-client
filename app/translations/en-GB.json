@@ -329,7 +329,7 @@
   "app.containers.App.attributes.date_start_empty": "No date set",
   "app.containers.App.attributes.description": "Description",
   "app.containers.App.attributes.description_api": "Description (only used in GPN)",
-  "app.containers.App.attributes.draft": "Workflow/completion status",
+  "app.containers.App.attributes.draft": "Workflow status",
   "app.containers.App.attributes.email": "Email address",
   "app.containers.App.attributes.gdp": "gdp",
   "app.containers.App.attributes.has_reference_landbased_ml": "Has reference to landbased marine litter?",
