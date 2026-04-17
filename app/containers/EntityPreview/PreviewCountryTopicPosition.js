@@ -53,6 +53,7 @@ export function PreviewCountryTopicPosition({ content, onUpdatePath }) {
       responsive={false}
       flex={{ shrink: 0 }}
       fill="horizontal"
+      margin={{ bottom: 'large' }}
     >
       <Box gap="small">
         <Box>

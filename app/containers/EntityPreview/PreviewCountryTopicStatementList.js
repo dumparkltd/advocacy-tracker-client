@@ -20,6 +20,7 @@ export function PreviewCountryTopicStatementList({ content, onUpdatePath }) {
       gap="xlarge"
       responsive={false}
       flex={{ shrink: 0 }}
+      margin={{ bottom: 'large' }}
     >
       {indicatorPositions && indicatorPositions.length > 0 && (
         <Box gap="small">

@@ -121,7 +121,7 @@ export function ActorIndicatorsField({
     ? content.get('withOptions')
     : true;
   return (
-    <Box gap="small">
+    <Box gap="small" margin={{ bottom: 'large' }}>
       {title && (
         <SectionTitle>
           {title}

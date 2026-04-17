@@ -23,6 +23,7 @@ export function PreviewCountryPositionsList({ content, onUpdatePath }) {
       gap="medium"
       responsive={false}
       flex={{ shrink: 0 }}
+      margin={{ bottom: 'large' }}
     >
       <SectionTitle>
         Current Country Positions by Topic

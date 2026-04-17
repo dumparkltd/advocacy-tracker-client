@@ -76,7 +76,7 @@ export function AttributeField({
   }
   if (!field) return null;
   return (
-    <Box gap="small">
+    <Box gap="small" margin={{ bottom: 'large' }}>
       {content.get('title') && (
         <SectionTitle>
           {content.get('title')}

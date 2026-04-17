@@ -90,7 +90,7 @@ export function EntityFields({
   isAdmin,
 }) {
   return (
-    <Styled gap="large">
+    <Styled>
       {fields && Object.keys(fields).map((fieldId) => {
         const fieldContent = fields[fieldId];
         if (!fieldContent) {
@@ -209,7 +209,7 @@ export function EntityFields({
             }
             if (theField) {
               return (
-                <Box key={fieldId} direction="row" fill={false} flex={false}>
+                <Box key={fieldId} direction="row" fill={false} flex={false} margin={{ bottom: 'large' }}>
                   <Box gap="small">
                     {fieldContent.title && (
                       <SectionTitle>
@@ -325,7 +325,7 @@ export function EntityFields({
             'Parent topic'
           );
           return (
-            <Box gap="small" key={fieldId}>
+            <Box gap="small" key={fieldId} margin={{ bottom: 'large' }}>
               <FieldFactory
                 field={{
                   ...field,
@@ -351,7 +351,7 @@ export function EntityFields({
         }
         if (fieldId === 'fields') {
           return (
-            <Box gap="large" key={fieldId}>
+            <Box gap="large" key={fieldId} margin={{ bottom: 'large' }}>
               {fieldContent.map(
                 (field, i) => (
                   <FieldFactory
