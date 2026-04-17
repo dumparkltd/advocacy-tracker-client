@@ -2140,8 +2140,8 @@ const getActorStatementsAndPositions = ({
             // - date
             // - has_precedence
             (a, b) => {
-              const aDate = new Date(a.getIn(['measure', 'date_start']) || a.getIn(['measure', 'created_at']));
-              const bDate = new Date(b.getIn(['measure', 'date_start']) || b.getIn(['measure', 'created_at']));
+              const aDate = new Date(new Date(a.getIn(['measure', 'date_start']) || a.getIn(['measure', 'created_at'])).toDateString()).getTime();
+              const bDate = new Date(new Date(b.getIn(['measure', 'date_start']) || b.getIn(['measure', 'created_at'])).toDateString()).getTime();
               const aSupport = (ACTION_INDICATOR_SUPPORTLEVELS[a.get('supportlevel_id') || 0] || {}).order || 0;
               const bSupport = (ACTION_INDICATOR_SUPPORTLEVELS[b.get('supportlevel_id') || 0] || {}).order || 0;
               const aPrecedence = !!a.getIn(['measure', 'has_precedence']);
