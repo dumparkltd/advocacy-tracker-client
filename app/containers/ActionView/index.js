@@ -365,6 +365,9 @@ export function ActionView(props) {
                       group={{
                         label: appMessages.nav.indicators,
                         fields: [
+                          checkActionAttribute(typeId, 'has_precedence')
+                          && viewEntity.getIn(['attributes',  'has_precedence'])
+                          && getStatusField(viewEntity, 'has_precedence'),
                           getIndicatorConnectionField({
                             indicators,
                             onEntityClick,

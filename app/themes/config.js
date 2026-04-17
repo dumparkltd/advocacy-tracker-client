@@ -397,6 +397,12 @@ export const ACTION_FIELDS = {
       controlType: 'checkbox',
       type: 'bool',
     },
+    has_precedence: {
+      optional: [ACTIONTYPES.EXPRESS],
+      defaultValue: false,
+      controlType: 'checkbox',
+      type: 'bool',
+    },
     notifications: {
       defaultValue: true,
       controlType: 'checkbox',
@@ -2365,6 +2371,9 @@ export const ACTIONTYPES_CONFIG = {
             id: 'indicators',
             title: 'Topic positions',
             rows: [
+              [{
+                attribute: 'has_precedence',
+              }],
               [{
                 connection: API.INDICATORS,
               }],
@@ -4408,6 +4417,10 @@ export const ATTRIBUTE_STATUSES = {
   notifications: [
     { value: true, message: 'ui.notificationStatuses.enabled' },
     { value: false, message: 'ui.notificationStatuses.disabled' },
+  ],
+  has_precedence: [
+    { value: true, message: 'ui.precedenceStatuses.true' },
+    { value: false, message: 'ui.precedenceStatuses.false' },
   ],
   is_archive: [
     { value: true, message: 'ui.archiveStatuses.archived' },

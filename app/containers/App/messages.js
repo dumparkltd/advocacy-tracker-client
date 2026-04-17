@@ -897,6 +897,10 @@ export default defineMessages({
       id: 'app.containers.App.attributes.is_official',
       defaultMessage: 'Official?',
     },
+    has_precedence: {
+      id: 'app.containers.App.attributes.has_precedence',
+      defaultMessage: 'Precedence',
+    },
     public_api: {
       id: 'app.containers.App.attributes.public_api',
       defaultMessage: 'Publish to GPN?',
@@ -1204,6 +1208,10 @@ export default defineMessages({
     public_api: {
       id: 'app.containers.App.attributeInfo.public_api',
       defaultMessage: 'public_api',
+    },
+    has_precedence: {
+      id: 'app.containers.App.attributeInfo.has_precedence',
+      defaultMessage: 'Normally statements with stronger support are considered more relevant than statements with less support (regardless of date). \n\n Check this to give this statement precedence over earlier statements, regardless of support level.',
     },
     public_api_indicators: {
       id: 'app.containers.App.attributeInfo.public_api_indicators',
@@ -2575,6 +2583,16 @@ export default defineMessages({
       disabled: {
         id: 'app.containers.App.ui.notificationStatuses.disabled',
         defaultMessage: 'Notifications disabled',
+      },
+    },
+    precedenceStatuses: {
+      true: {
+        id: 'app.containers.App.ui.precedenceStatuses.true',
+        defaultMessage: 'Takes precedence',
+      },
+      false: {
+        id: 'app.containers.App.ui.precedenceStatuses.false',
+        defaultMessage: 'No precedence',
       },
     },
     draftStatuses: {

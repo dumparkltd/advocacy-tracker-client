@@ -2136,60 +2136,25 @@ const getActorStatementsAndPositions = ({
             Map(),
           ).sort(
             // sort:
-            // first check for event and group statements,
-            // then dates
-            // then use higher level of suuport
+            // - by level of support
+            // - date
+            // - has_precedence
             (a, b) => {
-              const aEventId = eventsByStatement.get(a.get('measure_id'))
-                && eventsByStatement.get(a.get('measure_id')).first();
-              const bEventId = eventsByStatement.get(b.get('measure_id'))
-                && eventsByStatement.get(b.get('measure_id')).first();
+              const aDate = new Date(a.getIn(['measure', 'date_start']) || a.getIn(['measure', 'created_at']));
+              const bDate = new Date(b.getIn(['measure', 'date_start']) || b.getIn(['measure', 'created_at']));
+              const aSupport = (ACTION_INDICATOR_SUPPORTLEVELS[a.get('supportlevel_id') || 0] || {}).order || 0;
+              const bSupport = (ACTION_INDICATOR_SUPPORTLEVELS[b.get('supportlevel_id') || 0] || {}).order || 0;
+              const aPrecedence = !!a.getIn(['measure', 'has_precedence']);
+              const bPrecedence = !!b.getIn(['measure', 'has_precedence']);
 
-              // If both statements are from the same event
-              if (aEventId && bEventId && aEventId === bEventId) {
-                // Individual statements (no viaGroups) come before group statements
-                if (!a.get('viaGroups') && !!b.get('viaGroups')) {
-                  return -1;
-                }
-                if (!!a.get('viaGroups') && !b.get('viaGroups')) {
-                  return 1;
-                }
-              }
-              let aDate = a.getIn(['measure', 'date_start']);
-              let bDate = b.getIn(['measure', 'date_start']);
-              /* eslint-disable no-restricted-globals */
-              let aIsDate = aDate && isDate(aDate);
-              let bIsDate = bDate && isDate(bDate);
-              if (!aIsDate) {
-                aDate = a.getIn(['measure', 'created_at']);
-                aIsDate = new Date(aDate) instanceof Date && !isNaN(new Date(aDate));
-              }
-              if (!bIsDate) {
-                bDate = b.getIn(['measure', 'created_at']);
-                bIsDate = new Date(bDate) instanceof Date && !isNaN(new Date(bDate));
-              }
-              /* eslint-enable no-restricted-globals */
-              if (aIsDate && bIsDate) {
-                const aDateOnly = new Date(new Date(aDate).toDateString()).getTime();
-                const bDateOnly = new Date(new Date(bDate).toDateString()).getTime();
-                // check for support level if dates equals
-                if (aDateOnly === bDateOnly) {
-                  // if (a) {
-                  //   console.log(aDate, a.get('supportlevel_id'), a.getIn(['measure', 'code']))
-                  //   console.log(bDate, b.get('supportlevel_id'), b.getIn(['measure', 'code']))
-                  // }
-                  const aSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[a.get('supportlevel_id') || 0];
-                  const bSupportLevel = ACTION_INDICATOR_SUPPORTLEVELS[b.get('supportlevel_id') || 0];
-                  return aSupportLevel.order < bSupportLevel.order ? -1 : 1;
-                }
-                return aDateOnly < bDateOnly ? 1 : -1;
-              }
-              if (aIsDate) {
-                return -1;
-              }
-              if (bIsDate) {
-                return 1;
-              }
+              // a before b when:
+              // stronger or equal support AND more recent
+              if (aSupport <= bSupport && aDate > bDate) return -1;
+              // stronger support AND older, but b doesn't have precedence
+              if (aSupport < bSupport && aDate <= bDate && !bPrecedence) return -1;
+              // weaker support AND more recent, but a has precedence
+              if (aSupport > bSupport && aDate > bDate && aPrecedence) return -1;
+
               return 1;
             }
           ).toList();

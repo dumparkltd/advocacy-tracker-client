@@ -35,6 +35,7 @@ export function AttributeField({
     att
     && content.get('type') === 'status'
     && typeof entity.getIn(['attributes', att]) !== 'undefined'
+    && (!content.get('ifTrue') || entity.getIn(['attributes', att]))
   ) {
     field = getStatusField(entity, att, ATTRIBUTE_STATUSES[att]);
   }
