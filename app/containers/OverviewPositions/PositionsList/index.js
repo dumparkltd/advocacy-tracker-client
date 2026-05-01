@@ -570,7 +570,7 @@ export function PositionsList({
                       )}
                       onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.REG })}
                       onSelect={(value) => onUpdateAssociationQuery({ value, type: ACTORTYPES.REG })}
-                      label="Filter by region"
+                      label="Filter by geographic region"
                       buttonLabel="Select region"
                     />
                   )}
@@ -604,7 +604,7 @@ export function PositionsList({
                       )}
                       onClear={() => onUpdateAssociationQuery({ type: ACTORTYPES.REG })}
                       onSelect={(id) => onUpdateAssociationQuery({ value: id, type: ACTORTYPES.REG })}
-                      label="Filter by region"
+                      label="Filter by geographic region"
                       buttonLabel="Select region"
                     />
                   )}
