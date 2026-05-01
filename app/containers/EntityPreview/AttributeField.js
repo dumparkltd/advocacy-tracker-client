@@ -35,6 +35,7 @@ export function AttributeField({
     att
     && content.get('type') === 'status'
     && typeof entity.getIn(['attributes', att]) !== 'undefined'
+    && (!content.get('ifTrue') || entity.getIn(['attributes', att]))
   ) {
     field = getStatusField(entity, att, ATTRIBUTE_STATUSES[att]);
   }
@@ -75,7 +76,7 @@ export function AttributeField({
   }
   if (!field) return null;
   return (
-    <Box gap="small">
+    <Box gap="small" margin={{ bottom: 'large' }}>
       {content.get('title') && (
         <SectionTitle>
           {content.get('title')}

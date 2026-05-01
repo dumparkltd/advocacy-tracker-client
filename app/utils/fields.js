@@ -1142,6 +1142,26 @@ export const getActiontypePreviewFields = (typeId) => {
         attribute: 'is_official',
         type: 'status',
       },
+      is_archive: {
+        attribute: 'is_archive',
+        type: 'status',
+        ifTrue: true,
+      },
+      private: {
+        attribute: 'private',
+        type: 'status',
+        ifTrue: true,
+      },
+      draft: {
+        attribute: 'draft',
+        type: 'status',
+        ifTrue: true,
+      },
+      public_api: {
+        attribute: 'public_api',
+        type: 'status',
+        ifTrue: true,
+      },
       date: {
         attribute: 'date',
       },
@@ -1157,6 +1177,11 @@ export const getActiontypePreviewFields = (typeId) => {
       actors: {
         columnId: 'actors',
         title: 'Stakeholders',
+      },
+      has_precedence: {
+        attribute: 'has_precedence',
+        type: 'status',
+        ifTrue: true,
       },
       statementIndicators: {
         title: 'Topics',
