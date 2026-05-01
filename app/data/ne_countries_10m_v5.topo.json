@@ -50939,10 +50939,10 @@
           "arcs": [[340, 341, 342, 343, 344, -340]],
           "type": "Polygon",
           "properties": {
-            "SOV_A3": "SDS",
+            "SOV_A3": "SSD",
             "TYPE": "Sovereign country",
             "ADMIN": "South Sudan",
-            "ADM0_A3": "SDS"
+            "ADM0_A3": "SSD"
           }
         },
         {
