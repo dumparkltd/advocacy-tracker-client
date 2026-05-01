@@ -117,9 +117,20 @@ export function ActorIndicatorsField({
       indicators: indicatorsWithSupport,
     }),
   });
+  const hasIndicators = field && field.values && field.values.size > 0;
   const hasOptions = typeof content.get('withOptions') !== 'undefined'
     ? content.get('withOptions')
     : true;
+  const hasActiveOptions = hasOptions &&
+    (
+      (hasMemberOption(typeId) && includeActorMembers)
+      || !includeInofficial
+      || !includeUnpublishedAPI
+    );
+  console.log(hasIndicators)
+  console.log(hasOptions, hasActiveOptions)
+  console.log(content && content.toJS())
+
   return (
     <Box gap="small" margin={{ bottom: 'large' }}>
       {title && (
@@ -127,7 +138,7 @@ export function ActorIndicatorsField({
           {title}
         </SectionTitle>
       )}
-      {hasOptions && (
+      {hasOptions && (hasActiveOptions || hasIndicators) && (
         <CheckboxOptionGroup>
           {hasMemberOption(typeId) && (
             <CheckboxOption

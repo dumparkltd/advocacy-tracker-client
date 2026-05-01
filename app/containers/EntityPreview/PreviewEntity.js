@@ -111,6 +111,7 @@ export function PreviewEntity({
       },
       fields: getPreviewFieldsForActor({
         actor: previewEntity,
+        users: previewEntity.get('actorUsers'),
         associationsByType: previewEntity.get('associationsByType'),
         membersByType: previewEntity.get('membersByType'),
         taxonomiesWithCategoriesByType: previewEntity.get('taxonomiesByType'),

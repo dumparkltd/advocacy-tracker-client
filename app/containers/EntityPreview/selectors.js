@@ -388,95 +388,6 @@ export const selectPreviewEntity = createSelector(
   (entity) => entity
 );
 
-export const selectPreviewEntityWithConnections = createSelector(
-  selectPreviewEntity,
-  selectIndicatorsAssociated,
-  (state, { actionType }) => selectIndicatorConnections(state, actionType),
-  selectActionIndicatorsGroupedByActionAttributes,
-  selectActionIndicatorsGroupedByIndicator,
-  selectActionViewTaxonomyOptions,
-  selectActorsByType,
-
-  selectActorMembersByType,
-  selectActorAssociationsByType,
-  selectActorViewTaxonomyOptions,
-
-  (state) => selectEntities(state, API.USER_ROLES),
-  (state) => selectEntities(state, API.ROLES),
-  selectUserActionsByType,
-  (
-    previewEntity,
-    indicators,
-    indicatorConnections,
-    actionIndicatorsByActionFull,
-    actionIndicators,
-    actionTaxonomiesWithCategories,
-    actionActorsByType,
-
-    actorMembersByType,
-    actorAssociationsByType,
-    actorTaxonomiesWithCategories,
-
-    userRoles,
-    roles,
-    userActionsByType,
-  ) => {
-    if (
-      !previewEntity
-    ) return null;
-    if (previewEntity.get('type') === API.ACTIONS) {
-      let indicatorsWithConnections;
-      const hasSupportLevel = previewEntity
-        && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[previewEntity.getIn(['attributes', 'measuretype_id'])]
-        && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[previewEntity.getIn(['attributes', 'measuretype_id'])].length > 0;
-      if (hasSupportLevel && indicators && indicatorConnections && actionIndicators) {
-        indicatorsWithConnections = indicators
-          .map((indicator) => setIndicatorConnections({
-            indicator,
-            indicatorConnections,
-            actionIndicators,
-          }));
-        const viewEntityActors = actionIndicatorsByActionFull.get(parseInt(previewEntity.get('id'), 10));
-        if (viewEntityActors) {
-          indicatorsWithConnections = indicatorsWithConnections.map(
-            (indicator) => {
-              let indicatorX = indicator;
-              // console.log(actor && actor.toJS())
-              const indicatorConnection = viewEntityActors.find(
-                (connection) => qe(indicator.get('id'), connection.get('indicator_id'))
-              );
-              if (indicatorConnection) {
-                indicatorX = indicatorX.setIn(['supportlevel', previewEntity.get('id')], indicatorConnection.get('supportlevel_id'));
-              }
-              return indicatorX;
-            }
-          );
-        }
-      }
-      return previewEntity
-        .set('indicators', indicatorsWithConnections ? indicatorsWithConnections.sortBy((val, key) => key) : Map())
-        .set('categories', actionTaxonomiesWithCategories)
-        .set('actorsByType', actionActorsByType);
-    }
-    if (previewEntity.get('type') === API.ACTORS) {
-      return previewEntity
-        .set('membersByType', actorMembersByType)
-        .set('associationsByType', actorAssociationsByType)
-        .set('taxonomiesByType', actorTaxonomiesWithCategories);
-    }
-    if (previewEntity.get('type') === API.USERS && userRoles) {
-      return previewEntity
-        .set(
-          'roles',
-          userRoles
-            .filter((association) => qe(association.getIn(['attributes', 'user_id']), previewEntity.get('id')))
-            .map((association) => roles.find((role) => qe(role.get('id'), association.getIn(['attributes', 'role_id']))))
-        )
-        .set('actionsByType', userActionsByType);
-    }
-    return previewEntity;
-  }
-);
 const selectUserActorAssociations = createSelector(
   (state, { id }) => id,
   selectUserActorsGroupedByActor,
@@ -662,5 +573,99 @@ export const selectChildIndicators = createSelector(
         return indicator.set('supportlevels', support);
       }
     );
+  }
+);
+
+
+export const selectPreviewEntityWithConnections = createSelector(
+  selectPreviewEntity,
+  selectIndicatorsAssociated,
+  (state, { actionType }) => selectIndicatorConnections(state, actionType),
+  selectActionIndicatorsGroupedByActionAttributes,
+  selectActionIndicatorsGroupedByIndicator,
+  selectActionViewTaxonomyOptions,
+  selectActorsByType,
+
+  selectActorMembersByType,
+  selectActorAssociationsByType,
+  selectActorViewTaxonomyOptions,
+  selectActorUsers,
+
+  (state) => selectEntities(state, API.USER_ROLES),
+  (state) => selectEntities(state, API.ROLES),
+  selectUserActionsByType,
+  (
+    previewEntity,
+    indicators,
+    indicatorConnections,
+    actionIndicatorsByActionFull,
+    actionIndicators,
+    actionTaxonomiesWithCategories,
+    actionActorsByType,
+
+    actorMembersByType,
+    actorAssociationsByType,
+    actorTaxonomiesWithCategories,
+    actorUsers,
+
+    userRoles,
+    roles,
+    userActionsByType,
+  ) => {
+    if (
+      !previewEntity
+    ) return null;
+    if (previewEntity.get('type') === API.ACTIONS) {
+      let indicatorsWithConnections;
+      const hasSupportLevel = previewEntity
+        && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[previewEntity.getIn(['attributes', 'measuretype_id'])]
+        && ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[previewEntity.getIn(['attributes', 'measuretype_id'])].length > 0;
+      if (hasSupportLevel && indicators && indicatorConnections && actionIndicators) {
+        indicatorsWithConnections = indicators
+          .map((indicator) => setIndicatorConnections({
+            indicator,
+            indicatorConnections,
+            actionIndicators,
+          }));
+        const viewEntityActors = actionIndicatorsByActionFull.get(parseInt(previewEntity.get('id'), 10));
+        if (viewEntityActors) {
+          indicatorsWithConnections = indicatorsWithConnections.map(
+            (indicator) => {
+              let indicatorX = indicator;
+              // console.log(actor && actor.toJS())
+              const indicatorConnection = viewEntityActors.find(
+                (connection) => qe(indicator.get('id'), connection.get('indicator_id'))
+              );
+              if (indicatorConnection) {
+                indicatorX = indicatorX.setIn(['supportlevel', previewEntity.get('id')], indicatorConnection.get('supportlevel_id'));
+              }
+              return indicatorX;
+            }
+          );
+        }
+      }
+      return previewEntity
+        .set('indicators', indicatorsWithConnections ? indicatorsWithConnections.sortBy((val, key) => key) : Map())
+        .set('categories', actionTaxonomiesWithCategories)
+        .set('actorsByType', actionActorsByType);
+    }
+    if (previewEntity.get('type') === API.ACTORS) {
+      return previewEntity
+        .set('actorUsers', actorUsers)
+        .set('membersByType', actorMembersByType)
+        .set('associationsByType', actorAssociationsByType)
+        .set('taxonomiesByType', actorTaxonomiesWithCategories);
+    }
+    if (previewEntity.get('type') === API.USERS && userRoles) {
+      return previewEntity
+        .set(
+          'roles',
+          userRoles
+            .filter((association) => qe(association.getIn(['attributes', 'user_id']), previewEntity.get('id')))
+            .map((association) => roles.find((role) => qe(role.get('id'), association.getIn(['attributes', 'role_id']))))
+        )
+        .set('actionsByType', userActionsByType);
+    }
+    return previewEntity;
   }
 );

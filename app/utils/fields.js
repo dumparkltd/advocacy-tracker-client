@@ -882,6 +882,7 @@ export const getPreviewFooterForActor = (actor, intl) => {
 };
 export const getPreviewFieldsForActor = ({
   actor,
+  users,
   membersByType,
   associationsByType,
   taxonomiesWithCategoriesByType,
@@ -910,6 +911,15 @@ export const getPreviewFieldsForActor = ({
     },
     [],
   );
+  // associated users/staff
+  if (users) {
+    fields = [
+      ...fields,
+      getUserConnectionField({
+        users,
+      }),
+    ];
+  }
   // associated taxonomies
   if (taxonomiesWithCategoriesByType) {
     fields = [
@@ -1210,7 +1220,7 @@ export const getActortypePreviewFields = (typeId) => {
     fields = {
       ...fields,
       actorIndicators: {
-        withOptions: false,
+        withOptions: true,
       },
     };
   }
@@ -1228,6 +1238,18 @@ export const getActortypePreviewFields = (typeId) => {
       title: 'WWF staff',
     },
   };
+  if (qe(typeId, ACTORTYPES.CONTACT)) {
+    if (Object.keys(MEMBERSHIPS).indexOf(`${typeId}`) > -1) {
+      fields = {
+        ...fields,
+        countries: {
+          actortype: ACTORTYPES.COUNTRY,
+          title: 'Countries',
+          type: 'associations',
+        },
+      };
+    }
+  }
   if (Object.keys(MEMBERSHIPS).indexOf(`${typeId}`) > -1) {
     fields = {
       ...fields,

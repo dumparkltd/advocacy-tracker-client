@@ -53,6 +53,7 @@ export function AssociationsField({
     typeid: parseInt(actortype, 10),
   });
 
+  if (field && !field.values) return null;
   return (
     <Box gap="small" margin={{ bottom: 'large' }}>
       {content.get('title') && (
