@@ -23,11 +23,11 @@ export default defineMessages({
     },
     1: {
       id: 'app.containers.App.supportlevels.1',
-      defaultMessage: 'Strong support',
+      defaultMessage: 'Supportive',
     },
     2: {
       id: 'app.containers.App.supportlevels.2',
-      defaultMessage: 'Quite positive',
+      defaultMessage: 'Mostly supportive',
     },
     3: {
       id: 'app.containers.App.supportlevels.3',
@@ -35,11 +35,11 @@ export default defineMessages({
     },
     4: {
       id: 'app.containers.App.supportlevels.4',
-      defaultMessage: 'Rather sceptical',
+      defaultMessage: 'Mostly opposing',
     },
     5: {
       id: 'app.containers.App.supportlevels.5',
-      defaultMessage: 'Opponent',
+      defaultMessage: 'Opposing',
     },
     99: {
       id: 'app.containers.App.supportlevels.99',
@@ -49,19 +49,19 @@ export default defineMessages({
   supportlevelsAggregate: {
     0: {
       id: 'app.containers.App.supportlevelsAggregate.0',
-      defaultMessage: 'No support for any must-have',
+      defaultMessage: 'Not statement of support for any must-have',
     },
     1: {
       id: 'app.containers.App.supportlevelsAggregate.1',
-      defaultMessage: 'Strong support for all must-haves',
+      defaultMessage: "'Supportive' of all must-haves",
     },
     2: {
       id: 'app.containers.App.supportlevelsAggregate.2',
-      defaultMessage: 'Strong support for any must-have',
+      defaultMessage: "'Supportive' of at least one must-have",
     },
     3: {
       id: 'app.containers.App.supportlevelsAggregate.3',
-      defaultMessage: 'Some support for any must-have',
+      defaultMessage: "'Mostly supportive of at least one must-have",
     },
     4: {
       id: 'app.containers.App.supportlevelsAggregate.4',
