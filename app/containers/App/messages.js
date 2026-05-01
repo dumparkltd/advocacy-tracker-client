@@ -49,7 +49,7 @@ export default defineMessages({
   supportlevelsAggregate: {
     0: {
       id: 'app.containers.App.supportlevelsAggregate.0',
-      defaultMessage: 'Not statement of support for any must-have',
+      defaultMessage: 'No statement of support for any must-have',
     },
     1: {
       id: 'app.containers.App.supportlevelsAggregate.1',
@@ -61,7 +61,7 @@ export default defineMessages({
     },
     3: {
       id: 'app.containers.App.supportlevelsAggregate.3',
-      defaultMessage: "'Mostly supportive of at least one must-have",
+      defaultMessage: "'Mostly supportive' of at least one must-have",
     },
     4: {
       id: 'app.containers.App.supportlevelsAggregate.4',
