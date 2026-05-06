@@ -19,6 +19,7 @@ import { MAP_OPTIONS } from 'themes/config';
 
 import qe from 'utils/quasi-equals';
 
+import Dot from 'components/styled/Dot';
 
 import Tooltip from './Tooltip';
 import TooltipContent from './TooltipContent';
@@ -56,7 +57,21 @@ const Map = styled.div`
   z-index: 10;
   width: 100%;
 `;
-
+const HoverTooltip = styled.div`
+  position: absolute;
+  pointer-events: none;
+  z-index: 1000;
+  background: white;
+  padding: 1px 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  transform: translate(-50%, -100%) translateY(-15px);
+`;
 // const PROJ[projection] = {
 //   name: 'Custom',
 //   crs: 'ESRI:54030',
@@ -190,6 +205,8 @@ export function LeafletWrapper({
 
   const [tooltip, setTooltip] = useState(TOOLTIP_INITIAL);
   const [featureOver, setFeatureOver] = useState(null);
+  const [hoverInfo, setHoverInfo] = useState(null);
+
   const [zoom, setZoom] = useState(MAP_OPTIONS.ZOOM.INIT);
   const ref = useRef(null);
   const mapRef = useRef(null);
@@ -199,6 +216,7 @@ export function LeafletWrapper({
   const locationOverlayGroupRef = useRef(null);
   const countryTooltipGroupRef = useRef(null);
   const countryOverGroupRef = useRef(null);
+
   const mapEvents = {
     // resize: () => {
     //   // console.log('resize')
@@ -348,10 +366,15 @@ export function LeafletWrapper({
       }
     }
   }
-  const onFeatureOver = (e, feature) => {
-    if (e && L.DomEvent) L.DomEvent.stopPropagation(e);
-    if (!e || !feature || feature.id) setFeatureOver(null);
-    if (feature && feature.id) setFeatureOver(feature.id);
+  const onFeatureOver = (e) => {
+    if (e) {
+      const { feature } = e.sourceTarget;
+      if (L.DomEvent) L.DomEvent.stopPropagation(e);
+      if (!feature || feature.id) setFeatureOver(null);
+      if (feature && feature.id) setFeatureOver(feature.id);
+    } else {
+      setFeatureOver(null)
+    }
   };
   useLayoutEffect(() => {
     // console.log('[printArgs]')
@@ -457,6 +480,7 @@ export function LeafletWrapper({
         styleType,
         markerEvents: {
           click: (e) => onFeatureClick(e),
+          mouseover: (e) => onFeatureOver(e),
           mouseout: () => onFeatureOver(),
         },
       });
@@ -534,6 +558,7 @@ export function LeafletWrapper({
         }
       ).on({
         click: (e) => onFeatureClick(e),
+        mouseover: (e) => onFeatureOver(e),
         mouseout: () => onFeatureOver(),
       });
       countryOverlayGroupRef.current.addLayer(jsonLayer);
@@ -599,6 +624,7 @@ export function LeafletWrapper({
         config: circleLayerConfig,
         markerEvents: {
           click: (e) => onFeatureClick(e),
+          mouseover: (e) => onFeatureOver(e),
           mouseout: () => onFeatureOver(),
         },
       });
@@ -649,17 +675,63 @@ export function LeafletWrapper({
   }, [tooltip, mapSubject, includeSecondaryMembers]);
 
   useEffect(() => {
-    // console.log('[featureOver]')
-
+    // console.log('[featureOver]', featureOver)
     countryOverGroupRef.current.clearLayers();
     if (featureOver && countryData) {
-      const jsonLayer = L.geoJSON(
-        countryData.filter((f) => qe(f.id, featureOver)),
-        {
+      const feature = countryData.find((f) => qe(f.id, featureOver));
+      if (feature) {
+        // console.log('feature', feature)
+        const jsonLayer = L.geoJSON(feature, {
           style: mapOptions.OVER_STYLE,
-        },
-      );
-      countryOverGroupRef.current.addLayer(jsonLayer);
+        });
+
+        countryOverGroupRef.current.addLayer(jsonLayer);
+
+        const point = countryPointData && countryPointData.find((f) => qe(f.id, featureOver));
+        const center = point
+          ? L.latLng(point.geometry.coordinates[1], point.geometry.coordinates[0])
+          : jsonLayer.getBounds().getCenter();
+        const containerPoint = mapRef.current.latLngToContainerPoint(center);
+
+        let color = mapOptions.NO_DATA_COLOR;
+        if (feature.style && feature.style.fillColor) {
+          color = feature.style.fillColor;
+        } else if (
+          valueToStyle
+          && feature.values
+          && typeof feature.values[indicator] !== 'undefined'
+        ) {
+          color = valueToStyle(feature.values[indicator]).fillColor;
+        } else if (mapSubject) {
+          // style based on subject/indicator
+          // treat 0 as no data when showing counts
+          const noDataThreshold = indicator === 'indicator' ? 0 : 1;
+          if (
+            feature.values
+            && typeof feature.values[indicator] !== 'undefined'
+            && feature.values[indicator] >= noDataThreshold
+          ) {
+            const scale = mapSubject
+              && scaleColorCount(maxValueCountries, mapOptions.GRADIENT[mapSubject], indicator === 'indicator');
+            color = scale(feature.values[indicator]);
+          }
+        }
+        let title = 'UNDEFINED';
+        if (feature.attributes && feature.attributes.title) {
+          title = feature.attributes.title;
+        }
+        if (feature.tooltip && feature.tooltip.title) {
+          title = feature.tooltip.title;
+        }
+        setHoverInfo({
+          x: containerPoint.x,
+          y: containerPoint.y,
+          title,
+          color,
+        });
+      }
+    } else {
+      setHoverInfo(null);
     }
   }, [featureOver]);
   // update tooltip
@@ -689,6 +761,16 @@ export function LeafletWrapper({
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
       </Helmet>
       <Map id={mapId} ref={ref} styleType={styleType} />
+      {hoverInfo && (
+        <HoverTooltip
+          style={{
+            left: hoverInfo.x,
+            top: hoverInfo.y,
+          }}>
+          <Dot color={hoverInfo.color} size="10px" />
+          {hoverInfo.title}
+        </HoverTooltip>
+      )}
       {tooltip && tooltip.features && tooltip.features.length > 0 && (
         <Tooltip
           isPrintView={isPrintView}
