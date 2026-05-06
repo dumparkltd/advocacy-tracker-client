@@ -2447,6 +2447,10 @@ export const ACTIONTYPES_CONFIG = {
                 connection: API.ACTORS,
                 type: ACTORTYPES.COUNTRY,
                 prepopulateIfPrevious: true,
+                syncFromMembersOption: {
+                  memberType: ACTORTYPES.CONTACT,
+                  memberships: API.MEMBERSHIPS,
+                },
               }],
               [{
                 connection: API.ACTORS,
@@ -2701,6 +2705,10 @@ export const ACTIONTYPES_CONFIG = {
                 connection: API.ACTORS,
                 type: ACTORTYPES.COUNTRY,
                 prepopulateIfPrevious: true,
+                syncFromMembersOption: {
+                  memberType: ACTORTYPES.CONTACT,
+                  memberships: API.MEMBERSHIPS,
+                },
               }],
               [{
                 connection: API.ACTORS,
@@ -2962,6 +2970,10 @@ export const ACTIONTYPES_CONFIG = {
                 connection: API.ACTORS,
                 type: ACTORTYPES.COUNTRY,
                 prepopulateIfPrevious: true,
+                syncFromMembersOption: {
+                  memberType: ACTORTYPES.CONTACT,
+                  memberships: API.MEMBERSHIPS,
+                },
               }],
               [{
                 connection: API.ACTORS,
@@ -3227,6 +3239,10 @@ export const ACTIONTYPES_CONFIG = {
                 connection: API.ACTORS,
                 type: ACTORTYPES.COUNTRY,
                 prepopulateIfPrevious: true,
+                syncFromMembersOption: {
+                  memberType: ACTORTYPES.CONTACT,
+                  memberships: API.MEMBERSHIPS,
+                },
               }],
               [{
                 connection: API.ACTORS,
@@ -3500,6 +3516,10 @@ export const ACTIONTYPES_CONFIG = {
                 connection: API.ACTORS,
                 type: ACTORTYPES.COUNTRY,
                 prepopulateIfPrevious: true,
+                syncFromMembersOption: {
+                  memberType: ACTORTYPES.CONTACT,
+                  memberships: API.MEMBERSHIPS,
+                },
               }],
               [{
                 connection: API.ACTORS,
@@ -3781,6 +3801,10 @@ export const ACTIONTYPES_CONFIG = {
                 connection: API.ACTORS,
                 type: ACTORTYPES.COUNTRY,
                 prepopulateIfPrevious: true,
+                syncFromMembersOption: {
+                  memberType: ACTORTYPES.CONTACT,
+                  memberships: API.MEMBERSHIPS,
+                },
               }],
               [{
                 connection: API.ACTORS,

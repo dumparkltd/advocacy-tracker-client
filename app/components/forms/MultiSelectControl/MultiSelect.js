@@ -415,7 +415,7 @@ class MultiSelect extends React.Component {
     const showChangeHint = this.props.advanced && hasChanges;
     options = this.filterOptions(options, this.props, this.state);
     const filteredOptionsSelected = options.filter((option) => option.get('checked') || this.isOptionIndeterminate(option));
-    console.log(this.props.buttons)
+
     return (
       <div ref={this.setWrapperRef}>
         <Header

@@ -196,6 +196,9 @@ export const getActorsFormControl = ({
   typeId,
   path = 'associatedActorsByActortype',
   fieldId,
+  syncFromMembersOption,
+  membershipsByMember,
+  // actorsByActortype,
 }) => {
   const options = entityOptions({
     entities,
@@ -223,6 +226,9 @@ export const getActorsFormControl = ({
       })
       : null,
     hideByDefault,
+    syncFromMembersOption,
+    membershipsByMember,
+    // actorsByActortype,
   };
 };
 
@@ -1128,6 +1134,7 @@ const getEntityFormField = (
     actorsByActortype,
     associationsByActortype,
     membersByActortype,
+    membershipsByMember,
     resourcesByResourcetype,
     entityIndicatorConnections,
     onCreateOption,
@@ -1153,6 +1160,7 @@ const getEntityFormField = (
     fieldType,
     basis,
     multiple,
+    syncFromMembersOption,
   } = field;
   let result;
   if (attribute && !fieldConfig) {
@@ -1230,6 +1238,8 @@ const getEntityFormField = (
           isAdmin,
           intl,
           path,
+          syncFromMembersOption,
+          membershipsByMember,
         });
       }
     } else if (type && connection === API.ACTIONS) {

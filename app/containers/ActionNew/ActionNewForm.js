@@ -54,6 +54,7 @@ import {
   selectIsUserAdmin,
   selectTaxonomiesWithCategories,
   selectLocationKey,
+  selectMembershipsGroupedByMember,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -263,6 +264,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       typeId,
       topActionsByActiontype,
       subActionsByActiontype,
+      membershipsByMember,
       indicatorOptions,
       userOptions,
       onErrorDismiss,
@@ -362,6 +364,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             topActionsByActiontype,
             subActionsByActiontype,
             resourcesByResourcetype,
+            membershipsByMember,
             onCreateOption: inModal ? null : onCreateOption,
             intl,
             isNew: true,
@@ -394,6 +397,7 @@ ActionNewForm.propTypes = {
   userOptions: PropTypes.instanceOf(Map),
   topActionsByActiontype: PropTypes.instanceOf(Map),
   subActionsByActiontype: PropTypes.instanceOf(Map),
+  membershipsByMember: PropTypes.instanceOf(Map),
   onCreateOption: PropTypes.func,
   connectedTaxonomies: PropTypes.instanceOf(Map),
   actiontype: PropTypes.instanceOf(Map),
@@ -436,6 +440,7 @@ const mapStateToProps = (state, { typeId, autoUser }) => ({
   resourcesByResourcetype: selectResourcesByResourcetype(state, typeId),
   topActionsByActiontype: selectTopActionsByActiontype(state, typeId),
   subActionsByActiontype: selectSubActionsByActiontype(state, typeId),
+  membershipsByMember: selectMembershipsGroupedByMember(state, typeId),
   indicatorOptions: selectIndicatorOptions(state, typeId),
   userOptions: selectUserOptions(state, typeId),
   sessionUser: autoUser && selectSessionUser(state),
