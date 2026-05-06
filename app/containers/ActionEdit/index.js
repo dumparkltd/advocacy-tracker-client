@@ -54,6 +54,7 @@ import {
   selectActionIndicatorsForAction,
   selectTaxonomiesWithCategories,
   selectStepQuery,
+  selectMembershipsGroupedByMember,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -172,6 +173,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       onCreateOption,
       topActionsByActiontype,
       subActionsByActiontype,
+      membershipsByMember,
       indicatorOptions,
       userOptions,
       isAdmin,
@@ -264,6 +266,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                   entityIndicatorConnections,
                   onCreateOption,
                   intl,
+                  membershipsByMember,
                 })}
               />
             )
@@ -298,6 +301,7 @@ ActionEdit.propTypes = {
   taxonomies: PropTypes.object,
   topActionsByActiontype: PropTypes.object,
   subActionsByActiontype: PropTypes.object,
+  membershipsByMember: PropTypes.instanceOf(Map),
   indicatorOptions: PropTypes.object,
   userOptions: PropTypes.object,
   connectedTaxonomies: PropTypes.object,
@@ -335,6 +339,7 @@ const mapStateToProps = (state, { params }) => ({
   myId: selectSessionUserId(state),
   entityIndicatorConnections: selectActionIndicatorsForAction(state, params.id),
   step: selectStepQuery(state),
+  membershipsByMember: selectMembershipsGroupedByMember(state, params.id),
 });
 
 function mapDispatchToProps(dispatch, props) {
