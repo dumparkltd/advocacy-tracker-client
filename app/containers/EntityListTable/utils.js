@@ -785,7 +785,7 @@ export const prepareEntityRows = ({
               temp = entity.get('position')
                 && entity.getIn(['position', 'supportlevel_id']);
             }
-            if (typeof temp === 'undefined') {
+            if (typeof temp === 'undefined' || temp === null) {
               return {
                 ...memoEntity,
                 [col.id]: {
