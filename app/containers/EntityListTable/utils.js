@@ -597,13 +597,23 @@ export const prepareEntityRows = ({
             } else {
               temp = entity.get('associations') || (entity.get('associationsByType') && entity.get('associationsByType').flatten(true));
             }
+            // all related
             relatedEntities = getRelatedEntities(temp, connections.get('actors'), col);
+            // related countries
+            relatedEntitiesOther = getRelatedEntities(
+              entity.getIn(['associationsByType', parseInt(1, 10)]),
+              connections.get('actors'),
+              col,
+            );
             return {
               ...memoEntity,
               [col.id]: {
                 ...col,
+                valueCountry: getRelatedValue(relatedEntitiesOther, 'memberships', false, true),
                 value: getRelatedValue(relatedEntities, 'memberships'),
-                single: relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
+                single: relatedEntitiesOther && relatedEntitiesOther.size > 0
+                  ? relatedEntitiesOther.first()
+                  : relatedEntities && relatedEntities.size === 1 && relatedEntities.first(),
                 tooltip: relatedEntities && relatedEntities.size > 1
                   && relatedEntities.groupBy((t) => t.getIn(['attributes', 'actortype_id'])),
                 multiple: relatedEntities && relatedEntities.size > 1,

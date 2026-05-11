@@ -7,8 +7,8 @@ const LinkTooltip = styled(
 )`
   text-align: ${({ align }) => align === 'end' ? 'right' : 'left'};
   border-radius: 999px;
-  width: 40px;
-  height: 40px;
+  width: ${({ small }) => small ? 25 : 40}px;
+  height: ${({ small }) => small ? 25 : 40}px;
   border: 1px solid #f0f0f0;
   box-shadow: 0px 0px 9px -3px rgba(0,0,0,0.1);
   ${({ theme, showContent }) => {

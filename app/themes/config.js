@@ -135,7 +135,7 @@ export const RESOURCETYPES = {
 
 export const GENERAL_POS_TAXONOMY = 1;
 export const SECTOR_TAXONOMY = 2;
-export const ROLES_TAXONOMY = 3;
+export const TITLE_ROLES_TAXONOMY = 3;
 export const REGION_TYPE_TAXONOMY = 4;
 export const GROUP_TYPE_TAXONOMY = 5;
 export const EXPRESSFORM_TAXONOMY = 7;
@@ -143,6 +143,7 @@ export const EVENT_TYPE_TAXONOMY = 9;
 export const PRIORITY_TAXONOMY = 10;
 export const INTERACTION_TYPE_TAXONOMY = 12;
 export const AUTHORITY_TAXONOMY = 13;
+export const PROCESS_ROLES_TAXONOMY = 14;
 
 export const ACTION_INDICATOR_SUPPORTLEVELS = {
   // not assigned
@@ -1627,7 +1628,13 @@ export const ACTORTYPES_CONFIG = {
       {
         id: 'taxonomy',
         type: 'taxonomy',
-        taxonomy_id: 3, // role
+        taxonomy_id: TITLE_ROLES_TAXONOMY, // role
+        minSize: 'ms',
+      },
+      {
+        id: `taxonomy-${PROCESS_ROLES_TAXONOMY}`,
+        type: 'taxonomy',
+        taxonomy_id: PROCESS_ROLES_TAXONOMY, // role
         minSize: 'ms',
       },
       {
@@ -1703,7 +1710,11 @@ export const ACTORTYPES_CONFIG = {
                 },
               ],
               [{
-                taxonomy: 3,
+                taxonomy: TITLE_ROLES_TAXONOMY,
+                basis: '2/3',
+              }],
+              [{
+                taxonomy: PROCESS_ROLES_TAXONOMY,
                 basis: '2/3',
               }],
             ],

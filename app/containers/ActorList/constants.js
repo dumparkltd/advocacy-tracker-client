@@ -9,7 +9,8 @@ import {
   REGION_TYPE_TAXONOMY,
   GROUP_TYPE_TAXONOMY,
   SECTOR_TAXONOMY,
-  ROLES_TAXONOMY,
+  TITLE_ROLES_TAXONOMY,
+  PROCESS_ROLES_TAXONOMY,
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
@@ -80,11 +81,14 @@ export const CONFIG = {
       }],
     },
     {
-      id: `taxonomies-${ROLES_TAXONOMY}`,
-      title: 'Roles',
+      id: `taxonomies-roles`,
+      title: 'Categories',
       option: 'taxonomies',
       taxonomies: [{
-        id: ROLES_TAXONOMY,
+        id: TITLE_ROLES_TAXONOMY,
+        filterType: 'pills',
+      },{
+        id: PROCESS_ROLES_TAXONOMY,
         filterType: 'pills',
       }],
     },
