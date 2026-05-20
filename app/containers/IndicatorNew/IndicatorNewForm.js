@@ -46,6 +46,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectIsUserCoordinator,
   selectTaxonomiesWithCategories,
   selectLocationKey,
 } from 'containers/App/selectors';
@@ -111,6 +112,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
       formId,
       inModal,
       isAdmin,
+      isCoordinator,
       parentOptions,
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
@@ -142,6 +144,7 @@ export class IndicatorNewForm extends React.PureComponent { // eslint-disable-li
           scrollContainer={this.scrollContainer.current}
           fieldsByStep={dataReady && getIndicatorFormFields({
             isAdmin,
+            isCoordinator,
             isMine: true,
             isNew: true,
             connectedTaxonomies,
@@ -193,6 +196,7 @@ IndicatorNewForm.propTypes = {
   formId: PropTypes.string,
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   locationKey: PropTypes.string,
 };
 
@@ -206,6 +210,7 @@ const mapStateToProps = (state) => ({
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   actionsByActiontype: selectActionsByActiontype(state),
   isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
   parentOptions: selectIndicatorOptions(state),
   locationKey: selectLocationKey(state),
 });

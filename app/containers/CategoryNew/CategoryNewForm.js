@@ -35,7 +35,8 @@ import {
 import {
   selectReady,
   selectReadyForAuthCheck,
-  selectIsUserAdmin,
+  // selectIsUserAdmin,
+  selectIsUserCoordinator,
   selectTaxonomy,
 } from 'containers/App/selectors';
 
@@ -95,6 +96,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
       formId,
       inModal,
       invalidateEntitiesOnSuccess,
+      isCoordinator,
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
@@ -132,6 +134,7 @@ export class CategoryNewForm extends React.PureComponent { // eslint-disable-lin
           scrollContainer={this.scrollContainer.current}
           fieldsByStep={dataReady && getEntityFormFields(
             {
+              isCoordinator,
               isMine: true,
               taxonomy,
               intl,
@@ -168,6 +171,8 @@ CategoryNewForm.propTypes = {
   formDataPath: PropTypes.string,
   formId: PropTypes.string,
   inModal: PropTypes.bool,
+  // isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   invalidateEntitiesOnSuccess: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.array,
@@ -179,7 +184,8 @@ CategoryNewForm.contextTypes = {
 };
 
 const mapStateToProps = (state, { typeId }) => ({
-  isAdmin: selectIsUserAdmin(state),
+  // isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   taxonomy: selectTaxonomy(state, typeId),

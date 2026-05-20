@@ -45,6 +45,7 @@ import {
   selectActortype,
   selectSessionUser,
   selectIsUserAdmin,
+  selectIsUserCoordinator,
   selectTaxonomiesWithCategories,
   selectLocationKey,
 } from 'containers/App/selectors';
@@ -143,6 +144,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       formDataPath,
       inModal,
       isAdmin,
+      isCoordinator,
       invalidateEntitiesOnSuccess,
       dataReady,
       formId,
@@ -184,6 +186,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
           fieldsByStep={dataReady && getActortypeFormFields({
             isMine: true,
             isAdmin,
+            isCoordinator,
             typeId,
             taxonomies,
             connectedTaxonomies,
@@ -229,6 +232,7 @@ ActorNewForm.propTypes = {
   formId: PropTypes.string,
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   invalidateEntitiesOnSuccess: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.array,
@@ -259,6 +263,7 @@ const mapStateToProps = (state, { typeId, autoUser }) => ({
   userOptions: selectUserOptions(state, typeId),
   sessionUser: autoUser && selectSessionUser(state),
   isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
   locationKey: selectLocationKey(state),
 });
 

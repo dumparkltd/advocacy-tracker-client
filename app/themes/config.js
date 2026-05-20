@@ -1246,8 +1246,8 @@ export const ACTORTYPES_CONFIG = {
             skipNew: true,
             activeIf: { public_api: false },
           },
-          { attribute: 'private', needsAdminOrOwn: true, activeIf: { public_api: false } },
-          { attribute: 'draft', needsAdminOrOwn: true, activeIf: { public_api: false } },
+          { attribute: 'private', needsCoordinatorOrOwn: true, activeIf: { public_api: false } },
+          { attribute: 'draft', needsCoordinatorOrOwn: true, activeIf: { public_api: false } },
         ],
       },
       {
@@ -1465,8 +1465,8 @@ export const ACTORTYPES_CONFIG = {
         id: 'footer',
         fields: [
           { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-          { attribute: 'private', needsAdminOrOwn: true },
-          { attribute: 'draft', needsAdminOrOwn: true },
+          { attribute: 'private', needsCoordinatorOrOwn: true },
+          { attribute: 'draft', needsCoordinatorOrOwn: true },
         ],
       },
       {
@@ -1684,8 +1684,8 @@ export const ACTORTYPES_CONFIG = {
         id: 'footer',
         fields: [
           { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-          { attribute: 'private', needsAdminOrOwn: true },
-          { attribute: 'draft', needsAdminOrOwn: true },
+          { attribute: 'private', needsCoordinatorOrOwn: true },
+          { attribute: 'draft', needsCoordinatorOrOwn: true },
         ],
       },
       {
@@ -1899,8 +1899,8 @@ export const ACTORTYPES_CONFIG = {
         id: 'footer',
         fields: [
           { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-          { attribute: 'private', needsAdminOrOwn: true },
-          { attribute: 'draft', needsAdminOrOwn: true },
+          { attribute: 'private', needsCoordinatorOrOwn: true },
+          { attribute: 'draft', needsCoordinatorOrOwn: true },
         ],
       },
       {
@@ -2070,8 +2070,8 @@ export const ACTORTYPES_CONFIG = {
         id: 'footer',
         fields: [
           { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-          { attribute: 'private', needsAdminOrOwn: true },
-          { attribute: 'draft', needsAdminOrOwn: true },
+          { attribute: 'private', needsCoordinatorOrOwn: true },
+          { attribute: 'draft', needsCoordinatorOrOwn: true },
         ],
       },
       {
@@ -2348,8 +2348,8 @@ export const ACTIONTYPES_CONFIG = {
             skipNew: true,
             activeIf: { public_api: false },
           },
-          { attribute: 'private', needsAdminOrOwn: true, activeIf: { public_api: false } },
-          { attribute: 'draft', needsAdminOrOwn: true, activeIf: { public_api: false } },
+          { attribute: 'private', needsCoordinatorOrOwn: true, activeIf: { public_api: false } },
+          { attribute: 'draft', needsCoordinatorOrOwn: true, activeIf: { public_api: false } },
         ],
       },
       {
@@ -2603,8 +2603,8 @@ export const ACTIONTYPES_CONFIG = {
         id: 'footer',
         fields: [
           { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-          { attribute: 'private', needsAdminOrOwn: true },
-          { attribute: 'draft', needsAdminOrOwn: true },
+          { attribute: 'private', needsCoordinatorOrOwn: true },
+          { attribute: 'draft', needsCoordinatorOrOwn: true },
         ],
       },
       {
@@ -2883,8 +2883,8 @@ export const ACTIONTYPES_CONFIG = {
         id: 'footer',
         fields: [
           { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-          { attribute: 'private', needsAdminOrOwn: true },
-          { attribute: 'draft', needsAdminOrOwn: true },
+          { attribute: 'private', needsCoordinatorOrOwn: true },
+          { attribute: 'draft', needsCoordinatorOrOwn: true },
         ],
       },
       {
@@ -3152,8 +3152,8 @@ export const ACTIONTYPES_CONFIG = {
         id: 'footer',
         fields: [
           { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-          { attribute: 'private', needsAdminOrOwn: true },
-          { attribute: 'draft', needsAdminOrOwn: true },
+          { attribute: 'private', needsCoordinatorOrOwn: true },
+          { attribute: 'draft', needsCoordinatorOrOwn: true },
         ],
       },
       {
@@ -3428,8 +3428,8 @@ export const ACTIONTYPES_CONFIG = {
         id: 'footer',
         fields: [
           { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-          { attribute: 'private', needsAdminOrOwn: true },
-          { attribute: 'draft', needsAdminOrOwn: true },
+          { attribute: 'private', needsCoordinatorOrOwn: true },
+          { attribute: 'draft', needsCoordinatorOrOwn: true },
         ],
       },
       {
@@ -3705,8 +3705,8 @@ export const ACTIONTYPES_CONFIG = {
         id: 'footer',
         fields: [
           { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-          { attribute: 'private', needsAdminOrOwn: true },
-          { attribute: 'draft', needsAdminOrOwn: true },
+          { attribute: 'private', needsCoordinatorOrOwn: true },
+          { attribute: 'draft', needsCoordinatorOrOwn: true },
         ],
       },
       {
@@ -3899,8 +3899,8 @@ export const RESOURCETYPES_CONFIG = {
       id: 'footer',
       fields: [
         { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-        { attribute: 'private', needsAdminOrOwn: true },
-        { attribute: 'draft', needsAdminOrOwn: true },
+        { attribute: 'private', needsCoordinatorOrOwn: true },
+        { attribute: 'draft', needsCoordinatorOrOwn: true },
       ],
     },
     {
@@ -3958,8 +3958,8 @@ export const INDICATOR_CONFIG = {
           skipNew: true,
           activeIf: { public_api: false },
         },
-        { attribute: 'private', needsAdminOrOwn: true, activeIf: { public_api: false } },
-        { attribute: 'draft', needsAdminOrOwn: true, activeIf: { public_api: false } },
+        { attribute: 'private', needsCoordinatorOrOwn: true, activeIf: { public_api: false } },
+        { attribute: 'draft', needsCoordinatorOrOwn: true, activeIf: { public_api: false } },
       ],
     },
     {
@@ -4050,8 +4050,8 @@ export const PAGE_CONFIG = {
     {
       id: 'footer',
       fields: [
-        { attribute: 'private', needsAdminOrOwn: true },
-        { attribute: 'draft', needsAdminOrOwn: true },
+        { attribute: 'private', needsCoordinatorOrOwn: true },
+        { attribute: 'draft', needsCoordinatorOrOwn: true },
       ],
     },
     {
@@ -4125,8 +4125,8 @@ export const CATEGORY_CONFIG = {
       id: 'footer',
       fields: [
         { attribute: 'is_archive', needsAdmin: true, skipNew: true },
-        { attribute: 'private', needsAdminOrOwn: true },
-        { attribute: 'draft', needsAdminOrOwn: true },
+        { attribute: 'private', needsCoordinatorOrOwn: true },
+        { attribute: 'draft', needsCoordinatorOrOwn: true },
       ],
     },
     {

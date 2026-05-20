@@ -177,6 +177,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
       indicatorOptions,
       userOptions,
       isAdmin,
+      isCoordinator,
       isUserMember,
       myId,
       onErrorDismiss,
@@ -253,6 +254,7 @@ export class ActionEdit extends React.Component { // eslint-disable-line react/p
                 scrollContainer={this.scrollContainer.current}
                 fieldsByStep={dataReady && getActiontypeFormFields({
                   isAdmin,
+                  isCoordinator,
                   isMine,
                   typeId,
                   taxonomies,

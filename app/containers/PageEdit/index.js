@@ -41,6 +41,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectIsUserCoordinator,
   selectSessionUserId,
   selectStepQuery,
 } from 'containers/App/selectors';
@@ -110,6 +111,7 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
       viewDomain,
       viewDomainPage,
       isAdmin,
+      isCoordinator,
       myId,
       onErrorDismiss,
       onServerErrorDismiss,
@@ -161,6 +163,7 @@ export class PageEdit extends React.Component { // eslint-disable-line react/pre
                 fieldsByStep={dataReady && getEntityFormFields(
                   {
                     isAdmin: true,
+                    isCoordinator,
                     isMine,
                     intl,
                     entityType: API.PAGES,
@@ -195,6 +198,7 @@ PageEdit.propTypes = {
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   params: PropTypes.object,
   viewEntity: PropTypes.object,
   onErrorDismiss: PropTypes.func.isRequired,
@@ -211,6 +215,7 @@ const mapStateToProps = (state, props) => ({
   viewDomain: selectDomain(state),
   viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),

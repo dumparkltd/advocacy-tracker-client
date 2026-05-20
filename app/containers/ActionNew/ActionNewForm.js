@@ -52,6 +52,7 @@ import {
   selectActiontype,
   selectSessionUser,
   selectIsUserAdmin,
+  selectIsUserCoordinator,
   selectTaxonomiesWithCategories,
   selectLocationKey,
   selectMembershipsGroupedByMember,
@@ -279,6 +280,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       modalConnect,
       invalidateEntitiesOnSuccess,
       isAdmin,
+      isCoordinator,
       dataReady,
       formId,
     } = this.props;
@@ -354,6 +356,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           scrollContainer={this.scrollContainer.current}
           fieldsByStep={dataReady && getActiontypeFormFields({
             isAdmin,
+            isCoordinator,
             isMine: true,
             typeId,
             taxonomies,
@@ -414,6 +417,7 @@ ActionNewForm.propTypes = {
   ]),
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   // autoUser: PropTypes.bool,
   locationKey: PropTypes.string,
 };
@@ -424,6 +428,7 @@ ActionNewForm.contextTypes = {
 
 const mapStateToProps = (state, { typeId, autoUser }) => ({
   isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
   locationKey: selectLocationKey(state),
   authReady: selectReadyForAuthCheck(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),

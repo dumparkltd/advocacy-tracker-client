@@ -1336,11 +1336,24 @@ const checkPermission = ({
   permissions, // args
   requirements, // section / step / field
 }) => {
-  const { isAdmin, isMember, isMine } = permissions;
-  const { needsAdmin, needsMember, needsAdminOrOwn } = requirements;
+  const {
+    isAdmin,
+    isCoordinator,
+    isMember,
+    isMine,
+  } = permissions;
+  const {
+    needsAdmin,
+    needsCoordinator,
+    needsMember,
+    needsAdminOrOwn,
+    needsCoordinatorOrOwn,
+  } = requirements;
   const passAdmin = needsAdmin ? isAdmin : true;
+  const passCoordinator = needsCoordinator ? isCoordinator : true;
   const passMember = needsMember ? (isMember || isAdmin) : true;
   const passAdminOrMine = needsAdminOrOwn ? (isAdmin || isMine) : true;
+  const passCoordinatorOrMine = needsCoordinatorOrOwn ? (isCoordinator || isMine) : true;
   return passAdmin && passAdminOrMine && passMember;
 };
 
