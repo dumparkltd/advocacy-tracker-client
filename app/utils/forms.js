@@ -1349,12 +1349,15 @@ const checkPermission = ({
     needsAdminOrOwn,
     needsCoordinatorOrOwn,
   } = requirements;
+  console.log(permissions, requirements)
   const passAdmin = needsAdmin ? isAdmin : true;
-  const passCoordinator = needsCoordinator ? isCoordinator : true;
-  const passMember = needsMember ? (isMember || isAdmin) : true;
+  const passCoordinator = needsCoordinator ? (isCoordinator || isAdmin) : true;
+  const passMember = needsMember ? (isMember ||isCoordinator || isAdmin) : true;
   const passAdminOrMine = needsAdminOrOwn ? (isAdmin || isMine) : true;
   const passCoordinatorOrMine = needsCoordinatorOrOwn ? (isCoordinator || isMine) : true;
-  return passAdmin && passAdminOrMine && passMember;
+  console.log(passAdmin, passAdminOrMine, passMember, passCoordinatorOrMine)
+  console.log(passAdmin && passAdminOrMine && passMember && passCoordinatorOrMine)
+  return passAdmin && passAdminOrMine && passMember && passCoordinatorOrMine;
 };
 
 export const getEntityFormFields = (args, shape, attributes) => {
