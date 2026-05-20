@@ -246,6 +246,7 @@ export const CONFIG = {
         attribute: 'draft',
         options: ATTRIBUTE_STATUSES.draft,
         role: USER_ROLES.MEMBER.value,
+        roleEdit: USER_ROLES.COORDINATOR.value,
         filterUI: 'checkboxes',
       },
       {
@@ -254,7 +255,7 @@ export const CONFIG = {
         attribute: 'private',
         options: ATTRIBUTE_STATUSES.private,
         role: USER_ROLES.MEMBER.value,
-        roleEdit: USER_ROLES.ADMIN.value,
+        roleEdit: USER_ROLES.COORDINATOR.value,
         filterUI: 'checkboxes',
       },
       {
