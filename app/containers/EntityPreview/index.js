@@ -26,7 +26,6 @@ export function EntityPreview({
 }) {
   // PreviewEntity: using item path and id, includes header and footer
   // PreviewItem: using the main list item and its columns
-  // console.log('content', content && content.toJS())
   const size = React.useContext(ResponsiveContext);
   return (
     <Styled

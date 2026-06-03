@@ -8,7 +8,10 @@ import { lowerCase } from 'utils/string';
 
 import FieldLabel from 'components/forms/Label';
 import messages from 'components/forms/MultiSelectField/messages';
+
 import InfoOverlay from 'components/InfoOverlay';
+
+import appMessages from 'containers/App/messages';
 
 import WarningDot from './WarningDot';
 import FieldLabelWrap from './FieldLabelWrap';
@@ -47,6 +50,10 @@ export function FormFieldDefault({
   fieldAutofilledUnseen,
   intl,
 }) {
+  let content = '';
+  if (field.info && appMessages.attributeInfo[field.id]) {
+    content = intl.formatMessage(appMessages.attributeInfo[field.id]);
+  }
   return (
     <FormFieldWrap
       direction={inline ? 'row' : 'column'}
@@ -63,9 +70,11 @@ export function FormFieldDefault({
           {field.info && (
             <InfoOverlay
               title={field.label}
-              content={field.info}
+              content={content}
               padButton={{ horizontal: 'xxsmall' }}
               tooltip
+              markdown
+              size="xsmall"
             />
           )}
           {!fieldRequired && hasError && (

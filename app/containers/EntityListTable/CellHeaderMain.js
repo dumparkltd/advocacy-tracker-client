@@ -133,10 +133,8 @@ export function CellHeaderMain({ column, canEdit }) {
             padButton={{ horizontal: 'xsmall' }}
             content={(
               <Box
-                pad="small"
                 margin={{ horizontal: 'xsmall', vertical: 'xsmall' }}
                 background="white"
-                elevation="small"
                 overflow={{
                   vertical: 'auto',
                   horizontal: 'hidden',

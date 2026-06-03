@@ -4,11 +4,12 @@ import FieldFactory from 'components/fields/FieldFactory';
 import styled from 'styled-components';
 import { Box, Text } from 'grommet';
 
-import { API, ACTIONTYPES } from 'themes/config';
+import { API, ACTIONTYPES, ATTRIBUTE_STATUSES } from 'themes/config';
 import qe from 'utils/quasi-equals';
 
 import {
   getDateField,
+  getStatusField,
   getMarkdownField,
 } from 'utils/fields';
 
@@ -29,6 +30,14 @@ export function AttributeField({
     && entity.getIn(['attributes', 'description']).trim().length > 0
   ) {
     field = getMarkdownField(entity, 'description', true, null, true);
+  }
+  if (
+    att
+    && content.get('type') === 'status'
+    && typeof entity.getIn(['attributes', att]) !== 'undefined'
+    && (!content.get('ifTrue') || entity.getIn(['attributes', att]))
+  ) {
+    field = getStatusField(entity, att, ATTRIBUTE_STATUSES[att]);
   }
   if (att === 'date' || att === 'date_start') {
     let measureTypeId;
@@ -67,7 +76,7 @@ export function AttributeField({
   }
   if (!field) return null;
   return (
-    <Box gap="small">
+    <Box gap="small" margin={{ bottom: 'large' }}>
       {content.get('title') && (
         <SectionTitle>
           {content.get('title')}

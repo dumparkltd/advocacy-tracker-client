@@ -82,6 +82,14 @@ const MultiSelectDropButton = styled((p) => <Button {...p} />)`
 const Anchor = styled.div`
   position: relative;
 `;
+
+const SyncButton = styled(Button)`
+  font-family: 'wwfregular', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  text-transform: uppercase;
+  font-size: ${({ theme }) => theme.text.medium.size};
+  padding: 0;
+  color: ${({ theme }) => theme.global.colors.highlight};
+`;
 class MultiSelectField extends React.Component { // eslint-disable-line react/prefer-stateless-function
   constructor() {
     super();
@@ -173,7 +181,7 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
   )
 
   render() {
-    const { field, fieldData, fieldInfo } = this.props;
+    const { field, fieldData, fieldInfo, onSyncFromMembers  } = this.props;
     const { intl } = this.context;
     const { id, model, ...controlProps } = omit(field, FORM_NON_CONTROL_PROPS);
     // console.log('field', field)
@@ -248,6 +256,16 @@ class MultiSelectField extends React.Component { // eslint-disable-line react/pr
             </MultiselectActiveOptionList>
           </MultiselectActiveOptions>
         )}
+        {onSyncFromMembers && (
+          <SyncButton
+            onClick={(evt) => {
+              if (evt && evt.preventDefault) evt.preventDefault();
+              onSyncFromMembers();
+            }}
+          >
+            Populate countries from contacts
+          </SyncButton>
+        )}
       </MultiSelectFieldWrapper>
     );
   }
@@ -258,6 +276,7 @@ MultiSelectField.propTypes = {
   fieldData: PropTypes.object,
   fieldInfo: PropTypes.object,
   handleUpdate: PropTypes.func,
+  onSyncFromMembers: PropTypes.func,
   closeOnClickOutside: PropTypes.bool,
   scrollContainer: PropTypes.object,
 };

@@ -76,6 +76,7 @@ import PrintOnly from 'components/styled/PrintOnly';
 import {
   selectReady,
   selectIsUserMember,
+  selectIsUserCoordinator,
   selectIsUserAdmin,
   selectResourceConnections,
   selectTaxonomiesWithCategories,
@@ -116,6 +117,7 @@ export function ActionView(props) {
     viewEntity,
     dataReady,
     isMember,
+    isCoordinator,
     taxonomies,
     viewTaxonomies,
     resourcesByResourcetype,
@@ -201,7 +203,10 @@ export function ActionView(props) {
         icon: 'print',
       },
     ];
-    if (isMember) {
+    const canEdit = viewEntity.getIn(['attributes', 'public_api'])
+      ? isCoordinator
+      : isMember;
+    if (canEdit) {
       buttons = [
         ...buttons,
         {
@@ -317,6 +322,8 @@ export function ActionView(props) {
                     <FieldGroup
                       group={{
                         fields: [
+                          checkActionAttribute(typeId, 'is_official') && getStatusField(viewEntity, 'is_official'),
+                          checkActionAttribute(typeId, 'public_api') && getStatusField(viewEntity, 'public_api'),
                           getStatusField(viewEntity),
                           (isAdmin || isMine) && getStatusFieldIf({
                             entity: viewEntity,
@@ -344,6 +351,8 @@ export function ActionView(props) {
                       fields: [
                         checkActionAttribute(typeId, 'description')
                         && getMarkdownField(viewEntity, 'description', true),
+                        checkActionAttribute(typeId, 'quote_api')
+                        && getMarkdownField(viewEntity, 'quote_api', true),
                         checkActionAttribute(typeId, 'comment')
                         && getMarkdownField(viewEntity, 'comment', true),
                         checkActionAttribute(typeId, 'status_comment')
@@ -356,6 +365,9 @@ export function ActionView(props) {
                       group={{
                         label: appMessages.nav.indicators,
                         fields: [
+                          checkActionAttribute(typeId, 'has_precedence')
+                          && viewEntity.getIn(['attributes',  'has_precedence'])
+                          && getStatusField(viewEntity, 'has_precedence'),
                           getIndicatorConnectionField({
                             indicators,
                             onEntityClick,
@@ -365,6 +377,7 @@ export function ActionView(props) {
                               action: viewEntity,
                               intl,
                               isAdmin,
+                              indicators,
                             }),
                           }),
                         ],
@@ -497,6 +510,7 @@ export function ActionView(props) {
                     group={{
                       fields: [
                         checkActionAttribute(typeId, 'url') && getLinkField(viewEntity),
+                        checkActionAttribute(typeId, 'source_api') && getTextField(viewEntity, 'source_api'),
                       ],
                     }}
                   />
@@ -581,6 +595,7 @@ ActionView.propTypes = {
   handleEdit: PropTypes.func,
   handleClose: PropTypes.func,
   onEntityClick: PropTypes.func,
+  isCoordinator: PropTypes.bool,
   isMember: PropTypes.bool,
   isAdmin: PropTypes.bool,
   isPrintView: PropTypes.bool,
@@ -608,6 +623,7 @@ ActionView.propTypes = {
 
 const mapStateToProps = (state, props) => ({
   isMember: selectIsUserMember(state),
+  isCoordinator: selectIsUserCoordinator(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   viewEntity: selectViewEntity(state, props.params.id),
   viewTaxonomies: selectViewTaxonomies(state, props.params.id),

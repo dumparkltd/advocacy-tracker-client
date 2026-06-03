@@ -11,6 +11,7 @@ import { FormattedMessage, injectIntl, intlShape } from 'react-intl';
 import styled from 'styled-components';
 
 import {
+  API,
   ROUTES,
   ACTORTYPES,
   ACTIONTYPES,
@@ -29,7 +30,11 @@ import ContentHeader from 'containers/ContentHeader';
 
 import qe from 'utils/quasi-equals';
 import { lowerCase } from 'utils/string';
-import { getActiontypeColumns, getActortypeColumns } from 'utils/entities';
+import {
+  getActiontypeColumns,
+  getActortypeColumns,
+  mapIndicatorSupportLevels,
+} from 'utils/entities';
 import appMessages from 'containers/App/messages';
 
 import { getActorsForEntities, getUsersForEntities } from './utils';
@@ -80,6 +85,8 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
       includeActorChildren,
       includeInofficial,
       onSetIncludeInofficial,
+      includeUnpublishedAPI,
+      onSetIncludeUnpublishedAPI,
       intl,
       allEntityCount,
       headerInfo,
@@ -241,6 +248,9 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         }),
       ];
       if (qe(typeId, ACTORTYPES.COUNTRY)) {
+        const hasAggregateIndicators = connections && connections.get(API.INDICATORS).some(
+          (parent) => parent.getIn(['attributes', 'is_parent'])
+        );
         columns = [
           ...columns,
           {
@@ -253,12 +263,10 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
               title: intl.formatMessage(appMessages.attributes.supportlevel_id),
               type: 'key-categorical',
               attribute: 'supportlevel_id',
-              options: Object.values(ACTION_INDICATOR_SUPPORTLEVELS)
-                .sort((a, b) => a.order < b.order ? -1 : 1)
-                .map((level) => ({
-                  ...level,
-                  label: intl.formatMessage(appMessages.supportlevels[level.value]),
-                })),
+              options: mapIndicatorSupportLevels({
+                hasAggregateIndicators,
+                intl,
+              }),
             },
           },
         ];
@@ -332,6 +340,12 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         },
       ];
     } else if (config.types === 'indicators') {
+      const hasAggregateIndicators = entities.some(
+        (parent) => entities.some(
+          (child) => qe(parent.get('id'), child.getIn(['attributes', 'parent_id']))
+        )
+      );
+      // console.log('hasParentIndicators', hasParentIndicators)
       subjectOptions = [
         {
           type: 'secondary',
@@ -369,6 +383,10 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
               .map((level) => ({
                 ...level,
                 label: intl.formatMessage(appMessages.supportlevels[level.value]),
+                labelAgg: hasAggregateIndicators
+                  && level.aggregate
+                  && appMessages.supportlevelsAggregate[level.value]
+                  && intl.formatMessage(appMessages.supportlevelsAggregate[level.value]),
               })),
           },
         },
@@ -384,8 +402,14 @@ class EntitiesListView extends React.Component { // eslint-disable-line react/pr
         {
           active: !includeInofficial,
           onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
-          label: 'Consider "official" statements only (category: Level of Authority)',
+          label: 'Consider "official" statements only',
           type: 'inoffical',
+        },
+        {
+          active: !includeUnpublishedAPI,
+          onClick: () => onSetIncludeUnpublishedAPI(includeUnpublishedAPI ? '0' : '1'),
+          label: 'Consider only statements published to GPN',
+          type: 'unpublishedAPI',
         },
       ];
     } else if (config.types === 'users') {
@@ -658,6 +682,7 @@ EntitiesListView.propTypes = {
   includeActorMembers: PropTypes.bool,
   includeActorChildren: PropTypes.bool,
   includeInofficial: PropTypes.bool,
+  includeUnpublishedAPI: PropTypes.bool,
   listUpdating: PropTypes.bool,
   isAdmin: PropTypes.bool,
   hasFilters: PropTypes.bool,
@@ -676,6 +701,7 @@ EntitiesListView.propTypes = {
   onSetIncludeActorMembers: PropTypes.func,
   onSetIncludeActorChildren: PropTypes.func,
   onSetIncludeInofficial: PropTypes.func,
+  onSetIncludeUnpublishedAPI: PropTypes.func,
   onScrollToTop: PropTypes.func,
   onClearFilters: PropTypes.func,
   reducePreviewItem: PropTypes.func,

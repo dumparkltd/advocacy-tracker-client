@@ -52,7 +52,10 @@ import {
   selectActiontype,
   selectSessionUser,
   selectIsUserAdmin,
+  selectIsUserCoordinator,
   selectTaxonomiesWithCategories,
+  selectLocationKey,
+  selectMembershipsGroupedByMember,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -93,8 +96,13 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
     }
-    // repopulate if new data becomes ready
-    if (nextProps.dataReady && !this.props.dataReady && nextProps.sessionUser) {
+    // repopulate
+    if (
+      // if new data becomes ready
+      (nextProps.dataReady && !this.props.dataReady && nextProps.sessionUser)
+      // if locationKey changes
+      || (nextProps.locationKey !== this.props.locationKey)
+    ) {
       this.props.initialiseForm(this.getInitialFormData(nextProps));
     }
     if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
@@ -222,6 +230,8 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
                 .find((item) => item.keySeq().includes('indicator_id'))
                 .get('indicator_id');
               const indicator = indicatorId && indicatorOptions && indicatorOptions.get(indicatorId);
+
+              if (!indicator) return memo;
               return memo
                 .set(
                   'associatedIndicators',
@@ -255,6 +265,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       typeId,
       topActionsByActiontype,
       subActionsByActiontype,
+      membershipsByMember,
       indicatorOptions,
       userOptions,
       onErrorDismiss,
@@ -269,6 +280,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
       modalConnect,
       invalidateEntitiesOnSuccess,
       isAdmin,
+      isCoordinator,
       dataReady,
       formId,
     } = this.props;
@@ -344,6 +356,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
           scrollContainer={this.scrollContainer.current}
           fieldsByStep={dataReady && getActiontypeFormFields({
             isAdmin,
+            isCoordinator,
             isMine: true,
             typeId,
             taxonomies,
@@ -354,6 +367,7 @@ export class ActionNewForm extends React.PureComponent { // eslint-disable-line 
             topActionsByActiontype,
             subActionsByActiontype,
             resourcesByResourcetype,
+            membershipsByMember,
             onCreateOption: inModal ? null : onCreateOption,
             intl,
             isNew: true,
@@ -386,6 +400,7 @@ ActionNewForm.propTypes = {
   userOptions: PropTypes.instanceOf(Map),
   topActionsByActiontype: PropTypes.instanceOf(Map),
   subActionsByActiontype: PropTypes.instanceOf(Map),
+  membershipsByMember: PropTypes.instanceOf(Map),
   onCreateOption: PropTypes.func,
   connectedTaxonomies: PropTypes.instanceOf(Map),
   actiontype: PropTypes.instanceOf(Map),
@@ -402,7 +417,9 @@ ActionNewForm.propTypes = {
   ]),
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   // autoUser: PropTypes.bool,
+  locationKey: PropTypes.string,
 };
 
 ActionNewForm.contextTypes = {
@@ -411,6 +428,8 @@ ActionNewForm.contextTypes = {
 
 const mapStateToProps = (state, { typeId, autoUser }) => ({
   isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
+  locationKey: selectLocationKey(state),
   authReady: selectReadyForAuthCheck(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   taxonomies: selectActiontypeTaxonomiesWithCats(
@@ -426,6 +445,7 @@ const mapStateToProps = (state, { typeId, autoUser }) => ({
   resourcesByResourcetype: selectResourcesByResourcetype(state, typeId),
   topActionsByActiontype: selectTopActionsByActiontype(state, typeId),
   subActionsByActiontype: selectSubActionsByActiontype(state, typeId),
+  membershipsByMember: selectMembershipsGroupedByMember(state, typeId),
   indicatorOptions: selectIndicatorOptions(state, typeId),
   userOptions: selectUserOptions(state, typeId),
   sessionUser: autoUser && selectSessionUser(state),

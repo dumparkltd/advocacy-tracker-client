@@ -30,7 +30,7 @@ export function CellBodyActors({
   const buttonRef = useRef();
   const [showContent, setShowContent] = useState(false);
   return (
-    <Box alignContent={align}>
+    <Box direction="row" alignContent={align} align="center" gap="xsmall" wrap>
       {entity.single && (
         <Link
           href={getActorLink(entity.single)}
@@ -39,8 +39,8 @@ export function CellBodyActors({
           alignSelf={align}
         >
           <Box>
-            <Label textAlign={align} title={entity.value}>
-              {truncateText(entity.value, 25)}
+            <Label textAlign={align} title={entity.valueCountry || entity.value}>
+              {truncateText(entity.valueCountry || entity.value, entity.tooltip ? 10 : 15, false)}
             </Label>
           </Box>
         </Link>
@@ -51,10 +51,11 @@ export function CellBodyActors({
           showContent={showContent}
           alignSelf={align}
           onClick={() => setShowContent(!showContent)}
+          small={!!entity.single}
         >
           <Box align="center" justify="center">
-            <LabelTooltip textAlign={align}>
-              {entity.value}
+            <LabelTooltip textAlign={align} small={!!entity.single}>
+              {entity.valueCountry ? `+${parseInt(entity.value, 10) - 1}` : entity.value}
             </LabelTooltip>
           </Box>
         </LinkTooltip>

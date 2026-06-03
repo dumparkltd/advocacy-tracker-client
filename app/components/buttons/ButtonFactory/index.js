@@ -156,7 +156,7 @@ class ButtonFactory extends React.PureComponent { // eslint-disable-line react/p
             disabled={button.disabled}
             inForm
           >
-            {button.title || intl.formatMessage(appMessages.buttons.close)}
+            {button.title || intl.formatMessage(appMessages.buttons.closeMultiselect)}
           </ButtonFlat>
         );
       case 'textPrimary':

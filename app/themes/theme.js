@@ -489,6 +489,8 @@ theme.global = {
     privateBackground: '#fef7f9',
     archived: '#00728F',
     archivedBackground: '#f6f9fa',
+    publicAPI: '#5B0290',
+    publicAPIBackground: '#f7f2fa',
     draft: '#898989',
     draftBackground: '#f7f7f7',
     notifications: '#00728F',

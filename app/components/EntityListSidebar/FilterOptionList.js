@@ -13,7 +13,6 @@ import { truncateText } from 'utils/string';
 import { getFilterLabel } from 'components/TagList/utils';
 import OptionsOverlay from 'components/OptionsOverlay';
 import ButtonTagFilterWrap from 'components/buttons/ButtonTagFilterWrap';
-import appMessages from 'containers/App/messages';
 
 import EntityListSidebarOption from './EntityListSidebarOption';
 
@@ -25,7 +24,7 @@ export function FilterOptionList({
   intl,
   onUpdateQuery,
 }) {
-const optionCAF = option.get('connectionAttributeFilter');
+  const optionCAF = option.get('connectionAttributeFilter');
   return (
     <Box>
       <EntityListSidebarOption
@@ -83,15 +82,12 @@ const optionCAF = option.get('connectionAttributeFilter');
                         }
                         options={filter.get('attributeOptions')
                           .map((o) => {
-                            const label = intl.formatMessage(
-                              appMessages[optionCAF.get('optionMessages')][o.get('value')]
-                            );
                             const checked = filter.get('connectedAttributes')
                               ? filter.get('connectedAttributes').some(
                                 (att) => att.get('value') === o.get('value')
                               )
                               : false;
-                            return o.set('label', label).set('checked', checked);
+                            return o.set('checked', checked);
                           })
                           .toList()
                         }

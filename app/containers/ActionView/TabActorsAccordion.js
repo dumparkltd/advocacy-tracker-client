@@ -97,7 +97,7 @@ export function TabActorsAccordion({
                 ? {
                   id: 0,
                   titleButton: 'Directly targeted stakeholders',
-                  content: actives.indexOf(0) > -1 && (
+                  renderContent: (() => (
                     <Box pad={{ vertical: 'small' }}>
                       <FieldGroup
                         seamless
@@ -122,14 +122,14 @@ export function TabActorsAccordion({
                         }}
                       />
                     </Box>
-                  ),
+                  )),
                 }
                 : null,
               hasChildActors
                 ? {
                   id: 1,
                   titleButton: 'Indirectly targeted (from sub-activities)',
-                  content: actives.indexOf(1) > -1 && (
+                  renderContent: (() => (
                     <div>
                       {childActionsByActiontype.flatten(true).entrySeq().map(
                         ([childId, childAction]) => {
@@ -171,7 +171,7 @@ export function TabActorsAccordion({
                         }
                       )}
                     </div>
-                  ),
+                  )),
                 }
                 : null,
             ]}

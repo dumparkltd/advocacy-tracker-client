@@ -40,7 +40,9 @@ import {
   selectReadyForAuthCheck,
   selectResourcetype,
   selectIsUserAdmin,
+  selectIsUserCoordinator,
   selectTaxonomiesWithCategories,
+  selectLocationKey,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -74,6 +76,9 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
     }
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
+    }
+    if (nextProps.locationKey !== this.props.locationKey) {
+      this.props.initialiseForm(this.getInitialFormData());
     }
     if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
@@ -111,6 +116,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
       inModal,
       invalidateEntitiesOnSuccess,
       isAdmin,
+      isCoordinator,
     } = this.props;
     const { saveSending, isAnySending } = viewDomain.get('page').toJS();
     const saving = isAnySending || saveSending;
@@ -143,6 +149,7 @@ export class ResourceNew extends React.PureComponent { // eslint-disable-line re
           fieldsByStep={dataReady && getResourcetypeFormFields({
             typeId,
             isAdmin,
+            isCoordinator,
             isMine: true,
             connectedTaxonomies,
             actionsByActiontype,
@@ -180,10 +187,12 @@ ResourceNew.propTypes = {
   formId: PropTypes.string,
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   invalidateEntitiesOnSuccess: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.array,
   ]),
+  locationKey: PropTypes.string,
 };
 
 ResourceNew.contextTypes = {
@@ -197,6 +206,8 @@ const mapStateToProps = (state, { typeId }) => ({
   resourcetype: selectResourcetype(state, typeId),
   actionsByActiontype: selectActionsByActiontype(state, typeId),
   isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
+  locationKey: selectLocationKey(state),
 });
 
 function mapDispatchToProps(

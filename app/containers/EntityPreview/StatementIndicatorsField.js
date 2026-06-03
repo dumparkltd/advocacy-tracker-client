@@ -49,7 +49,6 @@ export function StatementIndicatorsField({
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
   }, [dataReady]);
-
   const field = getIndicatorConnectionField({
     indicators,
     onEntityClick,
@@ -59,11 +58,12 @@ export function StatementIndicatorsField({
       action: statement,
       intl,
       isAdmin,
+      indicators,
     }),
   });
 
   return (
-    <Box gap="small">
+    <Box gap="small" margin={{ bottom: 'large' }}>
       {content.get('title') && (
         <SectionTitle>
           {content.get('title')}

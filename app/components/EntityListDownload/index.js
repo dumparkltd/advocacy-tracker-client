@@ -97,9 +97,9 @@ const TextInput = styled(DebounceInput)`
   }
 `;
 
-const StyledInput = styled.input`
-  accent-color: ${({ theme }) => theme.global.colors.highlight};
-`;
+// const StyledInput = styled.input`
+//   accent-color: ${({ theme }) => theme.global.colors.highlight};
+// `;
 
 const OptionLabel = styled((p) => <Text as="label" {...p} />)`
   opacity: ${({ disabled }) => disabled ? 0.5 : 1};

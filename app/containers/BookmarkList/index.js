@@ -17,7 +17,7 @@ import { qe } from 'utils/quasi-equals';
 
 import { loadEntitiesIfNeeded, openBookmark } from 'containers/App/actions';
 import { selectReady, selectEntities } from 'containers/App/selectors';
-import { getNextQueryString } from 'containers/App/sagas';
+import { getNextQueryString } from 'utils/redirects';
 import { CONTENT_LIST, VIEWPORTS } from 'containers/App/constants';
 import { API, ROUTES } from 'themes/config';
 

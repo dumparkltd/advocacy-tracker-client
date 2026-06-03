@@ -60,6 +60,11 @@ export function Accordion({
                 {option.content}
               </div>
             )}
+            {open && option.renderContent && (
+              <div>
+                {option.renderContent()}
+              </div>
+            )}
           </div>
         );
       })}

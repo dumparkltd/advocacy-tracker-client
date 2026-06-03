@@ -39,29 +39,34 @@ import {
 } from './selectors';
 
 const getOwnActortypeColumns = ({
-  typeid, intl,
+  typeid, intl, isAggregateIndicator,
 }) => {
   let columns = [{
     id: 'supportlevel_id',
     type: 'supportlevel',
     title: intl.formatMessage(appMessages.attributes.supportlevel_id),
-  },
-  {
-    id: 'positionStatement',
-    type: 'positionStatement',
-  },
-  {
-    id: 'authority',
-    type: 'positionStatementAuthority',
   }];
-  if (MEMBERSHIPS[typeid] && MEMBERSHIPS[typeid].length > 0) {
+  if (!isAggregateIndicator) {
     columns = [
       ...columns,
       {
-        id: 'viaGroups',
-        type: 'viaGroups',
+        id: 'positionStatement',
+        type: 'positionStatement',
+      },
+      {
+        id: 'authority',
+        type: 'positionStatementAuthority',
       },
     ];
+    if (MEMBERSHIPS[typeid] && MEMBERSHIPS[typeid].length > 0) {
+      columns = [
+        ...columns,
+        {
+          id: 'viaGroups',
+          type: 'viaGroups',
+        },
+      ];
+    }
   }
   return columns;
 };
@@ -73,6 +78,7 @@ export function Actors({
   actorsByActortype,
   isAdmin,
   intl,
+  isAggregateIndicator,
 }) {
   if (!actorsByActortype) {
     return null;
@@ -97,6 +103,7 @@ export function Actors({
                 otherColumns: getOwnActortypeColumns({
                   typeId: actortypeid,
                   intl,
+                  isAggregateIndicator,
                 }),
               }),
             }),
@@ -114,6 +121,7 @@ Actors.propTypes = {
   actorConnections: PropTypes.object,
   actorsByActortype: PropTypes.object,
   isAdmin: PropTypes.bool,
+  isAggregateIndicator: PropTypes.bool,
   intl: intlShape,
 };
 

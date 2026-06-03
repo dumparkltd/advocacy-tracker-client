@@ -9,31 +9,38 @@ import {
   REGION_TYPE_TAXONOMY,
   GROUP_TYPE_TAXONOMY,
   SECTOR_TAXONOMY,
-  ROLES_TAXONOMY,
+  TITLE_ROLES_TAXONOMY,
+  PROCESS_ROLES_TAXONOMY,
   ACTION_INDICATOR_SUPPORTLEVELS,
 } from 'themes/config';
 
 import qe from 'utils/quasi-equals';
 
+// required for selectActorsWithPositionsData
+import { ACTORS_WITH_POSITIONS_DEPENDENCIES } from 'containers/App/selectors';
+
 export const DEPENDENCIES = [
-  API.ACTORS,
-  API.ACTIONS,
-  API.ACTOR_ACTIONS,
-  API.ACTION_ACTORS,
-  API.ACTOR_CATEGORIES,
-  API.ACTION_CATEGORIES,
-  API.ACTORTYPES,
-  API.ACTIONTYPES,
-  API.ACTORTYPE_TAXONOMIES,
-  API.ACTIONTYPE_TAXONOMIES,
-  API.TAXONOMIES,
-  API.CATEGORIES,
-  API.USERS,
-  API.USER_ROLES,
-  API.USER_ACTORS,
-  API.MEMBERSHIPS,
-  API.INDICATORS,
-  API.ACTION_INDICATORS,
+  ...new Set([
+    ...ACTORS_WITH_POSITIONS_DEPENDENCIES,
+    API.ACTORS,
+    API.ACTIONS,
+    API.ACTOR_ACTIONS,
+    API.ACTION_ACTORS,
+    API.ACTOR_CATEGORIES,
+    API.ACTION_CATEGORIES,
+    API.ACTORTYPES,
+    API.ACTIONTYPES,
+    API.ACTORTYPE_TAXONOMIES,
+    API.ACTIONTYPE_TAXONOMIES,
+    API.TAXONOMIES,
+    API.CATEGORIES,
+    API.USERS,
+    API.USER_ROLES,
+    API.USER_ACTORS,
+    API.MEMBERSHIPS,
+    API.INDICATORS,
+    API.ACTION_INDICATORS,
+  ]),
 ];
 
 export const CONFIG = {
@@ -74,11 +81,14 @@ export const CONFIG = {
       }],
     },
     {
-      id: `taxonomies-${ROLES_TAXONOMY}`,
-      title: 'Roles',
+      id: `taxonomies-roles`,
+      title: 'Categories',
       option: 'taxonomies',
       taxonomies: [{
-        id: ROLES_TAXONOMY,
+        id: TITLE_ROLES_TAXONOMY,
+        filterType: 'pills',
+      },{
+        id: PROCESS_ROLES_TAXONOMY,
         filterType: 'pills',
       }],
     },
@@ -179,6 +189,7 @@ export const CONFIG = {
           {},
         ),
         optionMessages: 'supportlevels',
+        optionMessagesAggregate: 'supportlevelsAggregate',
       },
     },
     members: { // filter by associated entity
@@ -235,6 +246,7 @@ export const CONFIG = {
         attribute: 'draft',
         options: ATTRIBUTE_STATUSES.draft,
         role: USER_ROLES.MEMBER.value,
+        roleEdit: USER_ROLES.COORDINATOR.value,
         filterUI: 'checkboxes',
       },
       {
@@ -243,7 +255,7 @@ export const CONFIG = {
         attribute: 'private',
         options: ATTRIBUTE_STATUSES.private,
         role: USER_ROLES.MEMBER.value,
-        roleEdit: USER_ROLES.ADMIN.value,
+        roleEdit: USER_ROLES.COORDINATOR.value,
         filterUI: 'checkboxes',
       },
       {
@@ -254,6 +266,19 @@ export const CONFIG = {
         role: USER_ROLES.ADMIN.value,
         filterUI: 'checkboxes',
         default: false,
+      },
+      {
+        search: false,
+        message: 'attributes.public_api',
+        attribute: 'public_api',
+        options: ATTRIBUTE_STATUSES.public_api,
+        role: USER_ROLES.MEMBER.value,
+        roleEdit: USER_ROLES.COORDINATOR.value,
+        filterUI: 'checkboxes',
+        default: false,
+        types: [
+          ACTORTYPES.COUNTRY,
+        ],
       },
       {
         search: false,

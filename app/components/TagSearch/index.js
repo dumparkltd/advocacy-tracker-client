@@ -133,6 +133,7 @@ export class TagSearch extends React.Component { // eslint-disable-line react/pr
           onChange={(e) => onSearch(e.target.value)}
           onFocus={() => this.setState({ active: true })}
           onBlur={() => this.setState({ active: false })}
+          autoFocus={this.props.multiselect}
           placeholder={placeholder || (intl.formatMessage(
             this.props.multiselect
               ? messages.searchPlaceholderMultiSelect
