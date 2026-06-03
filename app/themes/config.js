@@ -1740,7 +1740,6 @@ export const ACTORTYPES_CONFIG = {
               [
                 {
                   attribute: 'email',
-                  required: true,
                 },
                 {
                   attribute: 'phone',
@@ -3820,6 +3819,11 @@ export const ACTIONTYPES_CONFIG = {
               [{
                 connection: API.ACTORS,
                 type: ACTORTYPES.GROUP,
+                prepopulateIfPrevious: true,
+              }],
+              [{
+                connection: API.ACTORS,
+                type: ACTORTYPES.ORG,
                 prepopulateIfPrevious: true,
               }],
             ],
