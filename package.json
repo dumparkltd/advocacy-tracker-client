@@ -46,7 +46,7 @@
     "deploy:dev": "firebase deploy --project dev --only hosting --config firebase.dev.json",
     "deploy:test": "firebase deploy --project test --only hosting --config firebase.dev.json",
     "deploy:prod": "firebase deploy --project prod --only hosting --config firebase.prod.json",
-    "deploy:test-pdb": "firebase deploy --project test=pdb --only hosting --config firebase.prod.json"
+    "deploy:test-pdb": "firebase deploy --project test-pdb --only hosting --config firebase.prod.json"
   },
   "browserslist": [
     "last 2 versions",
