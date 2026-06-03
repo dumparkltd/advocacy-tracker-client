@@ -45,7 +45,9 @@ import {
   selectActortype,
   selectSessionUser,
   selectIsUserAdmin,
+  selectIsUserCoordinator,
   selectTaxonomiesWithCategories,
+  selectLocationKey,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -81,12 +83,17 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
     if (!nextProps.dataReady) {
       this.props.loadEntitiesIfNeeded();
     }
-    // repopulate if new data becomes ready
-    if (nextProps.dataReady && !this.props.dataReady && nextProps.sessionUser) {
-      this.props.initialiseForm(this.getInitialFormData(nextProps));
-    }
     if (nextProps.authReady && !this.props.authReady) {
       this.props.redirectIfNotPermitted();
+    }
+    // repopulate
+    if (
+      // if new data becomes ready
+      (nextProps.dataReady && !this.props.dataReady && nextProps.sessionUser)
+      // if locationKey changes
+      || (nextProps.locationKey !== this.props.locationKey)
+    ) {
+      this.props.initialiseForm(this.getInitialFormData(nextProps));
     }
     if (hasNewErrorNEW(nextProps, this.props) && this.scrollContainer) {
       scrollToTop(this.scrollContainer.current);
@@ -137,6 +144,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
       formDataPath,
       inModal,
       isAdmin,
+      isCoordinator,
       invalidateEntitiesOnSuccess,
       dataReady,
       formId,
@@ -178,6 +186,7 @@ export class ActorNewForm extends React.PureComponent { // eslint-disable-line r
           fieldsByStep={dataReady && getActortypeFormFields({
             isMine: true,
             isAdmin,
+            isCoordinator,
             typeId,
             taxonomies,
             connectedTaxonomies,
@@ -223,11 +232,13 @@ ActorNewForm.propTypes = {
   formId: PropTypes.string,
   inModal: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   invalidateEntitiesOnSuccess: PropTypes.oneOfType([
     PropTypes.string,
     PropTypes.array,
   ]),
   // autoUser: PropTypes.bool,
+  locationKey: PropTypes.string,
 };
 
 ActorNewForm.contextTypes = {
@@ -252,6 +263,8 @@ const mapStateToProps = (state, { typeId, autoUser }) => ({
   userOptions: selectUserOptions(state, typeId),
   sessionUser: autoUser && selectSessionUser(state),
   isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
+  locationKey: selectLocationKey(state),
 });
 
 function mapDispatchToProps(

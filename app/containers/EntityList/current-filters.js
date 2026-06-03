@@ -309,19 +309,18 @@ const getCurrentConnectionFilters = (
           values = values.split('|');
           if (connectionAttributeFilter && connectionAttributeFilter.options) {
             connectedAttributes = Object.values(connectionAttributeFilter.options).filter(
-              (o) => values.indexOf(o.value.toString()) > -1
+              (att) => values.indexOf(att.value.toString()) > -1
             ).map(
-              (o) => {
+              (att) => {
                 let newQueryValue = value;
                 const newValues = values.filter(
-                  (v) => !qe(v, o.value)
+                  (v) => !qe(v, att.value)
                 );
                 if (newValues.length > 0) {
                   newQueryValue = `${newQueryValue}>${connectionAttributeName}=${newValues.join('|')}`;
                 }
                 return ({
-                  ...o,
-                  label: intl.formatMessage(appMessages[connectionAttributeFilter.optionMessages][o.value]),
+                  ...att,
                   attribute: connectionAttributeName,
                   onClick: () => onClick({
                     query,
@@ -343,15 +342,40 @@ const getCurrentConnectionFilters = (
       const connection = connections.getIn([path, value]);
       if (connection) {
         const isCodePublic = checkCodeVisibility(connection, option.entityType, isAdmin);
+        const isAggregate = connection.getIn(['attributes', 'is_parent']);
         tags.push({
           label: getConnectionLabel(connection, value, !isCodePublic, labels, intl),
           labelLong: getConnectionLabel(connection, value, true, labels, intl),
           type: option.entityType,
           groupLabel: intl.formatMessage(appMessages.nav[option.entityTypeAs || option.entityType]),
-          connectedAttributes,
+          connectedAttributes: connectedAttributes && connectedAttributes.map(
+            (att) => {
+              let label = 'UNDEFINED';
+              if (
+                isAggregate
+                && connectionAttributeFilter.optionMessagesAggregate
+                && appMessages[connectionAttributeFilter.optionMessagesAggregate]
+                && appMessages[connectionAttributeFilter.optionMessagesAggregate][att.value]
+              ) {
+                label = intl.formatMessage(
+                  appMessages[connectionAttributeFilter.optionMessagesAggregate][att.value]
+                );
+              } else if (
+                connectionAttributeFilter.optionMessages
+                && appMessages[connectionAttributeFilter.optionMessages]
+                && appMessages[connectionAttributeFilter.optionMessages][att.value]
+              ) {
+                label = intl.formatMessage(
+                  appMessages[connectionAttributeFilter.optionMessages][att.value]
+                );
+              }
+              return ({ ...att, label });
+            }
+          ),
           connectionAttributeName,
           query,
           queryValue,
+          isAggregate,
           onClick: () => onClick({
             value: queryValue,
             query,
@@ -569,6 +593,7 @@ const getCurrentAttributeFilters = (
                   appMessage: !!attribute.message,
                   label,
                 }],
+                attribute: qAttribute,
                 type: 'attributes',
                 groupId: 'attributes',
                 groupLabel: intl.formatMessage(appMessages.nav.attributes),

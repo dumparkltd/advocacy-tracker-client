@@ -1,6 +1,7 @@
 import React from 'react';
 import { intlShape, injectIntl } from 'react-intl';
 import PropTypes from 'prop-types';
+import { List } from 'immutable';
 import { Control } from 'react-redux-form/immutable';
 import { omit } from 'lodash/object';
 import appMessage from 'utils/app-message';
@@ -126,7 +127,65 @@ export function FormFieldInner({
 
   let formField;
   if (field.controlType && field.controlType === 'multiselect') {
-    // console.log('field.options', field.options && field.options.toJS())
+    // build sync handler if configured
+    let onSyncFromMembers;
+    let hasMembersSelected = false;
+    if (field.syncFromMembersOption && field.membershipsByMember) {
+      // check if there are any members/contacts selected
+      const memberTypeId = String(field.syncFromMembersOption.memberType);
+      const membersData = formData.getIn([field.dataPath[0], memberTypeId]);
+      hasMembersSelected = membersData && membersData.some((d) => d.get('checked'));
+
+      //
+      onSyncFromMembers = () => {
+        if (!membersData) return;
+        // get IDs of checked contacts
+        const selectedMemberIds = membersData
+          .filter((d) => d.get('checked'))
+          .map((d) => String(d.get('value')))
+          .toSet();
+
+        // collect country IDs from memberships
+        const associationIdSet = new Set();
+        selectedMemberIds.forEach((memberId) => {
+          const memberofs = field.membershipsByMember.get(parseInt(memberId, 0));
+          if (memberofs) {
+            memberofs.forEach((associationId) => associationIdSet.add(String(associationId)));
+          }
+        });
+
+        // get current form values (only contains changed options)
+        const currentValues = formData.getIn(field.dataPath) || List();
+
+        let updatedValues = currentValues;
+        associationIdSet.forEach((countryId) => {
+          // check if already in form values
+          const existingIndex = updatedValues.findIndex(
+            (v) => String(v.get('value')) === countryId
+          );
+          if (existingIndex > -1) {
+            // already in values — make sure it's checked
+            if (!updatedValues.getIn([existingIndex, 'checked'])) {
+              updatedValues = updatedValues
+                .setIn([existingIndex, 'checked'], true)
+                .setIn([existingIndex, 'hasChanged'], true);
+            }
+          } else {
+            // not in values yet — find it in field.options and add it
+            const option = field.options.find(
+              (o) => String(o.get('value')) === countryId
+            );
+            if (option) {
+              updatedValues = updatedValues.push(
+                option.set('checked', true).set('hasChanged', true)
+              );
+            }
+          }
+        });
+
+        handleUpdate(formData.setIn(field.dataPath, updatedValues));
+      };
+    }
     formField = (
       <MultiSelectField
         field={field}
@@ -135,6 +194,7 @@ export function FormFieldInner({
         fieldData={formData.getIn(field.dataPath)}
         closeOnClickOutside={closeMultiselectOnClickOutside}
         handleUpdate={(data) => handleUpdate(formData.setIn(field.dataPath, data))}
+        onSyncFromMembers={hasMembersSelected ? onSyncFromMembers : null}
       />
     );
   } else {

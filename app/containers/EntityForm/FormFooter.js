@@ -49,7 +49,7 @@ export function FormFooter({
   const size = React.useContext(ResponsiveContext);
   const saveCloseRef = React.useRef(null);
   const [blockedSaveHint, setBlockedSaveHint] = React.useState(false);
-
+  // console.log('fields', fields)
   return (
     <Styled
       direction="row"
@@ -75,6 +75,8 @@ export function FormFooter({
               if (!field) return null;
               const modelPath = field.model && field.model.split('.').filter((val) => val !== '');
               const fieldTracked = get(formDataTracked, modelPath);
+              // console.log('fieldTracked', fieldTracked, modelPath)
+              // console.log('formDataTracked', formDataTracked)
               return (
                 <Box key={j}>
                   <FormField
@@ -137,15 +139,11 @@ export function FormFooter({
                 }}
                 onMouseOut={(e) => {
                   if (e && e.preventDefault) e.preventDefault();
-                  if (isBlocked) {
-                    setBlockedSaveHint(false);
-                  }
+                  setBlockedSaveHint(false);
                 }}
                 onBlur={(e) => {
                   if (e && e.preventDefault) e.preventDefault();
-                  if (isBlocked) {
-                    setBlockedSaveHint(false);
-                  }
+                  setBlockedSaveHint(false);
                 }}
               >
                 Save
@@ -155,6 +153,11 @@ export function FormFooter({
           <StyledButtonSubmit
             type="submit"
             disabled={isBlocked}
+            onClick={() => {
+              if (!isBlocked) {
+                handleUpdate(formData.set('close', true));
+              }
+            }}
             onMouseOver={(e) => {
               if (e && e.preventDefault) e.preventDefault();
               if (isBlocked) {
@@ -169,15 +172,11 @@ export function FormFooter({
             }}
             onMouseOut={(e) => {
               if (e && e.preventDefault) e.preventDefault();
-              if (isBlocked) {
-                setBlockedSaveHint(false);
-              }
+              setBlockedSaveHint(false);
             }}
             onBlur={(e) => {
               if (e && e.preventDefault) e.preventDefault();
-              if (isBlocked) {
-                setBlockedSaveHint(false);
-              }
+              setBlockedSaveHint(false);
             }}
           >
             Save & Close

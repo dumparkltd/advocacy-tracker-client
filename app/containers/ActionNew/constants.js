@@ -25,6 +25,7 @@ export const DEPENDENCIES = [
   API.ACTION_ACTIONS,
   API.USER_ACTIONS,
   API.USERS,
+  API.MEMBERSHIPS,
 ];
 
 export const FORM_INITIAL = fromJS({

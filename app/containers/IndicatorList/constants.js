@@ -5,20 +5,26 @@ import {
   ATTRIBUTE_STATUSES,
 } from 'themes/config';
 
+// required for selectActorsWithPositionsData
+import { ACTORS_WITH_POSITIONS_DEPENDENCIES } from 'containers/App/selectors';
+
 export const DEPENDENCIES = [
-  API.INDICATORS,
-  API.TAXONOMIES,
-  API.CATEGORIES,
-  API.ACTORS,
-  API.MEMBERSHIPS,
-  API.ACTIONS,
-  API.ACTION_INDICATORS,
-  API.ACTION_CATEGORIES,
-  API.ACTIONTYPE_TAXONOMIES,
-  API.ACTOR_ACTIONS,
-  API.ACTIONTYPES,
-  API.USERS,
-  API.USER_ROLES,
+  ...new Set([
+    ...ACTORS_WITH_POSITIONS_DEPENDENCIES,
+    API.INDICATORS,
+    API.TAXONOMIES,
+    API.CATEGORIES,
+    API.ACTORS,
+    API.MEMBERSHIPS,
+    API.ACTIONS,
+    API.ACTION_INDICATORS,
+    API.ACTION_CATEGORIES,
+    API.ACTIONTYPE_TAXONOMIES,
+    API.ACTOR_ACTIONS,
+    API.ACTIONTYPES,
+    API.USERS,
+    API.USER_ROLES,
+  ]),
 ];
 
 export const CONFIG = {
@@ -57,6 +63,7 @@ export const CONFIG = {
         attribute: 'draft',
         options: ATTRIBUTE_STATUSES.draft,
         role: USER_ROLES.MEMBER.value,
+        roleEdit: USER_ROLES.COORDINATOR.value,
         filterUI: 'checkboxes',
       },
       {
@@ -65,7 +72,7 @@ export const CONFIG = {
         attribute: 'private',
         options: ATTRIBUTE_STATUSES.private,
         role: USER_ROLES.MEMBER.value,
-        roleEdit: USER_ROLES.ADMIN.value,
+        roleEdit: USER_ROLES.COORDINATOR.value,
         filterUI: 'checkboxes',
       },
       {
@@ -74,6 +81,16 @@ export const CONFIG = {
         attribute: 'is_archive',
         options: ATTRIBUTE_STATUSES.is_archive,
         role: USER_ROLES.ADMIN.value,
+        filterUI: 'checkboxes',
+        default: false,
+      },
+      {
+        search: false,
+        message: 'attributes.public_api',
+        attribute: 'public_api',
+        options: ATTRIBUTE_STATUSES.public_api,
+        role: USER_ROLES.MEMBER.value,
+        roleEdit: USER_ROLES.COORDINATOR.value,
         filterUI: 'checkboxes',
         default: false,
       },

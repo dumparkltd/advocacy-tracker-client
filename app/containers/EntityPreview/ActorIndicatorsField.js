@@ -25,11 +25,13 @@ import {
   loadEntitiesIfNeeded,
   setIncludeActorMembers,
   setIncludeInofficialStatements,
+  setIncludeUnpublishedAPIStatements,
 } from 'containers/App/actions';
 
 import {
   selectReady,
   selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
   selectIncludeActorMembers,
   selectIsUserAdmin,
 } from 'containers/App/selectors';
@@ -90,6 +92,8 @@ export function ActorIndicatorsField({
   includeInofficial,
   onSetIncludeInofficial,
   content,
+  onSetIncludeUnpublishedAPI,
+  includeUnpublishedAPI,
 }) {
   useEffect(() => {
     if (!dataReady) onLoadEntitiesIfNeeded();
@@ -110,19 +114,31 @@ export function ActorIndicatorsField({
       typeId,
       intl,
       isAdmin,
+      indicators: indicatorsWithSupport,
     }),
   });
+  const hasIndicators = field && field.values && field.values.size > 0;
   const hasOptions = typeof content.get('withOptions') !== 'undefined'
     ? content.get('withOptions')
     : true;
+  const hasActiveOptions = hasOptions &&
+    (
+      (hasMemberOption(typeId) && includeActorMembers)
+      || !includeInofficial
+      || !includeUnpublishedAPI
+    );
+  console.log(hasIndicators)
+  console.log(hasOptions, hasActiveOptions)
+  console.log(content && content.toJS())
+
   return (
-    <Box gap="small">
+    <Box gap="small" margin={{ bottom: 'large' }}>
       {title && (
         <SectionTitle>
           {title}
         </SectionTitle>
       )}
-      {hasOptions && (
+      {hasOptions && (hasActiveOptions || hasIndicators) && (
         <CheckboxOptionGroup>
           {hasMemberOption(typeId) && (
             <CheckboxOption
@@ -138,9 +154,17 @@ export function ActorIndicatorsField({
             option={{
               active: !includeInofficial,
               onClick: () => onSetIncludeInofficial(includeInofficial ? '0' : '1'),
-              label: 'Only consider "official" statements (Level of Authority)',
+              label: 'Only consider "official" statements',
             }}
             type="official"
+          />
+          <CheckboxOption
+            option={{
+              active: !includeUnpublishedAPI,
+              onClick: () => onSetIncludeUnpublishedAPI(includeUnpublishedAPI ? '0' : '1'),
+              label: 'Only consider statements published to GPN',
+            }}
+            type="unpublishedAPI"
           />
         </CheckboxOptionGroup>
       )}
@@ -165,6 +189,8 @@ ActorIndicatorsField.propTypes = {
   indicatorsWithSupport: PropTypes.instanceOf(Map),
   includeInofficial: PropTypes.bool,
   onSetIncludeInofficial: PropTypes.func,
+  includeUnpublishedAPI: PropTypes.bool,
+  onSetIncludeUnpublishedAPI: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   isAdmin: PropTypes.bool,
   onSetIncludeActorMembers: PropTypes.func,
@@ -183,6 +209,7 @@ const mapStateToProps = (state, { actorId }) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   indicatorsWithSupport: selectIndicatorsWithSupport(state, { id: actorId }),
   includeInofficial: selectIncludeInofficialStatements(state),
+  includeUnpublishedAPI: selectIncludeUnpublishedAPIStatements(state),
   includeActorMembers: selectIncludeActorMembers(state),
   isAdmin: selectIsUserAdmin(state),
 });
@@ -199,6 +226,9 @@ export function mapDispatchToProps(dispatch) {
     },
     onSetIncludeInofficial: (value) => {
       dispatch(setIncludeInofficialStatements(value));
+    },
+    onSetIncludeUnpublishedAPI: (value) => {
+      dispatch(setIncludeUnpublishedAPIStatements(value));
     },
     onSetIncludeActorMembers: (active) => {
       dispatch(setIncludeActorMembers(active));

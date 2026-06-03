@@ -16,7 +16,6 @@ import {
   ROUTES,
   ACTIONTYPES,
   ACTION_INDICATOR_SUPPORTLEVELS,
-  OFFICIAL_STATEMENT_CATEGORY_ID,
 } from 'themes/config';
 
 import {
@@ -24,7 +23,8 @@ import {
   selectActorsWithPositions,
   selectMapIndicator,
   selectIndicators,
-  selectCategoryQuery,
+  selectIncludeInofficialStatements,
+  selectIncludeUnpublishedAPIStatements,
 } from 'containers/App/selectors';
 import {
   setMapIndicator,
@@ -63,6 +63,8 @@ export function EntitiesMapActions({
   mapSubject,
   onSetIncludeActorMembers,
   includeActorMembers,
+  includeInofficial,
+  includeUnpublishedAPI,
   countries,
   onEntityClick,
   intl,
@@ -70,7 +72,6 @@ export function EntitiesMapActions({
   mapIndicator,
   indicators,
   onSetMapIndicator,
-  catQuery,
   onUpdateQuery,
   isPrintView,
   filters,
@@ -78,7 +79,7 @@ export function EntitiesMapActions({
 }) {
   let indicatorOptions;
   let infoOptions = [];
-  let indicator = includeActorMembers ? 'actionsTotal' : 'actions';
+  let mapIndicatorClean = includeActorMembers ? 'actionsTotal' : 'actions';
   let mapSubjectClean = mapSubject || 'actors';
   let reduceCountryAreas;
   let countryCounts;
@@ -86,6 +87,7 @@ export function EntitiesMapActions({
   let infoTitle;
   let infoSubTitle;
   let mapInfo;
+  let filtersClean = [...filters];
 
   const isStatements = qe(typeId, ACTIONTYPES.EXPRESS);
   const isPositionIndicator = isStatements
@@ -122,37 +124,51 @@ export function EntitiesMapActions({
   }
 
   if (isStatements) {
-    const isOfficialFiltered = typeof catQuery === 'object'
-      ? catQuery.includes(OFFICIAL_STATEMENT_CATEGORY_ID.toString())
-      // string
-      : qe(catQuery, OFFICIAL_STATEMENT_CATEGORY_ID);
+    // add prominent checkboxes, remove from regular filters
+    filtersClean = filters.filter((filter) => filter.attribute !== 'is_official' && filter.attribute !== 'public_api');
+    const isOfficialFiltered = !includeInofficial;
     infoOptions.push({
       active: isOfficialFiltered,
-      label: 'Only show "official" statements (Level of Authority)',
+      label: 'Only show "official" statements',
       onClick: () => onUpdateQuery([{
-        arg: 'cat',
-        value: OFFICIAL_STATEMENT_CATEGORY_ID,
+        arg: 'where',
+        value: 'is_official:true',
         add: !isOfficialFiltered,
         remove: isOfficialFiltered,
-        replace: false,
-        multipleAttributeValues: false,
+      }]),
+    });
+    const isPublishedAPIFiltered = !includeUnpublishedAPI;
+    infoOptions.push({
+      active: isPublishedAPIFiltered,
+      label: 'Only show statements published to GPN',
+      onClick: () => onUpdateQuery([{
+        arg: 'where',
+        value: 'public_api:true',
+        add: !isPublishedAPIFiltered,
+        remove: isPublishedAPIFiltered,
       }]),
     });
 
     indicatorOptions = indicators.reduce(
-      (memo, entity) => ([
-        ...memo,
-        {
-          id: entity.get('id'),
-          value: entity.get('id'),
-          label: `${entity.getIn(['attributes', 'title'])}`,
-          supTitle: 'Country positions for topic',
-          active: qe(mapIndicator, entity.get('id')),
-          onClick: () => onEntityClick(entity.get('id'), ROUTES.INDICATOR),
-          href: `${ROUTES.INDICATOR}/${entity.get('id')}`,
-          // info: entity.getIn(['attributes', 'description']),
-        },
-      ]),
+      (memo, indicator) => {
+        // isAggregate
+        if (indicators.getIn(['attributes', 'is_parent'])) {
+          return memo;
+        }
+        return [
+          ...memo,
+          {
+            id: indicator.get('id'),
+            value: indicator.get('id'),
+            label: `${indicator.getIn(['attributes', 'title'])}`,
+            supTitle: 'Country positions for topic',
+            active: qe(mapIndicator, indicator.get('id')),
+            onClick: () => onEntityClick(indicator.get('id'), ROUTES.INDICATOR),
+            href: `${ROUTES.INDICATOR}/${indicator.get('id')}`,
+            // info: entity.getIn(['attributes', 'description']),
+          },
+        ];
+      },
       [{
         id: 'all',
         value: 'all',
@@ -260,7 +276,7 @@ export function EntitiesMapActions({
       }
       return memo;
     }, []);
-    indicator = mapIndicator;
+    mapIndicatorClean = mapIndicator;
     mapSubjectClean = null;
     mapInfo = {
       infoOptions,
@@ -393,9 +409,9 @@ export function EntitiesMapActions({
         reduceCountryAreas={reduceCountryAreas}
         typeLabels={typeLabels}
         mapData={{
-          filters,
+          filters: filtersClean,
           typeLabels,
-          indicator,
+          indicator: mapIndicatorClean,
           includeSecondaryMembers: includeActorMembers,
           scrollWheelZoom: true,
           mapSubject: mapSubjectClean,
@@ -427,10 +443,6 @@ EntitiesMapActions.propTypes = {
   typeId: PropTypes.string,
   mapSubject: PropTypes.string,
   mapIndicator: PropTypes.string,
-  catQuery: PropTypes.oneOfType([
-    PropTypes.string,
-    PropTypes.instanceOf(List),
-  ]),
   onSetIncludeActorMembers: PropTypes.func,
   includeActorMembers: PropTypes.bool,
   hasFilters: PropTypes.bool,
@@ -440,16 +452,19 @@ EntitiesMapActions.propTypes = {
   onUpdateQuery: PropTypes.func,
   filters: PropTypes.array,
   onClearFilters: PropTypes.func,
+  includeInofficial: PropTypes.bool,
+  includeUnpublishedAPI: PropTypes.bool,
   intl: intlShape.isRequired,
 };
 
 const mapStateToProps = (state, { typeId, includeActorMembers }) => ({
   countries: qe(typeId, ACTIONTYPES.EXPRESS)
     ? selectActorsWithPositions(state, { includeActorMembers, type: ACTORTYPES.COUNTRY })
-    : selectActortypeActors(state, { type: ACTORTYPES.COUNTRY }),
+    : selectActortypeActors(state, ACTORTYPES.COUNTRY),
   mapIndicator: selectMapIndicator(state),
-  catQuery: selectCategoryQuery(state),
   indicators: qe(typeId, ACTIONTYPES.EXPRESS) ? selectIndicators(state) : null,
+  includeInofficial: selectIncludeInofficialStatements(state),
+  includeUnpublishedAPI: selectIncludeUnpublishedAPIStatements(state),
 });
 
 function mapDispatchToProps(dispatch) {

@@ -125,8 +125,8 @@ export function MapKeySettingsPanel({
               <TagList filters={filters} onClear={onClearFilters} />
             )}
             {(
-              option.memberOption ||
-              (option.infoOptions && option.infoOptions.length > 0)
+              option.memberOption
+              || (option.infoOptions && option.infoOptions.length > 0)
             ) && (
               <Box margin={{ top: 'xsmall' }}>
                 {option.memberOption && (

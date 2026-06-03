@@ -42,6 +42,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectIsUserCoordinator,
   selectIsUserMember,
   selectSessionUserId,
   selectStepQuery,
@@ -112,6 +113,7 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
       viewEntity,
       dataReady,
       isAdmin,
+      isCoordinator,
       isUserMember,
       viewDomain,
       viewDomainPage,
@@ -185,8 +187,10 @@ export class CategoryEdit extends React.PureComponent { // eslint-disable-line r
                 fieldsByStep={dataReady && getEntityFormFields(
                   {
                     isAdmin,
+                    isCoordinator,
                     isMine,
                     intl,
+                    entityType: API.CATEGORIES,
                   },
                   CATEGORY_CONFIG.form,
                   CATEGORY_CONFIG.attributes,
@@ -219,6 +223,7 @@ CategoryEdit.propTypes = {
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   isUserMember: PropTypes.bool,
   params: PropTypes.object,
   parentOptions: PropTypes.object,
@@ -240,6 +245,7 @@ CategoryEdit.contextTypes = {
 
 const mapStateToProps = (state, props) => ({
   isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
   isUserMember: selectIsUserMember(state),
   viewDomain: selectDomain(state),
   viewDomainPage: selectDomainPage(state),

@@ -22,6 +22,7 @@ import {
   getUserConnectionField,
   getActorConnectionField,
   getTaxonomyFields,
+  getEntityLinkField,
   // getActionConnectionField,
   // getDateField,
   // getTextField,
@@ -52,6 +53,7 @@ import ActionUsersField from './ActionUsersField';
 import AssociationsField from './AssociationsField';
 import AttributeField from './AttributeField';
 import StatementIndicatorsField from './StatementIndicatorsField';
+import ChildIndicatorsField from './ChildIndicatorsField';
 import ActorIndicatorsField from './ActorIndicatorsField';
 
 const Styled = styled((p) => <Box {...p} />)``;
@@ -88,7 +90,7 @@ export function EntityFields({
   isAdmin,
 }) {
   return (
-    <Styled gap="large">
+    <Styled>
       {fields && Object.keys(fields).map((fieldId) => {
         const fieldContent = fields[fieldId];
         if (!fieldContent) {
@@ -207,7 +209,7 @@ export function EntityFields({
             }
             if (theField) {
               return (
-                <Box key={fieldId} direction="row" fill={false} flex={false}>
+                <Box key={fieldId} direction="row" fill={false} flex={false} margin={{ bottom: 'large' }}>
                   <Box gap="small">
                     {fieldContent.title && (
                       <SectionTitle>
@@ -252,7 +254,7 @@ export function EntityFields({
             />
           );
         }
-        if (fieldId === 'topicStatements') {
+        if (fieldId === 'topicStatements' && !fieldContent.isAggregateIndicator) {
           return (
             <PreviewCountryTopicStatementList
               key={fieldId}
@@ -295,27 +297,6 @@ export function EntityFields({
             />
           );
         }
-        if (fieldContent.attribute) {
-          return (
-            <AttributeField
-              key={fieldId}
-              entity={item}
-              content={fromJS(fieldContent)}
-              isAdmin={isAdmin}
-            />
-          );
-        }
-        if (fieldId === 'statementIndicators') {
-          return (
-            <StatementIndicatorsField
-              key={fieldId}
-              statement={item}
-              content={fromJS(fieldContent)}
-              onEntityClick={onEntityClick}
-              isAdmin={isAdmin}
-            />
-          );
-        }
         if (fieldId === 'statementIndicators') {
           return (
             <StatementIndicatorsField
@@ -336,9 +317,41 @@ export function EntityFields({
             />
           );
         }
+        if (fieldId === 'parentIndicator' && item.get('parentIndicator')) {
+          const field = getEntityLinkField(
+            item.get('parentIndicator'),
+            '/topic',
+            '',
+            'Parent topic'
+          );
+          return (
+            <Box gap="small" key={fieldId} margin={{ bottom: 'large' }}>
+              <FieldFactory
+                field={{
+                  ...field,
+                  onEntityClick,
+                  noPadding: true,
+                }}
+              />
+            </Box>
+          );
+        }
+        if (
+          fieldId === 'childIndicators'
+          && item.getIn(['attributes', 'is_parent'])
+        ) {
+          return (
+            <ChildIndicatorsField
+              key={fieldId}
+              indicator={item}
+              content={fromJS(fieldContent)}
+              onEntityClick={onEntityClick}
+            />
+          );
+        }
         if (fieldId === 'fields') {
           return (
-            <Box gap="large" key={fieldId}>
+            <Box gap="large" key={fieldId} margin={{ bottom: 'large' }}>
               {fieldContent.map(
                 (field, i) => (
                   <FieldFactory
@@ -353,6 +366,16 @@ export function EntityFields({
                 )
               )}
             </Box>
+          );
+        }
+        if (fieldContent.attribute) {
+          return (
+            <AttributeField
+              key={fieldId}
+              entity={item}
+              content={fromJS(fieldContent)}
+              isAdmin={isAdmin}
+            />
           );
         }
         return null;

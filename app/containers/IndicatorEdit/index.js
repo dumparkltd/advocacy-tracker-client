@@ -17,6 +17,7 @@ import {
   getIndicatorFormFields,
   getConnectionUpdatesFromFormData,
 } from 'utils/forms';
+import { getCheckedValuesFromOptions } from 'components/forms/MultiSelectControl';
 
 import qe from 'utils/quasi-equals';
 
@@ -48,6 +49,7 @@ import {
   selectReady,
   selectReadyForAuthCheck,
   selectIsUserAdmin,
+  selectIsUserCoordinator,
   selectIsUserMember,
   selectSessionUserId,
   selectTaxonomiesWithCategories,
@@ -63,6 +65,7 @@ import {
   selectViewEntity,
   selectActionsByActiontype,
   selectDomain,
+  selectIndicatorOptions,
 } from './selectors';
 
 import messages from './messages';
@@ -103,6 +106,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
       viewEntity,
       actionsByActiontype,
       step,
+      parentOptions,
     } = props;
     return viewEntity
       ? Map({
@@ -115,7 +119,9 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
           ? actionsByActiontype.map((actions) => entityOptions({ entities: actions }))
           : Map(),
         step,
-
+        associatedIndicators: parentOptions
+          ? entityOptions({ entities: parentOptions })
+          : Map(),
       })
       : Map();
   };
@@ -131,6 +137,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
       actionsByActiontype,
       onCreateOption,
       isAdmin,
+      isCoordinator,
       isUserMember,
       myId,
       onErrorDismiss,
@@ -141,8 +148,8 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
       handleSubmitFail,
       handleUpdate,
       handleDelete,
+      parentOptions,
     } = this.props;
-
     const { saveSending, saveError, deleteSending } = viewDomainPage.toJS();
 
     const typeLabel = intl.formatMessage(appMessages.entities.indicators.single);
@@ -183,6 +190,7 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
                 handleSubmit={(formData) => handleSubmit(
                   formData,
                   actionsByActiontype,
+                  parentOptions,
                 )}
                 handleSubmitFail={handleSubmitFail}
                 handleSubmitRemote={() => handleSubmitRemote(formDataPath)}
@@ -193,12 +201,14 @@ export class IndicatorEdit extends React.PureComponent { // eslint-disable-line 
                 onServerErrorDismiss={onServerErrorDismiss}
                 fieldsByStep={dataReady && getIndicatorFormFields({
                   isAdmin,
+                  isCoordinator,
                   viewEntity,
                   isMine,
                   connectedTaxonomies,
                   actionsByActiontype,
                   onCreateOption,
                   intl,
+                  indicatorOptions: parentOptions,
                   connectionAttributesForType: (actiontypeId) => ACTIONTYPE_ACTION_INDICATOR_SUPPORTLEVELS[actiontypeId]
                     ? [
                       {
@@ -242,6 +252,7 @@ IndicatorEdit.propTypes = {
   dataReady: PropTypes.bool,
   authReady: PropTypes.bool,
   isAdmin: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
   isUserMember: PropTypes.bool,
   params: PropTypes.object,
   actionsByActiontype: PropTypes.object,
@@ -249,6 +260,7 @@ IndicatorEdit.propTypes = {
   onErrorDismiss: PropTypes.func.isRequired,
   onServerErrorDismiss: PropTypes.func.isRequired,
   connectedTaxonomies: PropTypes.object,
+  parentOptions: PropTypes.object,
   myId: PropTypes.string,
   step: PropTypes.string,
 };
@@ -260,11 +272,13 @@ const mapStateToProps = (state, props) => ({
   viewDomain: selectDomain(state),
   viewDomainPage: selectDomainPage(state),
   isAdmin: selectIsUserAdmin(state),
+  isCoordinator: selectIsUserCoordinator(state),
   isUserMember: selectIsUserMember(state),
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
   viewEntity: selectViewEntity(state, props.params.id),
   actionsByActiontype: selectActionsByActiontype(state, props.params.id),
+  parentOptions: selectIndicatorOptions(state, props.params.id),
   connectedTaxonomies: selectTaxonomiesWithCategories(state),
   myId: selectSessionUserId(state),
   step: selectStepQuery(state),
@@ -305,6 +319,7 @@ function mapDispatchToProps(dispatch, props) {
     handleSubmit: (
       formData,
       actionsByActiontype,
+      indicatorOptions,
     ) => {
       let saveData = formData;
       if (actionsByActiontype) {
@@ -336,6 +351,16 @@ function mapDispatchToProps(dispatch, props) {
               }),
             )
         );
+      }
+      if (indicatorOptions) {
+        const indicatorUpdates = getCheckedValuesFromOptions(
+          formData.get('associatedIndicators'),
+        );
+        if (indicatorUpdates && indicatorUpdates.first()) {
+          saveData = saveData.setIn(['attributes', 'parent_id'], parseInt(indicatorUpdates.first(), 10));
+        } else {
+          saveData = saveData.setIn(['attributes', 'parent_id'], null);
+        }
       }
       dispatch(save(saveData.toJS()));
     },

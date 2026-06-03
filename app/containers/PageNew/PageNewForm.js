@@ -31,6 +31,7 @@ import {
 import {
   selectReady,
   selectReadyForAuthCheck,
+  selectIsUserCoordinator,
 } from 'containers/App/selectors';
 
 import Content from 'components/Content';
@@ -80,6 +81,7 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
       formDataPath,
       formId,
       inModal,
+      isCoordinator,
     } = this.props;
     const { saveSending } = viewDomain.get('page').toJS();
     const pageTitle = intl.formatMessage(messages.pageTitle);
@@ -104,10 +106,12 @@ export class PageNew extends React.PureComponent { // eslint-disable-line react/
           scrollContainer={this.scrollContainer.current}
           fieldsByStep={dataReady && getEntityFormFields(
             {
+              isCoordinator,
               isAdmin: true,
               isMine: true,
               isNew: true,
               intl,
+              entityType: API.PAGES,
             },
             PAGE_CONFIG.form, // shape
             PAGE_CONFIG.attributes, // attributes
@@ -136,6 +140,7 @@ PageNew.propTypes = {
   formDataPath: PropTypes.string,
   formId: PropTypes.string,
   inModal: PropTypes.bool,
+  isCoordinator: PropTypes.bool,
 };
 
 PageNew.contextTypes = {
@@ -145,6 +150,7 @@ PageNew.contextTypes = {
 const mapStateToProps = (state) => ({
   dataReady: selectReady(state, { path: DEPENDENCIES }),
   authReady: selectReadyForAuthCheck(state),
+  isCoordinator: selectIsUserCoordinator(state),
 });
 
 function mapDispatchToProps(

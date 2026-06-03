@@ -78,6 +78,7 @@ import {
   SET_INCLUDE_ACTOR_CHILDREN,
   SET_INCLUDE_MEMBERS_FORFILTERS,
   SET_INCLUDE_INOFFICAL_STATEMENTS,
+  SET_INCLUDE_UNPUBLISHEDAPI_STATEMENTS,
   SET_INCLUDE_ACTOR_CHILDREN_ON_MAP,
   SET_INCLUDE_ACTOR_CHILDREN_MEMBERS_ON_MAP,
   PRINT_VIEW,
@@ -184,10 +185,11 @@ export function loadEntitiesIfNeeded(path) {
     path,
   };
 }
-export function redirectIfNotPermitted(role) {
+export function redirectIfNotPermitted(role, pass) {
   return {
     type: REDIRECT_IF_NOT_PERMITTED,
     role,
+    pass,
   };
 }
 export function redirectIfNotSignedIn() {
@@ -612,6 +614,12 @@ export function setIncludeMembersForFiltering(value) {
 export function setIncludeInofficialStatements(value) {
   return {
     type: SET_INCLUDE_INOFFICAL_STATEMENTS,
+    value,
+  };
+}
+export function setIncludeUnpublishedAPIStatements(value) {
+  return {
+    type: SET_INCLUDE_UNPUBLISHEDAPI_STATEMENTS,
     value,
   };
 }
