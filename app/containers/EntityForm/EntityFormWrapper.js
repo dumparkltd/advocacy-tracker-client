@@ -10,7 +10,7 @@ import styled from 'styled-components';
 import { palette } from 'styled-theme';
 import { Text } from 'grommet';
 import { get } from 'lodash/object';
-
+import qe from 'utils/quasi-equals';
 import Messages from 'components/Messages';
 import Loading from 'components/Loading';
 import EntityForm from 'containers/EntityForm';
@@ -81,9 +81,28 @@ export function EntityFormWrapper({
                       if (!hasFieldChanges) {
                         const fieldData = get(formData.toJS(), modelPath);
                         if (fieldData) {
-                          hasFieldChanges = Object.keys(fieldData).some(
-                            (key) => fieldTracked[key] && fieldData[key].checked !== fieldTracked[key].checked.initialValue
-                          );
+                          hasFieldChanges = Object.keys(fieldData).some((key) => {
+                            if (!fieldTracked[key]) return false;
+
+                            if (fieldData[key].checked !== fieldTracked[key].checked.initialValue) {
+                              return true;
+                            }
+
+                            // check if any connection attribute changed (e.g. supportlevel_id)
+                            if (
+                              field.connectionAttributes
+                              && fieldData[key].association
+                              && fieldTracked[key].association
+                            ) {
+                              return field.connectionAttributes.some((attr) => {
+                                const a = attr.attribute;
+                                const initialAssociationData = fieldTracked[key].association[a];
+                                if (!initialAssociationData) return false;
+                                return !qe(fieldData[key].association[a], initialAssociationData.initialValue);
+                              });
+                            }
+                            return false;
+                          });
                         }
                       }
                     }
